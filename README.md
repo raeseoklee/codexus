@@ -97,6 +97,7 @@ Then invoke the `codexus` skill from inside an interactive Codex session when
 you need durable status, replay, memory, or schema evidence.
 
 Detailed setup: [Quick start](docs/quickstart.md).
+Codex-session usage: [Using Codexus inside Codex](docs/codex-session-usage.md).
 
 ## Common Commands
 
@@ -123,6 +124,7 @@ compatibility alias.
 
 - [Documentation index](docs/README.md)
 - [Quick start](docs/quickstart.md)
+- [Using Codexus inside Codex](docs/codex-session-usage.md)
 - [Architecture](docs/design/01-architecture.md)
 - [Detailed design](docs/design/02-detailed-design.md)
 - [Evolution engine](docs/design/03-evolution-engine.md)

@@ -22,6 +22,9 @@ Codex session
 
 Skill은 얇은 adapter입니다. 외부 `cx` CLI와 같은 core runtime을 호출합니다.
 
+User-facing 호출 예시는 [Codex 안에서 Codexus 사용하기](../codex-session-usage.md)를
+참고하세요.
+
 ## 설치
 
 Repo 안의 source skill:

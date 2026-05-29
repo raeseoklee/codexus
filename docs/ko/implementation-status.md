@@ -55,6 +55,7 @@ compatibility alias로 유지합니다.
 - Local CI parity는 `npm run ci`로 실행할 수 있습니다. Remote Actions 실행은 repository/account runner availability에 의존합니다.
 - Public repository readiness file이 추가되었습니다: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue template, PR template.
 - Root `install.sh`는 GitHub Pages `curl | sh` 설치, local-source test install, canonical bin link, optional Codex skill adapter 설치를 지원합니다.
+- User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.
 
 ## 검증
 

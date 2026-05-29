@@ -22,6 +22,9 @@ Codex session
 
 The skill is intentionally thin. It delegates to the same core used by the external `cx` CLI.
 
+For user-facing invocation examples, see
+[Using Codexus inside Codex](../codex-session-usage.md).
+
 ## Installation
 
 The repository stores the source skill at:

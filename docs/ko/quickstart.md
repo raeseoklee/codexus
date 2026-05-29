@@ -109,6 +109,18 @@ installer는 `codexus` skill을 `${CODEX_HOME:-~/.codex}/skills`에 기록합니
 interactive Codex session 안에서 Codexus status, replay, memory, schema, context
 evidence가 필요할 때 사용합니다.
 
+Codex 안에서는 명시적으로 요청합니다:
+
+```text
+codexus로 schema check 실행하고 결과를 요약해줘.
+```
+
+```text
+$codexus status <run-id> --json 확인해줘.
+```
+
+더 많은 예시는 [Codex 안에서 Codexus 사용하기](codex-session-usage.md)를 참고하세요.
+
 ## 8. Project Harness 초기화
 
 대상 project 안에서:
