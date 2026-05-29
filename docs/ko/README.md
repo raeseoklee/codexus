@@ -43,7 +43,8 @@ Codex interactive session -> Codexus adapter -> Codexus core
 두 표면은 같은 ledger, verification, memory, skill store를 공유해야 합니다.
 
 현재 구현은 P0-P2 surface와 high-risk promotion slice를 포함합니다: `init`, run
-observability, memory lifecycle, active skill index/export, bounded adapter
-retrieval/context formatting, lock inspection/stale recovery, schema artifact,
-gated model replay, app-server dry-run roundtrip, explicit-budget driver-failure
-repair, cron/gateway dry-run plan, local syntax/static validation.
+observability, memory lifecycle/curation, active skill index/export/improvement,
+approved adapter retrieval/context formatting, lock inspection/stale recovery,
+focused read-path enforcement가 붙은 schema artifact, gated model replay,
+app-server dry-run roundtrip/experiment manifest, explicit-budget
+driver-failure repair, cron/gateway dry-run plan, local syntax/static validation.

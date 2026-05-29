@@ -15,11 +15,13 @@ cx doctor --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx status <run-id> --json
 cx skill review <skill-id> --json
+cx memory curate --json
+cx skill improve <skill-id> --reason "tighten trigger" --json
 cx adapt omx context --task "parser regression" --json
-cx app-server roundtrip --dry-run --json
+cx app-server experiment --dry-run --json
 ```
 
-Current compatibility note: the package also exposes `chx` while the implementation migrates to the canonical `cx`/`codexus` names.
+Compatibility note: the package exposes `cx` and `codexus` as canonical bins; `chx` remains a temporary alias.
 
 ## Docs
 

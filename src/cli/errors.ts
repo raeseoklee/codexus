@@ -58,6 +58,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported app-server command${target ? `: ${target}` : ""}.`;
     case "invalid_event_tail_lines":
       return "Invalid event tail line count.";
+    case "invalid_timeout_ms":
+      return "Invalid timeout milliseconds.";
     case "missing_memory_kind":
       return "Missing memory kind.";
     case "missing_memory_text":
@@ -100,6 +102,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Run state is corrupt${target ? `: ${target}` : ""}.`;
     case "config_parse_failed":
       return `Config file could not be parsed${target ? `: ${target}` : ""}.`;
+    case "schema_validation_failed":
+      return `Schema validation failed${target ? `: ${target}` : ""}.`;
     case "run_not_found":
       return `Run not found${target ? `: ${target}` : ""}.`;
     case "skill_not_found":
@@ -126,9 +130,9 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unexpected_argument":
       return "Run the command with `--help` or check `cx --help` for supported arguments.";
     case "unsupported_skill_command":
-      return "Run `cx skill list --json`, `cx skill review <skill-id> --json`, or another supported skill subcommand.";
+      return "Run `cx skill list --json`, `cx skill review <skill-id> --json`, `cx skill improve <skill-id> --json`, or another supported skill subcommand.";
     case "unsupported_memory_command":
-      return "Run `cx memory search`, `cx memory list`, `cx memory add`, `cx memory review`, or `cx memory prune`.";
+      return "Run `cx memory search`, `cx memory list`, `cx memory add`, `cx memory review`, `cx memory curate`, or `cx memory prune`.";
     case "unsupported_runs_command":
       return "Run `cx runs list --json`.";
     case "unsupported_events_command":
@@ -163,6 +167,8 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Use `--before <iso-date>` or `--older-than-days <positive integer>`.";
     case "invalid_event_tail_lines":
       return "Use a positive integer for `--lines`.";
+    case "invalid_timeout_ms":
+      return "Use a positive integer for `--timeout-ms`.";
     case "invalid_skill_export_target":
       return "Use `--target codex` or `--target omx`.";
     case "skill_not_active":
@@ -181,6 +187,8 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Inspect the run ledger state file or restore it from version control/backups.";
     case "config_parse_failed":
       return "Fix the JSON syntax in the reported config file and rerun the command.";
+    case "schema_validation_failed":
+      return "Inspect the reported durable record and run `cx schema check --json` before retrying.";
     case "run_not_found":
       return "Check the run id and workspace, then rerun the command.";
     case "skill_not_found":

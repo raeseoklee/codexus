@@ -63,17 +63,18 @@ final assistant text는 nested `item.completed.item.text` 형태로 올 수 있�
 
 P0-P2 safe MVP surface와 첫 high-risk promotion slice는 구현되었습니다: 확장된
 JSON error contract, ledger decision event, driver-failure classification,
-stale-lock inspection/recovery, schema artifact, active skill index/export,
-bounded adapter retrieval/context formatting, memory lifecycle command, explicit
-live policy가 있는 replay gate, app-server fixture/status/dry-run roundtrip
-gate, project init, observability command, packaging/static check,
-explicit-budget driver-failure repair, cron/gateway dry-run plan.
+stale-lock inspection/recovery, schema artifact와 focused enforcement,
+active skill index/export/improvement, approved adapter retrieval/context
+formatting, memory lifecycle/curation command, explicit live policy가 있는 replay
+gate, app-server fixture/status/dry-run roundtrip/experiment gate, project init,
+observability command, packaging/static check, explicit-budget driver-failure
+repair, cron/gateway dry-run plan.
 
 다음 hardening:
 
-- durable read path에서 schema artifact enforce와 migration fixture 추가
+- dependency policy가 허용될 때 full JSON Schema engine 도입 검토
 - live model budget을 더 쓰기 전에 Claw-style replay parity scenario 확장
-- live roundtrip 전 supervised app-server process lifecycle evidence 추가
+- live roundtrip 전 app-server experiment manifest를 supervised process lifecycle evidence로 승격
 - cron/gateway live dispatch용 approval/policy event 추가
 - automatic adapter injection은 명시적 user-visible step 뒤에 유지
 

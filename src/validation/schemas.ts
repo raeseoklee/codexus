@@ -36,6 +36,15 @@ export interface SchemaArtifactStatus {
   error: string | null;
 }
 
+export type SchemaValidationType = "config" | "state" | "event" | "memory-entry" | "skill";
+
+export interface SchemaValidationResult {
+  schemaVersion: 1;
+  type: SchemaValidationType;
+  valid: boolean;
+  errors: string[];
+}
+
 export const schemaArtifactNames = [
   "config.schema.json",
   "state.schema.json",
@@ -64,4 +73,141 @@ export async function readSchemaArtifactStatus(root = resolve("schemas")): Promi
     }
   }
   return statuses;
+}
+
+function requireRecord(value: unknown, errors: string[], path: string): value is Record<string, unknown> {
+  if (isRecord(value)) return true;
+  errors.push(`${path}:not_object`);
+  return false;
+}
+
+function requireString(record: Record<string, unknown>, key: string, errors: string[], path = key): void {
+  if (typeof record[key] !== "string" || !(record[key] as string).trim()) errors.push(`${path}:missing_string`);
+}
+
+function requireNumber(record: Record<string, unknown>, key: string, errors: string[], path = key): void {
+  if (!Number.isFinite(record[key])) errors.push(`${path}:missing_number`);
+}
+
+function requireBoolean(record: Record<string, unknown>, key: string, errors: string[], path = key): void {
+  if (typeof record[key] !== "boolean") errors.push(`${path}:missing_boolean`);
+}
+
+function requireArray(record: Record<string, unknown>, key: string, errors: string[], path = key): unknown[] {
+  if (Array.isArray(record[key])) return record[key] as unknown[];
+  errors.push(`${path}:missing_array`);
+  return [];
+}
+
+function requireOneOf(record: Record<string, unknown>, key: string, allowed: readonly string[], errors: string[], path = key): void {
+  if (typeof record[key] !== "string" || !allowed.includes(record[key] as string)) errors.push(`${path}:invalid_enum`);
+}
+
+export function validateSchemaValue(type: SchemaValidationType, value: unknown): SchemaValidationResult {
+  const errors: string[] = [];
+  if (!requireRecord(value, errors, type)) return { schemaVersion: 1, type, valid: false, errors };
+  if (type !== "config" && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  if (type === "config" && value.schemaVersion !== undefined && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+
+  if (type === "config") {
+    requireOneOf(value, "driver", ["codex-exec", "mock", "codex-app-server"], errors);
+    if (requireRecord(value.codex, errors, "codex")) {
+      requireString(value.codex, "command", errors, "codex.command");
+      if (value.codex.model !== null && typeof value.codex.model !== "string") errors.push("codex.model:invalid");
+      requireOneOf(value.codex, "sandbox", ["read-only", "workspace-write", "danger-full-access"], errors, "codex.sandbox");
+      requireOneOf(value.codex, "approval", ["untrusted", "on-request", "never"], errors, "codex.approval");
+    }
+    if (requireRecord(value.verification, errors, "verification")) {
+      if (requireArray(value.verification, "commands", errors, "verification.commands").some((item) => typeof item !== "string")) {
+        errors.push("verification.commands:non_string_item");
+      }
+      requireNumber(value.verification, "timeoutMs", errors, "verification.timeoutMs");
+    }
+    if (requireRecord(value.repair, errors, "repair")) {
+      if (!Number.isInteger(value.repair.maxIterations) || (value.repair.maxIterations as number) < 0) errors.push("repair.maxIterations:invalid_integer");
+      if (!Number.isInteger(value.repair.maxDriverFailureIterations) || (value.repair.maxDriverFailureIterations as number) < 0) {
+        errors.push("repair.maxDriverFailureIterations:invalid_integer");
+      }
+    }
+    if (requireRecord(value.evolution, errors, "evolution")) {
+      requireBoolean(value.evolution, "enabled", errors, "evolution.enabled");
+      requireBoolean(value.evolution, "autoPromote", errors, "evolution.autoPromote");
+      requireBoolean(value.evolution, "redactBeforeMemory", errors, "evolution.redactBeforeMemory");
+    }
+    if (requireRecord(value.omx, errors, "omx")) {
+      if (!(value.omx.enabled === "auto" || typeof value.omx.enabled === "boolean")) errors.push("omx.enabled:invalid");
+      requireBoolean(value.omx, "preferSparkshellForVerification", errors, "omx.preferSparkshellForVerification");
+    }
+    if (requireRecord(value.automation, errors, "automation")) {
+      requireBoolean(value.automation, "cronEnabled", errors, "automation.cronEnabled");
+      requireBoolean(value.automation, "gatewayEnabled", errors, "automation.gatewayEnabled");
+    }
+  }
+
+  if (type === "state") {
+    requireString(value, "runId", errors);
+    requireOneOf(value, "status", ["running", "terminal"], errors);
+    requireString(value, "phase", errors);
+    requireString(value, "createdAt", errors);
+    requireString(value, "updatedAt", errors);
+    requireString(value, "cwd", errors);
+    requireString(value, "driver", errors);
+    requireString(value, "promptHash", errors);
+    if (!Number.isInteger(value.repairIteration) || (value.repairIteration as number) < 0) errors.push("repairIteration:invalid_integer");
+    if (value.driverRepairIteration !== undefined && (!Number.isInteger(value.driverRepairIteration) || (value.driverRepairIteration as number) < 0)) {
+      errors.push("driverRepairIteration:invalid_integer");
+    }
+    if (requireRecord(value.verification, errors, "verification")) {
+      requireBoolean(value.verification, "required", errors, "verification.required");
+      requireString(value.verification, "latestStatus", errors, "verification.latestStatus");
+    }
+    requireArray(value, "artifacts", errors);
+  }
+
+  if (type === "event") {
+    requireString(value, "eventId", errors);
+    requireString(value, "runId", errors);
+    requireString(value, "timestamp", errors);
+    requireString(value, "phase", errors);
+    requireString(value, "type", errors);
+    requireString(value, "source", errors);
+    if (!("payload" in value)) errors.push("payload:missing");
+  }
+
+  if (type === "memory-entry") {
+    requireString(value, "id", errors);
+    requireString(value, "createdAt", errors);
+    requireString(value, "sourceRunId", errors);
+    requireOneOf(value, "kind", ["repo_fact", "user_preference", "workflow_lesson", "verification_pattern", "failure_pattern", "tooling_note"], errors);
+    requireString(value, "text", errors);
+    if (requireArray(value, "tags", errors).some((item) => typeof item !== "string")) errors.push("tags:non_string_item");
+    requireOneOf(value, "confidence", ["low", "medium", "high"], errors);
+  }
+
+  if (type === "skill") {
+    requireString(value, "id", errors);
+    requireString(value, "name", errors);
+    requireString(value, "displayName", errors);
+    if (typeof value.displayName === "string" && !value.displayName.startsWith("codexus:")) errors.push("displayName:not_codexus_namespaced");
+    requireOneOf(value, "status", ["proposed", "active", "deprecated"], errors);
+    requireString(value, "version", errors);
+    if (requireArray(value, "sourceRunIds", errors).some((item) => typeof item !== "string")) errors.push("sourceRunIds:non_string_item");
+    requireRecord(value.trigger, errors, "trigger");
+    requireRecord(value.scope, errors, "scope");
+    if (requireArray(value, "procedure", errors).some((item) => typeof item !== "string")) errors.push("procedure:non_string_item");
+    if (requireRecord(value.safety, errors, "safety")) {
+      requireBoolean(value.safety, "requiresVerification", errors, "safety.requiresVerification");
+      if (requireArray(value.safety, "forbiddenActions", errors, "safety.forbiddenActions").some((item) => typeof item !== "string")) {
+        errors.push("safety.forbiddenActions:non_string_item");
+      }
+    }
+    requireRecord(value.promotion, errors, "promotion");
+  }
+
+  return { schemaVersion: 1, type, valid: errors.length === 0, errors };
+}
+
+export function assertSchemaValue(type: SchemaValidationType, value: unknown): void {
+  const result = validateSchemaValue(type, value);
+  if (!result.valid) throw new Error(`schema_validation_failed:${type}:${result.errors.join(",")}`);
 }

@@ -7,6 +7,7 @@ import type { DriverResult } from "../drivers/contract.ts";
 export interface ReplayScenario {
   id: string;
   driver: "mock";
+  parityCase?: "deterministic_pass" | "tool_success" | "tool_denial" | "permission_branch" | "multi_tool_turn" | "skill_path" | "large_output" | "usage_accounting";
   input: {
     task: string;
     files: string[];
@@ -35,6 +36,10 @@ export interface ReplayResult {
   skillId: string;
   status: "passed" | "failed" | "missing";
   scenarios: ReplayScenarioResult[];
+  coverage: {
+    parityCases: string[];
+    scenarioCount: number;
+  };
 }
 
 export interface ModelReplayResult {
@@ -57,6 +62,21 @@ export function buildDefaultReplaySpec(skillId: string, task: string): ReplaySpe
       {
         id: "default_scope_and_verification",
         driver: "mock",
+        parityCase: "deterministic_pass",
+        input: {
+          task,
+          files: [],
+        },
+        expected: {
+          mentionsVerification: true,
+          requiresTests: [],
+          forbids: ["promote without replay validation"],
+        },
+      },
+      {
+        id: "default_permission_and_promotion_safety",
+        driver: "mock",
+        parityCase: "permission_branch",
         input: {
           task,
           files: [],
@@ -104,6 +124,10 @@ export function evaluateReplaySpec(spec: ReplaySpec, skill: {
     skillId: spec.skillId,
     status: scenarios.every((scenario) => scenario.status === "passed") ? "passed" : "failed",
     scenarios,
+    coverage: {
+      parityCases: [...new Set(spec.scenarios.map((scenario) => scenario.parityCase ?? scenario.id))].sort(),
+      scenarioCount: spec.scenarios.length,
+    },
   };
 }
 

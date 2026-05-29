@@ -121,18 +121,19 @@ Not required:
 The P0-P2 safe MVP surfaces and the first high-risk promotion slice are now
 implemented: expanded JSON error contracts, ledger decision events,
 driver-failure classification, stale-lock inspection/recovery, schema artifacts,
-active skill index/export, bounded adapter retrieval/context formatting, memory
-lifecycle commands, replay gates with an explicit live policy, app-server
-fixture/status/dry-run roundtrip gating, project initialization, observability
-commands, packaging/static checks, explicit-budget driver-failure repair, and
-cron/gateway dry-run plans.
+active skill index/export/improvement, approved adapter retrieval/context
+formatting, memory lifecycle/curation commands, replay gates with an explicit
+live policy, focused schema enforcement and migration fixtures, app-server
+fixture/status/dry-run roundtrip/experiment gating, project initialization,
+observability commands, packaging/static checks, explicit-budget driver-failure
+repair, and cron/gateway dry-run plans.
 
 The next slice should deepen evidence on those surfaces rather than adding
 another runtime path:
 
-1. Enforce schema artifacts in durable read paths and add migration fixtures.
+1. Replace focused validators with a full JSON Schema engine only if dependency policy allows it.
 2. Expand Claw-style replay parity scenarios before spending more live model budget.
-3. Add supervised app-server process lifecycle evidence before live roundtrips.
+3. Upgrade the app-server experiment manifest into supervised process lifecycle evidence before live roundtrips.
 4. Add approval/policy events for cron/gateway live dispatch.
 5. Keep automatic adapter injection behind an explicit user-visible step.
 

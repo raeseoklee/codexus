@@ -4,8 +4,8 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildExperience, writeExperience } from "../src/evolution/experience.ts";
-import { appendMemoryEntry, searchMemoryEntries } from "../src/evolution/memory.ts";
-import { buildSkillProposal, deprecateSkill, listSkills, promoteSkill, reviewSkill, writeSkillProposal } from "../src/evolution/skills.ts";
+import { appendMemoryEntry, curateMemoryEntries, searchMemoryEntries } from "../src/evolution/memory.ts";
+import { buildSkillProposal, deprecateSkill, listSkills, promoteSkill, proposeSkillImprovement, retrieveActiveSkillsForTask, reviewSkill, writeSkillProposal } from "../src/evolution/skills.ts";
 import { runPaths } from "../src/ledger/paths.ts";
 import type { RunState } from "../src/types.ts";
 
@@ -67,6 +67,35 @@ test("memory entries are redacted and searchable", async () => {
   }
 });
 
+test("memory read path validates records and curator flags duplicates", async () => {
+  const cwd = await tempDir();
+  try {
+    const first = await appendMemoryEntry(cwd, {
+      id: "mem_duplicate_1",
+      sourceRunId: "run_evo",
+      kind: "workflow_lesson",
+      text: "Use parser fixtures for regression coverage.",
+      tags: ["parser"],
+      confidence: "medium",
+    });
+    await appendMemoryEntry(cwd, {
+      id: "mem_duplicate_2",
+      sourceRunId: "run_evo",
+      kind: "workflow_lesson",
+      text: first.text,
+      tags: ["parser"],
+      confidence: "medium",
+    });
+    const curation = await curateMemoryEntries(cwd);
+    assert.equal(curation.duplicateCandidates[0].id, "mem_duplicate_2");
+
+    await writeFile(join(cwd, ".codex-harness", "memory", "entries.jsonl"), `${JSON.stringify({ bad: true })}\n`);
+    await assert.rejects(() => curateMemoryEntries(cwd), /schema_validation_failed:memory-entry/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("skill proposal has promotion gate fields", async () => {
   const cwd = await tempDir();
   try {
@@ -121,6 +150,35 @@ test("skill promotion requires replay and writes active skill", async () => {
     assert.equal(typeof activeSkill.promotion.promotedAt, "string");
     const activeEvidence = JSON.parse(await readFile(join(promotion.activeDir, "evidence.json"), "utf8"));
     assert.equal(activeEvidence.sourceRunIds[0], "run_evo");
+    const promotionReview = JSON.parse(await readFile(join(promotion.activeDir, "promotion-review.json"), "utf8"));
+    assert.equal(promotionReview.replay.coverage.scenarioCount, 2);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("deprecated skills are excluded from approved adapter retrieval and can seed improvements", async () => {
+  const cwd = await tempDir();
+  try {
+    const experience = buildExperience({
+      paths: runPaths(cwd, "run_evo"),
+      state: state(cwd),
+      prompt: "fix parser regression",
+      driverResult: { status: "succeeded", exitCode: 0 },
+    });
+    const proposal = await writeSkillProposal(cwd, experience);
+    const promotion = await promoteSkill(cwd, proposal.id);
+    const beforeDeprecation = await retrieveActiveSkillsForTask(cwd, "parser regression", 3);
+    assert.equal(beforeDeprecation[0].id, proposal.id);
+
+    const improvement = await proposeSkillImprovement(cwd, proposal.id, "tighten parser trigger coverage");
+    assert.equal(improvement.sourceSkillId, proposal.id);
+    assert.match(improvement.proposal.displayName, /^codexus:/);
+
+    await deprecateSkill(cwd, proposal.id, "superseded by improvement");
+    const afterDeprecation = await retrieveActiveSkillsForTask(cwd, "parser regression", 3);
+    assert.equal(afterDeprecation.length, 0);
+    assert.ok(promotion.activeDir);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

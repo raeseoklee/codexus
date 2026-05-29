@@ -1,5 +1,5 @@
 import type { MemoryEntry } from "../evolution/memory.ts";
-import type { SkillProposal } from "../evolution/skills.ts";
+import type { ActiveSkillIndexEntry, SkillProposal } from "../evolution/skills.ts";
 
 export interface AdapterContextBlock {
   schemaVersion: 1;
@@ -14,6 +14,8 @@ export interface AdapterContextBlock {
     id: string;
     displayName: string;
     version: string;
+    replayStatus: string | null;
+    promotedAt: string | null;
   }>;
   memories: Array<{
     id: string;
@@ -32,10 +34,12 @@ function compactLine(text: string, maxChars: number): string {
 export function buildCodexAdapterContext(options: {
   task: string;
   skills: SkillProposal[];
+  approvals?: ActiveSkillIndexEntry[];
   memories: MemoryEntry[];
   maxChars?: number;
 }): AdapterContextBlock {
   const maxChars = options.maxChars ?? 6000;
+  const approvals = new Map((options.approvals ?? []).map((approval) => [approval.id, approval]));
   const lines: string[] = [
     "# Codexus Retrieved Context",
     "",
@@ -50,7 +54,10 @@ export function buildCodexAdapterContext(options: {
     lines.push("- None");
   } else {
     for (const skill of options.skills) {
+      const approval = approvals.get(skill.id);
       lines.push(`- ${skill.displayName} (${skill.id}, ${skill.version})`);
+      lines.push(`  Approval: replay=${approval?.replayStatus ?? "unknown"} promotedAt=${approval?.promotedAt ?? "unknown"} scenarios=${approval?.scenarioCount ?? 0}`);
+      lines.push(`  Sources: ${skill.sourceRunIds.join(", ") || "unspecified"}`);
       lines.push(`  Scope: ${skill.scope.allowedTaskShapes.join(", ") || "unspecified"}`);
       lines.push(`  Triggers: ${skill.trigger.keywords.join(", ") || "unspecified"}`);
       lines.push(`  Procedure: ${skill.procedure.map((step) => compactLine(step, 180)).join(" / ")}`);
@@ -87,6 +94,8 @@ export function buildCodexAdapterContext(options: {
       id: skill.id,
       displayName: skill.displayName,
       version: skill.version,
+      replayStatus: approvals.get(skill.id)?.replayStatus ?? null,
+      promotedAt: approvals.get(skill.id)?.promotedAt ?? null,
     })),
     memories: options.memories.map((memory) => ({
       id: memory.id,

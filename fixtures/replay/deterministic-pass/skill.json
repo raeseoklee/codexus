@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "skill_fixture_parser",
+  "name": "fixture-parser",
+  "displayName": "codexus:fixture-parser",
+  "status": "proposed",
+  "version": "0.1.0",
+  "sourceRunIds": ["run_fixture"],
+  "trigger": {
+    "keywords": ["parser", "fixture"],
+    "pathGlobs": []
+  },
+  "scope": {
+    "allowedTaskShapes": ["bugfix"],
+    "excludedTaskShapes": ["security_fix"]
+  },
+  "procedure": [
+    "Run required verification before claiming completion.",
+    "Include empty input and malformed input tests when parser behavior changes."
+  ],
+  "safety": {
+    "requiresVerification": true,
+    "forbiddenActions": ["promote without replay validation", "public AST shape change without review"]
+  },
+  "promotion": {
+    "requiredReplayStatus": "passed",
+    "reviewedBy": null,
+    "promotedAt": null
+  }
+}

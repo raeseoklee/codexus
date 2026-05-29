@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { runPaths } from "../../ledger/paths.ts";
 import { readState } from "../../ledger/state.ts";
+import { assertSchemaValue } from "../../validation/schemas.ts";
 import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 async function readJsonIfExists(path: string): Promise<unknown | null> {
@@ -13,7 +14,11 @@ async function readJsonIfExists(path: string): Promise<unknown | null> {
 async function readEventTail(path: string, limit = 10): Promise<unknown[]> {
   if (!existsSync(path)) return [];
   const raw = await readFile(path, "utf8");
-  return raw.split("\n").filter(Boolean).slice(-limit).map((line) => JSON.parse(line) as unknown);
+  return raw.split("\n").filter(Boolean).slice(-limit).map((line) => {
+    const event = JSON.parse(line) as unknown;
+    assertSchemaValue("event", event);
+    return event;
+  });
 }
 
 export async function statusCommand(args: ParsedArgs): Promise<void> {

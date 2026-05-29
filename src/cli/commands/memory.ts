@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { appendMemoryEntry, listMemoryEntries, pruneMemoryEntries, readMemoryIndex, readMemoryEntries, searchMemoryEntries, type MemoryEntry } from "../../evolution/memory.ts";
+import { appendMemoryEntry, curateMemoryEntries, listMemoryEntries, pruneMemoryEntries, readMemoryIndex, readMemoryEntries, searchMemoryEntries, type MemoryEntry } from "../../evolution/memory.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 export async function memoryCommand(args: ParsedArgs): Promise<void> {
@@ -63,6 +63,21 @@ export async function memoryCommand(args: ParsedArgs): Promise<void> {
       return;
     }
     console.log(`memory entries: ${index.total}`);
+    return;
+  }
+
+  if (subcommand === "curate") {
+    const staleDaysFlag = flagString(args.flags, "stale-days");
+    const staleDays = staleDaysFlag ? Number(staleDaysFlag) : 60;
+    if (!Number.isInteger(staleDays) || staleDays <= 0) throw new Error("invalid_memory_prune_window");
+    const curation = await curateMemoryEntries(cwd, { staleDays });
+    if (flagBool(args.flags, "json")) {
+      console.log(JSON.stringify({ curation }, null, 2));
+      return;
+    }
+    console.log(`memory entries: ${curation.total}`);
+    console.log(`duplicates: ${curation.duplicateCandidates.length}`);
+    console.log(`stale low-confidence: ${curation.staleLowConfidence.length}`);
     return;
   }
 

@@ -1,5 +1,7 @@
 import { resolve } from "node:path";
 import { CodexAppServerDriver } from "../../drivers/codex-app-server.ts";
+import { harnessRoot } from "../../ledger/paths.ts";
+import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 import { readAppServerSchemaFixture } from "../../validation/schemas.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -63,6 +65,49 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
     }
     console.log(`app-server ${result.mode} roundtrip: ${result.status}`);
     process.exitCode = result.status === "passed" ? 0 : 1;
+    return;
+  }
+
+  if (topic === "experiment") {
+    const dryRun = flagBool(args.flags, "dry-run") || !flagBool(args.flags, "live");
+    if (!dryRun && !liveEnabled()) throw new Error("unsupported_feature:codex-app-server-live-experiment");
+    const timeoutMs = Number(flagString(args.flags, "timeout-ms") ?? "30000");
+    if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) throw new Error("invalid_timeout_ms");
+    const experimentId = `app_server_${Date.now()}`;
+    const experimentDir = resolve(harnessRoot(cwd), "experiments", "app-server", experimentId);
+    const manifest = {
+      schemaVersion: 1,
+      experimentId,
+      mode: dryRun ? "dry-run" : "live",
+      status: dryRun ? "planned" : "prepared",
+      cwd,
+      experimentDir,
+      timeoutMs,
+      cleanup: {
+        required: true,
+        removesExperimentProcess: true,
+        preservesManifest: true,
+      },
+      lifecycle: [
+        "prepare_temp_workspace",
+        "start_codex_app_server",
+        "send_thread_start",
+        "send_turn_start",
+        "read_thread_items",
+        "stop_process",
+        "write_manifest",
+      ],
+      schemaFixture: fixture,
+    };
+    if (!dryRun) {
+      await ensureDir(experimentDir);
+      await writeJsonAtomic(resolve(experimentDir, "manifest.json"), manifest);
+    }
+    if (json) {
+      console.log(JSON.stringify(manifest, null, 2));
+      return;
+    }
+    console.log(`app-server experiment ${manifest.mode}: ${manifest.status}`);
     return;
   }
 

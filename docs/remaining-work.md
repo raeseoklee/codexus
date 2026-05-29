@@ -157,12 +157,14 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 The next implementation slice should turn gated surfaces into deeper evidence,
 not remove the gates:
 
-1. Enforce the JSON Schema artifacts in config/state/event read paths and add
-   migration fixtures for older durable records.
-2. Expand Claw-style replay parity scenarios before increasing model replay
+1. Replace the focused local schema checks with a full JSON Schema engine only
+   if dependency policy allows it; keep migration fixtures as the regression
+   boundary.
+2. Expand Claw-style replay parity fixtures toward tool denial, multi-tool
+   turns, large output, and usage accounting before increasing model replay
    usage.
-3. Build a supervised app-server live experiment with process lifecycle,
-   timeout, and cleanup evidence before enabling it as a driver.
+3. Turn the app-server sandbox experiment manifest into a supervised process
+   experiment with timeout and cleanup evidence before enabling it as a driver.
 4. Add approval/policy ledger events for cron/gateway live dispatch, then keep
    dry-run and live paths contract-compatible.
 5. Add an explicit, user-visible adapter injection step if retrieved

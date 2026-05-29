@@ -150,12 +150,12 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 다음 구현 slice는 gate를 제거하기보다 gated surface의 evidence를 더 깊게
 만드는 방향이 좋습니다:
 
-1. config/state/event read path에서 JSON Schema artifact를 enforce하고 older
-   durable record migration fixture를 추가합니다.
-2. model replay 사용량을 늘리기 전에 Claw-style replay parity scenario를
-   확장합니다.
-3. app-server를 driver로 켜기 전에 process lifecycle, timeout, cleanup evidence를
-   갖춘 supervised live experiment를 구현합니다.
+1. dependency policy가 허용될 때만 focused local schema check를 full JSON Schema
+   engine으로 교체합니다. Migration fixture는 regression boundary로 유지합니다.
+2. model replay 사용량을 늘리기 전에 Claw-style replay parity fixture를 tool
+   denial, multi-tool turn, large output, usage accounting까지 확장합니다.
+3. app-server를 driver로 켜기 전에 sandbox experiment manifest를 timeout과
+   cleanup evidence가 있는 supervised process experiment로 승격합니다.
 4. cron/gateway live dispatch용 approval/policy ledger event를 추가하고,
    dry-run/live path의 contract compatibility를 유지합니다.
 5. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고

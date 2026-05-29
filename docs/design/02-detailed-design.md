@@ -180,8 +180,8 @@ gate.
 
 ### `cx memory ...`
 
-Purpose: retrieve, add, list, review, and prune scoped memory entries and source
-run references.
+Purpose: retrieve, add, list, review, curate, and prune scoped memory entries
+and source run references.
 
 Subcommands:
 
@@ -189,6 +189,7 @@ Subcommands:
 - `add --kind <kind> <text>`
 - `list`
 - `review`
+- `curate`
 - `prune --before <iso-date>`
 
 ### `cx locks ...`
@@ -213,11 +214,12 @@ Purpose: format bounded active `codexus:<skill-name>` skills and memory entries
 into a prompt-safe block for the current Codex session. It retrieves context but
 does not inject it automatically or create a separate chat loop.
 
-### `cx app-server roundtrip`
+### `cx app-server roundtrip` and `cx app-server experiment`
 
 Purpose: expose an app-server dry-run roundtrip contract before any live
-process control. `--live` is rejected unless the local experiment gate is set,
-and the stable path remains `codex exec --json`.
+process control. The experiment command writes or previews a sandbox manifest
+with lifecycle, timeout, and cleanup intent. `--live` is rejected unless the
+local experiment gate is set, and the stable path remains `codex exec --json`.
 
 ### `cx cron run-now` and `cx gateway check`
 
@@ -232,11 +234,13 @@ Subcommands:
 - `review <skill-id>`
 - `promote <skill-id>`
 - `export <skill-id> --target codex|omx`
+- `improve <skill-id>`
 - `deprecate <skill-id>`
 - `index`
 - `list`
 
-Promotion must be explicit.
+Promotion and improvement must be explicit. Adapter retrieval only returns
+active skills whose active index entry is still approved and replay-passed.
 
 Generated skill records separate storage id from Codex-facing display identity.
 The stable storage id remains filesystem-safe, while the displayed identity uses

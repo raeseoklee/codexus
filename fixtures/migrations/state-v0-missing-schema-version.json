@@ -1,0 +1,17 @@
+{
+  "runId": "run_legacy",
+  "status": "terminal",
+  "phase": "complete",
+  "outcome": "complete",
+  "createdAt": "2026-05-29T00:00:00.000Z",
+  "updatedAt": "2026-05-29T00:00:00.000Z",
+  "cwd": "/tmp/codexus-legacy",
+  "driver": "mock",
+  "promptHash": "sha256:legacy",
+  "repairIteration": 0,
+  "verification": {
+    "required": false,
+    "latestStatus": "skipped"
+  },
+  "artifacts": []
+}

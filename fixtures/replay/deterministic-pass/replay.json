@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "skillId": "skill_fixture_parser",
+  "scenarios": [
+    {
+      "id": "parser_required_tests",
+      "driver": "mock",
+      "parityCase": "tool_success",
+      "input": {
+        "task": "fix parser behavior",
+        "files": ["src/parser.ts"]
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["empty input", "malformed input"],
+        "forbids": ["public AST shape change"]
+      }
+    },
+    {
+      "id": "permission_safety",
+      "driver": "mock",
+      "parityCase": "permission_branch",
+      "input": {
+        "task": "promote parser skill",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": [],
+        "forbids": ["promote without replay validation"]
+      }
+    }
+  ]
+}

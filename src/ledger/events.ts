@@ -2,6 +2,7 @@ import { appendFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { ensureDir } from "../util/fs.ts";
 import { createEventId } from "../util/id.ts";
+import { assertSchemaValue } from "../validation/schemas.ts";
 import type { HarnessEvent, HarnessPhase, JsonValue } from "../types.ts";
 
 export interface AppendEventInput {
@@ -24,6 +25,7 @@ export async function appendEvent(path: string, input: AppendEventInput): Promis
     source: input.source,
     payload: input.payload ?? {},
   };
+  assertSchemaValue("event", event);
   await appendFile(path, `${JSON.stringify(event)}\n`);
   return event;
 }

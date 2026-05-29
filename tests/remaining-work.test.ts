@@ -208,6 +208,7 @@ test("skill index, export, adapter context, gated replay, and memory lifecycle w
     assert.equal(context.status, 0, context.stderr);
     const contextOutput = JSON.parse(context.stdout);
     assert.match(contextOutput.contextBlock, /codexus:/);
+    assert.equal(contextOutput.skills[0].replayStatus, "passed");
     assert.ok(contextOutput.budget.usedChars <= 1600);
 
     const replay = runCli(cwd, ["replay", "skill", skillId, "--with-model-replay", "--json"]);
@@ -223,7 +224,17 @@ test("skill index, export, adapter context, gated replay, and memory lifecycle w
     const exportPath = JSON.parse(exported.stdout).export.path;
     assert.ok(existsSync(join(exportPath, "SKILL.md")));
     const index = runCli(cwd, ["skill", "index", "--json"]);
-    assert.equal(JSON.parse(index.stdout).activeIndex[0].exportState.codex.path, exportPath);
+    const indexOutput = JSON.parse(index.stdout);
+    assert.equal(indexOutput.activeIndex[0].exportState.codex.path, exportPath);
+    assert.equal(indexOutput.activeIndex[0].scenarioCount, 2);
+
+    const improve = runCli(cwd, ["skill", "improve", skillId, "--reason", "tighten parser regression trigger", "--json"]);
+    assert.equal(improve.status, 0, improve.stderr);
+    assert.match(JSON.parse(improve.stdout).improvement.proposal.displayName, /^codexus:/);
+
+    const curate = runCli(cwd, ["memory", "curate", "--json"]);
+    assert.equal(curate.status, 0, curate.stderr);
+    assert.equal(JSON.parse(curate.stdout).curation.total, 1);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -261,6 +272,9 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const appRoundtrip = runCli(cwd, ["app-server", "roundtrip", "--dry-run", "--json"]);
     assert.equal(appRoundtrip.status, 0, appRoundtrip.stderr);
     assert.equal(JSON.parse(appRoundtrip.stdout).status, "passed");
+    const appExperiment = runCli(cwd, ["app-server", "experiment", "--dry-run", "--timeout-ms", "1000", "--json"]);
+    assert.equal(appExperiment.status, 0, appExperiment.stderr);
+    assert.equal(JSON.parse(appExperiment.stdout).status, "planned");
     const appLive = runCli(cwd, ["app-server", "roundtrip", "--live", "--json"]);
     assert.equal(appLive.status, 1);
     assert.equal(JSON.parse(appLive.stdout).code, "unsupported_feature");

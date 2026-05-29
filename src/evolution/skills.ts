@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
+import { assertSchemaValue } from "../validation/schemas.ts";
 import { withFileLock } from "../util/lock.ts";
 import type { ExperienceRecord } from "./experience.ts";
 import { buildDefaultReplaySpec, evaluateReplaySpec, readReplaySpec, type ReplayResult } from "./replay.ts";
@@ -58,6 +59,12 @@ export interface PromotionResult {
   activeDir: string;
 }
 
+export interface SkillImprovementProposalResult {
+  sourceSkillId: string;
+  proposal: SkillProposal;
+  proposedDir: string;
+}
+
 export interface SkillListEntry {
   location: "proposed" | "active";
   path: string;
@@ -73,6 +80,10 @@ export interface ActiveSkillIndexEntry {
   status: "active" | "deprecated";
   sourceRunIds: string[];
   replayStatus: ReplayResult["status"];
+  evidencePath: string | null;
+  replayPath: string | null;
+  scenarioCount: number;
+  lastReviewedAt: string | null;
   exportState: Record<string, { exportedAt: string; path: string }>;
   promotedAt: string | null;
   updatedAt: string;
@@ -92,9 +103,34 @@ export function codexusSkillDisplayName(name: string): string {
 }
 
 function normalizeSkillProposal(skill: StoredSkillProposal): SkillProposal {
-  return {
+  const normalized = {
     ...skill,
     displayName: skill.displayName ?? codexusSkillDisplayName(skill.name),
+  };
+  assertSchemaValue("skill", normalized);
+  return normalized;
+}
+
+function normalizeActiveSkillIndexEntry(entry: Partial<ActiveSkillIndexEntry> & {
+  id: string;
+  name: string;
+  displayName: string;
+  version: string;
+  status: "active" | "deprecated";
+  sourceRunIds: string[];
+  replayStatus: ReplayResult["status"];
+  promotedAt: string | null;
+  updatedAt: string;
+  activeDir: string;
+}): ActiveSkillIndexEntry {
+  return {
+    schemaVersion: 1,
+    exportState: {},
+    evidencePath: null,
+    replayPath: null,
+    scenarioCount: 0,
+    lastReviewedAt: null,
+    ...entry,
   };
 }
 
@@ -188,7 +224,9 @@ export function activeSkillIndexPath(cwd: string): string {
 export async function readActiveSkillIndex(cwd: string): Promise<ActiveSkillIndexEntry[]> {
   const path = activeSkillIndexPath(cwd);
   if (!existsSync(path)) return [];
-  return JSON.parse(await readFile(path, "utf8")) as ActiveSkillIndexEntry[];
+  const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;
+  if (!Array.isArray(parsed)) throw new Error(`schema_validation_failed:active-skill-index:${path}`);
+  return parsed.map((entry) => normalizeActiveSkillIndexEntry(entry as Parameters<typeof normalizeActiveSkillIndexEntry>[0]));
 }
 
 export async function upsertActiveSkillIndexEntry(cwd: string, entry: ActiveSkillIndexEntry): Promise<void> {
@@ -248,7 +286,7 @@ export async function reviewSkill(cwd: string, skillId: string): Promise<SkillRe
   const replaySpec = await readReplaySpec(replayPath);
   const replay = replaySpec
     ? evaluateReplaySpec(replaySpec, skill)
-    : { schemaVersion: 1 as const, skillId, status: "missing" as const, scenarios: [] };
+    : { schemaVersion: 1 as const, skillId, status: "missing" as const, scenarios: [], coverage: { parityCases: [], scenarioCount: 0 } };
   const blockers: string[] = [];
   if (replay.status !== "passed") blockers.push(`replay_${replay.status}`);
   if (!existsSync(join(proposedSkillDir(cwd, skillId), "evidence.json"))) blockers.push("missing_evidence");
@@ -285,6 +323,18 @@ export async function promoteSkill(cwd: string, skillId: string): Promise<Promot
   await copyFile(join(sourceDir, "SKILL.md"), join(targetDir, "SKILL.md"));
   await copyFile(join(sourceDir, "evidence.json"), join(targetDir, "evidence.json"));
   await copyFile(join(sourceDir, "replay.json"), join(targetDir, "replay.json"));
+  const activeEvidencePath = join(targetDir, "evidence.json");
+  const activeReplayPath = join(targetDir, "replay.json");
+  const promotionReviewPath = join(targetDir, "promotion-review.json");
+  const reviewedAt = new Date().toISOString();
+  await writeJsonAtomic(promotionReviewPath, {
+    schemaVersion: 1,
+    skillId,
+    reviewedAt,
+    promotable: review.promotable,
+    blockers: review.blockers,
+    replay: review.replay,
+  });
   await upsertActiveSkillIndexEntry(cwd, {
     schemaVersion: 1,
     id: promoted.id,
@@ -294,9 +344,13 @@ export async function promoteSkill(cwd: string, skillId: string): Promise<Promot
     status: "active",
     sourceRunIds: promoted.sourceRunIds,
     replayStatus: review.replay.status,
+    evidencePath: activeEvidencePath,
+    replayPath: activeReplayPath,
+    scenarioCount: review.replay.coverage.scenarioCount,
+    lastReviewedAt: reviewedAt,
     exportState: {},
     promotedAt: promoted.promotion.promotedAt,
-    updatedAt: new Date().toISOString(),
+    updatedAt: reviewedAt,
     activeDir: targetDir,
   });
   return {
@@ -309,6 +363,10 @@ export async function deprecateSkill(cwd: string, skillId: string, reason = "dep
   const skill = await readSkillProposal(cwd, skillId);
   const deprecated: SkillProposal = { ...skill, status: "deprecated" };
   await writeJsonAtomic(join(proposedSkillDir(cwd, skillId), "skill.json"), deprecated);
+  const activeDir = activeSkillDir(cwd, skill);
+  if (existsSync(join(activeDir, "skill.json"))) {
+    await writeJsonAtomic(join(activeDir, "skill.json"), deprecated);
+  }
   await writeJsonAtomic(join(proposedSkillDir(cwd, skillId), "deprecation.json"), {
     skillId,
     version: skill.version,
@@ -323,8 +381,70 @@ export async function deprecateSkill(cwd: string, skillId: string, reason = "dep
   return deprecated;
 }
 
+export async function proposeSkillImprovement(cwd: string, skillId: string, reason = "improve active skill from curator review"): Promise<SkillImprovementProposalResult> {
+  const approved = (await readActiveSkillIndex(cwd)).find((entry) => entry.id === skillId && entry.status === "active" && entry.replayStatus === "passed");
+  const activeEntry = approved ? (await listSkills(cwd)).find((entry) => entry.location === "active" && entry.skill.id === skillId && entry.skill.status === "active") : null;
+  if (!activeEntry) throw new Error(`skill_not_active:${skillId}`);
+  const source = activeEntry.skill;
+  const suffix = String(Date.now());
+  const improvedName = `${source.name}-improvement`;
+  const proposal: SkillProposal = {
+    ...source,
+    id: `${source.id}_improvement_${suffix}`,
+    name: improvedName,
+    displayName: codexusSkillDisplayName(improvedName),
+    status: "proposed",
+    sourceRunIds: source.sourceRunIds,
+    procedure: [
+      ...source.procedure,
+      "Before using this improved procedure, compare it against the source skill evidence and replay results.",
+      `Improvement rationale: ${reason}`,
+    ],
+    safety: {
+      ...source.safety,
+      forbiddenActions: [...new Set([...source.safety.forbiddenActions, "replace active skill without replay validation"])],
+    },
+    promotion: {
+      requiredReplayStatus: "passed",
+      reviewedBy: null,
+      promotedAt: null,
+    },
+  };
+  const proposedDir = proposedSkillDir(cwd, proposal.id);
+  await ensureDir(proposedDir);
+  await writeJsonAtomic(join(proposedDir, "skill.json"), proposal);
+  await writeJsonAtomic(join(proposedDir, "evidence.json"), {
+    schemaVersion: 1,
+    skillId: proposal.id,
+    sourceSkillId: skillId,
+    sourceRunIds: proposal.sourceRunIds,
+    generatedAt: new Date().toISOString(),
+    reason,
+    sources: [activeEntry.path],
+  });
+  await writeJsonAtomic(join(proposedDir, "replay.json"), buildDefaultReplaySpec(proposal.id, reason));
+  await writeFile(join(proposedDir, "SKILL.md"), `# ${proposal.displayName}
+
+Source skill: ${skillId}
+Reason: ${reason}
+
+## Procedure
+
+${proposal.procedure.map((step) => `- ${step}`).join("\n")}
+
+## Safety
+
+${proposal.safety.forbiddenActions.map((item) => `- ${item}`).join("\n")}
+`);
+  return { sourceSkillId: skillId, proposal, proposedDir };
+}
+
 async function findActiveSkillEntry(cwd: string, skillId: string): Promise<SkillListEntry> {
-  const active = (await listSkills(cwd)).find((entry) => entry.location === "active" && entry.skill.id === skillId);
+  const index = await readActiveSkillIndex(cwd);
+  const approved = index.find((entry) => entry.id === skillId && entry.status === "active" && entry.replayStatus === "passed");
+  const active = approved
+    ? (await listSkills(cwd)).find((entry) => entry.location === "active" && entry.skill.id === skillId && entry.skill.status === "active")
+    : null;
   if (!active) throw new Error(`skill_not_active:${skillId}`);
   return active;
 }
@@ -364,6 +484,9 @@ ${body}`);
   await copyFile(join(sourceDir, "skill.json"), join(outputDir, "skill.json"));
   await copyFile(join(sourceDir, "evidence.json"), join(outputDir, "evidence.json"));
   await copyFile(join(sourceDir, "replay.json"), join(outputDir, "replay.json"));
+  if (existsSync(join(sourceDir, "promotion-review.json"))) {
+    await copyFile(join(sourceDir, "promotion-review.json"), join(outputDir, "promotion-review.json"));
+  }
   const writtenAt = new Date().toISOString();
   await writeJsonAtomic(join(outputDir, "codexus-export.json"), { schemaVersion: 1, skillId, target, writtenAt, source: entry.path });
   const index = await readActiveSkillIndex(cwd);
@@ -375,7 +498,11 @@ ${body}`);
     version: skill.version,
     status: "active" as const,
     sourceRunIds: skill.sourceRunIds,
-    replayStatus: "passed" as const,
+    replayStatus: "missing" as const,
+    evidencePath: null,
+    replayPath: null,
+    scenarioCount: 0,
+    lastReviewedAt: null,
     exportState: {},
     promotedAt: skill.promotion.promotedAt,
     updatedAt: writtenAt,
@@ -390,8 +517,12 @@ ${body}`);
 
 export async function retrieveActiveSkillsForTask(cwd: string, taskText: string, limit = 3): Promise<SkillProposal[]> {
   const terms = taskText.toLowerCase().split(/\s+/).filter(Boolean);
-  const active = (await listSkills(cwd)).filter((entry) => entry.location === "active").map((entry) => entry.skill);
+  const approvedIds = new Set((await readActiveSkillIndex(cwd))
+    .filter((entry) => entry.status === "active" && entry.replayStatus === "passed")
+    .map((entry) => entry.id));
+  const active = (await listSkills(cwd)).filter((entry) => entry.location === "active" && entry.skill.status === "active").map((entry) => entry.skill);
   return active
+    .filter((skill) => approvedIds.has(skill.id))
     .map((skill) => {
       const text = `${skill.name} ${skill.displayName} ${skill.trigger.keywords.join(" ")} ${skill.scope.allowedTaskShapes.join(" ")}`.toLowerCase();
       const score = terms.reduce((sum, term) => sum + (text.includes(term) ? 1 : 0), 0);

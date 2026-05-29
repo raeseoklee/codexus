@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { type ExperienceRecord } from "../../evolution/experience.ts";
-import { deprecateSkill, exportActiveSkill, listSkills, promoteSkill, readActiveSkillIndex, reviewSkill, writeSkillProposal } from "../../evolution/skills.ts";
+import { deprecateSkill, exportActiveSkill, listSkills, promoteSkill, proposeSkillImprovement, readActiveSkillIndex, reviewSkill, writeSkillProposal } from "../../evolution/skills.ts";
 import { runPaths } from "../../ledger/paths.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -87,6 +87,20 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
       return;
     }
     console.log(`${skillId}: deprecated`);
+    return;
+  }
+
+  if (subcommand === "improve") {
+    const skillId = args.positionals[1];
+    if (!skillId) throw new Error("missing_skill_id");
+    const reasonText = flagString(args.flags, "reason") ?? args.positionals.slice(2).join(" ").trim();
+    const reason = reasonText || undefined;
+    const result = await proposeSkillImprovement(cwd, skillId, reason);
+    if (json) {
+      console.log(JSON.stringify({ improvement: result }, null, 2));
+      return;
+    }
+    console.log(`${result.proposal.displayName}: proposed from ${skillId}`);
     return;
   }
 

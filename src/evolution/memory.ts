@@ -2,6 +2,7 @@ import { appendFile, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { redactSensitiveText } from "../policy/redaction.ts";
+import { assertSchemaValue } from "../validation/schemas.ts";
 import { withFileLock } from "../util/lock.ts";
 import { ensureDir } from "../util/fs.ts";
 
@@ -22,6 +23,15 @@ export interface MemoryIndex {
   byKind: Record<string, number>;
   lastUpdated: string | null;
   lastId: string | null;
+}
+
+export interface MemoryCurationResult {
+  schemaVersion: 1;
+  generatedAt: string;
+  total: number;
+  duplicateCandidates: Array<{ id: string; duplicateOf: string; reason: string }>;
+  staleLowConfidence: Array<{ id: string; ageDays: number; reason: string }>;
+  invalidEntries: Array<{ id: string; reason: string }>;
 }
 
 export function redactMemoryText(text: string): string {
@@ -65,6 +75,7 @@ export async function appendMemoryEntry(cwd: string, entry: Omit<MemoryEntry, "s
       ...entry,
       text: redactMemoryText(entry.text),
     };
+    assertSchemaValue("memory-entry", record);
     const path = memoryPath(cwd);
     await ensureDir(dirname(path));
     await appendFile(path, `${JSON.stringify(record)}\n`);
@@ -91,7 +102,11 @@ export async function readMemoryEntries(cwd: string): Promise<MemoryEntry[]> {
   const path = memoryPath(cwd);
   if (!existsSync(path)) return [];
   const raw = await readFile(path, "utf8");
-  return raw.split("\n").filter(Boolean).map((line) => JSON.parse(line) as MemoryEntry);
+  return raw.split("\n").filter(Boolean).map((line) => {
+    const entry = JSON.parse(line) as unknown;
+    assertSchemaValue("memory-entry", entry);
+    return entry as MemoryEntry;
+  });
 }
 
 export async function listMemoryEntries(cwd: string, limit = 20): Promise<MemoryEntry[]> {
@@ -102,7 +117,11 @@ export async function listMemoryEntries(cwd: string, limit = 20): Promise<Memory
 export async function readMemoryIndex(cwd: string): Promise<MemoryIndex> {
   const path = memoryIndexPath(cwd);
   if (existsSync(path)) {
-    return JSON.parse(await readFile(path, "utf8")) as MemoryIndex;
+    const parsed = JSON.parse(await readFile(path, "utf8")) as MemoryIndex;
+    if (parsed.schemaVersion !== 1 || !Number.isInteger(parsed.total) || parsed.total < 0 || typeof parsed.byKind !== "object" || parsed.byKind === null) {
+      throw new Error(`schema_validation_failed:memory-index:${path}`);
+    }
+    return parsed;
   }
   return await writeMemoryIndex(cwd, await readMemoryEntries(cwd));
 }
@@ -120,4 +139,41 @@ export async function pruneMemoryEntries(cwd: string, before: Date, dryRun = fal
     }
     return { removed, remaining: kept.length, dryRun };
   });
+}
+
+export async function curateMemoryEntries(cwd: string, options: { staleDays?: number } = {}): Promise<MemoryCurationResult> {
+  const entries = await readMemoryEntries(cwd);
+  const generatedAt = new Date().toISOString();
+  const staleDays = options.staleDays ?? 60;
+  const seen = new Map<string, MemoryEntry>();
+  const duplicateCandidates: MemoryCurationResult["duplicateCandidates"] = [];
+  const staleLowConfidence: MemoryCurationResult["staleLowConfidence"] = [];
+  const invalidEntries: MemoryCurationResult["invalidEntries"] = [];
+  const now = Date.now();
+
+  for (const entry of entries) {
+    const normalized = entry.text.toLowerCase().replace(/\s+/g, " ").trim();
+    const existing = seen.get(normalized);
+    if (existing) {
+      duplicateCandidates.push({ id: entry.id, duplicateOf: existing.id, reason: "same normalized text" });
+    } else {
+      seen.set(normalized, entry);
+    }
+    const ageDays = Math.floor((now - new Date(entry.createdAt).getTime()) / (24 * 60 * 60 * 1000));
+    if (!Number.isFinite(ageDays)) {
+      invalidEntries.push({ id: entry.id, reason: "invalid createdAt timestamp" });
+    } else if (entry.confidence === "low" && ageDays >= staleDays) {
+      staleLowConfidence.push({ id: entry.id, ageDays, reason: `low confidence and older than ${staleDays} days` });
+    }
+    if (entry.tags.length === 0) invalidEntries.push({ id: entry.id, reason: "missing tags" });
+  }
+
+  return {
+    schemaVersion: 1,
+    generatedAt,
+    total: entries.length,
+    duplicateCandidates,
+    staleLowConfidence,
+    invalidEntries,
+  };
 }

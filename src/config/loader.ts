@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { defaultConfig, type HarnessConfig } from "./schema.ts";
+import { assertSchemaValue } from "../validation/schemas.ts";
 
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
@@ -172,6 +173,7 @@ export function loadConfig(options: LoadConfigOptions = {}): LoadedConfig {
   }
 
   config = validateConfig(config, warnings);
+  assertSchemaValue("config", config);
 
   return { config, filesRead, warnings };
 }

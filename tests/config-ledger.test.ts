@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { loadConfig } from "../src/config/loader.ts";
 import { appendEvent } from "../src/ledger/events.ts";
 import { runPaths } from "../src/ledger/paths.ts";
@@ -86,6 +86,27 @@ test("state write/read and terminal transition are durable", async () => {
     const read = await readState(paths.state);
     assert.equal(read.status, "terminal");
     assert.equal(read.outcome, "complete");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("state migration accepts legacy schema-less state and rejects invalid records", async () => {
+  const cwd = await tempDir();
+  try {
+    const paths = runPaths(cwd, "run_legacy");
+    await mkdir(join(cwd, ".codex-harness", "runs", "run_legacy"), { recursive: true });
+    const legacy = JSON.parse(await readFile(resolve("fixtures/migrations/state-v0-missing-schema-version.json"), "utf8"));
+    await writeFile(paths.state, `${JSON.stringify({ ...legacy, cwd }, null, 2)}\n`);
+    const migrated = await readState(paths.state);
+    assert.equal(migrated.schemaVersion, 1);
+    assert.equal(migrated.driverRepairIteration, 0);
+
+    await writeFile(paths.state, `${JSON.stringify({ ...legacy, cwd, phase: "nonsense" }, null, 2)}\n`);
+    await assert.rejects(() => readState(paths.state), /state_corrupt/);
+
+    await writeFile(paths.state, `${JSON.stringify({ ...legacy, cwd, verification: { latestStatus: "skipped" } }, null, 2)}\n`);
+    await assert.rejects(() => readState(paths.state), /state_corrupt/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

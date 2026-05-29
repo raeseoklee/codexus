@@ -35,14 +35,17 @@ node codex/skills/codexus/scripts/cx.mjs events tail <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs verify <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs memory search "<query>" --json
 node codex/skills/codexus/scripts/cx.mjs memory review --json
+node codex/skills/codexus/scripts/cx.mjs memory curate --json
 node codex/skills/codexus/scripts/cx.mjs skill review <skill-id> --json
 node codex/skills/codexus/scripts/cx.mjs skill index --json
+node codex/skills/codexus/scripts/cx.mjs skill improve <skill-id> --reason "<why>" --json
 node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-replay --json
 node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
 node codex/skills/codexus/scripts/cx.mjs adapt omx context --task "<task>" --json
 node codex/skills/codexus/scripts/cx.mjs locks list --json
 node codex/skills/codexus/scripts/cx.mjs schema check --json
 node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json
+node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --json
 node codex/skills/codexus/scripts/cx.mjs plan --omx --json "<task>"
 ```
 

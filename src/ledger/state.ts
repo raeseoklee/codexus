@@ -1,9 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { writeJsonAtomic } from "../util/fs.ts";
 import { migrateRunState } from "../validation/state.ts";
+import { assertSchemaValue } from "../validation/schemas.ts";
 import type { HarnessPhase, RunState, TerminalOutcome } from "../types.ts";
 
 export async function writeState(path: string, state: RunState): Promise<void> {
+  assertSchemaValue("state", state);
   await writeJsonAtomic(path, { ...state, updatedAt: new Date().toISOString() });
 }
 

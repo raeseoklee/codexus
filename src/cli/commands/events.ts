@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { runPaths } from "../../ledger/paths.ts";
+import { assertSchemaValue } from "../../validation/schemas.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 export async function eventsCommand(args: ParsedArgs): Promise<void> {
@@ -14,7 +15,11 @@ export async function eventsCommand(args: ParsedArgs): Promise<void> {
   if (!Number.isInteger(lines) || lines <= 0) throw new Error("invalid_event_tail_lines");
   const paths = runPaths(cwd, runId);
   if (!existsSync(paths.events)) throw new Error(`run_not_found:${runId}`);
-  const events = (await readFile(paths.events, "utf8")).split("\n").filter(Boolean).slice(-lines).map((line) => JSON.parse(line) as unknown);
+  const events = (await readFile(paths.events, "utf8")).split("\n").filter(Boolean).slice(-lines).map((line) => {
+    const event = JSON.parse(line) as unknown;
+    assertSchemaValue("event", event);
+    return event;
+  });
   if (flagBool(args.flags, "json")) {
     console.log(JSON.stringify({ runId, events }, null, 2));
     return;

@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { buildCodexAdapterContext } from "../../adapters/context.ts";
-import { retrieveActiveSkillsForTask } from "../../evolution/skills.ts";
+import { readActiveSkillIndex, retrieveActiveSkillsForTask } from "../../evolution/skills.ts";
 import { readMemoryEntries, searchMemoryEntries } from "../../evolution/memory.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 import { readOmxStatus } from "../../adapters/omx.ts";
@@ -10,7 +10,8 @@ async function retrieveContext(cwd: string, task: string, args: ParsedArgs) {
   const memoryLimit = Number(flagString(args.flags, "memory-limit") ?? "5");
   const skills = await retrieveActiveSkillsForTask(cwd, task, Number.isInteger(skillLimit) && skillLimit > 0 ? skillLimit : 3);
   const memories = searchMemoryEntries(await readMemoryEntries(cwd), task, Number.isInteger(memoryLimit) && memoryLimit > 0 ? memoryLimit : 5);
-  return { skills, memories };
+  const approvals = await readActiveSkillIndex(cwd);
+  return { skills, memories, approvals };
 }
 
 export async function adaptOmxCommand(args: ParsedArgs): Promise<void> {
@@ -19,12 +20,13 @@ export async function adaptOmxCommand(args: ParsedArgs): Promise<void> {
     const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
     const task = flagString(args.flags, "task") ?? args.positionals.slice(1).join(" ").trim();
     if (!task) throw new Error("missing_prompt");
-    const { skills, memories } = await retrieveContext(cwd, task, args);
+    const { skills, memories, approvals } = await retrieveContext(cwd, task, args);
     if (topic === "context") {
       const maxChars = Number(flagString(args.flags, "max-chars") ?? "6000");
       const context = buildCodexAdapterContext({
         task,
         skills,
+        approvals,
         memories,
         maxChars: Number.isInteger(maxChars) && maxChars > 0 ? maxChars : 6000,
       });
