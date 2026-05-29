@@ -18,6 +18,14 @@ interactive sessions.
 User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
 ```
 
+## Demo
+
+![Codexus inside a Codex session](docs/assets/codexus-inside-codex.gif)
+
+This capture shows the Codex-session path using the same `codexus` skill wrapper
+that an installed adapter calls inside Codex. It avoids recording private Codex
+UI, account state, prompts, or local project data.
+
 ## What It Provides
 
 - Durable run ledgers under `.codex-harness/runs/<run-id>/`

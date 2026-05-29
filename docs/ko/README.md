@@ -45,6 +45,14 @@ Codex interactive session -> Codexus adapter -> Codexus core
 
 두 표면은 같은 ledger, verification, memory, skill store를 공유합니다.
 
+## 데모
+
+![Codexus inside a Codex session](../assets/codexus-inside-codex.gif)
+
+이 capture는 Codex 안에 설치된 adapter가 호출하는 것과 같은 `codexus` skill
+wrapper를 사용합니다. Private Codex UI, account state, prompt, local project data를
+녹화하지 않도록 안전한 terminal demo로 구성했습니다.
+
 현재 구현은 P0-P2 surface와 high-risk promotion slice를 포함합니다: `init`, run
 observability, memory lifecycle/curation, active skill index/export/improvement,
 approved adapter retrieval/context formatting/artifact, lock inspection/stale
