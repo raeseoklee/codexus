@@ -24,8 +24,8 @@
     "memory"
   ],
   "bin": {
-    "cx": "./dist/cli/main.js",
-    "codexus": "./dist/cli/main.js"
+    "cx": "dist/cli/main.js",
+    "codexus": "dist/cli/main.js"
   },
   "files": [
     "dist",

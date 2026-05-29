@@ -323,8 +323,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
   let missingCodexCwd: string | null = null;
   try {
     const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8"));
-    assert.equal(pkg.bin.cx, "./dist/cli/main.js");
-    assert.equal(pkg.bin.codexus, "./dist/cli/main.js");
+    assert.equal(pkg.bin.cx, "dist/cli/main.js");
+    assert.equal(pkg.bin.codexus, "dist/cli/main.js");
     assert.equal(Object.hasOwn(pkg.bin, "chx"), false);
     assert.equal(pkg.engines.node, ">=22");
     assert.ok(pkg.files.includes("dist"));

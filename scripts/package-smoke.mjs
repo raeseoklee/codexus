@@ -9,7 +9,12 @@ const root = process.cwd();
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd ?? root,
-    env: { ...process.env, ...(options.env ?? {}) },
+    env: {
+      ...process.env,
+      npm_config_dry_run: "false",
+      NPM_CONFIG_DRY_RUN: "false",
+      ...(options.env ?? {}),
+    },
     encoding: "utf8",
   });
   if (result.status !== 0) {

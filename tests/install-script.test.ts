@@ -21,6 +21,11 @@ test("install.sh delegates to npm install and links canonical bins", async () =>
     const pack = spawnSync("npm", ["pack", "--pack-destination", packDir], {
       cwd: root,
       encoding: "utf8",
+      env: {
+        ...process.env,
+        npm_config_dry_run: "false",
+        NPM_CONFIG_DRY_RUN: "false",
+      },
     });
     assert.equal(pack.status, 0, pack.stderr ?? pack.error?.message);
     const tarball = (await readdir(packDir)).find((name) => name.endsWith(".tgz"));
@@ -31,6 +36,8 @@ test("install.sh delegates to npm install and links canonical bins", async () =>
       encoding: "utf8",
       env: {
         ...process.env,
+        npm_config_dry_run: "false",
+        NPM_CONFIG_DRY_RUN: "false",
         CODEXUS_NPM_SPEC: join(packDir, tarball),
         CODEXUS_NPM_PREFIX: npmPrefix,
         CODEXUS_BIN_DIR: binDir,
