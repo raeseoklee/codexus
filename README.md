@@ -73,8 +73,11 @@ codexus doctor --json
 The package is currently published on the alpha channel. Use `codexus@next` to
 avoid depending on future dist-tag changes.
 
-Install with GitHub Pages if you also want the Codex-native skill adapter
-installed automatically:
+Global npm installs also install the Codex-native skill adapter into
+`${CODEX_HOME:-~/.codex}/skills/codexus` by default. Set
+`CODEXUS_INSTALL_CODEX_SKILL=0` when you need a CLI-only install.
+
+Install with GitHub Pages if you prefer a reviewable shell installer:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
@@ -115,7 +118,8 @@ cx doctor --json
 codexus runs list --json
 ```
 
-Install the Codex-native skill adapter from the published npm package:
+Refresh or reinstall the Codex-native skill adapter from the published npm
+package:
 
 ```bash
 node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json

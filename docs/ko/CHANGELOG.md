@@ -7,6 +7,14 @@ Codexus의 notable change를 이 파일에 기록합니다.
 이 프로젝트는 practical pre-1.0 changelog format을 따릅니다. 1.0 전에는 breaking
 change가 있을 수 있지만, 명확히 표시해야 합니다.
 
+## 0.1.0-alpha.1 - 2026-05-30
+
+### Changed
+
+- Global npm install은 이제 Codex-native skill adapter를 기본으로 함께 설치합니다.
+- CLI만 설치하려면 `CODEXUS_INSTALL_CODEX_SKILL=0`을 설정합니다.
+- Package smoke test는 postinstall adapter path까지 검증합니다.
+
 ## 0.1.0-alpha.0 - 2026-05-30
 
 첫 npm-ready alpha packaging slice입니다.

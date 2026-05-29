@@ -5,6 +5,10 @@ package_spec="${CODEXUS_NPM_SPEC:-codexus@next}"
 npm_prefix="${CODEXUS_NPM_PREFIX:-$HOME/.local}"
 bin_dir="${CODEXUS_BIN_DIR:-$npm_prefix/bin}"
 install_skill="${CODEXUS_INSTALL_CODEX_SKILL:-1}"
+case "$install_skill" in
+  0|false|False|FALSE|no|No|NO|off|Off|OFF) install_skill=0 ;;
+  *) install_skill=1 ;;
+esac
 
 log() {
   printf '%s\n' "$*"
@@ -28,7 +32,7 @@ if [ "$node_major" -lt 22 ]; then
 fi
 
 log "Installing $package_spec with npm prefix $npm_prefix"
-npm install -g "$package_spec" --prefix "$npm_prefix"
+CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g "$package_spec" --prefix "$npm_prefix"
 
 prefix_bin="$npm_prefix/bin"
 mkdir -p "$bin_dir"

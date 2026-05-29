@@ -1,6 +1,6 @@
 {
   "name": "codexus",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "A local execution harness for OpenAI Codex with durable ledgers, verification gates, memory, and replay-gated skills.",
   "license": "MIT",
   "type": "module",
@@ -33,6 +33,7 @@
     "schemas",
     "fixtures/app-server",
     "scripts/install-codex-skill.mjs",
+    "scripts/postinstall.mjs",
     "install.sh",
     "README.md",
     "LICENSE",
@@ -48,6 +49,7 @@
     "release:check": "npm run ci && npm run package:smoke",
     "prepack": "npm run build",
     "prepublishOnly": "npm run release:check",
+    "postinstall": "node scripts/postinstall.mjs",
     "doctor": "node src/cli/main.ts doctor",
     "install:codex-skill": "node scripts/install-codex-skill.mjs",
     "cx": "node src/cli/main.ts",

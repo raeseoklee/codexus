@@ -14,13 +14,18 @@ npm install -g codexus@next
 codexus doctor --json
 ```
 
-Direct npm installation installs the CLI only. It does not mutate
-`${CODEX_HOME:-~/.codex}` or install the Codex-native skill adapter.
+Global npm installation installs both the CLI and the Codex-native skill
+adapter into `${CODEX_HOME:-~/.codex}/skills/codexus` by default. Set
+`CODEXUS_INSTALL_CODEX_SKILL=0` for a CLI-only install:
+
+```bash
+CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus@next
+```
 
 ## Install Script
 
-Use the installer when you want npm installation plus the Codex-native skill
-adapter in one step:
+Use the installer when you want the same npm package install through a
+reviewable `curl | sh` path:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
@@ -120,9 +125,12 @@ For project work, add verification:
 cx run --verify "npm test" "fix the failing parser tests"
 ```
 
-## 7. Install the Codex-Native Adapter
+## 7. Use or Refresh the Codex-Native Adapter
 
-From the published npm package:
+The adapter is installed automatically by the global npm install unless you set
+`CODEXUS_INSTALL_CODEX_SKILL=0`.
+
+To refresh or reinstall it from the published npm package:
 
 ```bash
 node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json

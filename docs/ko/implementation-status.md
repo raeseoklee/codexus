@@ -48,16 +48,22 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
   `dist/cli/main.js`를 만듭니다.
 - `npm run package:smoke`는 `npm pack`, 임시 global install,
-  `codexus --help`, `cx --help`, runtime schema asset, mock run을 검증합니다.
+  `codexus --help`, `cx --help`, runtime schema asset, postinstall Codex skill
+  adapter 설치, mock run을 검증합니다.
 - `prepublishOnly`는 local CI와 package smoke를 묶은 `npm run release:check`를
   실행합니다.
 - npm tarball은 `dist`, `schemas`, Codex skill adapter,
-  `fixtures/app-server/schema.fixture.json`, `install.sh`, top-level release
-  metadata만 싣고 source, tests, docs, replay/migration fixture는 제외합니다.
+  `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
+  scripts, top-level release metadata만 싣고 source, tests, docs,
+  replay/migration fixture는 제외합니다.
 - `npm run typecheck` syntax/static validation
 - normal Codexus runtime path 바깥에 둔 optional advanced interop capability probe/export
 - `codex/skills/codexus` 아래 Codex-native skill adapter source
-- `${CODEX_HOME:-~/.codex}/skills/codexus`로 adapter를 설치하는 `scripts/install-codex-skill.mjs`
+- Global npm install은 `scripts/postinstall.mjs`를 통해
+  `CODEXUS_INSTALL_CODEX_SKILL=0`이 아닐 때
+  `${CODEX_HOME:-~/.codex}/skills/codexus`에 adapter를 설치합니다.
+- `scripts/install-codex-skill.mjs`는 명시적 adapter refresh 또는 cloned repository
+  install에 계속 사용합니다.
 - `doctor --json`의 installed Codexus skill tree match 진단과 installer source/installed tree hash metadata
 - `doctor --json --strict`는 JSON 진단 body를 유지하면서 fail-level check가 있을 때 nonzero exit code를 반환합니다.
 - Verification repair는 실패한 verification stdout/stderr tail을 bounded context
@@ -84,12 +90,13 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Local CI parity는 `npm run ci`로 실행할 수 있습니다. Remote Actions 실행은 repository/account runner availability에 의존합니다.
 - Public repository readiness file이 추가되었습니다: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue template, PR template.
 - Root `install.sh`는 GitHub Pages `curl | sh` 설치에서 npm(`codexus@next` 기본값)에
-  위임하고, canonical bin link와 optional Codex skill adapter 설치를 지원합니다.
+  위임하고, canonical bin link와 `CODEXUS_INSTALL_CODEX_SKILL=0`이 아닐 때 Codex
+  skill adapter 설치를 수행합니다.
 - User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.
 
 ## 검증
 
-- `npm test`: 67 tests 통과
+- `npm test`: 69 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`

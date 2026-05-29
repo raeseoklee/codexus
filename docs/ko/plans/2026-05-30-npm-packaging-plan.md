@@ -31,6 +31,9 @@ JavaScript entrypoint는 최적화가 아니라 release 전제입니다.
 - `fixtures/app-server/schema.fixture.json`은 schema/app-server dry-run command가
   runtime에 읽으므로 ship합니다.
 - Source, tests, docs, replay fixture, migration fixture는 npm tarball에서 제외합니다.
+- Global-install `postinstall` hook은 Codex-native skill adapter를 기본으로
+  설치하고, local dependency install은 `CODEXUS_INSTALL_CODEX_SKILL=1`을 지정하지
+  않으면 부작용 없이 유지합니다.
 - `install.sh`는 기본적으로 `npm install -g codexus@next`에 위임합니다.
 
 ## Release Gate
@@ -42,6 +45,7 @@ Publish 전 `npm run package:smoke`는 필수입니다. 이 command는 다음을
 - `codexus --help`
 - `cx --help`
 - `codexus schema check --json`
+- temporary `CODEX_HOME`에 postinstall Codex skill adapter 설치
 - `codexus run --driver mock --json "package smoke"`
 
 첫 npm release는 다음 형태를 사용합니다:

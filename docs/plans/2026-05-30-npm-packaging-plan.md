@@ -32,6 +32,9 @@ JavaScript entrypoint is therefore a release prerequisite, not an optimization.
   dry-run commands read it at runtime.
 - Exclude source, tests, docs, replay fixtures, and migration fixtures from the
   npm tarball.
+- Run a global-install `postinstall` hook that installs the Codex-native skill
+  adapter by default, while local dependency installs remain side-effect free
+  unless `CODEXUS_INSTALL_CODEX_SKILL=1` is set.
 - Make `install.sh` delegate to `npm install -g codexus@next` by default.
 
 ## Release Gate
@@ -43,6 +46,7 @@ JavaScript entrypoint is therefore a release prerequisite, not an optimization.
 - `codexus --help`
 - `cx --help`
 - `codexus schema check --json`
+- postinstall Codex skill adapter installation into a temporary `CODEX_HOME`
 - `codexus run --driver mock --json "package smoke"`
 
 The first npm release should use:

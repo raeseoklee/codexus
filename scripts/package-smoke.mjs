@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readdir, rm } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -36,10 +37,12 @@ const workspace = await mkdtemp(join(tmpdir(), "codexus-package-smoke-"));
 const packDir = join(workspace, "pack");
 const prefix = join(workspace, "prefix");
 const project = join(workspace, "project");
+const codexHome = join(workspace, "codex-home");
 
 try {
   await mkdir(packDir, { recursive: true });
   await mkdir(project, { recursive: true });
+  await mkdir(codexHome, { recursive: true });
 
   run("npm", ["pack", "--pack-destination", packDir]);
   const packed = (await readdir(packDir)).filter((name) => name.endsWith(".tgz"));
@@ -53,6 +56,7 @@ try {
     "package/fixtures/app-server/schema.fixture.json",
     "package/codex/skills/codexus/SKILL.md",
     "package/scripts/install-codex-skill.mjs",
+    "package/scripts/postinstall.mjs",
     "package/install.sh",
   ]) {
     assert(tarEntries.includes(required), `packed tarball missing ${required}`);
@@ -67,7 +71,10 @@ try {
     assert(!tarEntries.some((entry) => entry.startsWith(forbiddenPrefix)), `packed tarball should not contain ${forbiddenPrefix}`);
   }
 
-  run("npm", ["install", "-g", tarball, "--prefix", prefix]);
+  run("npm", ["install", "-g", tarball, "--prefix", prefix], {
+    env: { CODEX_HOME: codexHome },
+  });
+  assert(existsSync(join(codexHome, "skills", "codexus", "SKILL.md")), "postinstall did not install the Codex skill adapter");
 
   const codexus = binPath(prefix, "codexus");
   const cx = binPath(prefix, "cx");

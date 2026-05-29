@@ -14,12 +14,17 @@ npm install -g codexus@next
 codexus doctor --json
 ```
 
-직접 npm으로 설치하면 CLI만 설치합니다. `${CODEX_HOME:-~/.codex}`를 변경하거나
-Codex-native skill adapter를 설치하지 않습니다.
+Global npm 설치는 기본적으로 CLI와 Codex-native skill adapter를 함께 설치합니다.
+Adapter는 `${CODEX_HOME:-~/.codex}/skills/codexus`에 기록됩니다. CLI만 설치하려면
+다음처럼 실행합니다:
+
+```bash
+CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus@next
+```
 
 ## Install Script
 
-Npm 설치와 Codex-native skill adapter 설치를 한 번에 처리하려면 installer를
+같은 npm package 설치를 review 가능한 `curl | sh` 경로로 실행하려면 installer를
 사용합니다:
 
 ```bash
@@ -120,9 +125,12 @@ cx run --driver codex-exec --json "Reply exactly CODEXUS-OK"
 cx run --verify "npm test" "fix the failing parser tests"
 ```
 
-## 7. Codex-Native Adapter 설치
+## 7. Codex-Native Adapter 사용 또는 갱신
 
-Published npm package에서 설치:
+`CODEXUS_INSTALL_CODEX_SKILL=0`을 지정하지 않았다면 global npm 설치가 adapter를
+자동으로 설치합니다.
+
+Published npm package에서 갱신하거나 재설치:
 
 ```bash
 node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json

@@ -39,6 +39,9 @@ codex/skills/codexus/
 npm run install:codex-skill -- --json
 ```
 
+Global npm install은 `CODEXUS_INSTALL_CODEX_SKILL=0`이 아닐 때 같은 adapter
+installer를 자동으로 실행합니다.
+
 설치 위치:
 
 ```text

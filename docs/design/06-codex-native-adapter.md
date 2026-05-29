@@ -39,6 +39,9 @@ Install it into the local Codex skill store:
 npm run install:codex-skill -- --json
 ```
 
+Global npm installs run the same adapter installer automatically unless
+`CODEXUS_INSTALL_CODEX_SKILL=0` is set.
+
 The installer copies the skill to:
 
 ```text

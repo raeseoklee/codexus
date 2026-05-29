@@ -14,19 +14,26 @@ schema, and skill evidence.
 
 ## Install the Adapter
 
-The published npm package installs the CLI:
+The published npm package installs the CLI and the Codex skill adapter by
+default on global installs:
 
 ```bash
 npm install -g codexus@next
 ```
 
-Install the Codex skill adapter from that global package:
+For a CLI-only global install, opt out explicitly:
+
+```bash
+CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus@next
+```
+
+To refresh or reinstall the Codex skill adapter from that global package:
 
 ```bash
 node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json
 ```
 
-The GitHub Pages installer does both steps by default:
+The GitHub Pages installer also installs the adapter by default:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh

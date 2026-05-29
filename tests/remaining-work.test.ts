@@ -332,6 +332,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(pkg.files.includes("src"), false);
     assert.equal(pkg.files.includes("fixtures"), false);
     assert.equal(pkg.scripts.prepublishOnly, "npm run release:check");
+    assert.equal(pkg.scripts.postinstall, "node scripts/postinstall.mjs");
+    assert.ok(pkg.files.includes("scripts/postinstall.mjs"));
 
     const install = spawnSync(process.execPath, [resolve("scripts/install-codex-skill.mjs"), "--json"], {
       cwd,

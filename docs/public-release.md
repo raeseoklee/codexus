@@ -62,9 +62,11 @@ Do not publish the first public package with the `latest` tag.
 ## GitHub Pages Installer
 
 Codexus ships `install.sh` from the repository root. The script delegates to
-the npm package channel (`codexus@next` by default), then optionally installs
-the Codex-native skill adapter. Enable GitHub Pages from the `main` branch and
-`/` root so this URL works:
+the npm package channel (`codexus@next` by default), then installs the
+Codex-native skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is set.
+Direct global npm installs perform the same adapter install through package
+postinstall. Enable GitHub Pages from the `main` branch and `/` root so this
+URL works:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
