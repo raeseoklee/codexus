@@ -24,7 +24,10 @@ User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
 
 This capture shows the Codex-session path using the same `codexus` skill wrapper
 that an installed adapter calls inside Codex. It avoids recording private Codex
-UI, account state, prompts, or local project data.
+UI, account state, prompts, or local project data. The tape pins `bash`,
+guards against accidentally rendering under zsh, and uses a visible `bash$`
+prompt so the shell surface is explicit. It runs against a temporary workspace
+so the result is deterministic and does not expose local run history.
 
 ## What It Provides
 
