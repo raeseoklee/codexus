@@ -43,6 +43,13 @@ test("doctor reports missing codex command without crashing", async () => {
     const driver = output.checks.find((check: { id: string }) => check.id === "driver.codex-exec");
     assert.equal(driver.status, "warn");
     assert.match(driver.summary, /ENOENT|unavailable/);
+    const strict = spawnSync(process.execPath, [cli, "doctor", "--cwd", cwd, "--json", "--strict"], {
+      encoding: "utf8",
+    });
+    assert.equal(strict.status, 1);
+    const strictOutput = JSON.parse(strict.stdout);
+    assert.equal(strictOutput.ok, false);
+    assert.equal(strictOutput.strict, true);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

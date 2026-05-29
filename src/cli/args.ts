@@ -23,6 +23,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     "approve",
     "probe-process",
     "supervise-fake",
+    "strict",
   ]);
 
   for (let index = 0; index < rest.length; index += 1) {

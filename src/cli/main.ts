@@ -24,7 +24,7 @@ function helpText(): string {
   return `Codexus
 
 Usage:
-  cx doctor [--json]
+  cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] <prompt>
   cx plan [--omx] <task> [--json]

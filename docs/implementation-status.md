@@ -96,13 +96,17 @@ temporary compatibility alias.
 - Codex-native skill adapter source under `codex/skills/codexus`.
 - `scripts/install-codex-skill.mjs` installs the adapter into `${CODEX_HOME:-~/.codex}/skills/codexus`.
 - `doctor --json` diagnoses whether the installed Codexus skill tree matches this repository, and the installer writes source/installed tree hashes.
+- `doctor --json --strict` preserves the JSON diagnostic body while returning nonzero when a fail-level check is present.
+- GitHub Actions CI runs whitespace diff checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
 
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 52.
+- Current test count: 56.
 - Static check: `npm run typecheck`
+- CI workflow: `.github/workflows/ci.yml`
 - Doctor smoke: `node src/cli/main.ts doctor --json`
+- Doctor strict smoke: missing command diagnostics return `ok: false` and exit 1 with `--strict`.
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.
 - Doctor reports Codex feature availability through `codex features list`.
 - Mock run: `node src/cli/main.ts run --driver mock "hello mock" --json`
@@ -138,6 +142,7 @@ temporary compatibility alias.
 ## Acceptance Coverage
 
 - `doctor --json` reports Codex auth/version, Codex feature availability, app-server help, OMX version/features, git status, tmux, state root, and selected driver capability.
+- `doctor --json --strict` is the automation-facing form when fail-level checks must produce a nonzero process status.
 - `run` completes with both mock and real `codex-exec` drivers and writes a ledger.
 - Required verification failures prevent `complete`, and repair can recover when bounded budget remains.
 - `status --json` reconstructs state, verification, experience, and event tail without a live process.

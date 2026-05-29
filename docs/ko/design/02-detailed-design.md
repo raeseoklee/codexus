@@ -48,6 +48,11 @@ contract를 가져야 합니다. Human prose는 projection이지 source of truth
 
 자동화에 쓰이는 명령은 `--json`을 지원해야 합니다.
 
+`cx doctor --json`은 진단 command 자체가 완료되면 check 실패를 JSON의
+`ok: false`로 보고하고 기본 exit code는 0으로 유지합니다. CI나 자동화에서 check
+실패를 process failure로 다뤄야 할 때는 `cx doctor --json --strict`를
+사용합니다.
+
 Generated skill record는 storage id와 Codex-facing display identity를
 분리합니다. Storage id는 filesystem-safe하게 유지하고, Codex에 보이는
 identity는 `codexus:<skill-name>`을 사용해 Codexus 생성 skill임을 명확히

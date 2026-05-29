@@ -50,12 +50,16 @@ compatibility alias로 유지합니다.
 - `codex/skills/codexus` 아래 Codex-native skill adapter source
 - `${CODEX_HOME:-~/.codex}/skills/codexus`로 adapter를 설치하는 `scripts/install-codex-skill.mjs`
 - `doctor --json`의 installed Codexus skill tree match 진단과 installer source/installed tree hash metadata
+- `doctor --json --strict`는 JSON 진단 body를 유지하면서 fail-level check가 있을 때 nonzero exit code를 반환합니다.
+- GitHub Actions CI는 main push와 pull request에서 whitespace diff check, static syntax validation, unit test를 실행합니다.
 
 ## 검증
 
-- `npm test`: 52 tests 통과
+- `npm test`: 56 tests 통과
 - `npm run typecheck` 통과
+- CI workflow: `.github/workflows/ci.yml`
 - `doctor --json`: Codex auth/version/features, OMX, git, tmux, driver capability 확인
+- `doctor --json --strict`: missing command 진단이 `ok:false`와 exit 1을 반환함을 확인
 - mock driver: success/failure/repair/blocked/cancelled outcome 검증
 - real Codex smoke: `CHX-GOAL-OK` final artifact 확인
 - OMX adapter smoke: `.omx/state` hash 변경 없음

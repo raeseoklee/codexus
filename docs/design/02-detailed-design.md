@@ -88,6 +88,7 @@ Purpose: inspect local readiness.
 Inputs:
 
 - `--json`
+- `--strict`: for JSON automation, return a nonzero process exit code when any check has `status: "fail"`.
 - `--cwd <path>`
 
 Checks:
@@ -111,6 +112,7 @@ JSON shape:
 ```json
 {
   "ok": true,
+  "strict": false,
   "checks": [
     {
       "id": "codex.auth",
@@ -122,6 +124,8 @@ JSON shape:
   "warnings": []
 }
 ```
+
+Default JSON mode is diagnostic-friendly: `ok: false` is encoded in the JSON body, but the process exits 0 if the command itself completed. CI and automation should use `cx doctor --json --strict` when failed checks must fail the process.
 
 ### `cx run`
 

@@ -129,6 +129,7 @@ async function codexusSkillInstallCheck(): Promise<Check> {
 export async function doctorCommand(args: ParsedArgs): Promise<void> {
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
   const json = flagBool(args.flags, "json");
+  const strict = flagBool(args.flags, "strict");
   const { config, filesRead, warnings } = loadConfig({ cwd });
   const checks: Check[] = [];
   let driverProbe: DriverProbe | null = null;
@@ -179,9 +180,10 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   }
 
   const ok = checks.every((check) => check.status !== "fail");
-  const result = { ok, checks, warnings, configFiles: filesRead, driverProbe };
+  const result = { ok, strict, checks, warnings, configFiles: filesRead, driverProbe };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
+    process.exitCode = strict && !ok ? 1 : 0;
     return;
   }
   for (const check of checks) {
