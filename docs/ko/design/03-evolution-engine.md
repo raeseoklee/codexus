@@ -65,6 +65,12 @@ Proposed skill은 다음을 포함해야 합니다:
 .codex-harness/skills/proposed/<skill-id>/
 ```
 
+Codexus는 storage identity와 Codex-facing identity를 분리합니다. Storage id는
+`skill_document-parser-behavior`처럼 stable하고 filesystem-safe하게 유지합니다.
+Codex에 보여줄 display identity는 `codexus:<skill-name>` namespace를 사용합니다.
+예: `codexus:document-parser-behavior`. 이렇게 하면 Codexus가 생성/승격한 skill이
+사용자 작성 Codex skill이나 plugin-provided skill과 명확히 구분됩니다.
+
 ## Replay validation
 
 MVP replay는 deterministic structural gate입니다. skill identity, verification requirement, required procedure text, forbidden action, evidence presence를 확인합니다.

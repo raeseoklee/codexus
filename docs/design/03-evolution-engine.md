@@ -186,6 +186,7 @@ Proposed skills live under:
   "schemaVersion": 1,
   "id": "skill_parser_regression_tests",
   "name": "parser-regression-tests",
+  "displayName": "codexus:parser-regression-tests",
   "status": "proposed",
   "version": "0.1.0",
   "sourceRunIds": ["run_..."],
@@ -213,6 +214,13 @@ Proposed skills live under:
   }
 }
 ```
+
+Codexus keeps storage identity and Codex-facing identity separate. The storage id
+remains stable and filesystem-safe, for example `skill_parser_regression_tests`.
+The Codex-facing display identity is namespaced as `codexus:<skill-name>`, for
+example `codexus:parser-regression-tests`. This makes generated Codexus skills
+visibly distinct from user-authored Codex skills and plugin-provided skills while
+preserving reversible local storage.
 
 `SKILL.md` should be human-readable and compatible with future installation into a Codex/OMX skill surface when explicitly promoted.
 

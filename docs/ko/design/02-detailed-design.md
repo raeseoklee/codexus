@@ -11,6 +11,23 @@ contract를 가져야 합니다. Human prose는 projection이지 source of truth
 아닙니다. JSON error는 typed code와 hint를 포함해야 하며, caller가 stderr나
 문자열 substring에 의존하면 안 됩니다.
 
+자동화 대상 CLI failure는 다음 envelope를 사용합니다:
+
+```json
+{
+  "schemaVersion": 1,
+  "type": "error",
+  "code": "unknown_command",
+  "message": "Unknown command: nonesuch.",
+  "hint": "Run `cx --help` to see supported commands.",
+  "command": "nonesuch",
+  "details": {
+    "target": "nonesuch"
+  },
+  "exitCode": 1
+}
+```
+
 주요 명령:
 
 - `cx doctor`
@@ -25,6 +42,11 @@ contract를 가져야 합니다. Human prose는 projection이지 source of truth
 - `cx adapt omx status`
 
 자동화에 쓰이는 명령은 `--json`을 지원해야 합니다.
+
+Generated skill record는 storage id와 Codex-facing display identity를
+분리합니다. Storage id는 filesystem-safe하게 유지하고, Codex에 보이는
+identity는 `codexus:<skill-name>`을 사용해 Codexus 생성 skill임을 명확히
+표시합니다.
 
 `cx status --json`은 run id, phase, terminal outcome, selected driver/model,
 verification summary, latest typed events, evidence artifact path를 포함해야

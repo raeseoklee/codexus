@@ -9,6 +9,7 @@ export interface SkillProposal {
   schemaVersion: 1;
   id: string;
   name: string;
+  displayName: string;
   status: "proposed" | "active" | "deprecated";
   version: "0.1.0";
   sourceRunIds: string[];
@@ -61,8 +62,23 @@ export interface SkillListEntry {
   skill: SkillProposal;
 }
 
+type StoredSkillProposal = Omit<SkillProposal, "displayName"> & {
+  displayName?: string;
+};
+
 function slugify(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "general";
+}
+
+export function codexusSkillDisplayName(name: string): string {
+  return `codexus:${name}`;
+}
+
+function normalizeSkillProposal(skill: StoredSkillProposal): SkillProposal {
+  return {
+    ...skill,
+    displayName: skill.displayName ?? codexusSkillDisplayName(skill.name),
+  };
 }
 
 export function buildSkillProposal(experience: ExperienceRecord): SkillProposal {
@@ -71,6 +87,7 @@ export function buildSkillProposal(experience: ExperienceRecord): SkillProposal 
     schemaVersion: 1,
     id: `skill_${base}`,
     name: base,
+    displayName: codexusSkillDisplayName(base),
     status: "proposed",
     version: "0.1.0",
     sourceRunIds: [experience.runId],
@@ -119,9 +136,10 @@ export async function writeSkillProposal(cwd: string, experience: ExperienceReco
   await writeJsonAtomic(join(dir, "skill.json"), proposal);
   await writeJsonAtomic(join(dir, "evidence.json"), buildSkillEvidence(proposal, experience));
   await writeJsonAtomic(join(dir, "replay.json"), buildDefaultReplaySpec(proposal.id, experience.task.summary));
-  await writeFile(join(dir, "SKILL.md"), `# ${proposal.name}
+  await writeFile(join(dir, "SKILL.md"), `# ${proposal.displayName}
 
 Source run: ${experience.runId}
+Codexus skill id: ${proposal.id}
 
 ## Procedure
 
@@ -149,12 +167,12 @@ export function activeSkillsRoot(cwd: string): string {
 export async function readSkillProposal(cwd: string, skillId: string): Promise<SkillProposal> {
   const path = join(proposedSkillDir(cwd, skillId), "skill.json");
   if (!existsSync(path)) throw new Error(`skill_not_found:${skillId}`);
-  return JSON.parse(await readFile(path, "utf8")) as SkillProposal;
+  return normalizeSkillProposal(JSON.parse(await readFile(path, "utf8")) as StoredSkillProposal);
 }
 
 async function readSkillJson(path: string): Promise<SkillProposal | null> {
   if (!existsSync(path)) return null;
-  return JSON.parse(await readFile(path, "utf8")) as SkillProposal;
+  return normalizeSkillProposal(JSON.parse(await readFile(path, "utf8")) as StoredSkillProposal);
 }
 
 export async function listSkills(cwd: string): Promise<SkillListEntry[]> {

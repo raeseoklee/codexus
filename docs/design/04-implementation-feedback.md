@@ -125,4 +125,4 @@ Replay-gated skill promotion, workflow-kernel extraction, harness-level resume, 
 3. Add app-server schema generation fixtures and a gated roundtrip experiment.
 4. Add git-aware project initialization after the current non-git workspace is ready.
 5. Expand parity fixtures for large-output truncation and process interruption.
-6. Add JSON output contract tests for unknown commands, unexpected arguments, and unsupported capabilities.
+6. Extend JSON output contract tests beyond the implemented unknown-command and argument-validation cases to unexpected arguments and unsupported capabilities.

@@ -1,11 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildExperience, writeExperience } from "../src/evolution/experience.ts";
 import { appendMemoryEntry, searchMemoryEntries } from "../src/evolution/memory.ts";
-import { buildSkillProposal, deprecateSkill, promoteSkill, reviewSkill, writeSkillProposal } from "../src/evolution/skills.ts";
+import { buildSkillProposal, deprecateSkill, listSkills, promoteSkill, reviewSkill, writeSkillProposal } from "../src/evolution/skills.ts";
 import { runPaths } from "../src/ledger/paths.ts";
 import type { RunState } from "../src/types.ts";
 
@@ -121,6 +121,30 @@ test("skill promotion requires replay and writes active skill", async () => {
     assert.equal(typeof activeSkill.promotion.promotedAt, "string");
     const activeEvidence = JSON.parse(await readFile(join(promotion.activeDir, "evidence.json"), "utf8"));
     assert.equal(activeEvidence.sourceRunIds[0], "run_evo");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("legacy skill proposals are normalized with Codexus display names", async () => {
+  const cwd = await tempDir();
+  try {
+    const experience = buildExperience({
+      paths: runPaths(cwd, "run_evo"),
+      state: state(cwd),
+      prompt: "fix parser regression",
+      driverResult: { status: "succeeded", exitCode: 0 },
+    });
+    const proposal = await writeSkillProposal(cwd, experience);
+    const skillPath = join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "skill.json");
+    const legacy = JSON.parse(await readFile(skillPath, "utf8"));
+    delete legacy.displayName;
+    await writeFile(skillPath, `${JSON.stringify(legacy, null, 2)}\n`);
+
+    const review = await reviewSkill(cwd, proposal.id);
+    assert.equal(review.skill.displayName, "codexus:fix-parser-regression");
+    const listed = await listSkills(cwd);
+    assert.equal(listed[0].skill.displayName, "codexus:fix-parser-regression");
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

@@ -64,6 +64,23 @@ machine-readable contract. Human prose is a projection, not the source of
 truth. JSON errors should use typed codes and hints so callers do not parse
 stderr or match substrings.
 
+Automation-facing CLI failures use this envelope:
+
+```json
+{
+  "schemaVersion": 1,
+  "type": "error",
+  "code": "unknown_command",
+  "message": "Unknown command: nonesuch.",
+  "hint": "Run `cx --help` to see supported commands.",
+  "command": "nonesuch",
+  "details": {
+    "target": "nonesuch"
+  },
+  "exitCode": 1
+}
+```
+
 ### `cx doctor`
 
 Purpose: inspect local readiness.
@@ -170,6 +187,11 @@ Subcommands:
 - `list`
 
 Promotion must be explicit.
+
+Generated skill records separate storage id from Codex-facing display identity.
+The stable storage id remains filesystem-safe, while the displayed identity uses
+`codexus:<skill-name>` so generated Codexus skills are visually distinct in
+Codex-oriented surfaces.
 
 ### `cx adapt omx status`
 

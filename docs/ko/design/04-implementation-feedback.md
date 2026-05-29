@@ -68,5 +68,5 @@ final assistant text는 nested `item.completed.item.text` 형태로 올 수 있�
 - app-server schema fixture와 gated roundtrip
 - git-aware project initialization
 - large-output/interruption parity fixture
-- unknown command, unexpected argument, unsupported capability에 대한 JSON output contract test
+- 구현된 unknown command/argument validation JSON contract를 unexpected argument와 unsupported capability까지 확장
 - permission, approval, policy-block typed ledger event

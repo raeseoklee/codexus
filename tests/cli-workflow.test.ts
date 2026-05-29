@@ -73,6 +73,7 @@ test("skill propose command writes proposal from run experience", async () => {
     assert.equal(propose.status, 0, propose.stderr);
     const proposalOutput = JSON.parse(propose.stdout);
     assert.equal(proposalOutput.proposal.status, "proposed");
+    assert.equal(proposalOutput.proposal.displayName, "codexus:document-parser-behavior");
     assert.deepEqual(proposalOutput.proposal.sourceRunIds, [runOutput.runId]);
 
     const review = runCli(cwd, ["skill", "review", proposalOutput.proposal.id, "--json"]);
@@ -94,7 +95,45 @@ test("skill propose command writes proposal from run experience", async () => {
     assert.equal(list.status, 0, list.stderr);
     const listOutput = JSON.parse(list.stdout);
     assert.equal(listOutput.proposals[0].status, "active");
+    assert.equal(listOutput.proposals[0].displayName, "codexus:document-parser-behavior");
     assert.equal(listOutput.active[0].status, "active");
+
+    const textList = runCli(cwd, ["skill", "list"]);
+    assert.equal(textList.status, 0, textList.stderr);
+    assert.match(textList.stdout, /codexus:document-parser-behavior/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("json commands return typed error envelopes for cli failures", async () => {
+  const cwd = await tempDir();
+  try {
+    const unknown = runCli(cwd, ["nonesuch", "--json"]);
+    assert.equal(unknown.status, 1);
+    assert.equal(unknown.stderr, "");
+    const unknownOutput = JSON.parse(unknown.stdout);
+    assert.equal(unknownOutput.type, "error");
+    assert.equal(unknownOutput.code, "unknown_command");
+    assert.equal(unknownOutput.command, "nonesuch");
+    assert.equal(unknownOutput.details.target, "nonesuch");
+    assert.match(unknownOutput.hint, /cx --help/);
+
+    const invalidRepairLimit = runCli(cwd, [
+      "run",
+      "--driver",
+      "mock",
+      "--max-repairs",
+      "nope",
+      "--json",
+      "repair limit",
+    ]);
+    assert.equal(invalidRepairLimit.status, 1);
+    assert.equal(invalidRepairLimit.stderr, "");
+    const repairOutput = JSON.parse(invalidRepairLimit.stdout);
+    assert.equal(repairOutput.type, "error");
+    assert.equal(repairOutput.code, "invalid_max_repairs");
+    assert.match(repairOutput.hint, /non-negative integer/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

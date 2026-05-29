@@ -33,6 +33,7 @@ The current package still exposes `chx`; command examples in this status file de
 - Config loader with defaults, project/user config merge, unknown-key warnings, and basic runtime validation.
 - Run ledger under `.codex-harness/runs/<run-id>/`.
 - Atomic `state.json` writes and append-only `events.jsonl`.
+- Typed JSON CLI error envelope for automation-facing failures when `--json` is set.
 - Workflow kernel extracted from the `run` command.
 - Policy preflight for high-risk verification commands and non-git workspace warnings.
 - Mock driver for deterministic local tests.
@@ -47,6 +48,7 @@ The current package still exposes `chx`; command examples in this status file de
 - Experience record writer with decisions, failures, verification commands, and reusable lessons.
 - Automatic memory entry writing from reusable lessons plus bounded `memory search`.
 - Skill proposal writer with source-linked `evidence.json`, structural `replay.json`, replay review, active listing, promotion, and deprecation.
+- Codexus-generated skills carry a Codex-facing `codexus:<skill-name>` display identity while keeping stable storage ids.
 - OMX capability probe with older-version warning.
 - `cx plan --omx` writes harness and OMX-compatible plan artifacts without mutating `.omx/state`.
 - Codex-native skill adapter source under `codex/skills/codexus`.
@@ -55,7 +57,7 @@ The current package still exposes `chx`; command examples in this status file de
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 32.
+- Current test count: 34.
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.
 - Doctor reports Codex feature availability through `codex features list`.
@@ -70,6 +72,7 @@ The current package still exposes `chx`; command examples in this status file de
 - `resume --json` creates a linked follow-up supervised run.
 - `plan --omx --json` writes `.codex-harness/plans` and `.omx/plans` artifacts.
 - Skill proposal/review/promotion/deprecation workflow through both unit and CLI tests.
+- Structured JSON CLI error envelope for unknown commands and argument validation failures.
 - Real Codex exec smoke through ChatGPT-authenticated local Codex:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-CODEX-OK" --json`
   - observed final artifact: `CHX-CODEX-OK`
@@ -103,6 +106,7 @@ The current package still exposes `chx`; command examples in this status file de
 - `cx memory` only exposes search; memory creation is automatic/internal for now.
 - Skill replay validation is currently deterministic and structural; it does not yet run full model-in-the-loop replay scenarios.
 - Active skills are listed by scanning the active store; there is not yet a separate active index file.
+- Codexus skill display names are namespaced, but active skills are not yet exported into external Codex skill stores as separate generated skills.
 - Codex app-server driver is intentionally disabled for MVP.
 - Codex-native adapter currently calls the external Codexus core; it does not yet inject active skills into the current Codex prompt automatically.
 - Config schema validation is basic runtime validation, not full JSON Schema validation.

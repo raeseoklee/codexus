@@ -25,7 +25,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
       console.log(JSON.stringify({ proposal }, null, 2));
       return;
     }
-    console.log(`${proposal.id}: proposed`);
+    console.log(`${proposal.displayName}: proposed (${proposal.id})`);
     return;
   }
 
@@ -50,7 +50,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
       return;
     }
     for (const entry of skills) {
-      console.log(`${entry.skill.id}: ${entry.skill.status} (${entry.location})`);
+      console.log(`${entry.skill.displayName}: ${entry.skill.status} (${entry.location}, id: ${entry.skill.id})`);
     }
     return;
   }
@@ -63,7 +63,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
       console.log(JSON.stringify({ promotion: result }, null, 2));
       return;
     }
-    console.log(`${skillId}: active at ${result.activeDir}`);
+    console.log(`${result.skill.displayName}: active at ${result.activeDir}`);
     return;
   }
 
