@@ -135,3 +135,23 @@ Codexus Core
 ```
 
 This lets Codexus keep its durable supervisor strengths while gaining an OMX-like in-session workflow later.
+
+## Relationship to Claw Code
+
+Claw Code is the parity pressure reference for CLI harness behavior, not the
+auth/runtime boundary for Codexus.
+
+Codexus should borrow:
+
+- stable machine-readable diagnostic and status contracts,
+- typed error envelopes with recovery hints,
+- explicit worker/run state inspection,
+- permission modes and tool-scope evidence,
+- deterministic mock parity fixtures,
+- truthful unsupported status for protocol surfaces that are visible but not
+  implemented.
+
+Codexus should not copy Claw's auth model. Claw can target Anthropic,
+OpenAI-compatible gateways, and local model servers, and it explicitly does not
+support OpenAI Codex sessions. Codexus exists specifically to wrap the
+authenticated local Codex CLI while adding durable orchestration around it.

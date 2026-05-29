@@ -75,13 +75,18 @@ This starts a separate non-interactive Codex process. It is useful for bounded s
 - Prefer status, verification, replay, memory, and review commands before launching nested Codex runs.
 - Before changing adapter behavior, apply the
   [reference-first harness policy](../references/01-reference-first-harness-policy.md):
-  compare OpenClaude's terminal/provider/runtime surfaces and Hermes'
-  conversation/gateway loops, then record why the Codexus adapter should remain
-  thin or intentionally grow.
+  compare Claw's JSON/status/permission contracts, OpenClaude's
+  terminal/provider/runtime surfaces, and Hermes' conversation/gateway loops,
+  then record why the Codexus adapter should remain thin or intentionally grow.
+- If the adapter exposes a visible command for an unsupported protocol or
+  app-server path, return a truthful status envelope instead of implying support
+  from command presence.
 
 ## Next Steps
 
 - Add a project-level AGENTS.md snippet documenting `$codexus` usage.
 - Add active skill retrieval so the adapter can suggest relevant promoted skills for the current task.
 - Add app-server based turns only after the app-server driver is contract-tested.
+- Add permission, approval, and policy-block event display once the core ledger
+  records them as typed events.
 - Add a migration from `.codex-harness` to `.codexus` only with backward-compatible reads.

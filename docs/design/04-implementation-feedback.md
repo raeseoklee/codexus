@@ -19,6 +19,24 @@ The implementation blockers did not invalidate the architecture. They mainly sho
 
 ## Findings From Implementation
 
+### Claw Reference Correction Changes The Hardening Bar
+
+Observed: the correct Claw reference is `ultraworkers/claw-code`, and the
+source is inspectable. Its active baseline is the Rust CLI under `rust/`, with
+JSON command contracts, typed error behavior, worker state inspection,
+permission modes, mock parity fixtures, and event/report contract guidance.
+
+Decision: keep the Codexus architecture, but raise the detailed design bar for
+automation-facing surfaces. Codexus should add typed JSON errors, permission and
+approval ledger events, richer replay parity fixtures, and truthful
+capability/status envelopes for experimental app-server or daemon-like
+surfaces.
+
+Design impact: this is a hardening change, not a runtime pivot. `codex exec
+--json` remains the MVP driver because Codexus' core divergence from Claw is
+intentional: Codexus wraps authenticated local Codex CLI sessions, while Claw
+does not support Codex CLI session import/export.
+
 ### ChatGPT Account Subagent Model Limitation
 
 Observed: Codex native subagents using fixed role models such as `gpt-5.1-codex-max` failed with the ChatGPT account:
@@ -83,6 +101,10 @@ Required changes:
 - Treat stderr as evidence, not error, unless exit status indicates failure.
 - Document repair scope as verification-only for MVP.
 - Keep subagent usage opportunistic under ChatGPT account constraints.
+- Add typed JSON error envelopes for automation-facing commands.
+- Promote permission, approval, and policy-block events to first-class ledger events.
+- Expand replay fixtures using Claw's mock parity categories.
+- Require truthful capability/status envelopes for disabled experimental surfaces.
 
 These are now reflected in the main architecture and detailed design documents, not only this feedback note.
 
@@ -103,3 +125,4 @@ Replay-gated skill promotion, workflow-kernel extraction, harness-level resume, 
 3. Add app-server schema generation fixtures and a gated roundtrip experiment.
 4. Add git-aware project initialization after the current non-git workspace is ready.
 5. Expand parity fixtures for large-output truncation and process interruption.
+6. Add JSON output contract tests for unknown commands, unexpected arguments, and unsupported capabilities.

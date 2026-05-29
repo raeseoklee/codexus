@@ -35,6 +35,29 @@ Mandatory references:
 If Codexus intentionally diverges from a reference, the design note must record
 the constraint, rejected upstream path, Codexus decision, and residual risk.
 
+## Reference-Derived Architecture Pressure
+
+The corrected 2026-05-29 Claw audit makes several architecture requirements
+stronger, not optional:
+
+- `cx doctor`, `cx status`, `cx verify`, `cx replay`, and future diagnostic
+  commands must keep stable JSON output. Automation should never depend on
+  human prose.
+- Run identity, selected driver/model, permission or approval posture, tool
+  scope, verification status, and terminal outcome must be ledger facts.
+- Permission checks, denials, approval prompts, and policy blocks should become
+  typed events before Codexus grows team, cron, daemon, or remote execution.
+- Replay should evolve toward Claw-style parity fixtures: tool success, tool
+  denial, permission prompts, multi-step turns, plugin/skill paths,
+  compaction/large-output behavior, and usage accounting.
+- Experimental app-server or daemon-like surfaces must expose truthful
+  capability/status envelopes. A command existing is not evidence that a
+  protocol is supported.
+
+Codexus intentionally diverges from Claw on auth and runtime boundary: Claw does
+not support Codex CLI sessions or Codex session import/export, while Codexus is
+specifically a harness around authenticated local Codex CLI behavior.
+
 ## System Boundary
 
 In scope:
@@ -120,6 +143,10 @@ Initial commands, shown with the target `cx` CLI:
 - `cx adapt omx status`
 
 Every command that can be used by automation must support `--json`.
+
+JSON output is not a convenience flag. Following the Claw command contract
+pattern, JSON output is the automation contract and must include typed status or
+error fields, not only rendered summaries.
 
 ### Workflow Kernel
 
@@ -225,6 +252,10 @@ Default root:
 ```
 
 The ledger must be sufficient to reconstruct `cx status <run-id>` without a running process.
+
+The ledger should also be sufficient for future watchers to distinguish live
+truth from supporting evidence. If structured events exist, pane text, raw
+driver logs, and final prose are supporting evidence only.
 
 ### Verification Gate
 

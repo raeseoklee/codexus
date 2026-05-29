@@ -73,3 +73,22 @@ Codexus Core
 ```
 
 이 구조는 Codexus의 durable supervisor 장점을 유지하면서, 나중에 OMX처럼 session 안에서 자연스럽게 호출되는 UX를 제공합니다.
+
+## Claw Code와의 관계
+
+Claw Code는 CLI harness behavior의 parity pressure reference입니다. Codexus의
+auth/runtime boundary reference는 아닙니다.
+
+Codexus가 빌려야 할 것:
+
+- 안정적인 machine-readable diagnostic/status contract
+- recovery hint가 있는 typed error envelope
+- 명시적인 worker/run state inspection
+- permission mode와 tool-scope evidence
+- deterministic mock parity fixture
+- 보이지만 구현되지 않은 protocol surface의 truthful unsupported status
+
+Codexus는 Claw의 auth model을 복사하지 않습니다. Claw는 Anthropic,
+OpenAI-compatible gateway, local model server를 target할 수 있고 OpenAI Codex
+session은 지원하지 않습니다. Codexus는 authenticated local Codex CLI를 감싸
+durable orchestration을 추가하기 위해 존재합니다.

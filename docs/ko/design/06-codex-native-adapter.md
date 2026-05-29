@@ -75,13 +75,19 @@ node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounde
 - nested Codex run보다 status, verification, replay, memory, review 명령을 우선합니다.
 - adapter 동작을 바꾸기 전에
   [reference-first 하네스 정책](../references/01-reference-first-harness-policy.md)을
-  적용합니다. OpenClaude의 terminal/provider/runtime surface와 Hermes의
-  conversation/gateway loop를 비교하고, Codexus adapter가 thin해야 하는지 또는
-  의도적으로 커져야 하는지 기록합니다.
+  적용합니다. Claw의 JSON/status/permission contract, OpenClaude의
+  terminal/provider/runtime surface, Hermes의 conversation/gateway loop를
+  비교하고, Codexus adapter가 thin해야 하는지 또는 의도적으로 커져야 하는지
+  기록합니다.
+- adapter가 unsupported protocol이나 app-server path에 대한 visible command를
+  노출한다면, command 존재로 support를 암시하지 말고 truthful status envelope를
+  반환합니다.
 
 ## 다음 단계
 
 - `$codexus` 사용법을 설명하는 project-level AGENTS.md snippet 추가.
 - 현재 task에 맞는 promoted skill retrieval 추가.
 - app-server driver 계약 테스트 후 app-server turn 연결.
+- core ledger가 permission, approval, policy-block을 typed event로 기록한 뒤
+  adapter display에 연결.
 - `.codex-harness`에서 `.codexus`로의 migration은 backward-compatible read와 함께 별도로 진행.

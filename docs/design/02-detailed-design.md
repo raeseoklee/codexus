@@ -59,6 +59,11 @@ This layout keeps command parsing thin. The workflow kernel and driver contracts
 
 The target CLI name is `cx`; `codexus` may be offered as a long-form alias. The current MVP binary still exposes `chx` as a temporary compatibility alias.
 
+Claw-derived command rule: every automation-facing command must have a stable
+machine-readable contract. Human prose is a projection, not the source of
+truth. JSON errors should use typed codes and hints so callers do not parse
+stderr or match substrings.
+
 ### `cx doctor`
 
 Purpose: inspect local readiness.
@@ -132,6 +137,11 @@ Required behavior:
 - no model call,
 - no mutation.
 
+JSON output should include at least run id, phase, terminal outcome, selected
+driver/model, verification summary, latest typed events, and paths to evidence
+artifacts. If state is missing or corrupt, return a typed error with a recovery
+hint.
+
 ### `cx verify <run-id>`
 
 Purpose: rerun configured verification for an existing run and append evidence.
@@ -139,6 +149,11 @@ Purpose: rerun configured verification for an existing run and append evidence.
 ### `cx replay <scenario>`
 
 Purpose: run a mock or recorded scenario through the kernel to validate behavior without model access.
+
+Replay scenarios should converge toward the Claw mock parity categories:
+streaming text, file/tool roundtrips, write denial, multi-tool turns, shell
+output, permission prompt approved/denied, plugin or skill path, compaction or
+large-output behavior, and usage accounting.
 
 ### `cx memory search <query>`
 
@@ -335,6 +350,11 @@ Core event types:
 - `run.created`
 - `phase.changed`
 - `policy.warning`
+- `policy.blocked`
+- `permission.checked`
+- `permission.denied`
+- `approval.requested`
+- `approval.resolved`
 - `driver.started`
 - `driver.raw`
 - `driver.normalized`
@@ -349,6 +369,11 @@ Core event types:
 - `run.terminal`
 
 Raw Codex events should be stored in `raw/codex-stdout.jsonl` and referenced from normalized events instead of being discarded.
+
+Claw's event/report contract reinforces that structured events outrank terminal
+text. Codexus events should therefore carry enough provenance for consumers to
+tell whether an event is live driver output, normalized harness state, replay
+evidence, verification evidence, or a projected report field.
 
 ## Driver Contract
 
@@ -548,6 +573,11 @@ Initial error classes:
 - `repair_budget_exhausted`
 - `state_corrupt`
 - `unsupported_feature`
+- `unknown_command`
+- `unexpected_arguments`
+- `permission_denied`
+- `approval_required`
+- `capability_unavailable`
 
 Errors should include:
 
@@ -555,6 +585,10 @@ Errors should include:
 - short message,
 - suggested next action when obvious,
 - source command or file path.
+
+Typed errors should be emitted in JSON by automation-facing commands. Invalid
+suffix arguments should fail at parse time instead of falling through to prompt
+dispatch.
 
 ## OMX Adapter Contract
 
@@ -606,6 +640,14 @@ Minimum tests before feature work:
 - repair loop budget exhaustion,
 - `doctor --json` shape test,
 - `status` reconstruction test.
+
+Reference-parity tests to add next:
+
+- JSON error envelope tests for unknown commands and unexpected arguments,
+- permission and approval event tests,
+- large-output and malformed-driver-output tests,
+- replay fixture mapping tests for tool success, denial, and multi-tool turns,
+- truthful capability/status tests for disabled app-server behavior.
 
 Real smoke tests:
 

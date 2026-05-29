@@ -13,6 +13,20 @@ The engine answers four questions after each meaningful run:
 3. What procedure could be reused?
 4. What evidence proves that reusing it is safe?
 
+## Reference Alignment
+
+Hermes remains the primary reference for the learning loop, but the corrected
+Claw audit changes the evidence standard for evolution. Memories and skills
+should be derived from typed run facts, verification records, replay outcomes,
+and structured event/report records. They should not be derived from terminal
+prose alone when a structured event exists.
+
+Claw's mock parity harness also defines the next replay direction: skill
+proposals should eventually be tested against scenarios that cover tool
+success, tool denial, permission prompt branches, multi-tool turns,
+plugin/skill path behavior, compaction/large-output behavior, and usage
+metadata.
+
 ## Non-Goals
 
 - No silent prompt mutation.

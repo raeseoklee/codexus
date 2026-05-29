@@ -6,6 +6,19 @@
 
 Codexus의 진화 엔진은 실행 경험을 future leverage로 바꿉니다. 하지만 active behavior를 조용히 바꾸지 않습니다. memory와 skill은 source-linked, redacted, promotion-gated여야 합니다.
 
+## 레퍼런스 정렬
+
+Hermes는 learning loop의 주 reference입니다. 다만 수정된 Claw audit은 evolution의
+evidence 기준을 강화합니다. Memory와 skill은 terminal prose가 아니라 typed run
+fact, verification record, replay outcome, structured event/report record에서
+파생해야 합니다. structured event가 있으면 terminal prose는 supporting
+evidence입니다.
+
+Claw의 mock parity harness는 다음 replay 방향도 정의합니다. Skill proposal은
+향후 tool success, tool denial, permission prompt branch, multi-tool turn,
+plugin/skill path behavior, compaction/large-output behavior, usage metadata를
+다루는 scenario로 검증되어야 합니다.
+
 ## Pipeline
 
 ```text
