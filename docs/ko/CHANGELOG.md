@@ -7,6 +7,25 @@ Codexus의 notable change를 이 파일에 기록합니다.
 이 프로젝트는 practical pre-1.0 changelog format을 따릅니다. 1.0 전에는 breaking
 change가 있을 수 있지만, 명확히 표시해야 합니다.
 
+## 0.1.0-alpha.0 - 2026-05-30
+
+첫 npm-ready alpha packaging slice입니다.
+
+### Changed
+
+- Public npm bin이 source `.ts` file 대신 bundled `dist/cli/main.js`를
+  가리킵니다.
+- Npm-installed CLI의 Node engine floor를 `>=22`로 낮췄습니다.
+- Package tarball은 runtime asset만 싣습니다: `dist`, schema, Codex skill
+  adapter, app-server runtime fixture, installer, top-level release metadata.
+- `install.sh`는 npm package channel(`codexus@next` 기본값)에 위임합니다.
+
+### Added
+
+- esbuild bundling을 수행하는 `npm run build`
+- `npm pack`, temporary global install, public bin check, runtime schema asset
+  check, mock-run execution을 검증하는 `npm run package:smoke` release gate
+
 ## 0.1.0 - 2026-05-29
 
 Initial public-preparation release.

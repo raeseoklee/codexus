@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/raeseoklee/codexus/actions/workflows/ci.yml/badge.svg)](https://github.com/raeseoklee/codexus/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node.js >=26](https://img.shields.io/badge/Node.js-%3E%3D26-339933.svg)](package.json)
+[![Node.js >=22](https://img.shields.io/badge/Node.js-%3E%3D22-339933.svg)](package.json)
 
 [한국어 문서](docs/ko/README.md)
 
@@ -52,7 +52,8 @@ See [Implementation status](docs/implementation-status.md) and
 
 ## Requirements
 
-- Node.js 26 or newer
+- Node.js 22 or newer
+- npm for the installer and npm package workflow
 - Git
 - The local `codex` CLI for real Codex runs
 - A logged-in Codex CLI session for the `codex-exec` driver
@@ -68,6 +69,9 @@ Install with GitHub Pages after the repository is public and Pages is enabled:
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
 ```
 
+The installer delegates to the npm package channel (`codexus@next` by default)
+and installs the `codexus` and `cx` bins.
+
 For a review-first install:
 
 ```bash
@@ -82,6 +86,7 @@ Clone and verify the repository:
 git clone https://github.com/raeseoklee/codexus.git
 cd codexus
 npm run ci
+npm run package:smoke
 ```
 
 Run the CLI directly:
@@ -128,8 +133,7 @@ cx schema check --json
 cx app-server experiment --dry-run --record --supervise-fake --json
 ```
 
-Compatibility note: `cx` and `codexus` are canonical. `chx` remains a temporary
-compatibility alias.
+Public bins: `cx` and `codexus` are canonical.
 
 ## Documentation
 

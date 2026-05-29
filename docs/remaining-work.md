@@ -129,14 +129,18 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     - Create config, ignored state directories, and optional project docs
       snippets without mutating unrelated tool state.
 
-12. Finish packaging and alias migration. Status: canonical metadata and smoke coverage implemented; `chx` compatibility retained.
-    - Keep `cx` and `codexus` as canonical.
-    - Treat `chx` as compatibility only until a documented removal window.
-    - Add install smoke tests for the bin paths and Codex adapter installer.
+12. Finish packaging and alias migration. Status: npm-installed CLI packaging
+    and smoke coverage implemented.
+    - Keep `cx` and `codexus` as canonical public bins.
+    - Publish the first package as `0.1.0-alpha.0` with `--tag next`.
+    - Keep `npm run package:smoke` as the release gate for bin paths, runtime
+      assets, and mock-run execution.
 
-13. Add TypeScript/static verification. Status: local syntax/static check, versioned schema artifacts, and zero-dependency schema artifact subset validation implemented.
-    - Add a typecheck path or equivalent static validation beyond Node 26
-      type-stripped execution.
+13. Add TypeScript/static verification. Status: local syntax/static check,
+    esbuild release bundle, versioned schema artifacts, and zero-dependency
+    schema artifact subset validation implemented.
+    - Keep source checks and package smoke separate: source tests use the local
+      development runtime, while npm users execute bundled JavaScript.
     - Keep config and durable state validation covered by the focused validator plus schema artifact subset engine; replace with a full external engine only if dependency policy allows it.
 
 14. Add run observability commands. Status: implemented.

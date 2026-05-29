@@ -24,9 +24,9 @@ sh install.sh
 
 Installer environment variable:
 
-- `CODEXUS_REF`: 설치할 branch 또는 tag, 기본값 `main`
-- `CODEXUS_INSTALL_DIR`: install directory, 기본값 `~/.local/share/codexus`
-- `CODEXUS_BIN_DIR`: `cx`, `codexus`, `chx`를 둘 bin directory, 기본값 `~/.local/bin`
+- `CODEXUS_NPM_SPEC`: 설치할 npm package spec, 기본값 `codexus@next`
+- `CODEXUS_NPM_PREFIX`: npm global prefix, 기본값 `~/.local`
+- `CODEXUS_BIN_DIR`: `cx`, `codexus`를 둘 bin directory, 기본값 `~/.local/bin`
 - `CODEXUS_INSTALL_CODEX_SKILL=0`: Codex skill adapter 설치 생략
 
 ## 1. Clone
@@ -38,11 +38,13 @@ cd codexus
 
 ## 2. 로컬 도구 검증
 
-Codexus는 현재 Node.js 26 이상이 필요합니다.
+Npm으로 설치된 Codexus CLI는 Node.js 22 이상이 필요합니다. Source test는
+repository가 설정한 development Node runtime에서 실행합니다.
 
 ```bash
 node --version
 npm run ci
+npm run package:smoke
 ```
 
 테스트는 deterministic test driver를 사용하므로 Codex 모델 접근이 필요하지
@@ -90,7 +92,7 @@ cx doctor --json
 codexus runs list --json
 ```
 
-`chx`는 temporary compatibility alias로 남아 있습니다.
+공개 bin 이름은 `cx`와 `codexus`입니다.
 
 ## 6. 실제 Codex 실행 사용
 

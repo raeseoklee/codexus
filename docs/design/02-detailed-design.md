@@ -57,7 +57,7 @@ This layout keeps command parsing thin. The workflow kernel and driver contracts
 
 ## CLI Contract
 
-The canonical CLI names are `cx` and the long-form `codexus`. `chx` remains only as a temporary compatibility alias.
+The canonical public CLI names are `cx` and the long-form `codexus`.
 
 Claw-derived command rule: every automation-facing command must have a stable
 machine-readable contract. Human prose is a projection, not the source of
@@ -95,6 +95,7 @@ Checks:
 
 - Node version
 - package version
+- npm packaging readiness through `dist/cli/main.js` and release smoke tests
 - `codex --version`
 - `codex login status`
 - `codex exec --help`

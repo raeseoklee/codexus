@@ -13,7 +13,6 @@ Canonical product and CLI names:
 - product: `Codexus`
 - target CLI: `cx`
 - long-form alias: `codexus`
-- temporary MVP alias: `chx`
 
 ## Reference Governance
 

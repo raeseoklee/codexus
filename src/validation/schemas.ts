@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { findCodexusPackageRoot } from "../util/package-root.ts";
 import { inspectJsonSchemaSubset, jsonSchemaSubsetEngine, validateJsonSchemaSubset } from "./json-schema-subset.ts";
 
 export interface AppServerSchemaFixtureStatus {
@@ -17,7 +17,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function repoRoot(): string {
-  return resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+  return findCodexusPackageRoot();
 }
 
 export async function readAppServerSchemaFixture(path = join(repoRoot(), "fixtures", "app-server", "schema.fixture.json")): Promise<AppServerSchemaFixtureStatus> {

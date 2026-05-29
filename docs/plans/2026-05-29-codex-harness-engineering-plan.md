@@ -59,7 +59,8 @@ Target CLI: `cx`.
 
 Long-form CLI alias: `codexus`.
 
-Temporary MVP alias: `chx` remains acceptable until the implementation package/bin rename is complete.
+The implementation package/bin rename is complete for the public npm surface:
+`cx` and `codexus` are canonical public bins.
 
 Layered architecture:
 

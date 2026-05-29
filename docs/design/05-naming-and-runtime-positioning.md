@@ -54,9 +54,8 @@ codexus
 
 Current implementation note:
 
-- `package.json` exposes `cx` and `codexus` as canonical bins.
-- `chx` remains only as a temporary compatibility alias.
-- Any future `chx` removal should be handled with a documented deprecation window.
+- `package.json` exposes `cx` and `codexus` as canonical public bins.
+- The historical `chx` alias is not part of the npm-published public bin surface.
 
 ## Storage Namespace
 

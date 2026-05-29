@@ -26,6 +26,7 @@ public.
 
 ```bash
 npm run ci
+npm run package:smoke
 node src/cli/main.ts doctor --json
 node src/cli/main.ts schema check --json
 ```
@@ -41,10 +42,29 @@ availability is blocked.
 - Public repository visibility may change Actions billing behavior; verify the
   first run after publication.
 
+## npm Alpha Package
+
+The npm package is the primary install artifact. Before publishing:
+
+- Confirm `package.json` is on the intended prerelease version, for example
+  `0.1.0-alpha.0`.
+- Confirm `npm run package:smoke` passes. This runs `npm pack`, installs the
+  tarball into a temporary global prefix, checks the public bins, validates
+  runtime schema assets, and executes a mock run.
+- Publish the first release with a prerelease tag:
+
+```bash
+npm publish --tag next
+```
+
+Do not publish the first public package with the `latest` tag.
+
 ## GitHub Pages Installer
 
-Codexus ships `install.sh` from the repository root. Enable GitHub Pages from
-the `main` branch and `/` root so this URL works:
+Codexus ships `install.sh` from the repository root. The script delegates to
+the npm package channel (`codexus@next` by default), then optionally installs
+the Codex-native skill adapter. Enable GitHub Pages from the `main` branch and
+`/` root so this URL works:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh

@@ -25,6 +25,7 @@ GitHub repository를 private에서 public으로 변경하기 전에 이 checklis
 
 ```bash
 npm run ci
+npm run package:smoke
 node src/cli/main.ts doctor --json
 node src/cli/main.ts schema check --json
 ```
@@ -40,10 +41,29 @@ canonical verification path로 둡니다.
 - Public repository visibility는 Actions billing behavior를 바꿀 수 있으므로
   공개 후 첫 run을 확인합니다.
 
+## npm Alpha Package
+
+npm package가 기본 설치 artifact입니다. Publish 전에 다음을 확인합니다:
+
+- `package.json`이 의도한 prerelease version인지 확인합니다. 예:
+  `0.1.0-alpha.0`.
+- `npm run package:smoke`가 통과하는지 확인합니다. 이 command는 `npm pack`,
+  임시 global prefix install, public bin 확인, runtime schema asset 검증, mock
+  run을 실행합니다.
+- 첫 release는 prerelease tag로 publish합니다:
+
+```bash
+npm publish --tag next
+```
+
+첫 public package를 `latest` tag로 publish하지 않습니다.
+
 ## GitHub Pages Installer
 
-Codexus는 repository root의 `install.sh`를 제공합니다. 다음 URL이 동작하도록
-GitHub Pages source를 `main` branch와 `/` root로 활성화합니다:
+Codexus는 repository root의 `install.sh`를 제공합니다. 이 script는 npm package
+channel(`codexus@next` 기본값)에 위임한 뒤 optional Codex-native skill adapter를
+설치합니다. 다음 URL이 동작하도록 GitHub Pages source를 `main` branch와 `/` root로
+활성화합니다:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh

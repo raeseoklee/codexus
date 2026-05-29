@@ -3,14 +3,14 @@ import { createHash } from "node:crypto";
 import { access, readFile, readdir } from "node:fs/promises";
 import { constants, existsSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, resolve } from "node:path";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 import { loadConfig } from "../../config/loader.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
 import { createDriver } from "../../drivers/index.ts";
 import type { DriverProbe } from "../../drivers/contract.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
+import { findCodexusPackageRoot } from "../../util/package-root.ts";
 
 interface Check {
   id: string;
@@ -78,7 +78,7 @@ async function hashTreeIfExists(rootDir: string, exclude = new Set<string>()): P
 }
 
 async function codexusSkillInstallCheck(): Promise<Check> {
-  const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+  const repoRoot = findCodexusPackageRoot();
   const codexHome = process.env.CODEX_HOME ? resolve(process.env.CODEX_HOME) : join(homedir(), ".codex");
   const sourceRoot = join(repoRoot, "codex", "skills", "codexus");
   const sourceSkill = join(repoRoot, "codex", "skills", "codexus", "SKILL.md");
@@ -136,7 +136,7 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
 
   checks.push({
     id: "node.version",
-    status: Number(process.versions.node.split(".")[0]) >= 26 ? "pass" : "fail",
+    status: Number(process.versions.node.split(".")[0]) >= 22 ? "pass" : "fail",
     summary: `Node ${process.version}`,
   });
   checks.push(commandCheck("codex.version", config.codex.command, ["--version"], "codex available"));

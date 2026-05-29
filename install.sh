@@ -1,11 +1,9 @@
 #!/bin/sh
 set -eu
 
-repo_owner="raeseoklee"
-repo_name="codexus"
-ref="${CODEXUS_REF:-main}"
-install_dir="${CODEXUS_INSTALL_DIR:-$HOME/.local/share/codexus}"
-bin_dir="${CODEXUS_BIN_DIR:-$HOME/.local/bin}"
+package_spec="${CODEXUS_NPM_SPEC:-codexus@next}"
+npm_prefix="${CODEXUS_NPM_PREFIX:-$HOME/.local}"
+bin_dir="${CODEXUS_BIN_DIR:-$npm_prefix/bin}"
 install_skill="${CODEXUS_INSTALL_CODEX_SKILL:-1}"
 
 log() {
@@ -22,75 +20,38 @@ need_cmd() {
 }
 
 need_cmd node
-need_cmd tar
+need_cmd npm
 
 node_major="$(node -p "Number(process.versions.node.split('.')[0])")"
-if [ "$node_major" -lt 26 ]; then
-  fail "Node.js 26 or newer is required; found $(node --version)"
+if [ "$node_major" -lt 22 ]; then
+  fail "Node.js 22 or newer is required; found $(node --version)"
 fi
 
-tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/codexus-install.XXXXXX")"
-cleanup() {
-  rm -rf "$tmp_dir"
-}
-trap cleanup EXIT INT TERM
+log "Installing $package_spec with npm prefix $npm_prefix"
+npm install -g "$package_spec" --prefix "$npm_prefix"
 
-copy_tree() {
-  src="$1"
-  dst="$2"
-  rm -rf "$dst"
-  mkdir -p "$dst"
-  cp -R "$src"/. "$dst"/
-  rm -rf "$dst/.git" "$dst/.codex-harness" "$dst/.omx" "$dst/node_modules"
-}
-
-if [ "${CODEXUS_SOURCE_DIR:-}" ]; then
-  source_dir="$CODEXUS_SOURCE_DIR"
-  [ -d "$source_dir" ] || fail "CODEXUS_SOURCE_DIR is not a directory: $source_dir"
-  log "Installing Codexus from local source: $source_dir"
-else
-  need_cmd curl
-  archive_kind="tags"
-  case "$ref" in
-    main|master|develop|trunk)
-      archive_kind="heads"
-      ;;
-  esac
-  archive_url="${CODEXUS_ARCHIVE_URL:-https://github.com/$repo_owner/$repo_name/archive/refs/$archive_kind/$ref.tar.gz}"
-  archive_path="$tmp_dir/codexus.tar.gz"
-  log "Downloading Codexus from $archive_url"
-  curl -fsSL "$archive_url" -o "$archive_path"
-  tar -xzf "$archive_path" -C "$tmp_dir"
-  source_dir="$(find "$tmp_dir" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
-  [ -n "$source_dir" ] || fail "downloaded archive did not contain a source directory"
-fi
-
-mkdir -p "$(dirname "$install_dir")"
-copy_tree "$source_dir" "$install_dir"
-
-chmod +x "$install_dir/src/cli/main.ts" 2>/dev/null || true
-chmod +x "$install_dir/scripts/install-codex-skill.mjs" 2>/dev/null || true
-chmod +x "$install_dir/install.sh" 2>/dev/null || true
-
+prefix_bin="$npm_prefix/bin"
 mkdir -p "$bin_dir"
-ln -sfn "$install_dir/src/cli/main.ts" "$bin_dir/cx"
-ln -sfn "$install_dir/src/cli/main.ts" "$bin_dir/codexus"
-ln -sfn "$install_dir/src/cli/main.ts" "$bin_dir/chx"
+if [ "$bin_dir" != "$prefix_bin" ]; then
+  ln -sfn "$prefix_bin/cx" "$bin_dir/cx"
+  ln -sfn "$prefix_bin/codexus" "$bin_dir/codexus"
+fi
 
+package_root="$(npm root -g --prefix "$npm_prefix")/codexus"
 if [ "$install_skill" != "0" ]; then
-  if node "$install_dir/scripts/install-codex-skill.mjs" --json >/dev/null 2>&1; then
+  if node "$package_root/scripts/install-codex-skill.mjs" --json >/dev/null 2>&1; then
     log "Installed Codexus skill adapter into CODEX_HOME."
   else
-    log "Skipped Codexus skill adapter install. Re-run with npm run install:codex-skill from $install_dir for details."
+    log "Skipped Codexus skill adapter install. Re-run with: node $package_root/scripts/install-codex-skill.mjs --json"
   fi
 fi
 
-log "Installed Codexus to $install_dir"
-log "Linked cx, codexus, and chx into $bin_dir"
+log "Installed Codexus package to $package_root"
+log "Linked cx and codexus into $prefix_bin"
 
 case ":$PATH:" in
   *":$bin_dir:"*) ;;
   *) log "Add $bin_dir to PATH to run cx from any shell." ;;
 esac
 
-log "Try: $bin_dir/cx doctor --json"
+log "Try: $bin_dir/cx schema check --json"

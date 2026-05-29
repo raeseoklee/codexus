@@ -63,8 +63,8 @@ Usage:
   cx cron status|run-now [--dry-run] [--record] [--json]
   cx gateway status|check [--dry-run] [--record] [--json]
 
-Compatibility:
-  chx remains a temporary alias during the Codexus migration.
+Public bins:
+  codexus and cx are the supported command names.
 `;
 }
 

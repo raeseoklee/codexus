@@ -1,6 +1,6 @@
 {
   "name": "codexus",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.0",
   "description": "A local execution harness for OpenAI Codex with durable ledgers, verification gates, memory, and replay-gated skills.",
   "license": "MIT",
   "type": "module",
@@ -24,17 +24,15 @@
     "memory"
   ],
   "bin": {
-    "cx": "./src/cli/main.ts",
-    "codexus": "./src/cli/main.ts",
-    "chx": "./src/cli/main.ts"
+    "cx": "./dist/cli/main.js",
+    "codexus": "./dist/cli/main.js"
   },
   "files": [
-    "src",
+    "dist",
     "codex",
     "schemas",
-    "fixtures",
-    "scripts",
-    "docs",
+    "fixtures/app-server",
+    "scripts/install-codex-skill.mjs",
     "install.sh",
     "README.md",
     "LICENSE",
@@ -44,14 +42,21 @@
     "test": "node --test tests/*.test.ts",
     "check:whitespace": "git diff --check && git diff-tree --check --no-commit-id -r HEAD",
     "ci": "npm run check:whitespace && npm run typecheck && npm test",
+    "build": "node scripts/build.mjs",
     "typecheck": "node scripts/check-syntax.mjs",
+    "package:smoke": "node scripts/package-smoke.mjs",
+    "release:check": "npm run ci && npm run package:smoke",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run release:check",
     "doctor": "node src/cli/main.ts doctor",
     "install:codex-skill": "node scripts/install-codex-skill.mjs",
     "cx": "node src/cli/main.ts",
-    "codexus": "node src/cli/main.ts",
-    "chx": "node src/cli/main.ts"
+    "codexus": "node src/cli/main.ts"
   },
   "engines": {
-    "node": ">=26"
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
   }
 }

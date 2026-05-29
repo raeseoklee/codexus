@@ -9,14 +9,23 @@ const skillDir = resolve(scriptDir, "..");
 
 function isCodexusRoot(dir) {
   const packagePath = join(dir, "package.json");
-  const mainPath = join(dir, "src", "cli", "main.ts");
-  if (!existsSync(packagePath) || !existsSync(mainPath)) return false;
+  if (!existsSync(packagePath) || !resolveMain(dir)) return false;
   try {
     const pkg = JSON.parse(readFileSync(packagePath, "utf8"));
     return pkg.name === "codexus";
   } catch {
     return false;
   }
+}
+
+function resolveMain(root) {
+  for (const candidate of [
+    join(root, "dist", "cli", "main.js"),
+    join(root, "src", "cli", "main.ts"),
+  ]) {
+    if (existsSync(candidate)) return candidate;
+  }
+  return null;
 }
 
 function ascend(start) {
@@ -59,7 +68,11 @@ if (args[0] === "--print-root") {
   process.exit(0);
 }
 
-const main = join(root, "src", "cli", "main.ts");
+const main = resolveMain(root);
+if (!main) {
+  console.error(`codexus_entrypoint_not_found: ${root}`);
+  process.exit(1);
+}
 const result = spawnSync(process.execPath, [main, ...args], {
   cwd: root,
   env: process.env,

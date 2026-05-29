@@ -2,6 +2,7 @@
 .omc/
 .omx/
 node_modules/
+dist/
 .env
 .env.*
 *.log

@@ -8,14 +8,15 @@ Product name: Codexus
 
 Target CLI: `cx`
 
-Compatibility alias: `chx`
+Public bins: `cx`, `codexus`
 
-The package exposes `cx` and `codexus` as canonical bins. `chx` remains as a
-temporary compatibility alias.
+The npm package exposes `cx` and `codexus` as canonical bins. The historical
+`chx` alias is not published.
 
 ## MVP Spine Implemented
 
-- Dependency-free Node 26 CLI entrypoint: `node src/cli/main.ts`
+- Node 22+ npm-installed CLI entrypoint: `dist/cli/main.js`
+- Source development entrypoint: `node src/cli/main.ts`
 - Commands:
   - `doctor`
   - `init`
@@ -109,6 +110,17 @@ temporary compatibility alias.
   `{ "available": false }`.
 - Unsupported Codex exec config options emit `config.option_ignored` ledger
   events instead of being silently dropped.
+- `npm run build` bundles the TypeScript source with esbuild into
+  `dist/cli/main.js` for npm installation.
+- `npm run package:smoke` runs `npm pack`, installs the tarball into a temporary
+  global prefix, and verifies `codexus --help`, `cx --help`, runtime schema
+  assets, and a mock run.
+- `prepublishOnly` runs `npm run release:check`, which combines local CI and
+  package smoke verification.
+- The npm tarball ships `dist`, `schemas`, the Codex skill adapter,
+  `fixtures/app-server/schema.fixture.json`, `install.sh`, and top-level release
+  metadata. It excludes source, tests, docs, replay fixtures, and migration
+  fixtures.
 - `npm run typecheck` performs syntax/static validation with the local Node runtime.
 - Optional advanced interop capability probes and export commands remain
   outside the normal Codexus runtime path.
@@ -119,16 +131,22 @@ temporary compatibility alias.
 - GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
 - Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
 - Public repository readiness files are present: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue templates, and PR template.
-- Root `install.sh` supports GitHub Pages `curl | sh` installation, local-source test installs, canonical bin links, and optional Codex skill adapter installation.
+- Root `install.sh` supports GitHub Pages `curl | sh` installation by
+  delegating to npm (`codexus@next` by default), linking canonical bins, and
+  optionally installing the Codex skill adapter.
 - User-facing Codex-session usage docs now explain how to invoke the `$codexus` skill, what commands to prefer, and when to stay with normal Codex interaction.
 
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 63.
+- Current test count: 67.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
+- Package smoke: `npm run package:smoke`
+- Node 22 installed-package smoke: `codexus --help`, `codexus schema check
+  --json`, and a mock run executed through Node 22.22.3 against a packed and
+  temporary globally installed tarball.
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor strict smoke: missing command diagnostics return `ok: false` and exit 1 with `--strict`.
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.

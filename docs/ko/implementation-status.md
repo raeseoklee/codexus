@@ -8,14 +8,15 @@
 
 목표 CLI: `cx`
 
-Compatibility alias: `chx`
+Public bins: `cx`, `codexus`
 
-Package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. `chx`는 임시
-compatibility alias로 유지합니다.
+Npm package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. 기존 `chx`
+alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 구현된 MVP spine
 
-- Node 26 기반 dependency-free CLI entrypoint
+- Node 22+ npm-installed CLI entrypoint: `dist/cli/main.js`
+- Source development entrypoint: `node src/cli/main.ts`
 - `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`
 - `locks list/inspect/clear`, `schema check/validate/validate-run`, `app-server status/roundtrip/experiment`
 - `memory add/search/list/review/curate/prune`
@@ -44,6 +45,15 @@ compatibility alias로 유지합니다.
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, live execution disabled
 - cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
 - config/state/event/memory/skill versioned schema artifact, durable read-path focused enforcement, single-record/run-ledger schema artifact subset validation
+- `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
+  `dist/cli/main.js`를 만듭니다.
+- `npm run package:smoke`는 `npm pack`, 임시 global install,
+  `codexus --help`, `cx --help`, runtime schema asset, mock run을 검증합니다.
+- `prepublishOnly`는 local CI와 package smoke를 묶은 `npm run release:check`를
+  실행합니다.
+- npm tarball은 `dist`, `schemas`, Codex skill adapter,
+  `fixtures/app-server/schema.fixture.json`, `install.sh`, top-level release
+  metadata만 싣고 source, tests, docs, replay/migration fixture는 제외합니다.
 - `npm run typecheck` syntax/static validation
 - normal Codexus runtime path 바깥에 둔 optional advanced interop capability probe/export
 - `codex/skills/codexus` 아래 Codex-native skill adapter source
@@ -73,7 +83,8 @@ compatibility alias로 유지합니다.
 - GitHub Actions CI는 main push와 pull request에서 committed whitespace check, static syntax validation, unit test를 실행합니다.
 - Local CI parity는 `npm run ci`로 실행할 수 있습니다. Remote Actions 실행은 repository/account runner availability에 의존합니다.
 - Public repository readiness file이 추가되었습니다: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue template, PR template.
-- Root `install.sh`는 GitHub Pages `curl | sh` 설치, local-source test install, canonical bin link, optional Codex skill adapter 설치를 지원합니다.
+- Root `install.sh`는 GitHub Pages `curl | sh` 설치에서 npm(`codexus@next` 기본값)에
+  위임하고, canonical bin link와 optional Codex skill adapter 설치를 지원합니다.
 - User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.
 
 ## 검증
@@ -82,6 +93,9 @@ compatibility alias로 유지합니다.
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
+- Package smoke: `npm run package:smoke`
+- Node 22 installed-package smoke: packed tarball을 임시 global install한 뒤
+  Node 22.22.3으로 `codexus --help`, `codexus schema check --json`, mock run 실행
 - `doctor --json`: Codex auth/version/features, git, tmux, driver capability,
   optional advanced interop readiness 확인
 - `doctor --json --strict`: missing command 진단이 `ok:false`와 exit 1을 반환함을 확인

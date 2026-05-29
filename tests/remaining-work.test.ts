@@ -323,9 +323,15 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
   let missingCodexCwd: string | null = null;
   try {
     const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8"));
-    assert.equal(pkg.bin.cx, "./src/cli/main.ts");
-    assert.equal(pkg.bin.codexus, "./src/cli/main.ts");
-    assert.equal(pkg.bin.chx, "./src/cli/main.ts");
+    assert.equal(pkg.bin.cx, "./dist/cli/main.js");
+    assert.equal(pkg.bin.codexus, "./dist/cli/main.js");
+    assert.equal(Object.hasOwn(pkg.bin, "chx"), false);
+    assert.equal(pkg.engines.node, ">=22");
+    assert.ok(pkg.files.includes("dist"));
+    assert.ok(pkg.files.includes("fixtures/app-server"));
+    assert.equal(pkg.files.includes("src"), false);
+    assert.equal(pkg.files.includes("fixtures"), false);
+    assert.equal(pkg.scripts.prepublishOnly, "npm run release:check");
 
     const install = spawnSync(process.execPath, [resolve("scripts/install-codex-skill.mjs"), "--json"], {
       cwd,

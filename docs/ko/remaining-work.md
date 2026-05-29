@@ -125,14 +125,18 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - config, ignored state directory, optional project docs snippet을 만들되
       unrelated tool state는 mutate하지 않습니다.
 
-12. packaging과 alias migration 마무리. 상태: canonical metadata와 smoke coverage 구현, `chx` compatibility 유지.
-    - `cx`, `codexus`를 canonical로 유지합니다.
-    - `chx`는 문서화된 제거 window 전까지 compatibility alias로만 취급합니다.
-    - bin path와 Codex adapter installer smoke test를 추가합니다.
+12. packaging과 alias migration 마무리. 상태: npm-installed CLI packaging과
+    smoke coverage 구현.
+    - `cx`, `codexus`를 canonical public bin으로 유지합니다.
+    - 첫 package는 `0.1.0-alpha.0`과 `--tag next`로 publish합니다.
+    - `npm run package:smoke`를 bin path, runtime asset, mock-run execution
+      release gate로 유지합니다.
 
-13. TypeScript/static verification 추가. 상태: local syntax/static check, versioned schema artifact, zero-dependency schema artifact subset validation 구현.
-    - Node 26 type-stripped execution 외에 typecheck 또는 동등한 static
-      validation을 추가합니다.
+13. TypeScript/static verification 추가. 상태: local syntax/static check,
+    esbuild release bundle, versioned schema artifact, zero-dependency schema
+    artifact subset validation 구현.
+    - source check와 package smoke를 분리합니다. Source test는 local development
+      runtime에서 실행하고, npm user는 bundled JavaScript를 실행합니다.
     - config와 durable state validation은 focused validator와 schema artifact subset engine으로 계속 커버하고, dependency policy가 허용될 때만 full external engine으로 교체합니다.
 
 14. run observability command 추가. 상태: 구현.

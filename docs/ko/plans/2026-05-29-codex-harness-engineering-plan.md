@@ -39,9 +39,10 @@ OMC와 OMX는 같은 계열의 하네스 아이디어입니다. OMC는 Claude Co
 - 제품명: `Codexus`
 - 목표 CLI: `cx`
 - long-form alias: `codexus`
-- 임시 MVP alias: `chx`
+- Public npm bin: `cx`, `codexus`
 
-`chx`는 현재 구현 호환 alias이며, package/bin rename이 끝나면 `cx`가 기본 진입점이 됩니다.
+구현 package/bin rename은 public npm surface 기준으로 완료되었습니다. `cx`와
+`codexus`가 canonical public bin입니다.
 
 ## 제안 시스템
 

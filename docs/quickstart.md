@@ -24,9 +24,9 @@ sh install.sh
 
 Installer environment variables:
 
-- `CODEXUS_REF`: branch or tag to install, default `main`
-- `CODEXUS_INSTALL_DIR`: install directory, default `~/.local/share/codexus`
-- `CODEXUS_BIN_DIR`: bin directory for `cx`, `codexus`, and `chx`, default `~/.local/bin`
+- `CODEXUS_NPM_SPEC`: npm package spec to install, default `codexus@next`
+- `CODEXUS_NPM_PREFIX`: npm global prefix, default `~/.local`
+- `CODEXUS_BIN_DIR`: bin directory for `cx` and `codexus`, default `~/.local/bin`
 - `CODEXUS_INSTALL_CODEX_SKILL=0`: skip Codex skill adapter installation
 
 ## 1. Clone
@@ -38,11 +38,13 @@ cd codexus
 
 ## 2. Verify Local Tooling
 
-Codexus currently requires Node.js 26 or newer.
+Codexus requires Node.js 22 or newer for the npm-installed CLI. Source tests
+run with the repository's configured development Node runtime.
 
 ```bash
 node --version
 npm run ci
+npm run package:smoke
 ```
 
 The test suite uses the deterministic test driver, so it does not need Codex
@@ -90,7 +92,7 @@ cx doctor --json
 codexus runs list --json
 ```
 
-`chx` also exists as a temporary compatibility alias.
+The public bin names are `cx` and `codexus`.
 
 ## 6. Use Real Codex Execution
 

@@ -27,8 +27,7 @@
 - Cron/gateway dry-run contract를 policy-reviewed live dispatch로 승격합니다.
 - Codex skill export compatibility를 강화하고 third-party harness interop은
   optional로 유지합니다.
-- CLI surface가 안정화되면 release packaging을 추가합니다.
-- Temporary `chx` alias 제거 migration note를 게시합니다.
+- npm alpha release 후 installer와 package smoke를 유지보수합니다.
 
 ## Non-Goals
 
