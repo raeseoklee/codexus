@@ -46,7 +46,7 @@ OMC와 OMX는 같은 계열의 하네스 아이디어입니다. OMC는 Claude Co
 ## 제안 시스템
 
 1. CLI와 config
-   - `cx doctor`, `cx run`, `cx plan`, `cx verify`, `cx resume`, `cx status`, `cx replay`, `cx adapt omx`.
+   - `cx doctor`, `cx run`, `cx cancel`, `cx plan`, `cx verify`, `cx resume`, `cx status`, `cx replay`, `cx adapt omx`.
    - 프로젝트 config, 사용자 config, CLI flag를 merge합니다.
    - 자동화 가능한 명령은 `--json`을 지원합니다.
 

@@ -3,8 +3,8 @@
 [한국어](../ko/plans/2026-05-29-harness-remediation-plan.md)
 
 Date: 2026-05-29
-Status: accepted. Implemented in the remediation pass: R1, R2a, R3, R4, R5,
-R6, R7, and R8. Deferred: R2b external `cx cancel`.
+Status: accepted. Implemented in the remediation passes: R1, R2a, R2b, R3, R4,
+R5, R6, R7, and R8, plus the follow-up repair-context redaction expansion.
 Scope: turn the existing scaffolding into a harness that actually repairs,
 supervises, and learns — without breaking the gating/JSON/ledger contracts that
 already work.
@@ -27,7 +27,8 @@ headline promises:
 This plan fixed those in priority order while preserving the existing contracts:
 JSON output stays the automation surface, the ledger stays the source of truth,
 experimental surfaces stay gated, and `codex exec --json` stays the stable
-driver. R2b remains a later owner/liveness protocol, not part of this pass.
+driver. R2b is now implemented as an owner heartbeat plus cancel-marker
+protocol.
 
 ## Remediation Slices
 
@@ -40,7 +41,8 @@ consistency), P2 (positioning / depth).
 
 Implementation status: implemented. Verification repair now records and injects
 bounded verification artifact tails. Driver-failure repair now records and
-injects bounded raw driver log tails.
+injects bounded raw driver log tails. Follow-up hardening expanded redaction for
+common stdout/stderr secret shapes before those tails enter prompts or artifacts.
 
 Problem. There are two distinct repair paths and *each blinds the model in its
 own way*:
@@ -76,9 +78,10 @@ Approach.
   ledger-as-truth principle.
 
 Design constraints. Bound the size (no unbounded log replay into a prompt — this
-is also a prompt-hygiene/secret-surface concern; route through the existing
-redaction hook before injection). Do not change the verification record schema
-shape beyond additive fields.
+is also a prompt-hygiene/secret-surface concern; route through redaction before
+injection). Redaction covers common API tokens, AWS keys, JWTs, key/value secret
+assignments, `.env`-style dumps, and PEM/private-key blocks. Do not change the
+verification record schema shape beyond additive fields.
 
 Acceptance.
 - A mock scenario where verification fails with a known marker string asserts that
@@ -139,25 +142,26 @@ Effort. Medium.
 
 #### R2b (P1) — External `cx cancel <run-id>`
 
-Implementation status: deferred. This remains the follow-up owner/liveness and
-cancel-marker protocol.
+Implementation status: implemented. `cx cancel <run-id>` now writes a
+cancel-request marker for live owners and closes dead-owner ledgers directly.
 
 Problem. There is no way to cancel a run owned by another process.
 
-Approach. Write a cancel-request marker into the run ledger that the owning
-process polls during its run loop; reuse the lock owner metadata
-(`util/lock.ts`: pid/hostname/createdAt) to identify owner liveness and to detect
-an already-dead owner (in which case mark the orphaned run terminal directly).
+Approach. Each active run writes `owner.json` with pid, hostname, heartbeat, and
+TTL. `cx cancel` writes `cancel-request.json` when the owner is live; the owning
+kernel polls the marker and aborts its local `AbortSignal`. If the owner is
+missing, stale, or dead, the canceller writes `run.cancel_orphaned` and
+`run.terminal` and marks the ledger `cancelled`.
 
 Design constraints. Depends on R2a's abort plumbing existing first. Must not
 corrupt a ledger being written by a live owner — the owner performs the terminal
 write, the canceller only requests.
 
-Acceptance. `cx cancel <run-id>` against a live faked run causes that run to reach
-`cancelled`; against a dead-owner run, the command marks the orphan terminal with
-a recorded reason.
+Acceptance. Implemented with regression tests: `cx cancel <run-id>` against a
+live faked run reaches `cancelled`; against a dead-owner run, the command marks
+the orphan terminal with a recorded reason and report.
 
-Effort. Medium. Defer until after R3 — R2a is the urgent safety piece.
+Effort. Medium.
 
 ---
 
@@ -370,11 +374,10 @@ Effort. Small (docs), or medium if `research`/`plan` are implemented.
 3. R3 — real evolution content + non-tautological gate (the substance slice).
 4. R5 — usage accounting.
 5. R7 + R8 — honesty of config surface and docs.
-6. R2b — external `cx cancel` (depends on R2a; least urgent).
+6. R2b — external `cx cancel` owner/liveness protocol.
 
-R1+R4+R6 is the single small first PR. R2a and R3 are the two substantial slices
-and deserve their own PRs with parity/mock fixtures. R2b is deferred behind R3
-because R2a already provides the operator escape hatch for the common case.
+R1+R4+R6 was the single small first PR. R2a and R3 were the two substantial
+slices, and R2b landed afterward once the AbortSignal plumbing existed.
 
 ## What I Would NOT Do (yet)
 
@@ -395,8 +398,9 @@ because R2a already provides the operator escape hatch for the common case.
   shapes that may drift — keep both tolerant, fixture-backed, and capability-gated,
   consistent with the existing driver philosophy.
 - Cancellation (R2a/R2b) risks orphaned `running` ledgers if interrupted
-  mid-write — mitigate by always routing termination through the owning process's
-  `writeState` + terminal event; the external canceller only requests.
+  mid-write — mitigate by routing live-owner termination through the owning
+  process's `writeState` + terminal event, and letting the external canceller
+  directly close only owners proven missing/stale/dead.
 
 ## Acceptance Summary
 

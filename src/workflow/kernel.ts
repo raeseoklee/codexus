@@ -6,6 +6,7 @@ import { classifyDriverFailure } from "../drivers/errors.ts";
 import { appendMemoryEntry } from "../evolution/memory.ts";
 import { appendEvent } from "../ledger/events.ts";
 import { runPaths } from "../ledger/paths.ts";
+import { writeRunReport } from "../ledger/report.ts";
 import { terminal, transition, writeState } from "../ledger/state.ts";
 import { redactSensitiveText } from "../policy/redaction.ts";
 import { runPolicyPreflight } from "../policy/preflight.ts";
@@ -14,6 +15,7 @@ import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { sha256Text } from "../util/hash.ts";
 import { createRunId } from "../util/id.ts";
 import type { VerificationResult } from "../verification/runner.ts";
+import { readCancelRequest, startRunOwnerHeartbeat, type CancelRequest } from "./run-control.ts";
 
 export interface ExecuteRunOptions {
   cwd: string;
@@ -166,17 +168,17 @@ function failedRunError(result: DriverResult, verificationStatus: string, config
   };
 }
 
-async function writeReport(paths: ReturnType<typeof runPaths>, state: RunState, outcome: TerminalOutcome): Promise<void> {
-  const report = `# Run ${state.runId}
-
-- Outcome: ${outcome}
-- Driver: ${state.driver}
-- Verification: ${state.verification.latestStatus}
-- Repair iterations: ${state.repairIteration}
-- Driver repair iterations: ${state.driverRepairIteration ?? 0}
-${state.error ? `- Error: ${state.error.message.split("\n")[0]}\n` : ""}
-`;
-  await writeFile(paths.report, report);
+function abortedDriverResult(signal: AbortSignal, cancelRequest: CancelRequest | null): DriverResult {
+  const reason = cancelRequest
+    ? `external cancel requested: ${cancelRequest.reason}`
+    : signal.reason instanceof Error
+      ? signal.reason.message
+      : "run aborted";
+  return {
+    status: "cancelled",
+    exitCode: 130,
+    error: reason,
+  };
 }
 
 export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRunResult> {
@@ -185,6 +187,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
   const paths = runPaths(cwd, runId);
   await ensureDir(paths.rawDir);
   await ensureDir(paths.artifactsDir);
+  const ownerHeartbeat = await startRunOwnerHeartbeat(paths, runId);
 
   const preflight = runPolicyPreflight({
     cwd,
@@ -245,6 +248,49 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
     });
   }
 
+  const runAbortController = new AbortController();
+  let cancelRequest: CancelRequest | null = null;
+  let cancelPollInFlight = false;
+  const abortRun = (reason: Error): void => {
+    if (!runAbortController.signal.aborted) runAbortController.abort(reason);
+  };
+  const onSignalAbort = (): void => {
+    abortRun(signal?.reason instanceof Error ? signal.reason : new Error("run aborted"));
+  };
+  if (signal?.aborted) {
+    onSignalAbort();
+  } else {
+    signal?.addEventListener("abort", onSignalAbort, { once: true });
+  }
+  const pollCancelRequest = async (): Promise<void> => {
+    if (cancelPollInFlight || cancelRequest || runAbortController.signal.aborted) return;
+    cancelPollInFlight = true;
+    try {
+      const request = await readCancelRequest(paths);
+      if (!request || request.runId !== runId) return;
+      cancelRequest = request;
+      await appendEvent(paths.events, {
+        runId,
+        phase: state.phase,
+        type: "run.cancel_requested",
+        source: "cancel",
+        payload: {
+          requestId: request.requestId,
+          requestedAt: request.requestedAt,
+          requestedBy: request.requestedBy,
+          reason: request.reason,
+        },
+      });
+      abortRun(new Error(`external cancel requested: ${request.reason}`));
+    } finally {
+      cancelPollInFlight = false;
+    }
+  };
+  const cancelPoller = setInterval(() => {
+    void pollCancelRequest();
+  }, 250);
+  cancelPoller.unref?.();
+
   let result: DriverResult = { status: "blocked", error: "policy blocked run before driver execution" };
   let outcome: TerminalOutcome = "blocked";
   let verificationStatus = state.verification.latestStatus;
@@ -286,6 +332,8 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
       const rawStdoutPath = `${paths.rawDir}/${config.driver}${suffix}-stdout.jsonl`;
       const rawStderrPath = `${paths.rawDir}/${config.driver}${suffix}-stderr.log`;
       lastDriverRawPaths = { stdoutPath: rawStdoutPath, stderrPath: rawStderrPath };
+      await pollCancelRequest();
+      if (runAbortController.signal.aborted) return abortedDriverResult(runAbortController.signal, cancelRequest);
       const attemptResult = await driver.run({
         runId,
         cwd,
@@ -303,7 +351,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
           source: event.source,
           payload: event.payload,
         });
-      }, signal);
+      }, runAbortController.signal);
       await appendEvent(paths.events, {
         runId,
         phase: eventPhase,
@@ -339,6 +387,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         commands: config.verification.commands,
         artifactsDir: paths.artifactsDir,
         timeoutMs: config.verification.timeoutMs,
+        signal: runAbortController.signal,
       });
       verificationHistory.push(verification);
       await writeJsonAtomic(paths.verification, verification);
@@ -355,6 +404,10 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
     result = await runDriverAttempt(prompt, 0, "execute");
 
     outcome = outcomeFromDriver(result.status);
+    if (runAbortController.signal.aborted && result.status !== "cancelled") {
+      result = abortedDriverResult(runAbortController.signal, cancelRequest);
+      outcome = "cancelled";
+    }
     if (result.status !== "succeeded") {
       let classification = classifyDriverFailure(result);
       await appendEvent(paths.events, {
@@ -409,7 +462,12 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
       latestVerification = await runChecks();
       verificationStatus = latestVerification.status;
       verificationReason = undefined;
-      outcome = verificationStatus === "passed" ? "complete" : "failed";
+      if (runAbortController.signal.aborted) {
+        result = abortedDriverResult(runAbortController.signal, cancelRequest);
+        outcome = "cancelled";
+      } else {
+        outcome = verificationStatus === "passed" ? "complete" : "failed";
+      }
       while (outcome === "failed" && state.repairIteration < config.repair.maxIterations) {
         const nextIteration = state.repairIteration + 1;
         state = {
@@ -440,7 +498,12 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         latestVerification = await runChecks();
         verificationStatus = latestVerification.status;
         verificationReason = undefined;
-        outcome = verificationStatus === "passed" ? "complete" : "failed";
+        if (runAbortController.signal.aborted) {
+          result = abortedDriverResult(runAbortController.signal, cancelRequest);
+          outcome = "cancelled";
+        } else {
+          outcome = verificationStatus === "passed" ? "complete" : "failed";
+        }
       }
     } else if (result.status !== "succeeded" && state.verification.required && verificationStatus === "pending") {
       verificationStatus = "skipped";
@@ -457,6 +520,16 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
       ...state,
       verification: verificationState(state, verificationStatus, verificationReason),
       ...(result.usage ? { usage: result.usage } : {}),
+      ...(outcome === "cancelled" && result.error
+        ? {
+          error: {
+            code: cancelRequest ? "external_cancel_requested" : "run_cancelled",
+            message: result.error,
+            source: cancelRequest ? "cancel" : config.driver,
+            suggestion: "Inspect the run event ledger for the cancellation source.",
+          },
+        }
+        : {}),
       ...(outcome === "failed"
         ? { error: failedRunError(result, verificationStatus, config) }
         : {}),
@@ -515,7 +588,10 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
     }
   }
 
-  await writeReport(paths, state, outcome);
+  await writeRunReport(paths, state, outcome);
+  clearInterval(cancelPoller);
+  signal?.removeEventListener("abort", onSignalAbort);
+  await ownerHeartbeat.stop();
 
   return {
     runId,

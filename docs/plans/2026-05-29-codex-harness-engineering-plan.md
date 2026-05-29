@@ -64,7 +64,7 @@ Temporary MVP alias: `chx` remains acceptable until the implementation package/b
 Layered architecture:
 
 1. CLI and configuration
-   - Commands: `cx doctor`, `cx run`, `cx plan`, `cx verify`, `cx resume`, `cx status`, `cx adapt omx`, `cx replay`.
+- Commands: `cx doctor`, `cx run`, `cx cancel`, `cx plan`, `cx verify`, `cx resume`, `cx status`, `cx adapt omx`, `cx replay`.
    - Config precedence: project `.codex-harness/config.json`, user `~/.codex-harness/config.json`, CLI flags.
    - Machine-readable output with `--json` on every command.
 
@@ -150,6 +150,7 @@ Phase 1: Codex exec supervisor
 Phase 2: workflow state machine
 
 - Implement `cx run`.
+- Implement `cx cancel <run-id>` with owner/liveness and cancel-marker protocol.
 - Add phase transitions, terminal outcomes, and resumable `state.json`.
 - Add configurable verification commands.
 - Add repair loop with bounded iterations.

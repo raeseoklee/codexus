@@ -31,6 +31,7 @@ The package now exposes `cx` and `codexus` as canonical bins. `chx` remains only
 - [Implementation feedback](design/04-implementation-feedback.md): decisions made after MVP implementation blockers and whether the architecture direction changes.
 - [Naming and runtime positioning](design/05-naming-and-runtime-positioning.md): Codexus name, `cx` CLI target, external CLI runtime, and future Codex-native adapter.
 - [Codex-native adapter](design/06-codex-native-adapter.md): `$codexus` skill adapter, installation, supported first commands, and design rules.
+- [Supervised sessions](design/07-supervised-sessions.md): multi-turn supervised runs over one Codex thread via `codex exec resume`, ledger/session model, and the `cx session` surface.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Public release checklist](public-release.md): metadata, safety, verification, and visibility checklist for open-source publication.
@@ -71,12 +72,12 @@ The repository now has a working MVP harness spine:
 - durable run ledger and workflow kernel,
 - `codex exec --json` and mock drivers,
 - verification gate and bounded repair loop,
-- `init`, `status`, `runs`, `events`, `report`, `verify`, `resume`, `plan`, and `replay` CLI surfaces,
+- `init`, `run`, `cancel`, `status`, `runs`, `events`, `report`, `verify`, `resume`, `plan`, and `replay` CLI surfaces,
 - policy preflight for high-risk verification commands,
 - automatic experience and memory records with memory lifecycle and curation commands,
 - replay-gated skill proposal, review, improvement, promotion, active index, explicit export, listing, and deprecation,
 - optional advanced interop commands that do not affect the normal Codexus runtime,
 - lock inspection/stale recovery, versioned schema artifacts, schema artifact subset enforcement, focused read-path enforcement, and run-ledger validation,
-- approved adapter context artifacts, full replay parity fixture-matrix coverage, gated model replay, app-server dry-run roundtrip/recorded experiment manifests/process-probe/fake-supervision evidence, explicit-budget driver-failure repair, cron/gateway dry-run audit records with policy/approval contracts, installed skill tree diagnosis, and local syntax/static validation.
+- owner/liveness-based external run cancellation, approved adapter context artifacts, full replay parity fixture-matrix coverage, gated model replay, app-server dry-run roundtrip/recorded experiment manifests/process-probe/fake-supervision evidence, explicit-budget driver-failure repair, cron/gateway dry-run audit records with policy/approval contracts, installed skill tree diagnosis, and local syntax/static validation.
 
 The remaining work is no longer P0-P2 surface construction; it is deeper hardening: full external schema-engine enforcement if dependency policy allows it, preserving replay parity coverage, isolated real app-server process experiments, and eventually policy-gated cron/gateway automation. See [Remaining work](remaining-work.md).

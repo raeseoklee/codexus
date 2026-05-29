@@ -1,11 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { spawnSync } from "node:child_process";
-import { tmpdir } from "node:os";
+import { chmod, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { setTimeout as sleep } from "node:timers/promises";
+import { hostname, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { defaultConfig } from "../src/config/schema.ts";
 import { appendMemoryEntry } from "../src/evolution/memory.ts";
+import { runPaths } from "../src/ledger/paths.ts";
+import { writeState } from "../src/ledger/state.ts";
+import type { RunState } from "../src/types.ts";
 import { executeRun } from "../src/workflow/kernel.ts";
 
 const cli = resolve("src/cli/main.ts");
@@ -19,6 +23,35 @@ function runCli(cwd: string, args: string[]) {
     cwd,
     encoding: "utf8",
   });
+}
+
+async function waitForRunningRunId(cwd: string): Promise<string> {
+  const runsRoot = join(cwd, ".codex-harness", "runs");
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    try {
+      const entries = await readdir(runsRoot, { withFileTypes: true });
+      for (const entry of entries.filter((item) => item.isDirectory())) {
+        const state = JSON.parse(await readFile(join(runsRoot, entry.name, "state.json"), "utf8"));
+        if (state.status === "running") return entry.name;
+      }
+    } catch {
+      // The run directory can appear while the child is still bootstrapping.
+    }
+    await sleep(50);
+  }
+  throw new Error("running_run_not_found");
+}
+
+async function waitForChild(child: ChildProcessWithoutNullStreams): Promise<{ code: number | null; signal: string | null }> {
+  return await Promise.race([
+    new Promise<{ code: number | null; signal: string | null }>((resolve) => {
+      child.once("exit", (code, signal) => resolve({ code, signal }));
+    }),
+    sleep(5_000).then(() => {
+      child.kill("SIGKILL");
+      throw new Error("child_timeout");
+    }),
+  ]);
 }
 
 test("run command repairs failed verification once and completes", async () => {
@@ -67,6 +100,53 @@ test("run command repairs failed verification once and completes", async () => {
     const memory = runCli(cwd, ["memory", "search", "completion", "--json"]);
     assert.equal(memory.status, 0, memory.stderr);
     assert.ok(JSON.parse(memory.stdout).matches.length > 0);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("repair context artifacts redact secrets from verification output", async () => {
+  const cwd = await tempDir();
+  try {
+    const password = "hunter2";
+    const awsSecretKey = ["wJalrXUtnFEMI", "K7MDENG", "bPxRfiCYEXAMPLEKEY"].join("/");
+    const jwt = [
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+      "aaaaaaaaaaaaaaaa",
+      "bbbbbbbbbbbbbbbb",
+    ].join(".");
+    const message = `password=${password} AWS_SECRET_ACCESS_KEY=${awsSecretKey} jwt=${jwt}`;
+    const script = [
+      "const fs=require('fs');",
+      "if(!fs.existsSync('marker')){",
+      `console.error(${JSON.stringify(message)});`,
+      "fs.writeFileSync('marker','1');",
+      "process.exit(1)",
+      "}",
+    ].join(" ");
+    const verify = `node -e ${JSON.stringify(script)}`;
+    const result = runCli(cwd, [
+      "run",
+      "--driver",
+      "mock",
+      "--max-repairs",
+      "1",
+      "--verify",
+      verify,
+      "--json",
+      "repair secret context",
+    ]);
+    assert.equal(result.status, 0, result.stderr);
+    const parsed = JSON.parse(result.stdout);
+    const state = JSON.parse(await readFile(parsed.statePath, "utf8"));
+    const repairContextPath = state.artifacts.find((path: string) => path.endsWith("repair-context-001.md"));
+    assert.ok(repairContextPath);
+    const context = await readFile(repairContextPath, "utf8");
+    assert.equal(context.includes(password), false);
+    assert.equal(context.includes(awsSecretKey), false);
+    assert.equal(context.includes(jwt), false);
+    assert.match(context, /\[REDACTED:possible-secret\]/);
+    assert.match(context, /\[REDACTED:possible-jwt\]/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -287,6 +367,100 @@ test("aborted run reaches a cancelled terminal ledger", async () => {
     assert.equal(state.outcome, "cancelled");
     const events = await readFile(join(cwd, ".codex-harness", "runs", result.runId, "events.jsonl"), "utf8");
     assert.match(events, /run.terminal/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("cancel command requests live owner cancellation through the run ledger", async () => {
+  const cwd = await tempDir();
+  const child = spawn(process.execPath, [cli, "run", "--driver", "mock", "--json", "MOCK_SLEEP"], {
+    cwd,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  let stdout = "";
+  let stderr = "";
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk.toString();
+  });
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk.toString();
+  });
+  try {
+    const runId = await waitForRunningRunId(cwd);
+    const cancel = runCli(cwd, ["cancel", runId, "--reason", "test live cancel", "--json"]);
+    assert.equal(cancel.status, 0, cancel.stderr);
+    const cancelOutput = JSON.parse(cancel.stdout);
+    assert.equal(cancelOutput.status, "requested");
+    assert.equal(cancelOutput.owner.live, true);
+
+    const exit = await waitForChild(child);
+    assert.equal(exit.code, 1, stderr);
+    const output = JSON.parse(stdout);
+    assert.equal(output.runId, runId);
+    assert.equal(output.outcome, "cancelled");
+    const state = JSON.parse(await readFile(output.statePath, "utf8"));
+    assert.equal(state.status, "terminal");
+    assert.equal(state.outcome, "cancelled");
+    assert.equal(state.error.code, "external_cancel_requested");
+    const events = await readFile(join(cwd, ".codex-harness", "runs", runId, "events.jsonl"), "utf8");
+    assert.match(events, /run.cancel_requested/);
+    assert.match(events, /run.terminal/);
+  } finally {
+    child.kill("SIGKILL");
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("cancel command marks dead-owner running ledgers as orphan-cancelled", async () => {
+  const cwd = await tempDir();
+  try {
+    const runId = "run_orphan_cancel";
+    const paths = runPaths(cwd, runId);
+    const state: RunState = {
+      schemaVersion: 1,
+      runId,
+      status: "running",
+      phase: "execute",
+      outcome: null,
+      createdAt: "2026-05-29T00:00:00.000Z",
+      updatedAt: "2026-05-29T00:00:00.000Z",
+      cwd,
+      driver: "mock",
+      promptHash: "sha256:test",
+      repairIteration: 0,
+      driverRepairIteration: 0,
+      verification: { required: true, latestStatus: "pending" },
+      artifacts: [],
+    };
+    await writeState(paths.state, state);
+    await writeFile(paths.owner, `${JSON.stringify({
+      schemaVersion: 1,
+      runId,
+      pid: 999_999_999,
+      hostname: hostname(),
+      createdAt: "2026-05-29T00:00:00.000Z",
+      heartbeatAt: "2026-05-29T00:00:00.000Z",
+      ttlMs: 1,
+    }, null, 2)}\n`);
+
+    const cancel = runCli(cwd, ["cancel", runId, "--reason", "dead owner", "--json"]);
+    assert.equal(cancel.status, 0, cancel.stderr);
+    const output = JSON.parse(cancel.stdout);
+    assert.equal(output.status, "cancelled");
+    assert.equal(output.owner.live, false);
+    const cancelled = JSON.parse(await readFile(paths.state, "utf8"));
+    assert.equal(cancelled.status, "terminal");
+    assert.equal(cancelled.outcome, "cancelled");
+    assert.equal(cancelled.verification.latestStatus, "skipped");
+    assert.equal(cancelled.verification.reason, "not_reached_cancelled");
+    assert.equal(cancelled.error.code, "external_cancel_orphaned");
+    const events = await readFile(paths.events, "utf8");
+    assert.match(events, /run.cancel_orphaned/);
+    assert.match(events, /run.terminal/);
+    const report = runCli(cwd, ["report", runId, "--json"]);
+    assert.equal(report.status, 0, report.stderr);
+    assert.match(JSON.parse(report.stdout).preview, /Outcome: cancelled/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

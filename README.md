@@ -32,6 +32,7 @@ User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
 
 - Durable run ledgers under `.codex-harness/runs/<run-id>/`
 - Verification gates with bounded repair loops
+- Timeout, SIGINT, and external `cx cancel <run-id>` cancellation paths
 - Structured JSON error envelopes for automation
 - Memory records, curation, and bounded retrieval
 - Replay-gated skill proposal, review, promotion, improvement, export, and deprecation
@@ -115,6 +116,7 @@ Codex-session usage: [Using Codexus inside Codex](docs/codex-session-usage.md).
 cx doctor --json
 cx init --with-docs --json
 cx run --verify "npm test" "fix the failing parser tests"
+cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json
 cx events tail <run-id> --json
 cx verify <run-id> --json

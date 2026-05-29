@@ -74,6 +74,12 @@ node src/cli/main.ts events tail <run-id> --json
 node src/cli/main.ts schema validate-run <run-id> --json
 ```
 
+Cancel a live supervised run from another terminal:
+
+```bash
+cx cancel <run-id> --reason "no longer needed" --json
+```
+
 ## 5. Use the Local Bins
 
 For development, link the package:

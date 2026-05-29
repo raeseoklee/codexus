@@ -15,12 +15,15 @@ state root checks.
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs runs list --json
+node codex/skills/codexus/scripts/cx.mjs cancel <run-id> --reason "<why>" --json
 node codex/skills/codexus/scripts/cx.mjs status <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs events tail <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs report <run-id> --json
 ```
 
-Use to reconstruct a run from disk. It does not require a live process or model call.
+Use to reconstruct a run from disk or request cancellation of a live supervised
+run. `cancel` writes a marker for the live owner to poll; if the owner is dead,
+it marks the orphaned ledger terminal itself.
 
 ## Verification
 

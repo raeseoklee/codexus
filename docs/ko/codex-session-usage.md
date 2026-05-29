@@ -84,6 +84,7 @@ Wrapper는 설치된 skill metadata에서 Codexus repository를 찾습니다. Co
 ```bash
 doctor --json
 runs list --json
+cancel <run-id> --reason "<why>" --json
 status <run-id> --json
 events tail <run-id> --json
 verify <run-id> --json

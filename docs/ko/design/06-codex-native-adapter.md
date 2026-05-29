@@ -58,6 +58,7 @@ Codex 안에서는 낮은 위험의 명령부터 사용합니다:
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs doctor --json
+node codex/skills/codexus/scripts/cx.mjs cancel <run-id> --reason "<why>" --json
 node codex/skills/codexus/scripts/cx.mjs status <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs events tail <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs verify <run-id> --json

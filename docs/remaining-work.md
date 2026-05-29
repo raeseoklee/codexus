@@ -49,14 +49,14 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   pass/failure/extended fixtures.
 - Remediation hardening implemented from the accepted harness review:
   bounded repair context artifacts, terminal verification not-reached reasons,
-  in-process timeout/SIGINT cancellation, source-specific evolution lessons and
-  replay gates, usage accounting, config option ignored events, and docs
-  alignment for reserved phases/gated tool expansion.
+  expanded repair-context redaction, in-process timeout/SIGINT cancellation,
+  external owner/liveness-based `cx cancel <run-id>`, source-specific evolution
+  lessons and replay gates, usage accounting, config option ignored events, and
+  docs alignment for reserved phases/gated tool expansion.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
-  automation dispatch, and external `cx cancel <run-id>` owner/liveness
-  protocol.
+  automation dispatch, and richer wait/remote-host UX around cancellation.
 
 ### P0: Contract and Safety Hardening
 
@@ -170,15 +170,13 @@ not remove the gates:
 1. Replace the local schema-artifact subset engine with a full JSON Schema
    engine only if dependency policy allows it; keep migration fixtures as the
    regression boundary.
-2. Design and implement external `cx cancel <run-id>` as an owner/liveness and
-   cancel-marker protocol, building on the in-process AbortSignal path.
-3. Preserve the replay parity matrix as a contract: no new canonical parity
+2. Preserve the replay parity matrix as a contract: no new canonical parity
    label should be added without fixture coverage and CLI replay evidence.
-4. Promote deterministic fake app-server supervision into an isolated real
+3. Promote deterministic fake app-server supervision into an isolated real
    app-server start/stop experiment with timeout, cleanup, and bounded
    stdout/stderr evidence before enabling it as a driver.
-5. Promote cron/gateway policy/approval dry-run contracts into a
+4. Promote cron/gateway policy/approval dry-run contracts into a
    policy-reviewed live dispatch contract, then keep dry-run and live paths
    contract-compatible.
-6. Add an explicit, user-visible adapter injection step if retrieved
+5. Add an explicit, user-visible adapter injection step if retrieved
    `codexus:<skill-name>` context is ever inserted automatically.

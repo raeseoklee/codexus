@@ -84,6 +84,7 @@ Prefer read-only or evidence-oriented commands first:
 ```bash
 doctor --json
 runs list --json
+cancel <run-id> --reason "<why>" --json
 status <run-id> --json
 events tail <run-id> --json
 verify <run-id> --json

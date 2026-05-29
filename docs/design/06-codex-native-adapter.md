@@ -59,6 +59,7 @@ Inside Codex, prefer low-risk commands first:
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs doctor --json
+node codex/skills/codexus/scripts/cx.mjs cancel <run-id> --reason "<why>" --json
 node codex/skills/codexus/scripts/cx.mjs status <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs events tail <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs verify <run-id> --json

@@ -6,6 +6,8 @@ export interface RunPaths {
   input: string;
   state: string;
   events: string;
+  owner: string;
+  cancelRequest: string;
   rawDir: string;
   artifactsDir: string;
   verification: string;
@@ -26,6 +28,8 @@ export function runPaths(cwd: string, runId: string): RunPaths {
     input: join(runDir, "input.json"),
     state: join(runDir, "state.json"),
     events: join(runDir, "events.jsonl"),
+    owner: join(runDir, "owner.json"),
+    cancelRequest: join(runDir, "cancel-request.json"),
     rawDir: join(runDir, "raw"),
     artifactsDir: join(runDir, "artifacts"),
     verification: join(runDir, "verification.json"),

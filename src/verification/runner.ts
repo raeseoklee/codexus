@@ -29,6 +29,7 @@ export interface RunVerificationOptions {
   commands: string[];
   artifactsDir: string;
   timeoutMs?: number;
+  signal?: AbortSignal;
 }
 
 export function aggregateVerificationStatus(records: VerificationCommandRecord[]): VerificationStatus {
@@ -51,29 +52,67 @@ async function runOne(command: string, index: number, options: RunVerificationOp
     let stdout = "";
     let stderr = "";
     let settled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let killTimer: ReturnType<typeof setTimeout> | null = null;
     const child = spawn(command, {
       cwd: options.cwd,
       shell: true,
       stdio: ["ignore", "pipe", "pipe"],
     });
-    const timer = setTimeout(() => {
+    const finish = (record: VerificationCommandRecord): void => {
       if (settled) return;
-      child.kill("SIGTERM");
       settled = true;
-      const completedAt = new Date().toISOString();
+      if (timer) clearTimeout(timer);
+      options.signal?.removeEventListener("abort", onAbort);
       void Promise.all([writeFile(stdoutPath, stdout), writeFile(stderrPath, stderr)]).finally(() => {
-        resolve({
-          id,
-          command,
-          cwd: options.cwd,
-          startedAt,
-          completedAt,
-          exitCode: null,
-          status: "timed_out",
-          stdoutPath,
-          stderrPath,
-          summary: `timed out after ${timeoutMs}ms`,
-        });
+        resolve(record);
+      });
+    };
+    const scheduleKill = (): void => {
+      if (killTimer) return;
+      killTimer = setTimeout(() => {
+        child.kill("SIGKILL");
+      }, 2_000);
+      killTimer.unref?.();
+    };
+    function onAbort(): void {
+      stderr += "verification cancelled by signal\n";
+      child.kill("SIGTERM");
+      scheduleKill();
+      const completedAt = new Date().toISOString();
+      finish({
+        id,
+        command,
+        cwd: options.cwd,
+        startedAt,
+        completedAt,
+        exitCode: null,
+        status: "error",
+        stdoutPath,
+        stderrPath,
+        summary: "verification cancelled by signal",
+      });
+    }
+    if (options.signal?.aborted) {
+      onAbort();
+      return;
+    }
+    options.signal?.addEventListener("abort", onAbort, { once: true });
+    timer = setTimeout(() => {
+      child.kill("SIGTERM");
+      scheduleKill();
+      const completedAt = new Date().toISOString();
+      finish({
+        id,
+        command,
+        cwd: options.cwd,
+        startedAt,
+        completedAt,
+        exitCode: null,
+        status: "timed_out",
+        stdoutPath,
+        stderrPath,
+        summary: `timed out after ${timeoutMs}ms`,
       });
     }, timeoutMs);
 
@@ -85,44 +124,36 @@ async function runOne(command: string, index: number, options: RunVerificationOp
     });
     child.on("error", (error) => {
       if (settled) return;
-      clearTimeout(timer);
-      settled = true;
       const completedAt = new Date().toISOString();
       stderr += `${error instanceof Error ? error.message : String(error)}\n`;
-      void Promise.all([writeFile(stdoutPath, stdout), writeFile(stderrPath, stderr)]).finally(() => {
-        resolve({
-          id,
-          command,
-          cwd: options.cwd,
-          startedAt,
-          completedAt,
-          exitCode: null,
-          status: "error",
-          stdoutPath,
-          stderrPath,
-          summary: "verification command failed to start",
-        });
+      finish({
+        id,
+        command,
+        cwd: options.cwd,
+        startedAt,
+        completedAt,
+        exitCode: null,
+        status: "error",
+        stdoutPath,
+        stderrPath,
+        summary: "verification command failed to start",
       });
     });
     child.on("close", (code) => {
       if (settled) return;
-      clearTimeout(timer);
-      settled = true;
       const completedAt = new Date().toISOString();
       const status = code === 0 ? "passed" : "failed";
-      void Promise.all([writeFile(stdoutPath, stdout), writeFile(stderrPath, stderr)]).finally(() => {
-        resolve({
-          id,
-          command,
-          cwd: options.cwd,
-          startedAt,
-          completedAt,
-          exitCode: code,
-          status,
-          stdoutPath,
-          stderrPath,
-          summary: status === "passed" ? "passed" : `failed with exit code ${code}`,
-        });
+      finish({
+        id,
+        command,
+        cwd: options.cwd,
+        startedAt,
+        completedAt,
+        exitCode: code,
+        status,
+        stdoutPath,
+        stderrPath,
+        summary: status === "passed" ? "passed" : `failed with exit code ${code}`,
       });
     });
   });

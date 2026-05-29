@@ -16,7 +16,7 @@ compatibility alias로 유지합니다.
 ## 구현된 MVP spine
 
 - Node 26 기반 dependency-free CLI entrypoint
-- `doctor`, `init`, `run`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`
+- `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`
 - `locks list/inspect/clear`, `schema check/validate/validate-run`, `app-server status/roundtrip/experiment`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
@@ -54,11 +54,15 @@ compatibility alias로 유지합니다.
   artifact로 기록하고 repair prompt에 주입합니다.
 - Driver-failure repair는 raw driver log tail을 bounded context artifact로 기록하고
   repair prompt에 주입합니다.
+- Repair context redaction은 API token, AWS key, JWT, key/value secret
+  assignment, `.env` dump, private-key block의 대표 패턴을 막습니다.
 - Driver event phase는 mutable state가 아니라 explicit attempt phase로 기록됩니다.
 - Verification에 도달하지 못한 terminal run은 `pending`이 아니라 `skipped`와
   `not_reached_*` reason을 기록합니다.
 - `codex-exec`는 `codex.runTimeoutMs`, AbortSignal cancellation, CLI SIGINT,
   `driver.timeout` evidence, terminal `cancelled` ledger를 지원합니다.
+- `cx cancel <run-id>`는 live owner에 cancel marker를 쓰고, dead-owner running
+  ledger는 explicit event와 함께 orphan-cancelled로 닫습니다.
 - Experience와 generated skill은 verification command, repair history,
   driver-failure classification에서 source-specific lesson/replay requirement를
   생성합니다.
@@ -74,7 +78,7 @@ compatibility alias로 유지합니다.
 
 ## 검증
 
-- `npm test`: 63 tests 통과
+- `npm test`: 67 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -100,8 +104,6 @@ compatibility alias로 유지합니다.
 현재 high-level gap:
 
 - driver-failure repair는 repairable task failure에 한해 explicit budget이 있을 때만 실행됩니다.
-- external `cx cancel <run-id>`는 아직 구현하지 않았습니다. 현재 cancel은
-  in-process timeout/SIGINT/AbortSignal 경로입니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
 - app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision만 구현했습니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.

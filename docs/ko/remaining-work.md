@@ -47,14 +47,15 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   field, run-ledger validation, installed Codexus skill diagnostic,
   app-server process-probe evidence, replay pass/failure/extended fixture.
 - Accepted harness review 기반 remediation hardening 구현됨: bounded repair
-  context artifact, terminal verification not-reached reason, in-process
-  timeout/SIGINT cancellation, source-specific evolution lesson/replay gate,
-  usage accounting, config option ignored event, reserved phase/gated tool
-  expansion 문서 정리.
+  context artifact, 확장된 repair-context redaction, terminal verification
+  not-reached reason, in-process timeout/SIGINT cancellation, external
+  owner/liveness 기반 `cx cancel <run-id>`, source-specific evolution
+  lesson/replay gate, usage accounting, config option ignored event, reserved
+  phase/gated tool expansion 문서 정리.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
-  engine enforcement/migration, real cron/gateway automation dispatch, external
-  `cx cancel <run-id>` owner/liveness protocol.
+  engine enforcement/migration, real cron/gateway automation dispatch,
+  cancellation wait/remote-host UX 보강.
 
 ### P0: Contract and Safety Hardening
 
@@ -162,15 +163,13 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 1. dependency policy가 허용될 때만 local schema-artifact subset engine을 full JSON
    Schema engine으로 교체합니다. Migration fixture는 regression boundary로 유지합니다.
-2. external `cx cancel <run-id>`를 owner/liveness와 cancel-marker protocol로
-   설계/구현합니다. 이미 구현된 in-process AbortSignal path 위에 얹습니다.
-3. replay parity matrix를 contract로 유지합니다. 새 canonical parity label은
+2. replay parity matrix를 contract로 유지합니다. 새 canonical parity label은
    fixture coverage와 CLI replay evidence 없이 추가하지 않습니다.
-4. app-server를 driver로 켜기 전에 deterministic fake app-server supervision을
+3. app-server를 driver로 켜기 전에 deterministic fake app-server supervision을
    timeout, cleanup, bounded stdout/stderr evidence가 있는 isolated real
    app-server start/stop experiment로 승격합니다.
-5. cron/gateway policy/approval dry-run contract를 policy-reviewed live
+4. cron/gateway policy/approval dry-run contract를 policy-reviewed live
    dispatch contract로 승격하고, dry-run/live path의 contract compatibility를
    유지합니다.
-6. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고
+5. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고
    user-visible한 adapter injection 단계를 추가합니다.

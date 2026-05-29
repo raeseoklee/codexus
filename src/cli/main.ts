@@ -19,6 +19,7 @@ import { featureCommand } from "./commands/feature.ts";
 import { locksCommand } from "./commands/locks.ts";
 import { schemaCommand } from "./commands/schema.ts";
 import { appServerCommand } from "./commands/app-server.ts";
+import { cancelCommand } from "./commands/cancel.ts";
 
 function helpText(): string {
   return `Codexus
@@ -27,6 +28,7 @@ Usage:
   cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
+  cx cancel <run-id> [--reason <reason>] [--json]
   cx plan [--omx] <task> [--json]
   cx runs list [--json]
   cx status <run-id> [--json]
@@ -81,6 +83,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "run") {
     await runCommand(args);
+    return;
+  }
+  if (args.command === "cancel") {
+    await cancelCommand(args);
     return;
   }
   if (args.command === "runs") {

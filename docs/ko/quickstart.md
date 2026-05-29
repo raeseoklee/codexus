@@ -74,6 +74,12 @@ node src/cli/main.ts events tail <run-id> --json
 node src/cli/main.ts schema validate-run <run-id> --json
 ```
 
+다른 terminal에서 실행 중인 supervised run을 취소할 수 있습니다:
+
+```bash
+cx cancel <run-id> --reason "no longer needed" --json
+```
+
 ## 5. Local Bin 사용
 
 개발 중에는 package를 link할 수 있습니다:

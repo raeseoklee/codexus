@@ -20,6 +20,7 @@ temporary compatibility alias.
   - `doctor`
   - `init`
   - `run`
+  - `cancel`
   - `plan`
   - `runs list`
   - `status`
@@ -74,11 +75,15 @@ temporary compatibility alias.
   bounded verification failure context artifacts.
 - Explicit-budget repair loop for repairable driver task failures, including
   bounded raw driver log context artifacts.
+- Repair context redaction covers common API tokens, AWS keys, JWTs,
+  key/value secret assignments, `.env`-style dumps, and private-key blocks.
 - Driver events are phase-stamped from the explicit attempt phase.
 - Driver failures before verification record `skipped` with a `not_reached_*`
   reason instead of leaving terminal state at `pending`.
 - `codex-exec` supports `codex.runTimeoutMs`, AbortSignal cancellation, CLI
   SIGINT handling, `driver.timeout` evidence, and terminal `cancelled` ledgers.
+- `cx cancel <run-id>` writes a cancel marker for live run owners and closes
+  dead-owner running ledgers as orphan-cancelled with explicit events.
 - `cx verify` can rerun stored verification for an existing ledger.
 - `cx resume` creates a follow-up supervised run from an existing ledger.
 - Experience record writer with decisions, failures, verification commands,
@@ -194,8 +199,6 @@ See [Remaining work](remaining-work.md) for the prioritized backlog and design
 review. Current high-level gaps:
 
 - Driver-failure repair is implemented only for repairable task failures and only with an explicit budget.
-- External `cx cancel <run-id>` is not implemented yet; current cancellation is
-  in-process timeout/SIGINT/AbortSignal.
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
 - Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, and deterministic fake lifecycle supervision are implemented.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.

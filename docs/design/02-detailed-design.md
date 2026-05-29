@@ -149,6 +149,20 @@ Example:
 cx run --verify "npm test" "fix the failing parser tests"
 ```
 
+### `cx cancel <run-id>`
+
+Purpose: request cancellation for a live supervised run without corrupting the
+ledger.
+
+Behavior:
+
+- each active run writes `owner.json` with pid, hostname, heartbeat, and TTL,
+- `cx cancel` writes `cancel-request.json` when the owner is live,
+- the owning kernel polls the marker, aborts its local `AbortSignal`, and writes
+  the terminal `cancelled` state plus `run.cancel_requested` evidence,
+- if the owner is dead or stale, `cx cancel` marks the orphaned running ledger
+  terminal with `run.cancel_orphaned` and `run.terminal` events.
+
 ### `cx status <run-id>`
 
 Purpose: reconstruct current or terminal run state from disk.
