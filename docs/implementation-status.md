@@ -97,7 +97,8 @@ temporary compatibility alias.
 - `scripts/install-codex-skill.mjs` installs the adapter into `${CODEX_HOME:-~/.codex}/skills/codexus`.
 - `doctor --json` diagnoses whether the installed Codexus skill tree matches this repository, and the installer writes source/installed tree hashes.
 - `doctor --json --strict` preserves the JSON diagnostic body while returning nonzero when a fail-level check is present.
-- GitHub Actions CI runs whitespace diff checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
+- GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
+- Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
 
 ## Verified
 
@@ -105,6 +106,7 @@ temporary compatibility alias.
 - Current test count: 56.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
+- Local CI parity: `npm run ci`
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor strict smoke: missing command diagnostics return `ok: false` and exit 1 with `--strict`.
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.

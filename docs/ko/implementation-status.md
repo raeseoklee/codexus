@@ -51,13 +51,15 @@ compatibility alias로 유지합니다.
 - `${CODEX_HOME:-~/.codex}/skills/codexus`로 adapter를 설치하는 `scripts/install-codex-skill.mjs`
 - `doctor --json`의 installed Codexus skill tree match 진단과 installer source/installed tree hash metadata
 - `doctor --json --strict`는 JSON 진단 body를 유지하면서 fail-level check가 있을 때 nonzero exit code를 반환합니다.
-- GitHub Actions CI는 main push와 pull request에서 whitespace diff check, static syntax validation, unit test를 실행합니다.
+- GitHub Actions CI는 main push와 pull request에서 committed whitespace check, static syntax validation, unit test를 실행합니다.
+- Local CI parity는 `npm run ci`로 실행할 수 있습니다. Remote Actions 실행은 repository/account runner availability에 의존합니다.
 
 ## 검증
 
 - `npm test`: 56 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
+- Local CI parity: `npm run ci`
 - `doctor --json`: Codex auth/version/features, OMX, git, tmux, driver capability 확인
 - `doctor --json --strict`: missing command 진단이 `ok:false`와 exit 1을 반환함을 확인
 - mock driver: success/failure/repair/blocked/cancelled outcome 검증

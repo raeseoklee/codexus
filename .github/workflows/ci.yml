@@ -13,14 +13,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "26"
 
-      - name: Check formatting whitespace
-        run: git diff --check
+      - name: Check committed whitespace on push
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            git diff-tree --check --root --no-commit-id -r HEAD
+          else
+            git diff --check "${{ github.event.before }}..HEAD"
+          fi
+
+      - name: Check committed whitespace on pull request
+        if: github.event_name == 'pull_request'
+        run: git diff --check "${{ github.event.pull_request.base.sha }}...HEAD"
 
       - name: Static syntax check
         run: npm run typecheck
