@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { buildExperience, writeExperience } from "../src/evolution/experience.ts";
 import { appendMemoryEntry, curateMemoryEntries, searchMemoryEntries } from "../src/evolution/memory.ts";
 import { buildSkillProposal, deprecateSkill, listSkills, promoteSkill, proposeSkillImprovement, retrieveActiveSkillsForTask, reviewSkill, writeSkillProposal } from "../src/evolution/skills.ts";
+import { buildDefaultReplaySpec, evaluateReplaySpec } from "../src/evolution/replay.ts";
 import { runPaths } from "../src/ledger/paths.ts";
 import type { RunState } from "../src/types.ts";
 
@@ -40,8 +41,10 @@ test("writeExperience persists practical MVP record", async () => {
       state: state(cwd),
       prompt: "fix parser regression",
       driverResult: { status: "succeeded", exitCode: 0 },
+      verificationCommands: ["npm test"],
     });
     assert.equal(experience.task.shape, "bugfix");
+    assert.match(experience.reusableLessons[0].summary, /npm test/);
     const raw = JSON.parse(await readFile(paths.experience, "utf8"));
     assert.equal(raw.runId, "run_evo");
   } finally {
@@ -104,10 +107,12 @@ test("skill proposal has promotion gate fields", async () => {
       state: state(cwd),
       prompt: "fix parser regression",
       driverResult: { status: "succeeded", exitCode: 0 },
+      verificationCommands: ["npm test"],
     });
     const proposal = buildSkillProposal(experience);
     assert.equal(proposal.status, "proposed");
     assert.equal(proposal.promotion.requiredReplayStatus, "passed");
+    assert.ok(proposal.procedure.some((step) => step.includes("npm test")));
     await writeSkillProposal(cwd, experience);
     const raw = await readFile(join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "SKILL.md"), "utf8");
     assert.match(raw, /Source run: run_evo/);
@@ -116,9 +121,32 @@ test("skill proposal has promotion gate fields", async () => {
     assert.equal(evidence.verificationStatus, "passed");
     const replay = JSON.parse(await readFile(join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "replay.json"), "utf8"));
     assert.equal(replay.skillId, proposal.id);
+    assert.deepEqual(replay.scenarios[0].expected.requiresTests, ["npm test"]);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
+});
+
+test("source-specific replay fails boilerplate skills", () => {
+  const replay = buildDefaultReplaySpec("skill_parser", "fix parser regression", {
+    requiresTests: ["npm test"],
+    forbids: ["claim completion without running npm test"],
+  });
+  const result = evaluateReplaySpec(replay, {
+    id: "skill_parser",
+    procedure: [
+      "Review source run evidence before applying this procedure.",
+      "Run required verification before claiming completion.",
+    ],
+    safety: {
+      requiresVerification: true,
+      forbiddenActions: ["promote without replay validation"],
+    },
+  });
+  assert.equal(result.status, "failed");
+  const failures = result.scenarios.flatMap((scenario) => scenario.failures);
+  assert.ok(failures.includes("missing_required_test:npm test"));
+  assert.ok(failures.includes("missing_forbidden_action:claim completion without running npm test"));
 });
 
 test("skill promotion requires replay and writes active skill", async () => {

@@ -113,7 +113,8 @@ async function validateRunLedger(cwd: string, runId: string, schemaRoot?: string
 
   const input = existsSync(paths.input) ? await readJsonFile(paths.input).catch(() => null) : null;
   const evolutionEnabled = inputEvolutionEnabled(input);
-  const verificationRequired = parsedState ? parsedState.verification.required || parsedState.verification.latestStatus !== "skipped" : true;
+  const verificationNotReached = parsedState?.verification.latestStatus === "skipped" && parsedState.verification.reason?.startsWith("not_reached_");
+  const verificationRequired = parsedState ? !verificationNotReached && (parsedState.verification.required || parsedState.verification.latestStatus !== "skipped") : true;
   const artifactRequirements = [
     { name: "verification", path: paths.verification, required: verificationRequired },
     { name: "experience", path: paths.experience, required: evolutionEnabled },

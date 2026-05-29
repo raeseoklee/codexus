@@ -321,7 +321,8 @@ Initial config:
     "command": "codex",
     "model": null,
     "sandbox": "workspace-write",
-    "approval": "on-request"
+    "approval": "on-request",
+    "runTimeoutMs": 1800000
   },
   "verification": {
     "commands": [],
@@ -347,7 +348,7 @@ Initial config:
 }
 ```
 
-Unknown config keys should produce warnings, not crashes, until the schema stabilizes. Driver-specific config entries are interpreted through capability probes rather than blindly appended to every command invocation.
+Unknown config keys should produce warnings, not crashes, until the schema stabilizes. Driver-specific config entries are interpreted through capability probes rather than blindly appended to every command invocation. If a configured Codex option is dropped because the local `codex exec` capability probe does not advertise the flag, the run ledger records a `config.option_ignored` event.
 
 ## Storage Layout
 
@@ -441,6 +442,11 @@ Allowed `phase`:
 - `failed`
 - `blocked`
 - `cancelled`
+
+Current kernel execution uses `intake`, `execute`, `verify`, `repair`, `evolve`,
+and terminal phases. `research` and `plan` are reserved state-schema values for
+future first-class phases; today planning is exposed as the separate `cx plan`
+command.
 
 Allowed terminal `outcome`:
 

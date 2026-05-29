@@ -19,7 +19,8 @@ Codexus is a local runtime harness for Codex orchestration.
 한국어 설명:
 
 ```text
-Codexus는 Codex를 감싸 durable execution, tool routing, verification, recovery, memory, replay-gated skills를 제공하는 로컬 런타임 하네스입니다.
+Codexus는 Codex를 감싸 durable supervision, verification, recovery, memory,
+replay-gated skills를 제공하는 로컬 런타임 하네스입니다.
 ```
 
 ## 카테고리
@@ -28,7 +29,10 @@ Codexus는 Codex를 감싸 durable execution, tool routing, verification, recove
 Codex execution harness
 ```
 
-Codexus는 모델, IDE, hosted agent를 대체하지 않습니다. Codex 실행을 감싸 자동 실행, 도구 연결, 상태 기록, 검증, 복구, memory/skill화를 담당하는 runtime layer입니다.
+Codexus는 모델, IDE, hosted agent를 대체하지 않습니다. Codex 실행을 감싸 상태
+기록, 검증, supervision, 복구, memory/skill화를 담당하는 runtime layer입니다.
+Tool/MCP expansion은 policy와 approval contract가 활성화될 때까지 gated 상태로
+둡니다.
 
 ## CLI 명칭
 

@@ -81,6 +81,10 @@ function validateConfig(config: HarnessConfig, warnings: string[]): HarnessConfi
     warnings.push(`invalid config codex.approval '${String(next.codex.approval)}'; using default '${defaultConfig.codex.approval}'`);
     next.codex.approval = defaultConfig.codex.approval;
   }
+  if (next.codex.runTimeoutMs !== null && (!Number.isFinite(next.codex.runTimeoutMs) || next.codex.runTimeoutMs <= 0)) {
+    warnings.push(`invalid config codex.runTimeoutMs '${String(next.codex.runTimeoutMs)}'; using default ${defaultConfig.codex.runTimeoutMs}`);
+    next.codex.runTimeoutMs = defaultConfig.codex.runTimeoutMs;
+  }
   if (!Array.isArray(next.verification.commands) || next.verification.commands.some((command) => typeof command !== "string")) {
     warnings.push("invalid config verification.commands; using []");
     next.verification.commands = [];

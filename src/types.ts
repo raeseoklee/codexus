@@ -46,8 +46,10 @@ export interface RunState {
   verification: {
     required: boolean;
     latestStatus: "pending" | "passed" | "failed" | "skipped" | "timed_out" | "error";
+    reason?: string;
   };
   artifacts: string[];
+  usage?: { [key: string]: JsonValue };
   error?: HarnessError;
 }
 

@@ -236,6 +236,7 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       if (value.codex.model !== null && typeof value.codex.model !== "string") errors.push("codex.model:invalid");
       requireOneOf(value.codex, "sandbox", ["read-only", "workspace-write", "danger-full-access"], errors, "codex.sandbox");
       requireOneOf(value.codex, "approval", ["untrusted", "on-request", "never"], errors, "codex.approval");
+      if (value.codex.runTimeoutMs !== null && typeof value.codex.runTimeoutMs !== "number") errors.push("codex.runTimeoutMs:invalid");
     }
     if (requireRecord(value.verification, errors, "verification")) {
       if (requireArray(value.verification, "commands", errors, "verification.commands").some((item) => typeof item !== "string")) {
@@ -281,8 +282,10 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     if (requireRecord(value.verification, errors, "verification")) {
       requireBoolean(value.verification, "required", errors, "verification.required");
       requireOneOf(value.verification, "latestStatus", verificationStatuses, errors, "verification.latestStatus");
+      if (value.verification.reason !== undefined && typeof value.verification.reason !== "string") errors.push("verification.reason:invalid");
     }
     requireArray(value, "artifacts", errors);
+    if (value.usage !== undefined && !isRecord(value.usage)) errors.push("usage:invalid");
   }
 
   if (type === "event") {

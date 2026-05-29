@@ -36,13 +36,14 @@ test("loadConfig warns for unknown keys and normalizes invalid values", async ()
     await mkdir(join(cwd, ".codex-harness"), { recursive: true });
     await writeFile(join(cwd, ".codex-harness", "config.json"), JSON.stringify({
       driver: "not-real",
-      codex: { sandbox: "unsafe", extra: true },
+      codex: { sandbox: "unsafe", runTimeoutMs: -10, extra: true },
       verification: { timeoutMs: -1 },
       mystery: 1,
     }));
     const loaded = loadConfig({ cwd });
     assert.equal(loaded.config.driver, "codex-exec");
     assert.equal(loaded.config.codex.sandbox, "workspace-write");
+    assert.equal(loaded.config.codex.runTimeoutMs, 1_800_000);
     assert.equal(loaded.config.verification.timeoutMs, 120_000);
     assert.ok(loaded.warnings.some((warning) => warning.includes("unknown config key 'mystery'")));
     assert.ok(loaded.warnings.some((warning) => warning.includes("unknown config key 'codex.extra'")));

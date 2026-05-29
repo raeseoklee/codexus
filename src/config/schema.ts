@@ -5,6 +5,7 @@ export interface HarnessConfig {
     model: string | null;
     sandbox: "read-only" | "workspace-write" | "danger-full-access";
     approval: "untrusted" | "on-request" | "never";
+    runTimeoutMs: number | null;
   };
   verification: {
     commands: string[];
@@ -36,6 +37,7 @@ export const defaultConfig: HarnessConfig = {
     model: null,
     sandbox: "workspace-write",
     approval: "on-request",
+    runTimeoutMs: 1_800_000,
   },
   verification: {
     commands: [],

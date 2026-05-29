@@ -37,12 +37,12 @@ export interface DriverResult {
   status: "succeeded" | "failed" | "blocked" | "cancelled";
   finalMessage?: string;
   exitCode?: number;
-  usage?: Record<string, unknown>;
+  usage?: { [key: string]: JsonValue };
   error?: string;
 }
 
 export interface HarnessDriver {
   name: string;
   probe(config?: HarnessConfig): Promise<DriverProbe>;
-  run(request: DriverRequest, emit: (event: DriverEvent) => Promise<void>): Promise<DriverResult>;
+  run(request: DriverRequest, emit: (event: DriverEvent) => Promise<void>, signal?: AbortSignal): Promise<DriverResult>;
 }

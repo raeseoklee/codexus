@@ -23,6 +23,7 @@ The package now exposes `cx` and `codexus` as canonical bins. `chx` remains only
 - [Quick start](quickstart.md): local setup, deterministic test run, real Codex run, and Codex-native adapter installation.
 - [Using Codexus inside Codex](codex-session-usage.md): how to invoke the `$codexus` skill from an interactive Codex session, what to ask it to do, and when not to use it.
 - [Engineering plan](plans/2026-05-29-codex-harness-engineering-plan.md): migrated planning baseline, research findings, constraints, MVP scope, and risks.
+- [Harness remediation plan](plans/2026-05-29-harness-remediation-plan.md): accepted review findings and implemented remediation slices for repair, supervision, and evolution depth.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.

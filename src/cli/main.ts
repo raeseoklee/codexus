@@ -26,7 +26,7 @@ function helpText(): string {
 Usage:
   cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]
-  cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] <prompt>
+  cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx plan [--omx] <task> [--json]
   cx runs list [--json]
   cx status <run-id> [--json]

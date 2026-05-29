@@ -19,10 +19,10 @@ Codexus is a local runtime harness for Codex orchestration.
 Long description:
 
 ```text
-Codexus wraps Codex with durable execution, tool routing, verification, recovery, memory, and replay-gated skills.
+Codexus wraps Codex with durable supervision, verification, recovery, memory, and replay-gated skills.
 ```
 
-The name combines the Codex execution engine with a nexus layer: the place where tools, run state, verification evidence, memory, skills, and optional OMX interop connect.
+The name combines the Codex execution engine with a nexus layer: the place where run state, verification evidence, memory, skills, and optional advanced interop connect.
 
 ## Category
 
@@ -35,7 +35,7 @@ Codex execution harness
 More explicitly:
 
 ```text
-An execution/runtime harness that wraps Codex, drives automatic execution, connects tools, records state, verifies outcomes, recovers from failures, and turns reusable experience into auditable memory and skills.
+An execution/runtime harness that wraps Codex, records state, verifies outcomes, supervises and recovers runs, and turns reusable experience into auditable memory and skills. Tool/MCP expansion remains gated until its policy and approval contracts are enabled.
 ```
 
 ## CLI Naming

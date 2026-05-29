@@ -1,10 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { defaultConfig } from "../src/config/schema.ts";
 import { appendMemoryEntry } from "../src/evolution/memory.ts";
+import { executeRun } from "../src/workflow/kernel.ts";
 
 const cli = resolve("src/cli/main.ts");
 
@@ -22,7 +24,7 @@ function runCli(cwd: string, args: string[]) {
 test("run command repairs failed verification once and completes", async () => {
   const cwd = await tempDir();
   try {
-    const verify = "node -e \"const fs=require('fs'); if(!fs.existsSync('marker')){fs.writeFileSync('marker','1'); process.exit(1)}\"";
+    const verify = "node -e \"const fs=require('fs'); if(!fs.existsSync('marker')){console.error('CODEXUS_REPAIR_MARKER'); fs.writeFileSync('marker','1'); process.exit(1)}\"";
     const result = runCli(cwd, [
       "run",
       "--driver",
@@ -40,8 +42,15 @@ test("run command repairs failed verification once and completes", async () => {
     const state = JSON.parse(await readFile(parsed.statePath, "utf8"));
     assert.equal(state.repairIteration, 1);
     assert.equal(state.verification.latestStatus, "passed");
+    const repairContextPath = state.artifacts.find((path: string) => path.endsWith("repair-context-001.md"));
+    assert.ok(repairContextPath);
+    assert.match(await readFile(repairContextPath, "utf8"), /CODEXUS_REPAIR_MARKER/);
     const events = await readFile(join(cwd, ".codex-harness", "runs", parsed.runId, "events.jsonl"), "utf8");
     assert.match(events, /repair.started/);
+    const eventRecords = events.trim().split(/\n/).map((line) => JSON.parse(line));
+    const driverMessages = eventRecords.filter((event) => event.type === "driver.mock.message");
+    assert.equal(driverMessages[0].phase, "execute");
+    assert.ok(driverMessages.some((event) => event.phase === "repair"));
 
     const status = runCli(cwd, ["status", parsed.runId, "--json"]);
     assert.equal(status.status, 0, status.stderr);
@@ -223,6 +232,104 @@ test("run command preserves blocked and cancelled driver outcomes", async () => 
     const cancelled = runCli(cwd, ["run", "--driver", "mock", "--json", "MOCK_CANCEL"]);
     assert.equal(cancelled.status, 1);
     assert.equal(JSON.parse(cancelled.stdout).outcome, "cancelled");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("driver failure does not leave verification pending when checks were configured", async () => {
+  const cwd = await tempDir();
+  try {
+    const failed = runCli(cwd, [
+      "run",
+      "--driver",
+      "mock",
+      "--verify",
+      "node -e \"process.exit(0)\"",
+      "--json",
+      "MOCK_FAIL",
+    ]);
+    assert.equal(failed.status, 1);
+    const output = JSON.parse(failed.stdout);
+    assert.equal(output.outcome, "failed");
+    const state = JSON.parse(await readFile(output.statePath, "utf8"));
+    assert.equal(state.verification.latestStatus, "skipped");
+    assert.equal(state.verification.reason, "not_reached_driver_failed");
+
+    const validation = runCli(cwd, ["schema", "validate-run", output.runId, "--json"]);
+    assert.equal(validation.status, 0, validation.stderr);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("aborted run reaches a cancelled terminal ledger", async () => {
+  const cwd = await tempDir();
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(new Error("test abort")), 25);
+    const result = await executeRun({
+      cwd,
+      prompt: "MOCK_SLEEP",
+      config: {
+        ...defaultConfig,
+        driver: "mock",
+        evolution: {
+          ...defaultConfig.evolution,
+          enabled: false,
+        },
+      },
+      signal: controller.signal,
+    });
+    assert.equal(result.outcome, "cancelled");
+    const state = JSON.parse(await readFile(result.statePath, "utf8"));
+    assert.equal(state.status, "terminal");
+    assert.equal(state.outcome, "cancelled");
+    const events = await readFile(join(cwd, ".codex-harness", "runs", result.runId, "events.jsonl"), "utf8");
+    assert.match(events, /run.terminal/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("codex exec usage is stored in terminal state", async () => {
+  const cwd = await tempDir();
+  try {
+    const fakeCodex = join(cwd, "fake-codex-usage.mjs");
+    await writeFile(fakeCodex, `#!/usr/bin/env node
+if (process.argv[2] === "exec" && process.argv.includes("--help")) {
+  console.log("Options: --json --sandbox --model --output-last-message");
+  process.exit(0);
+}
+if (process.argv[2] === "exec") {
+  console.log(JSON.stringify({ type: "turn.completed", usage: { input_tokens: 5, output_tokens: 8, total_tokens: 13 } }));
+  process.exit(0);
+}
+`);
+    await chmod(fakeCodex, 0o755);
+    const result = await executeRun({
+      cwd,
+      prompt: "usage",
+      config: {
+        ...defaultConfig,
+        driver: "codex-exec",
+        codex: {
+          ...defaultConfig.codex,
+          command: fakeCodex,
+          runTimeoutMs: 1_000,
+        },
+        evolution: {
+          ...defaultConfig.evolution,
+          enabled: false,
+        },
+      },
+    });
+    assert.equal(result.outcome, "complete");
+    const state = JSON.parse(await readFile(result.statePath, "utf8"));
+    assert.deepEqual(state.usage, { available: true, input_tokens: 5, output_tokens: 8, total_tokens: 13 });
+    const status = runCli(cwd, ["status", result.runId, "--json"]);
+    assert.equal(status.status, 0, status.stderr);
+    assert.deepEqual(JSON.parse(status.stdout).state.usage, state.usage);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

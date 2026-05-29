@@ -157,11 +157,9 @@ The kernel owns phase transitions and terminal outcomes. It does not trust a mod
 3. verification policy evaluated,
 4. terminal outcome stored.
 
-Phases:
+Implemented runtime phases:
 
 - `intake`
-- `research`
-- `plan`
 - `execute`
 - `verify`
 - `repair`
@@ -170,6 +168,15 @@ Phases:
 - `failed`
 - `blocked`
 - `cancelled`
+
+Reserved state-schema phases:
+
+- `research`
+- `plan`
+
+These are accepted by the state schema for forward compatibility, but the
+current kernel does not execute separate research or planning phases during a
+run.
 
 Terminal outcomes:
 

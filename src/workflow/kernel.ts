@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import type { HarnessConfig } from "../config/schema.ts";
 import { createDriver } from "../drivers/index.ts";
 import type { DriverResult } from "../drivers/contract.ts";
@@ -7,16 +7,19 @@ import { appendMemoryEntry } from "../evolution/memory.ts";
 import { appendEvent } from "../ledger/events.ts";
 import { runPaths } from "../ledger/paths.ts";
 import { terminal, transition, writeState } from "../ledger/state.ts";
+import { redactSensitiveText } from "../policy/redaction.ts";
 import { runPolicyPreflight } from "../policy/preflight.ts";
-import type { RunState, TerminalOutcome } from "../types.ts";
+import type { HarnessPhase, RunState, TerminalOutcome } from "../types.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { sha256Text } from "../util/hash.ts";
 import { createRunId } from "../util/id.ts";
+import type { VerificationResult } from "../verification/runner.ts";
 
 export interface ExecuteRunOptions {
   cwd: string;
   prompt: string;
   config: HarnessConfig;
+  signal?: AbortSignal;
 }
 
 export interface ExecuteRunResult {
@@ -26,22 +29,109 @@ export interface ExecuteRunResult {
   reportPath: string;
 }
 
+const LOG_TAIL_CHARS = 2_000;
+const REPAIR_CONTEXT_MAX_CHARS = 6_000;
+
 function outcomeFromDriver(status: string): TerminalOutcome {
   if (status === "blocked") return "blocked";
   if (status === "cancelled") return "cancelled";
   return status === "succeeded" ? "complete" : "failed";
 }
 
-function repairPrompt(originalPrompt: string, result: DriverResult, verificationStatus: string): string {
+function tailText(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text;
+  return `[truncated ${text.length - maxChars} chars]\n${text.slice(-maxChars)}`;
+}
+
+async function readTail(path: string, maxChars = LOG_TAIL_CHARS): Promise<string> {
+  try {
+    return tailText(await readFile(path, "utf8"), maxChars);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return `[unavailable: ${message}]`;
+  }
+}
+
+function boundFailureContext(text: string): string {
+  return tailText(redactSensitiveText(text.trim()), REPAIR_CONTEXT_MAX_CHARS);
+}
+
+async function verificationFailureContext(verification: VerificationResult): Promise<string | null> {
+  const failed = verification.commands.find((command) => command.status !== "passed");
+  if (!failed) return null;
+  const stdout = await readTail(failed.stdoutPath);
+  const stderr = await readTail(failed.stderrPath);
+  return boundFailureContext(`Verification failure context
+
+Command: ${failed.command}
+Status: ${failed.status}
+Exit code: ${failed.exitCode ?? "null"}
+Summary: ${failed.summary}
+
+STDOUT tail:
+${stdout || "[empty]"}
+
+STDERR tail:
+${stderr || "[empty]"}`);
+}
+
+async function driverFailureContext(paths: { stdoutPath: string; stderrPath: string }, result: DriverResult): Promise<string> {
+  const stdout = await readTail(paths.stdoutPath);
+  const stderr = await readTail(paths.stderrPath);
+  return boundFailureContext(`Driver failure context
+
+Driver status: ${result.status}
+Exit code: ${result.exitCode ?? "null"}
+Error: ${result.error ?? "[none]"}
+
+Raw stdout tail:
+${stdout || "[empty]"}
+
+Raw stderr tail:
+${stderr || "[empty]"}`);
+}
+
+async function recordRepairContext(
+  paths: ReturnType<typeof runPaths>,
+  state: RunState,
+  name: string,
+  context: string | null,
+): Promise<RunState> {
+  if (!context) return state;
+  const path = `${paths.artifactsDir}/${name}.md`;
+  await writeFile(path, `${context}\n`);
+  return state.artifacts.includes(path) ? state : { ...state, artifacts: [...state.artifacts, path] };
+}
+
+function verificationState(
+  state: RunState,
+  latestStatus: RunState["verification"]["latestStatus"],
+  reason?: string,
+): RunState["verification"] {
+  return {
+    required: state.verification.required,
+    latestStatus,
+    ...(reason ? { reason } : {}),
+  };
+}
+
+function repairPrompt(originalPrompt: string, result: DriverResult, verificationStatus: string, failureContext?: string | null): string {
   return `Original task:
 ${originalPrompt}
 
 The previous attempt completed, but verification failed with status: ${verificationStatus}.
 ${result.finalMessage ? `\nPrevious final message:\n${result.finalMessage}\n` : ""}
+${failureContext ? `\nBounded failure context:\n${failureContext}\n` : ""}
 Repair the work using the verification failure as the source of truth, then stop.`;
 }
 
-function driverFailureRepairPrompt(originalPrompt: string, result: DriverResult, classification: ReturnType<typeof classifyDriverFailure>, iteration: number): string {
+function driverFailureRepairPrompt(
+  originalPrompt: string,
+  result: DriverResult,
+  classification: ReturnType<typeof classifyDriverFailure>,
+  iteration: number,
+  failureContext?: string | null,
+): string {
   return `Driver failure repair attempt ${iteration}
 
 Original task:
@@ -54,6 +144,7 @@ The previous driver attempt failed before verification.
 - Suggestion: ${classification.suggestion}
 ${result.finalMessage ? `\nPrevious final message:\n${result.finalMessage}\n` : ""}
 ${result.error ? `\nPrevious error:\n${result.error.slice(0, 2000)}\n` : ""}
+${failureContext ? `\nBounded failure context:\n${failureContext}\n` : ""}
 Repair the task by addressing the driver failure, then stop.`;
 }
 
@@ -89,7 +180,7 @@ ${state.error ? `- Error: ${state.error.message.split("\n")[0]}\n` : ""}
 }
 
 export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRunResult> {
-  const { cwd, prompt, config } = options;
+  const { cwd, prompt, config, signal } = options;
   const runId = createRunId();
   const paths = runPaths(cwd, runId);
   await ensureDir(paths.rawDir);
@@ -157,8 +248,16 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
   let result: DriverResult = { status: "blocked", error: "policy blocked run before driver execution" };
   let outcome: TerminalOutcome = "blocked";
   let verificationStatus = state.verification.latestStatus;
+  let verificationReason: string | undefined;
+  let latestVerification: VerificationResult | null = null;
+  const verificationHistory: VerificationResult[] = [];
+  let lastDriverRawPaths: { stdoutPath: string; stderrPath: string } | null = null;
 
   if (preflight.status === "blocked") {
+    if (state.verification.required && verificationStatus === "pending") {
+      verificationStatus = "skipped";
+      verificationReason = "not_reached_policy_blocked";
+    }
     state = {
       ...state,
       error: {
@@ -182,43 +281,49 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
 
     const driver = await createDriver(config);
 
-    const runDriverAttempt = async (attemptPrompt: string, attempt: number): Promise<DriverResult> => {
+    const runDriverAttempt = async (attemptPrompt: string, attempt: number, eventPhase: HarnessPhase): Promise<DriverResult> => {
       const suffix = attempt === 0 ? "" : `-repair-${attempt}`;
+      const rawStdoutPath = `${paths.rawDir}/${config.driver}${suffix}-stdout.jsonl`;
+      const rawStderrPath = `${paths.rawDir}/${config.driver}${suffix}-stderr.log`;
+      lastDriverRawPaths = { stdoutPath: rawStdoutPath, stderrPath: rawStderrPath };
       const attemptResult = await driver.run({
         runId,
         cwd,
         prompt: attemptPrompt,
         config,
         context: {
-          rawStdoutPath: `${paths.rawDir}/${config.driver}${suffix}-stdout.jsonl`,
-          rawStderrPath: `${paths.rawDir}/${config.driver}${suffix}-stderr.log`,
+          rawStdoutPath,
+          rawStderrPath,
         },
       }, async (event) => {
         await appendEvent(paths.events, {
           runId,
-          phase: state.phase,
+          phase: eventPhase,
           type: event.type,
           source: event.source,
           payload: event.payload,
         });
-      });
+      }, signal);
       await appendEvent(paths.events, {
         runId,
-        phase: state.phase,
+        phase: eventPhase,
         type: attemptResult.status === "succeeded" ? "driver.completed" : "driver.failed",
         source: config.driver,
         payload: {
           status: attemptResult.status,
           attempt,
           ...(attemptResult.exitCode !== undefined ? { exitCode: attemptResult.exitCode } : {}),
+          ...(attemptResult.usage ? { usage: attemptResult.usage } : {}),
           ...(attemptResult.error ? { error: attemptResult.error.slice(0, 2000) } : {}),
         },
       });
       return attemptResult;
     };
 
-    const runChecks = async (): Promise<string> => {
-      if (config.verification.commands.length === 0) return "skipped";
+    const runChecks = async (): Promise<VerificationResult> => {
+      if (config.verification.commands.length === 0) {
+        return { schemaVersion: 1, status: "skipped", commands: [] };
+      }
       state = transition(state, "verify");
       await writeState(paths.state, state);
       await appendEvent(paths.events, {
@@ -235,6 +340,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         artifactsDir: paths.artifactsDir,
         timeoutMs: config.verification.timeoutMs,
       });
+      verificationHistory.push(verification);
       await writeJsonAtomic(paths.verification, verification);
       await appendEvent(paths.events, {
         runId,
@@ -243,10 +349,10 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         source: "kernel",
         payload: { status: verification.status },
       });
-      return verification.status;
+      return verification;
     };
 
-    result = await runDriverAttempt(prompt, 0);
+    result = await runDriverAttempt(prompt, 0, "execute");
 
     outcome = outcomeFromDriver(result.status);
     if (result.status !== "succeeded") {
@@ -276,7 +382,10 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
           source: "kernel",
           payload: { iteration: nextIteration, classification },
         });
-        result = await runDriverAttempt(driverFailureRepairPrompt(prompt, result, classification, nextIteration), nextIteration);
+        const failureContext = lastDriverRawPaths ? await driverFailureContext(lastDriverRawPaths, result) : null;
+        state = await recordRepairContext(paths, state, `driver-repair-context-${String(nextIteration).padStart(3, "0")}`, failureContext);
+        await writeState(paths.state, state);
+        result = await runDriverAttempt(driverFailureRepairPrompt(prompt, result, classification, nextIteration, failureContext), nextIteration, "repair");
         await appendEvent(paths.events, {
           runId,
           phase: state.phase,
@@ -297,7 +406,9 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
       }
     }
     if (result.status === "succeeded" && config.verification.commands.length > 0) {
-      verificationStatus = await runChecks();
+      latestVerification = await runChecks();
+      verificationStatus = latestVerification.status;
+      verificationReason = undefined;
       outcome = verificationStatus === "passed" ? "complete" : "failed";
       while (outcome === "failed" && state.repairIteration < config.repair.maxIterations) {
         const nextIteration = state.repairIteration + 1;
@@ -313,7 +424,10 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
           source: "kernel",
           payload: { iteration: nextIteration, verificationStatus },
         });
-        result = await runDriverAttempt(repairPrompt(prompt, result, verificationStatus), (state.driverRepairIteration ?? 0) + nextIteration);
+        const failureContext = latestVerification ? await verificationFailureContext(latestVerification) : null;
+        state = await recordRepairContext(paths, state, `repair-context-${String(nextIteration).padStart(3, "0")}`, failureContext);
+        await writeState(paths.state, state);
+        result = await runDriverAttempt(repairPrompt(prompt, result, verificationStatus, failureContext), (state.driverRepairIteration ?? 0) + nextIteration, "repair");
         await appendEvent(paths.events, {
           runId,
           phase: state.phase,
@@ -323,9 +437,14 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         });
         outcome = outcomeFromDriver(result.status);
         if (result.status !== "succeeded") break;
-        verificationStatus = await runChecks();
+        latestVerification = await runChecks();
+        verificationStatus = latestVerification.status;
+        verificationReason = undefined;
         outcome = verificationStatus === "passed" ? "complete" : "failed";
       }
+    } else if (result.status !== "succeeded" && state.verification.required && verificationStatus === "pending") {
+      verificationStatus = "skipped";
+      verificationReason = "not_reached_driver_failed";
     }
 
     if (result.finalMessage) {
@@ -336,10 +455,8 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
 
     state = {
       ...state,
-      verification: {
-        ...state.verification,
-        latestStatus: verificationStatus,
-      },
+      verification: verificationState(state, verificationStatus, verificationReason),
+      ...(result.usage ? { usage: result.usage } : {}),
       ...(outcome === "failed"
         ? { error: failedRunError(result, verificationStatus, config) }
         : {}),
@@ -348,10 +465,8 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
 
   state = {
     ...state,
-    verification: {
-      ...state.verification,
-      latestStatus: verificationStatus,
-    },
+    verification: verificationState(state, verificationStatus, verificationReason),
+    ...(result.usage ? { usage: result.usage } : {}),
   };
   state = terminal(state, outcome);
   await writeState(paths.state, state);
@@ -371,6 +486,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
       prompt,
       driverResult: result,
       verificationCommands: config.verification.commands,
+      verificationHistory,
     });
     await appendEvent(paths.events, {
       runId,

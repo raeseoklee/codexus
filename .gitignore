@@ -1,4 +1,5 @@
 .codex-harness/
+.omc/
 .omx/
 node_modules/
 .env

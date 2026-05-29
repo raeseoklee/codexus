@@ -136,6 +136,17 @@ function normalizeActiveSkillIndexEntry(entry: Partial<ActiveSkillIndexEntry> & 
 
 export function buildSkillProposal(experience: ExperienceRecord): SkillProposal {
   const base = slugify(experience.task.summary);
+  const verificationCommands = experience.verification.commands;
+  const lessonSteps = experience.reusableLessons.length > 0
+    ? experience.reusableLessons.map((lesson) => `Apply source run lesson: ${lesson.summary}`)
+    : ["Inspect source run evidence and extract only task-relevant guidance before applying this skill."];
+  const verificationSteps = verificationCommands.length > 0
+    ? verificationCommands.map((command) => `Run verification command before claiming completion: ${command}`)
+    : ["Run the project-appropriate verification before claiming completion."];
+  const forbiddenActions = [
+    "promote without replay validation",
+    ...verificationCommands.map((command) => `claim completion without running ${command}`),
+  ];
   return {
     schemaVersion: 1,
     id: `skill_${base}`,
@@ -153,13 +164,14 @@ export function buildSkillProposal(experience: ExperienceRecord): SkillProposal 
       excludedTaskShapes: ["security_fix"],
     },
     procedure: [
-      "Review source run evidence before applying this procedure.",
-      "Apply the reusable lesson only within the declared scope.",
-      "Run required verification before claiming completion.",
+      `Review source run ${experience.runId} evidence before applying this procedure.`,
+      ...lessonSteps,
+      ...verificationSteps,
+      "Apply the procedure only within the declared task shape and stop if the source evidence does not match the current task.",
     ],
     safety: {
       requiresVerification: true,
-      forbiddenActions: ["promote without replay validation"],
+      forbiddenActions: [...new Set(forbiddenActions)],
     },
     promotion: {
       requiredReplayStatus: "passed",
@@ -188,7 +200,10 @@ export async function writeSkillProposal(cwd: string, experience: ExperienceReco
   await ensureDir(dir);
   await writeJsonAtomic(join(dir, "skill.json"), proposal);
   await writeJsonAtomic(join(dir, "evidence.json"), buildSkillEvidence(proposal, experience));
-  await writeJsonAtomic(join(dir, "replay.json"), buildDefaultReplaySpec(proposal.id, experience.task.summary));
+  await writeJsonAtomic(join(dir, "replay.json"), buildDefaultReplaySpec(proposal.id, experience.task.summary, {
+    requiresTests: experience.verification.commands,
+    forbids: proposal.safety.forbiddenActions,
+  }));
   await writeFile(join(dir, "SKILL.md"), `# ${proposal.displayName}
 
 Source run: ${experience.runId}

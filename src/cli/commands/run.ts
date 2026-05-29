@@ -35,6 +35,16 @@ function applyFlagOverrides(config: HarnessConfig, args: ParsedArgs): HarnessCon
     if (!Number.isInteger(parsed) || parsed < 0) throw new Error("invalid_max_repairs");
     next.repair.maxDriverFailureIterations = parsed;
   }
+  const runTimeoutMs = flagString(args.flags, "run-timeout-ms");
+  if (runTimeoutMs !== undefined) {
+    if (runTimeoutMs === "none") {
+      next.codex.runTimeoutMs = null;
+    } else {
+      const parsed = Number(runTimeoutMs);
+      if (!Number.isInteger(parsed) || parsed <= 0) throw new Error("invalid_timeout_ms");
+      next.codex.runTimeoutMs = parsed;
+    }
+  }
   return next;
 }
 
@@ -54,7 +64,14 @@ export async function runCommand(args: ParsedArgs): Promise<void> {
     const probe = await (await createDriver(config)).probe();
     if (!probe.available) throw new Error("unsupported_feature:codex-app-server");
   }
-  const result = await executeRun({ cwd, prompt, config });
+  const abortController = new AbortController();
+  const onSigint = (): void => {
+    abortController.abort(new Error("SIGINT received"));
+  };
+  process.once("SIGINT", onSigint);
+  const result = await executeRun({ cwd, prompt, config, signal: abortController.signal }).finally(() => {
+    process.off("SIGINT", onSigint);
+  });
 
   if (json) {
     console.log(JSON.stringify(result, null, 2));
@@ -62,5 +79,5 @@ export async function runCommand(args: ParsedArgs): Promise<void> {
     console.log(`${result.runId}: ${result.outcome}`);
     console.log(result.reportPath);
   }
-  process.exitCode = result.outcome === "complete" ? 0 : 1;
+  process.exitCode = result.outcome === "complete" ? 0 : (abortController.signal.aborted ? 130 : 1);
 }

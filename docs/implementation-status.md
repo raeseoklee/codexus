@@ -70,13 +70,24 @@ temporary compatibility alias.
 - Capability-gated Codex exec flag mapping.
 - Raw driver stdout/stderr preservation.
 - Verification runner for sequential shell checks with artifacts.
-- Bounded repair loop when Codex succeeds but verification fails.
-- Explicit-budget repair loop for repairable driver task failures.
+- Bounded repair loop when Codex succeeds but verification fails, including
+  bounded verification failure context artifacts.
+- Explicit-budget repair loop for repairable driver task failures, including
+  bounded raw driver log context artifacts.
+- Driver events are phase-stamped from the explicit attempt phase.
+- Driver failures before verification record `skipped` with a `not_reached_*`
+  reason instead of leaving terminal state at `pending`.
+- `codex-exec` supports `codex.runTimeoutMs`, AbortSignal cancellation, CLI
+  SIGINT handling, `driver.timeout` evidence, and terminal `cancelled` ledgers.
 - `cx verify` can rerun stored verification for an existing ledger.
 - `cx resume` creates a follow-up supervised run from an existing ledger.
-- Experience record writer with decisions, failures, verification commands, and reusable lessons.
+- Experience record writer with decisions, failures, verification commands,
+  repair history, driver-failure classification, and source-specific reusable
+  lessons.
 - Automatic memory entry writing from reusable lessons plus memory add/list/search/review/curate/prune lifecycle commands.
-- Skill proposal writer with source-linked `evidence.json`, structural `replay.json`, replay review, active listing, active index, improvement proposal, promotion, export, and deprecation.
+- Skill proposal writer with source-linked `evidence.json`, source-specific
+  `replay.json`, replay review, active listing, active index, improvement
+  proposal, promotion, export, and deprecation.
 - Codexus-generated skills carry a Codex-facing `codexus:<skill-name>` display identity while keeping stable storage ids.
 - Codex skill export and optional external harness bundle export write generated
   skill bundles through explicit commands.
@@ -89,6 +100,10 @@ temporary compatibility alias.
 - App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, and deterministic fake lifecycle supervision are present, while live app-server execution remains gated off.
 - Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records with policy/approval contract fields for future dispatch.
 - Versioned schema artifacts exist for config, state, events, memory entries, and skills, with focused enforcement plus zero-dependency schema-artifact subset validation on single-record and run-ledger checks.
+- Codex JSONL usage is captured when present and terminal state records usage or
+  `{ "available": false }`.
+- Unsupported Codex exec config options emit `config.option_ignored` ledger
+  events instead of being silently dropped.
 - `npm run typecheck` performs syntax/static validation with the local Node runtime.
 - Optional advanced interop capability probes and export commands remain
   outside the normal Codexus runtime path.
@@ -105,7 +120,7 @@ temporary compatibility alias.
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 57.
+- Current test count: 63.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -118,6 +133,14 @@ temporary compatibility alias.
 - Mock run with failing verification returning a failed outcome.
 - Mock run with failed first verification, one repair iteration, and passing second verification.
 - Mock run with blocked and cancelled driver outcomes.
+- Verification repair context artifact includes failing command output.
+- Driver failure with configured verification records `skipped` plus
+  `not_reached_driver_failed` instead of terminal `pending`.
+- AbortSignal cancellation reaches a terminal `cancelled` run ledger.
+- Fake Codex exec timeout reaches `cancelled` and preserves raw output.
+- Codex exec usage is captured into terminal state and `status --json`.
+- Source-specific replay fails boilerplate skills that omit required
+  verification evidence.
 - Policy-blocked run before driver execution for dangerous verification commands.
 - `status --json` reconstructs state, verification, experience, and event tail from disk.
 - `verify --json` reruns stored verification.
@@ -151,7 +174,12 @@ temporary compatibility alias.
 - `doctor --json --strict` is the automation-facing form when fail-level checks must produce a nonzero process status.
 - `run` completes with both mock and real `codex-exec` drivers and writes a ledger.
 - Required verification failures prevent `complete`, and repair can recover when bounded budget remains.
+- Repair prompts receive bounded failure context and record the exact context as
+  ledger artifacts.
+- `codex-exec` timeout and AbortSignal cancellation reach truthful terminal
+  `cancelled` state.
 - `status --json` reconstructs state, verification, experience, and event tail without a live process.
+- `status --json` surfaces terminal usage accounting when the driver provides it.
 - The Codex-native adapter returns approved bounded context candidates, formats
   prompt-safe context, and can write a non-injected approved context artifact.
 - Tests pass without model/network access through the mock driver.
@@ -166,6 +194,8 @@ See [Remaining work](remaining-work.md) for the prioritized backlog and design
 review. Current high-level gaps:
 
 - Driver-failure repair is implemented only for repairable task failures and only with an explicit budget.
+- External `cx cancel <run-id>` is not implemented yet; current cancellation is
+  in-process timeout/SIGINT/AbortSignal.
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
 - Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, and deterministic fake lifecycle supervision are implemented.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.

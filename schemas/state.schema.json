@@ -22,9 +22,11 @@
       "required": ["required", "latestStatus"],
       "properties": {
         "required": { "type": "boolean" },
-        "latestStatus": { "type": "string" }
+        "latestStatus": { "type": "string" },
+        "reason": { "type": "string" }
       }
     },
-    "artifacts": { "type": "array", "items": { "type": "string" } }
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "usage": { "type": "object" }
   }
 }

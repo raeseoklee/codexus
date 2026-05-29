@@ -1,7 +1,9 @@
 import { writeJsonAtomic } from "../util/fs.ts";
 import type { DriverResult } from "../drivers/contract.ts";
+import { classifyDriverFailure } from "../drivers/errors.ts";
 import type { RunPaths } from "../ledger/paths.ts";
 import type { RunState } from "../types.ts";
+import type { VerificationResult } from "../verification/runner.ts";
 
 export interface ExperienceRecord {
   schemaVersion: 1;
@@ -20,10 +22,16 @@ export interface ExperienceRecord {
     status: DriverResult["status"];
     exitCode?: number;
     error?: string;
+    usage?: DriverResult["usage"];
   };
   verification: {
     status: RunState["verification"]["latestStatus"];
     commands: string[];
+    history?: Array<{
+      status: VerificationResult["status"];
+      failedCommand?: string;
+      passedCommands: string[];
+    }>;
   };
   decisions: Array<{
     summary: string;
@@ -48,6 +56,7 @@ export interface WriteExperienceOptions {
   prompt: string;
   driverResult: DriverResult;
   verificationCommands?: string[];
+  verificationHistory?: VerificationResult[];
 }
 
 function summarizeTask(prompt: string): string {
@@ -68,32 +77,48 @@ export function buildExperience(options: WriteExperienceOptions): ExperienceReco
   const lessons: ExperienceRecord["reusableLessons"] = [];
   const decisions: ExperienceRecord["decisions"] = [];
   const failures: ExperienceRecord["failures"] = [];
+  const verificationHistory = options.verificationHistory ?? [];
+  const firstFailedVerification = verificationHistory
+    .flatMap((result) => result.commands)
+    .find((command) => command.status !== "passed");
+  const passedVerification = [...verificationHistory].reverse().find((result) => result.status === "passed");
   if (options.state.verification.latestStatus === "passed") {
+    const verificationSummary = firstFailedVerification
+      ? `Verification recovered after command "${firstFailedVerification.command}" first ended with ${firstFailedVerification.status}; rerun the required verification before claiming completion.`
+      : (options.verificationCommands?.length
+        ? `Completion was gated by verification command(s): ${options.verificationCommands.join(" && ")}.`
+        : "Completion was gated by the configured verification path.");
     lessons.push({
       kind: "verification_pattern",
-      summary: "This task reached completion with verification evidence recorded in the run ledger.",
+      summary: verificationSummary,
     });
     decisions.push({
-      summary: "Completion was gated on required verification.",
-      reason: "The harness only marked the run complete after verification passed.",
+      summary: options.verificationCommands?.length
+        ? `Completion was gated on: ${options.verificationCommands.join(" && ")}.`
+        : "Completion was gated on required verification.",
+      reason: passedVerification
+        ? `The last verification run ended with status ${passedVerification.status}.`
+        : "The harness only marked the run complete after verification passed.",
       evidence: [options.paths.verification],
     });
   }
   if (options.driverResult.status !== "succeeded") {
+    const classification = classifyDriverFailure(options.driverResult);
     lessons.push({
       kind: "workflow_lesson",
-      summary: "Driver failure should be inspected before reusing this run as a success pattern.",
+      summary: `Driver failure ${classification.code} (${classification.category}) should be inspected before reusing this run as a success pattern.`,
     });
     failures.push({
       summary: `Driver ended with status ${options.driverResult.status}.`,
-      lesson: "Do not reuse failed driver runs as success patterns without manual review.",
+      lesson: classification.suggestion,
       evidence: [options.paths.events, options.paths.state],
     });
   }
   if (["failed", "timed_out", "error"].includes(options.state.verification.latestStatus)) {
+    const failedCommandText = firstFailedVerification ? ` Command: ${firstFailedVerification.command}.` : "";
     failures.push({
       summary: `Verification ended with status ${options.state.verification.latestStatus}.`,
-      lesson: "Verification failure should be treated as the source of truth for repair or follow-up.",
+      lesson: `Verification failure should be treated as the source of truth for repair or follow-up.${failedCommandText}`,
       evidence: [options.paths.verification],
     });
   }
@@ -122,10 +147,20 @@ export function buildExperience(options: WriteExperienceOptions): ExperienceReco
       status: options.driverResult.status,
       ...(options.driverResult.exitCode !== undefined ? { exitCode: options.driverResult.exitCode } : {}),
       ...(options.driverResult.error ? { error: options.driverResult.error } : {}),
+      ...(options.driverResult.usage ? { usage: options.driverResult.usage } : {}),
     },
     verification: {
       status: options.state.verification.latestStatus,
       commands: options.verificationCommands ?? [],
+      ...(verificationHistory.length > 0
+        ? {
+          history: verificationHistory.map((result) => ({
+            status: result.status,
+            failedCommand: result.commands.find((command) => command.status !== "passed")?.command,
+            passedCommands: result.commands.filter((command) => command.status === "passed").map((command) => command.command),
+          })),
+        }
+        : {}),
     },
     decisions,
     failures,

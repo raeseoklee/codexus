@@ -8,12 +8,13 @@
     "driver": { "enum": ["codex-exec", "mock", "codex-app-server"] },
     "codex": {
       "type": "object",
-      "required": ["command", "model", "sandbox", "approval"],
+      "required": ["command", "model", "sandbox", "approval", "runTimeoutMs"],
       "properties": {
         "command": { "type": "string", "minLength": 1 },
         "model": { "type": ["string", "null"] },
         "sandbox": { "enum": ["read-only", "workspace-write", "danger-full-access"] },
-        "approval": { "enum": ["untrusted", "on-request", "never"] }
+        "approval": { "enum": ["untrusted", "on-request", "never"] },
+        "runTimeoutMs": { "type": ["number", "null"] }
       }
     },
     "verification": {

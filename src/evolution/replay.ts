@@ -125,7 +125,9 @@ export interface ModelReplayResult {
   };
 }
 
-export function buildDefaultReplaySpec(skillId: string, task: string): ReplaySpec {
+export function buildDefaultReplaySpec(skillId: string, task: string, options: { requiresTests?: string[]; forbids?: string[] } = {}): ReplaySpec {
+  const requiresTests = options.requiresTests ?? [];
+  const forbids = options.forbids ?? ["promote without replay validation"];
   return {
     schemaVersion: 1,
     skillId,
@@ -140,8 +142,8 @@ export function buildDefaultReplaySpec(skillId: string, task: string): ReplaySpe
         },
         expected: {
           mentionsVerification: true,
-          requiresTests: [],
-          forbids: ["promote without replay validation"],
+          requiresTests,
+          forbids,
         },
       },
       {
@@ -154,8 +156,8 @@ export function buildDefaultReplaySpec(skillId: string, task: string): ReplaySpe
         },
         expected: {
           mentionsVerification: true,
-          requiresTests: [],
-          forbids: ["promote without replay validation"],
+          requiresTests,
+          forbids,
         },
       },
     ],
