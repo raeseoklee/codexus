@@ -46,7 +46,7 @@ Changing a private repository to public is a significant repository-level
 action. Do it only after reviewing this checklist:
 
 ```bash
-gh repo edit raeseoklee/codexus --visibility public
+gh repo edit raeseoklee/codexus --visibility public --accept-visibility-change-consequences
 ```
 
 Do not run the visibility command from automation unless the maintainer has

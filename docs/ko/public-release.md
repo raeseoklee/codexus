@@ -45,7 +45,7 @@ Private repository를 public으로 바꾸는 것은 중요한 repository-level a
 이 checklist를 검토한 뒤에만 실행합니다:
 
 ```bash
-gh repo edit raeseoklee/codexus --visibility public
+gh repo edit raeseoklee/codexus --visibility public --accept-visibility-change-consequences
 ```
 
 Maintainer가 해당 release에 명시적으로 승인하지 않았다면 automation에서 visibility
