@@ -187,6 +187,32 @@ test("run command blocks dangerous verification commands before driver execution
   }
 });
 
+test("run command records verification failures as verification errors", async () => {
+  const cwd = await tempDir();
+  try {
+    const result = runCli(cwd, [
+      "run",
+      "--driver",
+      "mock",
+      "--max-repairs",
+      "0",
+      "--verify",
+      "node -e \"process.exit(2)\"",
+      "--json",
+      "verification failure",
+    ]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.outcome, "failed");
+    const state = JSON.parse(await readFile(output.statePath, "utf8"));
+    assert.equal(state.verification.latestStatus, "failed");
+    assert.equal(state.error.code, "verification_failed");
+    assert.equal(state.error.source, "verification");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("run command preserves blocked and cancelled driver outcomes", async () => {
   const cwd = await tempDir();
   try {

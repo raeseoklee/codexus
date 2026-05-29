@@ -10,6 +10,7 @@ import { loadConfig } from "../../config/loader.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
 import { createDriver } from "../../drivers/index.ts";
 import type { DriverProbe } from "../../drivers/contract.ts";
+import { trimmedProcessOutput } from "../../util/process-output.ts";
 
 interface Check {
   id: string;
@@ -18,13 +19,14 @@ interface Check {
   details?: Record<string, unknown>;
 }
 
-function run(command: string, args: string[]): { ok: boolean; stdout: string; stderr: string; status: number | null } {
+function run(command: string, args: string[]): { ok: boolean; stdout: string; stderr: string; status: number | null; error?: string } {
   const result = spawnSync(command, args, { encoding: "utf8" });
   return {
     ok: result.status === 0,
-    stdout: result.stdout.trim(),
-    stderr: result.stderr.trim(),
+    stdout: trimmedProcessOutput(result.stdout),
+    stderr: trimmedProcessOutput(result.stderr),
     status: result.status,
+    ...(result.error instanceof Error ? { error: result.error.message } : {}),
   };
 }
 
@@ -42,8 +44,8 @@ function commandCheck(
   return {
     id,
     status: failureStatus,
-    summary: result.stderr || `${command} ${args.join(" ")} failed`,
-    details: { status: result.status },
+    summary: result.stderr || result.error || `${command} ${args.join(" ")} failed`,
+    details: { status: result.status, ...(result.error ? { error: result.error } : {}) },
   };
 }
 
@@ -147,7 +149,7 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   checks.push(commandCheck("tmux.version", "tmux", ["-V"], "tmux available", "warn"));
 
   try {
-    driverProbe = await (await createDriver(config)).probe();
+    driverProbe = await (await createDriver(config)).probe(config);
     checks.push({
       id: `driver.${config.driver}`,
       status: driverProbe.available ? "pass" : "warn",

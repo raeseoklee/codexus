@@ -16,7 +16,7 @@ Target CLI:
 cx
 ```
 
-The MVP implementation still exposes `chx`; documentation now treats `cx` as the target CLI name and `chx` as a temporary compatibility alias until the code/package rename is done.
+The package now exposes `cx` and `codexus` as canonical bins. `chx` remains only as a temporary compatibility alias.
 
 ## Document Map
 

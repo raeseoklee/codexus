@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { aggregateVerificationStatus, runVerification } from "../src/verification/runner.ts";
-import { buildCodexExecArgs, extractCodexEventText, parseCodexExecCapabilities } from "../src/drivers/codex-exec.ts";
+import { buildCodexExecArgs, CodexExecDriver, extractCodexEventText, parseCodexExecCapabilities } from "../src/drivers/codex-exec.ts";
 import { defaultConfig } from "../src/config/schema.ts";
 
 async function tempDir(): Promise<string> {
@@ -63,6 +63,12 @@ test("parseCodexExecCapabilities reads help text", () => {
   assert.equal(capabilities.supportsJsonl, true);
   assert.equal(capabilities.supportsApprovalFlag, false);
   assert.equal(capabilities.supportsOutputLastMessage, true);
+});
+
+test("codex exec probe reports missing command without throwing", async () => {
+  const probe = await new CodexExecDriver().probe("definitely-not-a-command-codexus-test");
+  assert.equal(probe.available, false);
+  assert.match(probe.summary, /ENOENT|unavailable/);
 });
 
 test("extractCodexEventText reads item.completed agent text", () => {

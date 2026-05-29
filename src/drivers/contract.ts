@@ -43,6 +43,6 @@ export interface DriverResult {
 
 export interface HarnessDriver {
   name: string;
-  probe(): Promise<DriverProbe>;
+  probe(config?: HarnessConfig): Promise<DriverProbe>;
   run(request: DriverRequest, emit: (event: DriverEvent) => Promise<void>): Promise<DriverResult>;
 }

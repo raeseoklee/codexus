@@ -5,6 +5,7 @@ import { CodexAppServerDriver } from "../../drivers/codex-app-server.ts";
 import { superviseProcess } from "../../experiments/process-supervisor.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
+import { trimmedProcessOutput } from "../../util/process-output.ts";
 import { readAppServerSchemaFixture } from "../../validation/schemas.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -21,6 +22,8 @@ function supervisedAppServerHelpProbe(command: string, timeoutMs: number) {
   });
   const durationMs = Date.now() - start;
   const timedOut = result.error instanceof Error && (result.error as NodeJS.ErrnoException).code === "ETIMEDOUT";
+  const stdout = trimmedProcessOutput(result.stdout);
+  const stderr = trimmedProcessOutput(result.stderr);
   return {
     schemaVersion: 1,
     command,
@@ -33,8 +36,8 @@ function supervisedAppServerHelpProbe(command: string, timeoutMs: number) {
     exitCode: result.status,
     signal: result.signal,
     error: result.error instanceof Error ? result.error.message : null,
-    stdoutPreview: result.stdout.trim().slice(0, 1000),
-    stderrPreview: result.stderr.trim().slice(0, 1000),
+    stdoutPreview: stdout.slice(0, 1000),
+    stderrPreview: stderr.slice(0, 1000),
   };
 }
 

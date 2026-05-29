@@ -289,6 +289,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
   const cwd = resolve(".");
   const codexHome = await tempDir();
   const featureCwd = await tempDir();
+  let missingCodexCwd: string | null = null;
   try {
     const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8"));
     assert.equal(pkg.bin.cx, "./src/cli/main.ts");
@@ -336,6 +337,16 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.ok(["passed", "failed", "timed_out"].includes(appManifest.process.probe.status));
     assert.ok(appManifest.lifecycleIntent.includes("start_codex_app_server"));
     assert.deepEqual(appManifest.actualLifecycle, ["write_manifest"]);
+    missingCodexCwd = await tempDir();
+    await mkdir(join(missingCodexCwd, ".codex-harness"), { recursive: true });
+    await writeFile(join(missingCodexCwd, ".codex-harness", "config.json"), JSON.stringify({
+      codex: { command: "definitely-not-a-command-codexus-test" },
+    }));
+    const missingProbe = runCli(cwd, ["app-server", "experiment", "--dry-run", "--probe-process", "--cwd", missingCodexCwd, "--json"]);
+    assert.equal(missingProbe.status, 0, missingProbe.stderr);
+    const missingProbeOutput = JSON.parse(missingProbe.stdout);
+    assert.equal(missingProbeOutput.process.probe.status, "failed");
+    assert.match(missingProbeOutput.process.probe.error, /ENOENT/);
     const supervisedExperiment = runCli(cwd, ["app-server", "experiment", "--dry-run", "--timeout-ms", "1000", "--record", "--supervise-fake", "--cwd", featureCwd, "--json"]);
     assert.equal(supervisedExperiment.status, 0, supervisedExperiment.stderr);
     const supervisedOutput = JSON.parse(supervisedExperiment.stdout);
@@ -385,6 +396,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(gatewayLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(gatewayLiveOutput.policy.dispatchAllowed, false);
   } finally {
+    if (missingCodexCwd) await rm(missingCodexCwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
     await rm(featureCwd, { recursive: true, force: true });
   }

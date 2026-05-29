@@ -4,7 +4,7 @@
 
 ## CLI 계약
 
-목표 CLI는 `cx`이며, `codexus`는 long-form alias입니다. 현재 MVP는 `chx`도 compatibility alias로 노출합니다.
+정식 CLI는 `cx`와 long-form `codexus`입니다. `chx`는 임시 compatibility alias로만 유지합니다.
 
 Claw에서 가져온 command rule: 자동화 대상 command는 안정적인 machine-readable
 contract를 가져야 합니다. Human prose는 projection이지 source of truth가

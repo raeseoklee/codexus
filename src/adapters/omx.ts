@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { trimmedProcessOutput } from "../util/process-output.ts";
 
 export interface OmxFeatureStatus {
   explore: boolean;
@@ -19,8 +20,8 @@ function runOmx(args: string[]): { ok: boolean; stdout: string; stderr: string }
   const result = spawnSync("omx", args, { encoding: "utf8" });
   return {
     ok: result.status === 0,
-    stdout: result.stdout.trim(),
-    stderr: result.stderr.trim(),
+    stdout: trimmedProcessOutput(result.stdout),
+    stderr: trimmedProcessOutput(result.stderr),
   };
 }
 

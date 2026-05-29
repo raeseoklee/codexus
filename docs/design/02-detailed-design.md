@@ -57,7 +57,7 @@ This layout keeps command parsing thin. The workflow kernel and driver contracts
 
 ## CLI Contract
 
-The target CLI name is `cx`; `codexus` may be offered as a long-form alias. The current MVP binary still exposes `chx` as a temporary compatibility alias.
+The canonical CLI names are `cx` and the long-form `codexus`. `chx` remains only as a temporary compatibility alias.
 
 Claw-derived command rule: every automation-facing command must have a stable
 machine-readable contract. Human prose is a projection, not the source of

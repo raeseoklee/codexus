@@ -1,6 +1,8 @@
 import { spawn, spawnSync } from "node:child_process";
 import { writeFile } from "node:fs/promises";
+import type { HarnessConfig } from "../config/schema.ts";
 import type { DriverCapabilities, DriverEvent, DriverProbe, DriverRequest, DriverResult, HarnessDriver } from "./contract.ts";
+import { trimmedProcessOutput } from "../util/process-output.ts";
 
 export function parseCodexExecCapabilities(help: string): DriverCapabilities {
   return {
@@ -98,22 +100,25 @@ function finalTextFromEvent(value: unknown): string | null {
 export class CodexExecDriver implements HarnessDriver {
   readonly name = "codex-exec";
 
-  async probe(command = "codex"): Promise<DriverProbe> {
+  async probe(configOrCommand: HarnessConfig | string = "codex"): Promise<DriverProbe> {
+    const command = typeof configOrCommand === "string" ? configOrCommand : configOrCommand.codex.command;
     const result = spawnSync(command, ["exec", "--help"], { encoding: "utf8" });
-    const help = result.stdout || result.stderr || "";
+    const stdout = trimmedProcessOutput(result.stdout);
+    const stderr = trimmedProcessOutput(result.stderr);
+    const help = stdout || stderr;
     const capabilities = result.status === 0
       ? parseCodexExecCapabilities(help)
       : defaultCodexExecCapabilities();
     return {
       available: result.status === 0,
-      summary: result.status === 0 ? "codex exec available" : (result.stderr.trim() || "codex exec unavailable"),
+      summary: result.status === 0 ? "codex exec available" : (stderr || result.error?.message || "codex exec unavailable"),
       capabilities,
       details: { status: result.status },
     };
   }
 
   async run(request: DriverRequest, emit: (event: DriverEvent) => Promise<void>): Promise<DriverResult> {
-    const probe = await this.probe(request.config.codex.command);
+    const probe = await this.probe(request.config);
     const args = buildCodexExecArgs(request, probe.capabilities);
     await emit({
       type: "driver.started",

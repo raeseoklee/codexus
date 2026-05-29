@@ -57,6 +57,24 @@ ${result.error ? `\nPrevious error:\n${result.error.slice(0, 2000)}\n` : ""}
 Repair the task by addressing the driver failure, then stop.`;
 }
 
+function failedRunError(result: DriverResult, verificationStatus: string, config: HarnessConfig): RunState["error"] {
+  if (result.status === "succeeded" && ["failed", "timed_out", "error"].includes(verificationStatus)) {
+    return {
+      code: `verification_${verificationStatus}`,
+      message: `Verification ended with status ${verificationStatus}.`,
+      source: "verification",
+      suggestion: "Inspect verification artifacts and repair against the failing command output.",
+    };
+  }
+  const classification = classifyDriverFailure(result);
+  return {
+    code: classification.code,
+    message: classification.message.slice(0, 500),
+    source: config.driver,
+    suggestion: classification.suggestion,
+  };
+}
+
 async function writeReport(paths: ReturnType<typeof runPaths>, state: RunState, outcome: TerminalOutcome): Promise<void> {
   const report = `# Run ${state.runId}
 
@@ -323,17 +341,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         latestStatus: verificationStatus,
       },
       ...(outcome === "failed"
-        ? (() => {
-          const classification = classifyDriverFailure(result);
-          return {
-            error: {
-              code: classification.code,
-              message: classification.message.slice(0, 500),
-              source: config.driver,
-              suggestion: classification.suggestion,
-            },
-          };
-        })()
+        ? { error: failedRunError(result, verificationStatus, config) }
         : {}),
     };
   }

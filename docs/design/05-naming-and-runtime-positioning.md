@@ -54,9 +54,9 @@ codexus
 
 Current implementation note:
 
-- The MVP implementation still exposes `chx` in `package.json`.
-- Documentation should treat `cx` as the target CLI name.
-- `chx` should be kept as a temporary compatibility alias during migration, then deprecated after `cx` is stable.
+- `package.json` exposes `cx` and `codexus` as canonical bins.
+- `chx` remains only as a temporary compatibility alias.
+- Any future `chx` removal should be handled with a documented deprecation window.
 
 ## Storage Namespace
 
