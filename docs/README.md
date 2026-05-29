@@ -26,6 +26,7 @@ The MVP implementation still exposes `chx`; documentation now treats `cx` as the
 - [Evolution engine](design/03-evolution-engine.md): Hermes-inspired memory, skill proposal, replay validation, promotion, and rollback design.
 - [Implementation feedback](design/04-implementation-feedback.md): decisions made after MVP implementation blockers and whether the architecture direction changes.
 - [Naming and runtime positioning](design/05-naming-and-runtime-positioning.md): Codexus name, `cx` CLI target, external CLI runtime, and future Codex-native adapter.
+- [Codex-native adapter](design/06-codex-native-adapter.md): `$codexus` skill adapter, installation, supported first commands, and design rules.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 
 ## Positioning

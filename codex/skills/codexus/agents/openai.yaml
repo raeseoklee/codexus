@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codexus"
+  short_description: "Run Codexus from inside Codex"
+  default_prompt: "Use $codexus to check the current Codexus harness status."

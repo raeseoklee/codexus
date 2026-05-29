@@ -1,0 +1,82 @@
+# Codex-Native Adapter
+
+[한국어](../ko/design/06-codex-native-adapter.md)
+
+## Intent
+
+Codexus needs a Codex-native surface so users can keep working inside an interactive Codex session instead of repeatedly starting isolated `cx run "<prompt>"` calls.
+
+The adapter should not create a second chat implementation. It should let the current Codex conversation remain the primary interaction loop while Codexus supplies durable evidence, verification, replay, memory, and skill workflows.
+
+## Runtime Shape
+
+Implemented MVP:
+
+```text
+Codex session
+  -> $codexus skill
+  -> codex/skills/codexus/scripts/cx.mjs
+  -> Codexus core CLI
+  -> .codex-harness ledger / memory / skills
+```
+
+The skill is intentionally thin. It delegates to the same core used by the external `cx` CLI.
+
+## Installation
+
+The repository stores the source skill at:
+
+```text
+codex/skills/codexus/
+```
+
+Install it into the local Codex skill store:
+
+```bash
+npm run install:codex-skill -- --json
+```
+
+The installer copies the skill to:
+
+```text
+${CODEX_HOME:-~/.codex}/skills/codexus
+```
+
+It also writes `codexus-root.json` so the installed skill can find this repository and call the local Codexus core.
+
+## Supported First Commands
+
+Inside Codex, prefer low-risk commands first:
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs doctor --json
+node codex/skills/codexus/scripts/cx.mjs status <run-id> --json
+node codex/skills/codexus/scripts/cx.mjs verify <run-id> --json
+node codex/skills/codexus/scripts/cx.mjs memory search "<query>" --json
+node codex/skills/codexus/scripts/cx.mjs skill review <skill-id> --json
+node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --json
+```
+
+Supervised handoff is supported but should be deliberate:
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounded task>"
+```
+
+This starts a separate non-interactive Codex process. It is useful for bounded supervised runs, not for replacing the current interactive conversation.
+
+## Design Rules
+
+- Keep Codex as the interactive loop.
+- Keep Codexus as the evidence and orchestration layer.
+- Keep the adapter thin and deterministic.
+- Do not duplicate workflow-kernel logic inside the skill.
+- Do not auto-promote skills from inside the adapter.
+- Prefer status, verification, replay, memory, and review commands before launching nested Codex runs.
+
+## Next Steps
+
+- Add a project-level AGENTS.md snippet documenting `$codexus` usage.
+- Add active skill retrieval so the adapter can suggest relevant promoted skills for the current task.
+- Add app-server based turns only after the app-server driver is contract-tested.
+- Add a migration from `.codex-harness` to `.codexus` only with backward-compatible reads.

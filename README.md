@@ -26,6 +26,7 @@ Current compatibility note: the package also exposes `chx` while the implementat
 - [Detailed design](docs/design/02-detailed-design.md)
 - [Evolution engine](docs/design/03-evolution-engine.md)
 - [Naming and runtime positioning](docs/design/05-naming-and-runtime-positioning.md)
+- [Codex-native adapter](docs/design/06-codex-native-adapter.md)
 - [Implementation status](docs/implementation-status.md)
 
 ## Verification

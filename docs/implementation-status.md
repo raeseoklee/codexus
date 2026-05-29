@@ -49,11 +49,13 @@ The current package still exposes `chx`; command examples in this status file de
 - Skill proposal writer with source-linked `evidence.json`, structural `replay.json`, replay review, active listing, promotion, and deprecation.
 - OMX capability probe with older-version warning.
 - `cx plan --omx` writes harness and OMX-compatible plan artifacts without mutating `.omx/state`.
+- Codex-native skill adapter source under `codex/skills/codexus`.
+- `scripts/install-codex-skill.mjs` installs the adapter into `${CODEX_HOME:-~/.codex}/skills/codexus`.
 
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 30.
+- Current test count: 32.
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.
 - Doctor reports Codex feature availability through `codex features list`.
@@ -81,6 +83,8 @@ The current package still exposes `chx`; command examples in this status file de
   - command: `node src/cli/main.ts adapt omx status --json`
   - observed `.omx/state` hash unchanged before/after.
 - Static source check found no direct HTTP/OpenAI/ChatGPT backend calls in `src`, `tests`, or `package.json`.
+- Codex-native adapter wrapper root discovery is covered by tests.
+- Codex skill structure is validated with the Codex skill validator.
 
 ## Acceptance Coverage
 
@@ -100,6 +104,7 @@ The current package still exposes `chx`; command examples in this status file de
 - Skill replay validation is currently deterministic and structural; it does not yet run full model-in-the-loop replay scenarios.
 - Active skills are listed by scanning the active store; there is not yet a separate active index file.
 - Codex app-server driver is intentionally disabled for MVP.
+- Codex-native adapter currently calls the external Codexus core; it does not yet inject active skills into the current Codex prompt automatically.
 - Config schema validation is basic runtime validation, not full JSON Schema validation.
 - No TypeScript compile step yet; Node 26 directly executes type-stripped `.ts`.
 - This workspace is not yet a git repository, so git-aware checks warn instead of pass.
