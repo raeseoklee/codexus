@@ -178,12 +178,13 @@ Live model replay is never implicit. It requires structural replay first,
 `--model-budget`, and the local `CODEXUS_ENABLE_LIVE_MODEL_REPLAY=1` experiment
 gate.
 
-The structural replay path includes fixture-backed pass and failure cases. The
-fixture coverage currently proves deterministic handling of tool-success,
-permission-branch, tool-denial, multi-tool-turn, large-output, and
-usage-accounting labels, plus skill-path, file-tool-roundtrip, shell-output,
-and interruption labels; it is structural coverage, not proof that live model
-behavior has parity.
+The structural replay path includes fixture-backed pass, failure, and extended
+cases. A fixture matrix must cover every canonical parity label before a new
+label is accepted: deterministic pass, streaming text, tool success/denial,
+permission branch/approved/denied, multi-tool turn, skill path, file/tool
+roundtrip, shell output, interruption, compaction, large output, and usage
+accounting. This is structural coverage, not proof that live model behavior has
+parity.
 
 ### `cx memory ...`
 
@@ -243,6 +244,9 @@ local experiment gate is set, and the stable path remains `codex exec --json`.
 still avoiding process startup.
 `--probe-process` may add bounded `codex app-server --help` process evidence,
 but it is not a supervised app-server lifecycle or JSON-RPC turn execution.
+`--supervise-fake` records deterministic fake process lifecycle evidence with
+pid, timeout, stop signal, cleanup, and bounded stdout/stderr previews; it does
+not start the real app-server.
 
 ### `cx cron run-now` and `cx gateway check`
 
@@ -752,13 +756,12 @@ Minimum tests before feature work:
 - `doctor --json` shape test,
 - `status` reconstruction test.
 
-Reference-parity tests to add next:
+Reference-parity and contract coverage now in place:
 
 - JSON error envelope tests for unexpected arguments, unsupported capabilities, missing/corrupt state, and disabled drivers,
 - permission and approval event tests,
 - large-output and malformed-driver-output tests,
-- replay fixture mapping tests for tool success, denial, multi-tool turns,
-  large output, and usage accounting,
+- replay fixture matrix tests for every canonical parity label,
 - schema validation tests for single records and run ledgers,
 - dry-run audit-record tests for adapter context, app-server, cron, and gateway,
 - truthful capability/status tests for disabled app-server behavior.

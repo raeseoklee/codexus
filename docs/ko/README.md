@@ -38,14 +38,14 @@ User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
 Codex interactive session -> Codexus adapter -> Codexus core
 ```
 
-두 표면은 같은 ledger, verification, memory, skill store를 공유해야 합니다.
+두 표면은 같은 ledger, verification, memory, skill store를 공유합니다.
 
 현재 구현은 P0-P2 surface와 high-risk promotion slice를 포함합니다: `init`, run
 observability, memory lifecycle/curation, active skill index/export/improvement,
 approved adapter retrieval/context formatting/artifact, lock inspection/stale
 recovery, focused read-path enforcement와 run-ledger validation이 붙은 schema
-artifact, replay pass/failure/extended fixture, gated model replay, app-server
-dry-run roundtrip/recorded experiment manifest/process-probe evidence,
+artifact, full replay parity fixture-matrix coverage, gated model replay, app-server
+dry-run roundtrip/recorded experiment manifest/process-probe/fake-supervision evidence,
 explicit-budget driver-failure repair, cron/gateway dry-run audit record와
-policy/approval contract, installed skill diagnosis, local syntax/static
+policy/approval contract, installed skill tree diagnosis, local syntax/static
 validation.

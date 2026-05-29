@@ -43,9 +43,9 @@ Codexus should be used alongside Codex, not instead of Codex. The first stable m
 
 Runtime positioning:
 
-- implemented now: external supervisor CLI that drives `codex exec --json`,
-- intended next: Codex-native adapter invoked from inside a Codex session,
-- shared core: both surfaces should use the same ledger, verification, memory, and replay-gated skill system.
+- external supervisor CLI that drives `codex exec --json`,
+- Codex-native `$codexus` skill adapter invoked from inside a Codex session,
+- shared core: both surfaces use the same ledger, verification, memory, and replay-gated skill system.
 
 ## Design Principles
 
@@ -71,6 +71,6 @@ The repository now has a working MVP harness spine:
 - replay-gated skill proposal, review, improvement, promotion, active index, explicit export, listing, and deprecation,
 - optional OMX status/retrieval/context formatting and `.omx/plans` export without mutating `.omx/state`,
 - lock inspection/stale recovery, versioned schema artifacts, focused read-path enforcement, and run-ledger validation,
-- approved adapter context artifacts, replay pass/failure/extended fixtures, gated model replay, app-server dry-run roundtrip/recorded experiment manifests/process-probe evidence, explicit-budget driver-failure repair, cron/gateway dry-run audit records with policy/approval contracts, installed skill diagnosis, and local syntax/static validation.
+- approved adapter context artifacts, full replay parity fixture-matrix coverage, gated model replay, app-server dry-run roundtrip/recorded experiment manifests/process-probe/fake-supervision evidence, explicit-budget driver-failure repair, cron/gateway dry-run audit records with policy/approval contracts, installed skill tree diagnosis, and local syntax/static validation.
 
-The remaining work is no longer P0-P2 surface construction; it is deeper hardening: full schema-engine enforcement if dependency policy allows it, richer replay parity, supervised live app-server process experiments, and eventually policy-gated cron/gateway automation. See [Remaining work](remaining-work.md).
+The remaining work is no longer P0-P2 surface construction; it is deeper hardening: full schema-engine enforcement if dependency policy allows it, preserving replay parity coverage, isolated real app-server process experiments, and eventually policy-gated cron/gateway automation. See [Remaining work](remaining-work.md).

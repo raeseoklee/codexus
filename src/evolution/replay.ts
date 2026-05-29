@@ -4,19 +4,25 @@ import { defaultConfig } from "../config/schema.ts";
 import { CodexExecDriver } from "../drivers/codex-exec.ts";
 import type { DriverResult } from "../drivers/contract.ts";
 
-const replayParityCases = new Set([
+export const replayParityCaseLabels = [
   "deterministic_pass",
+  "streaming_text",
   "tool_success",
   "tool_denial",
   "permission_branch",
+  "permission_approved",
+  "permission_denied",
   "multi_tool_turn",
   "skill_path",
   "file_tool_roundtrip",
   "shell_output",
   "interruption",
+  "compaction",
   "large_output",
   "usage_accounting",
-]);
+] as const;
+
+const replayParityCases = new Set(replayParityCaseLabels);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -72,7 +78,7 @@ function validateReplaySpec(value: unknown): string[] {
 export interface ReplayScenario {
   id: string;
   driver: "mock";
-  parityCase?: "deterministic_pass" | "tool_success" | "tool_denial" | "permission_branch" | "multi_tool_turn" | "skill_path" | "file_tool_roundtrip" | "shell_output" | "interruption" | "large_output" | "usage_accounting";
+  parityCase?: typeof replayParityCaseLabels[number];
   input: {
     task: string;
     files: string[];

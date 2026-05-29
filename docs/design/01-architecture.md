@@ -6,7 +6,7 @@
 
 Codexus is a local evolutionary runtime harness for OpenAI Codex. It does not replace Codex. It supervises Codex runs, records durable state, verifies outcomes, extracts reusable experience, and gradually improves future runs through explicit memory and skill promotion.
 
-The architecture is intentionally CLI-first for the MVP. The stable MVP driver is `codex exec --json`; experimental Codex app-server integration and a Codex-native adapter are later surfaces behind capability detection.
+The architecture remains CLI-core. The stable driver is `codex exec --json`; the Codex-native adapter is implemented as the thin `$codexus` skill over the same core, while Codex app-server integration remains experimental behind capability detection and explicit gates.
 
 Canonical product and CLI names:
 

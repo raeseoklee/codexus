@@ -3,6 +3,20 @@
   "skillId": "skill_fixture_parser",
   "scenarios": [
     {
+      "id": "deterministic_baseline",
+      "driver": "mock",
+      "parityCase": "deterministic_pass",
+      "input": {
+        "task": "replay deterministic parser behavior",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": [],
+        "forbids": ["promote without replay validation"]
+      }
+    },
+    {
       "id": "parser_required_tests",
       "driver": "mock",
       "parityCase": "tool_success",

@@ -45,9 +45,10 @@ ${CODEX_HOME:-~/.codex}/skills/codexus
 It also writes `codexus-root.json` so the installed skill can find this repository and call the local Codexus core.
 
 `cx doctor --json` includes a `codexus.skill_install` check. It reports whether
-the installed skill is missing, stale, or hash-matched to this repository. A
-stale install is a warning, not an automatic mutation; reinstall explicitly with
-the command above.
+the installed skill is missing, stale, or tree-hash matched to this repository.
+The installer writes source and installed tree hashes into `codexus-root.json`.
+A stale install is a warning, not an automatic mutation; reinstall explicitly
+with the command above.
 
 ## Supported First Commands
 

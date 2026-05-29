@@ -77,12 +77,12 @@ node codex/skills/codexus/scripts/cx.mjs schema check --json
 node codex/skills/codexus/scripts/cx.mjs schema validate --type state --file .codex-harness/runs/<run-id>/state.json --json
 node codex/skills/codexus/scripts/cx.mjs schema validate-run <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json
-node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --record --probe-process --timeout-ms 30000 --json
+node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --record --probe-process --supervise-fake --timeout-ms 30000 --json
 node codex/skills/codexus/scripts/cx.mjs cron run-now --dry-run --record --task "<task>" --json
 node codex/skills/codexus/scripts/cx.mjs gateway check --dry-run --record --task "<event>" --json
 ```
 
-Use these for inspection, run-ledger validation, process-probe evidence, and dry-run audit evidence. Live app-server, cron, and gateway behavior remains gated even when feature gates are enabled.
+Use these for inspection, run-ledger validation, process-probe evidence, deterministic fake lifecycle supervision, and dry-run audit evidence. Live app-server, cron, and gateway behavior remains gated even when feature gates are enabled.
 
 ## Supervised Handoff
 

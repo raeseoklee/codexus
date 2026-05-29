@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { evaluateReplaySpec, readReplaySpec } from "../src/evolution/replay.ts";
+import { evaluateReplaySpec, readReplaySpec, replayParityCaseLabels } from "../src/evolution/replay.ts";
 
 const cli = resolve("src/cli/main.ts");
 
@@ -16,7 +16,7 @@ test("fixture-backed replay exposes parity coverage", async () => {
   const skill = JSON.parse(await readFile(skillPath, "utf8"));
   const result = evaluateReplaySpec(spec, skill);
   assert.equal(result.status, "passed");
-  assert.deepEqual(result.coverage.parityCases, ["permission_branch", "tool_success"]);
+  assert.deepEqual(result.coverage.parityCases, ["deterministic_pass", "permission_branch", "tool_success"]);
 
   const cliResult = spawnSync(process.execPath, [cli, "replay", replayPath, "--json"], {
     cwd: resolve("."),
@@ -52,7 +52,7 @@ test("fixture-backed replay exposes failure coverage and CLI failure status", as
   assert.deepEqual(output.replay.coverage.parityCases, result.coverage.parityCases);
 });
 
-test("extended replay fixture covers skill, file, shell, and interruption labels", async () => {
+test("extended replay fixture covers skill, file, shell, permission, compaction, and interruption labels", async () => {
   const replayPath = resolve("fixtures/replay/extended-pass/replay.json");
   const skillPath = resolve("fixtures/replay/extended-pass/skill.json");
   const spec = await readReplaySpec(replayPath);
@@ -60,7 +60,16 @@ test("extended replay fixture covers skill, file, shell, and interruption labels
   const skill = JSON.parse(await readFile(skillPath, "utf8"));
   const result = evaluateReplaySpec(spec, skill);
   assert.equal(result.status, "passed");
-  assert.deepEqual(result.coverage.parityCases, ["file_tool_roundtrip", "interruption", "shell_output", "skill_path"]);
+  assert.deepEqual(result.coverage.parityCases, [
+    "compaction",
+    "file_tool_roundtrip",
+    "interruption",
+    "permission_approved",
+    "permission_denied",
+    "shell_output",
+    "skill_path",
+    "streaming_text",
+  ]);
 
   const cliResult = spawnSync(process.execPath, [cli, "replay", replayPath, "--json"], {
     cwd: resolve("."),
@@ -68,6 +77,16 @@ test("extended replay fixture covers skill, file, shell, and interruption labels
   });
   assert.equal(cliResult.status, 0, cliResult.stderr);
   assert.deepEqual(JSON.parse(cliResult.stdout).replay.coverage.parityCases, result.coverage.parityCases);
+});
+
+test("fixture matrix covers every canonical replay parity label", async () => {
+  const covered = new Set<string>();
+  for (const dir of ["deterministic-pass", "failure-cases", "extended-pass"]) {
+    const spec = await readReplaySpec(resolve("fixtures/replay", dir, "replay.json"));
+    assert.ok(spec);
+    for (const scenario of spec.scenarios) covered.add(scenario.parityCase ?? scenario.id);
+  }
+  assert.deepEqual([...covered].sort(), [...replayParityCaseLabels].sort());
 });
 
 test("replay spec read path rejects invalid fixture shape", async () => {

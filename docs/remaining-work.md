@@ -164,12 +164,11 @@ not remove the gates:
 1. Replace the focused local schema checks with a full JSON Schema engine only
    if dependency policy allows it; keep migration fixtures as the regression
    boundary.
-2. Keep expanding Claw-style replay parity toward streaming text, explicit
-   permission approved/denied, and compaction cases before increasing model
-   replay usage.
-3. Turn the app-server process-probe evidence into a supervised start/stop
-   experiment with timeout, cleanup, and bounded stdout/stderr evidence before
-   enabling it as a driver.
+2. Preserve the replay parity matrix as a contract: no new canonical parity
+   label should be added without fixture coverage and CLI replay evidence.
+3. Promote deterministic fake app-server supervision into an isolated real
+   app-server start/stop experiment with timeout, cleanup, and bounded
+   stdout/stderr evidence before enabling it as a driver.
 4. Promote cron/gateway policy/approval dry-run contracts into a
    policy-reviewed live dispatch contract, then keep dry-run and live paths
    contract-compatible.

@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { loadConfig } from "../../config/loader.ts";
 import { CodexAppServerDriver } from "../../drivers/codex-app-server.ts";
+import { superviseProcess } from "../../experiments/process-supervisor.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 import { readAppServerSchemaFixture } from "../../validation/schemas.ts";
@@ -100,10 +101,19 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
   if (topic === "experiment") {
     const dryRun = flagBool(args.flags, "dry-run") || !flagBool(args.flags, "live");
     if (!dryRun && !liveEnabled()) throw new Error("unsupported_feature:codex-app-server-live-experiment");
+    if (!dryRun && flagBool(args.flags, "supervise-fake")) throw new Error("unsupported_feature:codex-app-server-live-fake-supervision");
     const timeoutMs = Number(flagString(args.flags, "timeout-ms") ?? "30000");
     if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) throw new Error("invalid_timeout_ms");
     const experimentId = `app_server_${Date.now()}`;
     const experimentDir = resolve(harnessRoot(cwd), "experiments", "app-server", experimentId);
+    const supervised = flagBool(args.flags, "supervise-fake")
+      ? await superviseProcess({
+        command: process.execPath,
+        args: ["-e", "console.log('codexus-fake-app-server-ready'); setInterval(() => {}, 1000);"],
+        cwd,
+        timeoutMs,
+      })
+      : null;
     const manifest = {
       schemaVersion: 1,
       experimentId,
@@ -117,7 +127,7 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
         removesExperimentProcess: true,
         preservesManifest: true,
       },
-      lifecycle: [
+      lifecycleIntent: [
         "prepare_temp_workspace",
         "start_codex_app_server",
         "send_thread_start",
@@ -126,15 +136,29 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
         "stop_process",
         "write_manifest",
       ],
+      actualLifecycle: supervised
+        ? [
+          "start_fake_app_server_process",
+          "readiness_output_observed",
+          "stop_fake_process",
+          "record_cleanup",
+          "write_manifest",
+        ]
+        : [
+          "write_manifest",
+        ],
       schemaFixture: fixture,
       process: {
-        supervised: false,
+        supervised: supervised !== null,
         reason: dryRun
-          ? "dry-run records lifecycle intent without starting a process"
+          ? supervised
+            ? "dry-run records deterministic fake process supervision without starting codex app-server"
+            : "dry-run records lifecycle intent without starting a process"
           : "live experiment currently prepares a sandbox manifest only",
         probe: flagBool(args.flags, "probe-process")
           ? supervisedAppServerHelpProbe(config.codex.command, timeoutMs)
           : null,
+        supervisor: supervised,
       },
     };
     const shouldRecord = !dryRun || flagBool(args.flags, "record");

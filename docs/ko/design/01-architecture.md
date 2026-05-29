@@ -6,7 +6,10 @@
 
 Codexus는 OpenAI Codex를 위한 로컬 진화형 runtime harness입니다. Codex를 대체하지 않고, Codex 실행을 감독하며 durable state, verification, recovery, memory, skill promotion을 제공합니다.
 
-MVP는 CLI-first입니다. 안정적인 driver는 `codex exec --json`이며, app-server와 Codex-native adapter는 capability-gated future surface입니다.
+Architecture는 CLI-core를 유지합니다. 안정적인 driver는 `codex exec --json`이며,
+Codex-native adapter는 같은 core 위의 얇은 `$codexus` skill로 구현되어 있습니다.
+Codex app-server integration은 capability detection과 explicit gate 뒤의
+experimental surface로 유지합니다.
 
 ## 레퍼런스 거버넌스
 

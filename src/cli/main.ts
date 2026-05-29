@@ -37,7 +37,7 @@ Usage:
   cx schema validate --type <config|state|event|memory-entry|skill> --file <path> [--json]
   cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|experiment [--dry-run|--live] [--json]
-  cx app-server experiment --dry-run --record [--probe-process] [--timeout-ms <n>] [--json]
+  cx app-server experiment --dry-run --record [--probe-process] [--supervise-fake] [--timeout-ms <n>] [--json]
   cx resume <run-id> [follow-up] [--json]
   cx verify <run-id> [--verify <cmd>] [--json]
   cx replay skill <skill-id> [--with-model-replay] [--allow-live-model-replay] [--model-budget <n>] [--json]

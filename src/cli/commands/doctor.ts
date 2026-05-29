@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { access, mkdir, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import { constants, existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -52,15 +52,41 @@ async function hashFileIfExists(path: string): Promise<string | null> {
   return `sha256:${createHash("sha256").update(await readFile(path)).digest("hex")}`;
 }
 
+async function hashTreeIfExists(rootDir: string, exclude = new Set<string>()): Promise<string | null> {
+  if (!existsSync(rootDir)) return null;
+  const entries: Array<[string, string]> = [];
+  async function walk(dir: string, prefix = ""): Promise<void> {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (exclude.has(relative)) continue;
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(path, relative);
+      } else if (entry.isFile()) {
+        entries.push([relative, createHash("sha256").update(await readFile(path)).digest("hex")]);
+      }
+    }
+  }
+  await walk(rootDir);
+  const hash = createHash("sha256");
+  for (const [relative, fileHash] of entries.sort((left, right) => left[0].localeCompare(right[0]))) {
+    hash.update(`${relative}\0${fileHash}\n`);
+  }
+  return `sha256:${hash.digest("hex")}`;
+}
+
 async function codexusSkillInstallCheck(): Promise<Check> {
   const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
   const codexHome = process.env.CODEX_HOME ? resolve(process.env.CODEX_HOME) : join(homedir(), ".codex");
+  const sourceRoot = join(repoRoot, "codex", "skills", "codexus");
   const sourceSkill = join(repoRoot, "codex", "skills", "codexus", "SKILL.md");
   const installedRoot = join(codexHome, "skills", "codexus");
   const installedSkill = join(installedRoot, "SKILL.md");
   const metadataPath = join(installedRoot, "codexus-root.json");
   const sourceHash = await hashFileIfExists(sourceSkill);
   const installedHash = await hashFileIfExists(installedSkill);
+  const sourceTreeHash = await hashTreeIfExists(sourceRoot);
+  const installedTreeHash = await hashTreeIfExists(installedRoot, new Set([".codexus-adapter-managed", "codexus-root.json"]));
   let installedMetadata: Record<string, unknown> | null = null;
   if (existsSync(metadataPath)) {
     try {
@@ -74,10 +100,14 @@ async function codexusSkillInstallCheck(): Promise<Check> {
       id: "codexus.skill_install",
       status: "warn",
       summary: "Codexus skill is not installed in CODEX_HOME",
-      details: { codexHome, installedRoot, sourceHash },
+      details: { codexHome, installedRoot, sourceHash, sourceTreeHash },
     };
   }
-  const current = sourceHash !== null && installedHash === sourceHash && installedMetadata?.root === repoRoot;
+  const current = sourceTreeHash !== null
+    && installedTreeHash === sourceTreeHash
+    && installedMetadata?.root === repoRoot
+    && installedMetadata?.sourceTreeHash === sourceTreeHash
+    && installedMetadata?.installedTreeHash === installedTreeHash;
   return {
     id: "codexus.skill_install",
     status: current ? "pass" : "warn",
@@ -87,6 +117,8 @@ async function codexusSkillInstallCheck(): Promise<Check> {
       installedRoot,
       sourceHash,
       installedHash,
+      sourceTreeHash,
+      installedTreeHash,
       installedRootMetadata: installedMetadata,
     },
   };
@@ -134,9 +166,8 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
 
   const root = harnessRoot(cwd);
   try {
-    await mkdir(root, { recursive: true });
-    await access(root, constants.W_OK);
-    checks.push({ id: "harness.state_root", status: "pass", summary: root });
+    await access(existsSync(root) ? root : cwd, constants.W_OK);
+    checks.push({ id: "harness.state_root", status: "pass", summary: root, details: { exists: existsSync(root), createsOnDemand: true } });
   } catch (error) {
     checks.push({
       id: "harness.state_root",

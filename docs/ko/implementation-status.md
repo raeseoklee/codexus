@@ -42,18 +42,18 @@ compatibility alias로 유지합니다.
 - deterministic replay 뒤 explicit budget/policy/live-environment gated model replay
 - `.omx/state`를 건드리지 않는 `cx init`
 - runs/events/report observability command
-- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록과 optional supervised `codex app-server --help` process-probe evidence, live execution disabled
+- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, live execution disabled
 - cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
 - config/state/event/memory/skill versioned schema artifact와 durable read-path focused enforcement
 - `npm run typecheck` syntax/static validation
 - `.omx/state`를 건드리지 않는 OMX status/plan interop
 - `codex/skills/codexus` 아래 Codex-native skill adapter source
 - `${CODEX_HOME:-~/.codex}/skills/codexus`로 adapter를 설치하는 `scripts/install-codex-skill.mjs`
-- `doctor --json`의 installed Codexus skill match 진단
+- `doctor --json`의 installed Codexus skill tree match 진단과 installer source/installed tree hash metadata
 
 ## 검증
 
-- `npm test`: 49 tests 통과
+- `npm test`: 52 tests 통과
 - `npm run typecheck` 통과
 - `doctor --json`: Codex auth/version/features, OMX, git, tmux, driver capability 확인
 - mock driver: success/failure/repair/blocked/cancelled outcome 검증
@@ -64,7 +64,7 @@ compatibility alias로 유지합니다.
 - Codex skill validator로 skill 구조 검증
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
-- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, replay parity pass/failure/extended coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 기록, memory lifecycle/curation, packaging, installed-skill diagnosis, feature gate policy/audit-record 테스트
+- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
 
 ## 남은 gap
 
@@ -73,7 +73,7 @@ compatibility alias로 유지합니다.
 
 - driver-failure repair는 repairable task failure에 한해 explicit budget이 있을 때만 실행됩니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
-- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록과 supervised help-process probe evidence만 구현했습니다.
+- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision만 구현했습니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
 - config/schema validation은 focused local enforcement와 schema artifact 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.

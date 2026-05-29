@@ -155,12 +155,11 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 1. dependency policy가 허용될 때만 focused local schema check를 full JSON Schema
    engine으로 교체합니다. Migration fixture는 regression boundary로 유지합니다.
-2. model replay 사용량을 늘리기 전에 Claw-style replay parity fixture를
-   streaming text, explicit permission approved/denied, compaction case까지
-   계속 확장합니다.
-3. app-server를 driver로 켜기 전에 process-probe evidence를 timeout, cleanup,
-   bounded stdout/stderr evidence가 있는 supervised start/stop experiment로
-   승격합니다.
+2. replay parity matrix를 contract로 유지합니다. 새 canonical parity label은
+   fixture coverage와 CLI replay evidence 없이 추가하지 않습니다.
+3. app-server를 driver로 켜기 전에 deterministic fake app-server supervision을
+   timeout, cleanup, bounded stdout/stderr evidence가 있는 isolated real
+   app-server start/stop experiment로 승격합니다.
 4. cron/gateway policy/approval dry-run contract를 policy-reviewed live
    dispatch contract로 승격하고, dry-run/live path의 contract compatibility를
    유지합니다.

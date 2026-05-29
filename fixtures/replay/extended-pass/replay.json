@@ -3,6 +3,20 @@
   "skillId": "skill_fixture_extended",
   "scenarios": [
     {
+      "id": "streaming_text_summary",
+      "driver": "mock",
+      "parityCase": "streaming_text",
+      "input": {
+        "task": "summarize streaming text",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["streaming text"],
+        "forbids": ["treat partial stream as final"]
+      }
+    },
+    {
       "id": "skill_path_context",
       "driver": "mock",
       "parityCase": "skill_path",
@@ -14,6 +28,34 @@
         "mentionsVerification": true,
         "requiresTests": ["skill path"],
         "forbids": ["auto-inject retrieved context"]
+      }
+    },
+    {
+      "id": "permission_approved_path",
+      "driver": "mock",
+      "parityCase": "permission_approved",
+      "input": {
+        "task": "handle approved permission branch",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["permission approved"],
+        "forbids": ["skip approval evidence"]
+      }
+    },
+    {
+      "id": "permission_denied_path",
+      "driver": "mock",
+      "parityCase": "permission_denied",
+      "input": {
+        "task": "handle denied permission branch",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["permission denied"],
+        "forbids": ["retry denied action silently"]
       }
     },
     {
@@ -42,6 +84,20 @@
         "mentionsVerification": true,
         "requiresTests": ["shell output summary"],
         "forbids": ["hide failing stderr"]
+      }
+    },
+    {
+      "id": "compaction_recovery",
+      "driver": "mock",
+      "parityCase": "compaction",
+      "input": {
+        "task": "recover after context compaction",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["compaction recovery"],
+        "forbids": ["restart from stale context"]
       }
     },
     {

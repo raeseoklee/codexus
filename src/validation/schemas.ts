@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export interface AppServerSchemaFixtureStatus {
   path: string;
@@ -14,7 +15,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export async function readAppServerSchemaFixture(path = resolve("fixtures/app-server/schema.fixture.json")): Promise<AppServerSchemaFixtureStatus> {
+function repoRoot(): string {
+  return resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+}
+
+export async function readAppServerSchemaFixture(path = join(repoRoot(), "fixtures", "app-server", "schema.fixture.json")): Promise<AppServerSchemaFixtureStatus> {
   if (!existsSync(path)) return { path, exists: false, valid: false, methods: [], error: "fixture_missing" };
   try {
     const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;

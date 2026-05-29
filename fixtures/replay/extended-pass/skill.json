@@ -4,29 +4,37 @@
   "name": "fixture-extended",
   "displayName": "codexus:fixture-extended",
   "status": "proposed",
-  "version": "0.1.0",
-  "sourceRunIds": ["run_fixture"],
-  "trigger": {
-    "keywords": ["skill", "file", "shell", "interruption"],
+    "version": "0.1.0",
+    "sourceRunIds": ["run_fixture"],
+    "trigger": {
+    "keywords": ["skill", "file", "shell", "interruption", "permission", "compaction"],
     "pathGlobs": []
   },
   "scope": {
     "allowedTaskShapes": ["bugfix", "feature", "verification"],
     "excludedTaskShapes": []
   },
-  "procedure": [
-    "Run required verification before claiming completion.",
-    "When using a skill path, inspect the source and keep retrieved context explicit.",
-    "For a file tool roundtrip, inspect the file, apply a scoped edit, and verify the resulting diff.",
-    "For shell output summary, keep the critical failing stderr and avoid hiding failures.",
-    "For interruption recovery, restore pending state and rerun verification before completion."
-  ],
+    "procedure": [
+      "Run required verification before claiming completion.",
+      "For streaming text, wait for final completion before treating streamed content as final.",
+      "When using a skill path, inspect the source and keep retrieved context explicit.",
+      "For permission approved paths, preserve the approval evidence before continuing.",
+      "For permission denied paths, stop the denied action and report the denial rather than retrying silently.",
+      "For a file tool roundtrip, inspect the file, apply a scoped edit, and verify the resulting diff.",
+      "For shell output summary, keep the critical failing stderr and avoid hiding failures.",
+      "For compaction recovery, rebuild from durable context and avoid restarting from stale context.",
+      "For interruption recovery, restore pending state and rerun verification before completion."
+    ],
   "safety": {
     "requiresVerification": true,
     "forbiddenActions": [
       "auto-inject retrieved context",
+      "treat partial stream as final",
+      "skip approval evidence",
+      "retry denied action silently",
       "overwrite unrelated changes",
       "hide failing stderr",
+      "restart from stale context",
       "drop pending verification"
     ]
   },

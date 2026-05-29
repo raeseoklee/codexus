@@ -18,7 +18,7 @@ cx skill review <skill-id> --json
 cx memory curate --json
 cx skill improve <skill-id> --reason "tighten trigger" --json
 cx adapt omx context --task "parser regression" --json
-cx app-server experiment --dry-run --record --json
+cx app-server experiment --dry-run --record --supervise-fake --json
 ```
 
 Compatibility note: the package exposes `cx` and `codexus` as canonical bins; `chx` remains a temporary alias.
