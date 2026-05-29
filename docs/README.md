@@ -29,6 +29,7 @@ The MVP implementation still exposes `chx`; documentation now treats `cx` as the
 - [Naming and runtime positioning](design/05-naming-and-runtime-positioning.md): Codexus name, `cx` CLI target, external CLI runtime, and future Codex-native adapter.
 - [Codex-native adapter](design/06-codex-native-adapter.md): `$codexus` skill adapter, installation, supported first commands, and design rules.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
+- [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 
 ## Positioning
 
@@ -70,4 +71,4 @@ The repository now has a working MVP harness spine:
 - replay-gated skill proposal, review, promotion, listing, and deprecation,
 - optional OMX status inspection and `.omx/plans` export without mutating `.omx/state`.
 
-The remaining work is no longer the core harness spine; it is hardening: richer app-server experiments, model-in-the-loop replay, active skill export into external Codex/OMX stores, and broader parity fixtures.
+The remaining work is no longer the core harness spine; it is hardening: richer JSON/error/event contracts, active skill index and export, model-in-the-loop replay, app-server experiments, and broader parity fixtures. See [Remaining work](remaining-work.md).

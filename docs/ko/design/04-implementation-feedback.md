@@ -63,10 +63,15 @@ final assistant text는 nested `item.completed.item.text` 형태로 올 수 있�
 
 다음 hardening:
 
-- model-in-the-loop replay
+- 구현된 unknown command/argument validation JSON contract를 unexpected argument,
+  unsupported capability, missing/corrupt state, disabled driver까지 확장
+- permission, approval, policy-block decision을 first-class ledger event로 승격
+- driver-failure repair 전에 driver-failure classification 추가
+- active skill index/export, cron, app-server run 전에 lock/lease handling과
+  schema migration reader 추가
 - active skill index와 외부 Codex/OMX skill export
-- app-server schema fixture와 gated roundtrip
-- git-aware project initialization
-- large-output/interruption parity fixture
-- 구현된 unknown command/argument validation JSON contract를 unexpected argument와 unsupported capability까지 확장
-- permission, approval, policy-block typed ledger event
+- deterministic replay 뒤 model-in-the-loop replay 추가, 이후 large-output,
+  interruption, tool denial, multi-tool turn parity fixture 확장
+- event/error contract 안정화 후 app-server schema fixture와 gated roundtrip
+
+전체 backlog는 [남은 작업](../remaining-work.md)에 유지합니다.

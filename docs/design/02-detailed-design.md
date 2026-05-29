@@ -665,7 +665,7 @@ Minimum tests before feature work:
 
 Reference-parity tests to add next:
 
-- JSON error envelope tests for unknown commands and unexpected arguments,
+- JSON error envelope tests for unexpected arguments, unsupported capabilities, missing/corrupt state, and disabled drivers,
 - permission and approval event tests,
 - large-output and malformed-driver-output tests,
 - replay fixture mapping tests for tool success, denial, and multi-tool turns,

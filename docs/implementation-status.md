@@ -102,6 +102,9 @@ The current package still exposes `chx`; command examples in this status file de
 
 ## Known Gaps
 
+See [Remaining work](remaining-work.md) for the prioritized backlog and design
+review. Current high-level gaps:
+
 - Repair loop handles verification failures only, not driver failures.
 - `cx memory` only exposes search; memory creation is automatic/internal for now.
 - Skill replay validation is currently deterministic and structural; it does not yet run full model-in-the-loop replay scenarios.
@@ -109,6 +112,8 @@ The current package still exposes `chx`; command examples in this status file de
 - Codexus skill display names are namespaced, but active skills are not yet exported into external Codex skill stores as separate generated skills.
 - Codex app-server driver is intentionally disabled for MVP.
 - Codex-native adapter currently calls the external Codexus core; it does not yet inject active skills into the current Codex prompt automatically.
+- Permission, approval, and policy decisions are not yet consistently surfaced as first-class ledger events.
+- Mutable stores do not yet have explicit lock/lease handling or schema migration readers.
 - Config schema validation is basic runtime validation, not full JSON Schema validation.
 - No TypeScript compile step yet; Node 26 directly executes type-stripped `.ts`.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.
