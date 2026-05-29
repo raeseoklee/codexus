@@ -22,6 +22,7 @@ Current compatibility note: the package also exposes `chx` while the implementat
 ## Docs
 
 - [Documentation index](docs/README.md)
+- [Reference governance](docs/references/README.md)
 - [Architecture](docs/design/01-architecture.md)
 - [Detailed design](docs/design/02-detailed-design.md)
 - [Evolution engine](docs/design/03-evolution-engine.md)

@@ -12,6 +12,19 @@ Codex session -> $codexus skill -> Codexus core
 
 This skill implements the Codex-native adapter surface. It should call the same Codexus core as the external CLI and use the same `.codex-harness` ledger, memory, and skill stores.
 
+## Reference-First Rule
+
+Before changing harness runtime behavior, consult
+`docs/references/01-reference-first-harness-policy.md`.
+
+Mandatory references are:
+
+- `raeseoklee/claw-code` for CLI and harness parity behavior.
+- `NousResearch/hermes-agent` for evolutionary memory, skills, cron, gateways,
+  and subagents.
+- `Gitlawb/openclaude` for provider/auth/session runtime, permissions,
+  headless streaming, and descriptor-first integration behavior.
+
 ## Important Limits
 
 - This skill does not create a separate chat UI.

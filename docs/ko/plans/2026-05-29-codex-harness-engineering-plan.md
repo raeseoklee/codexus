@@ -15,6 +15,19 @@ OMC와 OMX는 같은 계열의 하네스 아이디어입니다. OMC는 Claude Co
 - 비공개 ChatGPT/Codex backend API를 직접 호출하지 않습니다.
 - MVP의 안정적인 모델 접근 경계는 로컬 인증된 `codex` CLI입니다.
 - `codex app-server`는 capability detection 뒤에 둔 실험적 driver로 유지합니다.
+- 하네스 설계는
+  [reference-first 하네스 정책](../references/01-reference-first-harness-policy.md)을
+  따릅니다. 필수 레퍼런스는 `raeseoklee/claw-code`,
+  `NousResearch/hermes-agent`, `Gitlawb/openclaude`입니다.
+- `raeseoklee/claw-code`는 CLI/harness parity의 필수 기준입니다. 2026-05-29
+  기준 GitHub metadata는 읽었지만 source clone은 disabled repository HTTP
+  403으로 실패했으므로, source-level Claw parity note는 재감사 전까지
+  provisional입니다.
+- Hermes Agent는 memory, skill creation/improvement, session search, cron,
+  gateways, terminal backends, isolated subagents의 기준입니다.
+- OpenClaude는 provider profiles, Codex OAuth, `~/.codex/auth.json` reuse,
+  terminal-first tool loop, MCP/slash commands, permission requests, headless
+  gRPC streaming, descriptor-first provider metadata의 기준입니다.
 - self-improvement는 명시적이고 검토 가능하며 되돌릴 수 있어야 합니다.
 - 모든 mutating workflow는 resumable state, terminal outcome, verification evidence를 남겨야 합니다.
 

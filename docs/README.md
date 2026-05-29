@@ -21,6 +21,7 @@ The MVP implementation still exposes `chx`; documentation now treats `cx` as the
 ## Document Map
 
 - [Engineering plan](plans/2026-05-29-codex-harness-engineering-plan.md): migrated planning baseline, research findings, constraints, MVP scope, and risks.
+- [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.
 - [Evolution engine](design/03-evolution-engine.md): Hermes-inspired memory, skill proposal, replay validation, promotion, and rollback design.
@@ -48,6 +49,7 @@ Runtime positioning:
 ## Design Principles
 
 - Keep Codex as the execution engine.
+- Treat harness work as reference-first: consult `raeseoklee/claw-code`, `NousResearch/hermes-agent`, and `Gitlawb/openclaude` before changing core harness behavior.
 - Avoid undocumented ChatGPT/Codex backend APIs.
 - Prefer local, auditable files over hidden service state.
 - Treat every run as resumable until it reaches an explicit terminal outcome.

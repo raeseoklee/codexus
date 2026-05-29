@@ -73,6 +73,11 @@ This starts a separate non-interactive Codex process. It is useful for bounded s
 - Do not duplicate workflow-kernel logic inside the skill.
 - Do not auto-promote skills from inside the adapter.
 - Prefer status, verification, replay, memory, and review commands before launching nested Codex runs.
+- Before changing adapter behavior, apply the
+  [reference-first harness policy](../references/01-reference-first-harness-policy.md):
+  compare OpenClaude's terminal/provider/runtime surfaces and Hermes'
+  conversation/gateway loops, then record why the Codexus adapter should remain
+  thin or intentionally grow.
 
 ## Next Steps
 

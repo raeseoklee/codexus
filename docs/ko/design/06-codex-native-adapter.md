@@ -73,6 +73,11 @@ node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounde
 - Workflow kernel logic을 skill 안에 중복 구현하지 않습니다.
 - Adapter 안에서 skill을 자동 승격하지 않습니다.
 - nested Codex run보다 status, verification, replay, memory, review 명령을 우선합니다.
+- adapter 동작을 바꾸기 전에
+  [reference-first 하네스 정책](../references/01-reference-first-harness-policy.md)을
+  적용합니다. OpenClaude의 terminal/provider/runtime surface와 Hermes의
+  conversation/gateway loop를 비교하고, Codexus adapter가 thin해야 하는지 또는
+  의도적으로 커져야 하는지 기록합니다.
 
 ## 다음 단계
 

@@ -51,4 +51,4 @@
 - app-server driver는 MVP에서 disabled입니다.
 - Codex-native adapter는 현재 외부 Codexus core를 호출하며, active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
 - config validation은 full JSON Schema가 아니라 basic runtime validation입니다.
-- workspace가 아직 git repo가 아니면 git-aware checks는 warn입니다.
+- git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

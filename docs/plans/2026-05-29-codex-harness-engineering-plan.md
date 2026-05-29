@@ -25,11 +25,16 @@ Local environment:
 
 Reference findings:
 
+- Harness design is now governed by the
+  [reference-first harness policy](../references/01-reference-first-harness-policy.md).
+  The mandatory references are `raeseoklee/claw-code`,
+  `NousResearch/hermes-agent`, and `Gitlawb/openclaude`.
 - OpenAI Codex supports local CLI use, `codex exec --json`, plugins, hooks, app server tooling, MCP server mode, and ChatGPT sign-in. Official docs say Codex is included in eligible ChatGPT plans and can be used from Codex CLI/App/IDE/Web.
 - The generated Codex app-server protocol exposes useful JSON-RPC surfaces such as `thread/start`, `turn/start`, `turn/steer`, thread turns/items reads, skills/plugins lists, command execution, filesystem tools, MCP server calls, account/rate-limit reads, and model listing. This is useful but should be treated as optional/experimental until proven stable.
 - OMX upstream has moved to a CLI/JSON-first contract, `.omx` state/artifacts, skills, prompts, team runtime, durable goals, sparkshell/explore, Hermes/OpenClaw adapters, and an optional Hermes MCP bridge. Local installed OMX is behind upstream, so compatibility detection matters. In this plan, OMC means the Claude Code sibling in the same conceptual family, and OMX means the Codex-targeted sibling.
-- Claw Code is a Rust CLI harness with a parity-first philosophy: doctor/status, JSON output, permission modes, session state, slash commands, tools, MCP, LSP, subagent/team surfaces, and a mock parity harness. It is a good design reference, but not an auth model reference because it requires API keys rather than Claude subscription auth.
+- `raeseoklee/claw-code` is the mandatory parity-first CLI/harness reference. The 2026-05-29 audit could read GitHub metadata but could not clone source because the repository was disabled with HTTP 403, so existing source-specific Claw parity notes are provisional until re-audit.
 - Hermes Agent contributes the strongest ideas for self-improvement: skill creation, skill improvement, persistent memory, session search, cron, gateways, toolsets, terminal backends, and isolated subagents. For this project, the evolutionary loop should be adapted as local artifacts and workflows around Codex, not copied as a model provider layer.
+- OpenClaude contributes the strongest ideas for provider/session runtime: provider profiles, Codex OAuth, existing Codex CLI auth reuse through `~/.codex/auth.json`, terminal-first tool loops, MCP/slash-command workflows, permission requests, headless gRPC streaming, and descriptor-first provider metadata. For Codexus, this reinforces local Codex auth reuse and capability-driven driver metadata instead of private backend calls or broad hardcoded provider branches.
 
 ## Core Constraints
 
@@ -207,7 +212,8 @@ This gives a stable spine before adding planning, OMX team integration, app-serv
 
 - OpenAI Help: ChatGPT plan support for Codex
 - OpenAI Codex GitHub README
-- `ultraworkers/claw-code` README, USAGE, PARITY, Rust README
+- `raeseoklee/claw-code` GitHub metadata; source clone blocked by disabled repository on 2026-05-29
 - `NousResearch/hermes-agent` README and source tree
+- `Gitlawb/openclaude` README, advanced setup, integrations architecture, and source tree
 - `Yeachan-Heo/oh-my-codex` README, adapt docs, Hermes MCP bridge docs, CLI-first MCP taxonomy, plugin bundle contract
 - Local CLI help for `codex`, `codex exec`, `codex login`, `codex app-server`, `codex mcp-server`, `codex features`, `omx`, and `omx agents`

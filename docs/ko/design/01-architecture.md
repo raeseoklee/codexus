@@ -8,6 +8,26 @@ Codexus는 OpenAI Codex를 위한 로컬 진화형 runtime harness입니다. Cod
 
 MVP는 CLI-first입니다. 안정적인 driver는 `codex exec --json`이며, app-server와 Codex-native adapter는 capability-gated future surface입니다.
 
+## 레퍼런스 거버넌스
+
+하네스 아키텍처는 reference-first입니다. 핵심 하네스 동작을 변경하기 전에
+필수 upstream reference를 확인하고, 그 매핑을
+[레퍼런스 거버넌스](../references/README.md)에 맞춰 기록해야 합니다.
+
+필수 레퍼런스:
+
+- [raeseoklee/claw-code](https://github.com/raeseoklee/claw-code): parity-first
+  CLI와 하네스 동작.
+- [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent):
+  evolutionary memory, skills, cron, gateways, terminal backends, isolated
+  subagents.
+- [Gitlawb/openclaude](https://github.com/Gitlawb/openclaude): provider
+  profiles, Codex auth reuse, tool loops, permissions, headless service
+  boundary, descriptor-first integration architecture.
+
+Codexus가 reference와 의도적으로 다르게 가야 한다면 constraint, rejected
+upstream path, Codexus decision, residual risk를 설계 노트에 기록합니다.
+
 ## 시스템 경계
 
 포함:

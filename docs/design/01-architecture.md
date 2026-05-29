@@ -15,6 +15,26 @@ Canonical product and CLI names:
 - long-form alias: `codexus`
 - temporary MVP alias: `chx`
 
+## Reference Governance
+
+Harness architecture is reference-first. Before changing core harness behavior,
+consult the mandatory upstream references and record the mapping in
+[Reference governance](../references/README.md).
+
+Mandatory references:
+
+- [raeseoklee/claw-code](https://github.com/raeseoklee/claw-code) for
+  parity-first CLI and harness behavior.
+- [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) for
+  evolutionary memory, skills, cron, gateways, terminal backends, and isolated
+  subagents.
+- [Gitlawb/openclaude](https://github.com/Gitlawb/openclaude) for provider
+  profiles, Codex auth reuse, tool loops, permissions, headless service
+  boundaries, and descriptor-first integration architecture.
+
+If Codexus intentionally diverges from a reference, the design note must record
+the constraint, rejected upstream path, Codexus decision, and residual risk.
+
 ## System Boundary
 
 In scope:

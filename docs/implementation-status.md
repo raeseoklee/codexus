@@ -107,4 +107,4 @@ The current package still exposes `chx`; command examples in this status file de
 - Codex-native adapter currently calls the external Codexus core; it does not yet inject active skills into the current Codex prompt automatically.
 - Config schema validation is basic runtime validation, not full JSON Schema validation.
 - No TypeScript compile step yet; Node 26 directly executes type-stripped `.ts`.
-- This workspace is not yet a git repository, so git-aware checks warn instead of pass.
+- Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.
