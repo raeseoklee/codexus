@@ -1,0 +1,615 @@
+# Detailed Design
+
+[한국어](../ko/design/02-detailed-design.md)
+
+## Runtime Package Shape
+
+Initial source layout:
+
+```text
+src/
+  cli/
+    main.ts
+    commands/
+      doctor.ts
+      plan.ts
+      run.ts
+      status.ts
+      resume.ts
+      verify.ts
+      replay.ts
+      memory.ts
+      skill.ts
+      adapt-omx.ts
+  config/
+    loader.ts
+    schema.ts
+  drivers/
+    contract.ts
+    codex-exec.ts
+    codex-app-server.ts
+    mock.ts
+  ledger/
+    paths.ts
+    state.ts
+    events.ts
+    artifacts.ts
+  workflow/
+    kernel.ts
+    phases.ts
+    repair.ts
+  verification/
+    runner.ts
+    result.ts
+  policy/
+    preflight.ts
+    redaction.ts
+  evolution/
+    experience.ts
+    memory.ts
+    skills.ts
+    replay.ts
+  adapters/
+    omx.ts
+```
+
+This layout keeps command parsing thin. The workflow kernel and driver contracts should be testable without invoking the real CLI.
+
+## CLI Contract
+
+The target CLI name is `cx`; `codexus` may be offered as a long-form alias. The current MVP binary still exposes `chx` as a temporary compatibility alias.
+
+### `cx doctor`
+
+Purpose: inspect local readiness.
+
+Inputs:
+
+- `--json`
+- `--cwd <path>`
+
+Checks:
+
+- Node version
+- package version
+- `codex --version`
+- `codex login status`
+- `codex exec --help`
+- `codex app-server --help`
+- `codex features list`
+- `omx --version`
+- `omx doctor` availability
+- `git rev-parse --show-toplevel`
+- `tmux -V`
+- writable harness state root
+- selected driver capability probe
+
+JSON shape:
+
+```json
+{
+  "ok": true,
+  "checks": [
+    {
+      "id": "codex.auth",
+      "status": "pass",
+      "summary": "Logged in using ChatGPT",
+      "details": {}
+    }
+  ],
+  "warnings": []
+}
+```
+
+### `cx run`
+
+Purpose: supervise a Codex task through execution, verification, and experience capture.
+
+Inputs:
+
+- prompt argument or stdin
+- `--cwd <path>`
+- `--driver codex-exec|mock|codex-app-server`
+- `--verify <command>` repeatable
+- `--max-repairs <n>`
+- `--sandbox read-only|workspace-write|danger-full-access`
+- `--approval untrusted|on-request|never` where supported by the selected driver
+- `--json`
+
+Example:
+
+```bash
+cx run --verify "npm test" "fix the failing parser tests"
+```
+
+### `cx status <run-id>`
+
+Purpose: reconstruct current or terminal run state from disk.
+
+Required behavior:
+
+- no live process required,
+- no model call,
+- no mutation.
+
+### `cx verify <run-id>`
+
+Purpose: rerun configured verification for an existing run and append evidence.
+
+### `cx replay <scenario>`
+
+Purpose: run a mock or recorded scenario through the kernel to validate behavior without model access.
+
+### `cx memory search <query>`
+
+Purpose: retrieve scoped memory entries and source run references.
+
+### `cx skill ...`
+
+Subcommands:
+
+- `propose <run-id>`
+- `review <skill-id>`
+- `promote <skill-id>`
+- `deprecate <skill-id>`
+- `list`
+
+Promotion must be explicit.
+
+### `cx adapt omx status`
+
+Purpose: inspect available OMX interop capabilities without requiring OMX for core use.
+
+## Codex-Native Adapter Contract
+
+The external CLI is the implemented MVP. A later Codex-native adapter should make Codexus invokable from inside an interactive Codex session, similar in feel to OMX.
+
+Adapter requirements:
+
+- call the same Codexus core used by `cx`,
+- share `.codex-harness` ledger, memory, and skill stores,
+- avoid duplicating workflow kernel logic inside a skill or plugin wrapper,
+- support narrow commands first, such as status, memory search, skill review, and supervised run handoff,
+- preserve the external CLI as the automation and CI surface.
+
+## Config
+
+Config precedence:
+
+1. CLI flags
+2. project `.codex-harness/config.json`
+3. user `~/.codex-harness/config.json`
+4. defaults
+
+Initial config:
+
+```json
+{
+  "driver": "codex-exec",
+  "codex": {
+    "command": "codex",
+    "model": null,
+    "sandbox": "workspace-write",
+    "approval": "on-request"
+  },
+  "verification": {
+    "commands": [],
+    "timeoutMs": 120000
+  },
+  "repair": {
+    "maxIterations": 1
+  },
+  "evolution": {
+    "enabled": true,
+    "autoPromote": false,
+    "redactBeforeMemory": true
+  },
+  "omx": {
+    "enabled": "auto",
+    "preferSparkshellForVerification": true
+  }
+}
+```
+
+Unknown config keys should produce warnings, not crashes, until the schema stabilizes. Driver-specific config entries are interpreted through capability probes rather than blindly appended to every command invocation.
+
+## Storage Layout
+
+Project-local root:
+
+```text
+.codex-harness/
+  config.json
+  runs/
+  memory/
+  skills/
+  replay/
+  omx/
+```
+
+Run layout:
+
+```text
+.codex-harness/runs/<run-id>/
+  input.json
+  state.json
+  events.jsonl
+  raw/
+    codex-stdout.jsonl
+    codex-stderr.log
+  artifacts/
+    final-message.md
+    diff.patch
+  verification.json
+  experience.json
+  report.md
+```
+
+Rules:
+
+- `events.jsonl` is append-only.
+- `state.json` is atomically rewritten.
+- raw driver output is preserved before normalization.
+- reports are regenerated from structured records when possible.
+
+## Run Ids
+
+Format:
+
+```text
+run_YYYYMMDD_HHMMSS_<6-char-random>
+```
+
+The id must be filesystem-safe, sortable, and unique enough for local use.
+
+## State Schema
+
+`state.json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "runId": "run_20260529_171500_ab12cd",
+  "status": "running",
+  "phase": "execute",
+  "outcome": null,
+  "createdAt": "2026-05-29T08:15:00.000Z",
+  "updatedAt": "2026-05-29T08:16:00.000Z",
+  "cwd": "/absolute/path",
+  "driver": "codex-exec",
+  "promptHash": "sha256:...",
+  "repairIteration": 0,
+  "verification": {
+    "required": true,
+    "latestStatus": "pending"
+  },
+  "artifacts": []
+}
+```
+
+Allowed `status`:
+
+- `running`
+- `terminal`
+
+Allowed `phase`:
+
+- `intake`
+- `research`
+- `plan`
+- `execute`
+- `verify`
+- `repair`
+- `evolve`
+- `complete`
+- `failed`
+- `blocked`
+- `cancelled`
+
+Allowed terminal `outcome`:
+
+- `complete`
+- `failed`
+- `blocked`
+- `cancelled`
+
+## Event Schema
+
+`events.jsonl` records:
+
+```json
+{
+  "schemaVersion": 1,
+  "eventId": "evt_...",
+  "runId": "run_...",
+  "timestamp": "2026-05-29T08:15:00.000Z",
+  "phase": "execute",
+  "type": "driver.raw",
+  "source": "codex-exec",
+  "payload": {}
+}
+```
+
+Core event types:
+
+- `run.created`
+- `phase.changed`
+- `policy.warning`
+- `driver.started`
+- `driver.raw`
+- `driver.normalized`
+- `driver.completed`
+- `driver.failed`
+- `verification.started`
+- `verification.completed`
+- `repair.started`
+- `repair.completed`
+- `evolution.experience_written`
+- `skill.proposed`
+- `run.terminal`
+
+Raw Codex events should be stored in `raw/codex-stdout.jsonl` and referenced from normalized events instead of being discarded.
+
+## Driver Contract
+
+TypeScript shape:
+
+```ts
+export interface DriverCapabilities {
+  supportsJsonl: boolean;
+  supportsSandboxFlag: boolean;
+  supportsApprovalFlag: boolean;
+  supportsModelFlag: boolean;
+  supportsOutputLastMessage: boolean;
+  stderrMayContainWarningsOnSuccess: boolean;
+  finalMessageShapes: string[];
+}
+
+export interface DriverProbe {
+  available: boolean;
+  summary: string;
+  capabilities: DriverCapabilities;
+  details?: JsonValue;
+}
+
+export interface DriverRequest {
+  runId: string;
+  cwd: string;
+  prompt: string;
+  config: DriverConfig;
+  context?: Record<string, unknown>;
+}
+
+export interface DriverEvent {
+  type: string;
+  source: string;
+  payload: unknown;
+  raw?: unknown;
+}
+
+export interface DriverResult {
+  status: "succeeded" | "failed" | "blocked" | "cancelled";
+  finalMessage?: string;
+  exitCode?: number;
+  usage?: Record<string, unknown>;
+  error?: string;
+}
+
+export interface HarnessDriver {
+  name: string;
+  probe(): Promise<DriverProbe>;
+  run(request: DriverRequest, emit: (event: DriverEvent) => Promise<void>): Promise<DriverResult>;
+}
+```
+
+`probe()` must be cheap and must not perform a model call. Probe results should be cached per process when used by several commands, but each `doctor` run should report the current observed capabilities.
+
+Capability rules:
+
+- `run()` must only pass flags supported by its own capabilities.
+- Unsupported requested options should produce a warning event or be recorded in `doctor`, not silently pretend to apply.
+- Raw output capture is mandatory even when parsing fails.
+- A successful exit with stderr is not an error when `stderrMayContainWarningsOnSuccess` is true.
+
+## CodexExecDriver
+
+Command shape:
+
+```bash
+codex exec --json --skip-git-repo-check -C <cwd> --sandbox <mode> <prompt>
+```
+
+Optional flags:
+
+- `--model <model>`
+- `--sandbox <mode>`
+- `--output-last-message <path>`
+
+Do not pass top-level-only flags to `codex exec` unless the installed `codex exec --help` explicitly supports them. In `codex-cli 0.135.0`, `--ask-for-approval` is not accepted by `codex exec`, so approval policy must remain a future capability-gated feature for this driver.
+
+Observed MVP capabilities for `codex-cli 0.135.0`:
+
+```json
+{
+  "supportsJsonl": true,
+  "supportsSandboxFlag": true,
+  "supportsApprovalFlag": false,
+  "supportsModelFlag": true,
+  "supportsOutputLastMessage": true,
+  "stderrMayContainWarningsOnSuccess": true,
+  "finalMessageShapes": ["item.completed.item.text"]
+}
+```
+
+Parsing rules:
+
+- stdout is JSONL when possible,
+- malformed JSONL lines become `driver.raw_text` events,
+- stderr is preserved,
+- stderr on a zero exit is warning/noise, not a driver error,
+- nonzero exit is `failed` unless a known approval/blocker pattern maps to `blocked`.
+
+The installed Codex CLI emits the final assistant message as an `item.completed` event with nested `item.text`; parsers must inspect nested payloads rather than assuming a top-level `text` field.
+
+The driver must not parse final success from prose alone. It only reports driver completion. The kernel decides harness completion after verification.
+
+## Verification Runner
+
+Verification command record:
+
+```json
+{
+  "id": "verify_001",
+  "command": "npm test",
+  "cwd": "/absolute/path",
+  "startedAt": "...",
+  "completedAt": "...",
+  "exitCode": 0,
+  "status": "passed",
+  "stdoutPath": "artifacts/verify_001.stdout.log",
+  "stderrPath": "artifacts/verify_001.stderr.log",
+  "summary": "tests passed"
+}
+```
+
+Status values:
+
+- `passed`
+- `failed`
+- `skipped`
+- `timed_out`
+- `error`
+
+If any required verification is not `passed`, the run cannot become `complete`.
+
+## Repair Loop
+
+Repair input should be bounded:
+
+- user task summary,
+- relevant final Codex message,
+- failed verification summaries,
+- small stderr excerpts,
+- changed file list if available,
+- explicit instruction to repair and rerun verification.
+
+Repair stops when:
+
+- verification passes,
+- max repair iterations reached,
+- driver reports blocked/cancelled,
+- policy blocks further mutation.
+
+MVP repair scope is intentionally narrower: repair runs only after a driver succeeds and required verification fails. Driver failures are recorded and surfaced without automatic retry until error classification is stronger.
+
+Driver-failure repair requires a future classifier that can distinguish at least:
+
+- configuration/auth failure,
+- unsupported flag failure,
+- model/rate-limit failure,
+- policy/approval failure,
+- model-generated task failure.
+
+Only the last category is a candidate for automatic repair.
+
+## Subagent Execution Policy
+
+Subagents are not part of the MVP correctness path. They can help with parallel implementation or review, but the harness must continue to work when subagent launch fails.
+
+Rules:
+
+- Do not hardcode fixed role models for ChatGPT-authenticated accounts.
+- Prefer default/inherited subagent model selection.
+- Store subagent launch failures as operational evidence if they occur during harness-managed work.
+- Never require subagents for run ledger, verification, repair, memory, or skill promotion.
+
+## Status Reconstruction
+
+`cx status` reads:
+
+1. `state.json`
+2. latest `events.jsonl` tail
+3. `verification.json`
+4. `experience.json` if present
+
+It should never require raw Codex logs unless the user asks for verbose detail.
+
+## Error Classification
+
+Initial error classes:
+
+- `codex_not_found`
+- `codex_not_authenticated`
+- `driver_spawn_failed`
+- `driver_json_parse_warning`
+- `verification_failed`
+- `verification_timeout`
+- `policy_blocked`
+- `repair_budget_exhausted`
+- `state_corrupt`
+- `unsupported_feature`
+
+Errors should include:
+
+- stable code,
+- short message,
+- suggested next action when obvious,
+- source command or file path.
+
+## OMX Adapter Contract
+
+`cx adapt omx status --json`:
+
+```json
+{
+  "available": true,
+  "version": "0.11.9",
+  "features": {
+    "explore": true,
+    "sparkshell": true,
+    "team": true,
+    "agents": true
+  },
+  "warnings": [
+    {
+      "code": "omx_older_than_research_baseline",
+      "message": "Local OMX is older than the researched upstream baseline."
+    }
+  ]
+}
+```
+
+The adapter may call read-only commands automatically. Mutating OMX commands require explicit user command or workflow policy.
+
+## App-Server Driver Gate
+
+The app-server driver must remain gated until:
+
+- schema generation works in CI/dev,
+- thread start/turn start roundtrip is tested,
+- approval/request flows are understood,
+- failure modes are recorded,
+- driver can be disabled without affecting core runtime.
+
+Default config must keep it off.
+
+## Testing Strategy
+
+Minimum tests before feature work:
+
+- config precedence unit tests,
+- run id generation tests,
+- atomic state write tests,
+- event append tests,
+- mock driver successful run,
+- mock driver failed verification,
+- repair loop budget exhaustion,
+- `doctor --json` shape test,
+- `status` reconstruction test.
+
+Real smoke tests:
+
+- `cx doctor`
+- `cx run --driver codex-exec "Reply exactly OK"`
+
+Real smoke tests should be opt-in in CI because they consume Codex usage.

@@ -1,0 +1,5 @@
+.codex-harness/
+.omx/
+node_modules/
+*.log
+.DS_Store

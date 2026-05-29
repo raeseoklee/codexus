@@ -1,0 +1,21 @@
+{
+  "name": "codexus",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "cx": "./src/cli/main.ts",
+    "codexus": "./src/cli/main.ts",
+    "chx": "./src/cli/main.ts"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.ts",
+    "doctor": "node src/cli/main.ts doctor",
+    "cx": "node src/cli/main.ts",
+    "codexus": "node src/cli/main.ts",
+    "chx": "node src/cli/main.ts"
+  },
+  "engines": {
+    "node": ">=26"
+  }
+}
