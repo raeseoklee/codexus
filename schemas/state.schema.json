@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/state.schema.json",
+  "title": "Codexus Run State",
+  "type": "object",
+  "required": ["schemaVersion", "runId", "status", "phase", "createdAt", "updatedAt", "cwd", "driver", "promptHash", "repairIteration", "verification", "artifacts"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["running", "terminal"] },
+    "phase": { "type": "string" },
+    "outcome": { "type": ["string", "null"] },
+    "createdAt": { "type": "string" },
+    "updatedAt": { "type": "string" },
+    "cwd": { "type": "string" },
+    "driver": { "type": "string" },
+    "promptHash": { "type": "string" },
+    "repairIteration": { "type": "integer", "minimum": 0 },
+    "driverRepairIteration": { "type": "integer", "minimum": 0 },
+    "verification": {
+      "type": "object",
+      "required": ["required", "latestStatus"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "latestStatus": { "type": "string" }
+      }
+    },
+    "artifacts": { "type": "array", "items": { "type": "string" } }
+  }
+}

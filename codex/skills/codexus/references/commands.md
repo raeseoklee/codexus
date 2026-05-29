@@ -50,22 +50,39 @@ node codex/skills/codexus/scripts/cx.mjs skill index --json
 node codex/skills/codexus/scripts/cx.mjs skill export <skill-id> --target codex --json
 node codex/skills/codexus/scripts/cx.mjs skill deprecate <skill-id> "<reason>" --json
 node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-replay --json
+node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-replay --allow-live-model-replay --model-budget 1 --json
 ```
 
 Promotion should remain explicit. Do not auto-promote a skill just because a proposal exists.
+Live model replay is blocked unless the local experiment gate is explicitly enabled.
 
 ## Bounded Context Retrieval
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
+node codex/skills/codexus/scripts/cx.mjs adapt omx context --task "<task>" --json
 ```
 
-Use to retrieve bounded active skill and memory candidates. It does not create a separate chat loop.
+Use to retrieve bounded active skill and memory candidates or render them into a prompt-safe context block. It does not create a separate chat loop or inject context automatically.
+
+## Runtime Gates
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs locks list --json
+node codex/skills/codexus/scripts/cx.mjs locks inspect memory --json
+node codex/skills/codexus/scripts/cx.mjs schema check --json
+node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json
+node codex/skills/codexus/scripts/cx.mjs cron run-now --dry-run --task "<task>" --json
+node codex/skills/codexus/scripts/cx.mjs gateway check --dry-run --task "<event>" --json
+```
+
+Use these for inspection and dry-run evidence. Live app-server, cron, and gateway behavior remains gated.
 
 ## Supervised Handoff
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounded task>"
+node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --max-driver-repairs 1 --json "<bounded task>"
 ```
 
 Use sparingly from inside an active Codex session. It starts a separate non-interactive Codex run, so it is best for bounded checks or reproducible sub-runs, not for replacing the current chat.

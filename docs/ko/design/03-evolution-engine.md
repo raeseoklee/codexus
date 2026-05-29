@@ -73,9 +73,10 @@ Codex에 보여줄 display identity는 `codexus:<skill-name>` namespace를 사�
 
 ## Replay validation
 
-MVP replay는 deterministic structural gate입니다. skill identity, verification requirement, required procedure text, forbidden action, evidence presence를 확인합니다.
+기본 replay는 deterministic structural gate입니다. skill identity, verification requirement, required procedure text, forbidden action, evidence presence를 확인합니다.
 
-향후 model-in-the-loop replay는 이 deterministic gate 뒤에 추가합니다.
+선택적 model-in-the-loop replay는 explicit budget, policy, local experiment gate
+뒤에서만 실행하며, 이 deterministic gate를 첫 번째 방어선으로 유지합니다.
 
 ## Promotion과 deprecation
 

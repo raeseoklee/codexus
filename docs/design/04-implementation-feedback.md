@@ -118,20 +118,22 @@ Not required:
 
 ## Next Implementation Priority
 
-The P0-P2 safe MVP surfaces are now implemented: expanded JSON error contracts,
-ledger decision events, driver-failure classification, minimal locks, state
-migration reads, active skill index/export, bounded adapter retrieval, memory
-lifecycle commands, replay stubs, app-server fixture/status gating, project
-initialization, observability commands, packaging/static checks, and
-cron/gateway disabled gates.
+The P0-P2 safe MVP surfaces and the first high-risk promotion slice are now
+implemented: expanded JSON error contracts, ledger decision events,
+driver-failure classification, stale-lock inspection/recovery, schema artifacts,
+active skill index/export, bounded adapter retrieval/context formatting, memory
+lifecycle commands, replay gates with an explicit live policy, app-server
+fixture/status/dry-run roundtrip gating, project initialization, observability
+commands, packaging/static checks, explicit-budget driver-failure repair, and
+cron/gateway dry-run plans.
 
-The next slice should deepen those surfaces rather than adding another runtime
-path:
+The next slice should deepen evidence on those surfaces rather than adding
+another runtime path:
 
-1. Add stale-lock detection/recovery and lock inspection.
-2. Promote runtime validators into versioned JSON Schema artifacts.
-3. Add real model-in-the-loop replay behind budget and policy gates.
-4. Add app-server schema contract tests before any live turn roundtrip.
-5. Add a Codex-native adapter context formatter for bounded retrieved skills and memory.
+1. Enforce schema artifacts in durable read paths and add migration fixtures.
+2. Expand Claw-style replay parity scenarios before spending more live model budget.
+3. Add supervised app-server process lifecycle evidence before live roundtrips.
+4. Add approval/policy events for cron/gateway live dispatch.
+5. Keep automatic adapter injection behind an explicit user-visible step.
 
 The full backlog is maintained in [Remaining work](../remaining-work.md).

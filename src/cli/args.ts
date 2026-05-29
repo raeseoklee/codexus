@@ -8,7 +8,18 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const [command = "help", ...rest] = argv;
   const positionals: string[] = [];
   const flags: ParsedArgs["flags"] = {};
-  const booleanFlags = new Set(["json", "help", "omx", "force", "with-docs", "with-model-replay", "dry-run"]);
+  const booleanFlags = new Set([
+    "json",
+    "help",
+    "omx",
+    "force",
+    "with-docs",
+    "with-model-replay",
+    "allow-live-model-replay",
+    "dry-run",
+    "stale-only",
+    "live",
+  ]);
 
   for (let index = 0; index < rest.length; index += 1) {
     const arg = rest[index];

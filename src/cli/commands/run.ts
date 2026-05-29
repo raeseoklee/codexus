@@ -29,6 +29,12 @@ function applyFlagOverrides(config: HarnessConfig, args: ParsedArgs): HarnessCon
     if (!Number.isInteger(parsed) || parsed < 0) throw new Error("invalid_max_repairs");
     next.repair.maxIterations = parsed;
   }
+  const maxDriverRepairs = flagString(args.flags, "max-driver-repairs");
+  if (maxDriverRepairs !== undefined) {
+    const parsed = Number(maxDriverRepairs);
+    if (!Number.isInteger(parsed) || parsed < 0) throw new Error("invalid_max_repairs");
+    next.repair.maxDriverFailureIterations = parsed;
+  }
   return next;
 }
 

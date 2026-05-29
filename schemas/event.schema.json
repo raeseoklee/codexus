@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/event.schema.json",
+  "title": "Codexus Harness Event",
+  "type": "object",
+  "required": ["schemaVersion", "eventId", "runId", "timestamp", "phase", "type", "source", "payload"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "eventId": { "type": "string" },
+    "runId": { "type": "string" },
+    "timestamp": { "type": "string" },
+    "phase": { "type": "string" },
+    "type": { "type": "string" },
+    "source": { "type": "string" },
+    "payload": {}
+  }
+}

@@ -1,0 +1,70 @@
+import { resolve } from "node:path";
+import { CodexAppServerDriver } from "../../drivers/codex-app-server.ts";
+import { readAppServerSchemaFixture } from "../../validation/schemas.ts";
+import { flagBool, flagString, type ParsedArgs } from "../args.ts";
+
+function liveEnabled(): boolean {
+  return process.env.CODEXUS_ENABLE_APP_SERVER_LIVE === "1";
+}
+
+export async function appServerCommand(args: ParsedArgs): Promise<void> {
+  const topic = args.positionals[0] ?? "status";
+  const json = flagBool(args.flags, "json");
+  const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
+  const fixture = await readAppServerSchemaFixture();
+
+  if (topic === "status") {
+    const probe = await new CodexAppServerDriver().probe();
+    const status = {
+      schemaVersion: 1,
+      cwd,
+      feature: "codex-app-server",
+      status: liveEnabled() ? "live_gate_enabled" : "dry_run_only",
+      liveEnabled: liveEnabled(),
+      probe,
+      schemaFixture: fixture,
+    };
+    if (json) {
+      console.log(JSON.stringify(status, null, 2));
+      return;
+    }
+    console.log(`codex-app-server: ${status.status}`);
+    console.log(`schema fixture: ${fixture.valid ? "valid" : "invalid"}`);
+    return;
+  }
+
+  if (topic === "roundtrip") {
+    const dryRun = flagBool(args.flags, "dry-run") || !flagBool(args.flags, "live");
+    if (!dryRun && !liveEnabled()) throw new Error("unsupported_feature:codex-app-server-live-roundtrip");
+    const result = {
+      schemaVersion: 1,
+      cwd,
+      mode: dryRun ? "dry-run" : "live",
+      status: dryRun ? "passed" : "blocked",
+      request: {
+        method: "thread/start",
+        paramsShape: "fixture-validated placeholder",
+      },
+      response: dryRun
+        ? {
+          wouldStartThread: true,
+          wouldStartTurn: true,
+          wouldReadThreadItems: true,
+        }
+        : {
+          reason: "live app-server roundtrip remains an explicit experiment after process supervision is implemented",
+        },
+      schemaFixture: fixture,
+    };
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      process.exitCode = result.status === "passed" ? 0 : 1;
+      return;
+    }
+    console.log(`app-server ${result.mode} roundtrip: ${result.status}`);
+    process.exitCode = result.status === "passed" ? 0 : 1;
+    return;
+  }
+
+  throw new Error(`unsupported_app_server_command:${topic}`);
+}

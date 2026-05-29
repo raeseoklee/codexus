@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 
 export interface AppServerSchemaFixtureStatus {
   path: string;
@@ -25,4 +25,43 @@ export async function readAppServerSchemaFixture(path = resolve("fixtures/app-se
   } catch (error) {
     return { path, exists: true, valid: false, methods: [], error: error instanceof Error ? error.message : String(error) };
   }
+}
+
+export interface SchemaArtifactStatus {
+  name: string;
+  path: string;
+  exists: boolean;
+  valid: boolean;
+  id: string | null;
+  error: string | null;
+}
+
+export const schemaArtifactNames = [
+  "config.schema.json",
+  "state.schema.json",
+  "event.schema.json",
+  "memory-entry.schema.json",
+  "skill.schema.json",
+] as const;
+
+export async function readSchemaArtifactStatus(root = resolve("schemas")): Promise<SchemaArtifactStatus[]> {
+  const statuses: SchemaArtifactStatus[] = [];
+  for (const name of schemaArtifactNames) {
+    const path = join(root, name);
+    if (!existsSync(path)) {
+      statuses.push({ name, path, exists: false, valid: false, id: null, error: "schema_missing" });
+      continue;
+    }
+    try {
+      const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;
+      if (!isRecord(parsed) || typeof parsed.$schema !== "string" || typeof parsed.$id !== "string" || typeof parsed.title !== "string") {
+        statuses.push({ name, path, exists: true, valid: false, id: null, error: "schema_shape_invalid" });
+        continue;
+      }
+      statuses.push({ name, path, exists: true, valid: true, id: parsed.$id, error: null });
+    } catch (error) {
+      statuses.push({ name, path, exists: true, valid: false, id: null, error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+  return statuses;
 }

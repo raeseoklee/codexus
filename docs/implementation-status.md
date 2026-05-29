@@ -8,9 +8,10 @@ Product name: Codexus
 
 Target CLI: `cx`
 
-Current implementation alias: `chx`
+Compatibility alias: `chx`
 
-The current package still exposes `chx`; command examples in this status file describe implemented behavior and should be migrated to `cx` when the package/bin rename lands.
+The package exposes `cx` and `codexus` as canonical bins. `chx` remains as a
+temporary compatibility alias.
 
 ## MVP Spine Implemented
 
@@ -27,8 +28,15 @@ The current package still exposes `chx`; command examples in this status file de
   - `resume`
   - `verify`
   - `replay`
+  - `locks list`
+  - `locks inspect`
+  - `locks clear`
+  - `schema check`
+  - `app-server status`
+  - `app-server roundtrip`
   - `adapt omx status`
   - `adapt omx retrieve`
+  - `adapt omx context`
   - `memory add`
   - `memory search`
   - `memory list`
@@ -42,14 +50,16 @@ The current package still exposes `chx`; command examples in this status file de
   - `skill export`
   - `skill deprecate`
   - `cron status`
+  - `cron run-now`
   - `gateway status`
+  - `gateway check`
 - Config loader with defaults, project/user config merge, unknown-key warnings, and basic runtime validation.
 - Run ledger under `.codex-harness/runs/<run-id>/`.
 - Atomic `state.json` writes and append-only `events.jsonl`.
 - Typed JSON CLI error envelope for automation-facing failures when `--json` is set.
 - State corruption is surfaced as a typed JSON error.
 - Permission/policy/driver-failure classification events are written to run ledgers.
-- Minimal lock/lease protection exists for mutable memory and active-skill stores.
+- Minimal lock/lease protection exists for mutable memory and active-skill stores, with stale-lock inspection and recovery commands.
 - Workflow kernel extracted from the `run` command.
 - Policy preflight for high-risk verification commands and non-git workspace warnings.
 - Mock driver for deterministic local tests.
@@ -59,6 +69,7 @@ The current package still exposes `chx`; command examples in this status file de
 - Raw driver stdout/stderr preservation.
 - Verification runner for sequential shell checks with artifacts.
 - Bounded repair loop when Codex succeeds but verification fails.
+- Explicit-budget repair loop for repairable driver task failures.
 - `cx verify` can rerun stored verification for an existing ledger.
 - `cx resume` creates a follow-up supervised run from an existing ledger.
 - Experience record writer with decisions, failures, verification commands, and reusable lessons.
@@ -66,12 +77,13 @@ The current package still exposes `chx`; command examples in this status file de
 - Skill proposal writer with source-linked `evidence.json`, structural `replay.json`, replay review, active listing, active index, promotion, export, and deprecation.
 - Codexus-generated skills carry a Codex-facing `codexus:<skill-name>` display identity while keeping stable storage ids.
 - Codex/OMX skill export writes generated skill bundles through explicit commands.
-- Codex-native adapter retrieval can return bounded relevant active skills and memory entries.
-- Model replay is represented by an opt-in stub behind deterministic replay.
+- Codex-native adapter retrieval can return bounded relevant active skills and memory entries, and can format them into a prompt-safe context block.
+- Model replay has a deterministic first gate plus an explicit budget/policy/live-environment gate for local experiments.
 - `cx init` creates project-local config/state directories without mutating `.omx/state`.
 - Run observability commands list runs, tail events, and preview reports.
-- App-server schema fixture/status is present, while live app-server execution remains gated off.
-- Cron/gateway feature gates expose disabled status by default.
+- App-server schema fixture/status and dry-run roundtrip contract are present, while live app-server execution remains gated off.
+- Cron/gateway feature gates expose disabled status by default and dry-run automation plans for future dispatch.
+- Versioned schema artifacts exist for config, state, events, memory entries, and skills.
 - `npm run typecheck` performs syntax/static validation with the local Node runtime.
 - OMX capability probe with older-version warning.
 - `cx plan --omx` writes harness and OMX-compatible plan artifacts without mutating `.omx/state`.
@@ -81,7 +93,7 @@ The current package still exposes `chx`; command examples in this status file de
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 40.
+- Current test count: 42.
 - Static check: `npm run typecheck`
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.
@@ -99,7 +111,7 @@ The current package still exposes `chx`; command examples in this status file de
 - Skill proposal/review/promotion/deprecation workflow through both unit and CLI tests.
 - Structured JSON CLI error envelope for unknown commands and argument validation failures.
 - Structured JSON CLI error coverage for unexpected arguments, corrupt state, and disabled app-server driver.
-- Init, observability, active-skill index/export, adapter retrieval, model-replay stub, memory lifecycle, packaging, and feature-gate tests.
+- Init, observability, active-skill index/export, adapter retrieval/context formatting, gated model replay, stale locks, schema artifacts, driver-failure repair, app-server dry-run, memory lifecycle, packaging, and feature-gate tests.
 - Real Codex exec smoke through ChatGPT-authenticated local Codex:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-CODEX-OK" --json`
   - observed final artifact: `CHX-CODEX-OK`
@@ -122,7 +134,7 @@ The current package still exposes `chx`; command examples in this status file de
 - `run` completes with both mock and real `codex-exec` drivers and writes a ledger.
 - Required verification failures prevent `complete`, and repair can recover when bounded budget remains.
 - `status --json` reconstructs state, verification, experience, and event tail without a live process.
-- `adapt omx status --json` is read-only against `.omx/state`; `adapt omx retrieve --json` returns bounded context candidates.
+- `adapt omx status --json` is read-only against `.omx/state`; `adapt omx retrieve --json` returns bounded context candidates; `adapt omx context --json` formats prompt-safe context.
 - Tests pass without model/network access through the mock driver.
 - Evolution output writes source-linked experience and memory entries.
 - Skill promotion requires trigger/scope/safety/evidence/replay and writes a versioned active copy plus active index entry.
@@ -133,11 +145,10 @@ The current package still exposes `chx`; command examples in this status file de
 See [Remaining work](remaining-work.md) for the prioritized backlog and design
 review. Current high-level gaps:
 
-- Repair loop handles verification failures only. Driver failures are classified but not automatically repaired.
-- Model replay is still a policy/budget-gated stub; no full model-in-the-loop replay scenarios run yet.
-- Codex app-server driver is intentionally disabled for live execution; only fixture/status probing is implemented.
+- Driver-failure repair is implemented only for repairable task failures and only with an explicit budget.
+- Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
+- Codex app-server driver is intentionally disabled for live execution; fixture/status and dry-run roundtrip probing are implemented.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
-- Cron/gateway automation remains disabled behind feature gates.
-- Lock/lease support is minimal and does not yet include stale-lock recovery.
-- Config/schema validation is runtime validation, not full external JSON Schema validation.
+- Cron/gateway live automation remains disabled behind feature gates; dry-run plans are implemented.
+- Config/schema validation is runtime validation plus schema artifacts, not full external JSON Schema enforcement.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

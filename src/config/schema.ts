@@ -12,6 +12,7 @@ export interface HarnessConfig {
   };
   repair: {
     maxIterations: number;
+    maxDriverFailureIterations: number;
   };
   evolution: {
     enabled: boolean;
@@ -42,6 +43,7 @@ export const defaultConfig: HarnessConfig = {
   },
   repair: {
     maxIterations: 1,
+    maxDriverFailureIterations: 0,
   },
   evolution: {
     enabled: true,

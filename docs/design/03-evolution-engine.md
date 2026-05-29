@@ -254,7 +254,7 @@ Replay scenario:
 
 Replay does not need to prove the model will always behave correctly. It proves the skill specification is structured, scoped, and can be applied by the harness without broad or unsafe behavior.
 
-The MVP replay evaluator is intentionally structural: it checks skill identity, verification requirements, required procedure text, forbidden action coverage, and evidence presence before promotion. Later model-in-the-loop replay can execute archived prompts against a sandbox driver, but it should keep this deterministic gate as the first line of defense.
+The primary replay evaluator is intentionally structural: it checks skill identity, verification requirements, required procedure text, forbidden action coverage, and evidence presence before promotion. Optional model-in-the-loop replay can run only behind explicit budget, policy, and local experiment gates, and it must keep this deterministic gate as the first line of defense.
 
 ## Review and Promotion
 

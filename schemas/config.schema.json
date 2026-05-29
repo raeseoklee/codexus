@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/config.schema.json",
+  "title": "Codexus Config",
+  "type": "object",
+  "required": ["driver", "codex", "verification", "repair", "evolution", "omx", "automation"],
+  "properties": {
+    "driver": { "enum": ["codex-exec", "mock", "codex-app-server"] },
+    "codex": {
+      "type": "object",
+      "required": ["command", "model", "sandbox", "approval"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "model": { "type": ["string", "null"] },
+        "sandbox": { "enum": ["read-only", "workspace-write", "danger-full-access"] },
+        "approval": { "enum": ["untrusted", "on-request", "never"] }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["commands", "timeoutMs"],
+      "properties": {
+        "commands": { "type": "array", "items": { "type": "string" } },
+        "timeoutMs": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "repair": {
+      "type": "object",
+      "required": ["maxIterations", "maxDriverFailureIterations"],
+      "properties": {
+        "maxIterations": { "type": "integer", "minimum": 0 },
+        "maxDriverFailureIterations": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "evolution": {
+      "type": "object",
+      "required": ["enabled", "autoPromote", "redactBeforeMemory"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "autoPromote": { "type": "boolean" },
+        "redactBeforeMemory": { "type": "boolean" }
+      }
+    },
+    "omx": {
+      "type": "object",
+      "required": ["enabled", "preferSparkshellForVerification"],
+      "properties": {
+        "enabled": { "type": ["boolean", "string"] },
+        "preferSparkshellForVerification": { "type": "boolean" }
+      }
+    },
+    "automation": {
+      "type": "object",
+      "required": ["cronEnabled", "gatewayEnabled"],
+      "properties": {
+        "cronEnabled": { "type": "boolean" },
+        "gatewayEnabled": { "type": "boolean" }
+      }
+    }
+  }
+}

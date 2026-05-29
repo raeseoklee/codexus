@@ -1,7 +1,8 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { evaluateModelReplayStub, evaluateReplaySpec, readReplaySpec, type ReplaySpec } from "../../evolution/replay.ts";
+import { loadConfig } from "../../config/loader.ts";
+import { evaluateModelReplay, evaluateReplaySpec, readReplaySpec, type ReplaySpec } from "../../evolution/replay.ts";
 import { reviewSkill } from "../../evolution/skills.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -34,11 +35,20 @@ export async function replayCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (json) {
-    const modelReplay = evaluateModelReplayStub({
+    const { config } = loadConfig({ cwd });
+    const modelBudget = flagString(args.flags, "model-budget");
+    const modelReplay = await evaluateModelReplay({
+      cwd,
       requested: flagBool(args.flags, "with-model-replay"),
-      budget: flagString(args.flags, "model-budget") ? Number(flagString(args.flags, "model-budget")) : null,
+      allowLive: flagBool(args.flags, "allow-live-model-replay"),
+      budget: modelBudget !== undefined ? Number(modelBudget) : null,
+      replay: result,
+      codexCommand: config.codex.command,
+      codexModel: config.codex.model,
     });
     console.log(JSON.stringify({ replay: result, modelReplay }, null, 2));
+    process.exitCode = result.status === "passed" && !["blocked", "failed", "error"].includes(modelReplay.status) ? 0 : 1;
+    return;
   } else {
     console.log(`${result.skillId}: replay ${result.status}`);
     for (const scenario of result.scenarios) {

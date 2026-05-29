@@ -98,8 +98,8 @@ function finalTextFromEvent(value: unknown): string | null {
 export class CodexExecDriver implements HarnessDriver {
   readonly name = "codex-exec";
 
-  async probe(): Promise<DriverProbe> {
-    const result = spawnSync("codex", ["exec", "--help"], { encoding: "utf8" });
+  async probe(command = "codex"): Promise<DriverProbe> {
+    const result = spawnSync(command, ["exec", "--help"], { encoding: "utf8" });
     const help = result.stdout || result.stderr || "";
     const capabilities = result.status === 0
       ? parseCodexExecCapabilities(help)
@@ -113,7 +113,7 @@ export class CodexExecDriver implements HarnessDriver {
   }
 
   async run(request: DriverRequest, emit: (event: DriverEvent) => Promise<void>): Promise<DriverResult> {
-    const probe = await this.probe();
+    const probe = await this.probe(request.config.codex.command);
     const args = buildCodexExecArgs(request, probe.capabilities);
     await emit({
       type: "driver.started",

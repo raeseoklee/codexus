@@ -41,6 +41,15 @@ export class MockDriver implements HarnessDriver {
         error: "mock cancelled by test fixture",
       };
     }
+    if (request.prompt.includes("MOCK_DRIVER_REPAIR")) {
+      const repairAttempt = request.prompt.includes("Driver failure repair attempt");
+      return {
+        status: repairAttempt ? "succeeded" : "failed",
+        finalMessage: repairAttempt ? "mock driver repair complete" : "mock repairable driver failure",
+        exitCode: repairAttempt ? 0 : 1,
+        ...(repairAttempt ? {} : { error: "mock repairable driver failure" }),
+      };
+    }
     return {
       status: request.prompt.includes("MOCK_FAIL") ? "failed" : "succeeded",
       finalMessage: request.prompt.includes("MOCK_FAIL") ? "mock failure" : "mock complete",

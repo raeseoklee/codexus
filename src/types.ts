@@ -42,6 +42,7 @@ export interface RunState {
   driver: string;
   promptHash: string;
   repairIteration: number;
+  driverRepairIteration?: number;
   verification: {
     required: boolean;
     latestStatus: "pending" | "passed" | "failed" | "skipped" | "timed_out" | "error";

@@ -42,6 +42,8 @@ Codex interactive session -> Codexus adapter -> Codexus core
 
 두 표면은 같은 ledger, verification, memory, skill store를 공유해야 합니다.
 
-현재 구현은 P0-P2 surface를 포함합니다: `init`, run observability, memory
-lifecycle, active skill index/export, bounded adapter retrieval, app-server
-fixture/status gate, cron/gateway disabled gate, local syntax/static validation.
+현재 구현은 P0-P2 surface와 high-risk promotion slice를 포함합니다: `init`, run
+observability, memory lifecycle, active skill index/export, bounded adapter
+retrieval/context formatting, lock inspection/stale recovery, schema artifact,
+gated model replay, app-server dry-run roundtrip, explicit-budget driver-failure
+repair, cron/gateway dry-run plan, local syntax/static validation.

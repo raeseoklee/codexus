@@ -16,6 +16,9 @@ import { runsCommand } from "./commands/runs.ts";
 import { eventsCommand } from "./commands/events.ts";
 import { reportCommand } from "./commands/report.ts";
 import { featureCommand } from "./commands/feature.ts";
+import { locksCommand } from "./commands/locks.ts";
+import { schemaCommand } from "./commands/schema.ts";
+import { appServerCommand } from "./commands/app-server.ts";
 
 function helpText(): string {
   return `Codexus
@@ -23,15 +26,18 @@ function helpText(): string {
 Usage:
   cx doctor [--json]
   cx init [--with-docs] [--json]
-  cx run [--driver mock|codex-exec] [--verify <cmd>] <prompt>
+  cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] <prompt>
   cx plan [--omx] <task> [--json]
   cx runs list [--json]
   cx status <run-id> [--json]
   cx events tail <run-id> [--lines <n>] [--json]
   cx report <run-id> [--json]
+  cx locks list|inspect|clear [name] [--stale-only] [--json]
+  cx schema check [--json]
+  cx app-server status|roundtrip [--dry-run|--live] [--json]
   cx resume <run-id> [follow-up] [--json]
   cx verify <run-id> [--verify <cmd>] [--json]
-  cx replay skill <skill-id> [--with-model-replay] [--json]
+  cx replay skill <skill-id> [--with-model-replay] [--allow-live-model-replay] [--model-budget <n>] [--json]
   cx replay <path-to-replay.json> [--json]
   cx memory search <query> [--json]
   cx memory add --kind <kind> <text> [--json]
@@ -46,8 +52,9 @@ Usage:
   cx skill list [--json]
   cx adapt omx status [--json]
   cx adapt omx retrieve --task <task> [--json]
-  cx cron status [--json]
-  cx gateway status [--json]
+  cx adapt omx context --task <task> [--json]
+  cx cron status|run-now [--dry-run] [--json]
+  cx gateway status|check [--dry-run] [--json]
 
 Compatibility:
   chx remains a temporary alias during the Codexus migration.
@@ -85,6 +92,18 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "report") {
     await reportCommand(args);
+    return;
+  }
+  if (args.command === "locks") {
+    await locksCommand(args);
+    return;
+  }
+  if (args.command === "schema") {
+    await schemaCommand(args);
+    return;
+  }
+  if (args.command === "app-server") {
+    await appServerCommand(args);
     return;
   }
   if (args.command === "resume") {

@@ -92,6 +92,10 @@ function validateConfig(config: HarnessConfig, warnings: string[]): HarnessConfi
     warnings.push(`invalid config repair.maxIterations '${String(next.repair.maxIterations)}'; using default ${defaultConfig.repair.maxIterations}`);
     next.repair.maxIterations = defaultConfig.repair.maxIterations;
   }
+  if (!Number.isInteger(next.repair.maxDriverFailureIterations) || next.repair.maxDriverFailureIterations < 0) {
+    warnings.push(`invalid config repair.maxDriverFailureIterations '${String(next.repair.maxDriverFailureIterations)}'; using default ${defaultConfig.repair.maxDriverFailureIterations}`);
+    next.repair.maxDriverFailureIterations = defaultConfig.repair.maxDriverFailureIterations;
+  }
   if (typeof next.evolution.enabled !== "boolean") {
     warnings.push("invalid config evolution.enabled; using default true");
     next.evolution.enabled = defaultConfig.evolution.enabled;

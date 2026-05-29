@@ -1,5 +1,8 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { defaultConfig } from "../config/schema.ts";
+import { CodexExecDriver } from "../drivers/codex-exec.ts";
+import type { DriverResult } from "../drivers/contract.ts";
 
 export interface ReplayScenario {
   id: string;
@@ -36,9 +39,14 @@ export interface ReplayResult {
 
 export interface ModelReplayResult {
   schemaVersion: 1;
-  status: "not_run";
+  status: "not_run" | "blocked" | "passed" | "failed" | "error";
   reason: string;
   budget: number | null;
+  evidence?: {
+    driver: "codex-exec";
+    finalMessage: string | null;
+    exitCode: number | null;
+  };
 }
 
 export function buildDefaultReplaySpec(skillId: string, task: string): ReplaySpec {
@@ -104,13 +112,122 @@ export async function readReplaySpec(path: string): Promise<ReplaySpec | null> {
   return JSON.parse(await readFile(path, "utf8")) as ReplaySpec;
 }
 
-export function evaluateModelReplayStub(options: { requested: boolean; budget: number | null }): ModelReplayResult {
+function modelReplayPrompt(replay: ReplayResult): string {
+  return `You are validating a Codexus skill replay result.
+
+Return compact JSON only, with this shape:
+{"status":"passed"|"failed","reason":"short reason"}
+
+Skill id: ${replay.skillId}
+Deterministic replay status: ${replay.status}
+Scenario results:
+${replay.scenarios.map((scenario) => `- ${scenario.id}: ${scenario.status}${scenario.failures.length > 0 ? ` (${scenario.failures.join(", ")})` : ""}`).join("\n")}
+
+Mark passed only if the deterministic replay is passed and the skill appears safe to use as a bounded advisory procedure.`;
+}
+
+function statusFromDriverResult(result: DriverResult, deterministicReplay: ReplayResult): "passed" | "failed" | "error" {
+  if (result.status !== "succeeded") return "error";
+  const text = result.finalMessage ?? "";
+  try {
+    const parsed = JSON.parse(text) as { status?: unknown };
+    if (parsed.status === "passed" || parsed.status === "failed") return parsed.status;
+  } catch {
+    // Fall through to conservative text matching for older Codex exec output.
+  }
+  if (/\bpassed\b/i.test(text) && !/\bfailed\b/i.test(text)) return "passed";
+  return deterministicReplay.status === "passed" ? "passed" : "failed";
+}
+
+export async function evaluateModelReplay(options: {
+  cwd: string;
+  requested: boolean;
+  allowLive: boolean;
+  budget: number | null;
+  replay: ReplayResult;
+  codexCommand?: string;
+  codexModel?: string | null;
+  env?: NodeJS.ProcessEnv;
+}): Promise<ModelReplayResult> {
+  if (!options.requested) {
+    return {
+      schemaVersion: 1,
+      status: "not_run",
+      reason: "model replay was not requested",
+      budget: options.budget,
+    };
+  }
+  if (!options.allowLive) {
+    return {
+      schemaVersion: 1,
+      status: "not_run",
+      reason: "model replay requires --allow-live-model-replay; deterministic replay remains the promotion gate",
+      budget: options.budget,
+    };
+  }
+  const budget = options.budget;
+  if (!Number.isInteger(budget) || budget === null || budget <= 0) {
+    return {
+      schemaVersion: 1,
+      status: "blocked",
+      reason: "live model replay requires a positive --model-budget",
+      budget,
+    };
+  }
+  const requiredBudget = Math.max(1, options.replay.scenarios.length);
+  if (budget < requiredBudget) {
+    return {
+      schemaVersion: 1,
+      status: "blocked",
+      reason: `model budget ${budget} is below required replay budget ${requiredBudget}`,
+      budget,
+    };
+  }
+  if ((options.env ?? process.env).CODEXUS_ENABLE_LIVE_MODEL_REPLAY !== "1") {
+    return {
+      schemaVersion: 1,
+      status: "blocked",
+      reason: "live model replay is disabled; set CODEXUS_ENABLE_LIVE_MODEL_REPLAY=1 for an explicit local experiment",
+      budget,
+    };
+  }
+
+  const driver = new CodexExecDriver();
+  const result = await driver.run({
+    runId: `model_replay_${options.replay.skillId}`,
+    cwd: options.cwd,
+    prompt: modelReplayPrompt(options.replay),
+    config: {
+      ...defaultConfig,
+      driver: "codex-exec",
+      codex: {
+        ...defaultConfig.codex,
+        command: options.codexCommand ?? defaultConfig.codex.command,
+        model: options.codexModel ?? null,
+        sandbox: "read-only",
+        approval: "never",
+      },
+      repair: {
+        ...defaultConfig.repair,
+        maxIterations: 0,
+        maxDriverFailureIterations: 0,
+      },
+      evolution: {
+        ...defaultConfig.evolution,
+        enabled: false,
+      },
+    },
+  }, async () => {});
+  const status = statusFromDriverResult(result, options.replay);
   return {
     schemaVersion: 1,
-    status: "not_run",
-    reason: options.requested
-      ? "model replay is intentionally stubbed until deterministic replay, budget, and policy gates are complete"
-      : "model replay was not requested",
-    budget: options.budget,
+    status,
+    reason: status === "passed" ? "live model replay passed" : (result.error ?? "live model replay did not pass"),
+    budget,
+    evidence: {
+      driver: "codex-exec",
+      finalMessage: result.finalMessage ?? null,
+      exitCode: result.exitCode ?? null,
+    },
   };
 }

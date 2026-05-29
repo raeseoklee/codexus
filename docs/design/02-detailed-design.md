@@ -134,6 +134,7 @@ Inputs:
 - `--driver codex-exec|mock|codex-app-server`
 - `--verify <command>` repeatable
 - `--max-repairs <n>`
+- `--max-driver-repairs <n>` for repairable driver task failures
 - `--sandbox read-only|workspace-write|danger-full-access`
 - `--approval untrusted|on-request|never` where supported by the selected driver
 - `--json`
@@ -172,6 +173,11 @@ streaming text, file/tool roundtrips, write denial, multi-tool turns, shell
 output, permission prompt approved/denied, plugin or skill path, compaction or
 large-output behavior, and usage accounting.
 
+Live model replay is never implicit. It requires structural replay first,
+`--with-model-replay`, `--allow-live-model-replay`, a positive
+`--model-budget`, and the local `CODEXUS_ENABLE_LIVE_MODEL_REPLAY=1` experiment
+gate.
+
 ### `cx memory ...`
 
 Purpose: retrieve, add, list, review, and prune scoped memory entries and source
@@ -184,6 +190,39 @@ Subcommands:
 - `list`
 - `review`
 - `prune --before <iso-date>`
+
+### `cx locks ...`
+
+Purpose: inspect and clear Codexus lock metadata without guessing filesystem
+state.
+
+Subcommands:
+
+- `cx locks list --json`
+- `cx locks inspect <name> --json`
+- `cx locks clear <name> --stale-only --json`
+
+### `cx schema check`
+
+Purpose: verify that versioned schema artifacts and the app-server fixture are
+present and structurally valid.
+
+### `cx adapt omx context`
+
+Purpose: format bounded active `codexus:<skill-name>` skills and memory entries
+into a prompt-safe block for the current Codex session. It retrieves context but
+does not inject it automatically or create a separate chat loop.
+
+### `cx app-server roundtrip`
+
+Purpose: expose an app-server dry-run roundtrip contract before any live
+process control. `--live` is rejected unless the local experiment gate is set,
+and the stable path remains `codex exec --json`.
+
+### `cx cron run-now` and `cx gateway check`
+
+Purpose: return dry-run automation plans with lock and ledger-event intent.
+Live dispatch remains disabled until policy and approval events are complete.
 
 ### `cx skill ...`
 
@@ -246,7 +285,8 @@ Initial config:
     "timeoutMs": 120000
   },
   "repair": {
-    "maxIterations": 1
+    "maxIterations": 1,
+    "maxDriverFailureIterations": 0
   },
   "evolution": {
     "enabled": true,
@@ -256,6 +296,10 @@ Initial config:
   "omx": {
     "enabled": "auto",
     "preferSparkshellForVerification": true
+  },
+  "automation": {
+    "cronEnabled": false,
+    "gatewayEnabled": false
   }
 }
 ```

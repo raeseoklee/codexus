@@ -4,7 +4,7 @@
 
 날짜: 2026-05-29
 
-이 문서는 MVP spine과 첫 automation hardening 이후의 현재 backlog입니다. 남은
+이 문서는 MVP spine과 high-risk promotion slice 이후의 현재 backlog입니다. 남은
 항목, 필요한 이유, 다음 구현에서 지켜야 할 설계 제약을 정리합니다.
 
 ## 레퍼런스 재검토
@@ -29,18 +29,22 @@ authenticated local Codex CLI를 감싸며, private ChatGPT/Codex backend API에
 
 ## 우선순위 backlog
 
-P0-P2 구현 pass 이후 상태:
+P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 - Safe MVP surface 구현됨: 확장된 JSON error contract test, state corruption
   error, permission/policy/driver-classification ledger event, minimal lock,
   state migration reader, active skill index, 명시적 Codex/OMX export, bounded
-  adapter retrieval, model replay stub, memory lifecycle command, app-server
+  adapter retrieval, deterministic replay와 model replay gate, memory lifecycle command, app-server
   fixture/status gate, `cx init`, packaging/typecheck smoke, run observability,
   cron/gateway disabled gate.
-- 의도적으로 남김: driver-failure auto-repair, live model-in-the-loop replay,
-  live app-server turn execution, retrieved skill 자동 prompt injection,
-  stale-lock recovery, full external JSON Schema validation, real cron/gateway
-  automation.
+- 승격된 hardening surface: stale-lock metadata inspection/recovery, versioned
+  schema artifact, budget/policy-gated model replay runner, Codex-native
+  bounded context formatter, live gate가 있는 app-server dry-run roundtrip
+  contract, 명시적 budget이 필요한 repairable driver-failure retry,
+  cron/gateway dry-run automation plan.
+- 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
+  execution, retrieved skill 자동 prompt injection, full external JSON Schema
+  enforcement/migration, real cron/gateway automation dispatch.
 
 ### P0: Contract and Safety Hardening
 
@@ -55,13 +59,13 @@ P0-P2 구현 pass 이후 상태:
      `approval.resolved`, `policy.blocked` 같은 typed event를 추가합니다.
    - unattended, app-server, cron, external export는 이 event model 뒤에 둡니다.
 
-3. driver-failure repair 전에 driver-failure classification 추가. 상태: classification 구현, auto-repair deferred.
+3. driver-failure repair 전에 driver-failure classification 추가. 상태: classification과 explicit-budget task-failure repair 구현.
    - auth/config/unsupported-flag/sandbox/policy/model/network failure와 task
      failure를 구분합니다.
    - task-repairable failure만 retry하고, capability/auth failure는 terminal
      typed error로 surface합니다.
 
-4. state schema migration과 lock/lease protection 추가. 상태: migration reader와 minimal lock 구현, stale-lock recovery deferred.
+4. state schema migration과 lock/lease protection 추가. 상태: migration reader, minimal lock, stale-lock recovery, schema artifact 구현.
    - active skill index, export, cron, app-server run은 concurrent write를
      만듭니다.
    - 해당 기능 전 mutable store에 대한 minimal lock/lease와 versioned state
@@ -86,7 +90,7 @@ P0-P2 구현 pass 이후 상태:
    - 별도 chat loop를 만들지 않고 현재 Codex conversation을 주 surface로
      유지합니다.
 
-8. deterministic replay 뒤에 model-in-the-loop replay 추가. 상태: opt-in stub 구현, live replay deferred.
+8. deterministic replay 뒤에 model-in-the-loop replay 추가. 상태: budget/policy-gated runner 구현, routine live replay는 opt-in/env-gated 유지.
    - 현재 structural replay gate를 첫 번째 방어선으로 유지합니다.
    - model replay는 Codex usage를 소비하므로 opt-in 또는 budget-gated로 둡니다.
    - Claw-style parity scenario: tool success, denial, permission prompt,
@@ -100,7 +104,7 @@ P0-P2 구현 pass 이후 상태:
 
 ### P2: Runtime Expansion
 
-10. app-server schema fixture와 gated roundtrip 추가. 상태: fixture/status gate 구현, live roundtrip deferred.
+10. app-server schema fixture와 gated roundtrip 추가. 상태: fixture/status gate와 dry-run roundtrip contract 구현, live roundtrip deferred.
     - driver는 기본 disabled로 유지합니다.
     - live turn 실행 전에 truthful status/capability output을 먼저 둡니다.
     - app-server failure가 안정적인 `codex exec --json` path에 영향을 주면 안 됩니다.
@@ -115,7 +119,7 @@ P0-P2 구현 pass 이후 상태:
     - `chx`는 문서화된 제거 window 전까지 compatibility alias로만 취급합니다.
     - bin path와 Codex adapter installer smoke test를 추가합니다.
 
-13. TypeScript/static verification 추가. 상태: `npm run typecheck` local syntax/static check 구현.
+13. TypeScript/static verification 추가. 상태: local syntax/static check와 versioned schema artifact 구현.
     - Node 26 type-stripped execution 외에 typecheck 또는 동등한 static
       validation을 추가합니다.
     - config와 durable state에 JSON schema validation을 추가합니다.
@@ -124,7 +128,7 @@ P0-P2 구현 pass 이후 상태:
     - 제안 command: `cx runs list`, `cx events tail <run-id>`, `cx report <run-id>`.
     - 출력은 bounded, JSON-first로 유지합니다.
 
-15. cron/gateway automation은 P0 safety 이후에 추가. 상태: disabled feature gate 구현, real automation deferred.
+15. cron/gateway automation은 P0 safety 이후에 추가. 상태: disabled feature gate와 dry-run automation plan 구현, real automation deferred.
     - Hermes-style cron/gateway는 lock, schema migration, permission event,
       explicit user policy 뒤에 둬야 합니다.
 
@@ -143,14 +147,16 @@ P0-P2 구현 pass 이후 상태:
 
 ## 제안하는 다음 slice
 
-다음 구현 slice는 새 runtime surface보다 safe MVP surface를 더 깊게 만드는 것이
-좋습니다:
+다음 구현 slice는 gate를 제거하기보다 gated surface의 evidence를 더 깊게
+만드는 방향이 좋습니다:
 
-1. stale-lock detection/recovery와 lock metadata inspection.
-2. 현재 runtime validator를 config, state, event, memory, skill의 versioned JSON
-   Schema artifact로 승격.
-3. 명시적 budget/policy gate 뒤 model-in-the-loop replay 추가.
-4. live turn roundtrip 전에 app-server schema contract test 추가.
-5. `codexus:<skill-name>` skill과 memory를 prompt-safe bounded block으로
-   formatting하는 Codex-native adapter context command 추가. 단, 자동 competing
-   chat loop는 만들지 않습니다.
+1. config/state/event read path에서 JSON Schema artifact를 enforce하고 older
+   durable record migration fixture를 추가합니다.
+2. model replay 사용량을 늘리기 전에 Claw-style replay parity scenario를
+   확장합니다.
+3. app-server를 driver로 켜기 전에 process lifecycle, timeout, cleanup evidence를
+   갖춘 supervised live experiment를 구현합니다.
+4. cron/gateway live dispatch용 approval/policy ledger event를 추가하고,
+   dry-run/live path의 contract compatibility를 유지합니다.
+5. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고
+   user-visible한 adapter injection 단계를 추가합니다.

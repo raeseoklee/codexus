@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/skill.schema.json",
+  "title": "Codexus Skill Proposal",
+  "type": "object",
+  "required": ["schemaVersion", "id", "name", "displayName", "status", "version", "sourceRunIds", "trigger", "scope", "procedure", "safety", "promotion"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "displayName": { "type": "string", "pattern": "^codexus:" },
+    "status": { "enum": ["proposed", "active", "deprecated"] },
+    "version": { "type": "string" },
+    "sourceRunIds": { "type": "array", "items": { "type": "string" } },
+    "trigger": { "type": "object" },
+    "scope": { "type": "object" },
+    "procedure": { "type": "array", "items": { "type": "string" } },
+    "safety": { "type": "object" },
+    "promotion": { "type": "object" }
+  }
+}

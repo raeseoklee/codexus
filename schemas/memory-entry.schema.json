@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/memory-entry.schema.json",
+  "title": "Codexus Memory Entry",
+  "type": "object",
+  "required": ["schemaVersion", "id", "createdAt", "sourceRunId", "kind", "text", "tags", "confidence"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string" },
+    "createdAt": { "type": "string" },
+    "sourceRunId": { "type": "string" },
+    "kind": { "enum": ["repo_fact", "user_preference", "workflow_lesson", "verification_pattern", "failure_pattern", "tooling_note"] },
+    "text": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "confidence": { "enum": ["low", "medium", "high"] }
+  }
+}

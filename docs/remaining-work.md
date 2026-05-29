@@ -4,9 +4,9 @@
 
 Date: 2026-05-29
 
-This document is the current backlog after the MVP spine and the first
-automation hardening slice. It lists what remains, why it matters, and what
-design constraints should guide the next implementation passes.
+This document is the current backlog after the MVP spine and the high-risk
+promotion slice. It lists what remains, why it matters, and what design
+constraints should guide the next implementation passes.
 
 ## Reference Recheck
 
@@ -29,18 +29,24 @@ ChatGPT/Codex backend APIs.
 
 ## Priority Backlog
 
-Status after the P0-P2 implementation pass:
+Status after the P0-P2 implementation pass and high-risk promotion slice:
 
 - Implemented safe MVP surfaces: expanded JSON error contract tests, state
   corruption errors, permission/policy/driver-classification ledger events,
   minimal locks, state migration reader, active skill index, explicit Codex/OMX
-  export, bounded adapter retrieval, model replay stub, memory lifecycle
+  export, bounded adapter retrieval, deterministic replay and model replay
+  gate, memory lifecycle
   commands, app-server fixture/status gate, `cx init`, packaging/typecheck
   smoke, run observability commands, and cron/gateway disabled gates.
-- Still intentionally deferred: driver-failure auto-repair, live
-  model-in-the-loop replay, live app-server turn execution, automatic prompt
-  injection of retrieved skills, stale-lock recovery, full external JSON Schema
-  validation, and real cron/gateway automation.
+- Promoted hardening surfaces: stale-lock metadata inspection/recovery,
+  versioned schema artifacts, budget/policy-gated model replay runner,
+  Codex-native bounded context formatter, app-server dry-run roundtrip contract
+  with a live gate, explicit-budget repairable driver-failure retry, and
+  cron/gateway dry-run automation plans.
+- Still intentionally deferred: routine live model-in-the-loop replay, live
+  app-server turn execution, automatic prompt injection of retrieved skills,
+  full external JSON Schema enforcement/migrations, and real cron/gateway
+  automation dispatch.
 
 ### P0: Contract and Safety Hardening
 
@@ -56,13 +62,13 @@ Status after the P0-P2 implementation pass:
    - Gate unattended, app-server, cron, or external export behavior behind this
      event model.
 
-3. Add driver-failure classification before driver-failure repair. Status: classification implemented; auto-repair deferred.
+3. Add driver-failure classification before driver-failure repair. Status: classification and explicit-budget task-failure repair implemented.
    - Distinguish auth/config/unsupported-flag/sandbox/policy/model/network
      failures from task failures.
    - Retry only task-repairable failures; surface capability and auth failures
      as terminal typed errors.
 
-4. Add state schema migrations and lock/lease protection. Status: migration reader and minimal lock implemented; stale-lock recovery deferred.
+4. Add state schema migrations and lock/lease protection. Status: migration reader, minimal lock, stale-lock recovery, and schema artifacts implemented.
    - Active skill index, export, cron, and future app-server runs introduce
      concurrent writes.
    - Before those features, add a minimal lock/lease around mutable stores and a
@@ -88,7 +94,7 @@ Status after the P0-P2 implementation pass:
    - It should still avoid building a separate chat loop; the current Codex
      conversation remains the primary interaction surface.
 
-8. Add model-in-the-loop replay behind deterministic replay. Status: opt-in stub implemented; live replay deferred.
+8. Add model-in-the-loop replay behind deterministic replay. Status: budget/policy-gated runner implemented; routine live replay remains opt-in and env-gated.
    - The current structural replay gate remains first.
    - Model replay should be opt-in or budget-gated because it consumes Codex
      usage.
@@ -103,7 +109,7 @@ Status after the P0-P2 implementation pass:
 
 ### P2: Runtime Expansion
 
-10. Add app-server schema fixtures and gated roundtrip. Status: fixture/status gate implemented; live roundtrip deferred.
+10. Add app-server schema fixtures and gated roundtrip. Status: fixture/status gate and dry-run roundtrip contract implemented; live roundtrip deferred.
     - Keep the driver disabled by default.
     - Add truthful status/capability output before any live turn execution.
     - Do not let app-server failure affect the stable `codex exec --json` path.
@@ -118,7 +124,7 @@ Status after the P0-P2 implementation pass:
     - Treat `chx` as compatibility only until a documented removal window.
     - Add install smoke tests for the bin paths and Codex adapter installer.
 
-13. Add TypeScript/static verification. Status: local syntax/static check implemented with `npm run typecheck`.
+13. Add TypeScript/static verification. Status: local syntax/static check and versioned schema artifacts implemented.
     - Add a typecheck path or equivalent static validation beyond Node 26
       type-stripped execution.
     - Add JSON schema validation for config and durable state.
@@ -128,7 +134,7 @@ Status after the P0-P2 implementation pass:
       `cx report <run-id>`.
     - Keep outputs bounded and JSON-first.
 
-15. Add cron/gateway automation only after P0 safety work. Status: disabled feature gates implemented; real automation deferred.
+15. Add cron/gateway automation only after P0 safety work. Status: disabled feature gates and dry-run automation plans implemented; real automation deferred.
     - Hermes-style cron and gateway behavior should depend on locks, schema
       migration, permission events, and explicit user policy.
 
@@ -148,14 +154,16 @@ Status after the P0-P2 implementation pass:
 
 ## Suggested Next Slice
 
-The next implementation slice should deepen the safe MVP surfaces rather than
-adding a new runtime surface:
+The next implementation slice should turn gated surfaces into deeper evidence,
+not remove the gates:
 
-1. Add stale-lock detection/recovery and lock metadata inspection.
-2. Promote the current runtime validators into explicit versioned JSON Schema
-   artifacts for config, state, events, memory, and skills.
-3. Add model-in-the-loop replay behind an explicit budget and policy gate.
-4. Add app-server schema contract tests before any live turn roundtrip.
-5. Add a Codex-native adapter context command that formats retrieved
-   `codexus:<skill-name>` skills and memory into a bounded prompt-safe block,
-   while still avoiding an automatic competing chat loop.
+1. Enforce the JSON Schema artifacts in config/state/event read paths and add
+   migration fixtures for older durable records.
+2. Expand Claw-style replay parity scenarios before increasing model replay
+   usage.
+3. Build a supervised app-server live experiment with process lifecycle,
+   timeout, and cleanup evidence before enabling it as a driver.
+4. Add approval/policy ledger events for cron/gateway live dispatch, then keep
+   dry-run and live paths contract-compatible.
+5. Add an explicit, user-visible adapter injection step if retrieved
+   `codexus:<skill-name>` context is ever inserted automatically.

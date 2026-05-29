@@ -98,7 +98,76 @@ test("driver failures are classified and written to the run ledger", async () =>
   }
 });
 
-test("skill index, export, adapter retrieval, replay stub, and memory lifecycle work together", async () => {
+test("stale locks can be inspected and cleared while schema artifacts validate", async () => {
+  const cwd = await tempDir();
+  try {
+    const lockRoot = join(cwd, ".codex-harness", "locks");
+    const staleDir = join(lockRoot, "memory.lock");
+    const activeDir = join(lockRoot, "active.lock");
+    await mkdir(staleDir, { recursive: true });
+    await mkdir(activeDir, { recursive: true });
+    await writeFile(join(staleDir, "owner.json"), `${JSON.stringify({
+      schemaVersion: 1,
+      name: "memory",
+      pid: 1,
+      hostname: "test",
+      createdAt: "2000-01-01T00:00:00.000Z",
+      ttlMs: 1,
+      operation: "test",
+    })}\n`);
+    await writeFile(join(activeDir, "owner.json"), `${JSON.stringify({
+      schemaVersion: 1,
+      name: "active",
+      pid: process.pid,
+      hostname: "test",
+      createdAt: new Date().toISOString(),
+      ttlMs: 600_000,
+      operation: "test",
+    })}\n`);
+
+    const list = runCli(cwd, ["locks", "list", "--json"]);
+    assert.equal(list.status, 0, list.stderr);
+    const locks = JSON.parse(list.stdout).locks;
+    assert.equal(locks.find((lock: { name: string }) => lock.name === "memory").stale, true);
+    assert.equal(locks.find((lock: { name: string }) => lock.name === "active").stale, false);
+
+    const clear = runCli(cwd, ["locks", "clear", "memory", "--stale-only", "--json"]);
+    assert.equal(clear.status, 0, clear.stderr);
+    assert.equal(JSON.parse(clear.stdout).lock.exists, false);
+
+    const activeClear = runCli(cwd, ["locks", "clear", "active", "--stale-only", "--json"]);
+    assert.equal(activeClear.status, 1);
+    assert.equal(JSON.parse(activeClear.stdout).code, "lock_not_stale");
+
+    const schema = runCli(resolve("."), ["schema", "check", "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    const schemaOutput = JSON.parse(schema.stdout);
+    assert.equal(schemaOutput.ok, true);
+    assert.equal(schemaOutput.schemas.length, 5);
+    assert.equal(schemaOutput.appServerFixture.valid, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("repairable driver failures can be retried behind an explicit driver-repair budget", async () => {
+  const cwd = await tempDir();
+  try {
+    const run = runCli(cwd, ["run", "--driver", "mock", "--max-driver-repairs", "1", "--json", "MOCK_DRIVER_REPAIR"]);
+    assert.equal(run.status, 0, run.stderr);
+    const runOutput = JSON.parse(run.stdout);
+    assert.equal(runOutput.outcome, "complete");
+    const state = JSON.parse(await readFile(runOutput.statePath, "utf8"));
+    assert.equal(state.driverRepairIteration, 1);
+    const events = await readFile(join(cwd, ".codex-harness", "runs", runOutput.runId, "events.jsonl"), "utf8");
+    assert.match(events, /driver\.repair\.started/);
+    assert.match(events, /driver\.repair\.completed/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("skill index, export, adapter context, gated replay, and memory lifecycle work together", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();
   try {
@@ -135,9 +204,19 @@ test("skill index, export, adapter retrieval, replay stub, and memory lifecycle 
     assert.equal(retrieveOutput.skills[0].id, skillId);
     assert.equal(retrieveOutput.memories[0].id, JSON.parse(memory.stdout).entry.id);
 
+    const context = runCli(cwd, ["adapt", "omx", "context", "--task", "parser regression", "--max-chars", "1600", "--json"]);
+    assert.equal(context.status, 0, context.stderr);
+    const contextOutput = JSON.parse(context.stdout);
+    assert.match(contextOutput.contextBlock, /codexus:/);
+    assert.ok(contextOutput.budget.usedChars <= 1600);
+
     const replay = runCli(cwd, ["replay", "skill", skillId, "--with-model-replay", "--json"]);
     assert.equal(replay.status, 0, replay.stderr);
     assert.equal(JSON.parse(replay.stdout).modelReplay.status, "not_run");
+
+    const gatedReplay = runCli(cwd, ["replay", "skill", skillId, "--with-model-replay", "--allow-live-model-replay", "--model-budget", "1", "--json"]);
+    assert.equal(gatedReplay.status, 1);
+    assert.equal(JSON.parse(gatedReplay.stdout).modelReplay.status, "blocked");
 
     const exported = runCli(cwd, ["skill", "export", skillId, "--target", "codex", "--force", "--json"], { CODEX_HOME: codexHome });
     assert.equal(exported.status, 0, exported.stderr);
@@ -175,6 +254,26 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(JSON.parse(cron.stdout).enabled, false);
     const gateway = runCli(cwd, ["gateway", "status", "--json"]);
     assert.equal(JSON.parse(gateway.stdout).enabled, false);
+
+    const appStatus = runCli(cwd, ["app-server", "status", "--json"]);
+    assert.equal(appStatus.status, 0, appStatus.stderr);
+    assert.equal(JSON.parse(appStatus.stdout).schemaFixture.valid, true);
+    const appRoundtrip = runCli(cwd, ["app-server", "roundtrip", "--dry-run", "--json"]);
+    assert.equal(appRoundtrip.status, 0, appRoundtrip.stderr);
+    assert.equal(JSON.parse(appRoundtrip.stdout).status, "passed");
+    const appLive = runCli(cwd, ["app-server", "roundtrip", "--live", "--json"]);
+    assert.equal(appLive.status, 1);
+    assert.equal(JSON.parse(appLive.stdout).code, "unsupported_feature");
+
+    const cronDryRun = runCli(cwd, ["cron", "run-now", "--dry-run", "--task", "memory review", "--json"]);
+    assert.equal(cronDryRun.status, 0, cronDryRun.stderr);
+    assert.equal(JSON.parse(cronDryRun.stdout).status, "planned");
+    const gatewayDryRun = runCli(cwd, ["gateway", "check", "--dry-run", "--task", "repo event", "--json"]);
+    assert.equal(gatewayDryRun.status, 0, gatewayDryRun.stderr);
+    assert.equal(JSON.parse(gatewayDryRun.stdout).status, "planned");
+    const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
+    assert.equal(cronLive.status, 1);
+    assert.equal(JSON.parse(cronLive.stdout).code, "unsupported_feature");
   } finally {
     await rm(codexHome, { recursive: true, force: true });
   }

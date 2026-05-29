@@ -50,6 +50,12 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported runs command${target ? `: ${target}` : ""}.`;
     case "unsupported_events_command":
       return `Unsupported events command${target ? `: ${target}` : ""}.`;
+    case "unsupported_locks_command":
+      return `Unsupported locks command${target ? `: ${target}` : ""}.`;
+    case "unsupported_schema_command":
+      return `Unsupported schema command${target ? `: ${target}` : ""}.`;
+    case "unsupported_app_server_command":
+      return `Unsupported app-server command${target ? `: ${target}` : ""}.`;
     case "invalid_event_tail_lines":
       return "Invalid event tail line count.";
     case "missing_memory_kind":
@@ -58,6 +64,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing memory text.";
     case "missing_memory_id":
       return "Missing memory id.";
+    case "missing_lock_name":
+      return "Missing lock name.";
     case "missing_prompt":
       return "Missing run prompt.";
     case "missing_run_id":
@@ -84,6 +92,10 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Skill export target exists${target ? `: ${target}` : ""}.`;
     case "lock_unavailable":
       return `Lock is already held${target ? `: ${target}` : ""}.`;
+    case "lock_not_found":
+      return `Lock not found${target ? `: ${target}` : ""}.`;
+    case "lock_not_stale":
+      return `Lock is not stale${target ? `: ${target}` : ""}.`;
     case "state_corrupt":
       return `Run state is corrupt${target ? `: ${target}` : ""}.`;
     case "config_parse_failed":
@@ -121,6 +133,12 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Run `cx runs list --json`.";
     case "unsupported_events_command":
       return "Run `cx events tail <run-id> --json`.";
+    case "unsupported_locks_command":
+      return "Run `cx locks list`, `cx locks inspect <name>`, or `cx locks clear <name> --stale-only`.";
+    case "unsupported_schema_command":
+      return "Run `cx schema check --json`.";
+    case "unsupported_app_server_command":
+      return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "missing_prompt":
       return "Pass the prompt after `cx run`, for example `cx run --json \"inspect the project\"`.";
     case "missing_run_id":
@@ -138,7 +156,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "missing_replay_target":
       return "Pass `skill <skill-id>` or a path to `replay.json`.";
     case "invalid_max_repairs":
-      return "Use a non-negative integer for `--max-repairs`.";
+      return "Use a non-negative integer for `--max-repairs` or `--max-driver-repairs`.";
     case "invalid_memory_limit":
       return "Use a positive integer for `--limit`.";
     case "invalid_memory_prune_window":
@@ -155,6 +173,10 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Use `--force` to overwrite a previous generated export.";
     case "lock_unavailable":
       return "Wait for the active Codexus operation to finish, then retry.";
+    case "lock_not_found":
+      return "Run `cx locks list --json` to inspect current locks.";
+    case "lock_not_stale":
+      return "Use `cx locks inspect <name> --json`; clear active locks only after verifying no operation is running.";
     case "state_corrupt":
       return "Inspect the run ledger state file or restore it from version control/backups.";
     case "config_parse_failed":

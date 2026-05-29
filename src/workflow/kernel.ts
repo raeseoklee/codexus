@@ -41,6 +41,22 @@ ${result.finalMessage ? `\nPrevious final message:\n${result.finalMessage}\n` : 
 Repair the work using the verification failure as the source of truth, then stop.`;
 }
 
+function driverFailureRepairPrompt(originalPrompt: string, result: DriverResult, classification: ReturnType<typeof classifyDriverFailure>, iteration: number): string {
+  return `Driver failure repair attempt ${iteration}
+
+Original task:
+${originalPrompt}
+
+The previous driver attempt failed before verification.
+- Failure code: ${classification.code}
+- Failure category: ${classification.category}
+- Repairable: ${classification.repairable}
+- Suggestion: ${classification.suggestion}
+${result.finalMessage ? `\nPrevious final message:\n${result.finalMessage}\n` : ""}
+${result.error ? `\nPrevious error:\n${result.error.slice(0, 2000)}\n` : ""}
+Repair the task by addressing the driver failure, then stop.`;
+}
+
 async function writeReport(paths: ReturnType<typeof runPaths>, state: RunState, outcome: TerminalOutcome): Promise<void> {
   const report = `# Run ${state.runId}
 
@@ -48,6 +64,7 @@ async function writeReport(paths: ReturnType<typeof runPaths>, state: RunState, 
 - Driver: ${state.driver}
 - Verification: ${state.verification.latestStatus}
 - Repair iterations: ${state.repairIteration}
+- Driver repair iterations: ${state.driverRepairIteration ?? 0}
 ${state.error ? `- Error: ${state.error.message.split("\n")[0]}\n` : ""}
 `;
   await writeFile(paths.report, report);
@@ -88,6 +105,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
     driver: config.driver,
     promptHash: sha256Text(prompt),
     repairIteration: 0,
+    driverRepairIteration: 0,
     verification: {
       required: config.verification.commands.length > 0,
       latestStatus: config.verification.commands.length > 0 ? "pending" : "skipped",
@@ -214,7 +232,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
 
     outcome = outcomeFromDriver(result.status);
     if (result.status !== "succeeded") {
-      const classification = classifyDriverFailure(result);
+      let classification = classifyDriverFailure(result);
       await appendEvent(paths.events, {
         runId,
         phase: state.phase,
@@ -222,6 +240,43 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         source: "kernel",
         payload: classification,
       });
+      while (
+        result.status === "failed" &&
+        classification.repairable &&
+        (state.driverRepairIteration ?? 0) < config.repair.maxDriverFailureIterations
+      ) {
+        const nextIteration = (state.driverRepairIteration ?? 0) + 1;
+        state = {
+          ...transition(state, "repair"),
+          driverRepairIteration: nextIteration,
+        };
+        await writeState(paths.state, state);
+        await appendEvent(paths.events, {
+          runId,
+          phase: state.phase,
+          type: "driver.repair.started",
+          source: "kernel",
+          payload: { iteration: nextIteration, classification },
+        });
+        result = await runDriverAttempt(driverFailureRepairPrompt(prompt, result, classification, nextIteration), nextIteration);
+        await appendEvent(paths.events, {
+          runId,
+          phase: state.phase,
+          type: "driver.repair.completed",
+          source: "kernel",
+          payload: { iteration: nextIteration, driverStatus: result.status },
+        });
+        outcome = outcomeFromDriver(result.status);
+        if (result.status === "succeeded") break;
+        classification = classifyDriverFailure(result);
+        await appendEvent(paths.events, {
+          runId,
+          phase: state.phase,
+          type: "driver.failure_classified",
+          source: "kernel",
+          payload: classification,
+        });
+      }
     }
     if (result.status === "succeeded" && config.verification.commands.length > 0) {
       verificationStatus = await runChecks();
@@ -240,7 +295,7 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
           source: "kernel",
           payload: { iteration: nextIteration, verificationStatus },
         });
-        result = await runDriverAttempt(repairPrompt(prompt, result, verificationStatus), nextIteration);
+        result = await runDriverAttempt(repairPrompt(prompt, result, verificationStatus), (state.driverRepairIteration ?? 0) + nextIteration);
         await appendEvent(paths.events, {
           runId,
           phase: state.phase,
