@@ -64,8 +64,8 @@ OMC와 OMX는 같은 계열의 하네스 아이디어입니다. OMC는 Claude Co
 
 5. OMX adapter
    - OMX version/features를 탐지합니다.
-   - `.omx/state`는 직접 변경하지 않습니다.
-   - `.omx/plans` export는 명시적 명령에서만 수행합니다.
+   - External harness state는 직접 변경하지 않습니다.
+   - External compatibility export는 명시적 명령에서만 수행합니다.
 
 6. Codex-native adapter
    - 향후 Codex 세션 안에서 Codexus를 호출할 수 있게 합니다.
@@ -82,5 +82,5 @@ OMC와 OMX는 같은 계열의 하네스 아이디어입니다. OMC는 Claude Co
 - required verification이 실패하면 `complete`가 될 수 없습니다.
 - verification failure는 bounded repair loop로 복구할 수 있습니다.
 - `cx status --json`은 live process 없이 disk에서 상태를 재구성합니다.
-- `cx adapt omx status --json`은 `.omx/state`를 변경하지 않습니다.
+- Optional interop status command는 external harness state를 변경하지 않습니다.
 - proposed skill은 scope, trigger, safety, evidence, replay 없이는 승격되지 않습니다.

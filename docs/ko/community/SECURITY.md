@@ -35,5 +35,5 @@ public issue에 exploit detail을 올리지 마세요.
 ## Secret Handling
 
 Credential, Codex session material, environment file, private prompt가 포함된 raw
-ledger를 commit하지 마세요. Repository `.gitignore`는 local Codexus/OMX state
-directory를 기본적으로 제외합니다.
+ledger를 commit하지 마세요. Repository `.gitignore`는 local Codexus state와
+generated runtime artifact를 기본적으로 제외합니다.

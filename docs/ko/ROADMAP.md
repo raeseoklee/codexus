@@ -25,7 +25,8 @@
 ## Later: Automation and Ecosystem
 
 - Cron/gateway dry-run contract를 policy-reviewed live dispatch로 승격합니다.
-- Codex와 OMX 대상 skill export compatibility를 강화합니다.
+- Codex skill export compatibility를 강화하고 third-party harness interop은
+  optional로 유지합니다.
 - CLI surface가 안정화되면 release packaging을 추가합니다.
 - Temporary `chx` alias 제거 migration note를 게시합니다.
 

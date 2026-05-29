@@ -94,8 +94,6 @@ memory review --json
 skill index --json
 skill review <skill-id> --json
 replay skill <skill-id> --json
-adapt omx retrieve --task "<task>" --json
-adapt omx context --task "<task>" --json
 ```
 
 Use supervised runs deliberately:
@@ -126,7 +124,7 @@ Use Codexus when you need:
 - memory retrieval,
 - skill review/promotion evidence,
 - replay-gated behavior,
-- OMX context retrieval,
+- bounded context evidence,
 - a bounded supervised handoff.
 
 ## Troubleshooting

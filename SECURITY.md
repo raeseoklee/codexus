@@ -37,4 +37,4 @@ Please include:
 
 Do not commit credentials, Codex session material, environment files, or raw
 ledgers that contain private prompts. The repository `.gitignore` excludes
-local Codexus and OMX state directories by default.
+local Codexus state and generated runtime artifacts by default.

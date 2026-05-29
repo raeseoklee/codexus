@@ -25,7 +25,8 @@ live in [Remaining work](docs/remaining-work.md).
 ## Later: Automation and Ecosystem
 
 - Promote cron/gateway dry-run contracts into policy-reviewed live dispatch.
-- Strengthen skill export compatibility for Codex and OMX.
+- Strengthen Codex skill export compatibility and keep third-party harness
+  interop optional.
 - Add release packaging once the CLI surface stabilizes.
 - Publish migration notes for removing the temporary `chx` alias.
 

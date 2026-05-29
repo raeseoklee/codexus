@@ -294,12 +294,13 @@ The adapter may:
 - detect installed OMX version,
 - call `omx explore` for narrow read-only exploration,
 - call `omx sparkshell` for noisy read-only or verification commands,
-- write adapter metadata under `.omx/adapters/codex-harness/`,
-- export plan artifacts compatible with `.omx/plans/`.
+- write adapter metadata only through explicit interop commands,
+- export plan artifacts into external harness-compatible locations only when
+  the user asks for that target.
 
 The adapter must not:
 
-- mutate `.omx/state` directly,
+- mutate external harness state directly,
 - assume upstream-only features exist locally,
 - make OMX required for basic `cx run`.
 

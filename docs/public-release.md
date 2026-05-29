@@ -18,7 +18,8 @@ public.
 - Run `git status --short` and confirm there are no uncommitted secrets.
 - Run `rg -n "OPENAI_API_KEY|CODEX|token|secret|password|BEGIN .*PRIVATE KEY" .`
   and inspect any matches.
-- Confirm `.codex-harness/`, `.omx/`, logs, and local state are ignored.
+- Confirm `.codex-harness/`, logs, generated runtime artifacts, and local state
+  are ignored.
 - Do not publish private run ledgers or generated artifacts.
 
 ## Verification

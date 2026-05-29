@@ -34,7 +34,7 @@ UI, account state, prompts, or local project data.
 - Memory records, curation, and bounded retrieval
 - Replay-gated skill proposal, review, promotion, improvement, export, and deprecation
 - Codex-native `$codexus` adapter for using the same core inside a Codex session
-- Optional OMX context retrieval/export integration
+- Optional advanced interop commands that stay outside the core runtime path
 - Schema artifact validation, stale-lock recovery, and local CI parity
 - Gated app-server, cron, gateway, and model-replay experiments that do not affect the stable `codex exec --json` path
 
@@ -54,7 +54,8 @@ See [Implementation status](docs/implementation-status.md) and
 - The local `codex` CLI for real Codex runs
 - A logged-in Codex CLI session for the `codex-exec` driver
 
-Most tests use the mock driver and do not require model or network access.
+Most tests use a deterministic mock driver so CI does not require model or
+network access; real runs use the local authenticated Codex CLI.
 
 ## Quick Start
 
@@ -84,7 +85,6 @@ Run the CLI directly:
 
 ```bash
 node src/cli/main.ts doctor --json
-node src/cli/main.ts run --driver mock --json "hello from codexus"
 ```
 
 Use the canonical bin names during local development:
@@ -120,7 +120,6 @@ cx replay skill <skill-id> --json
 cx memory search "parser regression" --json
 cx skill review <skill-id> --json
 cx skill export <skill-id> --target codex --json
-cx adapt omx context --task "parser regression" --json
 cx schema check --json
 cx app-server experiment --dry-run --record --supervise-fake --json
 ```

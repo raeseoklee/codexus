@@ -21,11 +21,11 @@ Type "node codex/skills/codexus/scripts/cx.mjs schema check --json | jq -r .ok"
 Enter
 Sleep 1200ms
 
-Type "printf 'codex> use $codexus to retrieve context for parser regression\n'"
+Type "printf 'codex> use $codexus to inspect durable run state\n'"
 Enter
 Sleep 700ms
 
-Type "node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task parser-regression --json | jq -r '.skills | length'"
+Type "node codex/skills/codexus/scripts/cx.mjs runs list --json | jq -r '.runs | length'"
 Enter
 Sleep 1200ms
 

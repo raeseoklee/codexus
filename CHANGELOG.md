@@ -19,7 +19,7 @@ Initial public-preparation release.
 - Verification gates and bounded repair loops.
 - Memory lifecycle and replay-gated skill lifecycle.
 - Codex-native `$codexus` skill adapter.
-- Optional OMX retrieval/context/export integration.
+- Optional advanced interop commands kept outside the core runtime path.
 - Schema artifacts and local schema subset enforcement.
 - App-server dry-run/experiment surfaces behind live gates.
 - Cron/gateway dry-run audit records behind feature gates.

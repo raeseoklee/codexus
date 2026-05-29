@@ -18,7 +18,6 @@ compatibility alias로 유지합니다.
 - Node 26 기반 dependency-free CLI entrypoint
 - `doctor`, `init`, `run`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`
 - `locks list/inspect/clear`, `schema check/validate/validate-run`, `app-server status/roundtrip/experiment`
-- `adapt omx status/retrieve/context`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
 - `cron status/run-now`, `gateway status/check`
@@ -40,13 +39,13 @@ compatibility alias로 유지합니다.
 - Codexus 생성 skill의 Codex-facing 표시명 `codexus:<skill-name>`
 - approved active skill/memory retrieval, replay approval metadata를 포함한 prompt-safe context formatting, 자동 주입 없는 approved context artifact 기록
 - deterministic replay 뒤 explicit budget/policy/live-environment gated model replay
-- `.omx/state`를 건드리지 않는 `cx init`
+- unrelated tool state를 건드리지 않는 `cx init`
 - runs/events/report observability command
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, live execution disabled
 - cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
 - config/state/event/memory/skill versioned schema artifact, durable read-path focused enforcement, single-record/run-ledger schema artifact subset validation
 - `npm run typecheck` syntax/static validation
-- `.omx/state`를 건드리지 않는 OMX status/plan interop
+- normal Codexus runtime path 바깥에 둔 optional advanced interop capability probe/export
 - `codex/skills/codexus` 아래 Codex-native skill adapter source
 - `${CODEX_HOME:-~/.codex}/skills/codexus`로 adapter를 설치하는 `scripts/install-codex-skill.mjs`
 - `doctor --json`의 installed Codexus skill tree match 진단과 installer source/installed tree hash metadata
@@ -63,11 +62,12 @@ compatibility alias로 유지합니다.
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
-- `doctor --json`: Codex auth/version/features, OMX, git, tmux, driver capability 확인
+- `doctor --json`: Codex auth/version/features, git, tmux, driver capability,
+  optional advanced interop readiness 확인
 - `doctor --json --strict`: missing command 진단이 `ok:false`와 exit 1을 반환함을 확인
 - mock driver: success/failure/repair/blocked/cancelled outcome 검증
 - real Codex smoke: `CHX-GOAL-OK` final artifact 확인
-- OMX adapter smoke: `.omx/state` hash 변경 없음
+- Advanced interop smoke: external harness state에 대한 read-only behavior 확인
 - static source check: private ChatGPT/Codex backend 직접 호출 없음
 - Codex-native adapter wrapper root discovery 테스트
 - Codex skill validator로 skill 구조 검증

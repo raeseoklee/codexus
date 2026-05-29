@@ -94,8 +94,6 @@ memory review --json
 skill index --json
 skill review <skill-id> --json
 replay skill <skill-id> --json
-adapt omx retrieve --task "<task>" --json
-adapt omx context --task "<task>" --json
 ```
 
 Supervised run은 의도적으로 사용할 때만 실행합니다:
@@ -126,7 +124,7 @@ conversation을 대체하면 안 됩니다.
 - memory retrieval,
 - skill review/promotion evidence,
 - replay-gated behavior,
-- OMX context retrieval,
+- bounded context evidence,
 - bounded supervised handoff.
 
 ## Troubleshooting

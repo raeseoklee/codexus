@@ -2,8 +2,8 @@
 
 [English](../quickstart.md)
 
-이 문서는 첫 검증 단계에서 모델이나 네트워크 접근에 의존하지 않고 Codexus를
-로컬에서 실행하는 절차를 설명합니다.
+이 문서는 Codexus를 로컬에서 실행하는 절차를 설명합니다. 첫 검증 단계는 모델이나
+네트워크 접근에 의존하지 않고, 이후 실제 Codex 실행을 다룹니다.
 
 ## Install Script
 
@@ -45,7 +45,8 @@ node --version
 npm run ci
 ```
 
-테스트는 mock driver를 사용하므로 Codex 모델 접근이 필요하지 않습니다.
+테스트는 deterministic test driver를 사용하므로 Codex 모델 접근이 필요하지
+않습니다.
 
 ## 3. Doctor 실행
 
@@ -53,10 +54,10 @@ npm run ci
 node src/cli/main.ts doctor --json
 ```
 
-`doctor`는 Node, Codex CLI, Codex auth, driver capability, optional OMX, git,
-tmux, Codexus skill 설치 상태를 보고합니다.
+`doctor`는 Node, Codex CLI, Codex auth, driver capability, git, tmux, Codexus
+state, Codexus skill 설치 상태를 보고합니다.
 
-## 4. Mock Harness Task 실행
+## 4. Deterministic Test Harness Task 실행
 
 ```bash
 node src/cli/main.ts run --driver mock --json "hello from codexus"
@@ -129,5 +130,5 @@ $codexus status <run-id> --json 확인해줘.
 cx init --with-docs --json
 ```
 
-이 명령은 `.omx` state를 변경하지 않고 `.codex-harness/` directory와 config를
-생성합니다.
+이 명령은 관련 없는 tool state를 변경하지 않고 `.codex-harness/` directory와
+config를 생성합니다.

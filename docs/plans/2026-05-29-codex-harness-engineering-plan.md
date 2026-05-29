@@ -4,7 +4,7 @@
 
 Date: 2026-05-29
 Workspace: /Users/irae/Workspace/irae/codex-harness
-Status: migrated from `.omx/plans` into project docs
+Status: migrated from an earlier external harness planning artifact into project docs
 
 ## Goal
 
@@ -21,7 +21,7 @@ Local environment:
 - `codex-cli 0.135.0`
 - `codex login status`: logged in using ChatGPT
 - `oh-my-codex v0.11.9`
-- Current workspace contains only `.omx` runtime files; no git repo or app scaffold exists yet.
+- Current workspace contains only external harness runtime files; no git repo or app scaffold exists yet.
 
 Reference findings:
 
@@ -31,7 +31,11 @@ Reference findings:
   `NousResearch/hermes-agent`, and `Gitlawb/openclaude`.
 - OpenAI Codex supports local CLI use, `codex exec --json`, plugins, hooks, app server tooling, MCP server mode, and ChatGPT sign-in. Official docs say Codex is included in eligible ChatGPT plans and can be used from Codex CLI/App/IDE/Web.
 - The generated Codex app-server protocol exposes useful JSON-RPC surfaces such as `thread/start`, `turn/start`, `turn/steer`, thread turns/items reads, skills/plugins lists, command execution, filesystem tools, MCP server calls, account/rate-limit reads, and model listing. This is useful but should be treated as optional/experimental until proven stable.
-- OMX upstream has moved to a CLI/JSON-first contract, `.omx` state/artifacts, skills, prompts, team runtime, durable goals, sparkshell/explore, Hermes/OpenClaw adapters, and an optional Hermes MCP bridge. Local installed OMX is behind upstream, so compatibility detection matters. In this plan, OMC means the Claude Code sibling in the same conceptual family, and OMX means the Codex-targeted sibling.
+- The Codex-side sibling harness reference has moved to a CLI/JSON-first
+  contract, external state/artifacts, skills, prompts, team runtime, durable
+  goals, sparkshell/explore, Hermes/OpenClaw adapters, and an optional Hermes
+  MCP bridge. Local installed tooling is behind the researched upstream
+  baseline, so compatibility detection matters.
 - `ultraworkers/claw-code` is the mandatory parity-first CLI/harness reference. The corrected 2026-05-29 audit cloned and inspected the source at HEAD `4d3dc5b`. Key patterns: canonical Rust CLI under `rust/`, `doctor/status/sandbox/version --output-format json`, structured `init` and `state` output, permission modes and `--allowedTools`, broad slash/direct command surfaces, a deterministic mock parity harness, explicit event/report contracts, and truthful unsupported status for ACP/Zed/JSON-RPC surfaces.
 - Hermes Agent contributes the strongest ideas for self-improvement: skill creation, skill improvement, persistent memory, session search, cron, gateways, toolsets, terminal backends, and isolated subagents. For this project, the evolutionary loop should be adapted as local artifacts and workflows around Codex, not copied as a model provider layer.
 - OpenClaude contributes the strongest ideas for provider/session runtime: provider profiles, Codex OAuth, existing Codex CLI auth reuse through `~/.codex/auth.json`, terminal-first tool loops, MCP/slash-command workflows, permission requests, headless gRPC streaming, and descriptor-first provider metadata. For Codexus, this reinforces local Codex auth reuse and capability-driven driver metadata instead of private backend calls or broad hardcoded provider branches.
@@ -84,10 +88,12 @@ Layered architecture:
    - Explicit stop conditions to prevent false completion.
 
 5. OMX adapter
-   - Detect `omx` version, `omx doctor`, local `.omx`, tmux availability, and upstream-compatible features.
+   - Detect optional external harness version, doctor support, local state,
+     tmux availability, and upstream-compatible features.
    - Prefer `omx explore` and `omx sparkshell` for bounded read-only repo exploration and noisy verification output.
    - Optionally launch `omx team` only for work that benefits from coordinated parallel execution.
-   - Write interop metadata under `.omx/adapters/codex-harness/` and `.codex-harness/omx/`; avoid mutating `.omx/state` directly.
+   - Keep interop metadata under Codexus-owned state and avoid direct mutation
+     of external harness state.
 
 6. Codex-native adapter
    - Provide a future Codex skill/plugin/command surface so Codexus can be invoked from inside an interactive Codex session.
@@ -152,7 +158,7 @@ Phase 3: OMX interop
 
 - Implement `cx adapt omx doctor/status`.
 - Prefer `omx sparkshell` for noisy verification commands when available.
-- Support `cx plan --omx` to create `.omx/plans/...` compatible artifacts.
+- Support explicit compatibility export for plan artifacts.
 - Add version-gated warnings because local OMX is currently `0.11.9` while upstream research baseline is `0.18.6`.
 
 Phase 4: evolutionary learning loop
@@ -177,7 +183,7 @@ Phase 5: app-server driver experiment
 - `cx run --verify "npm test" ...` cannot report `complete` when verification fails.
 - A failed verification run can enter a repair iteration and preserve both failure and fix evidence.
 - `cx status --json <run-id>` reconstructs state from disk without a live process.
-- `cx adapt omx status --json` never mutates `.omx/state`.
+- Optional interop status commands never mutate external harness state.
 - Tests pass with the mock driver without network or model access.
 - No code uses private ChatGPT/Codex backend endpoints.
 - A completed nontrivial run produces an experience record with decisions, failures, verification evidence, and reusable lessons.

@@ -33,9 +33,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 
 - Implemented safe MVP surfaces: expanded JSON error contract tests, state
   corruption errors, permission/policy/driver-classification ledger events,
-  minimal locks, state migration reader, active skill index, explicit Codex/OMX
-  export, bounded adapter retrieval, deterministic replay and model replay
-  gate, memory lifecycle
+  minimal locks, state migration reader, active skill index, explicit Codex
+  export plus optional third-party bundle export, bounded adapter retrieval,
+  deterministic replay and model replay gate, memory lifecycle
   commands, app-server fixture/status gate, `cx init`, packaging/typecheck
   smoke, run observability commands, and cron/gateway disabled gates.
 - Promoted hardening surfaces: stale-lock metadata inspection/recovery,
@@ -85,8 +85,8 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
    - Write an index entry on promotion/deprecation with skill id, display name,
      version, source runs, replay status, and export state.
 
-6. Add explicit skill export commands. Status: implemented for explicit Codex/OMX bundle export.
-   - Proposed command shape: `cx skill export <skill-id> --target codex|omx`.
+6. Add explicit skill export commands. Status: implemented for explicit Codex export plus optional external harness bundle export.
+   - Proposed command shape: `cx skill export <skill-id> --target <target>`.
    - Keep storage ids filesystem-safe.
    - Use `displayName` for the Codex-facing `codexus:<skill-name>` identity.
    - Run Codex skill validation before writing to external skill stores because
@@ -121,7 +121,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 11. Add git-aware project initialization. Status: `cx init` implemented.
     - Proposed command shape: `cx init`.
     - Create config, ignored state directories, and optional project docs
-      snippets without mutating unrelated `.omx/state`.
+      snippets without mutating unrelated tool state.
 
 12. Finish packaging and alias migration. Status: canonical metadata and smoke coverage implemented; `chx` compatibility retained.
     - Keep `cx` and `codexus` as canonical.

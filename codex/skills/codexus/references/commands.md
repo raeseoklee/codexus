@@ -8,7 +8,8 @@ Use this reference when choosing which Codexus command to call from inside a Cod
 node codex/skills/codexus/scripts/cx.mjs doctor --json
 ```
 
-Use for environment readiness, Codex auth, driver capabilities, OMX availability, and state root checks.
+Use for environment readiness, Codex auth, driver capabilities, and Codexus
+state root checks.
 
 ## Run State
 
@@ -57,16 +58,6 @@ node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-re
 
 Promotion should remain explicit. Do not auto-promote a skill just because a proposal exists.
 Live model replay is blocked unless the local experiment gate is explicitly enabled.
-
-## Bounded Context Retrieval
-
-```bash
-node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
-node codex/skills/codexus/scripts/cx.mjs adapt omx context --task "<task>" --json
-node codex/skills/codexus/scripts/cx.mjs adapt omx context --task "<task>" --approve --json
-```
-
-Use to retrieve bounded active skill and memory candidates or render them into a prompt-safe context block. `--approve` writes a non-injected context artifact for explicit handoff. It does not create a separate chat loop or inject context automatically.
 
 ## Runtime Gates
 

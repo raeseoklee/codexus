@@ -20,7 +20,7 @@ The package now exposes `cx` and `codexus` as canonical bins. `chx` remains only
 
 ## Document Map
 
-- [Quick start](quickstart.md): local setup, mock run, real Codex run, and Codex-native adapter installation.
+- [Quick start](quickstart.md): local setup, deterministic test run, real Codex run, and Codex-native adapter installation.
 - [Using Codexus inside Codex](codex-session-usage.md): how to invoke the `$codexus` skill from an interactive Codex session, what to ask it to do, and when not to use it.
 - [Engineering plan](plans/2026-05-29-codex-harness-engineering-plan.md): migrated planning baseline, research findings, constraints, MVP scope, and risks.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
@@ -38,13 +38,13 @@ The package now exposes `cx` and `codexus` as canonical bins. `chx` remains only
 
 ## Positioning
 
-OMC and OMX are the same family of harness idea:
+Codexus is a standalone Codex execution harness. It should be used alongside
+Codex, not instead of Codex. The first stable model access boundary is the
+local authenticated `codex` CLI, especially `codex exec --json`.
 
-- OMC targets Claude Code.
-- OMX targets Codex.
-- This project targets Codex too, but it is not an OMX fork. It should learn from OMC/OMX and interoperate with OMX where useful.
-
-Codexus should be used alongside Codex, not instead of Codex. The first stable model access boundary is the local authenticated `codex` CLI, especially `codex exec --json`.
+Some design notes compare Codexus with sibling harness projects, and the CLI has
+optional advanced interop surfaces. Those are compatibility paths, not product
+requirements for normal Codexus use.
 
 Runtime positioning:
 
@@ -61,7 +61,7 @@ Runtime positioning:
 - Treat every run as resumable until it reaches an explicit terminal outcome.
 - Require verification evidence before claiming completion.
 - Make self-improvement explicit, reviewable, versioned, and reversible.
-- Use OMX as an optional sibling integration, not a required dependency.
+- Keep third-party harness interop optional and visibly outside the core path.
 
 ## Current Status
 
@@ -74,7 +74,7 @@ The repository now has a working MVP harness spine:
 - policy preflight for high-risk verification commands,
 - automatic experience and memory records with memory lifecycle and curation commands,
 - replay-gated skill proposal, review, improvement, promotion, active index, explicit export, listing, and deprecation,
-- optional OMX status/retrieval/context formatting and `.omx/plans` export without mutating `.omx/state`,
+- optional advanced interop commands that do not affect the normal Codexus runtime,
 - lock inspection/stale recovery, versioned schema artifacts, schema artifact subset enforcement, focused read-path enforcement, and run-ledger validation,
 - approved adapter context artifacts, full replay parity fixture-matrix coverage, gated model replay, app-server dry-run roundtrip/recorded experiment manifests/process-probe/fake-supervision evidence, explicit-budget driver-failure repair, cron/gateway dry-run audit records with policy/approval contracts, installed skill tree diagnosis, and local syntax/static validation.
 

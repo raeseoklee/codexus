@@ -2,8 +2,8 @@
 
 [한국어](ko/quickstart.md)
 
-This guide gets Codexus running locally without relying on model or network
-access for the first verification pass.
+This guide gets Codexus running locally. The first verification pass avoids
+model and network access; real Codex execution is covered after that.
 
 ## Install Script
 
@@ -45,7 +45,8 @@ node --version
 npm run ci
 ```
 
-The test suite uses the mock driver, so it does not need Codex model access.
+The test suite uses the deterministic test driver, so it does not need Codex
+model access.
 
 ## 3. Run Doctor
 
@@ -53,10 +54,10 @@ The test suite uses the mock driver, so it does not need Codex model access.
 node src/cli/main.ts doctor --json
 ```
 
-`doctor` reports Node, Codex CLI, Codex auth, driver capability, optional OMX,
-git, tmux, and Codexus skill-install status.
+`doctor` reports Node, Codex CLI, Codex auth, driver capability, git, tmux,
+Codexus state, and Codexus skill-install status.
 
-## 4. Run a Mock Harness Task
+## 4. Run a Deterministic Test Harness Task
 
 ```bash
 node src/cli/main.ts run --driver mock --json "hello from codexus"
@@ -129,5 +130,5 @@ Inside a target project:
 cx init --with-docs --json
 ```
 
-This creates `.codex-harness/` directories and config without mutating `.omx`
-state.
+This creates `.codex-harness/` directories and config without mutating unrelated
+tool state.

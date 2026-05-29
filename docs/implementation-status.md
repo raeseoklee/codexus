@@ -37,9 +37,6 @@ temporary compatibility alias.
   - `app-server status`
   - `app-server roundtrip`
   - `app-server experiment`
-  - `adapt omx status`
-  - `adapt omx retrieve`
-  - `adapt omx context`
   - `memory add`
   - `memory search`
   - `memory list`
@@ -81,18 +78,20 @@ temporary compatibility alias.
 - Automatic memory entry writing from reusable lessons plus memory add/list/search/review/curate/prune lifecycle commands.
 - Skill proposal writer with source-linked `evidence.json`, structural `replay.json`, replay review, active listing, active index, improvement proposal, promotion, export, and deprecation.
 - Codexus-generated skills carry a Codex-facing `codexus:<skill-name>` display identity while keeping stable storage ids.
-- Codex/OMX skill export writes generated skill bundles through explicit commands.
+- Codex skill export and optional external harness bundle export write generated
+  skill bundles through explicit commands.
 - Codex-native adapter retrieval can return bounded relevant approved active skills and memory entries, and can format them into a prompt-safe context block with replay approval metadata.
 - The Codex-native adapter can write an explicitly approved context artifact (`context.md` and `context.json`) without injecting it automatically.
 - Model replay has a deterministic first gate plus an explicit budget/policy/live-environment gate for local experiments.
-- `cx init` creates project-local config/state directories without mutating `.omx/state`.
+- `cx init` creates project-local config/state directories without mutating
+  unrelated tool state.
 - Run observability commands list runs, tail events, and preview reports.
 - App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, and deterministic fake lifecycle supervision are present, while live app-server execution remains gated off.
 - Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records with policy/approval contract fields for future dispatch.
 - Versioned schema artifacts exist for config, state, events, memory entries, and skills, with focused enforcement plus zero-dependency schema-artifact subset validation on single-record and run-ledger checks.
 - `npm run typecheck` performs syntax/static validation with the local Node runtime.
-- OMX capability probe with older-version warning.
-- `cx plan --omx` writes harness and OMX-compatible plan artifacts without mutating `.omx/state`.
+- Optional advanced interop capability probes and export commands remain
+  outside the normal Codexus runtime path.
 - Codex-native skill adapter source under `codex/skills/codexus`.
 - `scripts/install-codex-skill.mjs` installs the adapter into `${CODEX_HOME:-~/.codex}/skills/codexus`.
 - `doctor --json` diagnoses whether the installed Codexus skill tree matches this repository, and the installer writes source/installed tree hashes.
@@ -123,7 +122,8 @@ temporary compatibility alias.
 - `status --json` reconstructs state, verification, experience, and event tail from disk.
 - `verify --json` reruns stored verification.
 - `resume --json` creates a linked follow-up supervised run.
-- `plan --omx --json` writes `.codex-harness/plans` and `.omx/plans` artifacts.
+- Advanced plan export writes Codexus plan artifacts and optional external
+  compatibility artifacts.
 - Skill proposal/review/promotion/deprecation workflow through both unit and CLI tests.
 - Structured JSON CLI error envelope for unknown commands and argument validation failures.
 - Structured JSON CLI error coverage for unexpected arguments, corrupt state, and disabled app-server driver.
@@ -137,25 +137,28 @@ temporary compatibility alias.
 - Real Codex exec smoke after workflow-kernel extraction:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-GOAL-OK" --json`
   - observed final artifact: `CHX-GOAL-OK`
-- OMX adapter smoke:
-  - command: `node src/cli/main.ts adapt omx status --json`
-  - observed `.omx/state` hash unchanged before/after.
+- Advanced interop smoke verified read-only behavior against external harness
+  state.
 - Static source check found no direct HTTP/OpenAI/ChatGPT backend calls in `src`, `tests`, or `package.json`.
 - Codex-native adapter wrapper root discovery is covered by tests.
 - Codex skill structure is validated with the Codex skill validator.
 
 ## Acceptance Coverage
 
-- `doctor --json` reports Codex auth/version, Codex feature availability, app-server help, OMX version/features, git status, tmux, state root, and selected driver capability.
+- `doctor --json` reports Codex auth/version, Codex feature availability,
+  app-server help, git status, tmux, state root, selected driver capability,
+  and optional advanced interop readiness.
 - `doctor --json --strict` is the automation-facing form when fail-level checks must produce a nonzero process status.
 - `run` completes with both mock and real `codex-exec` drivers and writes a ledger.
 - Required verification failures prevent `complete`, and repair can recover when bounded budget remains.
 - `status --json` reconstructs state, verification, experience, and event tail without a live process.
-- `adapt omx status --json` is read-only against `.omx/state`; `adapt omx retrieve --json` returns approved bounded context candidates; `adapt omx context --json` formats prompt-safe context; `adapt omx context --approve --json` writes a non-injected approved context artifact.
+- The Codex-native adapter returns approved bounded context candidates, formats
+  prompt-safe context, and can write a non-injected approved context artifact.
 - Tests pass without model/network access through the mock driver.
 - Evolution output writes source-linked experience and memory entries.
 - Skill promotion requires trigger/scope/safety/evidence/replay and writes a versioned active copy, promotion-review evidence, and enriched active index entry.
-- Explicit skill export writes generated Codex/OMX bundles without auto-installing them.
+- Explicit skill export writes generated Codex and optional external bundles
+  without auto-installing them.
 
 ## Known Gaps
 

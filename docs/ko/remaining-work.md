@@ -33,8 +33,9 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 - Safe MVP surface 구현됨: 확장된 JSON error contract test, state corruption
   error, permission/policy/driver-classification ledger event, minimal lock,
-  state migration reader, active skill index, 명시적 Codex/OMX export, bounded
-  adapter retrieval, deterministic replay와 model replay gate, memory lifecycle command, app-server
+  state migration reader, active skill index, 명시적 Codex export와 optional
+  third-party bundle export, bounded adapter retrieval, deterministic replay와
+  model replay gate, memory lifecycle command, app-server
   fixture/status gate, `cx init`, packaging/typecheck smoke, run observability,
   cron/gateway disabled gate.
 - 승격된 hardening surface: stale-lock metadata inspection/recovery, versioned
@@ -81,8 +82,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    - promotion/deprecation 시 skill id, display name, version, source runs,
      replay status, export state를 index에 기록합니다.
 
-6. 명시적 skill export command 추가. 상태: 명시적 Codex/OMX bundle export 구현.
-   - 제안 command: `cx skill export <skill-id> --target codex|omx`.
+6. 명시적 skill export command 추가. 상태: 명시적 Codex export와 optional external harness bundle export 구현.
+   - 제안 command: `cx skill export <skill-id> --target <target>`.
    - storage id는 filesystem-safe하게 유지합니다.
    - Codex-facing identity는 `displayName`의 `codexus:<skill-name>`을 사용합니다.
    - 외부 skill-name 제약이 Codexus storage rule과 다를 수 있으므로 외부 store
@@ -115,7 +116,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 11. git-aware project initialization 추가. 상태: `cx init` 구현.
     - 제안 command: `cx init`.
     - config, ignored state directory, optional project docs snippet을 만들되
-      unrelated `.omx/state`는 mutate하지 않습니다.
+      unrelated tool state는 mutate하지 않습니다.
 
 12. packaging과 alias migration 마무리. 상태: canonical metadata와 smoke coverage 구현, `chx` compatibility 유지.
     - `cx`, `codexus`를 canonical로 유지합니다.
