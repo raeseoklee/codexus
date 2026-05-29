@@ -44,7 +44,7 @@ compatibility alias로 유지합니다.
 - runs/events/report observability command
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, live execution disabled
 - cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
-- config/state/event/memory/skill versioned schema artifact와 durable read-path focused enforcement
+- config/state/event/memory/skill versioned schema artifact, durable read-path focused enforcement, single-record/run-ledger schema artifact subset validation
 - `npm run typecheck` syntax/static validation
 - `.omx/state`를 건드리지 않는 OMX status/plan interop
 - `codex/skills/codexus` 아래 Codex-native skill adapter source
@@ -82,5 +82,5 @@ compatibility alias로 유지합니다.
 - app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision만 구현했습니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
-- config/schema validation은 focused local enforcement와 schema artifact 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
+- config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

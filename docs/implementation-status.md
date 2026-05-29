@@ -89,7 +89,7 @@ temporary compatibility alias.
 - Run observability commands list runs, tail events, and preview reports.
 - App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, and deterministic fake lifecycle supervision are present, while live app-server execution remains gated off.
 - Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records with policy/approval contract fields for future dispatch.
-- Versioned schema artifacts exist for config, state, events, memory entries, and skills, with focused enforcement on durable read paths.
+- Versioned schema artifacts exist for config, state, events, memory entries, and skills, with focused enforcement plus zero-dependency schema-artifact subset validation on single-record and run-ledger checks.
 - `npm run typecheck` performs syntax/static validation with the local Node runtime.
 - OMX capability probe with older-version warning.
 - `cx plan --omx` writes harness and OMX-compatible plan artifacts without mutating `.omx/state`.
@@ -164,5 +164,5 @@ review. Current high-level gaps:
 - Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, and deterministic fake lifecycle supervision are implemented.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
 - Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
-- Config/schema validation is focused local enforcement plus schema artifacts, not full draft-2020-12 JSON Schema engine enforcement.
+- Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

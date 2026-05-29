@@ -4,7 +4,13 @@ import { resolve } from "node:path";
 import { runPaths } from "../../ledger/paths.ts";
 import { readState } from "../../ledger/state.ts";
 import type { RunState } from "../../types.ts";
-import { readAppServerSchemaFixture, readSchemaArtifactStatus, validateSchemaValue, type SchemaValidationType } from "../../validation/schemas.ts";
+import {
+  readAppServerSchemaFixture,
+  readSchemaArtifactStatus,
+  validateSchemaArtifactValue,
+  validateSchemaValue,
+  type SchemaValidationType,
+} from "../../validation/schemas.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 const schemaValidationTypes = new Set<SchemaValidationType>(["config", "state", "event", "memory-entry", "skill"]);
@@ -24,13 +30,16 @@ async function readJsonFile(path: string): Promise<unknown> {
   }
 }
 
-async function validateJsonFile(type: SchemaValidationType, path: string) {
+async function validateJsonFile(type: SchemaValidationType, path: string, schemaRoot?: string) {
   const value = await readJsonFile(path);
+  const validation = validateSchemaValue(type, value);
+  const artifactValidation = await validateSchemaArtifactValue(type, value, schemaRoot);
   return {
     schemaVersion: 1 as const,
     type,
     file: path,
-    validation: validateSchemaValue(type, value),
+    validation,
+    artifactValidation,
   };
 }
 
@@ -43,7 +52,7 @@ function inputEvolutionEnabled(input: unknown): boolean {
   return input.config.evolution.enabled !== false;
 }
 
-async function validateRunLedger(cwd: string, runId: string) {
+async function validateRunLedger(cwd: string, runId: string, schemaRoot?: string) {
   const paths = runPaths(cwd, runId);
   let parsedState: RunState | null = null;
   const state = {
@@ -52,12 +61,15 @@ async function validateRunLedger(cwd: string, runId: string) {
     exists: existsSync(paths.state),
     valid: false,
     error: null as string | null,
+    artifactValidation: null as Awaited<ReturnType<typeof validateSchemaArtifactValue>> | null,
   };
   if (state.exists) {
     try {
       parsedState = await readState(paths.state);
       if (parsedState.runId !== runId) throw new Error("runId_mismatch");
-      state.valid = true;
+      state.artifactValidation = await validateSchemaArtifactValue("state", parsedState, schemaRoot);
+      state.valid = state.artifactValidation.valid;
+      if (!state.valid) state.error = `artifact:${state.artifactValidation.errors.join(",")}`;
     } catch (error) {
       state.error = error instanceof Error ? error.message : String(error);
     }
@@ -77,6 +89,8 @@ async function validateRunLedger(cwd: string, runId: string) {
         const event = JSON.parse(line) as unknown;
         const validation = validateSchemaValue("event", event);
         if (!validation.valid) eventErrors.push(`line_${index + 1}:${validation.errors.join(",")}`);
+        const artifactValidation = await validateSchemaArtifactValue("event", event, schemaRoot);
+        if (!artifactValidation.valid) eventErrors.push(`line_${index + 1}:artifact:${artifactValidation.errors.join(",")}`);
         if (typeof event === "object" && event !== null && !Array.isArray(event)) {
           const record = event as Record<string, unknown>;
           if (record.runId !== runId) eventErrors.push(`line_${index + 1}:runId_mismatch`);
@@ -135,7 +149,8 @@ async function validateRunLedger(cwd: string, runId: string) {
 
 export async function schemaCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "check";
-  const root = resolve(flagString(args.flags, "schema-root") ?? "schemas");
+  const rootFlag = flagString(args.flags, "schema-root");
+  const root = rootFlag ? resolve(rootFlag) : undefined;
   const json = flagBool(args.flags, "json");
 
   if (subcommand === "check" || subcommand === "list") {
@@ -158,8 +173,8 @@ export async function schemaCommand(args: ParsedArgs): Promise<void> {
     const type = parseSchemaType(flagString(args.flags, "type"));
     const file = flagString(args.flags, "file");
     if (!file) throw new Error("missing_schema_file");
-    const result = await validateJsonFile(type, resolve(file));
-    const ok = result.validation.valid;
+    const result = await validateJsonFile(type, resolve(file), root);
+    const ok = result.validation.valid && result.artifactValidation.valid;
     if (json) {
       console.log(JSON.stringify({ ok, ...result }, null, 2));
       process.exitCode = ok ? 0 : 1;
@@ -167,6 +182,9 @@ export async function schemaCommand(args: ParsedArgs): Promise<void> {
     }
     console.log(`${ok ? "OK" : "FAIL"} ${type} ${result.file}`);
     for (const error of result.validation.errors) console.log(`- ${error}`);
+    for (const error of result.artifactValidation.schemaErrors) console.log(`- schema:${error}`);
+    for (const error of result.artifactValidation.unsupportedKeywords) console.log(`- unsupported:${error}`);
+    for (const error of result.artifactValidation.errors) console.log(`- artifact:${error}`);
     process.exitCode = ok ? 0 : 1;
     return;
   }
@@ -175,7 +193,7 @@ export async function schemaCommand(args: ParsedArgs): Promise<void> {
     const runId = args.positionals[1];
     if (!runId) throw new Error("missing_run_id");
     const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
-    const result = await validateRunLedger(cwd, runId);
+    const result = await validateRunLedger(cwd, runId, root);
     if (json) {
       console.log(JSON.stringify(result, null, 2));
       process.exitCode = result.ok ? 0 : 1;

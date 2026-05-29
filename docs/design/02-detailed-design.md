@@ -218,12 +218,14 @@ Subcommands:
 ### `cx schema check`
 
 Purpose: verify that versioned schema artifacts and the app-server fixture are
-present and structurally valid.
+present, structurally valid, and compatible with the local zero-dependency JSON
+Schema subset engine.
 
 ### `cx schema validate` and `cx schema validate-run`
 
 Purpose: validate a single durable JSON record or an existing run ledger with
-focused local validators. `validate-run` checks state, event JSONL shape,
+both focused local validators and the local schema-artifact subset engine.
+`validate-run` checks state, event JSONL shape, artifact-schema compatibility,
 event/run id consistency, terminal event consistency, and optional
 verification/experience artifacts based on the run state and input config.
 

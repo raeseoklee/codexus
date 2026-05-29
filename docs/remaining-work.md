@@ -128,10 +128,10 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     - Treat `chx` as compatibility only until a documented removal window.
     - Add install smoke tests for the bin paths and Codex adapter installer.
 
-13. Add TypeScript/static verification. Status: local syntax/static check and versioned schema artifacts implemented.
+13. Add TypeScript/static verification. Status: local syntax/static check, versioned schema artifacts, and zero-dependency schema artifact subset validation implemented.
     - Add a typecheck path or equivalent static validation beyond Node 26
       type-stripped execution.
-    - Add JSON schema validation for config and durable state.
+    - Keep config and durable state validation covered by the focused validator plus schema artifact subset engine; replace with a full external engine only if dependency policy allows it.
 
 14. Add run observability commands. Status: implemented.
     - Proposed command shapes: `cx runs list`, `cx events tail <run-id>`,
@@ -161,9 +161,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 The next implementation slice should turn gated surfaces into deeper evidence,
 not remove the gates:
 
-1. Replace the focused local schema checks with a full JSON Schema engine only
-   if dependency policy allows it; keep migration fixtures as the regression
-   boundary.
+1. Replace the local schema-artifact subset engine with a full JSON Schema
+   engine only if dependency policy allows it; keep migration fixtures as the
+   regression boundary.
 2. Preserve the replay parity matrix as a contract: no new canonical parity
    label should be added without fixture coverage and CLI replay evidence.
 3. Promote deterministic fake app-server supervision into an isolated real

@@ -70,7 +70,21 @@ test("observability commands list runs, tail events, and read reports", async ()
 
     const validateState = runCli(cwd, ["schema", "validate", "--type", "state", "--file", runOutput.statePath, "--json"]);
     assert.equal(validateState.status, 0, validateState.stderr);
-    assert.equal(JSON.parse(validateState.stdout).ok, true);
+    const stateValidation = JSON.parse(validateState.stdout);
+    assert.equal(stateValidation.ok, true);
+    assert.equal(stateValidation.artifactValidation.engine, "local-json-schema-subset");
+    assert.equal(stateValidation.artifactValidation.valid, true);
+
+    const invalidStatePath = join(cwd, "invalid-state.json");
+    const invalidStateRecord = JSON.parse(await readFile(runOutput.statePath, "utf8"));
+    delete invalidStateRecord.runId;
+    await writeFile(invalidStatePath, `${JSON.stringify(invalidStateRecord, null, 2)}\n`);
+    const invalidState = runCli(cwd, ["schema", "validate", "--type", "state", "--file", invalidStatePath, "--json"]);
+    assert.equal(invalidState.status, 1);
+    const invalidStateOutput = JSON.parse(invalidState.stdout);
+    assert.equal(invalidStateOutput.ok, false);
+    assert.ok(invalidStateOutput.validation.errors.includes("runId:missing_string"));
+    assert.ok(invalidStateOutput.artifactValidation.errors.includes("$.runId:required"));
 
     const eventPath = join(cwd, ".codex-harness", "runs", runOutput.runId, "events.jsonl");
     await writeFile(eventPath, `${JSON.stringify({
@@ -132,6 +146,7 @@ test("driver failures are classified and written to the run ledger", async () =>
 
 test("stale locks can be inspected and cleared while schema artifacts validate", async () => {
   const cwd = await tempDir();
+  let schemaRoot: string | null = null;
   try {
     const lockRoot = join(cwd, ".codex-harness", "locks");
     const staleDir = join(lockRoot, "memory.lock");
@@ -176,8 +191,24 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
     assert.equal(schemaOutput.schemas.length, 5);
+    assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
+    assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
+
+    schemaRoot = await tempDir();
+    for (const name of ["config.schema.json", "state.schema.json", "event.schema.json", "memory-entry.schema.json", "skill.schema.json"]) {
+      await writeFile(join(schemaRoot, name), await readFile(resolve("schemas", name), "utf8"));
+    }
+    const unsupportedConfig = JSON.parse(await readFile(join(schemaRoot, "config.schema.json"), "utf8"));
+    unsupportedConfig.additionalProperties = false;
+    await writeFile(join(schemaRoot, "config.schema.json"), `${JSON.stringify(unsupportedConfig, null, 2)}\n`);
+    const unsupportedSchema = runCli(resolve("."), ["schema", "check", "--schema-root", schemaRoot, "--json"]);
+    assert.equal(unsupportedSchema.status, 1);
+    const unsupportedSchemaOutput = JSON.parse(unsupportedSchema.stdout);
+    assert.equal(unsupportedSchemaOutput.ok, false);
+    assert.ok(unsupportedSchemaOutput.schemas.find((item: { name: string }) => item.name === "config.schema.json").unsupportedKeywords.includes("$:additionalProperties"));
   } finally {
+    if (schemaRoot) await rm(schemaRoot, { recursive: true, force: true });
     await rm(cwd, { recursive: true, force: true });
   }
 });

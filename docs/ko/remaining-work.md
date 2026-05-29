@@ -122,10 +122,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - `chx`는 문서화된 제거 window 전까지 compatibility alias로만 취급합니다.
     - bin path와 Codex adapter installer smoke test를 추가합니다.
 
-13. TypeScript/static verification 추가. 상태: local syntax/static check와 versioned schema artifact 구현.
+13. TypeScript/static verification 추가. 상태: local syntax/static check, versioned schema artifact, zero-dependency schema artifact subset validation 구현.
     - Node 26 type-stripped execution 외에 typecheck 또는 동등한 static
       validation을 추가합니다.
-    - config와 durable state에 JSON schema validation을 추가합니다.
+    - config와 durable state validation은 focused validator와 schema artifact subset engine으로 계속 커버하고, dependency policy가 허용될 때만 full external engine으로 교체합니다.
 
 14. run observability command 추가. 상태: 구현.
     - 제안 command: `cx runs list`, `cx events tail <run-id>`, `cx report <run-id>`.
@@ -153,8 +153,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 다음 구현 slice는 gate를 제거하기보다 gated surface의 evidence를 더 깊게
 만드는 방향이 좋습니다:
 
-1. dependency policy가 허용될 때만 focused local schema check를 full JSON Schema
-   engine으로 교체합니다. Migration fixture는 regression boundary로 유지합니다.
+1. dependency policy가 허용될 때만 local schema-artifact subset engine을 full JSON
+   Schema engine으로 교체합니다. Migration fixture는 regression boundary로 유지합니다.
 2. replay parity matrix를 contract로 유지합니다. 새 canonical parity label은
    fixture coverage와 CLI replay evidence 없이 추가하지 않습니다.
 3. app-server를 driver로 켜기 전에 deterministic fake app-server supervision을

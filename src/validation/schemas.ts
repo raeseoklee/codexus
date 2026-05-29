@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { inspectJsonSchemaSubset, jsonSchemaSubsetEngine, validateJsonSchemaSubset } from "./json-schema-subset.ts";
 
 export interface AppServerSchemaFixtureStatus {
   path: string;
@@ -38,6 +39,9 @@ export interface SchemaArtifactStatus {
   exists: boolean;
   valid: boolean;
   id: string | null;
+  engine: typeof jsonSchemaSubsetEngine;
+  schemaErrors: string[];
+  unsupportedKeywords: string[];
   error: string | null;
 }
 
@@ -50,6 +54,13 @@ export interface SchemaValidationResult {
   errors: string[];
 }
 
+export interface SchemaArtifactValidationResult extends SchemaValidationResult {
+  engine: typeof jsonSchemaSubsetEngine;
+  schemaPath: string;
+  schemaErrors: string[];
+  unsupportedKeywords: string[];
+}
+
 export const schemaArtifactNames = [
   "config.schema.json",
   "state.schema.json",
@@ -58,30 +69,130 @@ export const schemaArtifactNames = [
   "skill.schema.json",
 ] as const;
 
+const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
+  config: "config.schema.json",
+  state: "state.schema.json",
+  event: "event.schema.json",
+  "memory-entry": "memory-entry.schema.json",
+  skill: "skill.schema.json",
+};
+
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
 const terminalOutcomes = ["complete", "failed", "blocked", "cancelled"] as const;
 const verificationStatuses = ["pending", "passed", "failed", "skipped", "timed_out", "error"] as const;
 
-export async function readSchemaArtifactStatus(root = resolve("schemas")): Promise<SchemaArtifactStatus[]> {
+function schemaRoot(): string {
+  return join(repoRoot(), "schemas");
+}
+
+export async function readSchemaArtifactStatus(root = schemaRoot()): Promise<SchemaArtifactStatus[]> {
   const statuses: SchemaArtifactStatus[] = [];
   for (const name of schemaArtifactNames) {
     const path = join(root, name);
     if (!existsSync(path)) {
-      statuses.push({ name, path, exists: false, valid: false, id: null, error: "schema_missing" });
+      statuses.push({
+        name,
+        path,
+        exists: false,
+        valid: false,
+        id: null,
+        engine: jsonSchemaSubsetEngine,
+        schemaErrors: [],
+        unsupportedKeywords: [],
+        error: "schema_missing",
+      });
       continue;
     }
     try {
       const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;
       if (!isRecord(parsed) || typeof parsed.$schema !== "string" || typeof parsed.$id !== "string" || typeof parsed.title !== "string") {
-        statuses.push({ name, path, exists: true, valid: false, id: null, error: "schema_shape_invalid" });
+        statuses.push({
+          name,
+          path,
+          exists: true,
+          valid: false,
+          id: null,
+          engine: jsonSchemaSubsetEngine,
+          schemaErrors: [],
+          unsupportedKeywords: [],
+          error: "schema_shape_invalid",
+        });
         continue;
       }
-      statuses.push({ name, path, exists: true, valid: true, id: parsed.$id, error: null });
+      const inspection = inspectJsonSchemaSubset(parsed);
+      const error = inspection.errors.length > 0
+        ? "schema_subset_shape_invalid"
+        : inspection.unsupportedKeywords.length > 0
+          ? "schema_subset_unsupported_keywords"
+          : null;
+      statuses.push({
+        name,
+        path,
+        exists: true,
+        valid: inspection.valid,
+        id: parsed.$id,
+        engine: inspection.engine,
+        schemaErrors: inspection.errors,
+        unsupportedKeywords: inspection.unsupportedKeywords,
+        error,
+      });
     } catch (error) {
-      statuses.push({ name, path, exists: true, valid: false, id: null, error: error instanceof Error ? error.message : String(error) });
+      statuses.push({
+        name,
+        path,
+        exists: true,
+        valid: false,
+        id: null,
+        engine: jsonSchemaSubsetEngine,
+        schemaErrors: [],
+        unsupportedKeywords: [],
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
   return statuses;
+}
+
+export async function validateSchemaArtifactValue(type: SchemaValidationType, value: unknown, root = schemaRoot()): Promise<SchemaArtifactValidationResult> {
+  const schemaPath = join(root, schemaArtifactsByType[type]);
+  if (!existsSync(schemaPath)) {
+    return {
+      schemaVersion: 1,
+      type,
+      valid: false,
+      errors: ["schema_missing"],
+      engine: jsonSchemaSubsetEngine,
+      schemaPath,
+      schemaErrors: [],
+      unsupportedKeywords: [],
+    };
+  }
+  try {
+    const schema = JSON.parse(await readFile(schemaPath, "utf8")) as unknown;
+    const validation = validateJsonSchemaSubset(schema, value);
+    const schemaErrors = validation.valid ? [] : inspectJsonSchemaSubset(schema).errors;
+    return {
+      schemaVersion: 1,
+      type,
+      valid: validation.valid,
+      errors: validation.errors,
+      engine: validation.engine,
+      schemaPath,
+      schemaErrors,
+      unsupportedKeywords: validation.unsupportedKeywords,
+    };
+  } catch (error) {
+    return {
+      schemaVersion: 1,
+      type,
+      valid: false,
+      errors: [error instanceof Error ? error.message : String(error)],
+      engine: jsonSchemaSubsetEngine,
+      schemaPath,
+      schemaErrors: [],
+      unsupportedKeywords: [],
+    };
+  }
 }
 
 function requireRecord(value: unknown, errors: string[], path: string): value is Record<string, unknown> {

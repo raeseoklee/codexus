@@ -43,9 +43,10 @@ Codex interactive session -> Codexus adapter -> Codexus core
 현재 구현은 P0-P2 surface와 high-risk promotion slice를 포함합니다: `init`, run
 observability, memory lifecycle/curation, active skill index/export/improvement,
 approved adapter retrieval/context formatting/artifact, lock inspection/stale
-recovery, focused read-path enforcement와 run-ledger validation이 붙은 schema
-artifact, full replay parity fixture-matrix coverage, gated model replay, app-server
-dry-run roundtrip/recorded experiment manifest/process-probe/fake-supervision evidence,
+recovery, focused read-path enforcement, schema artifact subset validation,
+run-ledger validation이 붙은 schema artifact, full replay parity fixture-matrix
+coverage, gated model replay, app-server dry-run roundtrip/recorded experiment
+manifest/process-probe/fake-supervision evidence,
 explicit-budget driver-failure repair, cron/gateway dry-run audit record와
 policy/approval contract, installed skill tree diagnosis, local syntax/static
 validation.

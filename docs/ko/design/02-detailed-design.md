@@ -159,11 +159,13 @@ model behavior parity 증명이 아니라 structural coverage입니다.
 ## Schema validation
 
 `cx schema check`는 versioned schema artifact와 app-server fixture가 존재하고
-기본 구조가 유효한지 확인합니다. `cx schema validate --type <type> --file
-<path>`는 단일 durable JSON record를 focused local validator로 검사합니다.
-`cx schema validate-run <run-id>`는 state, event JSONL shape, event/run id
-consistency, terminal event consistency, 그리고 run state/input config에 따른
-optional verification/experience artifact를 검사합니다.
+기본 구조가 유효하며 local zero-dependency JSON Schema subset engine으로 검사
+가능한지 확인합니다. `cx schema validate --type <type> --file <path>`는 단일
+durable JSON record를 focused local validator와 schema artifact subset engine으로
+함께 검사합니다. `cx schema validate-run <run-id>`는 state, event JSONL shape,
+artifact-schema compatibility, event/run id consistency, terminal event
+consistency, 그리고 run state/input config에 따른 optional
+verification/experience artifact를 검사합니다.
 
 ## Codex-native adapter
 
