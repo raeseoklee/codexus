@@ -16,7 +16,7 @@ MVP는 CLI-first입니다. 안정적인 driver는 `codex exec --json`이며, app
 
 필수 레퍼런스:
 
-- [raeseoklee/claw-code](https://github.com/raeseoklee/claw-code): parity-first
+- [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code): parity-first
   CLI와 하네스 동작.
 - [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent):
   evolutionary memory, skills, cron, gateways, terminal backends, isolated

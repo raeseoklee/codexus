@@ -12,15 +12,15 @@ mandatory reference set below and record the mapping.
 
 ## Mandatory References
 
-1. [raeseoklee/claw-code](https://github.com/raeseoklee/claw-code)
+1. [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code)
    - Role: parity-first CLI and harness behavior reference.
    - Use for: CLI ergonomics, doctor/status JSON surfaces, permission modes,
      session state, slash-command expectations, tool/MCP/LSP surfaces,
      subagent/team surfaces, and parity fixture thinking.
-   - Current access note: on 2026-05-29, GitHub metadata was readable but source
-     clone failed with `Your repository is disabled` and HTTP 403. Treat it as a
-     mandatory reference, but mark source-level claims as provisional until the
-     repository is readable again.
+   - Current audit note: on 2026-05-29, source clone succeeded and HEAD
+     `4d3dc5b` was inspected. Use `README.md`, `USAGE.md`, `PARITY.md`,
+     `rust/README.md`, `rust/MOCK_PARITY_HARNESS.md`, and the contract docs as
+     the active source baseline.
 2. [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)
    - Role: evolutionary agent and self-improvement reference.
    - Use for: memory, skill creation and improvement, session search,
@@ -36,7 +36,7 @@ mandatory reference set below and record the mapping.
 
 ## Decision Routing
 
-- CLI/session parity: start with `raeseoklee/claw-code`, then compare
+- CLI/session parity: start with `ultraworkers/claw-code`, then compare
   OpenClaude where provider/session behavior matters.
 - Evolution loops: start with Hermes Agent, then adapt to Codexus with local,
   source-linked, promotion-gated artifacts.

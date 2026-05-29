@@ -11,37 +11,82 @@ from.
 
 | Reference | URL | Default branch | Updated | Source access |
 | --- | --- | --- | --- | --- |
-| `raeseoklee/claw-code` | https://github.com/raeseoklee/claw-code | `main` | 2026-04-02T00:58:02Z | GitHub metadata readable; clone blocked by disabled repository, HTTP 403 |
+| `ultraworkers/claw-code` | https://github.com/ultraworkers/claw-code | `main` | 2026-05-29T10:33:13Z | cloned and inspected at `4d3dc5b` |
 | `NousResearch/hermes-agent` | https://github.com/NousResearch/hermes-agent | `main` | 2026-05-29T10:27:48Z | cloned and inspected |
 | `Gitlawb/openclaude` | https://github.com/Gitlawb/openclaude | `main` | 2026-05-29T10:18:19Z | cloned and inspected |
 
-`raeseoklee/claw-code` clone attempt:
-
-```text
-remote: Your repository is disabled.
-fatal: unable to access 'https://github.com/raeseoklee/claw-code.git/': The requested URL returned error: 403
-```
-
 ## Claw Code
 
-Observed metadata:
+Observed source paths:
 
-- Repository: `raeseoklee/claw-code`
-- Description: "The fastest repo in history to surpass 50K stars ... Better
-  Harness Tools that make real things done. Now writing in Rust using
-  oh-my-codex."
-- Status: public metadata visible, not archived, source unavailable through
-  clone on this date.
+- `README.md`
+- `USAGE.md`
+- `PARITY.md`
+- `rust/README.md`
+- `rust/MOCK_PARITY_HARNESS.md`
+- `docs/g004-events-reports-contract.md`
+- `docs/navigation-file-context.md`
+- `docs/local-openai-compatible-providers.md`
+- `docs/g011-acp-json-rpc-status-contract.md`
+- `rust/crates/runtime/src/permissions.rs`
+- `rust/crates/runtime/src/mcp.rs`
+- `rust/crates/runtime/src/report_schema.rs`
+- `rust/crates/rusty-claude-cli/tests/mock_parity_harness.rs`
+- `rust/crates/rusty-claude-cli/tests/output_format_contract.rs`
+
+Observed behavior themes:
+
+- Canonical runtime: `rust/` is the source of truth for the `claw` CLI binary;
+  `src/` and `tests/` are companion Python/reference and audit helpers.
+- Health and machine output: `doctor`, `status`, `sandbox`, and `version`
+  support machine-readable output through `--output-format json`.
+- Repository initialization: `claw init --output-format json` emits structured
+  `created`, `updated`, `skipped`, and `artifacts` fields so consumers do not
+  substring-match prose.
+- Session state: `claw state --output-format json` reads
+  `.claw/worker-state.json`, including worker id, session reference, model, and
+  permission mode.
+- Permission controls: supported modes include `read-only`, `workspace-write`,
+  and `danger-full-access`; `--allowedTools` scopes tool availability.
+- REPL/slash surface: status, sandbox, cost, resume, session, usage, stats,
+  compact, config, memory, diff, commit, PR, issue, export, hooks, files,
+  release notes, MCP, agents, skills, doctor, tasks, context, desktop, review,
+  advisor, security review, subagent, team, telemetry, providers, cron, and
+  plugin operations are represented in slash/direct command surfaces.
+- Provider stance: Claw can target Anthropic, OpenAI-compatible gateways, and
+  local model servers, but it does not support OpenAI Codex sessions or Codex
+  CLI session import/export.
+- Mock parity harness: deterministic Anthropic-compatible mock service covers
+  streaming text, file read/write, grep, multi-tool turns, bash stdout, approved
+  and denied permission prompts, plugin tools, auto-compaction, and token/cost
+  reporting.
+- Parity lanes: the Rust port tracks bash validation, file-tool guards,
+  task/team/cron registries, MCP lifecycle bridge, LSP registry, and permission
+  enforcement.
+- Event/report contract: structured lane events, report schema versions,
+  canonical payload/projection lineage, redaction provenance, policy-blocked
+  actions, approval tokens, and capability negotiation are first-class
+  interoperability concepts.
+- ACP/Zed/JSON-RPC stance: unsupported editor daemon behavior is surfaced as a
+  truthful status with a JSON envelope rather than inferred from command
+  presence.
 
 Codexus implication:
 
-- Keep Claw Code as a mandatory parity reference for CLI and harness behavior,
-  but do not make fresh source-specific claims until source access is restored.
-- Existing Codexus docs that mention Claw-style parity must be treated as
-  provisional reference baseline, not as current source audit.
-- When access returns, re-audit README, usage docs, parity fixtures, CLI command
-  contracts, permission/session behavior, tool/MCP/LSP behavior, and
-  subagent/team surfaces.
+- Keep `cx doctor/status/verify` and other automation surfaces explicitly
+  machine-readable; do not rely on natural-language status text for automation.
+- Treat run/session identity, permission mode, selected model/driver, and tool
+  scope as ledger facts, not final-report prose.
+- Expand Codexus replay tests toward Claw-style parity fixtures: tool success,
+  tool denial, permission prompts, multi-step turns, plugin/skill paths,
+  compaction/large-output behavior, and token/cost/accounting metadata.
+- Keep permission and approval events explicit before adding unattended,
+  remote, team, cron, or daemon-like execution.
+- Preserve the current Codex-auth boundary as a Codexus divergence: Claw does
+  not import Codex sessions, while Codexus intentionally wraps authenticated
+  local `codex` CLI behavior.
+- Use truthful capability/status envelopes for app-server or future daemon
+  surfaces; command presence alone must not imply support.
 
 ## Hermes Agent
 
@@ -142,12 +187,12 @@ Codexus implications:
 
 | Codexus surface | Primary reference | Secondary reference | Notes |
 | --- | --- | --- | --- |
-| CLI command contract | Claw Code | OpenClaude | Claw source needs re-audit when accessible. |
+| CLI command contract | Claw Code | OpenClaude | Use Claw's JSON command contracts and typed errors as parity pressure. |
 | Codex auth boundary | OpenClaude | Codexus local probes | Reuse local Codex auth; avoid private backend APIs. |
 | Evolution loop | Hermes Agent | Claw Code | Promotion must remain explicit and replay-gated. |
 | Skill lifecycle | Hermes Agent | OpenClaude slash commands | Prefer source-linked, reversible skills. |
 | Session and run ledger | Claw Code | OpenClaude gRPC/session model | Ledger is Codexus' source of truth. |
-| Permission flow | OpenClaude | Claw Code | Model permission events as ledger events. |
+| Permission flow | Claw Code | OpenClaude | Model permission checks, prompts, denials, and approvals as ledger events. |
 | Gateways/cron | Hermes Agent | OpenClaude service mode | Later surface after local core hardening. |
 | Provider/driver metadata | OpenClaude | Codex driver probes | Descriptor/capability-driven runtime. |
 | Codex-native adapter | Codexus docs | OpenClaude and Hermes | Keep current Codex chat primary unless a new chat is explicitly justified. |

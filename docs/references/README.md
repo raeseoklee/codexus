@@ -12,5 +12,5 @@ to Codexus.
   mandatory sources, decision routing, and the required process before harness
   architecture or runtime changes.
 - [2026-05-29 reference snapshot](audits/2026-05-29-reference-snapshot.md):
-  current audit of `raeseoklee/claw-code`, `NousResearch/hermes-agent`, and
+  current audit of `ultraworkers/claw-code`, `NousResearch/hermes-agent`, and
   `Gitlawb/openclaude`.

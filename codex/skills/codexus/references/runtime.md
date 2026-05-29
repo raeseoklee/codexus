@@ -19,7 +19,7 @@ Before changing harness runtime behavior, consult
 
 Mandatory references are:
 
-- `raeseoklee/claw-code` for CLI and harness parity behavior.
+- `ultraworkers/claw-code` for CLI and harness parity behavior.
 - `NousResearch/hermes-agent` for evolutionary memory, skills, cron, gateways,
   and subagents.
 - `Gitlawb/openclaude` for provider/auth/session runtime, permissions,

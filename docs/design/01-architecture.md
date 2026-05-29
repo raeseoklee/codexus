@@ -23,7 +23,7 @@ consult the mandatory upstream references and record the mapping in
 
 Mandatory references:
 
-- [raeseoklee/claw-code](https://github.com/raeseoklee/claw-code) for
+- [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) for
   parity-first CLI and harness behavior.
 - [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) for
   evolutionary memory, skills, cron, gateways, terminal backends, and isolated

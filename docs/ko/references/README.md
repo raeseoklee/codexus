@@ -11,5 +11,5 @@ upstream reference에서 출발하고, 그 동작을 Codexus에 어떻게 매핑
 - [Reference-first 하네스 정책](01-reference-first-harness-policy.md):
   필수 소스, 의사결정 라우팅, 하네스 아키텍처/런타임 변경 전 절차.
 - [2026-05-29 레퍼런스 스냅샷](audits/2026-05-29-reference-snapshot.md):
-  `raeseoklee/claw-code`, `NousResearch/hermes-agent`,
+  `ultraworkers/claw-code`, `NousResearch/hermes-agent`,
   `Gitlawb/openclaude`의 현재 감사 결과.

@@ -49,7 +49,7 @@ Runtime positioning:
 ## Design Principles
 
 - Keep Codex as the execution engine.
-- Treat harness work as reference-first: consult `raeseoklee/claw-code`, `NousResearch/hermes-agent`, and `Gitlawb/openclaude` before changing core harness behavior.
+- Treat harness work as reference-first: consult `ultraworkers/claw-code`, `NousResearch/hermes-agent`, and `Gitlawb/openclaude` before changing core harness behavior.
 - Avoid undocumented ChatGPT/Codex backend APIs.
 - Prefer local, auditable files over hidden service state.
 - Treat every run as resumable until it reaches an explicit terminal outcome.

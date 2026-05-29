@@ -17,12 +17,15 @@ OMC와 OMX는 같은 계열의 하네스 아이디어입니다. OMC는 Claude Co
 - `codex app-server`는 capability detection 뒤에 둔 실험적 driver로 유지합니다.
 - 하네스 설계는
   [reference-first 하네스 정책](../references/01-reference-first-harness-policy.md)을
-  따릅니다. 필수 레퍼런스는 `raeseoklee/claw-code`,
+  따릅니다. 필수 레퍼런스는 `ultraworkers/claw-code`,
   `NousResearch/hermes-agent`, `Gitlawb/openclaude`입니다.
-- `raeseoklee/claw-code`는 CLI/harness parity의 필수 기준입니다. 2026-05-29
-  기준 GitHub metadata는 읽었지만 source clone은 disabled repository HTTP
-  403으로 실패했으므로, source-level Claw parity note는 재감사 전까지
-  provisional입니다.
+- `ultraworkers/claw-code`는 CLI/harness parity의 필수 기준입니다. 수정된
+  2026-05-29 audit에서는 source를 clone하고 HEAD `4d3dc5b`를 확인했습니다.
+  핵심 pattern은 `rust/` 아래 canonical Rust CLI, `doctor/status/sandbox/version
+  --output-format json`, structured `init`/`state` output, permission mode와
+  `--allowedTools`, broad slash/direct command surface, deterministic mock parity
+  harness, explicit event/report contract, ACP/Zed/JSON-RPC surface의 truthful
+  unsupported status입니다.
 - Hermes Agent는 memory, skill creation/improvement, session search, cron,
   gateways, terminal backends, isolated subagents의 기준입니다.
 - OpenClaude는 provider profiles, Codex OAuth, `~/.codex/auth.json` reuse,
