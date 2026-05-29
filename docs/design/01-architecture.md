@@ -6,7 +6,13 @@
 
 Codexus is a local evolutionary runtime harness for OpenAI Codex. It does not replace Codex. It supervises Codex runs, records durable state, verifies outcomes, extracts reusable experience, and gradually improves future runs through explicit memory and skill promotion.
 
-The architecture remains CLI-core. The stable driver is `codex exec --json`; the Codex-native adapter is implemented as the thin `$codexus` skill over the same core, while Codex app-server integration remains experimental behind capability detection and explicit gates.
+The architecture remains core-first: the same Codexus core must be callable from
+the external `cx` CLI and from inside an interactive Codex session. The stable
+driver is `codex exec --json`; the product direction is an OMX-like
+Codex-native session runtime built from the thin `$codexus` skill, Codexus
+guidance overlays, local session state, and optional hook/status/tmux
+integration. Codex app-server integration remains experimental behind
+capability detection and explicit gates.
 
 Canonical product and CLI names:
 
@@ -102,7 +108,22 @@ flowchart TD
 
 ## Runtime Surfaces
 
-Codexus has two intended runtime surfaces.
+Codexus has two product runtime surfaces and one deferred advanced surface.
+
+Codex-native session runtime, target primary UX:
+
+```text
+Codex TUI session
+  -> codexus / $codexus skill
+  -> Codexus core
+  -> shared ledger / memory / skills / session state
+```
+
+This mode should make Codexus feel closer to OMX inside a running Codex
+session. It uses installable Codex surfaces rather than a private backend:
+skills, marker-bounded AGENTS overlays, local state, optional hooks/statusline
+integration, and optional tmux workers. Codexus must not claim transparent TUI
+transcript capture unless Codex exposes a supported transcript API.
 
 External CLI runtime, implemented first:
 
@@ -112,13 +133,15 @@ User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
 
 This mode is strongest for supervised runs, automation, verification gates, replay, repair, and durable evidence.
 
-Codex-native adapter, planned next:
+External exec-resume sessions, deferred:
 
 ```text
-Codex interactive session -> Codexus skill/plugin/command adapter -> Codexus core
+cx session start/continue -> codex exec resume <thread-id>
 ```
 
-This mode should make Codexus feel closer to OMX inside a running Codex session. It must call the same core runtime and share the same ledger/memory/skill store rather than duplicating orchestration logic.
+This can provide multi-turn continuity over a separate non-interactive Codex
+thread, but it is not the OMX-like path and should not be the primary session
+story.
 
 ## Major Components
 

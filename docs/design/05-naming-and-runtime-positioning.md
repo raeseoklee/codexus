@@ -101,39 +101,49 @@ Strengths:
 - replay and repair flows,
 - low coupling to Codex interactive session internals.
 
-### Codex-Native Adapter
+### Codex-Native Session Runtime
 
-This is the next runtime direction, closer to how OMX feels inside Codex.
+This is the primary product direction, closer to how OMX feels inside Codex.
 
 ```text
 Codex interactive session
-  -> Codexus skill/plugin/command adapter
+  -> Codexus skill + AGENTS overlay + optional hooks/status
   -> Codexus core
-  -> shared ledger / memory / skills
+  -> shared ledger / memory / skills / session state
 ```
 
 Target behavior:
 
 - users can invoke Codexus from inside a Codex session,
+- Codexus guidance can steer the current session toward checkpointing,
+  verification, memory lookup, and evidence capture,
 - the adapter calls the same core runtime instead of duplicating logic,
 - the same `.codex-harness` state remains the source of truth,
-- Codex-native usage complements the external CLI instead of replacing it.
+- Codex-native usage becomes the normal interactive UX while the external CLI
+  remains the engine and automation path.
 
 ## Relationship to OMX
 
 OMX is session-native: it augments a running Codex session with skills, prompts, modes, tmux workers, HUD, and helper commands.
 
-Codexus currently starts from the opposite edge: an external supervisor CLI that drives `codex exec --json` and records durable evidence around it.
+Codexus started from the opposite edge: an external supervisor CLI that drives
+`codex exec --json` and records durable evidence around it. The direction now
+changes from "CLI first, in-session later" to "shared core with in-session UX as
+the primary product shape."
 
 The intended end state is a dual surface:
 
 ```text
 Codexus Core
-  + External CLI: cx run / verify / replay / status
-  + Codex-native adapter: invoked inside Codex sessions
+  + Codex-native session runtime: skill / AGENTS overlay / hooks / state / tmux
+  + External CLI engine: cx run / verify / replay / status
 ```
 
-This lets Codexus keep its durable supervisor strengths while gaining an OMX-like in-session workflow later.
+The external `cx` surface remains essential for automation, bounded sub-runs,
+and recovery. It should not be the only story users see.
+
+The deferred `codex exec resume` path is an external multi-turn thread feature,
+not the OMX-like session-native runtime.
 
 ## Relationship to Claw Code
 

@@ -25,6 +25,13 @@ The skill is intentionally thin. It delegates to the same core used by the exter
 For user-facing invocation examples, see
 [Using Codexus inside Codex](../codex-session-usage.md).
 
+The adapter is the first installed piece of the broader
+[session-native supervision](07-supervised-sessions.md) direction. The target is
+not a separate chat surface or an external `codex exec resume` thread; it is an
+OMX-like harness that the current Codex TUI session can explicitly call through
+skills, marker-bounded AGENTS guidance, local state, optional hooks/status, and
+optional tmux workers.
+
 ## Installation
 
 The repository stores the source skill at:
@@ -101,7 +108,10 @@ This starts a separate non-interactive Codex process. It is useful for bounded s
 
 ## Next Steps
 
-- Add a project-level AGENTS.md snippet documenting `$codexus` usage.
+- Add a marker-bounded project/user AGENTS overlay documenting session-native
+  `$codexus` usage.
+- Add `cx setup codex-session`, `cx session status`, `cx session checkpoint`,
+  and `cx session verify` as the first session-native command slice.
 - Add explicit adapter injection only if the user-visible approval step and
   non-injected context artifact contract are preserved.
 - Add app-server based turns only after supervised lifecycle and JSON-RPC

@@ -149,9 +149,12 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 ## 이번 재검토의 방향 변경
 
-- custom chat surface를 먼저 만들지 않습니다. Codex-native adapter와 active
-  skill/memory retrieval이 더 적절한 다음 단계입니다. 현재 Codex conversation을
-  유지하면서 같은 core runtime을 사용하기 때문입니다.
+- custom chat surface를 먼저 만들지 않습니다. 다음 제품 방향은 OMX-like
+  Codex-native session runtime입니다: skill adapter, marker-bounded AGENTS
+  overlay, local session state, 명시적 checkpoint/verification, optional
+  hook/status, optional tmux worker를 같은 core runtime 위에 둡니다.
+- `codex exec resume` session은 primary session-native story가 아니라 deferred
+  external multi-turn feature로 취급합니다.
 - `codexus:<skill-name>`은 storage identity가 아니라 display identity로 취급합니다.
   파일시스템 churn을 피하면서 생성 skill의 출처를 명확히 보여줍니다.
 - lock/lease와 schema migration을 기존 암시보다 앞당깁니다. active index,
@@ -177,3 +180,6 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    유지합니다.
 5. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고
    user-visible한 adapter injection 단계를 추가합니다.
+6. 첫 session-native slice를 추가합니다: marker-bounded AGENTS overlay setup,
+   read-only `cx session status`, explicit checkpoint artifact, session
+   verification evidence.

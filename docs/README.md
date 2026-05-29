@@ -30,9 +30,9 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.
 - [Evolution engine](design/03-evolution-engine.md): Hermes-inspired memory, skill proposal, replay validation, promotion, and rollback design.
 - [Implementation feedback](design/04-implementation-feedback.md): decisions made after MVP implementation blockers and whether the architecture direction changes.
-- [Naming and runtime positioning](design/05-naming-and-runtime-positioning.md): Codexus name, `cx` CLI target, external CLI runtime, and future Codex-native adapter.
+- [Naming and runtime positioning](design/05-naming-and-runtime-positioning.md): Codexus name, `cx` CLI target, external CLI runtime, and Codex-native session direction.
 - [Codex-native adapter](design/06-codex-native-adapter.md): `$codexus` skill adapter, installation, supported first commands, and design rules.
-- [Supervised sessions](design/07-supervised-sessions.md): multi-turn supervised runs over one Codex thread via `codex exec resume`, ledger/session model, and the `cx session` surface.
+- [Session-native supervision](design/07-supervised-sessions.md): OMX-like direction using skills, AGENTS overlays, hooks/status state, and optional tmux workers inside the current Codex session.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Public release checklist](public-release.md): metadata, safety, verification, and visibility checklist for open-source publication.
@@ -51,9 +51,11 @@ requirements for normal Codexus use.
 
 Runtime positioning:
 
-- external supervisor CLI that drives `codex exec --json`,
-- Codex-native `$codexus` skill adapter invoked from inside a Codex session,
-- shared core: both surfaces use the same ledger, verification, memory, and replay-gated skill system.
+- primary direction: Codex-native session runtime invoked from inside a Codex
+  TUI session,
+- stable engine: external supervisor CLI that drives `codex exec --json`,
+- shared core: both surfaces use the same ledger, verification, memory, and
+  replay-gated skill system.
 
 ## Design Principles
 

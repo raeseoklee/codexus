@@ -154,9 +154,12 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 
 ## Direction Changes From This Review
 
-- Do not build a custom chat surface first. The Codex-native adapter plus
-  active skill/memory retrieval is the better next step because it preserves the
-  current Codex conversation and uses the same core runtime.
+- Do not build a custom chat surface first. The next product direction is an
+  OMX-like Codex-native session runtime: skill adapter, marker-bounded AGENTS
+  overlay, local session state, explicit checkpoints/verification, optional
+  hooks/status, and optional tmux workers over the same core runtime.
+- Treat `codex exec resume` sessions as a deferred external multi-turn feature,
+  not as the primary session-native story.
 - Treat `codexus:<skill-name>` as display identity, not storage identity. This
   avoids filesystem churn and keeps generated skills visually distinct.
 - Add lock/lease and schema migration earlier than originally implied. They are
@@ -184,3 +187,6 @@ not remove the gates:
    contract-compatible.
 5. Add an explicit, user-visible adapter injection step if retrieved
    `codexus:<skill-name>` context is ever inserted automatically.
+6. Add the first session-native slice: marker-bounded AGENTS overlay setup,
+   read-only `cx session status`, explicit checkpoint artifacts, and session
+   verification evidence.

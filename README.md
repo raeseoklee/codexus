@@ -21,8 +21,9 @@ model and execution engine, then adds the engineering layer needed for durable
 runs, verification gates, recovery loops, memory, and replay-gated skills.
 
 Codexus is not a Codex replacement. It is an orchestration layer around the
-authenticated local Codex CLI, with an optional Codex-native skill adapter for
-interactive sessions.
+authenticated local Codex CLI. The stable engine is still `cx`, while the
+product direction is an OMX-like Codex-native session runtime through the
+installed `codexus` skill, guidance overlays, local state, and optional hooks.
 
 ```text
 User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
@@ -166,6 +167,7 @@ Public bins: `cx` and `codexus` are canonical.
 - [Detailed design](docs/design/02-detailed-design.md)
 - [Evolution engine](docs/design/03-evolution-engine.md)
 - [Codex-native adapter](docs/design/06-codex-native-adapter.md)
+- [Session-native supervision](docs/design/07-supervised-sessions.md)
 - [Reference governance](docs/references/README.md)
 - [Implementation status](docs/implementation-status.md)
 - [Remaining work](docs/remaining-work.md)

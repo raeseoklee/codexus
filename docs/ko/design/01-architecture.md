@@ -6,10 +6,12 @@
 
 Codexus는 OpenAI Codex를 위한 로컬 진화형 runtime harness입니다. Codex를 대체하지 않고, Codex 실행을 감독하며 durable state, verification, recovery, memory, skill promotion을 제공합니다.
 
-Architecture는 CLI-core를 유지합니다. 안정적인 driver는 `codex exec --json`이며,
-Codex-native adapter는 같은 core 위의 얇은 `$codexus` skill로 구현되어 있습니다.
-Codex app-server integration은 capability detection과 explicit gate 뒤의
-experimental surface로 유지합니다.
+Architecture는 core-first를 유지합니다. 같은 Codexus core가 외부 `cx` CLI와
+interactive Codex session 안에서 모두 호출 가능해야 합니다. 안정적인 driver는
+`codex exec --json`입니다. 제품 방향은 얇은 `$codexus` skill, Codexus guidance
+overlay, local session state, optional hook/status/tmux integration을 조합한
+OMX-like Codex-native session runtime입니다. Codex app-server integration은
+capability detection과 explicit gate 뒤의 experimental surface로 유지합니다.
 
 ## 레퍼런스 거버넌스
 
@@ -76,19 +78,37 @@ authenticated local Codex CLI를 감싸는 하네스입니다.
 
 ## 런타임 표면
 
+Codexus에는 두 product runtime surface와 하나의 deferred advanced surface가 있습니다.
+
+목표 primary UX인 Codex-native session runtime:
+
+```text
+Codex TUI session
+  -> codexus / $codexus skill
+  -> Codexus core
+  -> shared ledger / memory / skills / session state
+```
+
+이 mode는 실행 중인 Codex session 안에서 Codexus가 OMX에 더 가깝게 느껴지게 해야
+합니다. private backend가 아니라 skill, marker-bounded AGENTS overlay, local state,
+optional hook/statusline integration, optional tmux worker 같은 installable Codex
+surface를 사용합니다. Codex가 지원되는 transcript API를 제공하지 않는 한 Codexus는 TUI
+transcript를 투명하게 캡처한다고 주장하면 안 됩니다.
+
 현재 구현된 external CLI runtime:
 
 ```text
 User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
 ```
 
-계획된 Codex-native adapter:
+Deferred advanced surface인 external exec-resume session:
 
 ```text
-Codex interactive session -> Codexus adapter -> Codexus core
+cx session start/continue -> codex exec resume <thread-id>
 ```
 
-Codex-native adapter는 OMX처럼 Codex 세션 안에서 호출되는 UX를 목표로 하지만, 핵심 로직은 외부 CLI와 동일한 core runtime을 사용해야 합니다.
+이는 별도 non-interactive Codex thread 위의 multi-turn continuity를 제공할 수 있지만
+OMX-like path가 아니며 primary session story가 되어서는 안 됩니다.
 
 ## 주요 컴포넌트
 

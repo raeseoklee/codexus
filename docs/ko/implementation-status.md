@@ -93,6 +93,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   위임하고, canonical bin link와 `CODEXUS_INSTALL_CODEX_SKILL=0`이 아닐 때 Codex
   skill adapter 설치를 수행합니다.
 - User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.
+- Session-native supervision 설계는 OMX-like in-Codex usage를 제품 방향으로
+  정리했고, `codex exec resume`은 별도 external multi-turn feature로 deferred했습니다.
 
 ## 검증
 
@@ -128,6 +130,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
 - app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision만 구현했습니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
+- Session-native setup, marker-bounded AGENTS overlay, checkpoint command,
+  session verification command, hook/status integration, tmux-backed Codexus
+  worker는 설계됐지만 아직 구현되지 않았습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

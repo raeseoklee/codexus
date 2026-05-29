@@ -178,14 +178,19 @@ verification/experience artifact를 검사합니다.
 
 ## Codex-native adapter
 
-외부 CLI가 MVP입니다. 향후 adapter는 Codex interactive session 안에서 Codexus core를 호출해야 합니다.
+외부 CLI는 구현된 engine path입니다. 제품 방향은 Codexus를 현재 interactive Codex
+session 안에서 OMX처럼 호출할 수 있게 하는 Codex-native session runtime입니다.
 
 요구사항:
 
 - `cx`와 같은 core runtime 사용
 - `.codex-harness` ledger/memory/skill store 공유
 - workflow kernel 중복 구현 금지
-- status, memory retrieval, skill review, bounded context retrieval, supervised run handoff부터 시작
+- status, memory retrieval, skill review, bounded context retrieval, checkpoint,
+  session verification부터 시작
+- supervised run handoff는 일반 in-session workflow가 아니라 의도적인 nested sub-run으로 취급
+- transparent prompt injection 전에 marker-bounded AGENTS overlay와 local session state 추가
+- 외부 CLI는 automation/CI surface로 유지
 
 `cx adapt omx context`는 active index에서 approved/replay-passed 상태인
 `codexus:<skill-name>` skill과 memory를 bounded prompt-safe block으로

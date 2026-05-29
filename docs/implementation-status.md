@@ -140,6 +140,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   installing the Codex skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is
   set.
 - User-facing Codex-session usage docs now explain how to invoke the `$codexus` skill, what commands to prefer, and when to stay with normal Codex interaction.
+- The session-native supervision design now makes OMX-like in-Codex usage the
+  product direction, with `codex exec resume` deferred as a separate external
+  multi-turn feature.
 
 ## Verified
 
@@ -225,6 +228,9 @@ review. Current high-level gaps:
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
 - Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, and deterministic fake lifecycle supervision are implemented.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
+- Session-native setup, marker-bounded AGENTS overlay, checkpoint command,
+  session verification command, hook/status integration, and tmux-backed
+  Codexus workers are designed but not implemented.
 - Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

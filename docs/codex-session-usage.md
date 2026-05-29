@@ -12,6 +12,12 @@ The Codex-native path keeps the current Codex conversation as the primary
 working loop. Codexus only adds durable status, verification, replay, memory,
 schema, and skill evidence.
 
+Design direction: Codexus is moving toward an OMX-like session-native runtime.
+The installed skill is the first layer. Future setup will add marker-bounded
+AGENTS guidance, session state, checkpoint/verification commands, and optional
+hook/status/tmux integration. See
+[Session-native supervision](design/07-supervised-sessions.md).
+
 ## Install the Adapter
 
 The published npm package installs the CLI and the Codex skill adapter by
@@ -115,6 +121,9 @@ skill index --json
 skill review <skill-id> --json
 replay skill <skill-id> --json
 ```
+
+As the session-native command surface lands, prefer checkpoint and session
+verification commands before starting nested `cx run` sub-runs.
 
 Use supervised runs deliberately:
 

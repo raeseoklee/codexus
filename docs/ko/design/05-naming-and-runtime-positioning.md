@@ -71,11 +71,16 @@ OMX는 Codex session-native harness입니다. Codexus는 현재 외부 superviso
 
 ```text
 Codexus Core
-  + External CLI: cx run / verify / replay / status
-  + Codex-native adapter: Codex session 안에서 호출
+  + Codex-native session runtime: skill / AGENTS overlay / hooks / state / tmux
+  + External CLI engine: cx run / verify / replay / status
 ```
 
-이 구조는 Codexus의 durable supervisor 장점을 유지하면서, 나중에 OMX처럼 session 안에서 자연스럽게 호출되는 UX를 제공합니다.
+이 구조는 Codexus의 durable supervisor 장점을 유지하면서, OMX처럼 현재 Codex session
+안에서 자연스럽게 호출되는 UX를 primary product shape로 만듭니다. 외부 `cx` surface는
+automation, bounded sub-run, recovery에 필수인 engine path로 남습니다.
+
+Deferred `codex exec resume` path는 외부 multi-turn thread feature이지,
+OMX-like session-native runtime이 아닙니다.
 
 ## Claw Code와의 관계
 

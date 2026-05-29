@@ -308,14 +308,21 @@ skill/memory context without requiring OMX for core use.
 
 ## Codex-Native Adapter Contract
 
-The external CLI is the implemented MVP. A later Codex-native adapter should make Codexus invokable from inside an interactive Codex session, similar in feel to OMX.
+The external CLI is the implemented engine path. The product direction is now a
+Codex-native session runtime that makes Codexus invokable from inside the
+current interactive Codex session, similar in feel to OMX.
 
 Adapter requirements:
 
 - call the same Codexus core used by `cx`,
 - share `.codex-harness` ledger, memory, and skill stores,
 - avoid duplicating workflow kernel logic inside a skill or plugin wrapper,
-- support narrow commands first, such as status, memory retrieval, skill review, bounded context retrieval, and supervised run handoff,
+- support narrow commands first, such as status, memory retrieval, skill review,
+  bounded context retrieval, checkpointing, and session verification,
+- treat supervised run handoff as a deliberate nested sub-run, not the normal
+  in-session workflow,
+- add marker-bounded AGENTS overlays and local session state before any
+  transparent prompt injection,
 - preserve the external CLI as the automation and CI surface.
 
 ## Config
