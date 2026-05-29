@@ -39,6 +39,33 @@ canonical verification path로 둡니다.
 - Public repository visibility는 Actions billing behavior를 바꿀 수 있으므로
   공개 후 첫 run을 확인합니다.
 
+## GitHub Pages Installer
+
+Codexus는 repository root의 `install.sh`를 제공합니다. 다음 URL이 동작하도록
+GitHub Pages source를 `main` branch와 `/` root로 활성화합니다:
+
+```bash
+curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
+```
+
+Project Pages root인 `https://raeseoklee.github.io/codexus/`는 `index.html`의
+작은 static landing page를 제공합니다.
+
+API form:
+
+```bash
+gh api --method POST repos/raeseoklee/codexus/pages -f 'source[branch]=main' -f 'source[path]=/'
+```
+
+Pages가 이미 있으면 update합니다:
+
+```bash
+gh api --method PUT repos/raeseoklee/codexus/pages -f 'source[branch]=main' -f 'source[path]=/'
+```
+
+Root URL인 `https://raeseoklee.github.io/install.sh`는 `raeseoklee.github.io`
+이름의 별도 User Pages repository가 필요합니다.
+
 ## Visibility Change
 
 Private repository를 public으로 바꾸는 것은 중요한 repository-level action입니다.

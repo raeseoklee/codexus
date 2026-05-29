@@ -100,11 +100,12 @@ temporary compatibility alias.
 - GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
 - Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
 - Public repository readiness files are present: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue templates, and PR template.
+- Root `install.sh` supports GitHub Pages `curl | sh` installation, local-source test installs, canonical bin links, and optional Codex skill adapter installation.
 
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 56.
+- Current test count: 57.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`

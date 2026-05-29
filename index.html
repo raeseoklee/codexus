@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Codexus</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+      body {
+        margin: 0;
+        background: Canvas;
+        color: CanvasText;
+      }
+      main {
+        width: min(880px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 72px 0;
+      }
+      h1 {
+        font-size: clamp(2.25rem, 8vw, 5rem);
+        line-height: 1;
+        margin: 0 0 20px;
+        letter-spacing: 0;
+      }
+      p {
+        max-width: 720px;
+        font-size: 1.1rem;
+      }
+      pre {
+        overflow-x: auto;
+        padding: 16px;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 8px;
+      }
+      a {
+        color: LinkText;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 28px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Codexus</h1>
+      <p>
+        A local execution harness for OpenAI Codex with durable ledgers,
+        verification gates, memory, and replay-gated skills.
+      </p>
+      <pre><code>curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh</code></pre>
+      <nav>
+        <a href="https://github.com/raeseoklee/codexus">GitHub</a>
+        <a href="https://github.com/raeseoklee/codexus/blob/main/docs/quickstart.md">Quick start</a>
+        <a href="https://github.com/raeseoklee/codexus/blob/main/docs/implementation-status.md">Status</a>
+        <a href="https://github.com/raeseoklee/codexus/blob/main/docs/ko/README.md">한국어</a>
+      </nav>
+    </main>
+  </body>
+</html>

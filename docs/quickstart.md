@@ -5,6 +5,30 @@
 This guide gets Codexus running locally without relying on model or network
 access for the first verification pass.
 
+## Install Script
+
+After the repository is public and GitHub Pages is enabled for `main` `/`, the
+installer URL is:
+
+```bash
+curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
+```
+
+Review-first form:
+
+```bash
+curl -fsSLO https://raeseoklee.github.io/codexus/install.sh
+less install.sh
+sh install.sh
+```
+
+Installer environment variables:
+
+- `CODEXUS_REF`: branch or tag to install, default `main`
+- `CODEXUS_INSTALL_DIR`: install directory, default `~/.local/share/codexus`
+- `CODEXUS_BIN_DIR`: bin directory for `cx`, `codexus`, and `chx`, default `~/.local/bin`
+- `CODEXUS_INSTALL_CODEX_SKILL=0`: skip Codex skill adapter installation
+
 ## 1. Clone
 
 ```bash

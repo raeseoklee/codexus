@@ -40,6 +40,33 @@ availability is blocked.
 - Public repository visibility may change Actions billing behavior; verify the
   first run after publication.
 
+## GitHub Pages Installer
+
+Codexus ships `install.sh` from the repository root. Enable GitHub Pages from
+the `main` branch and `/` root so this URL works:
+
+```bash
+curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
+```
+
+The project Pages root, `https://raeseoklee.github.io/codexus/`, serves a small
+static landing page from `index.html`.
+
+API form:
+
+```bash
+gh api --method POST repos/raeseoklee/codexus/pages -f 'source[branch]=main' -f 'source[path]=/'
+```
+
+If Pages already exists, update it:
+
+```bash
+gh api --method PUT repos/raeseoklee/codexus/pages -f 'source[branch]=main' -f 'source[path]=/'
+```
+
+The root URL `https://raeseoklee.github.io/install.sh` requires a separate User
+Pages repository named `raeseoklee.github.io`.
+
 ## Visibility Change
 
 Changing a private repository to public is a significant repository-level

@@ -54,10 +54,11 @@ compatibility alias로 유지합니다.
 - GitHub Actions CI는 main push와 pull request에서 committed whitespace check, static syntax validation, unit test를 실행합니다.
 - Local CI parity는 `npm run ci`로 실행할 수 있습니다. Remote Actions 실행은 repository/account runner availability에 의존합니다.
 - Public repository readiness file이 추가되었습니다: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue template, PR template.
+- Root `install.sh`는 GitHub Pages `curl | sh` 설치, local-source test install, canonical bin link, optional Codex skill adapter 설치를 지원합니다.
 
 ## 검증
 
-- `npm test`: 56 tests 통과
+- `npm test`: 57 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`

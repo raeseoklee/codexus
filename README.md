@@ -50,6 +50,20 @@ Most tests use the mock driver and do not require model or network access.
 
 ## Quick Start
 
+Install with GitHub Pages after the repository is public and Pages is enabled:
+
+```bash
+curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
+```
+
+For a review-first install:
+
+```bash
+curl -fsSLO https://raeseoklee.github.io/codexus/install.sh
+less install.sh
+sh install.sh
+```
+
 Clone and verify the repository:
 
 ```bash

@@ -5,6 +5,30 @@
 이 문서는 첫 검증 단계에서 모델이나 네트워크 접근에 의존하지 않고 Codexus를
 로컬에서 실행하는 절차를 설명합니다.
 
+## Install Script
+
+Repository가 public이고 GitHub Pages source가 `main` `/`로 활성화되면 installer
+URL은 다음과 같습니다:
+
+```bash
+curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
+```
+
+먼저 검토하고 설치하려면:
+
+```bash
+curl -fsSLO https://raeseoklee.github.io/codexus/install.sh
+less install.sh
+sh install.sh
+```
+
+Installer environment variable:
+
+- `CODEXUS_REF`: 설치할 branch 또는 tag, 기본값 `main`
+- `CODEXUS_INSTALL_DIR`: install directory, 기본값 `~/.local/share/codexus`
+- `CODEXUS_BIN_DIR`: `cx`, `codexus`, `chx`를 둘 bin directory, 기본값 `~/.local/bin`
+- `CODEXUS_INSTALL_CODEX_SKILL=0`: Codex skill adapter 설치 생략
+
 ## 1. Clone
 
 ```bash
