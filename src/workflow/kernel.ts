@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 import type { HarnessConfig } from "../config/schema.ts";
 import { createDriver } from "../drivers/index.ts";
 import type { DriverResult } from "../drivers/contract.ts";
+import { classifyDriverFailure } from "../drivers/errors.ts";
 import { appendMemoryEntry } from "../evolution/memory.ts";
 import { appendEvent } from "../ledger/events.ts";
 import { runPaths } from "../ledger/paths.ts";
@@ -95,6 +96,18 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
   };
   await writeState(paths.state, state);
   await appendEvent(paths.events, { runId, phase: state.phase, type: "run.created", source: "kernel" });
+  await appendEvent(paths.events, {
+    runId,
+    phase: state.phase,
+    type: "permission.checked",
+    source: "policy",
+    payload: {
+      driver: config.driver,
+      sandbox: config.codex.sandbox,
+      approval: config.codex.approval,
+      status: "delegated_to_driver",
+    },
+  });
   for (const finding of preflight.findings) {
     await appendEvent(paths.events, {
       runId,
@@ -119,6 +132,13 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         suggestion: "Remove or narrow the blocked command and rerun.",
       },
     };
+    await appendEvent(paths.events, {
+      runId,
+      phase: state.phase,
+      type: "approval.resolved",
+      source: "policy",
+      payload: { status: "not_requested", reason: "preflight_blocked" },
+    });
   } else {
     state = transition(state, "execute");
     await writeState(paths.state, state);
@@ -193,6 +213,16 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
     result = await runDriverAttempt(prompt, 0);
 
     outcome = outcomeFromDriver(result.status);
+    if (result.status !== "succeeded") {
+      const classification = classifyDriverFailure(result);
+      await appendEvent(paths.events, {
+        runId,
+        phase: state.phase,
+        type: "driver.failure_classified",
+        source: "kernel",
+        payload: classification,
+      });
+    }
     if (result.status === "succeeded" && config.verification.commands.length > 0) {
       verificationStatus = await runChecks();
       outcome = verificationStatus === "passed" ? "complete" : "failed";
@@ -237,8 +267,18 @@ export async function executeRun(options: ExecuteRunOptions): Promise<ExecuteRun
         ...state.verification,
         latestStatus: verificationStatus,
       },
-      ...(outcome === "failed" && result.error
-        ? { error: { code: "driver_failed", message: result.error.slice(0, 500), source: config.driver } }
+      ...(outcome === "failed"
+        ? (() => {
+          const classification = classifyDriverFailure(result);
+          return {
+            error: {
+              code: classification.code,
+              message: classification.message.slice(0, 500),
+              source: config.driver,
+              suggestion: classification.suggestion,
+            },
+          };
+        })()
         : {}),
     };
   }

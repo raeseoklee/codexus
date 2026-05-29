@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { evaluateReplaySpec, readReplaySpec, type ReplaySpec } from "../../evolution/replay.ts";
+import { evaluateModelReplayStub, evaluateReplaySpec, readReplaySpec, type ReplaySpec } from "../../evolution/replay.ts";
 import { reviewSkill } from "../../evolution/skills.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -34,7 +34,11 @@ export async function replayCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (json) {
-    console.log(JSON.stringify({ replay: result }, null, 2));
+    const modelReplay = evaluateModelReplayStub({
+      requested: flagBool(args.flags, "with-model-replay"),
+      budget: flagString(args.flags, "model-budget") ? Number(flagString(args.flags, "model-budget")) : null,
+    });
+    console.log(JSON.stringify({ replay: result, modelReplay }, null, 2));
   } else {
     console.log(`${result.skillId}: replay ${result.status}`);
     for (const scenario of result.scenarios) {

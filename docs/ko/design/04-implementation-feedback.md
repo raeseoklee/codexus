@@ -61,17 +61,19 @@ final assistant text는 nested `item.completed.item.text` 형태로 올 수 있�
 - policy preflight
 - config validation
 
+P0-P2 safe MVP surface는 구현되었습니다: 확장된 JSON error contract, ledger
+decision event, driver-failure classification, minimal lock, state migration
+read, active skill index/export, bounded adapter retrieval, memory lifecycle
+command, replay stub, app-server fixture/status gate, project init,
+observability command, packaging/static check, cron/gateway disabled gate.
+
 다음 hardening:
 
-- 구현된 unknown command/argument validation JSON contract를 unexpected argument,
-  unsupported capability, missing/corrupt state, disabled driver까지 확장
-- permission, approval, policy-block decision을 first-class ledger event로 승격
-- driver-failure repair 전에 driver-failure classification 추가
-- active skill index/export, cron, app-server run 전에 lock/lease handling과
-  schema migration reader 추가
-- active skill index와 외부 Codex/OMX skill export
-- deterministic replay 뒤 model-in-the-loop replay 추가, 이후 large-output,
-  interruption, tool denial, multi-tool turn parity fixture 확장
-- event/error contract 안정화 후 app-server schema fixture와 gated roundtrip
+- stale-lock detection/recovery와 lock inspection
+- runtime validator를 versioned JSON Schema artifact로 승격
+- budget/policy gate 뒤 real model-in-the-loop replay 추가
+- live turn roundtrip 전에 app-server schema contract test 추가
+- bounded retrieved skill/memory를 prompt-safe하게 formatting하는 Codex-native
+  adapter context command 추가
 
 전체 backlog는 [남은 작업](../remaining-work.md)에 유지합니다.

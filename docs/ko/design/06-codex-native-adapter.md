@@ -51,10 +51,14 @@ Codex 안에서는 낮은 위험의 명령부터 사용합니다:
 ```bash
 node codex/skills/codexus/scripts/cx.mjs doctor --json
 node codex/skills/codexus/scripts/cx.mjs status <run-id> --json
+node codex/skills/codexus/scripts/cx.mjs events tail <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs verify <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs memory search "<query>" --json
+node codex/skills/codexus/scripts/cx.mjs memory review --json
 node codex/skills/codexus/scripts/cx.mjs skill review <skill-id> --json
+node codex/skills/codexus/scripts/cx.mjs skill index --json
 node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --json
+node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
 ```
 
 Supervised handoff:
@@ -86,8 +90,7 @@ node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounde
 ## 다음 단계
 
 - `$codexus` 사용법을 설명하는 project-level AGENTS.md snippet 추가.
-- 현재 task에 맞는 promoted skill retrieval 추가.
+- retrieved active skill/memory를 prompt-safe하게 formatting하는 context command 추가.
 - app-server driver 계약 테스트 후 app-server turn 연결.
-- core ledger가 permission, approval, policy-block을 typed event로 기록한 뒤
-  adapter display에 연결.
+- permission, approval, policy-block event display를 더 풍부하게 개선.
 - `.codex-harness`에서 `.codexus`로의 migration은 backward-compatible read와 함께 별도로 진행.

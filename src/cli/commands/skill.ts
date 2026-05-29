@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { type ExperienceRecord } from "../../evolution/experience.ts";
-import { deprecateSkill, listSkills, promoteSkill, reviewSkill, writeSkillProposal } from "../../evolution/skills.ts";
+import { deprecateSkill, exportActiveSkill, listSkills, promoteSkill, readActiveSkillIndex, reviewSkill, writeSkillProposal } from "../../evolution/skills.ts";
 import { runPaths } from "../../ledger/paths.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -55,6 +55,16 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     return;
   }
 
+  if (subcommand === "index") {
+    const activeIndex = await readActiveSkillIndex(cwd);
+    if (json) {
+      console.log(JSON.stringify({ activeIndex }, null, 2));
+      return;
+    }
+    for (const entry of activeIndex) console.log(`${entry.displayName}: ${entry.status} (${entry.version})`);
+    return;
+  }
+
   if (subcommand === "promote") {
     const skillId = args.positionals[1];
     if (!skillId) throw new Error("missing_skill_id");
@@ -77,6 +87,20 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
       return;
     }
     console.log(`${skillId}: deprecated`);
+    return;
+  }
+
+  if (subcommand === "export") {
+    const skillId = args.positionals[1];
+    if (!skillId) throw new Error("missing_skill_id");
+    const target = flagString(args.flags, "target");
+    if (target !== "codex" && target !== "omx") throw new Error(`invalid_skill_export_target:${target ?? "missing"}`);
+    const result = await exportActiveSkill(cwd, skillId, target, flagBool(args.flags, "force"));
+    if (json) {
+      console.log(JSON.stringify({ export: result }, null, 2));
+      return;
+    }
+    console.log(`${skillId}: exported to ${result.path}`);
     return;
   }
 

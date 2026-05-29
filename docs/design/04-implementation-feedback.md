@@ -118,18 +118,20 @@ Not required:
 
 ## Next Implementation Priority
 
-Replay-gated skill promotion, workflow-kernel extraction, harness-level resume,
-explicit verify/replay commands, basic policy preflight, config validation,
-typed JSON error envelopes, and Codexus skill display namespaces are now
-implemented. The next slice should focus on the remaining contract and safety
-hardening before runtime expansion:
+The P0-P2 safe MVP surfaces are now implemented: expanded JSON error contracts,
+ledger decision events, driver-failure classification, minimal locks, state
+migration reads, active skill index/export, bounded adapter retrieval, memory
+lifecycle commands, replay stubs, app-server fixture/status gating, project
+initialization, observability commands, packaging/static checks, and
+cron/gateway disabled gates.
 
-1. Extend JSON output contract tests beyond the implemented unknown-command and argument-validation cases to unexpected arguments, unsupported capabilities, missing/corrupt state, and disabled drivers.
-2. Promote permission, approval, and policy-block decisions to first-class ledger events.
-3. Add driver-failure classification before attempting driver-failure repair.
-4. Add lock/lease handling and schema migration readers before active skill indexes, export, cron, or app-server runs create concurrent writers.
-5. Add active-skill index files and explicit export into Codex/OMX skill stores.
-6. Add model-in-the-loop replay behind the deterministic replay gate, then expand parity fixtures for large-output truncation, interruption, tool denial, and multi-tool turns.
-7. Add app-server schema generation fixtures and a gated roundtrip experiment only after the event/error contract is stable.
+The next slice should deepen those surfaces rather than adding another runtime
+path:
+
+1. Add stale-lock detection/recovery and lock inspection.
+2. Promote runtime validators into versioned JSON Schema artifacts.
+3. Add real model-in-the-loop replay behind budget and policy gates.
+4. Add app-server schema contract tests before any live turn roundtrip.
+5. Add a Codex-native adapter context formatter for bounded retrieved skills and memory.
 
 The full backlog is maintained in [Remaining work](../remaining-work.md).

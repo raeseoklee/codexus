@@ -34,6 +34,13 @@ export interface ReplayResult {
   scenarios: ReplayScenarioResult[];
 }
 
+export interface ModelReplayResult {
+  schemaVersion: 1;
+  status: "not_run";
+  reason: string;
+  budget: number | null;
+}
+
 export function buildDefaultReplaySpec(skillId: string, task: string): ReplaySpec {
   return {
     schemaVersion: 1,
@@ -95,4 +102,15 @@ export function evaluateReplaySpec(spec: ReplaySpec, skill: {
 export async function readReplaySpec(path: string): Promise<ReplaySpec | null> {
   if (!existsSync(path)) return null;
   return JSON.parse(await readFile(path, "utf8")) as ReplaySpec;
+}
+
+export function evaluateModelReplayStub(options: { requested: boolean; budget: number | null }): ModelReplayResult {
+  return {
+    schemaVersion: 1,
+    status: "not_run",
+    reason: options.requested
+      ? "model replay is intentionally stubbed until deterministic replay, budget, and policy gates are complete"
+      : "model replay was not requested",
+    budget: options.budget,
+  };
 }

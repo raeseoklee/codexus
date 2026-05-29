@@ -26,7 +26,12 @@ function mergeConfig<T extends Record<string, unknown>>(base: T, overlay: Record
 
 function readJsonFile(path: string): Record<string, unknown> | null {
   if (!existsSync(path)) return null;
-  const parsed = JSON.parse(readFileSync(path, "utf8")) as unknown;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(path, "utf8")) as unknown;
+  } catch {
+    throw new Error(`config_parse_failed:${path}`);
+  }
   if (!isRecord(parsed)) {
     throw new Error(`config_not_object:${path}`);
   }
@@ -106,6 +111,18 @@ function validateConfig(config: HarnessConfig, warnings: string[]): HarnessConfi
   if (typeof next.omx.preferSparkshellForVerification !== "boolean") {
     warnings.push("invalid config omx.preferSparkshellForVerification; using default true");
     next.omx.preferSparkshellForVerification = defaultConfig.omx.preferSparkshellForVerification;
+  }
+  if (!next.automation || typeof next.automation !== "object") {
+    warnings.push("invalid config automation; using defaults");
+    next.automation = structuredClone(defaultConfig.automation);
+  }
+  if (typeof next.automation.cronEnabled !== "boolean") {
+    warnings.push("invalid config automation.cronEnabled; using default false");
+    next.automation.cronEnabled = defaultConfig.automation.cronEnabled;
+  }
+  if (typeof next.automation.gatewayEnabled !== "boolean") {
+    warnings.push("invalid config automation.gatewayEnabled; using default false");
+    next.automation.gatewayEnabled = defaultConfig.automation.gatewayEnabled;
   }
   return next;
 }

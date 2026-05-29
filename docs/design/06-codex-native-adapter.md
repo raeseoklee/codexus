@@ -51,10 +51,14 @@ Inside Codex, prefer low-risk commands first:
 ```bash
 node codex/skills/codexus/scripts/cx.mjs doctor --json
 node codex/skills/codexus/scripts/cx.mjs status <run-id> --json
+node codex/skills/codexus/scripts/cx.mjs events tail <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs verify <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs memory search "<query>" --json
+node codex/skills/codexus/scripts/cx.mjs memory review --json
 node codex/skills/codexus/scripts/cx.mjs skill review <skill-id> --json
+node codex/skills/codexus/scripts/cx.mjs skill index --json
 node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --json
+node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
 ```
 
 Supervised handoff is supported but should be deliberate:
@@ -85,8 +89,7 @@ This starts a separate non-interactive Codex process. It is useful for bounded s
 ## Next Steps
 
 - Add a project-level AGENTS.md snippet documenting `$codexus` usage.
-- Add active skill retrieval so the adapter can suggest relevant promoted skills for the current task.
+- Add a prompt-safe context formatter for retrieved active skills and memory.
 - Add app-server based turns only after the app-server driver is contract-tested.
-- Add permission, approval, and policy-block event display once the core ledger
-  records them as typed events.
+- Add richer permission, approval, and policy-block event display.
 - Add a migration from `.codex-harness` to `.codexus` only with backward-compatible reads.

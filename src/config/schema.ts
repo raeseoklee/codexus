@@ -22,6 +22,10 @@ export interface HarnessConfig {
     enabled: "auto" | boolean;
     preferSparkshellForVerification: boolean;
   };
+  automation: {
+    cronEnabled: boolean;
+    gatewayEnabled: boolean;
+  };
 }
 
 export const defaultConfig: HarnessConfig = {
@@ -47,5 +51,9 @@ export const defaultConfig: HarnessConfig = {
   omx: {
     enabled: "auto",
     preferSparkshellForVerification: true,
+  },
+  automation: {
+    cronEnabled: false,
+    gatewayEnabled: false,
   },
 };

@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { loadConfig } from "../../config/loader.ts";
 import type { HarnessConfig } from "../../config/schema.ts";
+import { createDriver } from "../../drivers/index.ts";
 import { executeRun } from "../../workflow/kernel.ts";
 import { flagArray, flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -43,6 +44,10 @@ export async function runCommand(args: ParsedArgs): Promise<void> {
 
   const loaded = loadConfig({ cwd });
   const config = applyFlagOverrides(loaded.config, args);
+  if (config.driver === "codex-app-server") {
+    const probe = await (await createDriver(config)).probe();
+    if (!probe.available) throw new Error("unsupported_feature:codex-app-server");
+  }
   const result = await executeRun({ cwd, prompt, config });
 
   if (json) {

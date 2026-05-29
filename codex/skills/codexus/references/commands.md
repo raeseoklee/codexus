@@ -13,7 +13,10 @@ Use for environment readiness, Codex auth, driver capabilities, OMX availability
 ## Run State
 
 ```bash
+node codex/skills/codexus/scripts/cx.mjs runs list --json
 node codex/skills/codexus/scripts/cx.mjs status <run-id> --json
+node codex/skills/codexus/scripts/cx.mjs events tail <run-id> --json
+node codex/skills/codexus/scripts/cx.mjs report <run-id> --json
 ```
 
 Use to reconstruct a run from disk. It does not require a live process or model call.
@@ -31,6 +34,8 @@ Use when the current conversation needs to rerun or attach verification evidence
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs memory search "<query>" --json
+node codex/skills/codexus/scripts/cx.mjs memory list --json
+node codex/skills/codexus/scripts/cx.mjs memory review --json
 ```
 
 Use for bounded retrieval of source-linked lessons. Do not paste raw ledger history into prompts.
@@ -41,11 +46,21 @@ Use for bounded retrieval of source-linked lessons. Do not paste raw ledger hist
 node codex/skills/codexus/scripts/cx.mjs skill propose <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs skill review <skill-id> --json
 node codex/skills/codexus/scripts/cx.mjs skill promote <skill-id> --json
+node codex/skills/codexus/scripts/cx.mjs skill index --json
+node codex/skills/codexus/scripts/cx.mjs skill export <skill-id> --target codex --json
 node codex/skills/codexus/scripts/cx.mjs skill deprecate <skill-id> "<reason>" --json
-node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --json
+node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-replay --json
 ```
 
 Promotion should remain explicit. Do not auto-promote a skill just because a proposal exists.
+
+## Bounded Context Retrieval
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
+```
+
+Use to retrieve bounded active skill and memory candidates. It does not create a separate chat loop.
 
 ## Supervised Handoff
 

@@ -65,10 +65,11 @@ The repository now has a working MVP harness spine:
 - durable run ledger and workflow kernel,
 - `codex exec --json` and mock drivers,
 - verification gate and bounded repair loop,
-- `status`, `verify`, `resume`, `plan`, and `replay` CLI surfaces,
+- `init`, `status`, `runs`, `events`, `report`, `verify`, `resume`, `plan`, and `replay` CLI surfaces,
 - policy preflight for high-risk verification commands,
-- automatic experience and memory records,
-- replay-gated skill proposal, review, promotion, listing, and deprecation,
-- optional OMX status inspection and `.omx/plans` export without mutating `.omx/state`.
+- automatic experience and memory records with memory lifecycle commands,
+- replay-gated skill proposal, review, promotion, active index, explicit export, listing, and deprecation,
+- optional OMX status/context retrieval and `.omx/plans` export without mutating `.omx/state`,
+- app-server fixture/status gating, cron/gateway disabled feature gates, and local syntax/static validation.
 
-The remaining work is no longer the core harness spine; it is hardening: richer JSON/error/event contracts, active skill index and export, model-in-the-loop replay, app-server experiments, and broader parity fixtures. See [Remaining work](remaining-work.md).
+The remaining work is no longer P0-P2 surface construction; it is deeper hardening: real model-in-the-loop replay, live app-server experiments, stale-lock recovery, and eventually policy-gated cron/gateway automation. See [Remaining work](remaining-work.md).

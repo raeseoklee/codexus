@@ -37,8 +37,8 @@ contract를 가져야 합니다. Human prose는 projection이지 source of truth
 - `cx resume`
 - `cx verify`
 - `cx replay`
-- `cx memory search`
-- `cx skill propose/review/promote/deprecate/list`
+- `cx memory add/search/list/review/prune`
+- `cx skill propose/index/review/promote/export/deprecate/list`
 - `cx adapt omx status`
 
 자동화에 쓰이는 명령은 `--json`을 지원해야 합니다.
@@ -139,4 +139,4 @@ Replay는 Claw mock parity category를 따라 확장합니다:
 - `cx`와 같은 core runtime 사용
 - `.codex-harness` ledger/memory/skill store 공유
 - workflow kernel 중복 구현 금지
-- status, memory search, skill review, supervised run handoff부터 시작
+- status, memory retrieval, skill review, bounded context retrieval, supervised run handoff부터 시작

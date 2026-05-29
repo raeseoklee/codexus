@@ -8,7 +8,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const [command = "help", ...rest] = argv;
   const positionals: string[] = [];
   const flags: ParsedArgs["flags"] = {};
-  const booleanFlags = new Set(["json", "help", "omx"]);
+  const booleanFlags = new Set(["json", "help", "omx", "force", "with-docs", "with-model-replay", "dry-run"]);
 
   for (let index = 0; index < rest.length; index += 1) {
     const arg = rest[index];
@@ -54,4 +54,19 @@ export function flagArray(flags: ParsedArgs["flags"], key: string): string[] {
   if (Array.isArray(value)) return value;
   if (typeof value === "string") return [value];
   return [];
+}
+
+export function assertAllowedFlags(args: ParsedArgs, allowed: readonly string[]): void {
+  const allowedSet = new Set(allowed);
+  for (const key of Object.keys(args.flags)) {
+    if (!allowedSet.has(key)) {
+      throw new Error(`unexpected_argument:--${key}`);
+    }
+  }
+}
+
+export function assertMaxPositionals(args: ParsedArgs, max: number): void {
+  if (args.positionals.length > max) {
+    throw new Error(`unexpected_argument:${args.positionals[max]}`);
+  }
 }

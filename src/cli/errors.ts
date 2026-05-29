@@ -38,8 +38,26 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported adapt target${target ? `: ${target}` : ""}.`;
     case "unsupported_adapt_omx_command":
       return `Unsupported OMX adapter command${target ? `: ${target}` : ""}.`;
+    case "unsupported_feature":
+      return `Unsupported feature${target ? `: ${target}` : ""}.`;
+    case "unexpected_argument":
+      return `Unexpected argument${target ? `: ${target}` : ""}.`;
     case "unsupported_skill_command":
       return `Unsupported skill command${target ? `: ${target}` : ""}.`;
+    case "unsupported_memory_command":
+      return `Unsupported memory command${target ? `: ${target}` : ""}.`;
+    case "unsupported_runs_command":
+      return `Unsupported runs command${target ? `: ${target}` : ""}.`;
+    case "unsupported_events_command":
+      return `Unsupported events command${target ? `: ${target}` : ""}.`;
+    case "invalid_event_tail_lines":
+      return "Invalid event tail line count.";
+    case "missing_memory_kind":
+      return "Missing memory kind.";
+    case "missing_memory_text":
+      return "Missing memory text.";
+    case "missing_memory_id":
+      return "Missing memory id.";
     case "missing_prompt":
       return "Missing run prompt.";
     case "missing_run_id":
@@ -54,6 +72,22 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Invalid --max-repairs value.";
     case "invalid_memory_limit":
       return "Invalid memory limit.";
+    case "invalid_memory_prune_window":
+      return "Invalid memory prune window.";
+    case "invalid_skill_export_target":
+      return `Invalid skill export target${target ? `: ${target}` : ""}.`;
+    case "skill_not_active":
+      return `Skill is not active${target ? `: ${target}` : ""}.`;
+    case "skill_export_validation_failed":
+      return `Skill export validation failed${target ? `: ${target}` : ""}.`;
+    case "skill_export_target_exists":
+      return `Skill export target exists${target ? `: ${target}` : ""}.`;
+    case "lock_unavailable":
+      return `Lock is already held${target ? `: ${target}` : ""}.`;
+    case "state_corrupt":
+      return `Run state is corrupt${target ? `: ${target}` : ""}.`;
+    case "config_parse_failed":
+      return `Config file could not be parsed${target ? `: ${target}` : ""}.`;
     case "run_not_found":
       return `Run not found${target ? `: ${target}` : ""}.`;
     case "skill_not_found":
@@ -75,8 +109,18 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_adapt_target":
     case "unsupported_adapt_omx_command":
       return "Run `cx adapt omx status --json` for the currently supported adapter surface.";
+    case "unsupported_feature":
+      return "Use `cx doctor --json` to inspect supported local capabilities before enabling this feature.";
+    case "unexpected_argument":
+      return "Run the command with `--help` or check `cx --help` for supported arguments.";
     case "unsupported_skill_command":
       return "Run `cx skill list --json`, `cx skill review <skill-id> --json`, or another supported skill subcommand.";
+    case "unsupported_memory_command":
+      return "Run `cx memory search`, `cx memory list`, `cx memory add`, `cx memory review`, or `cx memory prune`.";
+    case "unsupported_runs_command":
+      return "Run `cx runs list --json`.";
+    case "unsupported_events_command":
+      return "Run `cx events tail <run-id> --json`.";
     case "missing_prompt":
       return "Pass the prompt after `cx run`, for example `cx run --json \"inspect the project\"`.";
     case "missing_run_id":
@@ -85,12 +129,36 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass the storage id of a proposed skill, for example `skill_document-parser`.";
     case "missing_memory_query":
       return "Pass a bounded query after `cx memory search`.";
+    case "missing_memory_kind":
+      return "Pass `--kind repo_fact|user_preference|workflow_lesson|verification_pattern|failure_pattern|tooling_note`.";
+    case "missing_memory_text":
+      return "Pass memory text after the memory command.";
+    case "missing_memory_id":
+      return "Pass the memory id to remove or inspect.";
     case "missing_replay_target":
       return "Pass `skill <skill-id>` or a path to `replay.json`.";
     case "invalid_max_repairs":
       return "Use a non-negative integer for `--max-repairs`.";
     case "invalid_memory_limit":
       return "Use a positive integer for `--limit`.";
+    case "invalid_memory_prune_window":
+      return "Use `--before <iso-date>` or `--older-than-days <positive integer>`.";
+    case "invalid_event_tail_lines":
+      return "Use a positive integer for `--lines`.";
+    case "invalid_skill_export_target":
+      return "Use `--target codex` or `--target omx`.";
+    case "skill_not_active":
+      return "Promote the skill first with `cx skill promote <skill-id> --json`.";
+    case "skill_export_validation_failed":
+      return "Review the generated skill metadata before exporting it.";
+    case "skill_export_target_exists":
+      return "Use `--force` to overwrite a previous generated export.";
+    case "lock_unavailable":
+      return "Wait for the active Codexus operation to finish, then retry.";
+    case "state_corrupt":
+      return "Inspect the run ledger state file or restore it from version control/backups.";
+    case "config_parse_failed":
+      return "Fix the JSON syntax in the reported config file and rerun the command.";
     case "run_not_found":
       return "Check the run id and workspace, then rerun the command.";
     case "skill_not_found":

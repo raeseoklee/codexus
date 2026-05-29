@@ -1,7 +1,9 @@
-import { copyFile, readdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { homedir } from "node:os";
 import { join } from "node:path";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
+import { withFileLock } from "../util/lock.ts";
 import type { ExperienceRecord } from "./experience.ts";
 import { buildDefaultReplaySpec, evaluateReplaySpec, readReplaySpec, type ReplayResult } from "./replay.ts";
 
@@ -60,6 +62,21 @@ export interface SkillListEntry {
   location: "proposed" | "active";
   path: string;
   skill: SkillProposal;
+}
+
+export interface ActiveSkillIndexEntry {
+  schemaVersion: 1;
+  id: string;
+  name: string;
+  displayName: string;
+  version: string;
+  status: "active" | "deprecated";
+  sourceRunIds: string[];
+  replayStatus: ReplayResult["status"];
+  exportState: Record<string, { exportedAt: string; path: string }>;
+  promotedAt: string | null;
+  updatedAt: string;
+  activeDir: string;
 }
 
 type StoredSkillProposal = Omit<SkillProposal, "displayName"> & {
@@ -164,6 +181,28 @@ export function activeSkillsRoot(cwd: string): string {
   return join(cwd, ".codex-harness", "skills", "active");
 }
 
+export function activeSkillIndexPath(cwd: string): string {
+  return join(activeSkillsRoot(cwd), "index.json");
+}
+
+export async function readActiveSkillIndex(cwd: string): Promise<ActiveSkillIndexEntry[]> {
+  const path = activeSkillIndexPath(cwd);
+  if (!existsSync(path)) return [];
+  return JSON.parse(await readFile(path, "utf8")) as ActiveSkillIndexEntry[];
+}
+
+export async function upsertActiveSkillIndexEntry(cwd: string, entry: ActiveSkillIndexEntry): Promise<void> {
+  await withFileLock(cwd, "active-skills", async () => {
+    const entries = existsSync(activeSkillIndexPath(cwd)) ? await readActiveSkillIndex(cwd) : [];
+    const next = [
+      ...entries.filter((candidate) => !(candidate.id === entry.id && candidate.version === entry.version)),
+      { ...entry, updatedAt: new Date().toISOString() },
+    ].sort((left, right) => left.displayName.localeCompare(right.displayName));
+    await ensureDir(activeSkillsRoot(cwd));
+    await writeJsonAtomic(activeSkillIndexPath(cwd), next);
+  });
+}
+
 export async function readSkillProposal(cwd: string, skillId: string): Promise<SkillProposal> {
   const path = join(proposedSkillDir(cwd, skillId), "skill.json");
   if (!existsSync(path)) throw new Error(`skill_not_found:${skillId}`);
@@ -246,6 +285,20 @@ export async function promoteSkill(cwd: string, skillId: string): Promise<Promot
   await copyFile(join(sourceDir, "SKILL.md"), join(targetDir, "SKILL.md"));
   await copyFile(join(sourceDir, "evidence.json"), join(targetDir, "evidence.json"));
   await copyFile(join(sourceDir, "replay.json"), join(targetDir, "replay.json"));
+  await upsertActiveSkillIndexEntry(cwd, {
+    schemaVersion: 1,
+    id: promoted.id,
+    name: promoted.name,
+    displayName: promoted.displayName,
+    version: promoted.version,
+    status: "active",
+    sourceRunIds: promoted.sourceRunIds,
+    replayStatus: review.replay.status,
+    exportState: {},
+    promotedAt: promoted.promotion.promotedAt,
+    updatedAt: new Date().toISOString(),
+    activeDir: targetDir,
+  });
   return {
     skill: promoted,
     activeDir: targetDir,
@@ -262,5 +315,90 @@ export async function deprecateSkill(cwd: string, skillId: string, reason = "dep
     deprecatedAt: new Date().toISOString(),
     reason,
   });
+  const index = await readActiveSkillIndex(cwd);
+  const existing = index.find((entry) => entry.id === skillId);
+  if (existing) {
+    await upsertActiveSkillIndexEntry(cwd, { ...existing, status: "deprecated" });
+  }
   return deprecated;
+}
+
+async function findActiveSkillEntry(cwd: string, skillId: string): Promise<SkillListEntry> {
+  const active = (await listSkills(cwd)).find((entry) => entry.location === "active" && entry.skill.id === skillId);
+  if (!active) throw new Error(`skill_not_active:${skillId}`);
+  return active;
+}
+
+function exportRoot(target: "codex" | "omx"): string {
+  if (target === "codex") return join(process.env.CODEX_HOME ?? join(homedir(), ".codex"), "skills");
+  return join(process.env.OMX_HOME ?? join(homedir(), ".omx"), "skills");
+}
+
+function exportDirName(skill: SkillProposal): string {
+  return `codexus-${skill.name}`;
+}
+
+function validateSkillForExternalTarget(skill: SkillProposal): void {
+  if (!skill.displayName.startsWith("codexus:")) throw new Error(`skill_export_validation_failed:${skill.id}`);
+  if (skill.procedure.length === 0 || skill.scope.allowedTaskShapes.length === 0) throw new Error(`skill_export_validation_failed:${skill.id}`);
+  if (!skill.safety.requiresVerification) throw new Error(`skill_export_validation_failed:${skill.id}`);
+}
+
+export async function exportActiveSkill(cwd: string, skillId: string, target: "codex" | "omx", force = false): Promise<{ skillId: string; target: "codex" | "omx"; path: string; writtenAt: string }> {
+  if (target !== "codex" && target !== "omx") throw new Error(`invalid_skill_export_target:${target}`);
+  const entry = await findActiveSkillEntry(cwd, skillId);
+  const skill = entry.skill;
+  validateSkillForExternalTarget(skill);
+  const outputDir = join(exportRoot(target), exportDirName(skill));
+  if (existsSync(outputDir) && !force) throw new Error(`skill_export_target_exists:${outputDir}`);
+  if (force) await rm(outputDir, { recursive: true, force: true });
+  await ensureDir(outputDir);
+  const sourceDir = entry.path.slice(0, -"skill.json".length);
+  const body = await readFile(join(sourceDir, "SKILL.md"), "utf8");
+  await writeFile(join(outputDir, "SKILL.md"), `---
+name: ${JSON.stringify(skill.displayName)}
+description: ${JSON.stringify(`Generated Codexus skill ${skill.displayName}.`)}
+---
+
+${body}`);
+  await copyFile(join(sourceDir, "skill.json"), join(outputDir, "skill.json"));
+  await copyFile(join(sourceDir, "evidence.json"), join(outputDir, "evidence.json"));
+  await copyFile(join(sourceDir, "replay.json"), join(outputDir, "replay.json"));
+  const writtenAt = new Date().toISOString();
+  await writeJsonAtomic(join(outputDir, "codexus-export.json"), { schemaVersion: 1, skillId, target, writtenAt, source: entry.path });
+  const index = await readActiveSkillIndex(cwd);
+  const indexed = index.find((candidate) => candidate.id === skillId) ?? {
+    schemaVersion: 1 as const,
+    id: skill.id,
+    name: skill.name,
+    displayName: skill.displayName,
+    version: skill.version,
+    status: "active" as const,
+    sourceRunIds: skill.sourceRunIds,
+    replayStatus: "passed" as const,
+    exportState: {},
+    promotedAt: skill.promotion.promotedAt,
+    updatedAt: writtenAt,
+    activeDir: sourceDir,
+  };
+  await upsertActiveSkillIndexEntry(cwd, {
+    ...indexed,
+    exportState: { ...indexed.exportState, [target]: { exportedAt: writtenAt, path: outputDir } },
+  });
+  return { skillId, target, path: outputDir, writtenAt };
+}
+
+export async function retrieveActiveSkillsForTask(cwd: string, taskText: string, limit = 3): Promise<SkillProposal[]> {
+  const terms = taskText.toLowerCase().split(/\s+/).filter(Boolean);
+  const active = (await listSkills(cwd)).filter((entry) => entry.location === "active").map((entry) => entry.skill);
+  return active
+    .map((skill) => {
+      const text = `${skill.name} ${skill.displayName} ${skill.trigger.keywords.join(" ")} ${skill.scope.allowedTaskShapes.join(" ")}`.toLowerCase();
+      const score = terms.reduce((sum, term) => sum + (text.includes(term) ? 1 : 0), 0);
+      return { skill, score };
+    })
+    .filter((item) => item.score > 0)
+    .sort((left, right) => right.score - left.score || left.skill.displayName.localeCompare(right.skill.displayName))
+    .slice(0, limit)
+    .map((item) => item.skill);
 }

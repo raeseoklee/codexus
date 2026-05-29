@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { runPaths } from "../../ledger/paths.ts";
 import { readState } from "../../ledger/state.ts";
-import { flagBool, flagString, type ParsedArgs } from "../args.ts";
+import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 async function readJsonIfExists(path: string): Promise<unknown | null> {
   if (!existsSync(path)) return null;
@@ -17,6 +17,8 @@ async function readEventTail(path: string, limit = 10): Promise<unknown[]> {
 }
 
 export async function statusCommand(args: ParsedArgs): Promise<void> {
+  assertAllowedFlags(args, ["json", "cwd"]);
+  assertMaxPositionals(args, 1);
   const runId = args.positionals[0];
   if (!runId) throw new Error("missing_run_id");
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());

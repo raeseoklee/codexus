@@ -172,9 +172,18 @@ streaming text, file/tool roundtrips, write denial, multi-tool turns, shell
 output, permission prompt approved/denied, plugin or skill path, compaction or
 large-output behavior, and usage accounting.
 
-### `cx memory search <query>`
+### `cx memory ...`
 
-Purpose: retrieve scoped memory entries and source run references.
+Purpose: retrieve, add, list, review, and prune scoped memory entries and source
+run references.
+
+Subcommands:
+
+- `search <query>`
+- `add --kind <kind> <text>`
+- `list`
+- `review`
+- `prune --before <iso-date>`
 
 ### `cx skill ...`
 
@@ -183,7 +192,9 @@ Subcommands:
 - `propose <run-id>`
 - `review <skill-id>`
 - `promote <skill-id>`
+- `export <skill-id> --target codex|omx`
 - `deprecate <skill-id>`
+- `index`
 - `list`
 
 Promotion must be explicit.
@@ -193,9 +204,10 @@ The stable storage id remains filesystem-safe, while the displayed identity uses
 `codexus:<skill-name>` so generated Codexus skills are visually distinct in
 Codex-oriented surfaces.
 
-### `cx adapt omx status`
+### `cx adapt omx ...`
 
-Purpose: inspect available OMX interop capabilities without requiring OMX for core use.
+Purpose: inspect available OMX interop capabilities and retrieve bounded active
+skill/memory context without requiring OMX for core use.
 
 ## Codex-Native Adapter Contract
 
@@ -206,7 +218,7 @@ Adapter requirements:
 - call the same Codexus core used by `cx`,
 - share `.codex-harness` ledger, memory, and skill stores,
 - avoid duplicating workflow kernel logic inside a skill or plugin wrapper,
-- support narrow commands first, such as status, memory search, skill review, and supervised run handoff,
+- support narrow commands first, such as status, memory retrieval, skill review, bounded context retrieval, and supervised run handoff,
 - preserve the external CLI as the automation and CI surface.
 
 ## Config

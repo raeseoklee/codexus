@@ -11,26 +11,43 @@ import { verifyCommand } from "./commands/verify.ts";
 import { replayCommand } from "./commands/replay.ts";
 import { planCommand } from "./commands/plan.ts";
 import { resumeCommand } from "./commands/resume.ts";
+import { initCommand } from "./commands/init.ts";
+import { runsCommand } from "./commands/runs.ts";
+import { eventsCommand } from "./commands/events.ts";
+import { reportCommand } from "./commands/report.ts";
+import { featureCommand } from "./commands/feature.ts";
 
 function helpText(): string {
   return `Codexus
 
 Usage:
   cx doctor [--json]
+  cx init [--with-docs] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] <prompt>
   cx plan [--omx] <task> [--json]
+  cx runs list [--json]
   cx status <run-id> [--json]
+  cx events tail <run-id> [--lines <n>] [--json]
+  cx report <run-id> [--json]
   cx resume <run-id> [follow-up] [--json]
   cx verify <run-id> [--verify <cmd>] [--json]
-  cx replay skill <skill-id> [--json]
+  cx replay skill <skill-id> [--with-model-replay] [--json]
   cx replay <path-to-replay.json> [--json]
   cx memory search <query> [--json]
+  cx memory add --kind <kind> <text> [--json]
+  cx memory list [--json]
+  cx memory review [--json]
+  cx memory prune --before <iso-date> [--json]
   cx skill propose <run-id> [--json]
   cx skill review <skill-id> [--json]
   cx skill promote <skill-id> [--json]
+  cx skill export <skill-id> --target codex|omx [--json]
   cx skill deprecate <skill-id> [reason] [--json]
   cx skill list [--json]
   cx adapt omx status [--json]
+  cx adapt omx retrieve --task <task> [--json]
+  cx cron status [--json]
+  cx gateway status [--json]
 
 Compatibility:
   chx remains a temporary alias during the Codexus migration.
@@ -46,12 +63,28 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
     await doctorCommand(args);
     return;
   }
+  if (args.command === "init") {
+    await initCommand(args);
+    return;
+  }
   if (args.command === "run") {
     await runCommand(args);
     return;
   }
+  if (args.command === "runs") {
+    await runsCommand(args);
+    return;
+  }
   if (args.command === "status") {
     await statusCommand(args);
+    return;
+  }
+  if (args.command === "events") {
+    await eventsCommand(args);
+    return;
+  }
+  if (args.command === "report") {
+    await reportCommand(args);
     return;
   }
   if (args.command === "resume") {
@@ -83,6 +116,14 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "skill") {
     await skillCommand(args);
+    return;
+  }
+  if (args.command === "cron") {
+    await featureCommand(args, "cron");
+    return;
+  }
+  if (args.command === "gateway") {
+    await featureCommand(args, "gateway");
     return;
   }
 

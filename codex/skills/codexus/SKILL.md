@@ -20,8 +20,8 @@ If this skill has been installed into `$CODEX_HOME/skills`, the same wrapper sho
 ## Decision Rules
 
 - Use normal Codex interaction for direct code edits, explanations, and small one-off checks.
-- Use Codexus when the user asks for harness behavior: durable run ledger, status, verification, replay, memory, skill proposal/review/promotion, OMX interop, or supervised handoff.
-- Prefer read-only Codexus commands first inside an ongoing conversation: `status`, `verify`, `replay`, `memory search`, `skill review`, `adapt omx status`.
+- Use Codexus when the user asks for harness behavior: durable run ledger, status, verification, replay, memory, skill proposal/review/promotion/export, OMX interop, bounded context retrieval, or supervised handoff.
+- Prefer read-only Codexus commands first inside an ongoing conversation: `status`, `events tail`, `verify`, `replay`, `memory search`, `memory review`, `skill review`, `skill index`, `adapt omx status`, `adapt omx retrieve`.
 - Use `run --driver codex-exec` only when an explicit supervised sub-run is useful. It starts a separate `codex exec` process and should not replace the active conversation for ordinary edits.
 - Preserve the current conversation as the primary interaction surface. Codexus augments it; it does not create a competing chat loop.
 
@@ -29,11 +29,16 @@ If this skill has been installed into `$CODEX_HOME/skills`, the same wrapper sho
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs doctor --json
+node codex/skills/codexus/scripts/cx.mjs runs list --json
 node codex/skills/codexus/scripts/cx.mjs status <run-id> --json
+node codex/skills/codexus/scripts/cx.mjs events tail <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs verify <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs memory search "<query>" --json
+node codex/skills/codexus/scripts/cx.mjs memory review --json
 node codex/skills/codexus/scripts/cx.mjs skill review <skill-id> --json
-node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --json
+node codex/skills/codexus/scripts/cx.mjs skill index --json
+node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-replay --json
+node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
 node codex/skills/codexus/scripts/cx.mjs plan --omx --json "<task>"
 ```
 

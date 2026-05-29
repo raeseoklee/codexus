@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "protocol": "codex-app-server",
+  "status": "experimental",
+  "methods": [
+    "thread/start",
+    "turn/start",
+    "turn/steer",
+    "thread/items/read",
+    "skills/list"
+  ],
+  "notes": [
+    "Fixture only. Live app-server turn execution remains disabled by default."
+  ]
+}
