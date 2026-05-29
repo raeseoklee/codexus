@@ -1,5 +1,7 @@
 .codex-harness/
 .omx/
 node_modules/
+.env
+.env.*
 *.log
 .DS_Store

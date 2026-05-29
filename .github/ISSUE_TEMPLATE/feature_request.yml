@@ -1,0 +1,58 @@
+name: Feature request
+description: Propose a Codexus feature or design change
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please explain the harness problem, not only the desired command shape. Korean is welcome.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow or reliability gap should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should Codexus do?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Mention simpler CLI, docs, or workflow alternatives if relevant.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI
+        - driver
+        - verification
+        - memory
+        - skills/replay
+        - Codex-native adapter
+        - OMX integration
+        - app-server
+        - cron/gateway
+        - docs
+        - other
+    validations:
+      required: false
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Design boundaries
+      options:
+        - label: This proposal does not require private ChatGPT/Codex backend APIs.
+          required: true
+        - label: I am okay with experimental live behavior being feature-gated first.
+          required: true

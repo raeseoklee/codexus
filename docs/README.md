@@ -20,6 +20,7 @@ The package now exposes `cx` and `codexus` as canonical bins. `chx` remains only
 
 ## Document Map
 
+- [Quick start](quickstart.md): local setup, mock run, real Codex run, and Codex-native adapter installation.
 - [Engineering plan](plans/2026-05-29-codex-harness-engineering-plan.md): migrated planning baseline, research findings, constraints, MVP scope, and risks.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
@@ -30,6 +31,9 @@ The package now exposes `cx` and `codexus` as canonical bins. `chx` remains only
 - [Codex-native adapter](design/06-codex-native-adapter.md): `$codexus` skill adapter, installation, supported first commands, and design rules.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
+- [Public release checklist](public-release.md): metadata, safety, verification, and visibility checklist for open-source publication.
+- [Roadmap](../ROADMAP.md): public-facing project direction.
+- [Changelog](../CHANGELOG.md): release notes.
 
 ## Positioning
 

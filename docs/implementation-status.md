@@ -99,6 +99,7 @@ temporary compatibility alias.
 - `doctor --json --strict` preserves the JSON diagnostic body while returning nonzero when a fail-level check is present.
 - GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
 - Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
+- Public repository readiness files are present: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue templates, and PR template.
 
 ## Verified
 

@@ -1,0 +1,97 @@
+# Quick Start
+
+[한국어](ko/quickstart.md)
+
+This guide gets Codexus running locally without relying on model or network
+access for the first verification pass.
+
+## 1. Clone
+
+```bash
+git clone https://github.com/raeseoklee/codexus.git
+cd codexus
+```
+
+## 2. Verify Local Tooling
+
+Codexus currently requires Node.js 26 or newer.
+
+```bash
+node --version
+npm run ci
+```
+
+The test suite uses the mock driver, so it does not need Codex model access.
+
+## 3. Run Doctor
+
+```bash
+node src/cli/main.ts doctor --json
+```
+
+`doctor` reports Node, Codex CLI, Codex auth, driver capability, optional OMX,
+git, tmux, and Codexus skill-install status.
+
+## 4. Run a Mock Harness Task
+
+```bash
+node src/cli/main.ts run --driver mock --json "hello from codexus"
+```
+
+The command writes a run ledger under `.codex-harness/runs/<run-id>/`.
+
+Inspect it:
+
+```bash
+node src/cli/main.ts runs list --json
+node src/cli/main.ts status <run-id> --json
+node src/cli/main.ts events tail <run-id> --json
+node src/cli/main.ts schema validate-run <run-id> --json
+```
+
+## 5. Use the Local Bins
+
+For development, link the package:
+
+```bash
+npm link
+cx doctor --json
+codexus runs list --json
+```
+
+`chx` also exists as a temporary compatibility alias.
+
+## 6. Use Real Codex Execution
+
+Install and authenticate the local Codex CLI first. Then run:
+
+```bash
+cx run --driver codex-exec --json "Reply exactly CODEXUS-OK"
+```
+
+For project work, add verification:
+
+```bash
+cx run --verify "npm test" "fix the failing parser tests"
+```
+
+## 7. Install the Codex-Native Adapter
+
+```bash
+npm run install:codex-skill
+```
+
+The installer writes the `codexus` skill into `${CODEX_HOME:-~/.codex}/skills`.
+Use it from an interactive Codex session when you need Codexus status, replay,
+memory, schema, or context evidence without starting a separate manual flow.
+
+## 8. Initialize a Project Harness
+
+Inside a target project:
+
+```bash
+cx init --with-docs --json
+```
+
+This creates `.codex-harness/` directories and config without mutating `.omx`
+state.

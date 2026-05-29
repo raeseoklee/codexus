@@ -1,13 +1,44 @@
 {
   "name": "codexus",
   "version": "0.1.0",
-  "private": true,
+  "description": "A local execution harness for OpenAI Codex with durable ledgers, verification gates, memory, and replay-gated skills.",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raeseoklee/codexus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raeseoklee/codexus/issues"
+  },
+  "homepage": "https://github.com/raeseoklee/codexus#readme",
+  "keywords": [
+    "codex",
+    "openai-codex",
+    "agent-harness",
+    "ai-agents",
+    "cli",
+    "orchestration",
+    "verification",
+    "replay",
+    "memory"
+  ],
   "bin": {
     "cx": "./src/cli/main.ts",
     "codexus": "./src/cli/main.ts",
     "chx": "./src/cli/main.ts"
   },
+  "files": [
+    "src",
+    "codex",
+    "schemas",
+    "fixtures",
+    "scripts",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "test": "node --test tests/*.test.ts",
     "check:whitespace": "git diff --check && git diff-tree --check --no-commit-id -r HEAD",

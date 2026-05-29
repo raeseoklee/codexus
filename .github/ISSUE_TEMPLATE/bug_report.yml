@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a reproducible Codexus problem
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a Codexus issue. Korean is welcome, but please include commands and output.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Include exact commands.
+      placeholder: |
+        1. Run `cx ...`
+        2. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Paste relevant output after removing secrets.
+      render: shell
+      placeholder: |
+        node src/cli/main.ts doctor --json
+        npm run typecheck
+        npm test
+    validations:
+      required: false
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: "v26.x.x"
+    validations:
+      required: false
+  - type: input
+    id: codex
+    attributes:
+      label: Codex CLI version
+      placeholder: "codex --version"
+    validations:
+      required: false
+  - type: dropdown
+    id: driver
+    attributes:
+      label: Driver
+      options:
+        - mock
+        - codex-exec
+        - codex-app-server
+        - not sure
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets, tokens, private prompts, and sensitive ledger contents from this report.
+          required: true
