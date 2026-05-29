@@ -51,6 +51,10 @@ curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
 Project Pages root인 `https://raeseoklee.github.io/codexus/`는 `index.html`의
 작은 static landing page를 제공합니다.
 
+Personal Free plan에서는 repository가 private인 동안 Pages가 비활성일 수
+있습니다. GitHub가 `Your current plan does not support GitHub Pages for this
+repository`를 반환하면 repository를 public으로 바꾼 뒤 Pages를 활성화합니다.
+
 API form:
 
 ```bash

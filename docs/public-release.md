@@ -52,6 +52,10 @@ curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
 The project Pages root, `https://raeseoklee.github.io/codexus/`, serves a small
 static landing page from `index.html`.
 
+On a personal Free plan, Pages may be unavailable while the repository remains
+private. If GitHub returns `Your current plan does not support GitHub Pages for
+this repository`, make the repository public first, then enable Pages.
+
 API form:
 
 ```bash
