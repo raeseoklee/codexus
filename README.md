@@ -63,14 +63,26 @@ network access; real runs use the local authenticated Codex CLI.
 
 ## Quick Start
 
-Install with GitHub Pages after the repository is public and Pages is enabled:
+Install from npm:
+
+```bash
+npm install -g codexus@next
+codexus doctor --json
+```
+
+The package is currently published on the alpha channel. Use `codexus@next` to
+avoid depending on future dist-tag changes.
+
+Install with GitHub Pages if you also want the Codex-native skill adapter
+installed automatically:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
 ```
 
-The installer delegates to the npm package channel (`codexus@next` by default)
-and installs the `codexus` and `cx` bins.
+The installer delegates to the npm package channel (`codexus@next` by default),
+installs the `codexus` and `cx` bins, and installs the Codex skill adapter
+unless `CODEXUS_INSTALL_CODEX_SKILL=0` is set.
 
 For a review-first install:
 
@@ -103,7 +115,13 @@ cx doctor --json
 codexus runs list --json
 ```
 
-Install the Codex-native skill adapter:
+Install the Codex-native skill adapter from the published npm package:
+
+```bash
+node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json
+```
+
+Or install it from a cloned repository:
 
 ```bash
 npm run install:codex-skill

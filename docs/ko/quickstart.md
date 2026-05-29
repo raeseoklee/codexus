@@ -5,10 +5,22 @@
 이 문서는 Codexus를 로컬에서 실행하는 절차를 설명합니다. 첫 검증 단계는 모델이나
 네트워크 접근에 의존하지 않고, 이후 실제 Codex 실행을 다룹니다.
 
+## npm 설치
+
+Codexus는 npm alpha package로 publish되어 있습니다:
+
+```bash
+npm install -g codexus@next
+codexus doctor --json
+```
+
+직접 npm으로 설치하면 CLI만 설치합니다. `${CODEX_HOME:-~/.codex}`를 변경하거나
+Codex-native skill adapter를 설치하지 않습니다.
+
 ## Install Script
 
-Repository가 public이고 GitHub Pages source가 `main` `/`로 활성화되면 installer
-URL은 다음과 같습니다:
+Npm 설치와 Codex-native skill adapter 설치를 한 번에 처리하려면 installer를
+사용합니다:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
@@ -109,6 +121,14 @@ cx run --verify "npm test" "fix the failing parser tests"
 ```
 
 ## 7. Codex-Native Adapter 설치
+
+Published npm package에서 설치:
+
+```bash
+node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json
+```
+
+Cloned repository에서 설치:
 
 ```bash
 npm run install:codex-skill

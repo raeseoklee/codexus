@@ -5,10 +5,22 @@
 This guide gets Codexus running locally. The first verification pass avoids
 model and network access; real Codex execution is covered after that.
 
+## npm Install
+
+Codexus is published on npm as an alpha package:
+
+```bash
+npm install -g codexus@next
+codexus doctor --json
+```
+
+Direct npm installation installs the CLI only. It does not mutate
+`${CODEX_HOME:-~/.codex}` or install the Codex-native skill adapter.
+
 ## Install Script
 
-After the repository is public and GitHub Pages is enabled for `main` `/`, the
-installer URL is:
+Use the installer when you want npm installation plus the Codex-native skill
+adapter in one step:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
@@ -109,6 +121,14 @@ cx run --verify "npm test" "fix the failing parser tests"
 ```
 
 ## 7. Install the Codex-Native Adapter
+
+From the published npm package:
+
+```bash
+node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json
+```
+
+From a cloned repository:
 
 ```bash
 npm run install:codex-skill

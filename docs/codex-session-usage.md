@@ -14,7 +14,19 @@ schema, and skill evidence.
 
 ## Install the Adapter
 
-The GitHub Pages installer installs the Codex skill adapter by default:
+The published npm package installs the CLI:
+
+```bash
+npm install -g codexus@next
+```
+
+Install the Codex skill adapter from that global package:
+
+```bash
+node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json
+```
+
+The GitHub Pages installer does both steps by default:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
