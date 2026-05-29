@@ -1,7 +1,10 @@
 import { spawnSync } from "node:child_process";
-import { access, mkdir } from "node:fs/promises";
-import { constants } from "node:fs";
-import { resolve } from "node:path";
+import { createHash } from "node:crypto";
+import { access, mkdir, readFile } from "node:fs/promises";
+import { constants, existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 import { loadConfig } from "../../config/loader.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
@@ -44,6 +47,51 @@ function commandCheck(
   };
 }
 
+async function hashFileIfExists(path: string): Promise<string | null> {
+  if (!existsSync(path)) return null;
+  return `sha256:${createHash("sha256").update(await readFile(path)).digest("hex")}`;
+}
+
+async function codexusSkillInstallCheck(): Promise<Check> {
+  const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+  const codexHome = process.env.CODEX_HOME ? resolve(process.env.CODEX_HOME) : join(homedir(), ".codex");
+  const sourceSkill = join(repoRoot, "codex", "skills", "codexus", "SKILL.md");
+  const installedRoot = join(codexHome, "skills", "codexus");
+  const installedSkill = join(installedRoot, "SKILL.md");
+  const metadataPath = join(installedRoot, "codexus-root.json");
+  const sourceHash = await hashFileIfExists(sourceSkill);
+  const installedHash = await hashFileIfExists(installedSkill);
+  let installedMetadata: Record<string, unknown> | null = null;
+  if (existsSync(metadataPath)) {
+    try {
+      installedMetadata = JSON.parse(await readFile(metadataPath, "utf8")) as Record<string, unknown>;
+    } catch {
+      installedMetadata = null;
+    }
+  }
+  if (!installedHash) {
+    return {
+      id: "codexus.skill_install",
+      status: "warn",
+      summary: "Codexus skill is not installed in CODEX_HOME",
+      details: { codexHome, installedRoot, sourceHash },
+    };
+  }
+  const current = sourceHash !== null && installedHash === sourceHash && installedMetadata?.root === repoRoot;
+  return {
+    id: "codexus.skill_install",
+    status: current ? "pass" : "warn",
+    summary: current ? "Codexus skill install matches this repository" : "Codexus skill install is missing metadata or differs from this repository",
+    details: {
+      codexHome,
+      installedRoot,
+      sourceHash,
+      installedHash,
+      installedRootMetadata: installedMetadata,
+    },
+  };
+}
+
 export async function doctorCommand(args: ParsedArgs): Promise<void> {
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
   const json = flagBool(args.flags, "json");
@@ -61,6 +109,7 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   checks.push(commandCheck("codex.exec_help", config.codex.command, ["exec", "--help"], "codex exec help ok"));
   checks.push(commandCheck("codex.app_server_help", config.codex.command, ["app-server", "--help"], "codex app-server help ok"));
   checks.push(commandCheck("codex.features", config.codex.command, ["features", "list"], "codex features listed", "warn"));
+  checks.push(await codexusSkillInstallCheck());
   checks.push(commandCheck("omx.version", "omx", ["--version"], "omx available", "warn"));
   checks.push(commandCheck("git.root", "git", ["-C", cwd, "rev-parse", "--show-toplevel"], "git root detected", "warn"));
   checks.push(commandCheck("tmux.version", "tmux", ["-V"], "tmux available", "warn"));

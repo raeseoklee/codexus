@@ -302,6 +302,10 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     });
     assert.equal(install.status, 0, install.stderr);
     assert.ok(existsSync(join(codexHome, "skills", "codexus", "SKILL.md")));
+    const doctor = runCli(cwd, ["doctor", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(doctor.status, 0, doctor.stderr);
+    const skillInstallCheck = JSON.parse(doctor.stdout).checks.find((check: { id: string }) => check.id === "codexus.skill_install");
+    assert.equal(skillInstallCheck.status, "pass");
 
     const typecheck = spawnSync("npm", ["run", "typecheck"], { cwd, encoding: "utf8" });
     assert.equal(typecheck.status, 0, typecheck.stderr);
@@ -317,7 +321,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const appRoundtrip = runCli(cwd, ["app-server", "roundtrip", "--dry-run", "--json"]);
     assert.equal(appRoundtrip.status, 0, appRoundtrip.stderr);
     assert.equal(JSON.parse(appRoundtrip.stdout).status, "passed");
-    const appExperiment = runCli(cwd, ["app-server", "experiment", "--dry-run", "--timeout-ms", "1000", "--record", "--cwd", featureCwd, "--json"]);
+    const appExperiment = runCli(cwd, ["app-server", "experiment", "--dry-run", "--timeout-ms", "1000", "--record", "--probe-process", "--cwd", featureCwd, "--json"]);
     assert.equal(appExperiment.status, 0, appExperiment.stderr);
     const appExperimentOutput = JSON.parse(appExperiment.stdout);
     assert.equal(appExperimentOutput.status, "planned");
@@ -325,6 +329,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const appManifest = JSON.parse(await readFile(join(appExperimentOutput.experimentDir, "manifest.json"), "utf8"));
     assert.equal(appManifest.schemaVersion, 1);
     assert.equal(appManifest.process.supervised, false);
+    assert.equal(appManifest.process.probe.command, "codex");
+    assert.ok(["passed", "failed", "timed_out"].includes(appManifest.process.probe.status));
     const appLive = runCli(cwd, ["app-server", "roundtrip", "--live", "--json"]);
     assert.equal(appLive.status, 1);
     assert.equal(JSON.parse(appLive.stdout).code, "unsupported_feature");
@@ -333,21 +339,69 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(cronDryRun.status, 0, cronDryRun.stderr);
     const cronDryRunOutput = JSON.parse(cronDryRun.stdout);
     assert.equal(cronDryRunOutput.status, "planned");
+    assert.equal(cronDryRunOutput.policy.decision, "dry_run_allowed");
+    assert.equal(cronDryRunOutput.policy.dispatchAllowed, false);
+    assert.equal(cronDryRunOutput.approval.status, "not_requested_for_dry_run");
     assert.ok(existsSync(cronDryRunOutput.record.path));
     assert.ok(cronDryRunOutput.ledgerEvents.includes("automation.policy_checked"));
+    assert.ok(cronDryRunOutput.ledgerEvents.includes("approval.resolved"));
     const cronRecord = JSON.parse(await readFile(cronDryRunOutput.record.path, "utf8"));
     assert.equal(cronRecord.schemaVersion, 1);
     assert.equal(cronRecord.ledgerEvents.some((event: { type: string }) => event.type === "automation.dispatch_skipped"), true);
+    assert.equal(cronRecord.ledgerEvents.some((event: { type: string; payload?: { status?: string } }) => event.type === "approval.resolved" && event.payload?.status === "not_requested"), true);
+    assert.deepEqual(cronRecord.plan.policy, cronDryRunOutput.policy);
     const gatewayDryRun = runCli(cwd, ["gateway", "check", "--dry-run", "--record", "--cwd", featureCwd, "--task", "repo event", "--json"]);
     assert.equal(gatewayDryRun.status, 0, gatewayDryRun.stderr);
     const gatewayDryRunOutput = JSON.parse(gatewayDryRun.stdout);
     assert.equal(gatewayDryRunOutput.status, "planned");
+    assert.equal(gatewayDryRunOutput.policy.decision, "dry_run_allowed");
     assert.ok(existsSync(gatewayDryRunOutput.record.path));
     const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
     assert.equal(cronLive.status, 1);
-    assert.equal(JSON.parse(cronLive.stdout).code, "unsupported_feature");
+    const cronLiveOutput = JSON.parse(cronLive.stdout);
+    assert.equal(cronLiveOutput.status, "blocked");
+    assert.equal(cronLiveOutput.policy.decision, "live_blocked_by_feature_gate");
+    assert.equal(cronLiveOutput.policy.dispatchAllowed, false);
+    const gatewayLive = runCli(cwd, ["gateway", "check", "--json"]);
+    assert.equal(gatewayLive.status, 1);
+    const gatewayLiveOutput = JSON.parse(gatewayLive.stdout);
+    assert.equal(gatewayLiveOutput.status, "blocked");
+    assert.equal(gatewayLiveOutput.policy.decision, "live_blocked_by_feature_gate");
+    assert.equal(gatewayLiveOutput.policy.dispatchAllowed, false);
   } finally {
     await rm(codexHome, { recursive: true, force: true });
     await rm(featureCwd, { recursive: true, force: true });
+  }
+});
+
+test("enabled automation gates still block live dispatch until dispatcher exists", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, ".codex-harness"), { recursive: true });
+    await writeFile(join(cwd, ".codex-harness", "config.json"), `${JSON.stringify({
+      automation: {
+        cronEnabled: true,
+        gatewayEnabled: true,
+      },
+    }, null, 2)}\n`);
+    const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
+    assert.equal(cronLive.status, 1);
+    const cronOutput = JSON.parse(cronLive.stdout);
+    assert.equal(cronOutput.status, "blocked");
+    assert.equal(cronOutput.enabled, true);
+    assert.equal(cronOutput.policy.decision, "live_requires_unimplemented_dispatcher");
+    assert.equal(cronOutput.policy.dispatchAllowed, false);
+    assert.equal(cronOutput.approval.status, "required_but_not_requested");
+    assert.ok(cronOutput.ledgerEvents.includes("automation.dispatch_skipped"));
+
+    const gatewayLive = runCli(cwd, ["gateway", "check", "--json"]);
+    assert.equal(gatewayLive.status, 1);
+    const gatewayOutput = JSON.parse(gatewayLive.stdout);
+    assert.equal(gatewayOutput.status, "blocked");
+    assert.equal(gatewayOutput.enabled, true);
+    assert.equal(gatewayOutput.policy.decision, "live_requires_unimplemented_dispatcher");
+    assert.equal(gatewayOutput.policy.dispatchAllowed, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
   }
 });

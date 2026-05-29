@@ -1,4 +1,6 @@
+import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
+import { loadConfig } from "../../config/loader.ts";
 import { CodexAppServerDriver } from "../../drivers/codex-app-server.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
@@ -9,10 +11,37 @@ function liveEnabled(): boolean {
   return process.env.CODEXUS_ENABLE_APP_SERVER_LIVE === "1";
 }
 
+function supervisedAppServerHelpProbe(command: string, timeoutMs: number) {
+  const startedAt = new Date().toISOString();
+  const start = Date.now();
+  const result = spawnSync(command, ["app-server", "--help"], {
+    encoding: "utf8",
+    timeout: timeoutMs,
+  });
+  const durationMs = Date.now() - start;
+  const timedOut = result.error instanceof Error && (result.error as NodeJS.ErrnoException).code === "ETIMEDOUT";
+  return {
+    schemaVersion: 1,
+    command,
+    args: ["app-server", "--help"],
+    startedAt,
+    completedAt: new Date().toISOString(),
+    durationMs,
+    timeoutMs,
+    status: timedOut ? "timed_out" : result.status === 0 ? "passed" : "failed",
+    exitCode: result.status,
+    signal: result.signal,
+    error: result.error instanceof Error ? result.error.message : null,
+    stdoutPreview: result.stdout.trim().slice(0, 1000),
+    stderrPreview: result.stderr.trim().slice(0, 1000),
+  };
+}
+
 export async function appServerCommand(args: ParsedArgs): Promise<void> {
   const topic = args.positionals[0] ?? "status";
   const json = flagBool(args.flags, "json");
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
+  const { config } = loadConfig({ cwd });
   const fixture = await readAppServerSchemaFixture();
 
   if (topic === "status") {
@@ -103,6 +132,9 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
         reason: dryRun
           ? "dry-run records lifecycle intent without starting a process"
           : "live experiment currently prepares a sandbox manifest only",
+        probe: flagBool(args.flags, "probe-process")
+          ? supervisedAppServerHelpProbe(config.codex.command, timeoutMs)
+          : null,
       },
     };
     const shouldRecord = !dryRun || flagBool(args.flags, "record");

@@ -11,6 +11,9 @@ const replayParityCases = new Set([
   "permission_branch",
   "multi_tool_turn",
   "skill_path",
+  "file_tool_roundtrip",
+  "shell_output",
+  "interruption",
   "large_output",
   "usage_accounting",
 ]);
@@ -69,7 +72,7 @@ function validateReplaySpec(value: unknown): string[] {
 export interface ReplayScenario {
   id: string;
   driver: "mock";
-  parityCase?: "deterministic_pass" | "tool_success" | "tool_denial" | "permission_branch" | "multi_tool_turn" | "skill_path" | "large_output" | "usage_accounting";
+  parityCase?: "deterministic_pass" | "tool_success" | "tool_denial" | "permission_branch" | "multi_tool_turn" | "skill_path" | "file_tool_roundtrip" | "shell_output" | "interruption" | "large_output" | "usage_accounting";
   input: {
     task: string;
     files: string[];

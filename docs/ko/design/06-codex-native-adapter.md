@@ -44,6 +44,11 @@ ${CODEX_HOME:-~/.codex}/skills/codexus
 
 Installer는 `codexus-root.json`을 함께 써서, 설치된 skill이 이 repo의 Codexus core를 찾을 수 있게 합니다.
 
+`cx doctor --json`은 `codexus.skill_install` check를 포함합니다. 설치된 skill이
+없거나 stale인지, 또는 이 repository와 hash가 일치하는지 보고합니다. Stale
+install은 warning이며 자동으로 변경하지 않습니다. 재설치는 위 명령으로
+명시적으로 수행합니다.
+
 ## 우선 지원 명령
 
 Codex 안에서는 낮은 위험의 명령부터 사용합니다:
@@ -90,7 +95,8 @@ node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounde
 ## 다음 단계
 
 - `$codexus` 사용법을 설명하는 project-level AGENTS.md snippet 추가.
-- retrieved active skill/memory를 prompt-safe하게 formatting하는 context command 추가.
-- app-server driver 계약 테스트 후 app-server turn 연결.
+- 명시적 user-visible approval step과 non-injected context artifact contract를
+  유지할 수 있을 때만 adapter injection 추가.
+- supervised lifecycle과 JSON-RPC roundtrip contract를 검증한 뒤 app-server turn 연결.
 - permission, approval, policy-block event display를 더 풍부하게 개선.
 - `.codex-harness`에서 `.codexus`로의 migration은 backward-compatible read와 함께 별도로 진행.

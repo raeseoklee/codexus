@@ -44,7 +44,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   artifacts, app-server dry-run roundtrip contract and recorded sandbox
   experiment manifests with a live gate, explicit-budget repairable
   driver-failure retry, cron/gateway dry-run automation plans and audit
-  records, run-ledger validation, and replay pass/failure fixtures.
+  records with policy/approval contract fields, run-ledger validation, installed
+  Codexus skill diagnostics, app-server process-probe evidence, and replay
+  pass/failure/extended fixtures.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, and real cron/gateway
@@ -96,7 +98,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
    - It should still avoid building a separate chat loop; the current Codex
      conversation remains the primary interaction surface.
 
-8. Add model-in-the-loop replay behind deterministic replay. Status: structural pass/failure fixtures and budget/policy-gated runner implemented; routine live replay remains opt-in and env-gated.
+8. Add model-in-the-loop replay behind deterministic replay. Status: structural pass/failure/extended fixtures and budget/policy-gated runner implemented; routine live replay remains opt-in and env-gated.
    - The current structural replay gate remains first.
    - Model replay should be opt-in or budget-gated because it consumes Codex
      usage.
@@ -111,7 +113,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 
 ### P2: Runtime Expansion
 
-10. Add app-server schema fixtures and gated roundtrip. Status: fixture/status gate, dry-run roundtrip contract, and recorded sandbox experiment manifests implemented; live roundtrip deferred.
+10. Add app-server schema fixtures and gated roundtrip. Status: fixture/status gate, dry-run roundtrip contract, recorded sandbox experiment manifests, and optional supervised help-process probe evidence implemented; live roundtrip deferred.
     - Keep the driver disabled by default.
     - Add truthful status/capability output before any live turn execution.
     - Do not let app-server failure affect the stable `codex exec --json` path.
@@ -136,7 +138,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
       `cx report <run-id>`.
     - Keep outputs bounded and JSON-first.
 
-15. Add cron/gateway automation only after P0 safety work. Status: disabled feature gates plus dry-run automation plans and audit records implemented; real automation deferred.
+15. Add cron/gateway automation only after P0 safety work. Status: disabled feature gates plus dry-run automation plans, audit records, and policy/approval contract fields implemented; real automation deferred.
     - Hermes-style cron and gateway behavior should depend on locks, schema
       migration, permission events, and explicit user policy.
 
@@ -162,12 +164,14 @@ not remove the gates:
 1. Replace the focused local schema checks with a full JSON Schema engine only
    if dependency policy allows it; keep migration fixtures as the regression
    boundary.
-2. Keep expanding Claw-style replay parity toward plugin/skill paths,
-   interruption, file/tool roundtrips, and shell-output cases before increasing
-   model replay usage.
-3. Turn the recorded app-server sandbox experiment manifest into a supervised process
-   experiment with timeout and cleanup evidence before enabling it as a driver.
-4. Promote cron/gateway dry-run audit records into a policy-reviewed live
-   dispatch contract, then keep dry-run and live paths contract-compatible.
+2. Keep expanding Claw-style replay parity toward streaming text, explicit
+   permission approved/denied, and compaction cases before increasing model
+   replay usage.
+3. Turn the app-server process-probe evidence into a supervised start/stop
+   experiment with timeout, cleanup, and bounded stdout/stderr evidence before
+   enabling it as a driver.
+4. Promote cron/gateway policy/approval dry-run contracts into a
+   policy-reviewed live dispatch contract, then keep dry-run and live paths
+   contract-compatible.
 5. Add an explicit, user-visible adapter injection step if retrieved
    `codexus:<skill-name>` context is ever inserted automatically.

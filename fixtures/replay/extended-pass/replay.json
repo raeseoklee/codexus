@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "skillId": "skill_fixture_extended",
+  "scenarios": [
+    {
+      "id": "skill_path_context",
+      "driver": "mock",
+      "parityCase": "skill_path",
+      "input": {
+        "task": "retrieve a Codexus skill path safely",
+        "files": ["codex/skills/codexus/SKILL.md"]
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["skill path"],
+        "forbids": ["auto-inject retrieved context"]
+      }
+    },
+    {
+      "id": "file_tool_roundtrip",
+      "driver": "mock",
+      "parityCase": "file_tool_roundtrip",
+      "input": {
+        "task": "inspect then edit a file",
+        "files": ["src/example.ts"]
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["file tool roundtrip"],
+        "forbids": ["overwrite unrelated changes"]
+      }
+    },
+    {
+      "id": "shell_output_summary",
+      "driver": "mock",
+      "parityCase": "shell_output",
+      "input": {
+        "task": "summarize shell verification",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["shell output summary"],
+        "forbids": ["hide failing stderr"]
+      }
+    },
+    {
+      "id": "interruption_recovery",
+      "driver": "mock",
+      "parityCase": "interruption",
+      "input": {
+        "task": "resume after interrupted work",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["interruption recovery"],
+        "forbids": ["drop pending verification"]
+      }
+    }
+  ]
+}

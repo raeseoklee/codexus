@@ -181,7 +181,8 @@ gate.
 The structural replay path includes fixture-backed pass and failure cases. The
 fixture coverage currently proves deterministic handling of tool-success,
 permission-branch, tool-denial, multi-tool-turn, large-output, and
-usage-accounting labels; it is structural coverage, not proof that live model
+usage-accounting labels, plus skill-path, file-tool-roundtrip, shell-output,
+and interruption labels; it is structural coverage, not proof that live model
 behavior has parity.
 
 ### `cx memory ...`
@@ -240,6 +241,8 @@ local experiment gate is set, and the stable path remains `codex exec --json`.
 
 `cx app-server experiment --dry-run --record --json` writes the manifest while
 still avoiding process startup.
+`--probe-process` may add bounded `codex app-server --help` process evidence,
+but it is not a supervised app-server lifecycle or JSON-RPC turn execution.
 
 ### `cx cron run-now` and `cx gateway check`
 
@@ -248,7 +251,9 @@ Live dispatch remains disabled until policy and approval events are complete.
 
 `--record` writes a dry-run audit record with policy-check, lock-planning, and
 dispatch-skipped events. These records are the compatibility boundary for later
-live cron/gateway dispatch.
+live cron/gateway dispatch. The plan also carries policy and approval contract
+fields; even when a feature gate is enabled, live dispatch stays blocked until a
+dispatcher capability is implemented and reviewed.
 
 ### `cx skill ...`
 

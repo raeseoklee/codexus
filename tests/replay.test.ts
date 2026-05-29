@@ -52,6 +52,24 @@ test("fixture-backed replay exposes failure coverage and CLI failure status", as
   assert.deepEqual(output.replay.coverage.parityCases, result.coverage.parityCases);
 });
 
+test("extended replay fixture covers skill, file, shell, and interruption labels", async () => {
+  const replayPath = resolve("fixtures/replay/extended-pass/replay.json");
+  const skillPath = resolve("fixtures/replay/extended-pass/skill.json");
+  const spec = await readReplaySpec(replayPath);
+  assert.ok(spec);
+  const skill = JSON.parse(await readFile(skillPath, "utf8"));
+  const result = evaluateReplaySpec(spec, skill);
+  assert.equal(result.status, "passed");
+  assert.deepEqual(result.coverage.parityCases, ["file_tool_roundtrip", "interruption", "shell_output", "skill_path"]);
+
+  const cliResult = spawnSync(process.execPath, [cli, "replay", replayPath, "--json"], {
+    cwd: resolve("."),
+    encoding: "utf8",
+  });
+  assert.equal(cliResult.status, 0, cliResult.stderr);
+  assert.deepEqual(JSON.parse(cliResult.stdout).replay.coverage.parityCases, result.coverage.parityCases);
+});
+
 test("replay spec read path rejects invalid fixture shape", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "codexus-replay-"));
   try {

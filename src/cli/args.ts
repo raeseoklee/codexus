@@ -21,6 +21,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     "live",
     "record",
     "approve",
+    "probe-process",
   ]);
 
   for (let index = 0; index < rest.length; index += 1) {

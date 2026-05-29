@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { loadConfig } from "../../config/loader.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
-import { assertFeatureEnabled, featureStatus, type GuardedFeature } from "../../policy/feature-gates.ts";
+import { featureStatus, type GuardedFeature } from "../../policy/feature-gates.ts";
 import { writeJsonAtomic } from "../../util/fs.ts";
 import { sha256Text } from "../../util/hash.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
@@ -11,8 +11,44 @@ interface AutomationDryRunRecord {
   dryRunId: string;
   recordedAt: string;
   plan: Record<string, unknown>;
-  ledgerEvents: Array<{ type: string; dryRun: true }>;
+  ledgerEvents: Array<{ type: string; dryRun: true; payload?: Record<string, unknown> }>;
   path: string;
+}
+
+const liveDispatchImplemented = false;
+
+function automationPolicyContract(feature: GuardedFeature, enabled: boolean, dryRun: boolean) {
+  const dispatchAllowed = enabled && !dryRun && liveDispatchImplemented;
+  return {
+    schemaVersion: 1,
+    feature,
+    featureGateEnabled: enabled,
+    dispatchAllowed,
+    requestedMode: dryRun ? "dry-run" : "live",
+    decision: dryRun ? "dry_run_allowed" : enabled ? "live_requires_unimplemented_dispatcher" : "live_blocked_by_feature_gate",
+    reason: dryRun
+      ? "dry-run can record policy evidence without dispatching work"
+      : enabled
+        ? "feature gate is enabled, but live dispatch remains unimplemented in this contract"
+        : "feature gate is disabled in config",
+    requiredBeforeLive: [
+      "permission.checked",
+      "approval.requested",
+      "approval.resolved",
+      "automation.lock_acquired",
+      "automation.dispatched",
+      "automation.completed",
+    ],
+  };
+}
+
+function automationApprovalContract(dryRun: boolean) {
+  return {
+    schemaVersion: 1,
+    requiredForLive: true,
+    status: dryRun ? "not_requested_for_dry_run" : "required_but_not_requested",
+    events: dryRun ? ["approval.resolved"] : ["approval.requested", "approval.resolved"],
+  };
 }
 
 async function recordAutomationDryRun(cwd: string, plan: Record<string, unknown>): Promise<AutomationDryRunRecord> {
@@ -26,7 +62,8 @@ async function recordAutomationDryRun(cwd: string, plan: Record<string, unknown>
     plan,
     ledgerEvents: [
       { type: "automation.requested", dryRun: true },
-      { type: "automation.policy_checked", dryRun: true },
+      { type: "automation.policy_checked", dryRun: true, payload: { policy: plan.policy as Record<string, unknown> } },
+      { type: "approval.resolved", dryRun: true, payload: { status: "not_requested", reason: "dry_run" } },
       { type: "automation.lock_planned", dryRun: true },
       { type: "automation.dispatch_skipped", dryRun: true },
       { type: "automation.completed", dryRun: true },
@@ -46,8 +83,8 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
     const expectedTopic = feature === "cron" ? "run-now" : "check";
     if (topic !== expectedTopic) throw new Error(`unsupported_feature:${feature}`);
     const dryRun = flagBool(args.flags, "dry-run");
-    if (!dryRun) assertFeatureEnabled(config, feature);
     const prompt = flagString(args.flags, "task") ?? args.positionals.slice(1).join(" ").trim();
+    const policy = automationPolicyContract(feature, status.enabled, dryRun);
     const plan = {
       schemaVersion: 1,
       feature,
@@ -57,16 +94,19 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
       enabled: status.enabled,
       promptHash: prompt ? sha256Text(prompt) : null,
       lockName: `automation-${feature}`,
+      policy,
+      approval: automationApprovalContract(dryRun),
       ledgerEvents: [
         "automation.requested",
         "automation.policy_checked",
+        "approval.resolved",
         "automation.lock_planned",
         "automation.dispatch_skipped",
         "automation.completed",
       ],
       reason: dryRun
         ? "dry-run only; no scheduler, gateway listener, or run ledger was mutated"
-        : "live automation dispatch is still gated by the feature policy",
+        : policy.reason,
     };
     const record = dryRun && flagBool(args.flags, "record")
       ? await recordAutomationDryRun(cwd, plan)

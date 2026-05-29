@@ -6,7 +6,7 @@ Codexus is a local runtime harness for Codex orchestration. It wraps the authent
 
 ## Positioning
 
-Codexus is a Codex execution harness, not a replacement for Codex. The MVP runs as an external supervisor CLI around `codex exec --json`; a future Codex-native adapter should make the same core runtime available from inside interactive Codex sessions.
+Codexus is a Codex execution harness, not a replacement for Codex. It runs as an external supervisor CLI around `codex exec --json`, and the `$codexus` Codex skill exposes the same core runtime from inside interactive Codex sessions.
 
 Target commands:
 
@@ -18,7 +18,7 @@ cx skill review <skill-id> --json
 cx memory curate --json
 cx skill improve <skill-id> --reason "tighten trigger" --json
 cx adapt omx context --task "parser regression" --json
-cx app-server experiment --dry-run --json
+cx app-server experiment --dry-run --record --json
 ```
 
 Compatibility note: the package exposes `cx` and `codexus` as canonical bins; `chx` remains a temporary alias.

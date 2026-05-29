@@ -44,6 +44,11 @@ ${CODEX_HOME:-~/.codex}/skills/codexus
 
 It also writes `codexus-root.json` so the installed skill can find this repository and call the local Codexus core.
 
+`cx doctor --json` includes a `codexus.skill_install` check. It reports whether
+the installed skill is missing, stale, or hash-matched to this repository. A
+stale install is a warning, not an automatic mutation; reinstall explicitly with
+the command above.
+
 ## Supported First Commands
 
 Inside Codex, prefer low-risk commands first:
@@ -89,7 +94,9 @@ This starts a separate non-interactive Codex process. It is useful for bounded s
 ## Next Steps
 
 - Add a project-level AGENTS.md snippet documenting `$codexus` usage.
-- Add a prompt-safe context formatter for retrieved active skills and memory.
-- Add app-server based turns only after the app-server driver is contract-tested.
+- Add explicit adapter injection only if the user-visible approval step and
+  non-injected context artifact contract are preserved.
+- Add app-server based turns only after supervised lifecycle and JSON-RPC
+  roundtrip contracts are tested.
 - Add richer permission, approval, and policy-block event display.
 - Add a migration from `.codex-harness` to `.codexus` only with backward-compatible reads.

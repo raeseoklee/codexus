@@ -47,7 +47,7 @@ node codex/skills/codexus/scripts/cx.mjs locks list --json
 node codex/skills/codexus/scripts/cx.mjs schema check --json
 node codex/skills/codexus/scripts/cx.mjs schema validate-run <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json
-node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --record --json
+node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --record --probe-process --json
 node codex/skills/codexus/scripts/cx.mjs plan --omx --json "<task>"
 ```
 
