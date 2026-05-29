@@ -98,8 +98,15 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
         "write_manifest",
       ],
       schemaFixture: fixture,
+      process: {
+        supervised: false,
+        reason: dryRun
+          ? "dry-run records lifecycle intent without starting a process"
+          : "live experiment currently prepares a sandbox manifest only",
+      },
     };
-    if (!dryRun) {
+    const shouldRecord = !dryRun || flagBool(args.flags, "record");
+    if (shouldRecord) {
       await ensureDir(experimentDir);
       await writeJsonAtomic(resolve(experimentDir, "manifest.json"), manifest);
     }

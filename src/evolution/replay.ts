@@ -4,6 +4,68 @@ import { defaultConfig } from "../config/schema.ts";
 import { CodexExecDriver } from "../drivers/codex-exec.ts";
 import type { DriverResult } from "../drivers/contract.ts";
 
+const replayParityCases = new Set([
+  "deterministic_pass",
+  "tool_success",
+  "tool_denial",
+  "permission_branch",
+  "multi_tool_turn",
+  "skill_path",
+  "large_output",
+  "usage_accounting",
+]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function requireString(record: Record<string, unknown>, key: string, errors: string[], path: string): void {
+  if (typeof record[key] !== "string" || !(record[key] as string).trim()) errors.push(`${path}.${key}:missing_string`);
+}
+
+function requireStringArray(record: Record<string, unknown>, key: string, errors: string[], path: string): void {
+  if (!Array.isArray(record[key]) || (record[key] as unknown[]).some((item) => typeof item !== "string")) {
+    errors.push(`${path}.${key}:missing_string_array`);
+  }
+}
+
+function validateReplaySpec(value: unknown): string[] {
+  const errors: string[] = [];
+  if (!isRecord(value)) return ["replay:not_object"];
+  if (value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  requireString(value, "skillId", errors, "replay");
+  if (!Array.isArray(value.scenarios) || value.scenarios.length === 0) {
+    errors.push("replay.scenarios:missing_nonempty_array");
+    return errors;
+  }
+  value.scenarios.forEach((scenario, index) => {
+    const path = `replay.scenarios.${index}`;
+    if (!isRecord(scenario)) {
+      errors.push(`${path}:not_object`);
+      return;
+    }
+    requireString(scenario, "id", errors, path);
+    if (scenario.driver !== "mock") errors.push(`${path}.driver:unsupported`);
+    if (scenario.parityCase !== undefined && (typeof scenario.parityCase !== "string" || !replayParityCases.has(scenario.parityCase))) {
+      errors.push(`${path}.parityCase:unsupported`);
+    }
+    if (!isRecord(scenario.input)) {
+      errors.push(`${path}.input:not_object`);
+    } else {
+      requireString(scenario.input, "task", errors, `${path}.input`);
+      requireStringArray(scenario.input, "files", errors, `${path}.input`);
+    }
+    if (!isRecord(scenario.expected)) {
+      errors.push(`${path}.expected:not_object`);
+    } else {
+      if (typeof scenario.expected.mentionsVerification !== "boolean") errors.push(`${path}.expected.mentionsVerification:missing_boolean`);
+      requireStringArray(scenario.expected, "requiresTests", errors, `${path}.expected`);
+      requireStringArray(scenario.expected, "forbids", errors, `${path}.expected`);
+    }
+  });
+  return errors;
+}
+
 export interface ReplayScenario {
   id: string;
   driver: "mock";
@@ -133,7 +195,10 @@ export function evaluateReplaySpec(spec: ReplaySpec, skill: {
 
 export async function readReplaySpec(path: string): Promise<ReplaySpec | null> {
   if (!existsSync(path)) return null;
-  return JSON.parse(await readFile(path, "utf8")) as ReplaySpec;
+  const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;
+  const errors = validateReplaySpec(parsed);
+  if (errors.length > 0) throw new Error(`replay_schema_invalid:${path}:${errors.join(",")}`);
+  return parsed as ReplaySpec;
 }
 
 function modelReplayPrompt(replay: ReplayResult): string {

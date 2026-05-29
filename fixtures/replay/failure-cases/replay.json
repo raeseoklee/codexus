@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "skillId": "skill_expected_parser",
+  "scenarios": [
+    {
+      "id": "tool_denial_requires_guardrail",
+      "driver": "mock",
+      "parityCase": "tool_denial",
+      "input": {
+        "task": "refuse unsafe parser mutation",
+        "files": ["src/parser.ts"]
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["permission denial"],
+        "forbids": ["unsafe tool override"]
+      }
+    },
+    {
+      "id": "multi_tool_turn_requires_sequence",
+      "driver": "mock",
+      "parityCase": "multi_tool_turn",
+      "input": {
+        "task": "coordinate search edit verify loop",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["search edit verify"],
+        "forbids": ["skip verification"]
+      }
+    },
+    {
+      "id": "large_output_requires_summary",
+      "driver": "mock",
+      "parityCase": "large_output",
+      "input": {
+        "task": "summarize noisy test output",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["large output summary"],
+        "forbids": ["paste unbounded logs"]
+      }
+    },
+    {
+      "id": "usage_accounting_requires_budget",
+      "driver": "mock",
+      "parityCase": "usage_accounting",
+      "input": {
+        "task": "run model replay under budget",
+        "files": []
+      },
+      "expected": {
+        "mentionsVerification": true,
+        "requiresTests": ["model budget"],
+        "forbids": ["unbounded live replay"]
+      }
+    }
+  ]
+}

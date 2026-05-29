@@ -21,7 +21,7 @@ If this skill has been installed into `$CODEX_HOME/skills`, the same wrapper sho
 
 - Use normal Codex interaction for direct code edits, explanations, and small one-off checks.
 - Use Codexus when the user asks for harness behavior: durable run ledger, status, verification, replay, memory, skill proposal/review/promotion/export, OMX interop, bounded context retrieval, or supervised handoff.
-- Prefer read-only Codexus commands first inside an ongoing conversation: `status`, `events tail`, `verify`, `replay`, `memory search`, `memory review`, `skill review`, `skill index`, `locks list`, `schema check`, `adapt omx status`, `adapt omx retrieve`, `adapt omx context`.
+- Prefer read-only Codexus commands first inside an ongoing conversation: `status`, `events tail`, `verify`, `replay`, `memory search`, `memory review`, `skill review`, `skill index`, `locks list`, `schema check`, `schema validate-run`, `adapt omx status`, `adapt omx retrieve`, `adapt omx context`.
 - Use `run --driver codex-exec` only when an explicit supervised sub-run is useful. It starts a separate `codex exec` process and should not replace the active conversation for ordinary edits.
 - Preserve the current conversation as the primary interaction surface. Codexus augments it; it does not create a competing chat loop.
 
@@ -42,10 +42,12 @@ node codex/skills/codexus/scripts/cx.mjs skill improve <skill-id> --reason "<why
 node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-replay --json
 node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
 node codex/skills/codexus/scripts/cx.mjs adapt omx context --task "<task>" --json
+node codex/skills/codexus/scripts/cx.mjs adapt omx context --task "<task>" --approve --json
 node codex/skills/codexus/scripts/cx.mjs locks list --json
 node codex/skills/codexus/scripts/cx.mjs schema check --json
+node codex/skills/codexus/scripts/cx.mjs schema validate-run <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json
-node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --json
+node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --record --json
 node codex/skills/codexus/scripts/cx.mjs plan --omx --json "<task>"
 ```
 

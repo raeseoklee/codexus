@@ -178,6 +178,12 @@ Live model replay is never implicit. It requires structural replay first,
 `--model-budget`, and the local `CODEXUS_ENABLE_LIVE_MODEL_REPLAY=1` experiment
 gate.
 
+The structural replay path includes fixture-backed pass and failure cases. The
+fixture coverage currently proves deterministic handling of tool-success,
+permission-branch, tool-denial, multi-tool-turn, large-output, and
+usage-accounting labels; it is structural coverage, not proof that live model
+behavior has parity.
+
 ### `cx memory ...`
 
 Purpose: retrieve, add, list, review, curate, and prune scoped memory entries
@@ -208,11 +214,22 @@ Subcommands:
 Purpose: verify that versioned schema artifacts and the app-server fixture are
 present and structurally valid.
 
+### `cx schema validate` and `cx schema validate-run`
+
+Purpose: validate a single durable JSON record or an existing run ledger with
+focused local validators. `validate-run` checks state, event JSONL shape,
+event/run id consistency, terminal event consistency, and optional
+verification/experience artifacts based on the run state and input config.
+
 ### `cx adapt omx context`
 
 Purpose: format bounded active `codexus:<skill-name>` skills and memory entries
 into a prompt-safe block for the current Codex session. It retrieves context but
 does not inject it automatically or create a separate chat loop.
+
+`--approve` writes a durable, non-injected context artifact under
+`.codex-harness/adapters/context/<id>/` with `context.md`, `context.json`, and a
+hash. This is an explicit handoff artifact, not automatic prompt mutation.
 
 ### `cx app-server roundtrip` and `cx app-server experiment`
 
@@ -221,10 +238,17 @@ process control. The experiment command writes or previews a sandbox manifest
 with lifecycle, timeout, and cleanup intent. `--live` is rejected unless the
 local experiment gate is set, and the stable path remains `codex exec --json`.
 
+`cx app-server experiment --dry-run --record --json` writes the manifest while
+still avoiding process startup.
+
 ### `cx cron run-now` and `cx gateway check`
 
 Purpose: return dry-run automation plans with lock and ledger-event intent.
 Live dispatch remains disabled until policy and approval events are complete.
+
+`--record` writes a dry-run audit record with policy-check, lock-planning, and
+dispatch-skipped events. These records are the compatibility boundary for later
+live cron/gateway dispatch.
 
 ### `cx skill ...`
 
@@ -728,7 +752,10 @@ Reference-parity tests to add next:
 - JSON error envelope tests for unexpected arguments, unsupported capabilities, missing/corrupt state, and disabled drivers,
 - permission and approval event tests,
 - large-output and malformed-driver-output tests,
-- replay fixture mapping tests for tool success, denial, and multi-tool turns,
+- replay fixture mapping tests for tool success, denial, multi-tool turns,
+  large output, and usage accounting,
+- schema validation tests for single records and run ledgers,
+- dry-run audit-record tests for adapter context, app-server, cron, and gateway,
 - truthful capability/status tests for disabled app-server behavior.
 
 Real smoke tests:

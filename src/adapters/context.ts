@@ -1,5 +1,10 @@
+import { join } from "node:path";
+import { writeFile } from "node:fs/promises";
 import type { MemoryEntry } from "../evolution/memory.ts";
 import type { ActiveSkillIndexEntry, SkillProposal } from "../evolution/skills.ts";
+import { harnessRoot } from "../ledger/paths.ts";
+import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
+import { sha256Text } from "../util/hash.ts";
 
 export interface AdapterContextBlock {
   schemaVersion: 1;
@@ -23,6 +28,23 @@ export interface AdapterContextBlock {
     sourceRunId: string;
     confidence: MemoryEntry["confidence"];
   }>;
+}
+
+export interface AdapterContextArtifact {
+  schemaVersion: 1;
+  artifactId: string;
+  status: "approved";
+  approval: {
+    approvedAt: string;
+    approvedBy: string;
+    contextHash: string;
+    injectedAutomatically: false;
+  };
+  paths: {
+    dir: string;
+    markdown: string;
+    json: string;
+  };
 }
 
 function compactLine(text: string, maxChars: number): string {
@@ -104,4 +126,40 @@ export function buildCodexAdapterContext(options: {
       confidence: memory.confidence,
     })),
   };
+}
+
+export async function writeApprovedAdapterContext(options: {
+  cwd: string;
+  context: AdapterContextBlock;
+  approvedBy?: string;
+}): Promise<AdapterContextArtifact> {
+  const approvedAt = new Date().toISOString();
+  const artifactId = `context_${Date.now()}`;
+  const dir = join(harnessRoot(options.cwd), "adapters", "context", artifactId);
+  const markdown = join(dir, "context.md");
+  const json = join(dir, "context.json");
+  const artifact: AdapterContextArtifact = {
+    schemaVersion: 1,
+    artifactId,
+    status: "approved",
+    approval: {
+      approvedAt,
+      approvedBy: options.approvedBy ?? "codexus-adapter",
+      contextHash: sha256Text(options.context.contextBlock),
+      injectedAutomatically: false,
+    },
+    paths: {
+      dir,
+      markdown,
+      json,
+    },
+  };
+  await ensureDir(dir);
+  await writeFile(markdown, options.context.contextBlock);
+  await writeJsonAtomic(json, {
+    schemaVersion: 1,
+    artifact,
+    context: options.context,
+  });
+  return artifact;
 }

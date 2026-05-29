@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "skill_actual_parser",
+  "name": "fixture-parser-unsafe",
+  "displayName": "codexus:fixture-parser-unsafe",
+  "status": "proposed",
+  "version": "0.1.0",
+  "sourceRunIds": ["run_fixture"],
+  "trigger": {
+    "keywords": ["parser"],
+    "pathGlobs": []
+  },
+  "scope": {
+    "allowedTaskShapes": ["bugfix"],
+    "excludedTaskShapes": []
+  },
+  "procedure": [
+    "Apply the parser change."
+  ],
+  "safety": {
+    "requiresVerification": false,
+    "forbiddenActions": []
+  },
+  "promotion": {
+    "requiredReplayStatus": "passed",
+    "reviewedBy": null,
+    "promotedAt": null
+  }
+}

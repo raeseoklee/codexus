@@ -34,7 +34,10 @@ Usage:
   cx report <run-id> [--json]
   cx locks list|inspect|clear [name] [--stale-only] [--json]
   cx schema check [--json]
+  cx schema validate --type <config|state|event|memory-entry|skill> --file <path> [--json]
+  cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|experiment [--dry-run|--live] [--json]
+  cx app-server experiment --dry-run --record [--timeout-ms <n>] [--json]
   cx resume <run-id> [follow-up] [--json]
   cx verify <run-id> [--verify <cmd>] [--json]
   cx replay skill <skill-id> [--with-model-replay] [--allow-live-model-replay] [--model-budget <n>] [--json]
@@ -54,9 +57,9 @@ Usage:
   cx skill list [--json]
   cx adapt omx status [--json]
   cx adapt omx retrieve --task <task> [--json]
-  cx adapt omx context --task <task> [--json]
-  cx cron status|run-now [--dry-run] [--json]
-  cx gateway status|check [--dry-run] [--json]
+  cx adapt omx context --task <task> [--approve] [--json]
+  cx cron status|run-now [--dry-run] [--record] [--json]
+  cx gateway status|check [--dry-run] [--record] [--json]
 
 Compatibility:
   chx remains a temporary alias during the Codexus migration.

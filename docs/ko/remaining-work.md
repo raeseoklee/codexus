@@ -39,12 +39,14 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   cron/gateway disabled gate.
 - 승격된 hardening surface: stale-lock metadata inspection/recovery, versioned
   schema artifact, budget/policy-gated model replay runner, Codex-native
-  bounded context formatter, live gate가 있는 app-server dry-run roundtrip
-  contract, 명시적 budget이 필요한 repairable driver-failure retry,
-  cron/gateway dry-run automation plan.
+  bounded context formatter와 자동 주입 없는 approved context artifact,
+  live gate가 있는 app-server dry-run roundtrip contract와 recorded sandbox
+  experiment manifest, 명시적 budget이 필요한 repairable driver-failure retry,
+  cron/gateway dry-run automation plan/audit record, run-ledger validation,
+  replay pass/failure fixture.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
-  enforcement/migration, real cron/gateway automation dispatch.
+  engine enforcement/migration, real cron/gateway automation dispatch.
 
 ### P0: Contract and Safety Hardening
 
@@ -65,7 +67,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    - task-repairable failure만 retry하고, capability/auth failure는 terminal
      typed error로 surface합니다.
 
-4. state schema migration과 lock/lease protection 추가. 상태: migration reader, minimal lock, stale-lock recovery, schema artifact 구현.
+4. state schema migration과 lock/lease protection 추가. 상태: migration reader, minimal lock, stale-lock recovery, schema artifact, focused record validation, run-ledger validation 구현.
    - active skill index, export, cron, app-server run은 concurrent write를
      만듭니다.
    - 해당 기능 전 mutable store에 대한 minimal lock/lease와 versioned state
@@ -85,12 +87,12 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    - 외부 skill-name 제약이 Codexus storage rule과 다를 수 있으므로 외부 store
      write 전에 Codex skill validation을 실행합니다.
 
-7. Codex-native adapter에 active skill retrieval 추가. 상태: shared core를 통한 bounded retrieval 구현.
+7. Codex-native adapter에 active skill retrieval 추가. 상태: shared core를 통한 bounded retrieval과 approved context artifact 기록 구현.
    - 현재 task에 맞는 active skill과 memory entry를 bounded retrieval합니다.
    - 별도 chat loop를 만들지 않고 현재 Codex conversation을 주 surface로
      유지합니다.
 
-8. deterministic replay 뒤에 model-in-the-loop replay 추가. 상태: budget/policy-gated runner 구현, routine live replay는 opt-in/env-gated 유지.
+8. deterministic replay 뒤에 model-in-the-loop replay 추가. 상태: structural pass/failure fixture와 budget/policy-gated runner 구현, routine live replay는 opt-in/env-gated 유지.
    - 현재 structural replay gate를 첫 번째 방어선으로 유지합니다.
    - model replay는 Codex usage를 소비하므로 opt-in 또는 budget-gated로 둡니다.
    - Claw-style parity scenario: tool success, denial, permission prompt,
@@ -104,7 +106,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 ### P2: Runtime Expansion
 
-10. app-server schema fixture와 gated roundtrip 추가. 상태: fixture/status gate와 dry-run roundtrip contract 구현, live roundtrip deferred.
+10. app-server schema fixture와 gated roundtrip 추가. 상태: fixture/status gate, dry-run roundtrip contract, recorded sandbox experiment manifest 구현, live roundtrip deferred.
     - driver는 기본 disabled로 유지합니다.
     - live turn 실행 전에 truthful status/capability output을 먼저 둡니다.
     - app-server failure가 안정적인 `codex exec --json` path에 영향을 주면 안 됩니다.
@@ -128,7 +130,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - 제안 command: `cx runs list`, `cx events tail <run-id>`, `cx report <run-id>`.
     - 출력은 bounded, JSON-first로 유지합니다.
 
-15. cron/gateway automation은 P0 safety 이후에 추가. 상태: disabled feature gate와 dry-run automation plan 구현, real automation deferred.
+15. cron/gateway automation은 P0 safety 이후에 추가. 상태: disabled feature gate와 dry-run automation plan/audit record 구현, real automation deferred.
     - Hermes-style cron/gateway는 lock, schema migration, permission event,
       explicit user policy 뒤에 둬야 합니다.
 
@@ -152,11 +154,12 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 1. dependency policy가 허용될 때만 focused local schema check를 full JSON Schema
    engine으로 교체합니다. Migration fixture는 regression boundary로 유지합니다.
-2. model replay 사용량을 늘리기 전에 Claw-style replay parity fixture를 tool
-   denial, multi-tool turn, large output, usage accounting까지 확장합니다.
-3. app-server를 driver로 켜기 전에 sandbox experiment manifest를 timeout과
+2. model replay 사용량을 늘리기 전에 Claw-style replay parity fixture를
+   plugin/skill path, interruption, file/tool roundtrip, shell-output case까지
+   계속 확장합니다.
+3. app-server를 driver로 켜기 전에 recorded sandbox experiment manifest를 timeout과
    cleanup evidence가 있는 supervised process experiment로 승격합니다.
-4. cron/gateway live dispatch용 approval/policy ledger event를 추가하고,
-   dry-run/live path의 contract compatibility를 유지합니다.
+4. cron/gateway dry-run audit record를 policy-reviewed live dispatch contract로
+   승격하고, dry-run/live path의 contract compatibility를 유지합니다.
 5. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고
    user-visible한 adapter injection 단계를 추가합니다.

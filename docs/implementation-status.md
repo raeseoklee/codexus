@@ -32,6 +32,8 @@ temporary compatibility alias.
   - `locks inspect`
   - `locks clear`
   - `schema check`
+  - `schema validate`
+  - `schema validate-run`
   - `app-server status`
   - `app-server roundtrip`
   - `app-server experiment`
@@ -81,11 +83,12 @@ temporary compatibility alias.
 - Codexus-generated skills carry a Codex-facing `codexus:<skill-name>` display identity while keeping stable storage ids.
 - Codex/OMX skill export writes generated skill bundles through explicit commands.
 - Codex-native adapter retrieval can return bounded relevant approved active skills and memory entries, and can format them into a prompt-safe context block with replay approval metadata.
+- The Codex-native adapter can write an explicitly approved context artifact (`context.md` and `context.json`) without injecting it automatically.
 - Model replay has a deterministic first gate plus an explicit budget/policy/live-environment gate for local experiments.
 - `cx init` creates project-local config/state directories without mutating `.omx/state`.
 - Run observability commands list runs, tail events, and preview reports.
-- App-server schema fixture/status, dry-run roundtrip contract, and sandboxed experiment manifest surface are present, while live app-server execution remains gated off.
-- Cron/gateway feature gates expose disabled status by default and dry-run automation plans for future dispatch.
+- App-server schema fixture/status, dry-run roundtrip contract, and sandboxed experiment manifest recording are present, while live app-server execution remains gated off.
+- Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records for future dispatch.
 - Versioned schema artifacts exist for config, state, events, memory entries, and skills, with focused enforcement on durable read paths.
 - `npm run typecheck` performs syntax/static validation with the local Node runtime.
 - OMX capability probe with older-version warning.
@@ -96,7 +99,7 @@ temporary compatibility alias.
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 46.
+- Current test count: 48.
 - Static check: `npm run typecheck`
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.
@@ -114,7 +117,7 @@ temporary compatibility alias.
 - Skill proposal/review/promotion/deprecation workflow through both unit and CLI tests.
 - Structured JSON CLI error envelope for unknown commands and argument validation failures.
 - Structured JSON CLI error coverage for unexpected arguments, corrupt state, and disabled app-server driver.
-- Init, observability, active-skill index/export/improvement, adapter approved retrieval/context formatting, replay parity coverage, gated model replay, stale locks, schema enforcement, migration fixtures, driver-failure repair, app-server dry-run/experiment, memory lifecycle/curation, packaging, and feature-gate tests.
+- Init, observability, active-skill index/export/improvement, adapter approved retrieval/context artifact recording, replay parity pass/failure coverage, gated model replay, stale locks, schema validation/run-ledger validation, migration fixtures, driver-failure repair, app-server dry-run/experiment recording, memory lifecycle/curation, packaging, and feature-gate audit-record tests.
 - Real Codex exec smoke through ChatGPT-authenticated local Codex:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-CODEX-OK" --json`
   - observed final artifact: `CHX-CODEX-OK`
@@ -137,7 +140,7 @@ temporary compatibility alias.
 - `run` completes with both mock and real `codex-exec` drivers and writes a ledger.
 - Required verification failures prevent `complete`, and repair can recover when bounded budget remains.
 - `status --json` reconstructs state, verification, experience, and event tail without a live process.
-- `adapt omx status --json` is read-only against `.omx/state`; `adapt omx retrieve --json` returns approved bounded context candidates; `adapt omx context --json` formats prompt-safe context.
+- `adapt omx status --json` is read-only against `.omx/state`; `adapt omx retrieve --json` returns approved bounded context candidates; `adapt omx context --json` formats prompt-safe context; `adapt omx context --approve --json` writes a non-injected approved context artifact.
 - Tests pass without model/network access through the mock driver.
 - Evolution output writes source-linked experience and memory entries.
 - Skill promotion requires trigger/scope/safety/evidence/replay and writes a versioned active copy, promotion-review evidence, and enriched active index entry.
@@ -150,8 +153,8 @@ review. Current high-level gaps:
 
 - Driver-failure repair is implemented only for repairable task failures and only with an explicit budget.
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
-- Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, and sandbox experiment manifest probing are implemented.
+- Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, and sandbox experiment manifest recording are implemented.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
-- Cron/gateway live automation remains disabled behind feature gates; dry-run plans are implemented.
+- Cron/gateway live automation remains disabled behind feature gates; dry-run plans and optional audit records are implemented.
 - Config/schema validation is focused local enforcement plus schema artifacts, not full draft-2020-12 JSON Schema engine enforcement.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

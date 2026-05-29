@@ -70,7 +70,7 @@ The repository now has a working MVP harness spine:
 - automatic experience and memory records with memory lifecycle and curation commands,
 - replay-gated skill proposal, review, improvement, promotion, active index, explicit export, listing, and deprecation,
 - optional OMX status/retrieval/context formatting and `.omx/plans` export without mutating `.omx/state`,
-- lock inspection/stale recovery and versioned schema artifacts with focused read-path enforcement,
-- gated model replay, app-server dry-run roundtrip/experiment manifest, explicit-budget driver-failure repair, cron/gateway dry-run plans, and local syntax/static validation.
+- lock inspection/stale recovery, versioned schema artifacts, focused read-path enforcement, and run-ledger validation,
+- approved adapter context artifacts, replay pass/failure fixtures, gated model replay, app-server dry-run roundtrip/recorded experiment manifests, explicit-budget driver-failure repair, cron/gateway dry-run audit records, and local syntax/static validation.
 
 The remaining work is no longer P0-P2 surface construction; it is deeper hardening: full schema-engine enforcement if dependency policy allows it, richer replay parity, supervised live app-server process experiments, and eventually policy-gated cron/gateway automation. See [Remaining work](remaining-work.md).

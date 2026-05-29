@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
@@ -18,6 +19,10 @@ function runCli(cwd: string, args: string[], env: Record<string, string> = {}) {
     encoding: "utf8",
     env: { ...process.env, ...env },
   });
+}
+
+function sha256Text(text: string): string {
+  return `sha256:${createHash("sha256").update(text).digest("hex")}`;
 }
 
 test("init command bootstraps project harness without mutating omx state", async () => {
@@ -56,6 +61,33 @@ test("observability commands list runs, tail events, and read reports", async ()
     const report = runCli(cwd, ["report", runOutput.runId, "--json"]);
     assert.equal(report.status, 0, report.stderr);
     assert.match(JSON.parse(report.stdout).preview, /Outcome: complete/);
+
+    const validateRun = runCli(cwd, ["schema", "validate-run", runOutput.runId, "--json"]);
+    assert.equal(validateRun.status, 0, validateRun.stderr);
+    const validation = JSON.parse(validateRun.stdout);
+    assert.equal(validation.ok, true);
+    assert.equal(validation.artifacts.find((artifact: { name: string }) => artifact.name === "events").count > 0, true);
+
+    const validateState = runCli(cwd, ["schema", "validate", "--type", "state", "--file", runOutput.statePath, "--json"]);
+    assert.equal(validateState.status, 0, validateState.stderr);
+    assert.equal(JSON.parse(validateState.stdout).ok, true);
+
+    const eventPath = join(cwd, ".codex-harness", "runs", runOutput.runId, "events.jsonl");
+    await writeFile(eventPath, `${JSON.stringify({
+      schemaVersion: 1,
+      eventId: "evt_bad",
+      runId: "run_other",
+      timestamp: "2026-05-29T00:00:00.000Z",
+      phase: "complete",
+      type: "run.terminal",
+      source: "test",
+      payload: { outcome: "complete" },
+    })}\n`);
+    const invalidRun = runCli(cwd, ["schema", "validate-run", runOutput.runId, "--json"]);
+    assert.equal(invalidRun.status, 1);
+    const invalidOutput = JSON.parse(invalidRun.stdout);
+    assert.equal(invalidOutput.ok, false);
+    assert.ok(invalidOutput.artifacts.find((artifact: { name: string }) => artifact.name === "events").errors.includes("line_1:runId_mismatch"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -211,6 +243,18 @@ test("skill index, export, adapter context, gated replay, and memory lifecycle w
     assert.equal(contextOutput.skills[0].replayStatus, "passed");
     assert.ok(contextOutput.budget.usedChars <= 1600);
 
+    const approvedContext = runCli(cwd, ["adapt", "omx", "context", "--task", "parser regression", "--approve", "--json"]);
+    assert.equal(approvedContext.status, 0, approvedContext.stderr);
+    const approvedOutput = JSON.parse(approvedContext.stdout);
+    assert.equal(approvedOutput.artifact.status, "approved");
+    assert.equal(approvedOutput.artifact.approval.injectedAutomatically, false);
+    assert.ok(existsSync(approvedOutput.artifact.paths.markdown));
+    const approvedMarkdown = await readFile(approvedOutput.artifact.paths.markdown, "utf8");
+    const approvedJson = JSON.parse(await readFile(approvedOutput.artifact.paths.json, "utf8"));
+    assert.equal(approvedJson.schemaVersion, 1);
+    assert.equal(approvedJson.context.contextBlock, approvedMarkdown);
+    assert.equal(approvedOutput.artifact.approval.contextHash, sha256Text(approvedMarkdown));
+
     const replay = runCli(cwd, ["replay", "skill", skillId, "--with-model-replay", "--json"]);
     assert.equal(replay.status, 0, replay.stderr);
     assert.equal(JSON.parse(replay.stdout).modelReplay.status, "not_run");
@@ -244,6 +288,7 @@ test("skill index, export, adapter context, gated replay, and memory lifecycle w
 test("packaging metadata, adapter install, typecheck, and guarded features are exposed", async () => {
   const cwd = resolve(".");
   const codexHome = await tempDir();
+  const featureCwd = await tempDir();
   try {
     const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8"));
     assert.equal(pkg.bin.cx, "./src/cli/main.ts");
@@ -272,23 +317,37 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const appRoundtrip = runCli(cwd, ["app-server", "roundtrip", "--dry-run", "--json"]);
     assert.equal(appRoundtrip.status, 0, appRoundtrip.stderr);
     assert.equal(JSON.parse(appRoundtrip.stdout).status, "passed");
-    const appExperiment = runCli(cwd, ["app-server", "experiment", "--dry-run", "--timeout-ms", "1000", "--json"]);
+    const appExperiment = runCli(cwd, ["app-server", "experiment", "--dry-run", "--timeout-ms", "1000", "--record", "--cwd", featureCwd, "--json"]);
     assert.equal(appExperiment.status, 0, appExperiment.stderr);
-    assert.equal(JSON.parse(appExperiment.stdout).status, "planned");
+    const appExperimentOutput = JSON.parse(appExperiment.stdout);
+    assert.equal(appExperimentOutput.status, "planned");
+    assert.ok(existsSync(join(appExperimentOutput.experimentDir, "manifest.json")));
+    const appManifest = JSON.parse(await readFile(join(appExperimentOutput.experimentDir, "manifest.json"), "utf8"));
+    assert.equal(appManifest.schemaVersion, 1);
+    assert.equal(appManifest.process.supervised, false);
     const appLive = runCli(cwd, ["app-server", "roundtrip", "--live", "--json"]);
     assert.equal(appLive.status, 1);
     assert.equal(JSON.parse(appLive.stdout).code, "unsupported_feature");
 
-    const cronDryRun = runCli(cwd, ["cron", "run-now", "--dry-run", "--task", "memory review", "--json"]);
+    const cronDryRun = runCli(cwd, ["cron", "run-now", "--dry-run", "--record", "--cwd", featureCwd, "--task", "memory review", "--json"]);
     assert.equal(cronDryRun.status, 0, cronDryRun.stderr);
-    assert.equal(JSON.parse(cronDryRun.stdout).status, "planned");
-    const gatewayDryRun = runCli(cwd, ["gateway", "check", "--dry-run", "--task", "repo event", "--json"]);
+    const cronDryRunOutput = JSON.parse(cronDryRun.stdout);
+    assert.equal(cronDryRunOutput.status, "planned");
+    assert.ok(existsSync(cronDryRunOutput.record.path));
+    assert.ok(cronDryRunOutput.ledgerEvents.includes("automation.policy_checked"));
+    const cronRecord = JSON.parse(await readFile(cronDryRunOutput.record.path, "utf8"));
+    assert.equal(cronRecord.schemaVersion, 1);
+    assert.equal(cronRecord.ledgerEvents.some((event: { type: string }) => event.type === "automation.dispatch_skipped"), true);
+    const gatewayDryRun = runCli(cwd, ["gateway", "check", "--dry-run", "--record", "--cwd", featureCwd, "--task", "repo event", "--json"]);
     assert.equal(gatewayDryRun.status, 0, gatewayDryRun.stderr);
-    assert.equal(JSON.parse(gatewayDryRun.stdout).status, "planned");
+    const gatewayDryRunOutput = JSON.parse(gatewayDryRun.stdout);
+    assert.equal(gatewayDryRunOutput.status, "planned");
+    assert.ok(existsSync(gatewayDryRunOutput.record.path));
     const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
     assert.equal(cronLive.status, 1);
     assert.equal(JSON.parse(cronLive.stdout).code, "unsupported_feature");
   } finally {
     await rm(codexHome, { recursive: true, force: true });
+    await rm(featureCwd, { recursive: true, force: true });
   }
 });

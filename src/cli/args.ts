@@ -19,6 +19,8 @@ export function parseArgs(argv: string[]): ParsedArgs {
     "dry-run",
     "stale-only",
     "live",
+    "record",
+    "approve",
   ]);
 
   for (let index = 0; index < rest.length; index += 1) {

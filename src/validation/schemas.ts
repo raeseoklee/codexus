@@ -53,6 +53,10 @@ export const schemaArtifactNames = [
   "skill.schema.json",
 ] as const;
 
+const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
+const terminalOutcomes = ["complete", "failed", "blocked", "cancelled"] as const;
+const verificationStatuses = ["pending", "passed", "failed", "skipped", "timed_out", "error"] as const;
+
 export async function readSchemaArtifactStatus(root = resolve("schemas")): Promise<SchemaArtifactStatus[]> {
   const statuses: SchemaArtifactStatus[] = [];
   for (const name of schemaArtifactNames) {
@@ -147,7 +151,8 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
   if (type === "state") {
     requireString(value, "runId", errors);
     requireOneOf(value, "status", ["running", "terminal"], errors);
-    requireString(value, "phase", errors);
+    requireOneOf(value, "phase", harnessPhases, errors);
+    if (value.outcome !== null && !terminalOutcomes.includes(value.outcome as typeof terminalOutcomes[number])) errors.push("outcome:invalid_enum");
     requireString(value, "createdAt", errors);
     requireString(value, "updatedAt", errors);
     requireString(value, "cwd", errors);
@@ -159,7 +164,7 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     }
     if (requireRecord(value.verification, errors, "verification")) {
       requireBoolean(value.verification, "required", errors, "verification.required");
-      requireString(value.verification, "latestStatus", errors, "verification.latestStatus");
+      requireOneOf(value.verification, "latestStatus", verificationStatuses, errors, "verification.latestStatus");
     }
     requireArray(value, "artifacts", errors);
   }
@@ -168,7 +173,7 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     requireString(value, "eventId", errors);
     requireString(value, "runId", errors);
     requireString(value, "timestamp", errors);
-    requireString(value, "phase", errors);
+    requireOneOf(value, "phase", harnessPhases, errors);
     requireString(value, "type", errors);
     requireString(value, "source", errors);
     if (!("payload" in value)) errors.push("payload:missing");

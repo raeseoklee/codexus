@@ -54,8 +54,16 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported locks command${target ? `: ${target}` : ""}.`;
     case "unsupported_schema_command":
       return `Unsupported schema command${target ? `: ${target}` : ""}.`;
+    case "unsupported_schema_type":
+      return `Unsupported schema validation type${target ? `: ${target}` : ""}.`;
     case "unsupported_app_server_command":
       return `Unsupported app-server command${target ? `: ${target}` : ""}.`;
+    case "missing_schema_file":
+      return "Missing schema validation file.";
+    case "json_parse_failed":
+      return `JSON file could not be parsed${target ? `: ${target}` : ""}.`;
+    case "replay_schema_invalid":
+      return `Replay schema is invalid${target ? `: ${target}` : ""}.`;
     case "invalid_event_tail_lines":
       return "Invalid event tail line count.";
     case "invalid_timeout_ms":
@@ -140,9 +148,17 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_locks_command":
       return "Run `cx locks list`, `cx locks inspect <name>`, or `cx locks clear <name> --stale-only`.";
     case "unsupported_schema_command":
-      return "Run `cx schema check --json`.";
+      return "Run `cx schema check --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
+    case "unsupported_schema_type":
+      return "Use `--type config|state|event|memory-entry|skill`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
+    case "missing_schema_file":
+      return "Pass `--file <path>` with `cx schema validate`.";
+    case "json_parse_failed":
+      return "Fix the JSON syntax in the reported file and rerun the command.";
+    case "replay_schema_invalid":
+      return "Fix the replay fixture shape before using it for skill review or promotion.";
     case "missing_prompt":
       return "Pass the prompt after `cx run`, for example `cx run --json \"inspect the project\"`.";
     case "missing_run_id":

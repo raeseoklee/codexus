@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { buildCodexAdapterContext } from "../../adapters/context.ts";
+import { buildCodexAdapterContext, writeApprovedAdapterContext } from "../../adapters/context.ts";
 import { readActiveSkillIndex, retrieveActiveSkillsForTask } from "../../evolution/skills.ts";
 import { readMemoryEntries, searchMemoryEntries } from "../../evolution/memory.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
@@ -30,11 +30,18 @@ export async function adaptOmxCommand(args: ParsedArgs): Promise<void> {
         memories,
         maxChars: Number.isInteger(maxChars) && maxChars > 0 ? maxChars : 6000,
       });
+      const artifact = flagBool(args.flags, "approve")
+        ? await writeApprovedAdapterContext({ cwd, context })
+        : null;
       if (flagBool(args.flags, "json")) {
-        console.log(JSON.stringify(context, null, 2));
+        console.log(JSON.stringify({ ...context, artifact }, null, 2));
         return;
       }
       console.log(context.contextBlock);
+      if (artifact) {
+        console.log(`\nApproved context artifact: ${artifact.paths.markdown}`);
+        console.log("Codexus does not inject this context automatically.");
+      }
       return;
     }
     if (flagBool(args.flags, "json")) {

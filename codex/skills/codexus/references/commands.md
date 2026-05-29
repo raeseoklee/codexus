@@ -63,9 +63,10 @@ Live model replay is blocked unless the local experiment gate is explicitly enab
 ```bash
 node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
 node codex/skills/codexus/scripts/cx.mjs adapt omx context --task "<task>" --json
+node codex/skills/codexus/scripts/cx.mjs adapt omx context --task "<task>" --approve --json
 ```
 
-Use to retrieve bounded active skill and memory candidates or render them into a prompt-safe context block. It does not create a separate chat loop or inject context automatically.
+Use to retrieve bounded active skill and memory candidates or render them into a prompt-safe context block. `--approve` writes a non-injected context artifact for explicit handoff. It does not create a separate chat loop or inject context automatically.
 
 ## Runtime Gates
 
@@ -73,13 +74,15 @@ Use to retrieve bounded active skill and memory candidates or render them into a
 node codex/skills/codexus/scripts/cx.mjs locks list --json
 node codex/skills/codexus/scripts/cx.mjs locks inspect memory --json
 node codex/skills/codexus/scripts/cx.mjs schema check --json
+node codex/skills/codexus/scripts/cx.mjs schema validate --type state --file .codex-harness/runs/<run-id>/state.json --json
+node codex/skills/codexus/scripts/cx.mjs schema validate-run <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json
-node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --timeout-ms 30000 --json
-node codex/skills/codexus/scripts/cx.mjs cron run-now --dry-run --task "<task>" --json
-node codex/skills/codexus/scripts/cx.mjs gateway check --dry-run --task "<event>" --json
+node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --record --timeout-ms 30000 --json
+node codex/skills/codexus/scripts/cx.mjs cron run-now --dry-run --record --task "<task>" --json
+node codex/skills/codexus/scripts/cx.mjs gateway check --dry-run --record --task "<event>" --json
 ```
 
-Use these for inspection and dry-run evidence. Live app-server, cron, and gateway behavior remains gated.
+Use these for inspection, run-ledger validation, and dry-run audit evidence. Live app-server, cron, and gateway behavior remains gated.
 
 ## Supervised Handoff
 

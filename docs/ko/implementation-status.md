@@ -17,7 +17,7 @@ compatibility alias로 유지합니다.
 
 - Node 26 기반 dependency-free CLI entrypoint
 - `doctor`, `init`, `run`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`
-- `locks list/inspect/clear`, `schema check`, `app-server status/roundtrip/experiment`
+- `locks list/inspect/clear`, `schema check/validate/validate-run`, `app-server status/roundtrip/experiment`
 - `adapt omx status/retrieve/context`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
@@ -38,12 +38,12 @@ compatibility alias로 유지합니다.
 - experience/memory 자동 기록과 memory lifecycle/curation command
 - replay-gated skill promotion/export/improvement/deprecation과 active skill index
 - Codexus 생성 skill의 Codex-facing 표시명 `codexus:<skill-name>`
-- approved active skill/memory retrieval과 replay approval metadata를 포함한 prompt-safe context formatting
+- approved active skill/memory retrieval, replay approval metadata를 포함한 prompt-safe context formatting, 자동 주입 없는 approved context artifact 기록
 - deterministic replay 뒤 explicit budget/policy/live-environment gated model replay
 - `.omx/state`를 건드리지 않는 `cx init`
 - runs/events/report observability command
-- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest, live execution disabled
-- cron/gateway disabled feature gate와 dry-run automation plan
+- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, live execution disabled
+- cron/gateway disabled feature gate와 dry-run automation plan 및 optional audit record
 - config/state/event/memory/skill versioned schema artifact와 durable read-path focused enforcement
 - `npm run typecheck` syntax/static validation
 - `.omx/state`를 건드리지 않는 OMX status/plan interop
@@ -52,7 +52,7 @@ compatibility alias로 유지합니다.
 
 ## 검증
 
-- `npm test`: 46 tests 통과
+- `npm test`: 48 tests 통과
 - `npm run typecheck` 통과
 - `doctor --json`: Codex auth/version/features, OMX, git, tmux, driver capability 확인
 - mock driver: success/failure/repair/blocked/cancelled outcome 검증
@@ -63,7 +63,7 @@ compatibility alias로 유지합니다.
 - Codex skill validator로 skill 구조 검증
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
-- init, observability, active skill index/export/improvement, adapter approved retrieval/context formatting, replay parity coverage, gated model replay, stale lock, schema enforcement, migration fixture, driver-failure repair, app-server dry-run/experiment, memory lifecycle/curation, packaging, feature gate 테스트
+- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, replay parity pass/failure coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment 기록, memory lifecycle/curation, packaging, feature gate audit-record 테스트
 
 ## 남은 gap
 
@@ -72,8 +72,8 @@ compatibility alias로 유지합니다.
 
 - driver-failure repair는 repairable task failure에 한해 explicit budget이 있을 때만 실행됩니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
-- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest probe만 구현했습니다.
-- Codex-native adapter retrieval은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
-- cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan만 구현했습니다.
+- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록만 구현했습니다.
+- Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
+- cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record만 구현했습니다.
 - config/schema validation은 focused local enforcement와 schema artifact 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.
