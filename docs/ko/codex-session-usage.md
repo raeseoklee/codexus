@@ -126,12 +126,13 @@ codexus session status를 다시 보고 checkpoint, verification, hook 상태만
 ```
 
 Notify hook을 활성화했다면 실제 CLI/TUI `turn-ended` dispatch 이후 최신
-`.codexus/session/state.json`에 최근 `hookEvents`가 포함됩니다. 수동 smoke event는
-hook event로 기록되지만 dispatch를 `observed`로 만들지는 않습니다.
-Desktop/app-server session은 CLI notify hook을 호출하지 않을 수 있으므로
-`session status`는 config 설치 상태와 `notifyDispatch`를 분리해 보고합니다. 이 hook은
-transcript를 캡처하지 않습니다. bounded turn activity만 기록하고, 기존 notify
-command가 있으면 그 command로 chain합니다.
+`.codexus/session/state.json`에 최근 `hookEvents`가 포함됩니다. Codexus notify
+adapter는 이런 event를 `runtimeSurface: "cli-tui"`로 표시하고 bounded process
+context도 기록합니다. 수동 smoke event는 hook event로 기록되지만 dispatch를
+`observed`로 만들지는 않습니다. Desktop/app-server session은 CLI notify hook을
+호출하지 않을 수 있으므로 `session status`는 config 설치 상태와 `notifyDispatch`를
+분리해 보고합니다. 이 hook은 transcript를 캡처하지 않습니다. bounded turn activity만
+기록하고, 기존 notify command가 있으면 그 command로 chain합니다.
 
 ## Codex 안에서 호출하는 방법
 

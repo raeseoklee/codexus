@@ -79,7 +79,11 @@ if (root) {
   const main = resolveMain(root);
   const result = spawnSync(process.execPath, [main, "session", "notify", "--event", event, "--json"], {
     cwd: process.cwd(),
-    env: { ...process.env, CODEXUS_NOTIFY_HOOK: "1" },
+    env: {
+      ...process.env,
+      CODEXUS_NOTIFY_HOOK: "1",
+      CODEXUS_NOTIFY_RUNTIME_SURFACE: "cli-tui",
+    },
     encoding: "utf8",
   });
   if (result.status !== 0) {

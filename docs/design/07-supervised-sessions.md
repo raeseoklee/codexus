@@ -294,6 +294,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   install when Codex project trust is not configured.
 - `notifyDispatch.status` reports `observed` only from real `turn-ended`
   events, and `capabilities.hooks` distinguishes `configured` from `available`.
+- Codexus notify adapter events record `runtimeSurface: "cli-tui"` while direct
+  or ambiguous `cx session notify` calls remain unknown unless explicitly
+  tagged.
 - Notify-hook detach restores the previous notify command or removes the
   Codexus-only notify line without installing or refreshing an overlay.
 - Unsupported statusline/tmux features return truthful unavailable statuses.

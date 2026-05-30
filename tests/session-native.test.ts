@@ -112,9 +112,10 @@ test("setup codex-session chains an existing notify hook behind Codexus", async 
     assert.equal(statusOutput.state.capabilities.hooks, "available");
     assert.equal(statusOutput.notifyDispatch.status, "observed");
     assert.equal(statusOutput.notifyDispatch.lastTurnEndedAt, statusOutput.state.hookEvents.at(-1).observedAt);
-    assert.equal(statusOutput.notifyDispatch.runtimeSurface, "unknown");
+    assert.equal(statusOutput.notifyDispatch.runtimeSurface, "cli-tui");
     assert.equal(statusOutput.state.capabilities.statusline, "unavailable");
     assert.equal(statusOutput.state.hookEvents.at(-1).event, "turn-ended");
+    assert.equal(statusOutput.state.hookEvents.at(-1).runtimeSurface, "cli-tui");
     assert.equal(typeof statusOutput.state.hookEvents.at(-1).process.pid, "number");
 
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });

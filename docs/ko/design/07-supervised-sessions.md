@@ -279,6 +279,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   trust가 설정되지 않았으면 설치를 거부합니다.
 - `notifyDispatch.status`는 실제 `turn-ended` event에서만 `observed`가 되며,
   `capabilities.hooks`는 `configured`와 `available`을 구분합니다.
+- Codexus notify adapter event는 `runtimeSurface: "cli-tui"`를 기록하고, direct
+  또는 모호한 `cx session notify` 호출은 명시 tag가 없으면 `unknown`으로 둡니다.
 - notify-hook detach는 overlay를 install/refresh하지 않고 이전 notify command를
   복원하거나 Codexus-only notify line을 제거합니다.
 - unsupported statusline/tmux feature는 정직한 unavailable status를 반환합니다.
