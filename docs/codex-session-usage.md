@@ -130,9 +130,13 @@ codexus session status를 다시 보고 checkpoint, verification, hook 상태만
 ```
 
 If the notify hook is enabled, the latest state should include recent
-`hookEvents` under `.codexus/session/state.json`. The hook does not capture a
-transcript; it only records bounded turn activity and chains to the previous
-notify command when one existed.
+`hookEvents` under `.codexus/session/state.json` after a real CLI/TUI
+`turn-ended` dispatch. Manual smoke events are recorded as hook events but do
+not make dispatch `observed`. Desktop/app-server sessions may not invoke the
+CLI notify hook, so `session status` reports `notifyDispatch` separately from
+config installation. The hook does not capture a transcript; it only records
+bounded turn activity and chains to the previous notify command when one
+existed.
 
 ## How to Invoke It in Codex
 

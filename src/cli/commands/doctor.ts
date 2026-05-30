@@ -11,7 +11,7 @@ import { createDriver } from "../../drivers/index.ts";
 import type { DriverProbe } from "../../drivers/contract.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
 import { findCodexusPackageRoot } from "../../util/package-root.ts";
-import { overlayStatus, readSessionStateWithMigration, sessionPaths, type SessionStateMigrationReport } from "../../session/state.ts";
+import { overlayStatus, readSessionStateWithMigration, refreshSessionState, sessionPaths, type NotifyDispatchState, type SessionStateMigrationReport } from "../../session/state.ts";
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 
 interface Check {
@@ -189,10 +189,13 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   let sessionStateInitialized = false;
   let sessionStateError: string | null = null;
   let sessionStateMigration: SessionStateMigrationReport | null = null;
+  let sessionNotifyDispatch: NotifyDispatchState | null = null;
   try {
     const stateRead = await readSessionStateWithMigration(cwd);
-    sessionStateInitialized = stateRead.state !== null;
+    const refreshedState = stateRead.state ? await refreshSessionState(cwd, stateRead.state) : null;
+    sessionStateInitialized = refreshedState !== null;
     sessionStateMigration = stateRead.migration;
+    sessionNotifyDispatch = refreshedState?.notifyDispatch ?? null;
   } catch (error) {
     sessionStateError = error instanceof Error ? error.message : String(error);
   }
@@ -223,15 +226,27 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
     summary: userOverlay.installed ? "User AGENTS.md has Codexus runtime overlay" : "User AGENTS.md does not have Codexus runtime overlay",
     details: userOverlay,
   });
+  const notifyDispatch = sessionNotifyDispatch ?? {
+    status: notifyHook.installed ? "unobserved" : "not_configured",
+    lastTurnEndedAt: null,
+    lastObservedAt: null,
+    runtimeSurface: "unknown",
+    caveat: notifyHook.installed
+      ? "Codexus notify is configured in Codex CLI config, but no real turn-ended dispatch has been observed for this session state."
+      : "Codexus notify is not configured in Codex CLI config.",
+  } satisfies NotifyDispatchState;
   checks.push({
     id: "codexus.session_hooks",
-    status: notifyHook.installed ? "pass" : "warn",
-    summary: notifyHook.installed
-      ? "Codexus notify hook is installed; statusline remains unavailable"
-      : "Codexus notify hook is not installed; statusline remains unavailable",
+    status: notifyDispatch.status === "observed" ? "pass" : "warn",
+    summary: notifyDispatch.status === "observed"
+      ? "Codexus notify hook has observed a turn-ended dispatch; statusline remains unavailable"
+      : notifyHook.installed
+        ? "Codexus notify hook is installed but no turn-ended dispatch has been observed; statusline remains unavailable"
+        : "Codexus notify hook is not installed; statusline remains unavailable",
     details: {
-      hooks: notifyHook.installed ? "available" : "unavailable",
+      hooks: notifyDispatch.status === "observed" ? "available" : notifyHook.installed ? "configured" : "unavailable",
       notifyHook,
+      notifyDispatch,
       statusline: "unavailable",
       fallback: "Use explicit `cx session checkpoint` and `cx session verify` commands.",
     },

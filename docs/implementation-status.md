@@ -151,6 +151,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   Codexus-only notify line without refreshing the AGENTS overlay.
 - `cx session notify --event <name>` is the internal notify-hook write surface
   and records bounded hook events in `.codexus/session/state.json`.
+- Session state schema v2 separates notify installation from dispatch:
+  `capabilities.hooks` is `configured` after install and `available` only after
+  a real `turn-ended` event is observed. Manual smoke events do not mark
+  dispatch observed.
 - `cx session migrate [--dry-run]` is the explicit migration boundary for
   `.codexus/session/state.json`; it reports pending migrations and persists
   them unless `--dry-run` is used.
@@ -158,12 +162,13 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   blocked verification attempts instead of executing dangerous commands.
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
-- `schemas/session-state.schema.json` is a first-class schema artifact, and
+- `schemas/session-state.schema.json` is a first-class schema artifact for the
+  v2 session-state shape, and
   `cx schema validate --type session-state --file <path> --json` validates
   session state through the same local schema-artifact subset engine.
 - `doctor --json` reports Codexus session state, project/user overlay status,
-  notify-hook installation status, and truthful unavailable status for
-  statusline integration.
+  notify-hook installation status, notify dispatch observation status, and
+  truthful unavailable status for statusline integration.
 - GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
 - Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
 - Public repository readiness files are present: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue templates, and PR template.
@@ -179,7 +184,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 86.
+- Current test count: 87.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -232,8 +237,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   validation, session lock handling, legacy root migration, status,
   checkpoint, verify, policy-blocked session verification, notify-hook trust
   refusal, notify-chain preservation, notify-hook disable, config backup, and
-  focused/schema validator drift cases, and explicit session-state migrations
-  are covered by CLI tests.
+  focused/schema validator drift cases, explicit session-state migrations, and
+  manual-smoke dispatch false-positive protection are covered by CLI tests.
 
 ## Acceptance Coverage
 

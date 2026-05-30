@@ -58,7 +58,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   후속 hardening pass에서 atomic config write, one-time config backup, notify-hook
   detach, validator/schema drift test도 추가했습니다. 이후 session-native hardening
   pass에서 `.codexus/session/state.json`용 explicit `cx session migrate` boundary도
-  추가했습니다.
+  추가했고, configured hook과 실제 `turn-ended` dispatch 관측을 구분하는 v2 notify
+  dispatch semantics를 반영했습니다.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,

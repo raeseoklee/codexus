@@ -59,7 +59,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   refuses install without Codex project trust. The follow-up hardening pass also
   added atomic config writes, one-time config backup, notify-hook detach, and
   validator/schema drift tests. A later session-native hardening pass added an
-  explicit `cx session migrate` boundary for `.codexus/session/state.json`.
+  explicit `cx session migrate` boundary for `.codexus/session/state.json` and
+  v2 notify dispatch semantics that distinguish configured hooks from observed
+  `turn-ended` dispatch.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway

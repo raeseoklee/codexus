@@ -78,7 +78,9 @@ test("setup codex-session chains an existing notify hook behind Codexus", async 
     assert.equal(output.notifyHook.changed, true);
     assert.equal(output.notifyHook.backupPath, join(codexHome, "config.toml.codexus.bak"));
     assert.deepEqual(output.notifyHook.previousNotify, [process.execPath, previousScript]);
-    assert.equal(output.state.capabilities.hooks, "available");
+    assert.equal(output.state.capabilities.hooks, "configured");
+    assert.equal(output.state.notifyDispatch.status, "unobserved");
+    assert.equal(output.state.notifyDispatch.lastTurnEndedAt, null);
 
     const config = await readFile(join(codexHome, "config.toml"), "utf8");
     assert.match(config, /codexus-notify-hook\.mjs/);
@@ -108,8 +110,12 @@ test("setup codex-session chains an existing notify hook behind Codexus", async 
     assert.equal(status.status, 0, status.stderr);
     const statusOutput = JSON.parse(status.stdout);
     assert.equal(statusOutput.state.capabilities.hooks, "available");
+    assert.equal(statusOutput.notifyDispatch.status, "observed");
+    assert.equal(statusOutput.notifyDispatch.lastTurnEndedAt, statusOutput.state.hookEvents.at(-1).observedAt);
+    assert.equal(statusOutput.notifyDispatch.runtimeSurface, "unknown");
     assert.equal(statusOutput.state.capabilities.statusline, "unavailable");
     assert.equal(statusOutput.state.hookEvents.at(-1).event, "turn-ended");
+    assert.equal(typeof statusOutput.state.hookEvents.at(-1).process.pid, "number");
 
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
@@ -181,6 +187,39 @@ test("setup codex-session refuses notify hook install when project is not truste
     assert.equal(output.notifyHook.reason, "project_not_found");
     assert.equal(output.notifyHook.installed, false);
     assert.doesNotMatch(await readFile(join(codexHome, "config.toml"), "utf8"), /codexus-notify-hook/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("manual notify smoke does not mark dispatch observed without turn-ended", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await writeFile(join(codexHome, "config.toml"), [
+      `[projects.${JSON.stringify(resolve(cwd))}]`,
+      'trust_level = "trusted"',
+      "",
+    ].join("\n"));
+    const setup = runCli(cwd, ["setup", "codex-session", "--enable-notify-hook", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(setup.status, 0, setup.stderr);
+
+    const notify = runCli(cwd, ["session", "notify", "--event", "codexus-manual-smoke", "--json"], {
+      CODEX_HOME: codexHome,
+      CODEXUS_NOTIFY_RUNTIME_SURFACE: "cli-tui",
+    });
+    assert.equal(notify.status, 0, notify.stderr);
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const output = JSON.parse(status.stdout);
+    assert.equal(output.state.hookEvents.at(-1).event, "codexus-manual-smoke");
+    assert.equal(output.state.hookEvents.at(-1).runtimeSurface, "cli-tui");
+    assert.equal(output.notifyDispatch.status, "unobserved");
+    assert.equal(output.notifyDispatch.lastTurnEndedAt, null);
+    assert.equal(output.notifyDispatch.lastObservedAt, output.state.hookEvents.at(-1).observedAt);
+    assert.equal(output.state.capabilities.hooks, "configured");
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -306,7 +345,7 @@ test("session migrate reports and persists explicit session-state migrations", a
     const dryRunOutput = JSON.parse(dryRun.stdout);
     assert.equal(dryRunOutput.status, "migrated");
     assert.equal(dryRunOutput.dryRun, true);
-    assert.deepEqual(dryRunOutput.migration.applied, ["session_state_v1.add_hook_events"]);
+    assert.deepEqual(dryRunOutput.migration.applied, ["session_state_v1.add_hook_events", "session_state_v2.add_notify_dispatch"]);
     assert.equal(Object.hasOwn(JSON.parse(await readFile(statePath, "utf8")), "hookEvents"), false);
 
     const migrate = runCli(cwd, ["session", "migrate", "--json"], { CODEX_HOME: codexHome });
@@ -314,7 +353,10 @@ test("session migrate reports and persists explicit session-state migrations", a
     const migrateOutput = JSON.parse(migrate.stdout);
     assert.equal(migrateOutput.status, "migrated");
     assert.equal(migrateOutput.dryRun, false);
-    assert.deepEqual(JSON.parse(await readFile(statePath, "utf8")).hookEvents, []);
+    const migratedState = JSON.parse(await readFile(statePath, "utf8"));
+    assert.equal(migratedState.schemaVersion, 2);
+    assert.deepEqual(migratedState.hookEvents, []);
+    assert.equal(migratedState.notifyDispatch.status, "not_configured");
 
     const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
     assert.equal(status.status, 0, status.stderr);
@@ -330,12 +372,12 @@ test("session migrate rejects unsupported future session-state versions", async 
   const codexHome = await tempDir();
   try {
     await mkdir(join(cwd, ".codexus", "session"), { recursive: true });
-    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 2 }\n");
+    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 3 }\n");
     const migrate = runCli(cwd, ["session", "migrate", "--json"], { CODEX_HOME: codexHome });
     assert.equal(migrate.status, 1);
     const output = JSON.parse(migrate.stdout);
     assert.equal(output.code, "session_state_corrupt");
-    assert.match(output.details.target, /unsupported_schema_version:2/);
+    assert.match(output.details.target, /unsupported_schema_version:3/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -452,6 +494,10 @@ test("session-state focused validator and schema artifact reject the same critic
       ["bad_status", (value: Record<string, unknown>) => { value.status = "running"; }],
       ["bad_capabilities_hooks", (value: Record<string, unknown>) => {
         (value.capabilities as Record<string, unknown>).hooks = "enabled";
+      }],
+      ["missing_notify_dispatch", (value: Record<string, unknown>) => { delete value.notifyDispatch; }],
+      ["bad_notify_dispatch_status", (value: Record<string, unknown>) => {
+        (value.notifyDispatch as Record<string, unknown>).status = "installed";
       }],
     ] as const;
     for (const [name, mutate] of invalidCases) {

@@ -192,6 +192,13 @@ Target behavior:
 - The notify hook records bounded turn activity in `.codexus/session/state.json`
   and chains to any previous top-level `notify = [...]` command through
   `--previous-notify`.
+- Notify capability is split into config installation and observed dispatch:
+  `capabilities.hooks` is `configured` after install, and becomes `available`
+  only after a real `turn-ended` event is observed. Manual smoke events must not
+  mark dispatch observed.
+- Runtime surface detection is unknown-biased. Codexus records bounded runtime
+  context when the hook fires, but it must not infer Desktop/app-server or
+  CLI/TUI support from missing dispatch alone.
 - Config rewrites must be atomic, must create a one-time
   `config.toml.codexus.bak` backup, and must support `--disable-notify-hook`
   to restore the previous notify command or remove Codexus when no previous
@@ -285,6 +292,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   artifact under `.codexus/session/`, and reports a typed result.
 - Optional notify-hook attachment preserves existing notify chains and refuses
   install when Codex project trust is not configured.
+- `notifyDispatch.status` reports `observed` only from real `turn-ended`
+  events, and `capabilities.hooks` distinguishes `configured` from `available`.
 - Notify-hook detach restores the previous notify command or removes the
   Codexus-only notify line without installing or refreshing an overlay.
 - Unsupported statusline/tmux features return truthful unavailable statuses.
@@ -306,7 +315,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    and notify-hook detach.
 8. Completed: add an explicit session-state migration boundary and `cx session
    migrate` command.
-9. Next: add statusline/HUD support only if Codex exposes a stable supported
+9. Completed: promote session state to v2 with truthful notify dispatch
+   capability semantics.
+10. Next: add statusline/HUD support only if Codex exposes a stable supported
    configuration surface.
-10. Later: revisit external `codex exec resume` as a separate advanced feature only
+11. Later: revisit external `codex exec resume` as a separate advanced feature only
    after the Codex-native path is useful.

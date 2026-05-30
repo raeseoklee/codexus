@@ -228,7 +228,8 @@ function requireOneOf(record: Record<string, unknown>, key: string, allowed: rea
 export function validateSchemaValue(type: SchemaValidationType, value: unknown): SchemaValidationResult {
   const errors: string[] = [];
   if (!requireRecord(value, errors, type)) return { schemaVersion: 1, type, valid: false, errors };
-  if (type !== "config" && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  const expectedSchemaVersion = type === "session-state" ? 2 : 1;
+  if (type !== "config" && value.schemaVersion !== expectedSchemaVersion) errors.push(`schemaVersion:not_${expectedSchemaVersion}`);
   if (type === "config" && value.schemaVersion !== undefined && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
 
   if (type === "config") {
@@ -339,12 +340,39 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     if (!(value.lastCommand === null || typeof value.lastCommand === "string")) errors.push("lastCommand:invalid");
     requireArray(value, "checkpoints", errors);
     requireArray(value, "verifications", errors);
-    requireArray(value, "hookEvents", errors);
+    const hookEvents = requireArray(value, "hookEvents", errors);
+    for (const item of hookEvents) {
+      if (!isRecord(item)) {
+        errors.push("hookEvents:non_object_item");
+        continue;
+      }
+      requireString(item, "id", errors, "hookEvents.id");
+      requireString(item, "event", errors, "hookEvents.event");
+      requireString(item, "observedAt", errors, "hookEvents.observedAt");
+      requireOneOf(item, "source", ["notify"], errors, "hookEvents.source");
+      requireString(item, "cwd", errors, "hookEvents.cwd");
+      requireOneOf(item, "runtimeSurface", ["unknown", "cli-tui", "desktop-app-server"], errors, "hookEvents.runtimeSurface");
+      if (requireRecord(item.process, errors, "hookEvents.process")) {
+        requireNumber(item.process, "pid", errors, "hookEvents.process.pid");
+        requireNumber(item.process, "ppid", errors, "hookEvents.process.ppid");
+        requireString(item.process, "cwd", errors, "hookEvents.process.cwd");
+        if (!(item.process.bundleIdentifier === null || typeof item.process.bundleIdentifier === "string")) {
+          errors.push("hookEvents.process.bundleIdentifier:invalid");
+        }
+      }
+    }
     requireArray(value, "linkedRunIds", errors);
     if (requireRecord(value.capabilities, errors, "capabilities")) {
       requireOneOf(value.capabilities, "tmux", ["available", "unavailable"], errors, "capabilities.tmux");
-      requireOneOf(value.capabilities, "hooks", ["available", "unavailable"], errors, "capabilities.hooks");
+      requireOneOf(value.capabilities, "hooks", ["available", "configured", "unavailable"], errors, "capabilities.hooks");
       requireOneOf(value.capabilities, "statusline", ["available", "unavailable"], errors, "capabilities.statusline");
+    }
+    if (requireRecord(value.notifyDispatch, errors, "notifyDispatch")) {
+      requireOneOf(value.notifyDispatch, "status", ["observed", "unobserved", "not_configured"], errors, "notifyDispatch.status");
+      if (!(value.notifyDispatch.lastTurnEndedAt === null || typeof value.notifyDispatch.lastTurnEndedAt === "string")) errors.push("notifyDispatch.lastTurnEndedAt:invalid");
+      if (!(value.notifyDispatch.lastObservedAt === null || typeof value.notifyDispatch.lastObservedAt === "string")) errors.push("notifyDispatch.lastObservedAt:invalid");
+      requireOneOf(value.notifyDispatch, "runtimeSurface", ["unknown", "cli-tui", "desktop-app-server"], errors, "notifyDispatch.runtimeSurface");
+      requireString(value.notifyDispatch, "caveat", errors, "notifyDispatch.caveat");
     }
     if (requireRecord(value.overlays, errors, "overlays")) {
       requireRecord(value.overlays.project, errors, "overlays.project");

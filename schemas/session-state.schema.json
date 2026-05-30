@@ -3,9 +3,9 @@
   "$id": "https://codexus.local/schemas/session-state.schema.json",
   "title": "Codexus Session State",
   "type": "object",
-  "required": ["schemaVersion", "sessionId", "cwd", "status", "createdAt", "updatedAt", "lastCommand", "checkpoints", "verifications", "hookEvents", "linkedRunIds", "capabilities", "overlays"],
+  "required": ["schemaVersion", "sessionId", "cwd", "status", "createdAt", "updatedAt", "lastCommand", "checkpoints", "verifications", "hookEvents", "linkedRunIds", "capabilities", "notifyDispatch", "overlays"],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "const": 2 },
     "sessionId": { "type": "string", "minLength": 1 },
     "cwd": { "type": "string", "minLength": 1 },
     "status": { "enum": ["initialized"] },
@@ -18,13 +18,24 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "event", "observedAt", "source", "cwd"],
+        "required": ["id", "event", "observedAt", "source", "cwd", "runtimeSurface", "process"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
           "event": { "type": "string", "minLength": 1 },
           "observedAt": { "type": "string" },
           "source": { "enum": ["notify"] },
-          "cwd": { "type": "string" }
+          "cwd": { "type": "string" },
+          "runtimeSurface": { "enum": ["unknown", "cli-tui", "desktop-app-server"] },
+          "process": {
+            "type": "object",
+            "required": ["pid", "ppid", "cwd", "bundleIdentifier"],
+            "properties": {
+              "pid": { "type": "number" },
+              "ppid": { "type": "number" },
+              "cwd": { "type": "string" },
+              "bundleIdentifier": { "type": ["string", "null"] }
+            }
+          }
         }
       }
     },
@@ -34,8 +45,19 @@
       "required": ["tmux", "hooks", "statusline"],
       "properties": {
         "tmux": { "enum": ["available", "unavailable"] },
-        "hooks": { "enum": ["available", "unavailable"] },
+        "hooks": { "enum": ["available", "configured", "unavailable"] },
         "statusline": { "enum": ["available", "unavailable"] }
+      }
+    },
+    "notifyDispatch": {
+      "type": "object",
+      "required": ["status", "lastTurnEndedAt", "lastObservedAt", "runtimeSurface", "caveat"],
+      "properties": {
+        "status": { "enum": ["observed", "unobserved", "not_configured"] },
+        "lastTurnEndedAt": { "type": ["string", "null"] },
+        "lastObservedAt": { "type": ["string", "null"] },
+        "runtimeSurface": { "enum": ["unknown", "cli-tui", "desktop-app-server"] },
+        "caveat": { "type": "string" }
       }
     },
     "overlays": {

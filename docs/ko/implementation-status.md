@@ -84,6 +84,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   line을 AGENTS overlay refresh 없이 제거합니다.
 - `cx session notify --event <name>`은 internal notify-hook write surface이며
   bounded hook event를 `.codexus/session/state.json`에 기록합니다.
+- Session state schema v2는 notify 설치와 dispatch 관측을 분리합니다.
+  `capabilities.hooks`는 install 직후 `configured`이고 실제 `turn-ended` event가
+  관측된 뒤에만 `available`입니다. 수동 smoke event는 dispatch observed로 인정하지
+  않습니다.
 - `cx session migrate [--dry-run]`은 `.codexus/session/state.json`의 explicit
   migration boundary입니다. Pending migration을 보고하고, `--dry-run`이 아니면
   persist합니다.
@@ -91,12 +95,13 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   실행하지 않고 blocked verification attempt로 기록합니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
-- `schemas/session-state.schema.json`은 first-class schema artifact이며,
+- `schemas/session-state.schema.json`은 v2 session-state shape용 first-class schema
+  artifact이며,
   `cx schema validate --type session-state --file <path> --json`은 같은 local
   schema-artifact subset engine으로 session state를 검증합니다.
 - `doctor --json`은 Codexus session state, project/user overlay 상태,
-  notify-hook 설치 상태, statusline integration의 unavailable 상태를 정직하게
-  보고합니다.
+  notify-hook 설치 상태, notify dispatch 관측 상태, statusline integration의
+  unavailable 상태를 정직하게 보고합니다.
 - Verification repair는 실패한 verification stdout/stderr tail을 bounded context
   artifact로 기록하고 repair prompt에 주입합니다.
 - Driver-failure repair는 raw driver log tail을 bounded context artifact로 기록하고
@@ -129,7 +134,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 86 tests 통과
+- `npm test`: 87 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -152,7 +157,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   validation, session lock handling, legacy root migration, status/checkpoint/verify,
   policy-blocked session verification, notify-hook trust refusal,
   notify-chain preservation, notify-hook disable, config backup,
-  focused/schema validator drift case, explicit session-state migration CLI 테스트
+  focused/schema validator drift case, explicit session-state migration,
+  manual-smoke dispatch false-positive protection CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트

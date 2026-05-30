@@ -11,6 +11,7 @@ import {
   overlayStatus,
   recordSessionHookEvent,
   readSessionStateWithMigration,
+  refreshSessionState,
   sessionPaths,
   updateSessionState,
 } from "../../session/state.ts";
@@ -24,7 +25,8 @@ function statePath(cwd: string): string {
 async function statusCommand(cwd: string, json: boolean): Promise<void> {
   const paths = sessionPaths(cwd);
   const stateRead = await readSessionStateWithMigration(cwd);
-  const state = stateRead.state;
+  const notifyHook = await inspectNotifyHookConfig(cwd);
+  const state = stateRead.state ? await refreshSessionState(cwd, stateRead.state) : null;
   const result = {
     schemaVersion: 1,
     status: state ? "initialized" : "not_initialized",
@@ -34,7 +36,16 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
       project: await overlayStatus(cwd, "project"),
       user: await overlayStatus(cwd, "user"),
     },
-    notifyHook: await inspectNotifyHookConfig(cwd),
+    notifyHook,
+    notifyDispatch: state?.notifyDispatch ?? {
+      status: notifyHook.installed ? "unobserved" : "not_configured",
+      lastTurnEndedAt: null,
+      lastObservedAt: null,
+      runtimeSurface: "unknown",
+      caveat: notifyHook.installed
+        ? "Codexus notify is configured in Codex CLI config, but no session state exists yet and no real turn-ended dispatch has been observed."
+        : "Codexus notify is not configured in Codex CLI config.",
+    },
     migration: stateRead.migration,
     state,
   };

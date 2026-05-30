@@ -180,6 +180,13 @@ Codexus는 hook/status integration을 hard dependency가 아니라 optional capa
   이미 trusted일 때만 Codex notify hook을 설치할 수 있습니다.
 - notify hook은 bounded turn activity를 `.codexus/session/state.json`에 기록하고,
   기존 top-level `notify = [...]` command가 있으면 `--previous-notify`로 chain합니다.
+- Notify capability는 config 설치와 실제 dispatch 관측을 분리합니다.
+  `capabilities.hooks`는 install 직후 `configured`이고, 실제 `turn-ended` event가
+  관측된 뒤에만 `available`이 됩니다. 수동 smoke event는 dispatch observed로
+  간주하지 않습니다.
+- Runtime surface detection은 `unknown`에 강하게 편향합니다. Codexus는 hook이 실제로
+  발화될 때 bounded runtime context를 기록하지만, dispatch 부재만으로 Desktop/app-server
+  또는 CLI/TUI support를 단정하지 않습니다.
 - Config rewrite는 atomic이어야 하고 one-time `config.toml.codexus.bak` backup을
   만들어야 하며, `--disable-notify-hook`으로 이전 notify command를 복원하거나
   previous command가 없을 때 AGENTS overlay를 refresh하지 않고 Codexus-only notify
@@ -270,6 +277,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   `.codexus/session/` 아래 artifact를 기록하며 typed result를 보고합니다.
 - optional notify-hook attachment는 기존 notify chain을 보존하고, Codex project
   trust가 설정되지 않았으면 설치를 거부합니다.
+- `notifyDispatch.status`는 실제 `turn-ended` event에서만 `observed`가 되며,
+  `capabilities.hooks`는 `configured`와 `available`을 구분합니다.
 - notify-hook detach는 overlay를 install/refresh하지 않고 이전 notify command를
   복원하거나 Codexus-only notify line을 제거합니다.
 - unsupported statusline/tmux feature는 정직한 unavailable status를 반환합니다.
@@ -290,7 +299,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    하드닝합니다.
 8. 완료: explicit session-state migration boundary와 `cx session migrate` command를
    추가합니다.
-9. 다음: Codex가 안정적인 supported configuration surface를 노출할 때만 statusline/HUD
+9. 완료: session state를 v2로 승격하고 truthful notify dispatch capability semantics를
+   추가합니다.
+10. 다음: Codex가 안정적인 supported configuration surface를 노출할 때만 statusline/HUD
    support를 추가합니다.
-10. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
+11. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
    feature로 재검토합니다.

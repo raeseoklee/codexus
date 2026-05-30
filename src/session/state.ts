@@ -10,10 +10,13 @@ import { codexHome, inspectNotifyHookConfig } from "./hook-config.ts";
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
-export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 1 as const;
+export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 2 as const;
 
 export type OverlayScope = "project" | "user";
 export type CapabilityStatus = "available" | "unavailable";
+export type HookCapabilityStatus = "available" | "configured" | "unavailable";
+export type NotifyDispatchStatus = "observed" | "unobserved" | "not_configured";
+export type RuntimeSurface = "unknown" | "cli-tui" | "desktop-app-server";
 
 export interface OverlayStatus {
   scope: OverlayScope;
@@ -46,6 +49,21 @@ export interface SessionHookEventRecord {
   observedAt: string;
   source: "notify";
   cwd: string;
+  runtimeSurface: RuntimeSurface;
+  process: {
+    pid: number;
+    ppid: number;
+    cwd: string;
+    bundleIdentifier: string | null;
+  };
+}
+
+export interface NotifyDispatchState {
+  status: NotifyDispatchStatus;
+  lastTurnEndedAt: string | null;
+  lastObservedAt: string | null;
+  runtimeSurface: RuntimeSurface;
+  caveat: string;
 }
 
 export interface CodexusSessionState {
@@ -62,9 +80,10 @@ export interface CodexusSessionState {
   linkedRunIds: string[];
   capabilities: {
     tmux: CapabilityStatus;
-    hooks: CapabilityStatus;
+    hooks: HookCapabilityStatus;
     statusline: CapabilityStatus;
   };
+  notifyDispatch: NotifyDispatchState;
   overlays: {
     project: OverlayStatus;
     user: OverlayStatus;
@@ -121,18 +140,45 @@ function isOverlayStatus(value: unknown): value is OverlayStatus {
     && typeof value.markerEnd === "string";
 }
 
+function isRuntimeSurface(value: unknown): value is RuntimeSurface {
+  return value === "unknown" || value === "cli-tui" || value === "desktop-app-server";
+}
+
+function isNotifyDispatchState(value: unknown): value is NotifyDispatchState {
+  if (!isRecord(value)) return false;
+  return (value.status === "observed" || value.status === "unobserved" || value.status === "not_configured")
+    && (value.lastTurnEndedAt === null || typeof value.lastTurnEndedAt === "string")
+    && (value.lastObservedAt === null || typeof value.lastObservedAt === "string")
+    && isRuntimeSurface(value.runtimeSurface)
+    && typeof value.caveat === "string";
+}
+
+function isSessionHookEventRecord(value: unknown): value is SessionHookEventRecord {
+  if (!isRecord(value)) return false;
+  if (typeof value.id !== "string" || typeof value.event !== "string" || typeof value.observedAt !== "string") return false;
+  if (value.source !== "notify" || typeof value.cwd !== "string") return false;
+  if (!isRuntimeSurface(value.runtimeSurface)) return false;
+  if (!isRecord(value.process)) return false;
+  return typeof value.process.pid === "number"
+    && typeof value.process.ppid === "number"
+    && typeof value.process.cwd === "string"
+    && (value.process.bundleIdentifier === null || typeof value.process.bundleIdentifier === "string");
+}
+
 function isSessionState(value: unknown): value is CodexusSessionState {
   if (!isRecord(value)) return false;
-  if (value.schemaVersion !== 1) return false;
+  if (value.schemaVersion !== CURRENT_SESSION_STATE_SCHEMA_VERSION) return false;
   if (typeof value.sessionId !== "string" || typeof value.cwd !== "string") return false;
   if (value.status !== "initialized") return false;
   if (typeof value.createdAt !== "string" || typeof value.updatedAt !== "string") return false;
   if (!(value.lastCommand === null || typeof value.lastCommand === "string")) return false;
   if (!Array.isArray(value.checkpoints) || !Array.isArray(value.verifications) || !Array.isArray(value.hookEvents) || !Array.isArray(value.linkedRunIds)) return false;
+  if (!value.hookEvents.every(isSessionHookEventRecord)) return false;
   if (!isRecord(value.capabilities)) return false;
   if (!(value.capabilities.tmux === "available" || value.capabilities.tmux === "unavailable")) return false;
-  if (!(value.capabilities.hooks === "available" || value.capabilities.hooks === "unavailable")) return false;
+  if (!(value.capabilities.hooks === "available" || value.capabilities.hooks === "configured" || value.capabilities.hooks === "unavailable")) return false;
   if (!(value.capabilities.statusline === "available" || value.capabilities.statusline === "unavailable")) return false;
+  if (!isNotifyDispatchState(value.notifyDispatch)) return false;
   if (!isRecord(value.overlays)) return false;
   return isOverlayStatus(value.overlays.project) && isOverlayStatus(value.overlays.user);
 }
@@ -157,9 +203,133 @@ function schemaVersionOf(value: Record<string, unknown>): number | null {
   return typeof value.schemaVersion === "number" ? value.schemaVersion : null;
 }
 
+function normalizeRuntimeSurface(value: unknown): RuntimeSurface {
+  return isRuntimeSurface(value) ? value : "unknown";
+}
+
+function normalizeHookProcess(value: unknown, cwd: string): SessionHookEventRecord["process"] {
+  if (isRecord(value)
+    && typeof value.pid === "number"
+    && typeof value.ppid === "number"
+    && typeof value.cwd === "string"
+    && (value.bundleIdentifier === null || typeof value.bundleIdentifier === "string")) {
+    return {
+      pid: value.pid,
+      ppid: value.ppid,
+      cwd: value.cwd,
+      bundleIdentifier: value.bundleIdentifier,
+    };
+  }
+  return {
+    pid: 0,
+    ppid: 0,
+    cwd,
+    bundleIdentifier: null,
+  };
+}
+
+function normalizeHookEvents(value: unknown, fallbackCwd: string): SessionHookEventRecord[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!isRecord(item)
+      || typeof item.id !== "string"
+      || typeof item.event !== "string"
+      || typeof item.observedAt !== "string"
+      || item.source !== "notify"
+      || typeof item.cwd !== "string") {
+      return [];
+    }
+    return [{
+      id: item.id,
+      event: item.event,
+      observedAt: item.observedAt,
+      source: "notify" as const,
+      cwd: item.cwd,
+      runtimeSurface: normalizeRuntimeSurface(item.runtimeSurface),
+      process: normalizeHookProcess(item.process, item.cwd || fallbackCwd),
+    }];
+  });
+}
+
+function latestHookEvent(events: SessionHookEventRecord[], eventName?: string): SessionHookEventRecord | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    if (!eventName || events[index].event === eventName) return events[index];
+  }
+  return null;
+}
+
+function notifyDispatchCaveat(status: NotifyDispatchStatus): string {
+  if (status === "observed") {
+    return "Codexus has observed at least one real turn-ended notify event. Runtime surface is captured from the hook process when available.";
+  }
+  if (status === "unobserved") {
+    return "Codexus notify is configured in Codex CLI config, but no real turn-ended dispatch has been observed for this session state. Manual smoke events do not prove live dispatch; Desktop/app-server sessions may not invoke CLI notify.";
+  }
+  return "Codexus notify is not configured in Codex CLI config.";
+}
+
+export function deriveNotifyDispatch(events: SessionHookEventRecord[], notifyConfigured: boolean): NotifyDispatchState {
+  const lastObserved = latestHookEvent(events);
+  const lastTurnEnded = latestHookEvent(events, "turn-ended");
+  const status: NotifyDispatchStatus = notifyConfigured
+    ? lastTurnEnded ? "observed" : "unobserved"
+    : "not_configured";
+  return {
+    status,
+    lastTurnEndedAt: lastTurnEnded?.observedAt ?? null,
+    lastObservedAt: lastObserved?.observedAt ?? null,
+    runtimeSurface: lastTurnEnded?.runtimeSurface ?? "unknown",
+    caveat: notifyDispatchCaveat(status),
+  };
+}
+
+function hooksCapabilityFromDispatch(dispatch: NotifyDispatchState): HookCapabilityStatus {
+  if (dispatch.status === "observed") return "available";
+  if (dispatch.status === "unobserved") return "configured";
+  return "unavailable";
+}
+
+function migrateV1SessionState(value: Record<string, unknown>, applied: string[]): Record<string, unknown> {
+  let next: Record<string, unknown> = value;
+  if (!Object.hasOwn(next, "hookEvents")) {
+    next = {
+      ...next,
+      hookEvents: [],
+    };
+    applied.push("session_state_v1.add_hook_events");
+  }
+  const hookEvents = normalizeHookEvents(next.hookEvents, typeof next.cwd === "string" ? next.cwd : "");
+  const previousHooksConfigured = isRecord(next.capabilities) && next.capabilities.hooks === "available";
+  const notifyDispatch = deriveNotifyDispatch(hookEvents, previousHooksConfigured);
+  next = {
+    ...next,
+    schemaVersion: CURRENT_SESSION_STATE_SCHEMA_VERSION,
+    hookEvents,
+    notifyDispatch,
+    capabilities: {
+      ...(isRecord(next.capabilities) ? next.capabilities : {}),
+      hooks: hooksCapabilityFromDispatch(notifyDispatch),
+    },
+  };
+  applied.push("session_state_v2.add_notify_dispatch");
+  return next;
+}
+
 function migrateSessionState(value: unknown): { value: unknown; report: SessionStateMigrationReport } {
   if (!isRecord(value)) return { value, report: migrationReport({ fromVersion: null, reason: "not_an_object" }) };
   const fromVersion = schemaVersionOf(value);
+  const applied: string[] = [];
+  if (fromVersion === 1) {
+    const next = migrateV1SessionState(value, applied);
+    return {
+      value: next,
+      report: migrationReport({
+        fromVersion,
+        migrated: applied.length > 0,
+        applied,
+      }),
+    };
+  }
   if (fromVersion !== CURRENT_SESSION_STATE_SCHEMA_VERSION) {
     return {
       value,
@@ -170,21 +340,10 @@ function migrateSessionState(value: unknown): { value: unknown; report: SessionS
     };
   }
 
-  const applied: string[] = [];
-  let next: Record<string, unknown> = value;
-  if (!Object.hasOwn(next, "hookEvents")) {
-    next = {
-      ...next,
-      hookEvents: [],
-    };
-    applied.push("session_state_v1.add_hook_events");
-  }
   return {
-    value: next,
+    value,
     report: migrationReport({
       fromVersion,
-      migrated: applied.length > 0,
-      applied,
     }),
   };
 }
@@ -314,18 +473,19 @@ export async function installOverlay(cwd: string, scope: OverlayScope): Promise<
   return { ...(await overlayStatus(cwd, scope)), changed };
 }
 
-export async function detectSessionCapabilities(cwd = process.cwd()): Promise<CodexusSessionState["capabilities"]> {
+export async function detectSessionCapabilities(cwd = process.cwd(), dispatch?: NotifyDispatchState): Promise<CodexusSessionState["capabilities"]> {
   const tmux = spawnSync("tmux", ["-V"], { encoding: "utf8" });
-  const notifyHook = await inspectNotifyHookConfig(cwd);
+  const resolvedDispatch = dispatch ?? deriveNotifyDispatch([], (await inspectNotifyHookConfig(cwd)).installed);
   return {
     tmux: tmux.status === 0 ? "available" : "unavailable",
-    hooks: notifyHook.installed ? "available" : "unavailable",
+    hooks: hooksCapabilityFromDispatch(resolvedDispatch),
     statusline: "unavailable",
   };
 }
 
 async function defaultState(cwd: string): Promise<CodexusSessionState> {
   const createdAt = nowIso();
+  const notifyDispatch = deriveNotifyDispatch([], (await inspectNotifyHookConfig(cwd)).installed);
   return {
     schemaVersion: CURRENT_SESSION_STATE_SCHEMA_VERSION,
     sessionId: createId("session"),
@@ -338,7 +498,8 @@ async function defaultState(cwd: string): Promise<CodexusSessionState> {
     verifications: [],
     hookEvents: [],
     linkedRunIds: [],
-    capabilities: await detectSessionCapabilities(cwd),
+    capabilities: await detectSessionCapabilities(cwd, notifyDispatch),
+    notifyDispatch,
     overlays: {
       project: await overlayStatus(cwd, "project"),
       user: await overlayStatus(cwd, "user"),
@@ -433,11 +594,13 @@ export async function writeSessionState(cwd: string, state: CodexusSessionState)
 }
 
 export async function refreshSessionState(cwd: string, state: CodexusSessionState): Promise<CodexusSessionState> {
+  const notifyDispatch = deriveNotifyDispatch(state.hookEvents, (await inspectNotifyHookConfig(cwd)).installed);
   return {
     ...state,
     cwd: resolve(cwd),
     updatedAt: nowIso(),
-    capabilities: await detectSessionCapabilities(cwd),
+    capabilities: await detectSessionCapabilities(cwd, notifyDispatch),
+    notifyDispatch,
     overlays: {
       project: await overlayStatus(cwd, "project"),
       user: await overlayStatus(cwd, "user"),
@@ -476,6 +639,20 @@ export function createHookEventId(): string {
   return createId("hook");
 }
 
+function runtimeSurfaceFromEnv(env: NodeJS.ProcessEnv): RuntimeSurface {
+  const explicit = env.CODEXUS_NOTIFY_RUNTIME_SURFACE;
+  return isRuntimeSurface(explicit) ? explicit : "unknown";
+}
+
+function hookProcessContext(cwd: string): SessionHookEventRecord["process"] {
+  return {
+    pid: process.pid,
+    ppid: process.ppid,
+    cwd: resolve(cwd),
+    bundleIdentifier: process.env.__CFBundleIdentifier ?? null,
+  };
+}
+
 export async function recordSessionHookEvent(cwd: string, event: string): Promise<{ record: SessionHookEventRecord; state: CodexusSessionState }> {
   const record: SessionHookEventRecord = {
     id: createHookEventId(),
@@ -483,6 +660,8 @@ export async function recordSessionHookEvent(cwd: string, event: string): Promis
     observedAt: nowIso(),
     source: "notify",
     cwd: resolve(cwd),
+    runtimeSurface: runtimeSurfaceFromEnv(process.env),
+    process: hookProcessContext(cwd),
   };
   const state = await updateSessionState(cwd, "session notify", (value) => ({
     ...value,
