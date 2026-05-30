@@ -56,7 +56,9 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   first-class `session-state` schema artifact validation, 기존 notify chain을
   보존하고 Codex project trust 없이는 설치를 거부하는 explicit notify-hook attachment.
   후속 hardening pass에서 atomic config write, one-time config backup, notify-hook
-  detach, validator/schema drift test도 추가했습니다.
+  detach, validator/schema drift test도 추가했습니다. 이후 session-native hardening
+  pass에서 `.codexus/session/state.json`용 explicit `cx session migrate` boundary도
+  추가했습니다.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,
@@ -193,5 +195,5 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    기존 notify command를 chain으로 계속 보존해야 합니다.
 7. 명시적 session state protocol이 안정된 뒤에만 tmux-backed Codexus worker를
    추가합니다.
-8. Versioned `.codexus/session/state.json` schema는 명시적 migration boundary를
-   통해서만 확장합니다.
+8. Versioned `.codexus/session/state.json` schema는 explicit `cx session migrate`
+   migration boundary를 통해서만 확장합니다.

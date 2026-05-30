@@ -7,9 +7,10 @@ import { runVerification } from "../../verification/runner.ts";
 import {
   createCheckpointId,
   createVerificationId,
+  migrateSessionStateFile,
   overlayStatus,
   recordSessionHookEvent,
-  readSessionState,
+  readSessionStateWithMigration,
   sessionPaths,
   updateSessionState,
 } from "../../session/state.ts";
@@ -22,7 +23,8 @@ function statePath(cwd: string): string {
 
 async function statusCommand(cwd: string, json: boolean): Promise<void> {
   const paths = sessionPaths(cwd);
-  const state = await readSessionState(cwd);
+  const stateRead = await readSessionStateWithMigration(cwd);
+  const state = stateRead.state;
   const result = {
     schemaVersion: 1,
     status: state ? "initialized" : "not_initialized",
@@ -33,6 +35,7 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
       user: await overlayStatus(cwd, "user"),
     },
     notifyHook: await inspectNotifyHookConfig(cwd),
+    migration: stateRead.migration,
     state,
   };
   if (json) {
@@ -43,6 +46,19 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`State: ${statePath(cwd)}`);
   console.log(`Project overlay: ${result.overlays.project.installed ? "installed" : "missing"}`);
   console.log(`Notify hook: ${result.notifyHook.status}`);
+}
+
+async function migrateCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
+  assertMaxPositionals(args, 1);
+  const result = await migrateSessionStateFile(cwd, {
+    dryRun: flagBool(args.flags, "dry-run"),
+  });
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  console.log(`Session migration: ${result.status}`);
+  console.log(result.statePath);
 }
 
 async function checkpointCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
@@ -211,6 +227,10 @@ export async function sessionCommand(args: ParsedArgs): Promise<void> {
   }
   if (subcommand === "notify") {
     await notifyCommand(args, cwd, json);
+    return;
+  }
+  if (subcommand === "migrate") {
+    await migrateCommand(args, cwd, json);
     return;
   }
   throw new Error(`unsupported_session_command:${subcommand}`);

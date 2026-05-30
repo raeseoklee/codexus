@@ -173,6 +173,9 @@ Codexus는 hook/status integration을 hard dependency가 아니라 optional capa
 목표 동작:
 
 - `codexus session status --json`은 session state를 읽습니다.
+- `codexus session migrate --json`은 `.codexus/session/state.json`의 explicit
+  migration boundary입니다. 새 session-state schema 변경은 writer를 바꾸기 전에
+  여기 migration을 추가해야 합니다.
 - `cx setup codex-session --enable-notify-hook --json`은 현재 project가 Codex에서
   이미 trusted일 때만 Codex notify hook을 설치할 수 있습니다.
 - notify hook은 bounded turn activity를 `.codexus/session/state.json`에 기록하고,
@@ -219,6 +222,7 @@ Codex leader pane
 ```bash
 cx setup codex-session [--scope user|project] [--enable-notify-hook|--disable-notify-hook] [--json]
 cx session status [--json]
+cx session migrate [--dry-run] [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
 cx session notify [--event <name>] [--json]
@@ -258,6 +262,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   availability, tmux availability, session-state health를 보고합니다.
 - Codex 안에서 Codexus status를 요청하면 skill이 local Codexus core를 호출하고 grounded
   JSON output을 요약합니다.
+- `cx session migrate --json`은 explicit session-state migration을 보고하고
+  persist합니다. `--dry-run`은 state rewrite 없이 같은 migration을 보고합니다.
 - `cx session checkpoint <label> --json`은 같은 project에서 나중에 참조 가능한 local
   checkpoint artifact를 씁니다.
 - `cx session verify --verify <cmd> --json`은 verification을 실행하고
@@ -282,7 +288,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    optional notify-hook attachment를 추가합니다.
 7. 완료: Codex config rewrite를 atomic write, one-time backup, notify-hook detach로
    하드닝합니다.
-8. 다음: Codex가 안정적인 supported configuration surface를 노출할 때만 statusline/HUD
+8. 완료: explicit session-state migration boundary와 `cx session migrate` command를
+   추가합니다.
+9. 다음: Codex가 안정적인 supported configuration surface를 노출할 때만 statusline/HUD
    support를 추가합니다.
-9. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
+10. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
    feature로 재검토합니다.

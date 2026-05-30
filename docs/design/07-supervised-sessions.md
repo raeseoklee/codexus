@@ -184,6 +184,9 @@ hard dependency.
 Target behavior:
 
 - `codexus session status --json` reads the session state.
+- `codexus session migrate --json` is the explicit migration boundary for
+  `.codexus/session/state.json`; new session-state schema changes must add a
+  migration here before changing writers.
 - `cx setup codex-session --enable-notify-hook --json` can install a Codex
   notify hook only after the current project is already trusted by Codex.
 - The notify hook records bounded turn activity in `.codexus/session/state.json`
@@ -233,6 +236,7 @@ Implemented first-slice CLI surface:
 ```bash
 cx setup codex-session [--scope user|project] [--enable-notify-hook|--disable-notify-hook] [--json]
 cx session status [--json]
+cx session migrate [--dry-run] [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
 cx session notify [--event <name>] [--json]
@@ -273,6 +277,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   statusline availability, tmux availability, and session-state health.
 - From inside Codex, asking for Codexus status causes the skill to call local
   Codexus core and summarize grounded JSON output.
+- `cx session migrate --json` reports and persists explicit session-state
+  migrations; `--dry-run` reports the same migration without rewriting state.
 - `cx session checkpoint <label> --json` writes a local checkpoint artifact that
   can be referenced later in the same project.
 - `cx session verify --verify <cmd> --json` runs verification, records the
@@ -298,7 +304,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    notify-hook attachment behind Codex project trust checks.
 7. Completed: harden Codex config rewrites with atomic writes, one-time backup,
    and notify-hook detach.
-8. Next: add statusline/HUD support only if Codex exposes a stable supported
+8. Completed: add an explicit session-state migration boundary and `cx session
+   migrate` command.
+9. Next: add statusline/HUD support only if Codex exposes a stable supported
    configuration surface.
-9. Later: revisit external `codex exec resume` as a separate advanced feature only
+10. Later: revisit external `codex exec resume` as a separate advanced feature only
    after the Codex-native path is useful.

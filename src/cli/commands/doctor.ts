@@ -11,7 +11,7 @@ import { createDriver } from "../../drivers/index.ts";
 import type { DriverProbe } from "../../drivers/contract.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
 import { findCodexusPackageRoot } from "../../util/package-root.ts";
-import { overlayStatus, readSessionState, sessionPaths } from "../../session/state.ts";
+import { overlayStatus, readSessionStateWithMigration, sessionPaths, type SessionStateMigrationReport } from "../../session/state.ts";
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 
 interface Check {
@@ -188,20 +188,27 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   const sessionStateExists = existsSync(session.state);
   let sessionStateInitialized = false;
   let sessionStateError: string | null = null;
+  let sessionStateMigration: SessionStateMigrationReport | null = null;
   try {
-    sessionStateInitialized = (await readSessionState(cwd)) !== null;
+    const stateRead = await readSessionStateWithMigration(cwd);
+    sessionStateInitialized = stateRead.state !== null;
+    sessionStateMigration = stateRead.migration;
   } catch (error) {
     sessionStateError = error instanceof Error ? error.message : String(error);
   }
   checks.push({
     id: "codexus.session_state",
-    status: sessionStateError ? "fail" : sessionStateExists ? "pass" : "warn",
-    summary: sessionStateError ?? (sessionStateExists ? session.state : "Codexus session state has not been initialized"),
+    status: sessionStateError ? "fail" : sessionStateMigration?.migrated ? "warn" : sessionStateExists ? "pass" : "warn",
+    summary: sessionStateError
+      ?? (sessionStateMigration?.migrated
+        ? `Codexus session state requires migration: ${sessionStateMigration.applied.join(",")}`
+        : sessionStateExists ? session.state : "Codexus session state has not been initialized"),
     details: {
       statePath: session.state,
       sessionRoot: session.sessionRoot,
       exists: sessionStateExists,
       initialized: sessionStateInitialized,
+      migration: sessionStateMigration,
     },
   });
   checks.push({

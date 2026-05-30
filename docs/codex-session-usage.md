@@ -176,6 +176,7 @@ Prefer read-only or evidence-oriented commands first:
 
 ```bash
 session status --json
+session migrate --dry-run --json
 session checkpoint "before risky refactor" --json
 session verify --verify "npm test" --json
 doctor --json
@@ -200,6 +201,10 @@ Current session state is cwd-scoped. If two Codex windows operate on the same
 project at the same time, Codexus serializes writes with the `session` lock; a
 second overlapping checkpoint/verify command can return `lock_unavailable` and
 should be retried after the active operation finishes.
+
+`session migrate --json` is the explicit migration boundary for
+`.codexus/session/state.json`. Use `--dry-run` first when you want to inspect
+pending migrations without rewriting the state file.
 
 Use supervised runs deliberately:
 

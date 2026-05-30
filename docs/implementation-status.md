@@ -151,6 +151,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   Codexus-only notify line without refreshing the AGENTS overlay.
 - `cx session notify --event <name>` is the internal notify-hook write surface
   and records bounded hook events in `.codexus/session/state.json`.
+- `cx session migrate [--dry-run]` is the explicit migration boundary for
+  `.codexus/session/state.json`; it reports pending migrations and persists
+  them unless `--dry-run` is used.
 - `cx session verify` reuses the verification policy preflight and records
   blocked verification attempts instead of executing dangerous commands.
 - Session state reads perform focused structure validation, and mutable session
@@ -176,7 +179,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 84.
+- Current test count: 86.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -229,7 +232,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   validation, session lock handling, legacy root migration, status,
   checkpoint, verify, policy-blocked session verification, notify-hook trust
   refusal, notify-chain preservation, notify-hook disable, config backup, and
-  focused/schema validator drift cases are covered by CLI tests.
+  focused/schema validator drift cases, and explicit session-state migrations
+  are covered by CLI tests.
 
 ## Acceptance Coverage
 

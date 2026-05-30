@@ -10,6 +10,7 @@ import { codexHome, inspectNotifyHookConfig } from "./hook-config.ts";
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
+export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 1 as const;
 
 export type OverlayScope = "project" | "user";
 export type CapabilityStatus = "available" | "unavailable";
@@ -48,7 +49,7 @@ export interface SessionHookEventRecord {
 }
 
 export interface CodexusSessionState {
-  schemaVersion: 1;
+  schemaVersion: typeof CURRENT_SESSION_STATE_SCHEMA_VERSION;
   sessionId: string;
   cwd: string;
   status: "initialized";
@@ -73,6 +74,29 @@ export interface CodexusSessionState {
 interface OverlayRange {
   start: number;
   endAfter: number;
+}
+
+export interface SessionStateMigrationReport {
+  schemaVersion: 1;
+  fromVersion: number | null;
+  toVersion: typeof CURRENT_SESSION_STATE_SCHEMA_VERSION;
+  migrated: boolean;
+  applied: string[];
+  reason: string | null;
+}
+
+export interface SessionStateReadResult {
+  state: CodexusSessionState | null;
+  migration: SessionStateMigrationReport;
+}
+
+export interface SessionStateMigrationFileResult {
+  schemaVersion: 1;
+  status: "not_initialized" | "current" | "migrated";
+  dryRun: boolean;
+  statePath: string;
+  migration: SessionStateMigrationReport;
+  state: CodexusSessionState | null;
 }
 
 export interface SessionPaths {
@@ -113,11 +137,55 @@ function isSessionState(value: unknown): value is CodexusSessionState {
   return isOverlayStatus(value.overlays.project) && isOverlayStatus(value.overlays.user);
 }
 
-function migrateSessionState(value: unknown): unknown {
-  if (!isRecord(value) || value.schemaVersion !== 1) return value;
+function migrationReport(options: {
+  fromVersion: number | null;
+  migrated?: boolean;
+  applied?: string[];
+  reason?: string | null;
+}): SessionStateMigrationReport {
   return {
-    hookEvents: [],
-    ...value,
+    schemaVersion: 1,
+    fromVersion: options.fromVersion,
+    toVersion: CURRENT_SESSION_STATE_SCHEMA_VERSION,
+    migrated: options.migrated ?? false,
+    applied: options.applied ?? [],
+    reason: options.reason ?? null,
+  };
+}
+
+function schemaVersionOf(value: Record<string, unknown>): number | null {
+  return typeof value.schemaVersion === "number" ? value.schemaVersion : null;
+}
+
+function migrateSessionState(value: unknown): { value: unknown; report: SessionStateMigrationReport } {
+  if (!isRecord(value)) return { value, report: migrationReport({ fromVersion: null, reason: "not_an_object" }) };
+  const fromVersion = schemaVersionOf(value);
+  if (fromVersion !== CURRENT_SESSION_STATE_SCHEMA_VERSION) {
+    return {
+      value,
+      report: migrationReport({
+        fromVersion,
+        reason: fromVersion === null ? "missing_schema_version" : `unsupported_schema_version:${fromVersion}`,
+      }),
+    };
+  }
+
+  const applied: string[] = [];
+  let next: Record<string, unknown> = value;
+  if (!Object.hasOwn(next, "hookEvents")) {
+    next = {
+      ...next,
+      hookEvents: [],
+    };
+    applied.push("session_state_v1.add_hook_events");
+  }
+  return {
+    value: next,
+    report: migrationReport({
+      fromVersion,
+      migrated: applied.length > 0,
+      applied,
+    }),
   };
 }
 
@@ -259,7 +327,7 @@ export async function detectSessionCapabilities(cwd = process.cwd()): Promise<Co
 async function defaultState(cwd: string): Promise<CodexusSessionState> {
   const createdAt = nowIso();
   return {
-    schemaVersion: 1,
+    schemaVersion: CURRENT_SESSION_STATE_SCHEMA_VERSION,
     sessionId: createId("session"),
     cwd: resolve(cwd),
     status: "initialized",
@@ -279,13 +347,29 @@ async function defaultState(cwd: string): Promise<CodexusSessionState> {
 }
 
 export async function readSessionState(cwd: string): Promise<CodexusSessionState | null> {
+  return (await readSessionStateWithMigration(cwd)).state;
+}
+
+export async function readSessionStateWithMigration(cwd: string): Promise<SessionStateReadResult> {
   const paths = sessionPaths(cwd);
-  if (!existsSync(paths.state)) return null;
+  if (!existsSync(paths.state)) {
+    return {
+      state: null,
+      migration: migrationReport({
+        fromVersion: null,
+        reason: "not_initialized",
+      }),
+    };
+  }
   try {
     const parsed = JSON.parse(await readFile(paths.state, "utf8")) as unknown;
     const migrated = migrateSessionState(parsed);
-    if (!isSessionState(migrated)) throw new Error("invalid_shape");
-    return migrated;
+    if (migrated.report.reason) throw new Error(migrated.report.reason);
+    if (!isSessionState(migrated.value)) throw new Error("invalid_shape");
+    return {
+      state: migrated.value,
+      migration: migrated.report,
+    };
   } catch (error) {
     throw new Error(`session_state_corrupt:${error instanceof Error ? error.message : String(error)}`);
   }
@@ -297,9 +381,9 @@ async function loadOrCreateSessionStateUnlocked(cwd: string): Promise<CodexusSes
   await ensureDir(paths.checkpointsDir);
   await ensureDir(paths.verificationDir);
   await ensureDir(paths.contextDir);
-  const existing = await readSessionState(cwd);
-  if (existing) {
-    const refreshed = await refreshSessionState(cwd, existing);
+  const existing = await readSessionStateWithMigration(cwd);
+  if (existing.state) {
+    const refreshed = await refreshSessionState(cwd, existing.state);
     await writeSessionState(cwd, refreshed);
     return refreshed;
   }
@@ -311,6 +395,36 @@ async function loadOrCreateSessionStateUnlocked(cwd: string): Promise<CodexusSes
 export async function loadOrCreateSessionState(cwd: string): Promise<CodexusSessionState> {
   return await withFileLock(cwd, "session", async () => await loadOrCreateSessionStateUnlocked(cwd), {
     operation: "session-state",
+  });
+}
+
+export async function migrateSessionStateFile(cwd: string, options: { dryRun?: boolean } = {}): Promise<SessionStateMigrationFileResult> {
+  return await withFileLock(cwd, "session", async () => {
+    const paths = sessionPaths(cwd);
+    const result = await readSessionStateWithMigration(cwd);
+    if (!result.state) {
+      return {
+        schemaVersion: 1,
+        status: "not_initialized",
+        dryRun: options.dryRun ?? false,
+        statePath: paths.state,
+        migration: result.migration,
+        state: null,
+      };
+    }
+    if (result.migration.migrated && !options.dryRun) {
+      await writeSessionState(cwd, result.state);
+    }
+    return {
+      schemaVersion: 1,
+      status: result.migration.migrated ? "migrated" : "current",
+      dryRun: options.dryRun ?? false,
+      statePath: paths.state,
+      migration: result.migration,
+      state: result.state,
+    };
+  }, {
+    operation: "session-migrate",
   });
 }
 

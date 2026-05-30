@@ -260,6 +260,88 @@ test("session status rejects malformed session state", async () => {
   }
 });
 
+test("session migrate reports and persists explicit session-state migrations", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  const statePath = join(cwd, ".codexus", "session", "state.json");
+  const legacyState = {
+    schemaVersion: 1,
+    sessionId: "session_legacy",
+    cwd: resolve(cwd),
+    status: "initialized",
+    createdAt: "2026-05-30T00:00:00.000Z",
+    updatedAt: "2026-05-30T00:00:00.000Z",
+    lastCommand: null,
+    checkpoints: [],
+    verifications: [],
+    linkedRunIds: [],
+    capabilities: {
+      tmux: "unavailable",
+      hooks: "unavailable",
+      statusline: "unavailable",
+    },
+    overlays: {
+      project: {
+        scope: "project",
+        path: join(cwd, "AGENTS.md"),
+        installed: false,
+        markerStart: "<!-- CODEXUS:RUNTIME:START -->",
+        markerEnd: "<!-- CODEXUS:RUNTIME:END -->",
+      },
+      user: {
+        scope: "user",
+        path: join(codexHome, "AGENTS.md"),
+        installed: false,
+        markerStart: "<!-- CODEXUS:RUNTIME:START -->",
+        markerEnd: "<!-- CODEXUS:RUNTIME:END -->",
+      },
+    },
+  };
+  try {
+    await mkdir(join(cwd, ".codexus", "session"), { recursive: true });
+    await writeFile(statePath, `${JSON.stringify(legacyState, null, 2)}\n`);
+
+    const dryRun = runCli(cwd, ["session", "migrate", "--dry-run", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(dryRun.status, 0, dryRun.stderr);
+    const dryRunOutput = JSON.parse(dryRun.stdout);
+    assert.equal(dryRunOutput.status, "migrated");
+    assert.equal(dryRunOutput.dryRun, true);
+    assert.deepEqual(dryRunOutput.migration.applied, ["session_state_v1.add_hook_events"]);
+    assert.equal(Object.hasOwn(JSON.parse(await readFile(statePath, "utf8")), "hookEvents"), false);
+
+    const migrate = runCli(cwd, ["session", "migrate", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(migrate.status, 0, migrate.stderr);
+    const migrateOutput = JSON.parse(migrate.stdout);
+    assert.equal(migrateOutput.status, "migrated");
+    assert.equal(migrateOutput.dryRun, false);
+    assert.deepEqual(JSON.parse(await readFile(statePath, "utf8")).hookEvents, []);
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    assert.equal(JSON.parse(status.stdout).migration.migrated, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session migrate rejects unsupported future session-state versions", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await mkdir(join(cwd, ".codexus", "session"), { recursive: true });
+    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 2 }\n");
+    const migrate = runCli(cwd, ["session", "migrate", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(migrate.status, 1);
+    const output = JSON.parse(migrate.stdout);
+    assert.equal(output.code, "session_state_corrupt");
+    assert.match(output.details.target, /unsupported_schema_version:2/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("doctor reports malformed session state as a failed check", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();

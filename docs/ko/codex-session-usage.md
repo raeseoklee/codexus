@@ -172,6 +172,7 @@ Wrapper는 설치된 skill metadata에서 Codexus repository를 찾습니다. Co
 
 ```bash
 session status --json
+session migrate --dry-run --json
 session checkpoint "before risky refactor" --json
 session verify --verify "npm test" --json
 doctor --json
@@ -196,6 +197,10 @@ command를 우선 사용합니다.
 작업하면 Codexus는 `session` lock으로 write를 직렬화합니다. 겹치는 checkpoint/verify
 command는 `lock_unavailable`을 반환할 수 있으며 active operation이 끝난 뒤 재시도해야
 합니다.
+
+`session migrate --json`은 `.codexus/session/state.json`의 explicit migration
+boundary입니다. State file을 rewrite하지 않고 pending migration을 확인하려면
+`--dry-run`을 먼저 사용합니다.
 
 Supervised run은 의도적으로 사용할 때만 실행합니다:
 

@@ -58,7 +58,8 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   explicit notify-hook attachment that preserves existing notify chains and
   refuses install without Codex project trust. The follow-up hardening pass also
   added atomic config writes, one-time config backup, notify-hook detach, and
-  validator/schema drift tests.
+  validator/schema drift tests. A later session-native hardening pass added an
+  explicit `cx session migrate` boundary for `.codexus/session/state.json`.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
@@ -202,5 +203,5 @@ not remove the gates:
    must keep preserving any previous notify command through chaining.
 7. Add tmux-backed Codexus workers only after the explicit session state
    protocol is stable.
-8. Extend the versioned `.codexus/session/state.json` schema only through an
-   explicit migration boundary.
+8. Extend the versioned `.codexus/session/state.json` schema only through the
+   explicit `cx session migrate` migration boundary.

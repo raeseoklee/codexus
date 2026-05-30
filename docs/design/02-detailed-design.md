@@ -327,8 +327,9 @@ Adapter requirements:
 
 Implemented first slice:
 
-- `cx setup codex-session [--scope user|project] [--json]`
+- `cx setup codex-session [--scope user|project] [--enable-notify-hook|--disable-notify-hook] [--json]`
 - `cx session status [--json]`
+- `cx session migrate [--dry-run] [--json]`
 - `cx session checkpoint <label> [--json]`
 - `cx session verify --verify <cmd> [--json]`
 
