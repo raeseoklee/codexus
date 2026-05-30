@@ -44,6 +44,13 @@ export interface ChangeEvidenceSummary {
   scope: string | null;
 }
 
+export interface ChangeEvidenceGate {
+  enabled: boolean;
+  status: "not_requested" | "passed" | "failed" | "blocked";
+  exitCode: 0 | 1;
+  reason: string;
+}
+
 export interface ChangeEvidenceReport {
   schemaVersion: 1;
   cwd: string;
@@ -60,6 +67,7 @@ export interface ChangeEvidenceReport {
   derivableFacts: DerivableFact[];
   heuristicClaims: HeuristicClaim[];
   changeEvidence: ChangeEvidenceSummary;
+  gate: ChangeEvidenceGate;
 }
 
 interface GitResult {
@@ -283,10 +291,43 @@ function scopeEvidenceGaps(diff: ChangeEvidenceReport["diff"], scope: string | u
   }];
 }
 
+function gateFor(status: ChangeEvidenceStatus, enabled: boolean): ChangeEvidenceGate {
+  if (!enabled) {
+    return {
+      enabled: false,
+      status: "not_requested",
+      exitCode: 0,
+      reason: "pass --gate to make changeEvidence.status affect the process exit code",
+    };
+  }
+  if (status === "pass") {
+    return {
+      enabled: true,
+      status: "passed",
+      exitCode: 0,
+      reason: "fresh passing verification covers the current workspace fingerprint",
+    };
+  }
+  if (status === "fail") {
+    return {
+      enabled: true,
+      status: "failed",
+      exitCode: 1,
+      reason: "derivable evidence gaps are present",
+    };
+  }
+  return {
+    enabled: true,
+    status: "blocked",
+    exitCode: 1,
+    reason: "insufficient evidence to prove the current change is covered",
+  };
+}
+
 export function buildChangeEvidenceReport(
   cwd: string,
   state: CodexusSessionState | null,
-  options: { since?: string; scope?: string; reviews?: string[] } = {},
+  options: { since?: string; scope?: string; reviews?: string[]; gate?: boolean } = {},
 ): ChangeEvidenceReport {
   const resolvedCwd = resolve(cwd);
   const diff = readDiffFiles(resolvedCwd, options.since);
@@ -370,6 +411,7 @@ export function buildChangeEvidenceReport(
     : !state
       ? "unknown"
       : "pass";
+  const gate = gateFor(status, options.gate === true);
   return {
     schemaVersion: 1,
     cwd: resolvedCwd,
@@ -388,5 +430,6 @@ export function buildChangeEvidenceReport(
       includesUntracked: diff.includesUntracked,
       scope: options.scope ?? null,
     },
+    gate,
   };
 }

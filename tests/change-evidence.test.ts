@@ -97,6 +97,42 @@ test("slop check fails on stale verification after workspace change", async () =
   }
 });
 
+test("slop check --gate turns evidence status into an automation exit code", async () => {
+  const cwd = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    await writeFile(join(cwd, "parser.ts"), "export const value = 1;\n");
+
+    const unknown = runCli(cwd, ["slop", "check", "--gate", "--json"]);
+    assert.equal(unknown.status, 1);
+    const unknownOutput = JSON.parse(unknown.stdout);
+    assert.equal(unknownOutput.changeEvidence.status, "unknown");
+    assert.equal(unknownOutput.gate.status, "blocked");
+    assert.equal(unknownOutput.gate.exitCode, 1);
+    assert.deepEqual(unknownOutput.evidenceGaps, []);
+
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"]);
+    assert.equal(verify.status, 0, verify.stderr);
+
+    const passed = runCli(cwd, ["slop", "check", "--gate", "--json"]);
+    assert.equal(passed.status, 0, passed.stderr);
+    const passedOutput = JSON.parse(passed.stdout);
+    assert.equal(passedOutput.changeEvidence.status, "pass");
+    assert.equal(passedOutput.gate.status, "passed");
+
+    await writeFile(join(cwd, "parser.ts"), "export const value = 2;\n");
+
+    const failed = runCli(cwd, ["session", "slop", "--gate", "--json"]);
+    assert.equal(failed.status, 1);
+    const failedOutput = JSON.parse(failed.stdout);
+    assert.equal(failedOutput.changeEvidence.status, "fail");
+    assert.equal(failedOutput.gate.status, "failed");
+    assert.equal(failedOutput.evidenceGaps[0].kind, "stale_verification");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("slop check --since inspects a committed range without staged or untracked scope", async () => {
   const cwd = await tempDir();
   try {

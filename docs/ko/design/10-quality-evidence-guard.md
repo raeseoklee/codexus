@@ -187,11 +187,14 @@ cx slop check --json                       # 기본 working-tree
 cx slop check --since <ref> --json         # 명시적 커밋 범위
 cx slop check --scope "<glob>" --json      # out-of-scope finding용 scope 선언
 cx slop check --review <path> --json       # 명시적 review artifact 연결
+cx slop check --gate --json                # changeEvidence가 통과하지 않으면 nonzero 반환
 cx session slop --json
 ```
 
 `cx session status`는 compact한 `changeEvidence` 요약을 surface할 수 있고, `cx slop check`가
-diff-레인 claim을 더합니다.
+diff-레인 claim을 더합니다. 기본 command는 report-only라 exit 0을 유지합니다. `--gate`는
+기저 `changeEvidence.status`를 바꾸지 않고 tri-state evidence 결과를 automation exit
+code로 변환합니다: `pass`는 통과, `fail`은 실패, `unknown`은 evidence 부족으로 blocked입니다.
 
 ## 비목표
 
@@ -220,6 +223,8 @@ verification/evidence 모델을 읽어 보수적으로 다음을 보고합니다
 - `--scope`가 명시적으로 제공된 경우 선언 scope 밖 파일,
 - `--review`가 존재하는 파일을 가리킬 때 linked explicit review artifact,
 - 선언된 `--review` 파일이 없을 때 missing review artifact evidence gap,
+- heuristic을 failure로 승격하지 않으면서 같은 evidence result를 automation exit code로
+  변환하는 `--gate` mode,
 
 그리고 derivable gateable fact만 반영하는 `changeEvidence` tri-state 요약을
 `cx session status`에 부착합니다. Persisted `cx session intent`는 deferred입니다. 명시적
@@ -232,6 +237,9 @@ verification/evidence 모델을 읽어 보수적으로 다음을 보고합니다
   evidence-linked.
 - `changeEvidence.status`는 `pass | fail | unknown`이고 derivable gateable fact만 주도;
   non-gating fact와 휴리스틱이 움직이지 못하고 risk 등급이 없음.
+- `--gate`는 tri-state evidence status만 기준으로 실패합니다. `fail`은 derivable gap이
+  있다는 뜻이고, `unknown`은 coverage를 증명할 evidence가 부족하다는 뜻입니다. Heuristic
+  claim은 여전히 failure가 되지 않습니다.
 - 부재한 도구/artifact에 의존하는 사실(예: coverage artifact 없는 changed-line coverage)은
   gap/fail이 아니라 `unknown`으로 보고.
 - "behavior change엔 test 필요"는 heuristic claim; derivable한 test 관련 사실은 "같은 diff에서

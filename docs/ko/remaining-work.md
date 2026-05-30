@@ -219,9 +219,9 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    session state protocol이 안정되기 전에는 launch를 추가하지 않습니다.
 8. Versioned `.codexus/session/state.json` schema는 explicit `cx session migrate`
    migration boundary를 통해서만 확장합니다.
-9. Quality evidence guard는 explicit review artifact link를 받습니다. 추가 확장은 coverage,
-   lint/typecheck output 같은 derivable artifact에서만 해야 하며 heuristic finding은 계속
-   advisory입니다.
+9. Quality evidence guard는 explicit review artifact link와 `--gate` automation mode를
+   받습니다. 추가 확장은 coverage, lint/typecheck output 같은 derivable artifact에서만
+   해야 하며 heuristic finding은 계속 advisory입니다.
 10. Subagent support는 recorder-only로 유지합니다. Recorder semantics가 안정되고 지원되는
    launch contract가 생기기 전까지 active native spawn launcher를 노출하지 않습니다.
    Subagent claim은 verification freshness와 계속 분리해야 합니다.

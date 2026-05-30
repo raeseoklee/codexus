@@ -241,6 +241,7 @@ session verify --auto --json
 session verify --auto --execute --json
 session verify --verify "npm test" --json
 session slop --json
+session slop --gate --json
 session subagent record --file <result.json> --json
 session workers status --json
 doctor --json
@@ -268,6 +269,8 @@ Use `session hud --json` when you want a compact status summary for the current
 chat. Use `session slop --json` when you want Codex to summarize whether the
 current workspace has fresh verification, objective diff facts, declared-scope
 escapes, linked review artifacts, or advisory quality claims. Use
+`session slop --gate --json` when an automation step should return nonzero
+unless the current change has passing evidence. Use
 `session subagent record/attach` only to record claim bundles; those claims
 remain unverified until a separate verification or review artifact supports
 them. `session workers status --json` is a capability gate; it does not start

@@ -404,7 +404,7 @@ async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Pr
 }
 
 async function slopCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
-  assertAllowedFlags(args, ["json", "cwd", "since", "scope", "review"]);
+  assertAllowedFlags(args, ["json", "cwd", "since", "scope", "review", "gate"]);
   assertMaxPositionals(args, 1);
   const stateRead = await readSessionStateWithMigration(cwd);
   const state = stateRead.state ? await refreshSessionState(cwd, stateRead.state) : null;
@@ -413,18 +413,22 @@ async function slopCommand(args: ParsedArgs, cwd: string, json: boolean): Promis
       since: flagString(args.flags, "since"),
       scope: flagString(args.flags, "scope"),
       reviews: flagArray(args.flags, "review"),
+      gate: flagBool(args.flags, "gate"),
     }),
     migration: stateRead.migration,
   };
   if (json) {
     console.log(JSON.stringify(report, null, 2));
+    process.exitCode = report.gate.exitCode;
     return;
   }
   console.log(`Change evidence: ${report.changeEvidence.status}`);
+  console.log(`Gate: ${report.gate.status}`);
   console.log(`Verification: ${report.changeEvidence.verification}`);
   console.log(`Evidence gaps: ${report.evidenceGaps.length}`);
   console.log(`Derivable facts: ${report.derivableFacts.length}`);
   console.log(`Heuristic claims: ${report.heuristicClaims.length}`);
+  process.exitCode = report.gate.exitCode;
 }
 
 async function workersCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {

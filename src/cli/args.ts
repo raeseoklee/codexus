@@ -31,6 +31,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     "always-on",
     "auto",
     "execute",
+    "gate",
   ]);
 
   for (let index = 0; index < rest.length; index += 1) {

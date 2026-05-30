@@ -86,7 +86,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `cx slop check`와 `cx session slop`은 quality evidence guard를 제공합니다:
   tri-state `changeEvidence`, derivable evidence gap, non-gating derivable fact,
   advisory heuristic claim, 명시적 diff base metadata, optional declared-scope 및
-  explicit review-artifact check.
+  explicit review-artifact check. `--gate`는 같은 tri-state evidence status를
+  automation exit code로 변환하지만 heuristic으로 change를 fail시키지는 않습니다.
 - `cx session subagent record/attach/status`는 subagent claim bundle을
   `.codexus/session/subagents/` 아래 기록하고 session state에서 link하며, subagent claim을
   verification freshness와 분리합니다. 현재 recorder-only slice에서 Codexus는 native
@@ -164,7 +165,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 141 tests 통과
+- `npm test`: 142 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -192,6 +193,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Session HUD, quality evidence guard의 explicit review-artifact link, schema
   engine status, replay parity status, adapter injection approval artifact,
   session worker gate, recorder-only subagent launch rejection CLI 테스트
+- Slop guard gate mode의 pass, fail, unknown/blocked outcome 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트

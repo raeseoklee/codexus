@@ -156,7 +156,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx slop check` and `cx session slop` expose the quality evidence guard:
   tri-state `changeEvidence`, derivable evidence gaps, non-gating derivable
   facts, advisory heuristic claims, explicit diff base metadata, and optional
-  declared-scope and explicit review-artifact checks.
+  declared-scope and explicit review-artifact checks. `--gate` converts the
+  same tri-state evidence status into an automation exit code without letting
+  heuristics fail a change.
 - `cx session subagent record/attach/status` records subagent claim bundles
   under `.codexus/session/subagents/`, links them from session state, and keeps
   subagent claims separate from verification freshness. Codexus does not expose
@@ -217,7 +219,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 141.
+- Current test count: 142.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -276,6 +278,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   schema engine status, replay parity status, adapter injection approval
   artifacts, session worker gates, and recorder-only subagent launch rejection
   are covered by CLI tests.
+- Slop guard gate mode is covered for pass, fail, and unknown/blocked outcomes.
 
 ## Acceptance Coverage
 

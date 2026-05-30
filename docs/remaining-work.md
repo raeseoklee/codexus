@@ -229,9 +229,10 @@ evidence only when the supporting runtime exists:
    not add launch until the session state protocol is stable.
 8. Extend the versioned `.codexus/session/state.json` schema only through the
    explicit `cx session migrate` migration boundary.
-9. The quality evidence guard now accepts explicit review artifact links.
-   Further expansion must still come only from derivable artifacts such as
-   coverage or lint/typecheck outputs; heuristics stay advisory.
+9. The quality evidence guard now accepts explicit review artifact links and
+   `--gate` automation mode. Further expansion must still come only from
+   derivable artifacts such as coverage or lint/typecheck outputs; heuristics
+   stay advisory.
 10. Subagent support remains recorder-only. Do not expose an active native
    spawn launcher until recorder semantics remain stable and a supported launch
    contract exists; subagent claims must stay separate from verification

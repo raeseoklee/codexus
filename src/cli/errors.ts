@@ -198,7 +198,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_session_workers_command":
       return "Run `cx session workers status --json`.";
     case "unsupported_slop_command":
-      return "Run `cx slop check --json`.";
+      return "Run `cx slop check --json` or `cx slop check --gate --json`.";
     case "invalid_session_setup_scope":
       return "Use `--scope project` or `--scope user`.";
     case "missing_session_checkpoint_label":

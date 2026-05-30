@@ -202,11 +202,15 @@ cx slop check --json                       # working-tree by default
 cx slop check --since <ref> --json         # explicit committed range
 cx slop check --scope "<glob>" --json      # declare scope for out-of-scope findings
 cx slop check --review <path> --json       # link an explicit review artifact
+cx slop check --gate --json                # return nonzero unless changeEvidence passes
 cx session slop --json
 ```
 
 `cx session status` may surface the compact `changeEvidence` summary; `cx slop
-check` adds the diff-lane claims.
+check` adds the diff-lane claims. By default the command is report-only and
+returns exit 0; `--gate` turns the tri-state evidence result into an automation
+exit code without changing the underlying `changeEvidence.status`: `pass`
+passes, `fail` fails, and `unknown` is blocked for insufficient evidence.
 
 ## Non-Goals
 
@@ -238,6 +242,8 @@ conservatively report:
 - linked explicit review artifacts when `--review` points at an existing file,
 - missing review artifacts as evidence gaps when a declared `--review` file is
   absent,
+- `--gate` mode that converts the same evidence result into an automation exit
+  code without promoting heuristics to failures,
 
 plus a `changeEvidence` tri-state summary attached to `cx session status` that
 reflects derivable gateable facts only. Persisted `cx session intent` remains
@@ -251,6 +257,9 @@ deferred; no out-of-scope finding is fabricated without an explicit declaration.
 - `changeEvidence.status` is `pass | fail | unknown`, driven only by derivable
   gateable facts; non-gating facts and heuristics never move it and there is no
   risk grade.
+- `--gate` fails only from the tri-state evidence status: `fail` means a
+  derivable gap exists, and `unknown` means the command cannot prove coverage.
+  Heuristic claims still never become failures.
 - A fact that depends on an absent tool/artifact (e.g. changed-line coverage with
   no coverage artifact) is reported as `unknown`, not as a gap or fail.
 - "Behavior change needs a test" is a heuristic claim; the only derivable
