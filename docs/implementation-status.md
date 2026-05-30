@@ -103,7 +103,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx init` creates project-local config/state directories without mutating
   unrelated tool state.
 - Run observability commands list runs, tail events, and preview reports.
-- App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, and deterministic fake lifecycle supervision are present, while live app-server execution remains gated off.
+- App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, and explicit opt-in Stage B read-only socket observation are present, while live app-server execution remains gated off.
 - Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records with policy/approval contract fields for future dispatch.
 - Versioned schema artifacts exist for config, state, events, memory entries, and skills, with focused enforcement plus zero-dependency schema-artifact subset validation on single-record and run-ledger checks.
 - Codex JSONL usage is captured when present and terminal state records usage or
@@ -184,7 +184,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 87.
+- Current test count: 101.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -218,7 +218,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Skill proposal/review/promotion/deprecation workflow through both unit and CLI tests.
 - Structured JSON CLI error envelope for unknown commands and argument validation failures.
 - Structured JSON CLI error coverage for unexpected arguments, corrupt state, and disabled app-server driver.
-- Init, observability, active-skill index/export/improvement, adapter approved retrieval/context artifact recording, full replay parity fixture-matrix coverage, gated model replay, stale locks, schema validation/run-ledger validation, migration fixtures, driver-failure repair, app-server dry-run/experiment process-probe and fake-supervision recording, memory lifecycle/curation with conflict and quality findings, packaging, installed-skill tree diagnosis, and feature-gate policy/audit-record tests.
+- Init, observability, active-skill index/export/improvement, adapter approved retrieval/context artifact recording, full replay parity fixture-matrix coverage, gated model replay, stale locks, schema validation/run-ledger validation, migration fixtures, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision recording, Stage A isolated real evidence, Stage B read-only evidence, memory lifecycle/curation with conflict and quality findings, packaging, installed-skill tree diagnosis, and feature-gate policy/audit-record tests.
 - Real Codex exec smoke through ChatGPT-authenticated local Codex:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-CODEX-OK" --json`
   - observed final artifact: `CHX-CODEX-OK`
@@ -269,7 +269,7 @@ review. Current high-level gaps:
 
 - Driver-failure repair is implemented only for repairable task failures and only with an explicit budget.
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
-- Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, and deterministic fake lifecycle supervision are implemented.
+- Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, deterministic fake lifecycle supervision, Stage A isolated real evidence, and Stage B read-only evidence are implemented behind explicit gates.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
 - Session state is currently a cwd-scoped singleton because Codex does not expose
   a stable per-conversation id to Codexus.

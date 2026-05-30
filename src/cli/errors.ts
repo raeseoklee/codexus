@@ -82,6 +82,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Invalid event tail line count.";
     case "invalid_timeout_ms":
       return "Invalid timeout milliseconds.";
+    case "invalid_observe_ms":
+      return "Invalid observe milliseconds.";
     case "missing_memory_kind":
       return "Missing memory kind.";
     case "missing_memory_text":
@@ -92,6 +94,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing lock name.";
     case "missing_prompt":
       return "Missing run prompt.";
+    case "missing_app_server_socket":
+      return "Missing app-server socket path.";
     case "missing_run_id":
       return "Missing run id.";
     case "missing_skill_id":
@@ -211,6 +215,10 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Use a positive integer for `--lines`.";
     case "invalid_timeout_ms":
       return "Use a positive integer for `--timeout-ms`.";
+    case "invalid_observe_ms":
+      return "Use a positive integer for `--observe-ms` that is less than or equal to `--timeout-ms`.";
+    case "missing_app_server_socket":
+      return "Pass `--sock <path>` with `cx app-server experiment --live-read-only`.";
     case "invalid_skill_export_target":
       return "Use `--target codex` or `--target omx`.";
     case "skill_not_active":

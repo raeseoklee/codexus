@@ -60,6 +60,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   pass에서 `.codexus/session/state.json`용 explicit `cx session migrate` boundary도
   추가했고, configured hook과 실제 `turn-ended` dispatch 관측을 구분하는 v2 notify
   dispatch semantics를 반영했습니다.
+- Desktop app-server attachment evidence는 Stage A isolated real evidence와
+  explicit opt-in 및 사용자 제공 socket이 필요한 Stage B read-only command
+  surface까지 진행했습니다. 이 경로는 transcript 값이 아니라 method shape만
+  기록하며 아직 product behavior를 활성화하지 않습니다.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,
@@ -187,9 +191,11 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 2. replay parity matrix를 contract로 유지합니다. 새 canonical parity label은
    fixture coverage와 CLI replay evidence 없이 추가하지 않습니다.
 3. app-server product behavior를 활성화하기 전에 Desktop app-server attachment
-   evidence slice를 진행합니다. Stage A는 임시 상태 기반 격리 evidence이고, Stage A가
-   통과할 때만 Stage B에서 실제 daemon에 대한 명시적 read-only opt-in을 수행합니다.
-   app-server driver 활성화는 별도 gate로 계속 분리합니다.
+   evidence loop를 마무리합니다. Stage A isolated temporary-state evidence는
+   구현됐고, Stage B는 gated read-only command surface를 갖췄습니다. 남은 evidence는
+   실제 Desktop daemon에서 user-visible turn boundary를 관측하는 것과, 그 뒤의 별도
+   session-event mapping 설계입니다. app-server driver 활성화는 별도 gate로 계속
+   분리합니다.
 4. cron/gateway policy/approval dry-run contract를 policy-reviewed live
    dispatch contract로 승격하고, dry-run/live path의 contract compatibility를
    유지합니다.

@@ -4,7 +4,9 @@
 
 날짜: 2026-05-30
 
-상태: 계획된 evidence slice이며, 활성화된 runtime path가 아닙니다.
+상태: Stage A는 구현됐고, Stage B read-only command는 explicit opt-in 뒤에
+구현됐습니다. 실제 Desktop daemon observation은 여전히 manual이며 enabled runtime
+path가 아닙니다.
 
 ## 결정
 
@@ -149,8 +151,11 @@ cx app-server experiment --live-read-only --record --sock <path> --json
 ```
 
 `--isolated-real`은 `CODEXUS_ENABLE_APP_SERVER_ISOLATED=1` 뒤에서 구현됐습니다.
-`--live-read-only`는 consent와 safety gate가 구현될 때까지 unsupported 상태로
-남겨야 합니다. 오류는 structured하고 truthful해야 합니다.
+`--live-read-only`는 `CODEXUS_ENABLE_DESKTOP_APP_SERVER_ATTACH=1`과 명시적
+`--sock <path>` 뒤에서 구현됐습니다. 이 경로는 read-only app-server request
+(`initialize`, `thread/list`, `remoteControl/status/read`)만 보내고 transcript 값이
+아닌 notification method shape만 기록합니다. 오류는 structured하고 truthful해야
+합니다.
 
 ## 검증
 

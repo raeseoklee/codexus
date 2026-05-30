@@ -42,7 +42,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - deterministic replay 뒤 explicit budget/policy/live-environment gated model replay
 - unrelated tool state를 건드리지 않는 `cx init`
 - runs/events/report observability command
-- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, live execution disabled
+- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled
 - cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
 - config/state/event/memory/skill versioned schema artifact, durable read-path focused enforcement, single-record/run-ledger schema artifact subset validation
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
@@ -134,7 +134,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 87 tests 통과
+- `npm test`: 101 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -161,7 +161,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   manual-smoke dispatch false-positive protection CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
-- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
+- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
 
 ## 남은 gap
 
@@ -170,7 +170,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 - driver-failure repair는 repairable task failure에 한해 explicit budget이 있을 때만 실행됩니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
-- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision만 구현했습니다.
+- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision, Stage A isolated real evidence, Stage B read-only evidence를 explicit gate 뒤에 구현했습니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
 - Codex가 stable per-conversation id를 Codexus에 노출하지 않기 때문에 session state는
   현재 cwd-scoped singleton입니다.

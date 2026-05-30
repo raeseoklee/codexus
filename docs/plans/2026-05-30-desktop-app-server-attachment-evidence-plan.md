@@ -4,7 +4,9 @@
 
 Date: 2026-05-30
 
-Status: planned evidence slice, not an enabled runtime path.
+Status: Stage A is implemented, and the Stage B read-only command is
+implemented behind explicit opt-in. Real Desktop daemon observation remains
+manual and is not an enabled runtime path.
 
 ## Decision
 
@@ -154,8 +156,11 @@ cx app-server experiment --live-read-only --record --sock <path> --json
 ```
 
 `--isolated-real` is implemented behind `CODEXUS_ENABLE_APP_SERVER_ISOLATED=1`.
-`--live-read-only` should remain unsupported until its consent and safety gates
-are implemented. Errors must be structured and truthful.
+`--live-read-only` is implemented behind
+`CODEXUS_ENABLE_DESKTOP_APP_SERVER_ATTACH=1` plus explicit `--sock <path>`.
+That path sends only read-only app-server requests (`initialize`,
+`thread/list`, `remoteControl/status/read`) and records notification method
+shapes rather than transcript values. Errors must be structured and truthful.
 
 ## Verification
 

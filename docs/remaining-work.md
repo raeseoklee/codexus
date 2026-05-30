@@ -62,6 +62,10 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   explicit `cx session migrate` boundary for `.codexus/session/state.json` and
   v2 notify dispatch semantics that distinguish configured hooks from observed
   `turn-ended` dispatch.
+- Desktop app-server attachment evidence advanced through Stage A isolated
+  real evidence and a Stage B read-only command surface that requires explicit
+  opt-in and a user-provided socket. It records method shapes, not transcript
+  values, and still does not enable product behavior.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
@@ -195,10 +199,12 @@ not remove the gates:
    regression boundary.
 2. Preserve the replay parity matrix as a contract: no new canonical parity
    label should be added without fixture coverage and CLI replay evidence.
-3. Run the Desktop app-server attachment evidence slice before enabling any
-   app-server product behavior: Stage A isolated temporary-state evidence, then
-   Stage B explicit read-only opt-in against a real daemon only if Stage A
-   passes. Keep app-server driver enablement separate and still gated.
+3. Complete the Desktop app-server attachment evidence loop before enabling any
+   app-server product behavior: Stage A isolated temporary-state evidence is
+   implemented, and Stage B has a gated read-only command surface. The remaining
+   evidence is a real Desktop daemon observation with a user-visible turn
+   boundary, followed by a separate session-event mapping design. Keep app-server
+   driver enablement separate and still gated.
 4. Promote cron/gateway policy/approval dry-run contracts into a
    policy-reviewed live dispatch contract, then keep dry-run and live paths
    contract-compatible.

@@ -4,6 +4,7 @@ import { loadConfig } from "../../config/loader.ts";
 import { CodexAppServerDriver } from "../../drivers/codex-app-server.ts";
 import { superviseProcess } from "../../experiments/process-supervisor.ts";
 import { runIsolatedRealStageA } from "../../experiments/app-server-stage-a.ts";
+import { runLiveReadOnlyStageB } from "../../experiments/app-server-stage-b.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
@@ -16,6 +17,10 @@ function liveEnabled(): boolean {
 
 function isolatedRealEnabled(): boolean {
   return process.env.CODEXUS_ENABLE_APP_SERVER_ISOLATED === "1";
+}
+
+function desktopAttachEnabled(): boolean {
+  return process.env.CODEXUS_ENABLE_DESKTOP_APP_SERVER_ATTACH === "1";
 }
 
 function supervisedAppServerHelpProbe(command: string, timeoutMs: number) {
@@ -107,6 +112,34 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (topic === "experiment") {
+    if (flagBool(args.flags, "live-read-only")) {
+      if (!desktopAttachEnabled()) throw new Error("unsupported_feature:codex-app-server-live-read-only");
+      const socketPath = flagString(args.flags, "sock");
+      if (!socketPath) throw new Error("missing_app_server_socket");
+      const timeoutMs = Number(flagString(args.flags, "timeout-ms") ?? "30000");
+      if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) throw new Error("invalid_timeout_ms");
+      const observeMs = Number(flagString(args.flags, "observe-ms") ?? "5000");
+      if (!Number.isInteger(observeMs) || observeMs <= 0 || observeMs > timeoutMs) {
+        throw new Error("invalid_observe_ms");
+      }
+      const experimentId = `app_server_live_read_only_${Date.now()}`;
+      const experimentDir = resolve(harnessRoot(cwd), "experiments", "app-server", experimentId);
+      const { manifest } = await runLiveReadOnlyStageB({
+        cwd,
+        experimentDir,
+        experimentId,
+        timeoutMs,
+        observeMs,
+        socketPath,
+        record: flagBool(args.flags, "record"),
+      });
+      if (json) {
+        console.log(JSON.stringify(manifest, null, 2));
+        return;
+      }
+      console.log(`app-server experiment live-read-only: event=${manifest.eventObservation.status} runtime=${manifest.eventObservation.runtimeSurface}`);
+      return;
+    }
     if (flagBool(args.flags, "isolated-real")) {
       if (!isolatedRealEnabled()) throw new Error("unsupported_feature:codex-app-server-isolated-real");
       const timeoutMs = Number(flagString(args.flags, "timeout-ms") ?? "30000");
