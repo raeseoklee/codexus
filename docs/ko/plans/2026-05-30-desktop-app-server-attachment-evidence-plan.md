@@ -5,8 +5,10 @@
 날짜: 2026-05-30
 
 상태: Stage A는 구현됐고, Stage B read-only command는 explicit opt-in 뒤에
-구현됐습니다. 실제 Desktop daemon observation은 여전히 manual이며 enabled runtime
-path가 아닙니다.
+구현됐습니다. 첫 maintainer Desktop smoke는 negative result였습니다. 현재 활성
+Codex Desktop app-server surface는 stdio 기반이었고, managed daemon control socket은
+없었으며, 발견된 IPC socket은 WebSocket handshake 전에 닫혔습니다. Desktop
+attachment는 아직 enabled runtime path가 아닙니다.
 
 ## 결정
 
@@ -127,6 +129,22 @@ Stage B에서 구현으로 넘어가는 gate:
   `available`.
 - Negative result도 정상 결과입니다. 안정적인 read-only event를 찾지 못하면 Codexus는
   Desktop attachment를 unavailable/unobserved로 계속 보고해야 합니다.
+
+현재 evidence:
+
+- Stage B `--live-read-only`를 maintainer Desktop 환경에서 발견된 local IPC socket에
+  대해 실행했습니다.
+- 이 명령은 explicit opt-in contract를 지켰고, remote control을 켜지 않았으며,
+  Codex config를 쓰지 않았고, turn을 시작하지 않았고, transcript data를 저장하지
+  않았습니다.
+- Socket은 WebSocket handshake 전에 닫혔으므로 read-only request는 전송되지 않았고
+  event method도 관측되지 않았습니다.
+- 결과: `connection.status: "unavailable"`,
+  `eventObservation.runtimeSurface: "unknown"`,
+  `promotionRecommendation: "block_stage_b"`.
+- 다음 positive Stage B 시도에는 사용자 제공 app-server WebSocket socket, 이미 opt-in된
+  managed daemon socket, 또는 별도 stdio-observer 설계가 필요합니다. 그 경우에도
+  remote control을 조용히 켜면 안 됩니다.
 
 ## 비목표
 

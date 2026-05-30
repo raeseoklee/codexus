@@ -171,6 +171,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - driver-failure repair는 repairable task failure에 한해 explicit budget이 있을 때만 실행됩니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
 - app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision, Stage A isolated real evidence, Stage B read-only evidence를 explicit gate 뒤에 구현했습니다.
+- 첫 Stage B maintainer Desktop smoke는 negative였습니다. 사용할 수 있는 app-server
+  WebSocket socket을 찾지 못했고, 발견된 IPC socket은 handshake 전에 닫혔습니다.
+  지원되는 socket 또는 별도 stdio-observer 설계가 증명될 때까지 Desktop attachment는
+  unavailable/unobserved로 유지합니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
 - Codex가 stable per-conversation id를 Codexus에 노출하지 않기 때문에 session state는
   현재 cwd-scoped singleton입니다.

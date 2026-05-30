@@ -5,8 +5,11 @@
 Date: 2026-05-30
 
 Status: Stage A is implemented, and the Stage B read-only command is
-implemented behind explicit opt-in. Real Desktop daemon observation remains
-manual and is not an enabled runtime path.
+implemented behind explicit opt-in. A first maintainer Desktop smoke produced a
+negative result: the active Codex Desktop app-server surface was stdio-based, the
+managed daemon control socket was absent, and a discovered IPC socket closed
+before WebSocket handshake. Desktop attachment is still not an enabled runtime
+path.
 
 ## Decision
 
@@ -132,6 +135,21 @@ Promotion gate from Stage B to implementation:
 - A negative result remains a supported outcome: Codexus should keep reporting
   Desktop attachment as unavailable/unobserved if no stable read-only event is
   found.
+
+Current evidence:
+
+- Stage B `--live-read-only` has been exercised against a discovered local IPC
+  socket in a maintainer Desktop environment.
+- The command preserved the explicit opt-in contract and did not enable remote
+  control, write Codex config, start a turn, or store transcript data.
+- The socket closed before WebSocket handshake, so no read-only requests were
+  sent and no event methods were observed.
+- Result: `connection.status: "unavailable"`,
+  `eventObservation.runtimeSurface: "unknown"`, and
+  `promotionRecommendation: "block_stage_b"`.
+- The next positive Stage B attempt needs a user-provided app-server WebSocket
+  socket, an already opt-in managed daemon socket, or a separate stdio-observer
+  design. It must still avoid enabling remote control silently.
 
 ## Non-Goals
 

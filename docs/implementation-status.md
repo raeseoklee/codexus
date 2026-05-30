@@ -270,6 +270,10 @@ review. Current high-level gaps:
 - Driver-failure repair is implemented only for repairable task failures and only with an explicit budget.
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
 - Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, deterministic fake lifecycle supervision, Stage A isolated real evidence, and Stage B read-only evidence are implemented behind explicit gates.
+- First Stage B maintainer Desktop smoke was negative: no usable app-server
+  WebSocket socket was found, and a discovered IPC socket closed before
+  handshake. Desktop attachment remains unavailable/unobserved until a supported
+  socket or a separate stdio-observer design is proven.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
 - Session state is currently a cwd-scoped singleton because Codex does not expose
   a stable per-conversation id to Codexus.
