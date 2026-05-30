@@ -7,6 +7,24 @@ Codexus의 notable change를 이 파일에 기록합니다.
 이 프로젝트는 practical pre-1.0 changelog format을 따릅니다. 1.0 전에는 breaking
 change가 있을 수 있지만, 명확히 표시해야 합니다.
 
+## 0.1.0-alpha.2 - 2026-05-30
+
+### Added
+
+- Memory curation은 이제 memory entry를 변경하지 않고 advisory conflict
+  candidate와 curator-derived tri-state quality finding을 보고합니다.
+- Session notify dispatch는 configured hook과 실제 관측된 `turn-ended`
+  dispatch를 구분하고 CLI/TUI runtime surface evidence를 기록합니다.
+- Desktop app-server attachment는 isolated probing, consent, read-only,
+  non-disruptive socket gate가 있는 evidence-first A/B slice로 문서화했습니다.
+
+### Changed
+
+- Codexus session state는 향후 schema change를 위한 explicit migration boundary를
+  사용합니다.
+- Memory quality는 표준 준수가 아니라 29148-inspired curation characteristic으로
+  프레이밍합니다.
+
 ## 0.1.0-alpha.1 - 2026-05-30
 
 ### Changed
