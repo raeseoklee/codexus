@@ -1,0 +1,150 @@
+# Desktop App-Server Attachment Evidence Plan
+
+[Korean](../ko/plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md)
+
+Date: 2026-05-30
+
+Status: planned evidence slice, not an enabled runtime path.
+
+## Decision
+
+Codexus should investigate Codex Desktop attachment through the experimental
+app-server surface in two stages:
+
+1. Stage A: isolated evidence in temporary state only.
+2. Stage B: read-only evidence against a real, already opt-in Desktop/app-server
+   daemon.
+
+This is an evidence slice. It must not enable the app-server driver, steer live
+turns, mutate user Codex configuration, or claim Desktop attachment support
+until a real event is observed and mapped into Codexus session state.
+
+## Context
+
+The CLI/TUI notify-hook path is now proven with a real `turn-ended` event:
+`notifyDispatch.status` becomes `observed`, `capabilities.hooks` becomes
+`available`, and the hook event records `runtimeSurface: "cli-tui"`.
+
+Desktop/app-server sessions may not invoke the CLI notify hook. That makes the
+app-server surface the likely remaining half of Codexus session-native
+attachment:
+
+- CLI/TUI runtime: Codex `notify = [...]` hook.
+- Desktop/app-server runtime: app-server event subscription, if the supported
+  event surface exists and is stable enough.
+
+Local Codex exposes this as an experimental surface:
+
+- `codex app-server daemon ...`
+- `codex app-server proxy --sock <SOCKET_PATH>`
+- `codex app-server generate-json-schema --out <DIR> [--experimental]`
+- `codex remote-control start|stop --json`
+
+Because the surface is explicitly experimental and can reach a live daemon, the
+first implementation must collect evidence before adding product behavior.
+
+## Stage A: Isolated Evidence
+
+Stage A proves the protocol and lifecycle shape without touching the user's live
+Desktop daemon.
+
+Requirements:
+
+- Use a temporary `CODEX_HOME`.
+- Use a temporary workspace and temporary socket path.
+- Generate app-server JSON Schema into a temporary directory and record bounded
+  drift evidence against the committed fixture.
+- If a daemon/proxy process is started, supervise it with timeout,
+  `SIGTERM -> short wait -> SIGKILL`, bounded stdout/stderr capture, and cleanup
+  assertions.
+- Do not call `enable-remote-control` on the user's real daemon.
+- Do not reuse the user's default control socket.
+- Do not write to `~/.codex/config.toml`.
+
+Output:
+
+- An experiment manifest under `.codexus/experiments/app-server/...`.
+- Bounded help/schema/process evidence.
+- A cleanup result proving no supervised child process remains.
+
+Promotion gate from Stage A to Stage B:
+
+- Schema generation works.
+- Proxy/daemon lifecycle is either proven in isolation or the exact reason it
+  cannot be isolated is recorded.
+- Cleanup assertions pass.
+- The manifest states which event methods look relevant for turn/session
+  observation.
+
+## Stage B: Real Daemon Read-Only Evidence
+
+Stage B may connect to a real Desktop/app-server daemon only with explicit
+consent and only in read-only mode.
+
+Requirements:
+
+- Require an explicit command flag and environment gate, for example
+  `--live-read-only` plus `CODEXUS_ENABLE_DESKTOP_APP_SERVER_ATTACH=1`.
+- Connect only to a user-provided socket or a daemon whose remote-control mode
+  was already enabled by the user. Codexus must not silently enable remote
+  control.
+- If Codexus ever offers to run `enable-remote-control`, it must be a visible
+  command with an audit record and a clear disable/cleanup path.
+- Subscribe/read only. Do not start turns, steer turns, execute commands, call
+  filesystem write tools, alter approvals, or mutate Desktop state.
+- Bound all event reads by timeout and byte limits.
+- Redact captured event payloads before storing artifacts.
+- Record the runtime surface as `desktop-app-server` only from observed
+  app-server evidence, never from the absence of CLI notify dispatch.
+
+Output:
+
+- A read-only evidence manifest.
+- The event method names and bounded payload shapes needed to map Desktop turn
+  activity.
+- A proposed mapping into Codexus session `hookEvents` or a new event type if
+  app-server events are not semantically equivalent to CLI `turn-ended`.
+
+Promotion gate from Stage B to implementation:
+
+- A real Desktop/app-server event corresponding to a user-visible turn boundary
+  is observed.
+- The event can be represented without storing a transcript.
+- The mapping preserves the current truthful capability model:
+  `configured` before observation, `available` only after observation.
+- A negative result remains a supported outcome: Codexus should keep reporting
+  Desktop attachment as unavailable/unobserved if no stable read-only event is
+  found.
+
+## Non-Goals
+
+- Enabling `codex-app-server` as a run driver.
+- Replacing the stable `codex exec --json` path.
+- Capturing Desktop transcripts.
+- Creating a competing chat loop.
+- Automatically enabling remote control or modifying user Codex config.
+- Treating app-server absence as a failure of the CLI/TUI attachment path.
+
+## Next CLI Shape
+
+The first implementation should extend the existing experimental command
+surface instead of adding stable user-facing promises:
+
+```bash
+cx app-server experiment --dry-run --record --probe-process --json
+cx app-server experiment --dry-run --record --probe-process --supervise-fake --json
+cx app-server experiment --isolated-real --record --json
+cx app-server experiment --live-read-only --record --sock <path> --json
+```
+
+`--isolated-real` and `--live-read-only` should remain unsupported until their
+gates are implemented. Their errors must be structured and truthful.
+
+## Verification
+
+- Unit tests for gate enforcement and unsupported structured errors.
+- Manifest tests for Stage A fields, cleanup status, redaction, and bounded
+  output.
+- A fake/proxy fixture that proves event mapping without a live Desktop daemon.
+- A manual Stage B smoke only when the user explicitly opts in.
+- `npm run ci` and `npm run package:smoke` before publishing any related slice.

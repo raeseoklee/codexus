@@ -784,6 +784,13 @@ The app-server driver must remain gated until:
 
 Default config must keep it off.
 
+Desktop/app-server attachment is a separate evidence track from enabling the
+app-server as a run driver. The next slice must follow the A/B contract in
+[Desktop app-server attachment evidence plan](../plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md):
+isolated temporary-state evidence first, then explicit read-only opt-in against
+a real daemon. Stage B must not enable remote control silently, mutate user
+Codex config, steer turns, or store transcripts.
+
 ## Testing Strategy
 
 Minimum tests before feature work:

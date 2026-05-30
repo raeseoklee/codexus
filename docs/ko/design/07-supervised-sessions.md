@@ -195,6 +195,12 @@ Codexus는 hook/status integration을 hard dependency가 아니라 optional capa
   보고할 수 있습니다.
 - Codex TUI statusline configuration이 Codexus state를 포함할 수 있으면 이후 setup
   slice에서 명시적인 user-visible configuration으로 활성화합니다.
+- Desktop/app-server attachment는 CLI/TUI notify를 대체하는 것이 아니라
+  session-native attachment의 두 번째 runtime 절반입니다. 이는 A/B evidence plan으로만
+  조사합니다: 먼저 격리 app-server evidence, 그다음 실제 daemon에 대한 명시적 read-only
+  opt-in입니다. Codexus는 remote control을 자동 활성화하거나, 사용자 Codex config를
+  변경하거나, turn을 조종하거나, 실제 read-only event 관측 전 `desktop-app-server`
+  availability를 보고하면 안 됩니다.
 
 hook 또는 statusline path가 unavailable이면 `doctor`와 `session status`가 명확히 말해야
 합니다.
@@ -303,7 +309,11 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    추가합니다.
 9. 완료: session state를 v2로 승격하고 truthful notify dispatch capability semantics를
    추가합니다.
-10. 다음: Codex가 안정적인 supported configuration surface를 노출할 때만 statusline/HUD
-   support를 추가합니다.
-11. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
+10. 다음:
+   [Desktop app-server attachment evidence plan](../plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md)의
+   A/B contract에 따라 Desktop app-server attachment evidence slice를 실행합니다.
+11. 이후: compact read-only session summary인 `cx session hud --json`을 추가합니다.
+   Statusline integration은 Codex가 안정적인 supported configuration surface를 노출할
+   때까지 계속 보류합니다.
+12. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
    feature로 재검토합니다.

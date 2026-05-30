@@ -192,9 +192,10 @@ not remove the gates:
    regression boundary.
 2. Preserve the replay parity matrix as a contract: no new canonical parity
    label should be added without fixture coverage and CLI replay evidence.
-3. Promote deterministic fake app-server supervision into an isolated real
-   app-server start/stop experiment with timeout, cleanup, and bounded
-   stdout/stderr evidence before enabling it as a driver.
+3. Run the Desktop app-server attachment evidence slice before enabling any
+   app-server product behavior: Stage A isolated temporary-state evidence, then
+   Stage B explicit read-only opt-in against a real daemon only if Stage A
+   passes. Keep app-server driver enablement separate and still gated.
 4. Promote cron/gateway policy/approval dry-run contracts into a
    policy-reviewed live dispatch contract, then keep dry-run and live paths
    contract-compatible.

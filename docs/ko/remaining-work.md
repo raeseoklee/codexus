@@ -183,9 +183,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    Schema engine으로 교체합니다. Migration fixture는 regression boundary로 유지합니다.
 2. replay parity matrix를 contract로 유지합니다. 새 canonical parity label은
    fixture coverage와 CLI replay evidence 없이 추가하지 않습니다.
-3. app-server를 driver로 켜기 전에 deterministic fake app-server supervision을
-   timeout, cleanup, bounded stdout/stderr evidence가 있는 isolated real
-   app-server start/stop experiment로 승격합니다.
+3. app-server product behavior를 활성화하기 전에 Desktop app-server attachment
+   evidence slice를 진행합니다. Stage A는 임시 상태 기반 격리 evidence이고, Stage A가
+   통과할 때만 Stage B에서 실제 daemon에 대한 명시적 read-only opt-in을 수행합니다.
+   app-server driver 활성화는 별도 gate로 계속 분리합니다.
 4. cron/gateway policy/approval dry-run contract를 policy-reviewed live
    dispatch contract로 승격하고, dry-run/live path의 contract compatibility를
    유지합니다.

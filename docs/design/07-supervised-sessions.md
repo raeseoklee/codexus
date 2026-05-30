@@ -207,6 +207,12 @@ Target behavior:
   checkpoint state.
 - If Codex TUI statusline configuration can include Codexus state, a later setup
   slice can enable it with explicit user-visible configuration.
+- Desktop/app-server attachment is the second runtime half of session-native
+  attachment, not a replacement for CLI/TUI notify. Investigate it only through
+  the A/B evidence plan: isolated app-server evidence first, then explicit
+  read-only opt-in against a real daemon. Codexus must not enable remote control,
+  mutate user Codex config, steer turns, or report `desktop-app-server`
+  availability before observing a real read-only event.
 
 If a hook or statusline path is unavailable, `doctor` and `session status` must
 say so clearly.
@@ -320,7 +326,11 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    migrate` command.
 9. Completed: promote session state to v2 with truthful notify dispatch
    capability semantics.
-10. Next: add statusline/HUD support only if Codex exposes a stable supported
+10. Next: run the Desktop app-server attachment evidence slice using the A/B
+   contract in
+   [Desktop app-server attachment evidence plan](../plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md).
+11. Later: add `cx session hud --json` as a compact read-only session summary;
+   statusline integration remains blocked until Codex exposes a stable supported
    configuration surface.
-11. Later: revisit external `codex exec resume` as a separate advanced feature only
+12. Later: revisit external `codex exec resume` as a separate advanced feature only
    after the Codex-native path is useful.

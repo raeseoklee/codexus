@@ -221,6 +221,12 @@ formatting합니다. 자동 prompt injection이나 별도 chat loop는 만들지
 - `--supervise-fake`는 pid, timeout, stop signal, cleanup, bounded stdout/stderr
   preview를 가진 deterministic fake process lifecycle evidence를 기록합니다.
   실제 app-server를 시작하지 않습니다.
+- Desktop/app-server attachment는 app-server를 run driver로 활성화하는 것과 별도의
+  evidence track입니다.
+  [Desktop app-server attachment evidence plan](../plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md)의
+  A/B contract를 따라야 합니다: 먼저 임시 상태 기반 격리 evidence, 그다음 실제 daemon에
+  대한 명시적 read-only opt-in입니다. Stage B는 remote control을 조용히 켜거나, 사용자
+  Codex config를 변경하거나, turn을 조종하거나, transcript를 저장하면 안 됩니다.
 - `cx cron run-now --dry-run --json`과 `cx gateway check --dry-run --json`은
   lock name과 ledger event intent를 포함한 automation plan만 반환합니다.
   Real dispatch는 approval/policy event가 완성된 뒤에만 추가합니다.
