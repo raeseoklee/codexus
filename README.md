@@ -1,13 +1,3 @@
-```text
- ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓███████▓▒░
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
-░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
-░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░  ░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░
-░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░
- ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓███████▓▒░
-```
-
 # Codexus
 
 [![CI](https://github.com/raeseoklee/codexus/actions/workflows/ci.yml/badge.svg)](https://github.com/raeseoklee/codexus/actions/workflows/ci.yml)
@@ -16,78 +6,99 @@
 
 [Korean](docs/ko/README.md)
 
-Codexus is a local execution harness for OpenAI Codex. It keeps Codex as the
-model and execution engine, then adds the engineering layer needed for durable
-runs, verification gates, recovery loops, memory, and replay-gated skills.
+**Codexus runs OpenAI's Codex CLI with evidence.**
 
-Codexus is not a Codex replacement. It is an orchestration layer around the
-authenticated local Codex CLI. The stable engine is still `cx`, while the
-product direction is an OMX-like Codex-native session runtime through the
-installed `codexus` skill, guidance overlays, local state, and optional notify hooks.
+Tell it what to change and how to verify it. Codexus runs the local authenticated
+Codex CLI, runs your verification command, feeds real failure output back into a
+bounded repair loop when the check fails, and reports `complete` only when the
+check passes.
 
-```text
-User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
+Every run is saved under `.codexus/runs/<id>`, so you can inspect, resume,
+verify, or cancel it even after a terminal closes or a process crashes.
+
+Same Codex model. Same local Codex auth. More supervision, recovery, memory, and
+truthful status around the work.
+
+## Why Use It
+
+| Plain Codex CLI | With Codexus |
+| --- | --- |
+| A task can look done before tests pass. | `complete` only after your verify command passes. |
+| A run lives in one terminal session. | Every run has a durable ledger under `.codexus/runs/<id>`. |
+| Failure output disappears into scrollback. | Failures become bounded repair context and saved evidence. |
+| Lessons are manual. | Useful lessons can become memory or replay-gated skills. |
+| Experimental surfaces are easy to overstate. | Gated features report what is proven, configured, or unavailable. |
+
+## See It
+
+```bash
+npm install -g codexus@next
+codexus run --verify "npm test" "fix the failing parser tests"
 ```
 
-## What It Provides
+Codexus runs Codex, then runs `npm test`. If the test fails, Codexus gives Codex
+the real failing output and retries within the configured repair budget. The run
+is `complete` only when the verification command passes.
 
-- Durable run ledgers under `.codexus/runs/<run-id>/`
-- Automatic migration from legacy `.codex-harness/` into `.codexus/`
-- Verification gates with bounded repair loops
-- Timeout, SIGINT, and external `cx cancel <run-id>` cancellation paths
-- Structured JSON error envelopes for automation
-- Memory records, curation, and bounded retrieval
-- Replay-gated skill proposal, review, promotion, improvement, export, and deprecation
-- Codex-native `$codexus` adapter for using the same core inside a Codex session
-- Optional advanced interop commands that stay outside the core runtime path
-- Schema artifact validation, stale-lock recovery, and local CI parity
-- Gated app-server, cron, gateway, and model-replay experiments that do not affect the stable `codex exec --json` path
-
-## Status
-
-Codexus is usable as an early local harness. The stable path is the CLI around
-`codex exec --json`; live app-server turns, routine live model replay, automatic
-prompt injection, and live cron/gateway dispatch remain intentionally gated.
-
-See [Implementation status](docs/implementation-status.md) and
-[Remaining work](docs/remaining-work.md) for exact coverage and gaps.
-
-## Requirements
-
-- Node.js 22 or newer
-- npm for the installer and npm package workflow
-- Git
-- The local `codex` CLI for real Codex runs
-- A logged-in Codex CLI session for the `codex-exec` driver
-
-Most tests use a deterministic mock driver so CI does not require model or
-network access; real runs use the local authenticated Codex CLI.
+> Early alpha, and intentionally honest about it: live app-server turns, routine
+> live model replay, automatic prompt injection, and live cron/gateway dispatch
+> remain gated off. See [Status](#status).
 
 ## Quick Start
 
-Install from npm:
+Install the current alpha package:
 
 ```bash
 npm install -g codexus@next
 codexus doctor --json
 ```
 
-The package is currently published on the alpha channel. Use `codexus@next` to
-avoid depending on future dist-tag changes.
+Run a supervised task with verification:
+
+```bash
+codexus run --verify "npm test" "fix the failing tests"
+```
 
 Global npm installs also install the Codex-native skill adapter into
 `${CODEX_HOME:-~/.codex}/skills/codexus` by default. Set
 `CODEXUS_INSTALL_CODEX_SKILL=0` when you need a CLI-only install.
+
+Detailed setup: [Quick start](docs/quickstart.md).
+
+## Use Inside Codex
+
+Codexus is also meant to be used from inside an interactive Codex session. The
+installed `codexus` skill calls the same local Codexus core for status,
+checkpoints, verification, replay, memory, and schema evidence without creating a
+separate chat loop.
+
+Project setup:
+
+```bash
+codexus setup codex-session --scope project --enable-notify-hook --json
+```
+
+Then, inside Codex, ask for the `codexus` skill when you need durable evidence:
+
+```text
+codexus, summarize the latest session status, checkpoint, and verification state.
+```
+
+Codex-session usage: [Using Codexus inside Codex](docs/codex-session-usage.md).
+
+## Install Options
+
+Install from npm:
+
+```bash
+npm install -g codexus@next
+```
 
 Install with GitHub Pages if you prefer a reviewable shell installer:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
 ```
-
-The installer delegates to the npm package channel (`codexus@next` by default),
-installs the `codexus` and `cx` bins, reports the installed package version, and
-installs the Codex skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is set.
 
 For a review-first install:
 
@@ -106,38 +117,38 @@ npm run ci
 npm run package:smoke
 ```
 
-Run the CLI directly:
+## Core Features
 
-```bash
-node src/cli/main.ts doctor --json
-```
+- Evidence-backed run ledgers under `.codexus/runs/<run-id>/`
+- Verification gates with bounded repair loops
+- Timeout, SIGINT, and external `cx cancel <run-id>` cancellation paths
+- Structured JSON error envelopes for automation
+- Memory records, curation, and bounded retrieval
+- Replay-gated skill proposal, review, promotion, improvement, export, and deprecation
+- Codex-native `$codexus` adapter for using the same core inside a Codex session
+- Schema artifact validation, stale-lock recovery, and local CI parity
+- Automatic migration from legacy `.codex-harness/` into `.codexus/`
+- Gated app-server, cron, gateway, and model-replay experiments that do not affect the stable `codex exec --json` path
 
-Use the canonical bin names during local development:
+## Status
 
-```bash
-npm link
-cx doctor --json
-codexus runs list --json
-```
+Codexus is usable as an early local harness. The stable path is the CLI around
+`codex exec --json`; live app-server turns, routine live model replay, automatic
+prompt injection, and live cron/gateway dispatch remain intentionally gated.
 
-Refresh or reinstall the Codex-native skill adapter from the published npm
-package:
+See [Implementation status](docs/implementation-status.md) and
+[Remaining work](docs/remaining-work.md) for exact coverage and gaps.
 
-```bash
-node "$(npm root -g)/codexus/scripts/install-codex-skill.mjs" --json
-```
+## Requirements
 
-Or install it from a cloned repository:
+- Node.js 22 or newer
+- npm for the installer and package workflow
+- Git
+- The local `codex` CLI for real Codex runs
+- A logged-in Codex CLI session for the `codex-exec` driver
 
-```bash
-npm run install:codex-skill
-```
-
-Then invoke the `codexus` skill from inside an interactive Codex session when
-you need durable status, replay, memory, or schema evidence.
-
-Detailed setup: [Quick start](docs/quickstart.md).
-Codex-session usage: [Using Codexus inside Codex](docs/codex-session-usage.md).
+Most tests use a deterministic mock driver so CI does not require model or
+network access; real runs use the local authenticated Codex CLI.
 
 ## Common Commands
 
@@ -178,8 +189,8 @@ Public bins: `cx` and `codexus` are canonical.
 - [Remaining work](docs/remaining-work.md)
 - [Public release checklist](docs/public-release.md)
 
-Documentation is written in English first. Korean translations live under
-`docs/ko/`, and English documents link to them as `Korean`.
+Selected documents have Korean translations under `docs/ko/`, and English
+documents link to them as `Korean`.
 
 ## Safety Boundaries
 
@@ -187,6 +198,21 @@ Codexus intentionally avoids private ChatGPT/Codex backend APIs. The stable
 driver boundary is the local authenticated Codex CLI. Experimental surfaces are
 feature-gated and report dry-run, policy, approval, and evidence records before
 any live dispatch path is enabled.
+
+<details>
+<summary>Codexus banner</summary>
+
+```text
+ ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓███████▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░  ░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░
+░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░
+ ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓███████▓▒░
+```
+
+</details>
 
 ## Contributing
 

@@ -1,67 +1,193 @@
-# Codexus 문서
+# Codexus
 
-[English](../README.md)
+[English](../../README.md)
 
-Codexus는 Codex 오케스트레이션을 위한 로컬 런타임 하네스입니다. OpenAI Codex를 모델/실행 엔진으로 유지하면서, 그 바깥에 내구성 있는 실행, 검증 게이트, 복구 루프, 메모리, replay-gated skill을 추가합니다.
+**Codexus는 OpenAI Codex CLI를 검증 증거와 함께 실행합니다.**
 
-## 문서 정책
+무엇을 고칠지와 어떻게 검증할지를 알려주면, Codexus는 로컬에 로그인된 Codex CLI를
+실행하고 검증 명령을 돌립니다. 검증이 실패하면 실제 실패 출력을 Codex에 다시 전달해
+제한된 repair loop를 수행하고, 검증이 통과했을 때만 `complete`라고 보고합니다.
 
-- 영문 문서를 기본으로 작성합니다.
-- 한국어 번역 문서는 `docs/ko/` 아래에 둡니다.
-- 영문 문서에서 한국어 번역을 링크할 때는 `Korean`으로 표기합니다.
-- 새 user-facing 문서를 추가할 때는 필요한 한국어 번역도 함께 추가합니다.
+모든 실행은 `.codexus/runs/<id>` 아래에 저장됩니다. 터미널이 닫히거나 프로세스가
+죽어도 이후에 상태를 확인하고, 이어서 검증하거나, 재개하거나, 취소할 수 있습니다.
+
+같은 Codex 모델, 같은 로컬 Codex 인증을 사용합니다. 그 바깥에 감독, 복구, 메모리,
+정직한 상태 보고를 더합니다.
+
+## 왜 쓰나요
+
+| 그냥 Codex CLI | Codexus 사용 |
+| --- | --- |
+| 테스트가 통과하기 전에 완료처럼 보일 수 있습니다. | 검증 명령이 통과해야만 `complete`입니다. |
+| 실행 기록이 한 터미널 세션에 묶입니다. | 모든 실행이 `.codexus/runs/<id>`에 남습니다. |
+| 실패 출력이 scrollback에 묻힙니다. | 실패 출력이 repair context와 증거로 저장됩니다. |
+| 배운 점은 사람이 따로 기억해야 합니다. | 유용한 lesson을 memory나 replay-gated skill로 승격할 수 있습니다. |
+| 실험 기능의 상태를 과대평가하기 쉽습니다. | proven/configured/unavailable 상태를 구분해서 보고합니다. |
+
+## 바로 보기
+
+```bash
+npm install -g codexus@next
+codexus run --verify "npm test" "fix the failing parser tests"
+```
+
+Codexus는 Codex를 실행한 뒤 `npm test`를 실행합니다. 테스트가 실패하면 실제 실패
+출력을 Codex에 전달해 제한된 repair loop를 돌립니다. 실행은 검증 명령이 통과했을
+때만 `complete`가 됩니다.
+
+> 현재는 early alpha입니다. Live app-server turn, routine live model replay,
+> automatic prompt injection, live cron/gateway dispatch는 의도적으로 gate 뒤에
+> 있습니다. 자세한 상태는 [구현 상태](implementation-status.md)를 확인하세요.
+
+## 빠른 시작
+
+현재 alpha package를 설치합니다:
+
+```bash
+npm install -g codexus@next
+codexus doctor --json
+```
+
+검증이 붙은 supervised task를 실행합니다:
+
+```bash
+codexus run --verify "npm test" "fix the failing tests"
+```
+
+Global npm install은 기본적으로 Codex-native skill adapter도
+`${CODEX_HOME:-~/.codex}/skills/codexus`에 설치합니다. CLI만 설치하고 싶으면
+`CODEXUS_INSTALL_CODEX_SKILL=0`을 사용하세요.
+
+자세한 setup: [빠른 시작](quickstart.md)
+
+## Codex 안에서 사용하기
+
+Codexus는 interactive Codex session 안에서도 사용할 수 있게 설계되어 있습니다. 설치된
+`codexus` skill은 같은 로컬 Codexus core를 호출해 status, checkpoint, verification,
+replay, memory, schema evidence를 제공합니다. 별도의 chat loop를 만들지 않습니다.
+
+Project setup:
+
+```bash
+codexus setup codex-session --scope project --enable-notify-hook --json
+```
+
+그 뒤 Codex 안에서 durable evidence가 필요할 때 `codexus` skill을 요청합니다:
+
+```text
+codexus session status를 보고 최근 checkpoint와 verification 상태만 요약해줘.
+```
+
+Codex-session 사용법: [Codex 안에서 Codexus 사용하기](codex-session-usage.md)
+
+## 설치 옵션
+
+Npm 설치:
+
+```bash
+npm install -g codexus@next
+```
+
+GitHub Pages installer:
+
+```bash
+curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
+```
+
+Review-first install:
+
+```bash
+curl -fsSLO https://raeseoklee.github.io/codexus/install.sh
+less install.sh
+sh install.sh
+```
+
+Repository clone 후 검증:
+
+```bash
+git clone https://github.com/raeseoklee/codexus.git
+cd codexus
+npm run ci
+npm run package:smoke
+```
+
+## 핵심 기능
+
+- `.codexus/runs/<run-id>/` 아래 evidence-backed run ledger
+- 검증 게이트와 제한된 repair loop
+- Timeout, SIGINT, 외부 `cx cancel <run-id>` 취소 경로
+- Automation을 위한 structured JSON error envelope
+- Memory record, curation, bounded retrieval
+- Replay-gated skill 제안, 리뷰, 승격, 개선, export, deprecation
+- 같은 core를 Codex session 안에서 쓰기 위한 `$codexus` adapter
+- Schema artifact validation, stale-lock recovery, local CI parity
+- Legacy `.codex-harness/`에서 `.codexus/`로 자동 migration
+- Stable `codex exec --json` path에 영향을 주지 않는 gated app-server, cron, gateway, model-replay experiment
+
+## 상태
+
+Codexus는 early local harness로 사용할 수 있습니다. 안정 경로는
+`codex exec --json`을 감싸는 CLI입니다. Live app-server turn, routine live model
+replay, automatic prompt injection, live cron/gateway dispatch는 의도적으로 gate 뒤에
+있습니다.
+
+정확한 coverage와 gap은 [구현 상태](implementation-status.md)와
+[남은 작업](remaining-work.md)을 확인하세요.
+
+## 요구 사항
+
+- Node.js 22 이상
+- Installer와 package workflow를 위한 npm
+- Git
+- 실제 Codex run을 위한 로컬 `codex` CLI
+- `codex-exec` driver를 위한 로그인된 Codex CLI session
+
+대부분의 테스트는 deterministic mock driver를 사용하므로 CI에는 모델이나 네트워크
+접근이 필요하지 않습니다. 실제 run은 로컬에 인증된 Codex CLI를 사용합니다.
+
+## 자주 쓰는 명령
+
+```bash
+cx doctor --json
+cx init --with-docs --json
+cx setup codex-session --scope project --enable-notify-hook --json
+cx session status --json
+cx session checkpoint "before risky refactor" --json
+cx session verify --verify "npm test" --json
+cx run --verify "npm test" "fix the failing parser tests"
+cx cancel <run-id> --reason "no longer needed" --json
+cx status <run-id> --json
+cx events tail <run-id> --json
+cx verify <run-id> --json
+cx replay skill <skill-id> --json
+cx memory search "parser regression" --json
+cx skill review <skill-id> --json
+cx skill export <skill-id> --target codex --json
+cx schema check --json
+cx app-server experiment --dry-run --record --supervise-fake --json
+```
+
+Public bin은 `cx`와 `codexus`입니다.
 
 ## 문서 지도
 
-- [빠른 시작](quickstart.md): local setup, deterministic test run, real Codex run, Codex-native adapter 설치.
-- [Codex 안에서 Codexus 사용하기](codex-session-usage.md): interactive Codex session에서 `$codexus` skill을 호출하는 방법, 요청 예시, 사용하지 않아도 되는 경우.
-- [엔지니어링 계획](plans/2026-05-29-codex-harness-engineering-plan.md): 연구 기준, 제약, MVP 범위, 위험.
-- [하네스 개선 계획](plans/2026-05-29-harness-remediation-plan.md): repair, supervision,
-  evolution depth에 대한 accepted review finding과 구현된 remediation slice.
-- [npm packaging plan](plans/2026-05-30-npm-packaging-plan.md): bundled npm CLI entrypoint, package contents, installer strategy, release gate.
-- [Desktop app-server attachment evidence plan](plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md): Codex app-server를 통한 Desktop attachment A/B evidence slice와 consent/read-only gate.
-- [Memory quality curation plan](plans/2026-05-30-memory-quality-curation-plan.md): 29148-inspired memory quality 특성, tri-state curator finding, conflict detection, supersession review boundary.
-- [레퍼런스 거버넌스](references/README.md): mandatory reference-first 정책과 현재 upstream harness audit.
-- [아키텍처](design/01-architecture.md): 시스템 경계, 런타임 계층, 드라이버 전략.
-- [상세 설계](design/02-detailed-design.md): CLI, 상태 머신, 저장소 레이아웃, 이벤트 스키마, 검증.
-- [진화 엔진](design/03-evolution-engine.md): Hermes에서 영감을 받은 메모리, 스킬 제안, replay 검증, 승격/폐기.
-- [구현 피드백](design/04-implementation-feedback.md): MVP 구현 중 확인된 제약과 설계 반영.
-- [명칭과 런타임 포지셔닝](design/05-naming-and-runtime-positioning.md): Codexus, `cx`, 외부 CLI 런타임, Codex-native session 방향.
-- [Codex-native adapter](design/06-codex-native-adapter.md): `$codexus` skill adapter, 설치, 우선 지원 명령, 설계 규칙.
-- [세션 네이티브 감독](design/07-supervised-sessions.md): 현재 Codex session 안에서 skill, AGENTS overlay, hooks/status state, optional tmux worker를 조합하는 OMX-like 방향.
-- [구현 상태](implementation-status.md): 현재 구현된 MVP spine, 검증 증거, 남은 gap.
-- [남은 작업](remaining-work.md): 우선순위 backlog, 추가 설계 고려사항, 제안하는 다음 slice.
-- [Public release checklist](public-release.md): open-source publication을 위한 metadata, safety, verification, visibility checklist.
-- [Roadmap](ROADMAP.md): public-facing project direction.
-- [Changelog](CHANGELOG.md): release notes.
+- [빠른 시작](quickstart.md)
+- [Codex 안에서 Codexus 사용하기](codex-session-usage.md)
+- [아키텍처](design/01-architecture.md)
+- [상세 설계](design/02-detailed-design.md)
+- [진화 엔진](design/03-evolution-engine.md)
+- [Codex-native adapter](design/06-codex-native-adapter.md)
+- [세션 네이티브 감독](design/07-supervised-sessions.md)
+- [레퍼런스 거버넌스](references/README.md)
+- [구현 상태](implementation-status.md)
+- [남은 작업](remaining-work.md)
+- [Public release checklist](public-release.md)
+- [Roadmap](ROADMAP.md)
+- [Changelog](CHANGELOG.md)
 
-## 포지셔닝
+## 안전 경계
 
-Codexus는 Codex 대체물이 아니라 Codex 실행 하네스입니다.
-
-현재 구현은 외부 supervisor CLI와 Codex-native `$codexus` skill adapter를 함께
-제공하며, 제품 방향은 Codex TUI 안에서 동작하는 session-native runtime입니다:
-
-```text
-User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
-```
-
-```text
-Codex interactive session -> Codexus adapter -> Codexus core
-```
-
-두 표면은 같은 ledger, verification, memory, skill store를 공유합니다.
-
-현재 구현은 P0-P2 surface와 high-risk promotion slice를 포함합니다: `init`, run,
-external cancel, observability, memory lifecycle/curation, active skill index/export/improvement,
-approved adapter retrieval/context formatting/artifact, lock inspection/stale
-recovery, focused read-path enforcement, schema artifact subset validation,
-run-ledger validation이 붙은 schema artifact, full replay parity fixture-matrix
-coverage, gated model replay, app-server dry-run roundtrip/recorded experiment
-manifest/process-probe/fake-supervision evidence,
-explicit-budget driver-failure repair, cron/gateway dry-run audit record와
-policy/approval contract, installed skill tree diagnosis, local syntax/static
-validation.
-
-일부 설계 문서는 sibling harness와의 비교나 optional advanced interop을 다룹니다.
-이것은 normal Codexus 사용 경로의 필수 조건이 아니라 compatibility surface입니다.
+Codexus는 private ChatGPT/Codex backend API를 의도적으로 사용하지 않습니다. 안정적인
+driver boundary는 로컬에 인증된 Codex CLI입니다. Experimental surface는 feature gate
+뒤에 있으며, live dispatch path를 활성화하기 전에 dry-run, policy, approval, evidence
+record를 먼저 보고합니다.
