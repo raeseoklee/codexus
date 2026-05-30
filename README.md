@@ -31,6 +31,8 @@ truthful status around the work.
 
 ## See It
 
+From a shell:
+
 ```bash
 npm install -g codexus@next
 codexus run --verify "npm test" "fix the failing parser tests"
@@ -43,6 +45,42 @@ is `complete` only when the verification command passes.
 > Early alpha, and intentionally honest about it: live app-server turns, routine
 > live model replay, automatic prompt injection, and live cron/gateway dispatch
 > remain gated off. See [Status](#status).
+
+## Use It In Codex CLI Chat
+
+Codexus is not only a standalone `cx` command. The npm package installs a
+Codex-native `codexus` skill, so you can stay inside your current Codex CLI/TUI
+chat and ask Codex to call the local Codexus core for evidence.
+
+One-time project setup from a shell:
+
+```bash
+codexus setup codex-session --scope project --enable-notify-hook --json
+```
+
+Then type normal requests in the Codex chat:
+
+```text
+Use the codexus skill and show the current session status.
+```
+
+```text
+Codexus, create a checkpoint named "before parser cleanup".
+```
+
+```text
+Codexus, run session verification with "npm test" and summarize the evidence.
+```
+
+```text
+Codexus, search memory for "parser regression" and use only relevant findings.
+```
+
+The current Codex conversation remains the main working loop. Codexus adds
+durable state, checkpoints, verification artifacts, memory lookup, replay, and
+skill evidence. It does not create a competing chat session.
+
+Full guide: [Using Codexus inside Codex](docs/codex-session-usage.md).
 
 ## Quick Start
 
@@ -64,27 +102,6 @@ Global npm installs also install the Codex-native skill adapter into
 `CODEXUS_INSTALL_CODEX_SKILL=0` when you need a CLI-only install.
 
 Detailed setup: [Quick start](docs/quickstart.md).
-
-## Use Inside Codex
-
-Codexus is also meant to be used from inside an interactive Codex session. The
-installed `codexus` skill calls the same local Codexus core for status,
-checkpoints, verification, replay, memory, and schema evidence without creating a
-separate chat loop.
-
-Project setup:
-
-```bash
-codexus setup codex-session --scope project --enable-notify-hook --json
-```
-
-Then, inside Codex, ask for the `codexus` skill when you need durable evidence:
-
-```text
-codexus, summarize the latest session status, checkpoint, and verification state.
-```
-
-Codex-session usage: [Using Codexus inside Codex](docs/codex-session-usage.md).
 
 ## Install Options
 

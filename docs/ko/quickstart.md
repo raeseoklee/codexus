@@ -130,7 +130,7 @@ cx run --driver codex-exec --json "Reply exactly CODEXUS-OK"
 cx run --verify "npm test" "fix the failing parser tests"
 ```
 
-## 7. Codex-Native Adapter 사용 또는 갱신
+## 7. Codex CLI 채팅 안에서 Codexus 사용
 
 `CODEXUS_INSTALL_CODEX_SKILL=0`을 지정하지 않았다면 global npm 설치가 adapter를
 자동으로 설치합니다.
@@ -148,8 +148,8 @@ npm run install:codex-skill
 ```
 
 installer는 `codexus` skill을 `${CODEX_HOME:-~/.codex}/skills`에 기록합니다.
-interactive Codex session 안에서 Codexus status, replay, memory, schema, context
-evidence가 필요할 때 사용합니다.
+Codex CLI/TUI 채팅 안에서 Codexus status, checkpoint, verification, replay,
+memory, schema, context evidence가 필요할 때 사용합니다.
 
 대상 project 안에서 session-native overlay를 설치합니다:
 
@@ -157,7 +157,27 @@ evidence가 필요할 때 사용합니다.
 cx setup codex-session --scope project --json
 ```
 
-nested supervised run보다 먼저 명시적 session evidence를 남깁니다:
+그 다음 해당 project에서 Codex를 열고 채팅창에 이렇게 요청합니다:
+
+```text
+codexus skill을 사용해서 현재 session status를 보여줘.
+```
+
+```text
+Codexus로 "before risky refactor" checkpoint를 만들어줘.
+```
+
+```text
+Codexus로 "npm test" session verification을 실행하고 evidence를 요약해줘.
+```
+
+내부적으로 skill은 local wrapper를 호출합니다:
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs <command>
+```
+
+nested supervised run보다 먼저 명시적 session evidence를 남기는 쪽을 선호합니다:
 
 ```bash
 cx session status --json
@@ -165,15 +185,14 @@ cx session checkpoint "before risky refactor" --json
 cx session verify --verify "npm test" --json
 ```
 
-Codex 안에서는 명시적으로 요청합니다:
+별도 non-interactive Codex sub-run이 필요할 때만 명시적으로 요청합니다:
 
 ```text
-codexus로 schema check 실행하고 결과를 요약해줘.
+Codexus로 "<bounded task>" supervised run을 시작하고 run id를 알려줘.
 ```
 
-```text
-$codexus status <run-id> --json 확인해줘.
-```
+일반 edit는 현재 Codex chat에서 계속 진행하고, Codexus는 evidence와 state 용도로
+사용합니다.
 
 더 많은 예시는 [Codex 안에서 Codexus 사용하기](codex-session-usage.md)를 참고하세요.
 

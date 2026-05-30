@@ -19,6 +19,46 @@ Explicit checkpoint and verification commands are available now. Statusline and
 tmux integration remain capability-gated. See
 [Session-native supervision](design/07-supervised-sessions.md).
 
+## 30-Second Codex CLI Chat Flow
+
+Run setup once from a shell in the project you want Codex to work on:
+
+```bash
+npm install -g codexus@next
+codexus setup codex-session --scope project --enable-notify-hook --json
+```
+
+Then stay inside the Codex CLI/TUI chat. Do not type `cx ...` manually unless
+you want to. Ask Codex to use the installed `codexus` skill:
+
+```text
+Use the codexus skill and show the current session status.
+```
+
+```text
+Codexus, create a checkpoint named "before parser cleanup".
+```
+
+```text
+Codexus, run session verification with "npm test" and summarize the evidence.
+```
+
+```text
+Codexus, search memory for "parser regression" and use only relevant findings.
+```
+
+What happens behind the scenes:
+
+- Codex stays in the current chat.
+- The `codexus` skill calls `node codex/skills/codexus/scripts/cx.mjs ...`.
+- Codexus writes local evidence under `.codexus/session/` or `.codexus/runs/`.
+- Codex reads the JSON result and summarizes it back into the chat.
+
+Use `codexus run ...` or `run --driver codex-exec ...` only when you want a
+separate supervised sub-run. For normal edits, keep working in the current Codex
+conversation and use Codexus for status, checkpoint, verification, memory, and
+replay evidence.
+
 ## Install the Adapter
 
 The published npm package installs the CLI and the Codex skill adapter by
@@ -108,25 +148,25 @@ cx setup codex-session --scope project --disable-notify-hook --json
 Use this flow to dogfood Codexus from inside a real Codex session:
 
 ```text
-codexus session status 확인해줘.
+Use the codexus skill and show the current session status.
 ```
 
 Then create a project-local evidence boundary:
 
 ```text
-codexus checkpoint "before parser cleanup" 기록해줘.
+Codexus, create a checkpoint named "before parser cleanup".
 ```
 
 Run verification through the session surface:
 
 ```text
-codexus verify "npm test" 결과를 현재 작업 증거로 붙여줘.
+Codexus, run session verification with "npm test" and summarize the evidence.
 ```
 
 Check that Codexus recorded the state:
 
 ```text
-codexus session status를 다시 보고 checkpoint, verification, hook 상태만 요약해줘.
+Codexus, show session status again and summarize only checkpoint, verification, and hook state.
 ```
 
 If the notify hook is enabled, the latest state should include recent
@@ -147,23 +187,23 @@ the harness command or evidence you want.
 Examples:
 
 ```text
-codexus로 doctor 상태 확인해줘.
+Use the codexus skill and summarize doctor status.
 ```
 
 ```text
-$codexus runs list --json 결과를 보고 최근 run 상태를 요약해줘.
+$codexus runs list --json, then summarize the recent run state.
 ```
 
 ```text
-codexus로 schema check를 실행하고 문제가 있으면 원인을 정리해줘.
+Codexus, run schema check and explain any problems.
 ```
 
 ```text
-codexus로 run_... 상태와 events tail을 확인해줘.
+Codexus, inspect run_... status and events tail.
 ```
 
 ```text
-codexus memory search "parser regression" 결과를 현재 작업에 필요한 것만 요약해줘.
+Codexus, search memory for "parser regression" and summarize only findings relevant to this task.
 ```
 
 Codex will use the installed `codexus` skill, which calls:

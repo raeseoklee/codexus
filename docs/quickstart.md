@@ -130,7 +130,7 @@ For project work, add verification:
 cx run --verify "npm test" "fix the failing parser tests"
 ```
 
-## 7. Use or Refresh the Codex-Native Adapter
+## 7. Use Codexus From Codex CLI Chat
 
 The adapter is installed automatically by the global npm install unless you set
 `CODEXUS_INSTALL_CODEX_SKILL=0`.
@@ -148,8 +148,9 @@ npm run install:codex-skill
 ```
 
 The installer writes the `codexus` skill into `${CODEX_HOME:-~/.codex}/skills`.
-Use it from an interactive Codex session when you need Codexus status, replay,
-memory, schema, or context evidence without starting a separate manual flow.
+Use it from Codex CLI/TUI chat when you need Codexus status, checkpoints,
+verification, replay, memory, schema, or context evidence without starting a
+separate manual flow.
 
 Inside a target project, install the session-native overlay:
 
@@ -157,7 +158,27 @@ Inside a target project, install the session-native overlay:
 cx setup codex-session --scope project --json
 ```
 
-Then prefer explicit session evidence before nested supervised runs:
+Then open Codex in that project and type chat requests like these:
+
+```text
+Use the codexus skill and show the current session status.
+```
+
+```text
+Codexus, create a checkpoint named "before risky refactor".
+```
+
+```text
+Codexus, run session verification with "npm test" and summarize the evidence.
+```
+
+Behind the scenes, the skill calls the local wrapper:
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs <command>
+```
+
+Prefer explicit session evidence before nested supervised runs:
 
 ```bash
 cx session status --json
@@ -165,15 +186,14 @@ cx session checkpoint "before risky refactor" --json
 cx session verify --verify "npm test" --json
 ```
 
-In Codex, ask for it explicitly:
+If you want a separate non-interactive Codex sub-run, ask for one explicitly:
 
 ```text
-codexus로 schema check 실행하고 결과를 요약해줘.
+Codexus, start a supervised run for "<bounded task>" and report the run id.
 ```
 
-```text
-$codexus status <run-id> --json 확인해줘.
-```
+For ordinary edits, keep working in the current Codex chat and use Codexus only
+for evidence and state.
 
 More examples: [Using Codexus inside Codex](codex-session-usage.md).
 

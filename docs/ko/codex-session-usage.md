@@ -18,6 +18,45 @@ layer이고, `cx setup codex-session`은 marker-bounded AGENTS guidance,
 tmux integration은 아직 capability gate 뒤에 있습니다.
 [세션 네이티브 감독](design/07-supervised-sessions.md)을 참고하세요.
 
+## 30초 Codex CLI 채팅 흐름
+
+Codex가 작업할 project에서 shell로 setup을 한 번 실행합니다:
+
+```bash
+npm install -g codexus@next
+codexus setup codex-session --scope project --enable-notify-hook --json
+```
+
+그 다음에는 Codex CLI/TUI 채팅 안에 그대로 머무릅니다. 직접 `cx ...`를 입력할
+필요는 없습니다. Codex에게 설치된 `codexus` skill을 사용하라고 요청합니다:
+
+```text
+codexus skill을 사용해서 현재 session status를 보여줘.
+```
+
+```text
+Codexus로 "before parser cleanup" checkpoint를 만들어줘.
+```
+
+```text
+Codexus로 "npm test" session verification을 실행하고 evidence를 요약해줘.
+```
+
+```text
+Codexus memory에서 "parser regression"을 검색하고 관련 있는 내용만 반영해줘.
+```
+
+내부 동작:
+
+- Codex는 현재 채팅 안에 그대로 있습니다.
+- `codexus` skill이 `node codex/skills/codexus/scripts/cx.mjs ...`를 호출합니다.
+- Codexus는 `.codexus/session/` 또는 `.codexus/runs/` 아래에 local evidence를 씁니다.
+- Codex는 JSON 결과를 읽고 현재 채팅에 요약합니다.
+
+`codexus run ...` 또는 `run --driver codex-exec ...`는 별도 supervised sub-run이
+필요할 때만 사용합니다. 일반 edit는 현재 Codex conversation에서 계속 진행하고,
+Codexus는 status, checkpoint, verification, memory, replay evidence 용도로 사용합니다.
+
 ## Adapter 설치
 
 Published npm package는 global install 시 CLI와 Codex skill adapter를 기본으로
