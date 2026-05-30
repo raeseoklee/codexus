@@ -7,6 +7,13 @@ All notable changes to Codexus will be documented in this file.
 This project follows a practical pre-1.0 changelog format. Breaking changes can
 occur before 1.0, but they should be called out clearly.
 
+## Unreleased
+
+### Added
+
+- CLI version reporting via `cx --version` and `cx version --json`, covered by
+  source CLI tests and installed package smoke tests.
+
 ## 0.1.0-alpha.3 - 2026-05-31
 
 ### Added

@@ -66,6 +66,7 @@ default on global installs:
 
 ```bash
 npm install -g codexus@next
+codexus --version
 ```
 
 For a CLI-only global install, opt out explicitly:

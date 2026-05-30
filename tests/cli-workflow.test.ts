@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { chmod, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
@@ -24,6 +25,30 @@ function runCli(cwd: string, args: string[]) {
     encoding: "utf8",
   });
 }
+
+test("version commands report package metadata without touching workspace state", async () => {
+  const cwd = await tempDir();
+  try {
+    const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8")) as { name: string; version: string };
+
+    const short = runCli(cwd, ["--version"]);
+    assert.equal(short.status, 0, short.stderr);
+    assert.equal(short.stdout.trim(), pkg.version);
+    assert.equal(existsSync(join(cwd, ".codexus")), false);
+
+    const json = runCli(cwd, ["version", "--json"]);
+    assert.equal(json.status, 0, json.stderr);
+    const output = JSON.parse(json.stdout);
+    assert.equal(output.schemaVersion, 1);
+    assert.equal(output.name, pkg.name);
+    assert.equal(output.version, pkg.version);
+    assert.equal(output.node, process.version);
+    assert.match(output.packageRoot, /codex-harness$/);
+    assert.equal(existsSync(join(cwd, ".codexus")), false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
 
 async function waitForRunningRunId(cwd: string): Promise<string> {
   const runsRoot = join(cwd, ".codexus", "runs");

@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { mkdir, mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const root = process.cwd();
+const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -83,6 +84,10 @@ try {
   const cx = binPath(prefix, "cx");
   assert(run(codexus, ["--help"]).stdout.includes("Codexus"), "codexus --help did not render help");
   assert(run(cx, ["--help"]).stdout.includes("Codexus"), "cx --help did not render help");
+  assert(run(codexus, ["--version"]).stdout === pkg.version, "codexus --version did not report package version");
+  const installedVersion = JSON.parse(run(cx, ["version", "--json"]).stdout);
+  assert(installedVersion.version === pkg.version, "cx version --json did not report package version");
+  assert(installedVersion.name === "codexus", "cx version --json did not report package name");
 
   const schema = JSON.parse(run(codexus, ["schema", "check", "--json"]).stdout);
   assert(schema.ok === true, "codexus schema check did not return ok=true");

@@ -222,7 +222,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 143.
+- Current test count: 144.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -284,6 +284,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Slop guard gate mode is covered for pass, fail, and unknown/blocked outcomes.
 - Always-on notify heartbeat quality snapshots are covered by session-native
   tests and session-state schema validation.
+- CLI version reporting is covered by source CLI tests and installed package
+  smoke tests.
 
 ## Acceptance Coverage
 

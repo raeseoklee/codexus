@@ -64,6 +64,7 @@ Published npm package는 global install 시 CLI와 Codex skill adapter를 기본
 
 ```bash
 npm install -g codexus@next
+codexus --version
 ```
 
 CLI만 설치하려면 명시적으로 opt out합니다:

@@ -7,6 +7,13 @@ Codexus의 notable change를 이 파일에 기록합니다.
 이 프로젝트는 practical pre-1.0 changelog format을 따릅니다. 1.0 전에는 breaking
 change가 있을 수 있지만, 명확히 표시해야 합니다.
 
+## Unreleased
+
+### Added
+
+- `cx --version`과 `cx version --json`을 통한 CLI version reporting을
+  추가했습니다. Source CLI test와 installed package smoke test로 커버합니다.
+
 ## 0.1.0-alpha.3 - 2026-05-31
 
 ### Added

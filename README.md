@@ -88,6 +88,7 @@ Install the current alpha package:
 
 ```bash
 npm install -g codexus@next
+codexus --version
 codexus doctor --json
 ```
 

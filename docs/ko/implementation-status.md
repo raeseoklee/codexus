@@ -168,7 +168,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 143 tests 통과
+- `npm test`: 144 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -199,6 +199,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Slop guard gate mode의 pass, fail, unknown/blocked outcome 테스트
 - Always-on notify heartbeat quality snapshot은 session-native test와 session-state
   schema validation으로 커버됩니다.
+- CLI version reporting은 source CLI test와 installed package smoke test로
+  커버됩니다.
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트

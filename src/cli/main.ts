@@ -23,12 +23,15 @@ import { schemaCommand } from "./commands/schema.ts";
 import { appServerCommand } from "./commands/app-server.ts";
 import { cancelCommand } from "./commands/cancel.ts";
 import { slopCommand } from "./commands/slop.ts";
+import { versionCommand } from "./commands/version.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
   return `Codexus
 
 Usage:
+  cx --version
+  cx version [--json]
   cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]
   cx setup codex-session [--scope user|project] [--always-on] [--enable-notify-hook|--disable-notify-hook] [--json]
@@ -94,6 +97,14 @@ Public bins:
 async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   if (args.command === "help" || args.command === "--help" || args.flags.help === true) {
     console.log(helpText());
+    return;
+  }
+  if (args.command === "--version" || args.command === "-v") {
+    await versionCommand(args, { short: true });
+    return;
+  }
+  if (args.command === "version") {
+    await versionCommand(args);
     return;
   }
   await migrateLegacyHarnessRoot(flagString(args.flags, "cwd") ?? process.cwd());
