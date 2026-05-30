@@ -407,6 +407,9 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
           errors.push("hookEvents.process.bundleIdentifier:invalid");
         }
       }
+      if ("heartbeatEvidence" in item && !(item.heartbeatEvidence === null || isRecord(item.heartbeatEvidence))) {
+        errors.push("hookEvents.heartbeatEvidence:invalid");
+      }
     }
     requireArray(value, "linkedRunIds", errors);
     if (requireRecord(value.capabilities, errors, "capabilities")) {

@@ -201,6 +201,11 @@ Codexus, code-changing work should carry best-effort checkpoint and verification
 evidence — while the session status model, not overlay compliance, guarantees the
 truth of what is verified, stale, or missing.
 
+The overlay requests behavior; it does not prove behavior. The notify hook's
+role is similarly narrow: a `turn-ended` heartbeat records a bounded derived
+evidence snapshot, but verification is never executed by the hook and
+`cx session status --json` remains authoritative.
+
 ## Implementation Slices
 
 1. Strengthen `cx session status` into the ambient evidence model, with
@@ -211,8 +216,8 @@ truth of what is verified, stale, or missing.
 2. Add verify auto-detection: `cx session verify --auto` (detect + recommend
    always; execute only with an explicit run opt-in such as `--execute`; policy
    preflight for danger).
-3. Add the `--always-on` overlay profile and make the notify hook a heartbeat
-   that recomputes derived evidence state on `turn-ended`.
+3. Completed: add the `--always-on` overlay profile and make the notify hook a
+   heartbeat that records derived evidence state on `turn-ended`.
 4. Add the evidence-bearing-only rule to the design docs and to command
    acceptance criteria.
 5. Begin isolating Codex-bound assumptions from the driver/kernel/event schema

@@ -155,7 +155,7 @@ separate manual flow.
 Inside a target project, install the session-native overlay:
 
 ```bash
-cx setup codex-session --scope project --json
+cx setup codex-session --scope project --always-on --enable-notify-hook --json
 ```
 
 Then open Codex in that project and type chat requests like these:
@@ -163,6 +163,11 @@ Then open Codex in that project and type chat requests like these:
 ```text
 Use the codexus skill and show the current session status.
 ```
+
+The always-on overlay is guidance, not proof. The notify hook records a bounded
+`turn-ended` heartbeat and derived evidence snapshot when CLI/TUI dispatch
+fires, but `cx session status --json` recomputes the current state on demand and
+remains authoritative.
 
 ```text
 Codexus, create a checkpoint named "before risky refactor".

@@ -128,11 +128,22 @@ To attach a Codex notify hook, opt in explicitly:
 cx setup codex-session --scope project --enable-notify-hook --json
 ```
 
+To install the always-on overlay profile at the same time:
+
+```bash
+cx setup codex-session --scope project --always-on --enable-notify-hook --json
+```
+
 The notify-hook installer updates `${CODEX_HOME:-~/.codex}/config.toml` only
 after the current project is already trusted in Codex config. If an existing
 top-level `notify = [...]` command is present, Codexus wraps it as
 `--previous-notify` instead of replacing it. Statusline integration still
 reports `unavailable`.
+
+On a real CLI/TUI `turn-ended` dispatch, the hook records a bounded heartbeat
+event and a derived evidence snapshot. It never runs verification and never makes
+stale evidence fresh by itself; `cx session status --json` recomputes the truth
+from disk and the current workspace fingerprint.
 
 Before the first Codexus config rewrite, setup writes a one-time
 `config.toml.codexus.bak` backup and updates the config with an atomic
@@ -177,7 +188,9 @@ smoke events are recorded as hook events but do not make dispatch `observed`.
 Desktop/app-server sessions may not invoke the CLI notify hook, so
 `session status` reports `notifyDispatch` separately from config installation.
 The hook does not capture a transcript; it only records bounded turn activity
-and chains to the previous notify command when one existed.
+and chains to the previous notify command when one existed. In always-on mode,
+the latest `turn-ended` event may also include `heartbeatEvidence`, a snapshot
+of the same derived status model that `session status` recomputes on demand.
 
 ## How to Invoke It in Codex
 

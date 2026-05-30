@@ -28,6 +28,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     "strict",
     "enable-notify-hook",
     "disable-notify-hook",
+    "always-on",
     "auto",
     "execute",
   ]);

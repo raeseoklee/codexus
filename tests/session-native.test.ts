@@ -278,6 +278,140 @@ test("setup codex-session writes a one-time backup and survives damaged markers"
   }
 });
 
+test("setup codex-session --always-on installs always-on overlay without verification side effects", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    const agentsPath = join(cwd, "AGENTS.md");
+    const first = runCli(cwd, ["setup", "codex-session", "--scope", "project", "--always-on", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(first.status, 0, first.stderr);
+    const firstOutput = JSON.parse(first.stdout);
+    assert.equal(firstOutput.alwaysOn, true);
+    assert.equal(firstOutput.overlay.profile, "always-on");
+    assert.equal(firstOutput.overlay.installed, true);
+    assert.equal(firstOutput.overlay.changed, true);
+    assert.equal(firstOutput.state.verifications.length, 0);
+    assert.equal(firstOutput.state.lastVerifiedFingerprint, null);
+
+    const agents = await readFile(agentsPath, "utf8");
+    assert.equal(markerCount(agents, "<!-- CODEXUS:RUNTIME:START -->"), 1);
+    assert.equal(markerCount(agents, "<!-- CODEXUS:RUNTIME:END -->"), 1);
+    assert.match(agents, /Always-on profile/);
+    assert.match(agents, /checkpoint/);
+    assert.match(agents, /before claiming completion/);
+    assert.match(agents, /truth comes from `cx session status --json`/);
+
+    const second = runCli(cwd, ["setup", "codex-session", "--scope", "project", "--always-on", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(second.status, 0, second.stderr);
+    assert.equal(JSON.parse(second.stdout).overlay.changed, false);
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.evidence.verification, "missing");
+    assert.equal(statusOutput.evidence.evidenceFresh, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("always-on session status recommends verification but does not execute it", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    const sentinel = join(cwd, "verify-sentinel.txt");
+    await writeFile(join(cwd, "package.json"), `${JSON.stringify({
+      name: "fixture",
+      scripts: {
+        test: `node -e "require('fs').writeFileSync(${JSON.stringify(sentinel)}, 'ran')"`,
+      },
+    }, null, 2)}\n`);
+
+    const setup = runCli(cwd, ["setup", "codex-session", "--scope", "project", "--always-on", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(setup.status, 0, setup.stderr);
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const output = JSON.parse(status.stdout);
+    assert.equal(output.verifyDetection.recommended, "npm test");
+    assert.equal(output.evidence.recommendedVerify, "npm test");
+    assert.equal(existsSync(sentinel), false);
+    assert.equal(output.state.verifications.length, 0);
+    assert.equal(output.state.lastVerifiedFingerprint, null);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("always-on notify heartbeat preserves stale evidence and previous notify chain", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const previousScript = join(cwd, "previous-notify.mjs");
+    const previousLog = join(cwd, "previous-notify.log");
+    await writeFile(previousScript, `import { writeFileSync } from "node:fs"; writeFileSync(${JSON.stringify(previousLog)}, "previous\\n");\n`);
+    await writeFile(join(codexHome, "config.toml"), [
+      `notify = ${JSON.stringify([process.execPath, previousScript])}`,
+      "",
+      `[projects.${JSON.stringify(resolve(cwd))}]`,
+      'trust_level = "trusted"',
+      "",
+    ].join("\n"));
+
+    const setup = runCli(cwd, ["setup", "codex-session", "--scope", "project", "--always-on", "--enable-notify-hook", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(setup.status, 0, setup.stderr);
+    const setupOutput = JSON.parse(setup.stdout);
+    assert.equal(setupOutput.alwaysOn, true);
+    assert.equal(setupOutput.notifyHook.status, "installed");
+
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 0, verify.stderr);
+    const verified = JSON.parse(verify.stdout);
+    const verificationId = verified.state.lastVerifiedFingerprint.verificationId;
+    const verificationCount = verified.state.verifications.length;
+
+    await writeFile(join(cwd, "tracked.txt"), "initial\nchanged after verify\n");
+
+    const hook = spawnSync(process.execPath, [
+      setupOutput.notifyHook.scriptPath,
+      "--event",
+      "turn-ended",
+      "--previous-notify",
+      JSON.stringify([process.execPath, previousScript]),
+    ], {
+      cwd,
+      encoding: "utf8",
+      env: { ...process.env, CODEX_HOME: codexHome },
+    });
+    assert.equal(hook.status, 0, hook.stderr);
+    assert.equal(await readFile(previousLog, "utf8"), "previous\n");
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const output = JSON.parse(status.stdout);
+    const latestHook = output.state.hookEvents.at(-1);
+    assert.equal(latestHook.event, "turn-ended");
+    assert.equal(latestHook.heartbeatEvidence.verification, "stale");
+    assert.equal(latestHook.heartbeatEvidence.evidenceFresh, false);
+    assert.equal(output.notifyDispatch.status, "observed");
+    assert.equal(output.state.verifications.length, verificationCount);
+    assert.equal(output.state.lastVerifiedFingerprint.verificationId, verificationId);
+    assert.equal(output.evidence.verification, "stale");
+    assert.equal(output.evidence.evidenceFresh, false);
+    assert.equal(output.evidence.dirtySinceLastVerify, true);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.paths.state, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("session status reports initialized state and overlay status", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();

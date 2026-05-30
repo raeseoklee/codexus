@@ -238,7 +238,7 @@ Codex leader pane
 구현된 첫 slice CLI surface:
 
 ```bash
-cx setup codex-session [--scope user|project] [--enable-notify-hook|--disable-notify-hook] [--json]
+cx setup codex-session [--scope user|project] [--always-on] [--enable-notify-hook|--disable-notify-hook] [--json]
 cx session status [--json]
 cx session migrate [--dry-run] [--json]
 cx session checkpoint <label> [--json]
@@ -276,6 +276,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 - npm/global install이 동작하는 `codexus` skill adapter를 제공합니다.
 - `cx setup codex-session --scope project --json`은 marker-bounded Codexus AGENTS
   overlay만 설치/갱신합니다.
+- `cx setup codex-session --scope project --always-on --json`은 더 강한 always-on
+  overlay profile을 설치합니다. 현재 Codex session에서 checkpoint와 verification을
+  요청하지만, 그것만으로 실제 수행을 증명하지는 않습니다.
 - `cx doctor --json`은 skill install, overlay install, hook availability, statusline
   availability, tmux availability, session-state health를 보고합니다.
 - Codex 안에서 Codexus status를 요청하면 skill이 local Codexus core를 호출하고 grounded

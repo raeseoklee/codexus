@@ -30,7 +30,7 @@ function helpText(): string {
 Usage:
   cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]
-  cx setup codex-session [--scope user|project] [--enable-notify-hook|--disable-notify-hook] [--json]
+  cx setup codex-session [--scope user|project] [--always-on] [--enable-notify-hook|--disable-notify-hook] [--json]
   cx session status [--json]
   cx session migrate [--dry-run] [--json]
   cx session checkpoint <label> [--json]

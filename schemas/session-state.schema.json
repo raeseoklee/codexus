@@ -106,7 +106,8 @@
               "cwd": { "type": "string" },
               "bundleIdentifier": { "type": ["string", "null"] }
             }
-          }
+          },
+          "heartbeatEvidence": { "type": ["object", "null"] }
         }
       }
     },

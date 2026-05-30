@@ -16,97 +16,13 @@ import {
   updateSessionState,
 } from "../../session/state.ts";
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
-import { computeWorkspaceFingerprint, fingerprintsEqual, type WorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
+import { deriveEvidenceModel } from "../../session/evidence.ts";
+import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 
 function statePath(cwd: string): string {
   return sessionPaths(cwd).state;
-}
-
-type EvidenceVerification = "passed" | "failed" | "missing" | "stale";
-
-interface EvidenceModel {
-  verification: EvidenceVerification;
-  evidenceFresh: boolean;
-  dirtySinceLastVerify: boolean;
-  recommendedVerify: string | null;
-  lastCheckpoint: { id: string; label: string; createdAt: string; path: string } | null;
-  lastVerification: { id: string; status: string; createdAt: string; path: string } | null;
-  currentFingerprint: WorkspaceFingerprint;
-  fingerprintReliable: boolean;
-}
-
-// Derive the always-on evidence model purely from the saved state and a freshly
-// computed workspace fingerprint. Never trusts agent self-report: dirty/fresh
-// come from fingerprint comparison, and degraded fingerprints can never report
-// evidenceFresh:true.
-function deriveEvidenceModel(
-  state: NonNullable<Awaited<ReturnType<typeof refreshSessionState>>>,
-  currentFingerprint: WorkspaceFingerprint,
-  recommendedVerify: string | null,
-): EvidenceModel {
-  const lastCheckpointRecord = state.checkpoints.at(-1) ?? null;
-  const lastVerificationRecord = state.verifications.at(-1) ?? null;
-  const lastVerifiedFingerprint = state.lastVerifiedFingerprint;
-
-  const lastCheckpoint = lastCheckpointRecord
-    ? { id: lastCheckpointRecord.id, label: lastCheckpointRecord.label, createdAt: lastCheckpointRecord.createdAt, path: lastCheckpointRecord.path }
-    : null;
-  const lastVerification = lastVerificationRecord
-    ? { id: lastVerificationRecord.id, status: lastVerificationRecord.status, createdAt: lastVerificationRecord.createdAt, path: lastVerificationRecord.path }
-    : null;
-
-  // No prior verified fingerprint at all -> missing. We cannot assert dirtiness
-  // against nothing, so dirtySinceLastVerify is true (work is unverified).
-  if (!lastVerifiedFingerprint) {
-    return {
-      verification: "missing",
-      evidenceFresh: false,
-      dirtySinceLastVerify: true,
-      recommendedVerify,
-      lastCheckpoint,
-      lastVerification,
-      currentFingerprint,
-      fingerprintReliable: !currentFingerprint.degraded,
-    };
-  }
-
-  const storedFingerprint = lastVerifiedFingerprint.fingerprint;
-  const fingerprintReliable = !currentFingerprint.degraded && !storedFingerprint.degraded;
-  // fingerprintsEqual already returns false if either side is degraded, so a
-  // degraded fingerprint is treated as dirty (cannot prove cleanliness).
-  const dirtySinceLastVerify = !fingerprintsEqual(currentFingerprint, storedFingerprint);
-  const lastStatusPassed = lastVerifiedFingerprint.status === "passed";
-
-  // evidenceFresh demands a passing last verification, a clean workspace, and a
-  // reliable (non-degraded) fingerprint on both sides. Anything less is not fresh.
-  const evidenceFresh = lastStatusPassed && !dirtySinceLastVerify && fingerprintReliable;
-
-  let verification: EvidenceVerification;
-  if (evidenceFresh) {
-    verification = "passed";
-  } else if (!fingerprintReliable || dirtySinceLastVerify) {
-    // Cannot reliably compare, OR the workspace moved since the last verification
-    // (whether it passed or failed). Either way the recorded verdict no longer
-    // describes the current workspace, so report stale rather than a now-untrue
-    // passed/failed. lastVerification.status still carries the historical result.
-    verification = "stale";
-  } else {
-    // Reliable and clean, but the last verification did not pass -> failure stands.
-    verification = "failed";
-  }
-
-  return {
-    verification,
-    evidenceFresh,
-    dirtySinceLastVerify,
-    recommendedVerify,
-    lastCheckpoint,
-    lastVerification,
-    currentFingerprint,
-    fingerprintReliable,
-  };
 }
 
 async function statusCommand(cwd: string, json: boolean): Promise<void> {

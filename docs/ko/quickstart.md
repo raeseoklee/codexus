@@ -154,7 +154,7 @@ memory, schema, context evidence가 필요할 때 사용합니다.
 대상 project 안에서 session-native overlay를 설치합니다:
 
 ```bash
-cx setup codex-session --scope project --json
+cx setup codex-session --scope project --always-on --enable-notify-hook --json
 ```
 
 그 다음 해당 project에서 Codex를 열고 채팅창에 이렇게 요청합니다:
@@ -162,6 +162,10 @@ cx setup codex-session --scope project --json
 ```text
 codexus skill을 사용해서 현재 session status를 보여줘.
 ```
+
+always-on overlay는 guidance이지 proof가 아닙니다. Notify hook은 CLI/TUI dispatch가
+발화할 때 bounded `turn-ended` heartbeat와 derived evidence snapshot을 기록하지만,
+현재 상태의 기준은 항상 `cx session status --json`의 on-demand 재계산입니다.
 
 ```text
 Codexus로 "before risky refactor" checkpoint를 만들어줘.

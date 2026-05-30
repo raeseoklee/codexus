@@ -7,13 +7,16 @@ import { harnessRoot } from "../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { withFileLock } from "../util/lock.ts";
 import { codexHome, inspectNotifyHookConfig } from "./hook-config.ts";
-import { isWorkspaceFingerprint, type WorkspaceFingerprint } from "./workspace-fingerprint.ts";
+import { deriveEvidenceModel, type EvidenceModel } from "./evidence.ts";
+import { detectVerifyCandidates } from "./verify-detect.ts";
+import { computeWorkspaceFingerprint, isWorkspaceFingerprint, type WorkspaceFingerprint } from "./workspace-fingerprint.ts";
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
 export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 3 as const;
 
 export type OverlayScope = "project" | "user";
+export type OverlayProfile = "default" | "always-on";
 export type CapabilityStatus = "available" | "unavailable";
 export type HookCapabilityStatus = "available" | "configured" | "unavailable";
 export type NotifyDispatchStatus = "observed" | "unobserved" | "not_configured";
@@ -65,6 +68,7 @@ export interface SessionHookEventRecord {
     cwd: string;
     bundleIdentifier: string | null;
   };
+  heartbeatEvidence?: EvidenceModel | null;
 }
 
 export interface NotifyDispatchState {
@@ -172,7 +176,12 @@ function isSessionHookEventRecord(value: unknown): value is SessionHookEventReco
   return typeof value.process.pid === "number"
     && typeof value.process.ppid === "number"
     && typeof value.process.cwd === "string"
-    && (value.process.bundleIdentifier === null || typeof value.process.bundleIdentifier === "string");
+    && (value.process.bundleIdentifier === null || typeof value.process.bundleIdentifier === "string")
+    && (
+      value.heartbeatEvidence === undefined
+      || value.heartbeatEvidence === null
+      || isRecord(value.heartbeatEvidence)
+    );
 }
 
 function isSessionVerificationRecord(value: unknown): value is SessionVerificationRecord {
@@ -276,6 +285,7 @@ function normalizeHookEvents(value: unknown, fallbackCwd: string): SessionHookEv
       cwd: item.cwd,
       runtimeSurface: normalizeRuntimeSurface(item.runtimeSurface),
       process: normalizeHookProcess(item.process, item.cwd || fallbackCwd),
+      heartbeatEvidence: isRecord(item.heartbeatEvidence) ? item.heartbeatEvidence as unknown as EvidenceModel : null,
     }];
   });
 }
@@ -461,7 +471,15 @@ function findOverlayRange(text: string): OverlayRange | null {
   return null;
 }
 
-function overlayBody(): string {
+function overlayBody(profile: OverlayProfile = "default"): string {
+  const alwaysOnLines = profile === "always-on"
+    ? [
+      "- Always-on profile: before code-changing work, create or update a Codexus checkpoint when it would help future recovery.",
+      "- Always-on profile: before claiming completion, run or request an explicit `cx session verify --verify <cmd> --json` or `cx session verify --auto --execute --json` when a safe verification command is known.",
+      "- Always-on profile: if verification is missing, failed, stale, or degraded, say so plainly; truth comes from `cx session status --json`, not from this overlay being present.",
+      "- Always-on profile: notify hook heartbeats may record derived evidence snapshots, but they must never execute verification or turn stale evidence fresh by themselves.",
+    ]
+    : [];
   return [
     CODEXUS_OVERLAY_START,
     "# Codexus Runtime Overlay",
@@ -475,6 +493,7 @@ function overlayBody(): string {
     "- Use `cx run --driver codex-exec` only for an explicit bounded supervised sub-run.",
     "- Ground Codexus claims in command output, ledger state, or artifacts under `.codexus/`.",
     "- Treat unavailable hooks, statusline integration, or Codex private session APIs as unsupported instead of pretending they are active.",
+    ...alwaysOnLines,
     "",
     "Session state lives under `.codexus/session/`.",
     CODEXUS_OVERLAY_END,
@@ -511,10 +530,10 @@ async function writeBackupOnce(path: string, text: string): Promise<string | nul
   return backupPath;
 }
 
-export async function installOverlay(cwd: string, scope: OverlayScope): Promise<OverlayStatus & { changed: boolean }> {
+export async function installOverlay(cwd: string, scope: OverlayScope, profile: OverlayProfile = "default"): Promise<OverlayStatus & { changed: boolean; profile: OverlayProfile }> {
   const path = overlayPath(cwd, scope);
   const existing = existsSync(path) ? await readFile(path, "utf8") : "";
-  const body = overlayBody();
+  const body = overlayBody(profile);
   let next: string;
   const range = findOverlayRange(existing);
   if (range) {
@@ -528,7 +547,7 @@ export async function installOverlay(cwd: string, scope: OverlayScope): Promise<
     await writeBackupOnce(path, existing);
     await writeTextAtomic(path, next);
   }
-  return { ...(await overlayStatus(cwd, scope)), changed };
+  return { ...(await overlayStatus(cwd, scope)), changed, profile };
 }
 
 export async function detectSessionCapabilities(cwd = process.cwd(), dispatch?: NotifyDispatchState): Promise<CodexusSessionState["capabilities"]> {
@@ -713,6 +732,14 @@ function hookProcessContext(cwd: string): SessionHookEventRecord["process"] {
 }
 
 export async function recordSessionHookEvent(cwd: string, event: string): Promise<{ record: SessionHookEventRecord; state: CodexusSessionState }> {
+  const base = await loadOrCreateSessionState(cwd);
+  const heartbeatEvidence = event === "turn-ended"
+    ? deriveEvidenceModel(
+      base,
+      computeWorkspaceFingerprint(cwd),
+      detectVerifyCandidates(cwd).recommended,
+    )
+    : null;
   const record: SessionHookEventRecord = {
     id: createHookEventId(),
     event,
@@ -721,6 +748,7 @@ export async function recordSessionHookEvent(cwd: string, event: string): Promis
     cwd: resolve(cwd),
     runtimeSurface: runtimeSurfaceFromEnv(process.env),
     process: hookProcessContext(cwd),
+    heartbeatEvidence,
   };
   const state = await updateSessionState(cwd, "session notify", (value) => ({
     ...value,

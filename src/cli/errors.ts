@@ -66,6 +66,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Invalid Codex-session setup scope${target ? `: ${target}` : ""}.`;
     case "conflicting_notify_hook_flags":
       return "Cannot enable and disable the Codex notify hook in the same command.";
+    case "conflicting_always_on_disable_notify_hook":
+      return "Cannot install the always-on overlay while disabling the Codex notify hook.";
     case "missing_session_checkpoint_label":
       return "Missing session checkpoint label.";
     case "missing_session_verification_command":

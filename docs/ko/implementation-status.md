@@ -71,6 +71,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `.codexus/migration-conflicts/` 아래에 보존합니다.
 - `cx setup codex-session`은 project 또는 user `AGENTS.md`에 marker-bounded Codexus
   runtime overlay를 설치/갱신하며 marker 밖 내용은 변경하지 않습니다.
+- `cx setup codex-session --always-on`은 위험한 변경 전 checkpoint와 완료 전
+  verification을 Codex에 요청하는 overlay profile을 설치합니다. 진실의 기준은 계속
+  `cx session status --json`입니다.
 - Codexus AGENTS overlay write는 atomic이며 one-time `.codexus.bak` backup을 만들고,
   기존 marker가 손상된 경우 새 marker block을 append합니다.
 - `cx session status`, `cx session checkpoint`, `cx session verify`는
@@ -84,7 +87,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   line을 AGENTS overlay refresh 없이 제거합니다.
 - `cx session notify --event <name>`은 internal notify-hook write surface이며
   bounded hook event를 `.codexus/session/state.json`에 기록합니다.
-- Session state schema v2는 notify 설치와 dispatch 관측을 분리합니다.
+- 실제 `turn-ended` dispatch에서 notify event는 derived evidence model의 bounded
+  snapshot인 `heartbeatEvidence`를 포함할 수 있습니다. Hook은 verification을 실행하지
+  않고 stale evidence를 fresh로 만들 수도 없습니다.
+- Session state schema v3는 notify 설치와 dispatch 관측을 분리하고
+  workspace-fingerprint evidence를 추가합니다.
   `capabilities.hooks`는 install 직후 `configured`이고 실제 `turn-ended` event가
   관측된 뒤에만 `available`입니다. 수동 smoke event는 dispatch observed로 인정하지
   않습니다.
@@ -95,7 +102,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   실행하지 않고 blocked verification attempt로 기록합니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
-- `schemas/session-state.schema.json`은 v2 session-state shape용 first-class schema
+- `schemas/session-state.schema.json`은 v3 session-state shape용 first-class schema
   artifact이며,
   `cx schema validate --type session-state --file <path> --json`은 같은 local
   schema-artifact subset engine으로 session state를 검증합니다.

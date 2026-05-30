@@ -172,7 +172,7 @@ network access; real runs use the local authenticated Codex CLI.
 ```bash
 cx doctor --json
 cx init --with-docs --json
-cx setup codex-session --scope project --enable-notify-hook --json
+cx setup codex-session --scope project --always-on --enable-notify-hook --json
 cx session status --json
 cx session checkpoint "before risky refactor" --json
 cx session verify --verify "npm test" --json

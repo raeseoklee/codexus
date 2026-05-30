@@ -254,7 +254,7 @@ completion gate.
 Implemented first-slice CLI surface:
 
 ```bash
-cx setup codex-session [--scope user|project] [--enable-notify-hook|--disable-notify-hook] [--json]
+cx setup codex-session [--scope user|project] [--always-on] [--enable-notify-hook|--disable-notify-hook] [--json]
 cx session status [--json]
 cx session migrate [--dry-run] [--json]
 cx session checkpoint <label> [--json]
@@ -293,6 +293,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 - npm/global install provides a working `codexus` skill adapter.
 - `cx setup codex-session --scope project --json` installs or updates only a
   marker-bounded Codexus AGENTS overlay.
+- `cx setup codex-session --scope project --always-on --json` installs the
+  stronger always-on overlay profile. It requests checkpoints and verification
+  in the current Codex session but does not prove that they happened.
 - `cx doctor --json` reports skill install, overlay install, hook availability,
   statusline availability, tmux availability, and session-state health.
 - From inside Codex, asking for Codexus status causes the skill to call local

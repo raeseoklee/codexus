@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
-import { installOverlay, loadOrCreateSessionState, overlayStatus, sessionPaths, type OverlayScope } from "../../session/state.ts";
+import { installOverlay, loadOrCreateSessionState, overlayStatus, sessionPaths, type OverlayProfile, type OverlayScope } from "../../session/state.ts";
 import { disableNotifyHookConfig, installNotifyHookConfig, inspectNotifyHookConfig } from "../../session/hook-config.ts";
 
 function parseScope(value: string | undefined): OverlayScope {
@@ -19,10 +19,13 @@ export async function setupCommand(args: ParsedArgs): Promise<void> {
   const scope = parseScope(flagString(args.flags, "scope"));
   const enableNotifyHook = flagBool(args.flags, "enable-notify-hook");
   const disableNotifyHook = flagBool(args.flags, "disable-notify-hook");
+  const alwaysOn = flagBool(args.flags, "always-on");
   if (enableNotifyHook && disableNotifyHook) throw new Error("conflicting_notify_hook_flags");
+  if (alwaysOn && disableNotifyHook) throw new Error("conflicting_always_on_disable_notify_hook");
+  const overlayProfile: OverlayProfile = alwaysOn ? "always-on" : "default";
   const overlay = disableNotifyHook
     ? { ...(await overlayStatus(cwd, scope)), changed: false }
-    : await installOverlay(cwd, scope);
+    : await installOverlay(cwd, scope, overlayProfile);
   const notifyHook = enableNotifyHook
     ? await installNotifyHookConfig(cwd)
     : disableNotifyHook
@@ -33,6 +36,7 @@ export async function setupCommand(args: ParsedArgs): Promise<void> {
     schemaVersion: 1,
     setup: "codex-session",
     scope,
+    alwaysOn,
     overlay,
     notifyHook,
     statePath: sessionPaths(cwd).state,

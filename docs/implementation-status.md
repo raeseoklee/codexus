@@ -138,6 +138,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx setup codex-session` installs or refreshes a marker-bounded Codexus
   runtime overlay in project or user `AGENTS.md` without changing content
   outside the markers.
+- `cx setup codex-session --always-on` installs an overlay profile that asks
+  Codex to checkpoint before risky changes and verify before completion, while
+  keeping `cx session status --json` as the source of truth.
 - Codexus AGENTS overlay writes are atomic, create a one-time `.codexus.bak`
   backup, and append a fresh marker block when existing markers are damaged.
 - `cx session status`, `cx session checkpoint`, and `cx session verify` provide
@@ -151,7 +154,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   Codexus-only notify line without refreshing the AGENTS overlay.
 - `cx session notify --event <name>` is the internal notify-hook write surface
   and records bounded hook events in `.codexus/session/state.json`.
-- Session state schema v2 separates notify installation from dispatch:
+- On real `turn-ended` dispatch, notify events can include a bounded
+  `heartbeatEvidence` snapshot of the derived evidence model. The hook never
+  executes verification and cannot make stale evidence fresh.
+- Session state schema v3 separates notify installation from dispatch and adds
+  workspace-fingerprint evidence:
   `capabilities.hooks` is `configured` after install and `available` only after
   a real `turn-ended` event is observed. Manual smoke events do not mark
   dispatch observed.
@@ -163,7 +170,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
 - `schemas/session-state.schema.json` is a first-class schema artifact for the
-  v2 session-state shape, and
+  v3 session-state shape, and
   `cx schema validate --type session-state --file <path> --json` validates
   session state through the same local schema-artifact subset engine.
 - `doctor --json` reports Codexus session state, project/user overlay status,
