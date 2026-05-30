@@ -227,6 +227,8 @@ formatting합니다. 자동 prompt injection이나 별도 chat loop는 만들지
   A/B contract를 따라야 합니다: 먼저 임시 상태 기반 격리 evidence, 그다음 실제 daemon에
   대한 명시적 read-only opt-in입니다. Stage B는 remote control을 조용히 켜거나, 사용자
   Codex config를 변경하거나, turn을 조종하거나, transcript를 저장하면 안 됩니다.
+  또한 observer/concurrent-client behavior가 non-disruptive로 확인되지 않은 실제
+  control socket에는 연결하면 안 됩니다.
 - `cx cron run-now --dry-run --json`과 `cx gateway check --dry-run --json`은
   lock name과 ledger event intent를 포함한 automation plan만 반환합니다.
   Real dispatch는 approval/policy event가 완성된 뒤에만 추가합니다.

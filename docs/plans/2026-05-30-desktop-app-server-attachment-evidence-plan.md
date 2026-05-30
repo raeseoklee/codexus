@@ -57,6 +57,8 @@ Requirements:
 - If a daemon/proxy process is started, supervise it with timeout,
   `SIGTERM -> short wait -> SIGKILL`, bounded stdout/stderr capture, and cleanup
   assertions.
+- Do not initiate Codex/model turns. Stage A is limited to schema, lifecycle,
+  control-socket, and observer-safety evidence.
 - Do not call `enable-remote-control` on the user's real daemon.
 - Do not reuse the user's default control socket.
 - Do not write to `~/.codex/config.toml`.
@@ -72,6 +74,9 @@ Promotion gate from Stage A to Stage B:
 - Schema generation works.
 - Proxy/daemon lifecycle is either proven in isolation or the exact reason it
   cannot be isolated is recorded.
+- Observer/concurrent-client behavior is proven in isolation when possible. If
+  the control socket appears single-client or disruptive, Stage B must not
+  connect to the user's real daemon.
 - Cleanup assertions pass.
 - The manifest states which event methods look relevant for turn/session
   observation.
@@ -88,10 +93,15 @@ Requirements:
 - Connect only to a user-provided socket or a daemon whose remote-control mode
   was already enabled by the user. Codexus must not silently enable remote
   control.
+- Before connecting to a real daemon, establish that the control socket supports
+  observer or concurrent read-only clients. If the socket is single-client, might
+  displace the Desktop app, or cannot be classified from Stage A evidence,
+  Codexus must defer Stage B rather than connecting.
 - If Codexus ever offers to run `enable-remote-control`, it must be a visible
   command with an audit record and a clear disable/cleanup path.
 - Subscribe/read only. Do not start turns, steer turns, execute commands, call
   filesystem write tools, alter approvals, or mutate Desktop state.
+- Do not initiate model turns. Stage B observes user-driven Desktop turns only.
 - Bound all event reads by timeout and byte limits.
 - Redact captured event payloads before storing artifacts.
 - Record the runtime surface as `desktop-app-server` only from observed
@@ -100,6 +110,8 @@ Requirements:
 Output:
 
 - A read-only evidence manifest.
+- Socket selection and non-disruption evidence, including how the socket path was
+  provided and whether observer/concurrent-client behavior is known.
 - The event method names and bounded payload shapes needed to map Desktop turn
   activity.
 - A proposed mapping into Codexus session `hookEvents` or a new event type if
@@ -122,6 +134,7 @@ Promotion gate from Stage B to implementation:
 - Replacing the stable `codex exec --json` path.
 - Capturing Desktop transcripts.
 - Creating a competing chat loop.
+- Initiating app-server model turns during evidence collection.
 - Automatically enabling remote control or modifying user Codex config.
 - Treating app-server absence as a failure of the CLI/TUI attachment path.
 
@@ -145,6 +158,8 @@ gates are implemented. Their errors must be structured and truthful.
 - Unit tests for gate enforcement and unsupported structured errors.
 - Manifest tests for Stage A fields, cleanup status, redaction, and bounded
   output.
+- Isolated observer/concurrent-client probe evidence when the local app-server
+  surface makes it possible.
 - A fake/proxy fixture that proves event mapping without a live Desktop daemon.
 - A manual Stage B smoke only when the user explicitly opts in.
 - `npm run ci` and `npm run package:smoke` before publishing any related slice.

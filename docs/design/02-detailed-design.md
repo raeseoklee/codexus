@@ -789,7 +789,8 @@ app-server as a run driver. The next slice must follow the A/B contract in
 [Desktop app-server attachment evidence plan](../plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md):
 isolated temporary-state evidence first, then explicit read-only opt-in against
 a real daemon. Stage B must not enable remote control silently, mutate user
-Codex config, steer turns, or store transcripts.
+Codex config, steer turns, store transcripts, or connect to a real control
+socket unless observer/concurrent-client behavior is known to be non-disruptive.
 
 ## Testing Strategy
 
