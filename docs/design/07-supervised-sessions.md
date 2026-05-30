@@ -10,7 +10,7 @@ Status: proposed direction change
 Codexus should move toward an OMX-like, Codex-session-native runtime as the
 primary user experience.
 
-The previous `cx session start/continue` proposal used
+The previous external thread proposal used
 `codex exec resume <thread-id>` to create a separate multi-turn non-interactive
 Codex thread. That is useful as an external supervised-run feature, but it is
 not the OMX-like shape the product needs. It does not attach to the current
@@ -102,12 +102,14 @@ The previous `codex exec resume <thread-id>` idea is deferred as an optional
 advanced feature. If implemented, it should be documented as:
 
 ```text
-cx session start/continue
+cx thread start/continue
   -> one external non-interactive Codex exec thread
   -> multiple supervised turns over that external thread
 ```
 
-It is not the primary OMX-like path.
+It is not the primary OMX-like path. Keep the `cx session` namespace reserved
+for the current Codex-session-native state, checkpoint, and verification
+surface.
 
 ## Session-Native Components
 
@@ -168,6 +170,11 @@ This state is not a hidden transcript. Codexus should not claim to capture the
 full current TUI conversation unless Codex exposes a supported transcript API.
 Instead, the current Codex agent explicitly writes checkpoints and evidence when
 the user or overlay asks for them.
+
+Until Codex exposes a stable per-conversation identifier, this state is a
+cwd-scoped singleton, not a per-Codex-thread store. Concurrent writes are
+protected by the Codexus `session` lock; another overlapping writer should
+retry after the active session operation completes.
 
 ### Hooks and HUD
 
@@ -243,8 +250,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 
 - `cx run`: remains the external supervised sub-run engine.
 - `cx resume`: remains shallow compatibility for one previous run.
-- future `cx session start/continue`: if built, it belongs to the external
-  exec-resume layer, not the Codex-native layer.
+- future `cx thread start/continue`: if built, it belongs to the external
+  exec-resume layer, not the Codex-native layer. Do not reuse `cx session` for
+  that external thread feature.
 - `$codexus`: becomes the preferred in-Codex entrypoint for session-native use.
 
 ## Acceptance Criteria

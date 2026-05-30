@@ -136,12 +136,13 @@ This mode is strongest for supervised runs, automation, verification gates, repl
 External exec-resume sessions, deferred:
 
 ```text
-cx session start/continue -> codex exec resume <thread-id>
+cx thread start/continue -> codex exec resume <thread-id>
 ```
 
 This can provide multi-turn continuity over a separate non-interactive Codex
 thread, but it is not the OMX-like path and should not be the primary session
-story.
+story. The `cx session` namespace is reserved for current-session state,
+checkpoint, and verification commands.
 
 ## Major Components
 

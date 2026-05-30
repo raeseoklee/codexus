@@ -77,6 +77,11 @@ This updates only the Codexus marker block in `AGENTS.md` and initializes
 `.codex-harness/session/state.json`. Use `--scope user` to install the overlay
 in `${CODEX_HOME:-~/.codex}/AGENTS.md` instead.
 
+For safety, setup writes a one-time `AGENTS.md.codexus.bak` backup before the
+first Codexus rewrite and uses an atomic same-directory rename for the updated
+file. If existing Codexus markers are damaged or out of order, setup preserves
+the file and appends a fresh marker block instead of trying to splice it.
+
 ## How to Invoke It in Codex
 
 In an interactive Codex session, mention `codexus` or `$codexus` and describe
@@ -138,6 +143,11 @@ replay skill <skill-id> --json
 
 Prefer checkpoint and session verification commands before starting nested
 `cx run` sub-runs.
+
+Current session state is cwd-scoped. If two Codex windows operate on the same
+project at the same time, Codexus serializes writes with the `session` lock; a
+second overlapping checkpoint/verify command can return `lock_unavailable` and
+should be retried after the active operation finishes.
 
 Use supervised runs deliberately:
 

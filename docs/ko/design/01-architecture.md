@@ -104,11 +104,12 @@ User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
 Deferred advanced surface인 external exec-resume session:
 
 ```text
-cx session start/continue -> codex exec resume <thread-id>
+cx thread start/continue -> codex exec resume <thread-id>
 ```
 
 이는 별도 non-interactive Codex thread 위의 multi-turn continuity를 제공할 수 있지만
-OMX-like path가 아니며 primary session story가 되어서는 안 됩니다.
+OMX-like path가 아니며 primary session story가 되어서는 안 됩니다. `cx session`
+namespace는 현재 session state/checkpoint/verification command 전용으로 유지합니다.
 
 ## 주요 컴포넌트
 

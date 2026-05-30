@@ -160,6 +160,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   hooks/status, and optional tmux workers over the same core runtime.
 - Treat `codex exec resume` sessions as a deferred external multi-turn feature,
   not as the primary session-native story.
+- Reserve `cx session` for the Codex-native state/checkpoint/verification
+  surface. If external exec-resume returns, prefer a separate namespace such as
+  `cx thread start/continue`.
 - Treat `codexus:<skill-name>` as display identity, not storage identity. This
   avoids filesystem churn and keeps generated skills visually distinct.
 - Add lock/lease and schema migration earlier than originally implied. They are
@@ -191,3 +194,5 @@ not remove the gates:
    setup/status/checkpoint/verify capability checks.
 7. Add tmux-backed Codexus workers only after the explicit session state
    protocol is stable.
+8. Add a versioned schema artifact for `.codex-harness/session/state.json` if
+   session state grows beyond the current focused read-path validation.

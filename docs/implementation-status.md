@@ -135,10 +135,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx setup codex-session` installs or refreshes a marker-bounded Codexus
   runtime overlay in project or user `AGENTS.md` without changing content
   outside the markers.
+- Codexus AGENTS overlay writes are atomic, create a one-time `.codexus.bak`
+  backup, and append a fresh marker block when existing markers are damaged.
 - `cx session status`, `cx session checkpoint`, and `cx session verify` provide
   the first Codex-native session surface under `.codex-harness/session/`.
 - `cx session verify` reuses the verification policy preflight and records
   blocked verification attempts instead of executing dangerous commands.
+- Session state reads perform focused structure validation, and mutable session
+  state updates are protected by the Codexus `session` lock.
 - `doctor --json` reports Codexus session state, project/user overlay status,
   and truthful unavailable status for hook/statusline integration.
 - GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
@@ -156,7 +160,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 74.
+- Current test count: 78.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -205,8 +209,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Static source check found no direct HTTP/OpenAI/ChatGPT backend calls in `src`, `tests`, or `package.json`.
 - Codex-native adapter wrapper root discovery is covered by tests.
 - Codex skill structure is validated with the Codex skill validator.
-- Session-native setup, status, checkpoint, verify, and policy-blocked session
-  verification commands are covered by CLI tests.
+- Session-native setup, damaged-marker recovery, session-state shape
+  validation, session lock handling, status, checkpoint, verify, and
+  policy-blocked session verification commands are covered by CLI tests.
 
 ## Acceptance Coverage
 
@@ -239,6 +244,8 @@ review. Current high-level gaps:
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
 - Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, and deterministic fake lifecycle supervision are implemented.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
+- Session state is currently a cwd-scoped singleton because Codex does not expose
+  a stable per-conversation id to Codexus.
 - Hook/statusline integration and tmux-backed Codexus workers are designed but
   not implemented; the explicit session setup/status/checkpoint/verify slice is
   implemented.

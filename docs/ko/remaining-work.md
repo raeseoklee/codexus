@@ -155,6 +155,9 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   hook/status, optional tmux worker를 같은 core runtime 위에 둡니다.
 - `codex exec resume` session은 primary session-native story가 아니라 deferred
   external multi-turn feature로 취급합니다.
+- `cx session`은 Codex-native state/checkpoint/verification surface 전용으로
+  유지합니다. external exec-resume을 다시 추가한다면 `cx thread start/continue` 같은
+  별도 namespace를 선호합니다.
 - `codexus:<skill-name>`은 storage identity가 아니라 display identity로 취급합니다.
   파일시스템 churn을 피하면서 생성 skill의 출처를 명확히 보여줍니다.
 - lock/lease와 schema migration을 기존 암시보다 앞당깁니다. active index,
@@ -184,3 +187,5 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    optional hook/statusline support를 추가합니다.
 7. 명시적 session state protocol이 안정된 뒤에만 tmux-backed Codexus worker를
    추가합니다.
+8. Session state가 현재 focused read-path validation보다 커지면
+   `.codex-harness/session/state.json`용 versioned schema artifact를 추가합니다.

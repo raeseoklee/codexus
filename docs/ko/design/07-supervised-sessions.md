@@ -9,7 +9,7 @@
 
 Codexus의 primary UX는 OMX와 비슷한 Codex-session-native runtime으로 이동합니다.
 
-이전 `cx session start/continue` 제안은 `codex exec resume <thread-id>`로 별도
+이전 external thread 제안은 `codex exec resume <thread-id>`로 별도
 non-interactive Codex thread를 이어가는 구조였습니다. 이 기능은 외부 supervised run
 기능으로는 유용하지만, 제품이 원하는 OMX-like 형태는 아닙니다. 현재 Codex TUI
 conversation에 붙는 것이 아니라 별도 `codex exec` thread를 시작하고 재개하기 때문입니다.
@@ -97,12 +97,13 @@ automation, reproducible evidence에 강합니다. 현재 Codex TUI conversation
 구현한다면 다음처럼 문서화해야 합니다:
 
 ```text
-cx session start/continue
+cx thread start/continue
   -> one external non-interactive Codex exec thread
   -> multiple supervised turns over that external thread
 ```
 
-이는 primary OMX-like path가 아닙니다.
+이는 primary OMX-like path가 아닙니다. `cx session` namespace는 현재 Codex session-native
+state, checkpoint, verification surface 전용으로 유지합니다.
 
 ## 세션 네이티브 구성요소
 
@@ -158,6 +159,11 @@ State가 추적할 항목:
 이 state는 숨겨진 transcript가 아닙니다. Codex가 지원되는 transcript API를 제공하지 않는 한
 Codexus는 현재 TUI conversation 전체를 캡처한다고 주장하면 안 됩니다. 대신 현재 Codex
 agent가 사용자 또는 overlay 요청에 따라 checkpoint와 evidence를 명시적으로 기록합니다.
+
+Codex가 안정적인 per-conversation identifier를 노출하기 전까지 이 state는
+per-Codex-thread store가 아니라 cwd-scoped singleton입니다. 동시 write는 Codexus
+`session` lock으로 보호되며, 겹치는 writer는 active session operation이 끝난 뒤 재시도해야
+합니다.
 
 ### Hooks and HUD
 
@@ -230,8 +236,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 
 - `cx run`: 외부 supervised sub-run engine으로 유지합니다.
 - `cx resume`: 이전 run 하나에 대한 shallow compatibility로 유지합니다.
-- future `cx session start/continue`: 구현한다면 Codex-native layer가 아니라 external
-  exec-resume layer에 속합니다.
+- future `cx thread start/continue`: 구현한다면 Codex-native layer가 아니라 external
+  exec-resume layer에 속합니다. external thread feature에 `cx session`을 재사용하지 않습니다.
 - `$codexus`: 세션 네이티브 사용의 선호 in-Codex entrypoint가 됩니다.
 
 ## 수용 기준

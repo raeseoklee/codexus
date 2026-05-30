@@ -1,11 +1,12 @@
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
+import { withFileLock } from "../util/lock.ts";
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
@@ -60,6 +61,11 @@ export interface CodexusSessionState {
   };
 }
 
+interface OverlayRange {
+  start: number;
+  endAfter: number;
+}
+
 export interface SessionPaths {
   root: string;
   sessionRoot: string;
@@ -67,6 +73,35 @@ export interface SessionPaths {
   checkpointsDir: string;
   verificationDir: string;
   contextDir: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isOverlayStatus(value: unknown): value is OverlayStatus {
+  if (!isRecord(value)) return false;
+  return (value.scope === "project" || value.scope === "user")
+    && typeof value.path === "string"
+    && typeof value.installed === "boolean"
+    && typeof value.markerStart === "string"
+    && typeof value.markerEnd === "string";
+}
+
+function isSessionState(value: unknown): value is CodexusSessionState {
+  if (!isRecord(value)) return false;
+  if (value.schemaVersion !== 1) return false;
+  if (typeof value.sessionId !== "string" || typeof value.cwd !== "string") return false;
+  if (value.status !== "initialized") return false;
+  if (typeof value.createdAt !== "string" || typeof value.updatedAt !== "string") return false;
+  if (!(value.lastCommand === null || typeof value.lastCommand === "string")) return false;
+  if (!Array.isArray(value.checkpoints) || !Array.isArray(value.verifications) || !Array.isArray(value.linkedRunIds)) return false;
+  if (!isRecord(value.capabilities)) return false;
+  if (!(value.capabilities.tmux === "available" || value.capabilities.tmux === "unavailable")) return false;
+  if (!(value.capabilities.hooks === "available" || value.capabilities.hooks === "unavailable")) return false;
+  if (!(value.capabilities.statusline === "available" || value.capabilities.statusline === "unavailable")) return false;
+  if (!isRecord(value.overlays)) return false;
+  return isOverlayStatus(value.overlays.project) && isOverlayStatus(value.overlays.user);
 }
 
 function nowIso(): string {
@@ -109,7 +144,23 @@ export function overlayPath(cwd: string, scope: OverlayScope): string {
 }
 
 export function hasCodexusOverlay(text: string): boolean {
-  return text.includes(CODEXUS_OVERLAY_START) && text.includes(CODEXUS_OVERLAY_END);
+  return findOverlayRange(text) !== null;
+}
+
+function findOverlayRange(text: string): OverlayRange | null {
+  let searchFrom = 0;
+  while (searchFrom < text.length) {
+    const start = text.indexOf(CODEXUS_OVERLAY_START, searchFrom);
+    if (start === -1) return null;
+    const afterStart = start + CODEXUS_OVERLAY_START.length;
+    const end = text.indexOf(CODEXUS_OVERLAY_END, afterStart);
+    const nextStart = text.indexOf(CODEXUS_OVERLAY_START, afterStart);
+    if (end !== -1 && (nextStart === -1 || end < nextStart)) {
+      return { start, endAfter: end + CODEXUS_OVERLAY_END.length };
+    }
+    searchFrom = nextStart === -1 ? afterStart : nextStart;
+  }
+  return null;
 }
 
 function overlayBody(): string {
@@ -147,23 +198,37 @@ export async function overlayStatus(cwd: string, scope: OverlayScope): Promise<O
   };
 }
 
+async function writeTextAtomic(path: string, text: string): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  const tmp = join(dirname(path), `.${basename(path)}.${process.pid}.${Date.now()}.tmp`);
+  await writeFile(tmp, text);
+  await rename(tmp, path);
+}
+
+async function writeBackupOnce(path: string, text: string): Promise<string | null> {
+  if (!existsSync(path) || text.length === 0) return null;
+  const backupPath = `${path}.codexus.bak`;
+  if (existsSync(backupPath)) return backupPath;
+  await writeTextAtomic(backupPath, text);
+  return backupPath;
+}
+
 export async function installOverlay(cwd: string, scope: OverlayScope): Promise<OverlayStatus & { changed: boolean }> {
   const path = overlayPath(cwd, scope);
   const existing = existsSync(path) ? await readFile(path, "utf8") : "";
   const body = overlayBody();
   let next: string;
-  if (hasCodexusOverlay(existing)) {
-    const start = existing.indexOf(CODEXUS_OVERLAY_START);
-    const end = existing.indexOf(CODEXUS_OVERLAY_END, start);
-    next = `${existing.slice(0, start)}${body}${existing.slice(end + CODEXUS_OVERLAY_END.length)}`;
+  const range = findOverlayRange(existing);
+  if (range) {
+    next = `${existing.slice(0, range.start)}${body}${existing.slice(range.endAfter)}`;
   } else {
     const prefix = existing.length > 0 && !existing.endsWith("\n") ? `${existing}\n\n` : existing;
     next = `${prefix}${body}\n`;
   }
   const changed = next !== existing;
   if (changed) {
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, next);
+    await writeBackupOnce(path, existing);
+    await writeTextAtomic(path, next);
   }
   return { ...(await overlayStatus(cwd, scope)), changed };
 }
@@ -202,14 +267,15 @@ export async function readSessionState(cwd: string): Promise<CodexusSessionState
   const paths = sessionPaths(cwd);
   if (!existsSync(paths.state)) return null;
   try {
-    const parsed = JSON.parse(await readFile(paths.state, "utf8")) as CodexusSessionState;
+    const parsed = JSON.parse(await readFile(paths.state, "utf8")) as unknown;
+    if (!isSessionState(parsed)) throw new Error("invalid_shape");
     return parsed;
   } catch (error) {
     throw new Error(`session_state_corrupt:${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
-export async function loadOrCreateSessionState(cwd: string): Promise<CodexusSessionState> {
+async function loadOrCreateSessionStateUnlocked(cwd: string): Promise<CodexusSessionState> {
   const paths = sessionPaths(cwd);
   await ensureDir(paths.sessionRoot);
   await ensureDir(paths.checkpointsDir);
@@ -224,6 +290,12 @@ export async function loadOrCreateSessionState(cwd: string): Promise<CodexusSess
   const created = await defaultState(cwd);
   await writeSessionState(cwd, created);
   return created;
+}
+
+export async function loadOrCreateSessionState(cwd: string): Promise<CodexusSessionState> {
+  return await withFileLock(cwd, "session", async () => await loadOrCreateSessionStateUnlocked(cwd), {
+    operation: "session-state",
+  });
 }
 
 export async function writeSessionState(cwd: string, state: CodexusSessionState): Promise<void> {
@@ -248,14 +320,18 @@ export async function updateSessionState(
   command: string,
   update: (state: CodexusSessionState) => CodexusSessionState,
 ): Promise<CodexusSessionState> {
-  const base = await loadOrCreateSessionState(cwd);
-  const updated = await refreshSessionState(cwd, {
-    ...update(base),
-    lastCommand: command,
-    updatedAt: nowIso(),
+  return await withFileLock(cwd, "session", async () => {
+    const base = await loadOrCreateSessionStateUnlocked(cwd);
+    const updated = await refreshSessionState(cwd, {
+      ...update(base),
+      lastCommand: command,
+      updatedAt: nowIso(),
+    });
+    await writeSessionState(cwd, updated);
+    return updated;
+  }, {
+    operation: command,
   });
-  await writeSessionState(cwd, updated);
-  return updated;
 }
 
 export function createCheckpointId(): string {

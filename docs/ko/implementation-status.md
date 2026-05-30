@@ -68,10 +68,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `doctor --json --strict`는 JSON 진단 body를 유지하면서 fail-level check가 있을 때 nonzero exit code를 반환합니다.
 - `cx setup codex-session`은 project 또는 user `AGENTS.md`에 marker-bounded Codexus
   runtime overlay를 설치/갱신하며 marker 밖 내용은 변경하지 않습니다.
+- Codexus AGENTS overlay write는 atomic이며 one-time `.codexus.bak` backup을 만들고,
+  기존 marker가 손상된 경우 새 marker block을 append합니다.
 - `cx session status`, `cx session checkpoint`, `cx session verify`는
   `.codex-harness/session/` 아래 첫 Codex-native session surface를 제공합니다.
 - `cx session verify`는 verification policy preflight를 재사용해 위험한 command를
   실행하지 않고 blocked verification attempt로 기록합니다.
+- Session state read path는 focused structure validation을 수행하고, mutable session
+  state update는 Codexus `session` lock으로 보호합니다.
 - `doctor --json`은 Codexus session state, project/user overlay 상태,
   hook/statusline integration의 unavailable 상태를 정직하게 보고합니다.
 - Verification repair는 실패한 verification stdout/stderr tail을 bounded context
@@ -106,7 +110,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 74 tests 통과
+- `npm test`: 78 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -125,7 +129,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - static source check: private ChatGPT/Codex backend 직접 호출 없음
 - Codex-native adapter wrapper root discovery 테스트
 - Codex skill validator로 skill 구조 검증
-- Session-native setup/status/checkpoint/verify와 policy-blocked session
+- Session-native setup, damaged-marker recovery, session-state shape validation,
+  session lock handling, status/checkpoint/verify, policy-blocked session
   verification command CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
@@ -140,6 +145,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
 - app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision만 구현했습니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
+- Codex가 stable per-conversation id를 Codexus에 노출하지 않기 때문에 session state는
+  현재 cwd-scoped singleton입니다.
 - Hook/statusline integration과 tmux-backed Codexus worker는 설계됐지만 아직
   구현되지 않았습니다. 명시적 session setup/status/checkpoint/verify slice는
   구현됐습니다.

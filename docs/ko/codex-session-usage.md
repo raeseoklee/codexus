@@ -76,6 +76,10 @@ cx setup codex-session --scope project --json
 `.codex-harness/session/state.json`을 초기화합니다. `--scope user`를 사용하면
 overlay를 `${CODEX_HOME:-~/.codex}/AGENTS.md`에 설치합니다.
 
+안전을 위해 setup은 첫 Codexus rewrite 전에 `AGENTS.md.codexus.bak` one-time backup을
+쓰고, updated file은 same-directory atomic rename으로 교체합니다. 기존 Codexus marker가
+손상됐거나 순서가 어긋난 경우 file을 보존하고 새 marker block을 append합니다.
+
 ## Codex 안에서 호출하는 방법
 
 Interactive Codex session에서 `codexus` 또는 `$codexus`를 언급하고, 원하는 harness
@@ -138,6 +142,11 @@ replay skill <skill-id> --json
 
 nested `cx run` sub-run을 시작하기 전에 checkpoint와 session verification
 command를 우선 사용합니다.
+
+현재 session state는 cwd-scoped입니다. 같은 project에서 Codex window 두 개가 동시에
+작업하면 Codexus는 `session` lock으로 write를 직렬화합니다. 겹치는 checkpoint/verify
+command는 `lock_unavailable`을 반환할 수 있으며 active operation이 끝난 뒤 재시도해야
+합니다.
 
 Supervised run은 의도적으로 사용할 때만 실행합니다:
 
