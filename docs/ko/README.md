@@ -196,6 +196,7 @@ Public bin은 `cx`와 `codexus`입니다.
 - [진화 엔진](design/03-evolution-engine.md)
 - [Codex-native adapter](design/06-codex-native-adapter.md)
 - [세션 네이티브 감독](design/07-supervised-sessions.md)
+- [단독 정체성과 always-on evidence](design/08-standalone-identity-and-always-on-evidence.md)
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)

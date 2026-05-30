@@ -177,7 +177,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   installing the Codex skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is
   set.
 - User-facing Codex-session usage docs now explain how to invoke the `$codexus` skill, what commands to prefer, and when to stay with normal Codex interaction.
-- The session-native supervision design now makes OMX-like in-Codex usage the
+- The session-native supervision design now makes OMX-informed in-Codex usage the
   product direction, with `codex exec resume` deferred as a separate external
   multi-turn feature.
 

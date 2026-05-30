@@ -10,7 +10,7 @@ Architecture는 core-first를 유지합니다. 같은 Codexus core가 외부 `cx
 interactive Codex session 안에서 모두 호출 가능해야 합니다. 안정적인 driver는
 `codex exec --json`입니다. 제품 방향은 얇은 `$codexus` skill, Codexus guidance
 overlay, local session state, optional hook/status/tmux integration을 조합한
-OMX-like Codex-native session runtime입니다. Codex app-server integration은
+OMX에서 배운 Codex-native session runtime입니다. Codex app-server integration은
 capability detection과 explicit gate 뒤의 experimental surface로 유지합니다.
 
 ## 레퍼런스 거버넌스
@@ -108,7 +108,7 @@ cx thread start/continue -> codex exec resume <thread-id>
 ```
 
 이는 별도 non-interactive Codex thread 위의 multi-turn continuity를 제공할 수 있지만
-OMX-like path가 아니며 primary session story가 되어서는 안 됩니다. `cx session`
+session-native path가 아니며 primary session story가 되어서는 안 됩니다. `cx session`
 namespace는 현재 session state/checkpoint/verification command 전용으로 유지합니다.
 
 ## 주요 컴포넌트

@@ -164,7 +164,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 ## 이번 재검토의 방향 변경
 
-- custom chat surface를 먼저 만들지 않습니다. 다음 제품 방향은 OMX-like
+- custom chat surface를 먼저 만들지 않습니다. 다음 제품 방향은 OMX에서 배운
   Codex-native session runtime입니다: skill adapter, marker-bounded AGENTS
   overlay, local session state, 명시적 checkpoint/verification, optional
   hook/status, optional tmux worker를 같은 core runtime 위에 둡니다.

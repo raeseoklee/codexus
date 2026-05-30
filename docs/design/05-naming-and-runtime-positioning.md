@@ -143,7 +143,7 @@ The external `cx` surface remains essential for automation, bounded sub-runs,
 and recovery. It should not be the only story users see.
 
 The deferred `codex exec resume` path is an external multi-turn thread feature,
-not the OMX-like session-native runtime.
+not the session-native runtime.
 
 ## Relationship to Claw Code
 

@@ -28,7 +28,8 @@ User-facing 호출 예시는 [Codex 안에서 Codexus 사용하기](../codex-ses
 Adapter는 더 큰 [세션 네이티브 감독](07-supervised-sessions.md) 방향의 첫 설치
 구성요소입니다. 목표는 별도 chat surface나 외부 `codex exec resume` thread가 아니라,
 현재 Codex TUI session이 skill, marker-bounded AGENTS guidance, local state, optional
-hook/status, optional tmux worker를 통해 명시적으로 호출할 수 있는 OMX-like harness입니다.
+hook/status, optional tmux worker를 통해 명시적으로 호출할 수 있는 OMX에서 배운
+session-native harness입니다.
 
 ## 설치
 

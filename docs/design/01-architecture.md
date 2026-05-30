@@ -8,7 +8,7 @@ Codexus is a local evolutionary runtime harness for OpenAI Codex. It does not re
 
 The architecture remains core-first: the same Codexus core must be callable from
 the external `cx` CLI and from inside an interactive Codex session. The stable
-driver is `codex exec --json`; the product direction is an OMX-like
+driver is `codex exec --json`; the product direction is an OMX-informed
 Codex-native session runtime built from the thin `$codexus` skill, Codexus
 guidance overlays, local session state, and optional hook/status/tmux
 integration. Codex app-server integration remains experimental behind
@@ -140,7 +140,7 @@ cx thread start/continue -> codex exec resume <thread-id>
 ```
 
 This can provide multi-turn continuity over a separate non-interactive Codex
-thread, but it is not the OMX-like path and should not be the primary session
+thread, but it is not the session-native path and should not be the primary session
 story. The `cx session` namespace is reserved for current-session state,
 checkpoint, and verification commands.
 

@@ -172,7 +172,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 ## Direction Changes From This Review
 
 - Do not build a custom chat surface first. The next product direction is an
-  OMX-like Codex-native session runtime: skill adapter, marker-bounded AGENTS
+  OMX-informed, Codex-native session runtime: skill adapter, marker-bounded AGENTS
   overlay, local session state, explicit checkpoints/verification, optional
   hooks/status, and optional tmux workers over the same core runtime.
 - Treat `codex exec resume` sessions as a deferred external multi-turn feature,

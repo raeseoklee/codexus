@@ -80,7 +80,7 @@ Codexus Core
 automation, bounded sub-run, recovery에 필수인 engine path로 남습니다.
 
 Deferred `codex exec resume` path는 외부 multi-turn thread feature이지,
-OMX-like session-native runtime이 아닙니다.
+session-native runtime이 아닙니다.
 
 ## Claw Code와의 관계
 

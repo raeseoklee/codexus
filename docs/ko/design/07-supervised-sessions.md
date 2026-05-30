@@ -7,11 +7,12 @@
 
 ## 결정
 
-Codexus의 primary UX는 OMX와 비슷한 Codex-session-native runtime으로 이동합니다.
+Codexus의 primary UX는 OMX에서 배운 Codex-session-native runtime으로 이동합니다. OMX는
+session-native integration의 prior art이지 Codexus의 정체성이 아닙니다.
 
 이전 external thread 제안은 `codex exec resume <thread-id>`로 별도
 non-interactive Codex thread를 이어가는 구조였습니다. 이 기능은 외부 supervised run
-기능으로는 유용하지만, 제품이 원하는 OMX-like 형태는 아닙니다. 현재 Codex TUI
+기능으로는 유용하지만, 제품이 원하는 session-native 형태는 아닙니다. 현재 Codex TUI
 conversation에 붙는 것이 아니라 별도 `codex exec` thread를 시작하고 재개하기 때문입니다.
 
 새 방향은 다음입니다:
@@ -102,7 +103,7 @@ cx thread start/continue
   -> multiple supervised turns over that external thread
 ```
 
-이는 primary OMX-like path가 아닙니다. `cx session` namespace는 현재 Codex session-native
+이는 primary session-native path가 아닙니다. `cx session` namespace는 현재 Codex session-native
 state, checkpoint, verification surface 전용으로 유지합니다.
 
 ## 세션 네이티브 구성요소

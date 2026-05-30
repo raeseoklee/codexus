@@ -129,7 +129,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   위임하고, canonical bin link와 `CODEXUS_INSTALL_CODEX_SKILL=0`이 아닐 때 Codex
   skill adapter 설치를 수행합니다.
 - User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.
-- Session-native supervision 설계는 OMX-like in-Codex usage를 제품 방향으로
+- Session-native supervision 설계는 OMX에서 배운 in-Codex usage를 제품 방향으로
   정리했고, `codex exec resume`은 별도 external multi-turn feature로 deferred했습니다.
 
 ## 검증

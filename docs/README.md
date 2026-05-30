@@ -34,7 +34,8 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Implementation feedback](design/04-implementation-feedback.md): decisions made after MVP implementation blockers and whether the architecture direction changes.
 - [Naming and runtime positioning](design/05-naming-and-runtime-positioning.md): Codexus name, `cx` CLI target, external CLI runtime, and Codex-native session direction.
 - [Codex-native adapter](design/06-codex-native-adapter.md): `$codexus` skill adapter, installation, supported first commands, and design rules.
-- [Session-native supervision](design/07-supervised-sessions.md): OMX-like direction using skills, AGENTS overlays, hooks/status state, and optional tmux workers inside the current Codex session.
+- [Session-native supervision](design/07-supervised-sessions.md): OMX-informed session-native integration using skills, AGENTS overlays, hooks/status state, and optional tmux workers inside the current Codex session.
+- [Standalone identity and always-on evidence](design/08-standalone-identity-and-always-on-evidence.md): evidence-first identity, OMX decoupling, the always-on evidence model (derived dirty/stale, verify auto-detection, evidence-bearing-only gate), and engine-agnostic invariants.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Public release checklist](public-release.md): metadata, safety, verification, and visibility checklist for open-source publication.

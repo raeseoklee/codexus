@@ -12,7 +12,7 @@ The Codex-native path keeps the current Codex conversation as the primary
 working loop. Codexus only adds durable status, verification, replay, memory,
 schema, and skill evidence.
 
-Codexus is moving toward an OMX-like session-native runtime. The installed
+Codexus is moving toward an OMX-informed, Codex-native session runtime. The installed
 skill is the first layer; `cx setup codex-session` adds marker-bounded AGENTS
 guidance, `.codexus/session/` state, and optional notify-hook attachment.
 Explicit checkpoint and verification commands are available now. Statusline and

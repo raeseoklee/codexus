@@ -7,14 +7,16 @@ Status: proposed direction change
 
 ## Decision
 
-Codexus should move toward an OMX-like, Codex-session-native runtime as the
-primary user experience.
+Codexus should move toward an OMX-informed, Codex-session-native runtime as the
+primary user experience. OMX is prior art for session-native integration; it is
+not Codexus' identity.
 
 The previous external thread proposal used
 `codex exec resume <thread-id>` to create a separate multi-turn non-interactive
 Codex thread. That is useful as an external supervised-run feature, but it is
-not the OMX-like shape the product needs. It does not attach to the current
-Codex TUI conversation; it starts and resumes a separate `codex exec` thread.
+not the session-native shape the product needs. It does not attach to the
+current Codex TUI conversation; it starts and resumes a separate `codex exec`
+thread.
 
 The new direction is:
 
@@ -107,9 +109,9 @@ cx thread start/continue
   -> multiple supervised turns over that external thread
 ```
 
-It is not the primary OMX-like path. Keep the `cx session` namespace reserved
-for the current Codex-session-native state, checkpoint, and verification
-surface.
+It is not the primary session-native path. Keep the `cx session` namespace
+reserved for the current Codex-session-native state, checkpoint, and
+verification surface.
 
 ## Session-Native Components
 

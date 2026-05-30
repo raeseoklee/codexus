@@ -28,9 +28,9 @@ For user-facing invocation examples, see
 The adapter is the first installed piece of the broader
 [session-native supervision](07-supervised-sessions.md) direction. The target is
 not a separate chat surface or an external `codex exec resume` thread; it is an
-OMX-like harness that the current Codex TUI session can explicitly call through
-skills, marker-bounded AGENTS guidance, local state, optional hooks/status, and
-optional tmux workers.
+OMX-informed session-native harness that the current Codex TUI session can
+explicitly call through skills, marker-bounded AGENTS guidance, local state,
+optional hooks/status, and optional tmux workers.
 
 ## Installation
 
