@@ -1,6 +1,6 @@
 # Session-Native Supervision
 
-[한국어](../ko/design/07-supervised-sessions.md)
+[Korean](../ko/design/07-supervised-sessions.md)
 
 Date: 2026-05-30
 Status: proposed direction change

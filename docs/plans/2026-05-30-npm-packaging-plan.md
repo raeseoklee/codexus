@@ -1,6 +1,6 @@
 # npm Packaging Plan
 
-[한국어](../ko/plans/2026-05-30-npm-packaging-plan.md)
+[Korean](../ko/plans/2026-05-30-npm-packaging-plan.md)
 
 Date: 2026-05-30
 

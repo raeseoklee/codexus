@@ -14,7 +14,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js >=22](https://img.shields.io/badge/Node.js-%3E%3D22-339933.svg)](package.json)
 
-[한국어 문서](docs/ko/README.md)
+[Korean](docs/ko/README.md)
 
 Codexus is a local execution harness for OpenAI Codex. It keeps Codex as the
 model and execution engine, then adds the engineering layer needed for durable
@@ -178,8 +178,8 @@ Public bins: `cx` and `codexus` are canonical.
 - [Remaining work](docs/remaining-work.md)
 - [Public release checklist](docs/public-release.md)
 
-English is the primary documentation language. Korean counterparts are kept
-under `docs/ko/` and linked from the English documents.
+Documentation is written in English first. Korean translations live under
+`docs/ko/`, and English documents link to them as `Korean`.
 
 ## Safety Boundaries
 

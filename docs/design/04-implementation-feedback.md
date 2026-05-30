@@ -1,6 +1,6 @@
 # Implementation Feedback Review
 
-[한국어](../ko/design/04-implementation-feedback.md)
+[Korean](../ko/design/04-implementation-feedback.md)
 
 Date: 2026-05-29
 

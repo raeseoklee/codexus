@@ -1,6 +1,6 @@
 # Architecture
 
-[한국어](../ko/design/01-architecture.md)
+[Korean](../ko/design/01-architecture.md)
 
 ## Purpose
 

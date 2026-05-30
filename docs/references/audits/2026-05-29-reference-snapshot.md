@@ -1,6 +1,6 @@
 # Reference Snapshot: 2026-05-29
 
-[한국어](../../ko/references/audits/2026-05-29-reference-snapshot.md)
+[Korean](../../ko/references/audits/2026-05-29-reference-snapshot.md)
 
 This snapshot records the mandatory harness references consulted for Codexus on
 2026-05-29. It is not a full code review of the upstream projects. It is the

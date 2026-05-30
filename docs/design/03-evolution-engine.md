@@ -1,6 +1,6 @@
 # Evolution Engine Design
 
-[한국어](../ko/design/03-evolution-engine.md)
+[Korean](../ko/design/03-evolution-engine.md)
 
 ## Intent
 

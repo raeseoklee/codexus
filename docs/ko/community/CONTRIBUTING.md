@@ -13,7 +13,7 @@ gate 뒤에 두는 방향을 유지해야 합니다.
 - app-server, cron, gateway, model-replay 실험을 하더라도 안정적인
   `codex exec --json` path를 보존합니다.
 - local, auditable file과 deterministic test를 선호합니다.
-- 영어 문서를 기본으로 작성하고 user-facing 문서에는 한국어 counterpart를 추가합니다.
+- 영문 문서를 기본으로 작성하고 user-facing 문서에는 필요한 한국어 번역을 추가합니다.
 - runtime dependency는 design need가 명확하고 문서화된 경우에만 추가합니다.
 
 ## Development Setup
@@ -38,7 +38,7 @@ node src/cli/main.ts run --driver mock --json "hello"
 - 변경 범위가 명확하고 문서화되어 있습니다.
 - `npm run ci`가 local에서 통과합니다.
 - 새 동작에는 focused test가 있습니다.
-- user-facing 문서를 바꾸면 영어와 한국어 문서를 함께 갱신합니다.
+- user-facing 문서를 바꾸면 영문 문서를 먼저 갱신하고 필요한 한국어 번역도 함께 갱신합니다.
 - CLI JSON output은 machine-parseable 상태를 유지합니다.
 - experimental live behavior는 feature-gated이며 dry-run path를 가집니다.
 

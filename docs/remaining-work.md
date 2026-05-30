@@ -1,6 +1,6 @@
 # Remaining Work
 
-[한국어](ko/remaining-work.md)
+[Korean](ko/remaining-work.md)
 
 Date: 2026-05-29
 

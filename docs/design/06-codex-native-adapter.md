@@ -1,6 +1,6 @@
 # Codex-Native Adapter
 
-[한국어](../ko/design/06-codex-native-adapter.md)
+[Korean](../ko/design/06-codex-native-adapter.md)
 
 ## Intent
 

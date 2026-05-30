@@ -1,6 +1,6 @@
 # Quick Start
 
-[한국어](ko/quickstart.md)
+[Korean](ko/quickstart.md)
 
 This guide gets Codexus running locally. The first verification pass avoids
 model and network access; real Codex execution is covered after that.

@@ -1,6 +1,6 @@
 # Codexus Engineering Plan
 
-[한국어](../ko/plans/2026-05-29-codex-harness-engineering-plan.md)
+[Korean](../ko/plans/2026-05-29-codex-harness-engineering-plan.md)
 
 Date: 2026-05-29
 Workspace: /Users/irae/Workspace/irae/codex-harness

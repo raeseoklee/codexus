@@ -1,6 +1,6 @@
 # Harness Remediation Plan
 
-[한국어](../ko/plans/2026-05-29-harness-remediation-plan.md)
+[Korean](../ko/plans/2026-05-29-harness-remediation-plan.md)
 
 Date: 2026-05-29
 Status: accepted. Implemented in the remediation passes: R1, R2a, R2b, R3, R4,

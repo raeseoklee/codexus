@@ -1,6 +1,6 @@
 # Codexus Documentation
 
-[한국어](ko/README.md)
+[Korean](ko/README.md)
 
 Codexus is a local runtime harness for Codex orchestration. It keeps OpenAI Codex as the model/runtime engine, then adds the harness engineering layer that makes Codex feel more durable, observable, recoverable, and self-improving.
 

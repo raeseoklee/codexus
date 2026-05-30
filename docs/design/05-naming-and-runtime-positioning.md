@@ -1,6 +1,6 @@
 # Naming and Runtime Positioning
 
-[한국어](../ko/design/05-naming-and-runtime-positioning.md)
+[Korean](../ko/design/05-naming-and-runtime-positioning.md)
 
 ## Product Name
 

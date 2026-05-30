@@ -1,6 +1,6 @@
 # Using Codexus Inside Codex
 
-[한국어](ko/codex-session-usage.md)
+[Korean](ko/codex-session-usage.md)
 
 Codexus can be used in two ways:
 

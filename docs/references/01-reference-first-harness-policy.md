@@ -1,6 +1,6 @@
 # Reference-First Harness Policy
 
-[한국어](../ko/references/01-reference-first-harness-policy.md)
+[Korean](../ko/references/01-reference-first-harness-policy.md)
 
 Status: active
 

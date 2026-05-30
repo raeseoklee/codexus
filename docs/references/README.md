@@ -1,6 +1,6 @@
 # Reference Governance
 
-[한국어](../ko/references/README.md)
+[Korean](../ko/references/README.md)
 
 Codexus harness design is reference-first. Harness decisions should start from
 the mandatory upstream references, then record how the reference behavior maps

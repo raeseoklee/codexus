@@ -1,6 +1,6 @@
 # Public Release Checklist
 
-[한국어](ko/public-release.md)
+[Korean](ko/public-release.md)
 
 Use this checklist before changing the GitHub repository from private to
 public.

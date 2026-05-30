@@ -1,6 +1,6 @@
 # Implementation Status
 
-[한국어](ko/implementation-status.md)
+[Korean](ko/implementation-status.md)
 
 Date: 2026-05-29
 

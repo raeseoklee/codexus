@@ -1,6 +1,6 @@
 # Detailed Design
 
-[한국어](../ko/design/02-detailed-design.md)
+[Korean](../ko/design/02-detailed-design.md)
 
 ## Runtime Package Shape
 
