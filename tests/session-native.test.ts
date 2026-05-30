@@ -26,6 +26,21 @@ function markerCount(text: string, marker: string): number {
   return text.split(marker).length - 1;
 }
 
+function git(cwd: string, args: string[]): void {
+  const result = spawnSync("git", ["-C", cwd, ...args], { encoding: "utf8" });
+  assert.equal(result.status, 0, `git ${args.join(" ")} failed: ${result.stderr}`);
+}
+
+async function initGitRepo(cwd: string): Promise<void> {
+  git(cwd, ["init", "--quiet"]);
+  git(cwd, ["config", "user.email", "test@codexus.local"]);
+  git(cwd, ["config", "user.name", "Codexus Test"]);
+  git(cwd, ["config", "commit.gpgsign", "false"]);
+  await writeFile(join(cwd, "tracked.txt"), "initial\n");
+  git(cwd, ["add", "tracked.txt"]);
+  git(cwd, ["commit", "--quiet", "-m", "initial"]);
+}
+
 test("setup codex-session installs a marker-bounded project overlay idempotently", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();
@@ -346,7 +361,11 @@ test("session migrate reports and persists explicit session-state migrations", a
     const dryRunOutput = JSON.parse(dryRun.stdout);
     assert.equal(dryRunOutput.status, "migrated");
     assert.equal(dryRunOutput.dryRun, true);
-    assert.deepEqual(dryRunOutput.migration.applied, ["session_state_v1.add_hook_events", "session_state_v2.add_notify_dispatch"]);
+    assert.deepEqual(dryRunOutput.migration.applied, [
+      "session_state_v1.add_hook_events",
+      "session_state_v2.add_notify_dispatch",
+      "session_state_v3.add_workspace_fingerprint",
+    ]);
     assert.equal(Object.hasOwn(JSON.parse(await readFile(statePath, "utf8")), "hookEvents"), false);
 
     const migrate = runCli(cwd, ["session", "migrate", "--json"], { CODEX_HOME: codexHome });
@@ -355,9 +374,10 @@ test("session migrate reports and persists explicit session-state migrations", a
     assert.equal(migrateOutput.status, "migrated");
     assert.equal(migrateOutput.dryRun, false);
     const migratedState = JSON.parse(await readFile(statePath, "utf8"));
-    assert.equal(migratedState.schemaVersion, 2);
+    assert.equal(migratedState.schemaVersion, 3);
     assert.deepEqual(migratedState.hookEvents, []);
     assert.equal(migratedState.notifyDispatch.status, "not_configured");
+    assert.equal(migratedState.lastVerifiedFingerprint, null);
 
     const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
     assert.equal(status.status, 0, status.stderr);
@@ -373,12 +393,12 @@ test("session migrate rejects unsupported future session-state versions", async 
   const codexHome = await tempDir();
   try {
     await mkdir(join(cwd, ".codexus", "session"), { recursive: true });
-    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 3 }\n");
+    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 4 }\n");
     const migrate = runCli(cwd, ["session", "migrate", "--json"], { CODEX_HOME: codexHome });
     assert.equal(migrate.status, 1);
     const output = JSON.parse(migrate.stdout);
     assert.equal(output.code, "session_state_corrupt");
-    assert.match(output.details.target, /unsupported_schema_version:3/);
+    assert.match(output.details.target, /unsupported_schema_version:4/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -500,6 +520,36 @@ test("session-state focused validator and schema artifact reject the same critic
       ["bad_notify_dispatch_status", (value: Record<string, unknown>) => {
         (value.notifyDispatch as Record<string, unknown>).status = "installed";
       }],
+      ["missing_last_verified_fingerprint", (value: Record<string, unknown>) => { delete value.lastVerifiedFingerprint; }],
+      ["bad_last_verified_fingerprint_shape", (value: Record<string, unknown>) => {
+        value.lastVerifiedFingerprint = {
+          verificationId: "verification_x",
+          status: "passed",
+          recordedAt: "2026-05-30T00:00:00.000Z",
+          fingerprint: { schemaVersion: 1, isGit: true },
+        };
+      }],
+      ["bad_verification_fingerprint", (value: Record<string, unknown>) => {
+        value.verifications = [{
+          id: "verification_x",
+          createdAt: "2026-05-30T00:00:00.000Z",
+          status: "passed",
+          commands: ["npm test"],
+          path: "/tmp/verification.json",
+          artifactsDir: "/tmp/artifacts",
+          workspaceFingerprint: { schemaVersion: 2 },
+        }];
+      }],
+      ["missing_verification_fingerprint_field", (value: Record<string, unknown>) => {
+        value.verifications = [{
+          id: "verification_x",
+          createdAt: "2026-05-30T00:00:00.000Z",
+          status: "passed",
+          commands: ["npm test"],
+          path: "/tmp/verification.json",
+          artifactsDir: "/tmp/artifacts",
+        }];
+      }],
     ] as const;
     for (const [name, mutate] of invalidCases) {
       const candidate = structuredClone(baseline) as Record<string, unknown>;
@@ -509,6 +559,178 @@ test("session-state focused validator and schema artifact reject the same critic
       assert.equal(focused.valid, false, `${name}: focused validator should reject`);
       assert.equal(artifact.valid, false, `${name}: schema artifact should reject`);
     }
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session verify stores a workspace fingerprint and last-verified evidence", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 0, verify.stderr);
+    const output = JSON.parse(verify.stdout);
+    assert.equal(output.executed, true);
+    const fingerprint = output.verification.workspaceFingerprint;
+    assert.equal(fingerprint.degraded, false);
+    assert.equal(fingerprint.isGit, true);
+    assert.ok(fingerprint.head, "expected a HEAD commit");
+    assert.equal(output.state.lastVerifiedFingerprint.status, "passed");
+    assert.equal(output.state.lastVerifiedFingerprint.verificationId, output.verification.id);
+    assert.equal(output.state.lastVerifiedFingerprint.fingerprint.unstagedDiffHash, fingerprint.unstagedDiffHash);
+
+    // The persisted state must validate against the v3 schema artifact.
+    const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session status reports evidenceFresh after verify and stale after a real change", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const setup = runCli(cwd, ["setup", "codex-session", "--scope", "project", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(setup.status, 0, setup.stderr);
+
+    // Before any verification: missing.
+    const initial = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(initial.status, 0, initial.stderr);
+    const initialOutput = JSON.parse(initial.stdout);
+    assert.equal(initialOutput.evidence.verification, "missing");
+    assert.equal(initialOutput.evidence.evidenceFresh, false);
+    assert.equal(initialOutput.evidence.dirtySinceLastVerify, true);
+
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 0, verify.stderr);
+
+    // Immediately after a passing verify with no changes: fresh.
+    const fresh = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(fresh.status, 0, fresh.stderr);
+    const freshOutput = JSON.parse(fresh.stdout);
+    assert.equal(freshOutput.evidence.verification, "passed");
+    assert.equal(freshOutput.evidence.evidenceFresh, true);
+    assert.equal(freshOutput.evidence.dirtySinceLastVerify, false);
+
+    // A real content change makes the evidence stale and dirty.
+    await writeFile(join(cwd, "tracked.txt"), "initial\nnew work\n");
+    const stale = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(stale.status, 0, stale.stderr);
+    const staleOutput = JSON.parse(stale.stdout);
+    assert.equal(staleOutput.evidence.verification, "stale");
+    assert.equal(staleOutput.evidence.evidenceFresh, false);
+    assert.equal(staleOutput.evidence.dirtySinceLastVerify, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("a failed verification then a workspace change reports stale, not a now-untrue failed", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    // Failing verification on a clean workspace -> verification: "failed".
+    const verify = runCli(cwd, ["session", "verify", "--verify", "false", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(JSON.parse(verify.stdout).verification.status, "failed");
+    const failed = JSON.parse(runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome }).stdout).evidence;
+    assert.equal(failed.verification, "failed");
+    assert.equal(failed.dirtySinceLastVerify, false);
+    assert.equal(failed.lastVerification.status, "failed");
+    // After an edit the failed verdict no longer describes the current workspace
+    // -> stale (dirty precedes failed); lastVerification.status still shows it.
+    await writeFile(join(cwd, "fix.txt"), "an edit after the failure\n");
+    const stale = JSON.parse(runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome }).stdout).evidence;
+    assert.equal(stale.verification, "stale");
+    assert.equal(stale.evidenceFresh, false);
+    assert.equal(stale.dirtySinceLastVerify, true);
+    assert.equal(stale.lastVerification.status, "failed");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session status never claims evidenceFresh in a non-git (degraded) workspace", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    // Not a git repo: fingerprints are degraded and cannot prove freshness even
+    // after a passing verification.
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 0, verify.stderr);
+    const verifyOutput = JSON.parse(verify.stdout);
+    assert.equal(verifyOutput.verification.workspaceFingerprint.degraded, true);
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const output = JSON.parse(status.stdout);
+    assert.equal(output.evidence.evidenceFresh, false);
+    assert.equal(output.evidence.verification, "stale");
+    assert.equal(output.evidence.fingerprintReliable, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session verify --auto recommends without executing and --execute runs", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const setup = runCli(cwd, ["setup", "codex-session", "--scope", "project", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(setup.status, 0, setup.stderr);
+    // Single strong candidate: a package.json with only a test script.
+    await writeFile(join(cwd, "package.json"), `${JSON.stringify({
+      name: "fixture",
+      scripts: { test: "node -e \"console.log('auto-ok')\"" },
+    }, null, 2)}\n`);
+
+    const recommend = runCli(cwd, ["session", "verify", "--auto", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(recommend.status, 0, recommend.stderr);
+    const recommendOutput = JSON.parse(recommend.stdout);
+    assert.equal(recommendOutput.mode, "recommend");
+    assert.equal(recommendOutput.executed, false);
+    assert.equal(recommendOutput.detection.recommended, "npm test");
+    // Detect-and-recommend-only must not record a verification.
+    const afterRecommend = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(JSON.parse(afterRecommend.stdout).state.verifications.length, 0);
+
+    const execute = runCli(cwd, ["session", "verify", "--auto", "--execute", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(execute.status, 0, execute.stderr);
+    const executeOutput = JSON.parse(execute.stdout);
+    assert.equal(executeOutput.executed, true);
+    assert.deepEqual(executeOutput.verification.commands, ["npm test"]);
+    assert.equal(executeOutput.state.verifications.length, 1);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session verify --auto --execute still enforces the policy preflight danger block", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    // An explicit dangerous command via --auto --execute must still be blocked.
+    const verify = runCli(cwd, ["session", "verify", "--auto", "--execute", "--verify", "rm -rf /", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 1);
+    const output = JSON.parse(verify.stdout);
+    assert.equal(output.verification.status, "blocked");
+    assert.equal(output.policy.status, "blocked");
+    // Blocked path records a fingerprint but must NOT promote lastVerifiedFingerprint.
+    assert.ok(output.verification.workspaceFingerprint);
+    assert.equal(output.state.lastVerifiedFingerprint, null);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });

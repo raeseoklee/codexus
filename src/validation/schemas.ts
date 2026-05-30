@@ -225,10 +225,28 @@ function requireOneOf(record: Record<string, unknown>, key: string, allowed: rea
   if (typeof record[key] !== "string" || !allowed.includes(record[key] as string)) errors.push(`${path}:invalid_enum`);
 }
 
+function validateWorkspaceFingerprint(value: unknown, errors: string[], path: string): void {
+  if (!requireRecord(value, errors, path)) return;
+  if (value.schemaVersion !== 1) errors.push(`${path}.schemaVersion:not_1`);
+  requireBoolean(value, "isGit", errors, `${path}.isGit`);
+  if (!(value.head === null || typeof value.head === "string")) errors.push(`${path}.head:invalid`);
+  if (!(value.stagedDiffHash === null || typeof value.stagedDiffHash === "string")) errors.push(`${path}.stagedDiffHash:invalid`);
+  if (!(value.unstagedDiffHash === null || typeof value.unstagedDiffHash === "string")) errors.push(`${path}.unstagedDiffHash:invalid`);
+  if (requireRecord(value.untracked, errors, `${path}.untracked`)) {
+    requireString(value.untracked, "hash", errors, `${path}.untracked.hash`);
+    requireNumber(value.untracked, "count", errors, `${path}.untracked.count`);
+    requireBoolean(value.untracked, "partial", errors, `${path}.untracked.partial`);
+  }
+  requireString(value, "cwd", errors, `${path}.cwd`);
+  requireString(value, "computedAt", errors, `${path}.computedAt`);
+  requireBoolean(value, "degraded", errors, `${path}.degraded`);
+  if (!(value.degradedReason === null || typeof value.degradedReason === "string")) errors.push(`${path}.degradedReason:invalid`);
+}
+
 export function validateSchemaValue(type: SchemaValidationType, value: unknown): SchemaValidationResult {
   const errors: string[] = [];
   if (!requireRecord(value, errors, type)) return { schemaVersion: 1, type, valid: false, errors };
-  const expectedSchemaVersion = type === "session-state" ? 2 : 1;
+  const expectedSchemaVersion = type === "session-state" ? 3 : 1;
   if (type !== "config" && value.schemaVersion !== expectedSchemaVersion) errors.push(`schemaVersion:not_${expectedSchemaVersion}`);
   if (type === "config" && value.schemaVersion !== undefined && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
 
@@ -339,7 +357,36 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     requireString(value, "updatedAt", errors);
     if (!(value.lastCommand === null || typeof value.lastCommand === "string")) errors.push("lastCommand:invalid");
     requireArray(value, "checkpoints", errors);
-    requireArray(value, "verifications", errors);
+    const verifications = requireArray(value, "verifications", errors);
+    for (const item of verifications) {
+      if (!isRecord(item)) {
+        errors.push("verifications:non_object_item");
+        continue;
+      }
+      requireString(item, "id", errors, "verifications.id");
+      requireString(item, "createdAt", errors, "verifications.createdAt");
+      requireString(item, "status", errors, "verifications.status");
+      if (requireArray(item, "commands", errors, "verifications.commands").some((command) => typeof command !== "string")) {
+        errors.push("verifications.commands:non_string_item");
+      }
+      requireString(item, "path", errors, "verifications.path");
+      requireString(item, "artifactsDir", errors, "verifications.artifactsDir");
+      if (!("workspaceFingerprint" in item)) {
+        errors.push("verifications.workspaceFingerprint:missing");
+      } else if (item.workspaceFingerprint !== null) {
+        validateWorkspaceFingerprint(item.workspaceFingerprint, errors, "verifications.workspaceFingerprint");
+      }
+    }
+    if (!("lastVerifiedFingerprint" in value)) {
+      errors.push("lastVerifiedFingerprint:missing");
+    } else if (value.lastVerifiedFingerprint !== null) {
+      if (requireRecord(value.lastVerifiedFingerprint, errors, "lastVerifiedFingerprint")) {
+        requireString(value.lastVerifiedFingerprint, "verificationId", errors, "lastVerifiedFingerprint.verificationId");
+        requireString(value.lastVerifiedFingerprint, "status", errors, "lastVerifiedFingerprint.status");
+        requireString(value.lastVerifiedFingerprint, "recordedAt", errors, "lastVerifiedFingerprint.recordedAt");
+        validateWorkspaceFingerprint(value.lastVerifiedFingerprint.fingerprint, errors, "lastVerifiedFingerprint.fingerprint");
+      }
+    }
     const hookEvents = requireArray(value, "hookEvents", errors);
     for (const item of hookEvents) {
       if (!isRecord(item)) {

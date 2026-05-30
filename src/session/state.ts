@@ -7,10 +7,11 @@ import { harnessRoot } from "../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { withFileLock } from "../util/lock.ts";
 import { codexHome, inspectNotifyHookConfig } from "./hook-config.ts";
+import { isWorkspaceFingerprint, type WorkspaceFingerprint } from "./workspace-fingerprint.ts";
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
-export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 2 as const;
+export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 3 as const;
 
 export type OverlayScope = "project" | "user";
 export type CapabilityStatus = "available" | "unavailable";
@@ -41,6 +42,14 @@ export interface SessionVerificationRecord {
   commands: string[];
   path: string;
   artifactsDir: string;
+  workspaceFingerprint: WorkspaceFingerprint | null;
+}
+
+export interface LastVerifiedFingerprint {
+  verificationId: string;
+  status: string;
+  recordedAt: string;
+  fingerprint: WorkspaceFingerprint;
 }
 
 export interface SessionHookEventRecord {
@@ -76,6 +85,7 @@ export interface CodexusSessionState {
   lastCommand: string | null;
   checkpoints: SessionCheckpointRecord[];
   verifications: SessionVerificationRecord[];
+  lastVerifiedFingerprint: LastVerifiedFingerprint | null;
   hookEvents: SessionHookEventRecord[];
   linkedRunIds: string[];
   capabilities: {
@@ -165,6 +175,23 @@ function isSessionHookEventRecord(value: unknown): value is SessionHookEventReco
     && (value.process.bundleIdentifier === null || typeof value.process.bundleIdentifier === "string");
 }
 
+function isSessionVerificationRecord(value: unknown): value is SessionVerificationRecord {
+  if (!isRecord(value)) return false;
+  if (typeof value.id !== "string" || typeof value.createdAt !== "string" || typeof value.status !== "string") return false;
+  if (!Array.isArray(value.commands) || !value.commands.every((item) => typeof item === "string")) return false;
+  if (typeof value.path !== "string" || typeof value.artifactsDir !== "string") return false;
+  if (!(value.workspaceFingerprint === null || isWorkspaceFingerprint(value.workspaceFingerprint))) return false;
+  return true;
+}
+
+function isLastVerifiedFingerprint(value: unknown): value is LastVerifiedFingerprint {
+  if (!isRecord(value)) return false;
+  return typeof value.verificationId === "string"
+    && typeof value.status === "string"
+    && typeof value.recordedAt === "string"
+    && isWorkspaceFingerprint(value.fingerprint);
+}
+
 function isSessionState(value: unknown): value is CodexusSessionState {
   if (!isRecord(value)) return false;
   if (value.schemaVersion !== CURRENT_SESSION_STATE_SCHEMA_VERSION) return false;
@@ -173,6 +200,8 @@ function isSessionState(value: unknown): value is CodexusSessionState {
   if (typeof value.createdAt !== "string" || typeof value.updatedAt !== "string") return false;
   if (!(value.lastCommand === null || typeof value.lastCommand === "string")) return false;
   if (!Array.isArray(value.checkpoints) || !Array.isArray(value.verifications) || !Array.isArray(value.hookEvents) || !Array.isArray(value.linkedRunIds)) return false;
+  if (!value.verifications.every(isSessionVerificationRecord)) return false;
+  if (!(value.lastVerifiedFingerprint === null || isLastVerifiedFingerprint(value.lastVerifiedFingerprint))) return false;
   if (!value.hookEvents.every(isSessionHookEventRecord)) return false;
   if (!isRecord(value.capabilities)) return false;
   if (!(value.capabilities.tmux === "available" || value.capabilities.tmux === "unavailable")) return false;
@@ -289,6 +318,8 @@ function hooksCapabilityFromDispatch(dispatch: NotifyDispatchState): HookCapabil
   return "unavailable";
 }
 
+// v1 -> v2: add hookEvents and derived notifyDispatch. Leaves schemaVersion at 2;
+// the v2 -> v3 step finishes the chain so forward migration stays additive.
 function migrateV1SessionState(value: Record<string, unknown>, applied: string[]): Record<string, unknown> {
   let next: Record<string, unknown> = value;
   if (!Object.hasOwn(next, "hookEvents")) {
@@ -303,7 +334,7 @@ function migrateV1SessionState(value: Record<string, unknown>, applied: string[]
   const notifyDispatch = deriveNotifyDispatch(hookEvents, previousHooksConfigured);
   next = {
     ...next,
-    schemaVersion: CURRENT_SESSION_STATE_SCHEMA_VERSION,
+    schemaVersion: 2,
     hookEvents,
     notifyDispatch,
     capabilities: {
@@ -315,12 +346,39 @@ function migrateV1SessionState(value: Record<string, unknown>, applied: string[]
   return next;
 }
 
+// v2 -> v3: introduce the workspace-fingerprint evidence model. Existing
+// verification records gain an explicit `workspaceFingerprint: null` (they were
+// recorded before fingerprints existed and cannot be reconstructed), and the
+// state gains `lastVerifiedFingerprint: null`. Defaulting to null is honest: a
+// migrated state has no fingerprint evidence until the next verify run.
+function migrateV2SessionState(value: Record<string, unknown>, applied: string[]): Record<string, unknown> {
+  const verifications = Array.isArray(value.verifications)
+    ? value.verifications.map((record) => (
+      isRecord(record) && !Object.hasOwn(record, "workspaceFingerprint")
+        ? { ...record, workspaceFingerprint: null }
+        : record
+    ))
+    : value.verifications;
+  const next: Record<string, unknown> = {
+    ...value,
+    schemaVersion: 3,
+    verifications,
+    lastVerifiedFingerprint: Object.hasOwn(value, "lastVerifiedFingerprint")
+      ? value.lastVerifiedFingerprint
+      : null,
+  };
+  applied.push("session_state_v3.add_workspace_fingerprint");
+  return next;
+}
+
 function migrateSessionState(value: unknown): { value: unknown; report: SessionStateMigrationReport } {
   if (!isRecord(value)) return { value, report: migrationReport({ fromVersion: null, reason: "not_an_object" }) };
   const fromVersion = schemaVersionOf(value);
   const applied: string[] = [];
-  if (fromVersion === 1) {
-    const next = migrateV1SessionState(value, applied);
+  if (fromVersion === 1 || fromVersion === 2) {
+    let next: Record<string, unknown> = value;
+    if (fromVersion === 1) next = migrateV1SessionState(next, applied);
+    next = migrateV2SessionState(next, applied);
     return {
       value: next,
       report: migrationReport({
@@ -496,6 +554,7 @@ async function defaultState(cwd: string): Promise<CodexusSessionState> {
     lastCommand: null,
     checkpoints: [],
     verifications: [],
+    lastVerifiedFingerprint: null,
     hookEvents: [],
     linkedRunIds: [],
     capabilities: await detectSessionCapabilities(cwd, notifyDispatch),

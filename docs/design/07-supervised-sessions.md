@@ -233,6 +233,11 @@ Codex leader pane
 
 This should complement Codex native subagents, not replace them.
 
+For Codex native subagents inside the current session, see
+[Subagent evidence supervision](09-subagent-evidence-supervision.md). The same
+rule applies there: subagents may produce claims, but verification remains the
+completion gate.
+
 ## Explicit Non-Goals
 
 - Do not build a separate chat/readline UI.

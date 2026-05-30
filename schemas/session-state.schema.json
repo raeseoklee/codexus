@@ -3,9 +3,9 @@
   "$id": "https://codexus.local/schemas/session-state.schema.json",
   "title": "Codexus Session State",
   "type": "object",
-  "required": ["schemaVersion", "sessionId", "cwd", "status", "createdAt", "updatedAt", "lastCommand", "checkpoints", "verifications", "hookEvents", "linkedRunIds", "capabilities", "notifyDispatch", "overlays"],
+  "required": ["schemaVersion", "sessionId", "cwd", "status", "createdAt", "updatedAt", "lastCommand", "checkpoints", "verifications", "lastVerifiedFingerprint", "hookEvents", "linkedRunIds", "capabilities", "notifyDispatch", "overlays"],
   "properties": {
-    "schemaVersion": { "const": 2 },
+    "schemaVersion": { "const": 3 },
     "sessionId": { "type": "string", "minLength": 1 },
     "cwd": { "type": "string", "minLength": 1 },
     "status": { "enum": ["initialized"] },
@@ -13,7 +13,78 @@
     "updatedAt": { "type": "string" },
     "lastCommand": { "type": ["string", "null"] },
     "checkpoints": { "type": "array", "items": { "type": "object" } },
-    "verifications": { "type": "array", "items": { "type": "object" } },
+    "verifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "createdAt", "status", "commands", "path", "artifactsDir", "workspaceFingerprint"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "createdAt": { "type": "string" },
+          "status": { "type": "string", "minLength": 1 },
+          "commands": { "type": "array", "items": { "type": "string" } },
+          "path": { "type": "string", "minLength": 1 },
+          "artifactsDir": { "type": "string", "minLength": 1 },
+          "workspaceFingerprint": {
+            "type": ["object", "null"],
+            "required": ["schemaVersion", "isGit", "head", "stagedDiffHash", "unstagedDiffHash", "untracked", "cwd", "computedAt", "degraded", "degradedReason"],
+            "properties": {
+              "schemaVersion": { "const": 1 },
+              "isGit": { "type": "boolean" },
+              "head": { "type": ["string", "null"] },
+              "stagedDiffHash": { "type": ["string", "null"] },
+              "unstagedDiffHash": { "type": ["string", "null"] },
+              "untracked": {
+                "type": "object",
+                "required": ["hash", "count", "partial"],
+                "properties": {
+                  "hash": { "type": "string", "minLength": 1 },
+                  "count": { "type": "number" },
+                  "partial": { "type": "boolean" }
+                }
+              },
+              "cwd": { "type": "string", "minLength": 1 },
+              "computedAt": { "type": "string" },
+              "degraded": { "type": "boolean" },
+              "degradedReason": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "lastVerifiedFingerprint": {
+      "type": ["object", "null"],
+      "required": ["verificationId", "status", "recordedAt", "fingerprint"],
+      "properties": {
+        "verificationId": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 },
+        "recordedAt": { "type": "string" },
+        "fingerprint": {
+          "type": "object",
+          "required": ["schemaVersion", "isGit", "head", "stagedDiffHash", "unstagedDiffHash", "untracked", "cwd", "computedAt", "degraded", "degradedReason"],
+          "properties": {
+            "schemaVersion": { "const": 1 },
+            "isGit": { "type": "boolean" },
+            "head": { "type": ["string", "null"] },
+            "stagedDiffHash": { "type": ["string", "null"] },
+            "unstagedDiffHash": { "type": ["string", "null"] },
+            "untracked": {
+              "type": "object",
+              "required": ["hash", "count", "partial"],
+              "properties": {
+                "hash": { "type": "string", "minLength": 1 },
+                "count": { "type": "number" },
+                "partial": { "type": "boolean" }
+              }
+            },
+            "cwd": { "type": "string", "minLength": 1 },
+            "computedAt": { "type": "string" },
+            "degraded": { "type": "boolean" },
+            "degradedReason": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
     "hookEvents": {
       "type": "array",
       "items": {

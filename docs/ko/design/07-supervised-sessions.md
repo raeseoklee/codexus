@@ -220,6 +220,10 @@ Codex leader pane
 
 이는 Codex native subagent를 대체하지 않고 보완해야 합니다.
 
+현재 session 안의 Codex native subagent는
+[Subagent evidence supervision](09-subagent-evidence-supervision.md)을 참고합니다. 같은 규칙이
+적용됩니다: subagent는 claim을 만들 수 있지만 completion gate는 verification입니다.
+
 ## 명시적 비목표
 
 - 별도 chat/readline UI를 만들지 않습니다.

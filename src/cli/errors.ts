@@ -70,6 +70,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing session checkpoint label.";
     case "missing_session_verification_command":
       return "Missing session verification command.";
+    case "ambiguous_session_verification_command":
+      return "Multiple verification candidates were detected; choose one with --verify \"<cmd>\".";
     case "session_state_corrupt":
       return `Codexus session state is corrupt${target ? `: ${target}` : ""}.`;
     case "missing_schema_file":

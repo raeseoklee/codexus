@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { assertMaxPositionals, flagArray, flagBool, flagString, type ParsedArgs } from "../args.ts";
+import { assertAllowedFlags, assertMaxPositionals, flagArray, flagBool, flagString, type ParsedArgs } from "../args.ts";
 import { loadConfig } from "../../config/loader.ts";
 import { runPolicyPreflight } from "../../policy/preflight.ts";
 import { runVerification } from "../../verification/runner.ts";
@@ -16,10 +16,97 @@ import {
   updateSessionState,
 } from "../../session/state.ts";
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
+import { computeWorkspaceFingerprint, fingerprintsEqual, type WorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
+import { detectVerifyCandidates } from "../../session/verify-detect.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 
 function statePath(cwd: string): string {
   return sessionPaths(cwd).state;
+}
+
+type EvidenceVerification = "passed" | "failed" | "missing" | "stale";
+
+interface EvidenceModel {
+  verification: EvidenceVerification;
+  evidenceFresh: boolean;
+  dirtySinceLastVerify: boolean;
+  recommendedVerify: string | null;
+  lastCheckpoint: { id: string; label: string; createdAt: string; path: string } | null;
+  lastVerification: { id: string; status: string; createdAt: string; path: string } | null;
+  currentFingerprint: WorkspaceFingerprint;
+  fingerprintReliable: boolean;
+}
+
+// Derive the always-on evidence model purely from the saved state and a freshly
+// computed workspace fingerprint. Never trusts agent self-report: dirty/fresh
+// come from fingerprint comparison, and degraded fingerprints can never report
+// evidenceFresh:true.
+function deriveEvidenceModel(
+  state: NonNullable<Awaited<ReturnType<typeof refreshSessionState>>>,
+  currentFingerprint: WorkspaceFingerprint,
+  recommendedVerify: string | null,
+): EvidenceModel {
+  const lastCheckpointRecord = state.checkpoints.at(-1) ?? null;
+  const lastVerificationRecord = state.verifications.at(-1) ?? null;
+  const lastVerifiedFingerprint = state.lastVerifiedFingerprint;
+
+  const lastCheckpoint = lastCheckpointRecord
+    ? { id: lastCheckpointRecord.id, label: lastCheckpointRecord.label, createdAt: lastCheckpointRecord.createdAt, path: lastCheckpointRecord.path }
+    : null;
+  const lastVerification = lastVerificationRecord
+    ? { id: lastVerificationRecord.id, status: lastVerificationRecord.status, createdAt: lastVerificationRecord.createdAt, path: lastVerificationRecord.path }
+    : null;
+
+  // No prior verified fingerprint at all -> missing. We cannot assert dirtiness
+  // against nothing, so dirtySinceLastVerify is true (work is unverified).
+  if (!lastVerifiedFingerprint) {
+    return {
+      verification: "missing",
+      evidenceFresh: false,
+      dirtySinceLastVerify: true,
+      recommendedVerify,
+      lastCheckpoint,
+      lastVerification,
+      currentFingerprint,
+      fingerprintReliable: !currentFingerprint.degraded,
+    };
+  }
+
+  const storedFingerprint = lastVerifiedFingerprint.fingerprint;
+  const fingerprintReliable = !currentFingerprint.degraded && !storedFingerprint.degraded;
+  // fingerprintsEqual already returns false if either side is degraded, so a
+  // degraded fingerprint is treated as dirty (cannot prove cleanliness).
+  const dirtySinceLastVerify = !fingerprintsEqual(currentFingerprint, storedFingerprint);
+  const lastStatusPassed = lastVerifiedFingerprint.status === "passed";
+
+  // evidenceFresh demands a passing last verification, a clean workspace, and a
+  // reliable (non-degraded) fingerprint on both sides. Anything less is not fresh.
+  const evidenceFresh = lastStatusPassed && !dirtySinceLastVerify && fingerprintReliable;
+
+  let verification: EvidenceVerification;
+  if (evidenceFresh) {
+    verification = "passed";
+  } else if (!fingerprintReliable || dirtySinceLastVerify) {
+    // Cannot reliably compare, OR the workspace moved since the last verification
+    // (whether it passed or failed). Either way the recorded verdict no longer
+    // describes the current workspace, so report stale rather than a now-untrue
+    // passed/failed. lastVerification.status still carries the historical result.
+    verification = "stale";
+  } else {
+    // Reliable and clean, but the last verification did not pass -> failure stands.
+    verification = "failed";
+  }
+
+  return {
+    verification,
+    evidenceFresh,
+    dirtySinceLastVerify,
+    recommendedVerify,
+    lastCheckpoint,
+    lastVerification,
+    currentFingerprint,
+    fingerprintReliable,
+  };
 }
 
 async function statusCommand(cwd: string, json: boolean): Promise<void> {
@@ -27,11 +114,17 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   const stateRead = await readSessionStateWithMigration(cwd);
   const notifyHook = await inspectNotifyHookConfig(cwd);
   const state = stateRead.state ? await refreshSessionState(cwd, stateRead.state) : null;
+  const detection = detectVerifyCandidates(cwd);
+  const evidence = state
+    ? deriveEvidenceModel(state, computeWorkspaceFingerprint(cwd), detection.recommended)
+    : null;
   const result = {
     schemaVersion: 1,
     status: state ? "initialized" : "not_initialized",
     cwd,
     paths,
+    evidence,
+    verifyDetection: detection,
     overlays: {
       project: await overlayStatus(cwd, "project"),
       user: await overlayStatus(cwd, "user"),
@@ -57,6 +150,11 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`State: ${statePath(cwd)}`);
   console.log(`Project overlay: ${result.overlays.project.installed ? "installed" : "missing"}`);
   console.log(`Notify hook: ${result.notifyHook.status}`);
+  if (evidence) {
+    console.log(`Verification: ${evidence.verification} (evidenceFresh: ${evidence.evidenceFresh})`);
+    console.log(`Dirty since last verify: ${evidence.dirtySinceLastVerify}`);
+    console.log(`Recommended verify: ${evidence.recommendedVerify ?? "none"}`);
+  }
 }
 
 async function migrateCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
@@ -118,10 +216,63 @@ async function checkpointCommand(args: ParsedArgs, cwd: string, json: boolean): 
   console.log(markdownPath);
 }
 
+// Detect-and-recommend-only path. `cx session verify --auto --json` returns a
+// recommendation from project signals and never executes anything.
+async function verifyAutoRecommendCommand(cwd: string, json: boolean): Promise<void> {
+  const detection = detectVerifyCandidates(cwd);
+  const result = {
+    schemaVersion: 1,
+    mode: "recommend" as const,
+    executed: false,
+    detection,
+    statePath: statePath(cwd),
+  };
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(detection.recommended
+      ? `Recommended verification: ${detection.recommended}`
+      : detection.candidates.length > 0
+        ? `Verification candidates: ${detection.candidates.join(", ")}`
+        : "No verification command could be inferred.");
+    console.log(detection.reason);
+    console.log(detection.recommended
+      ? "Run `cx session verify --auto --execute` to actually verify."
+      : "Choose one with `cx session verify --verify \"<cmd>\"` to actually verify.");
+  }
+}
+
 async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
-  const commands = flagArray(args.flags, "verify");
-  if (commands.length === 0) throw new Error("missing_session_verification_command");
   assertMaxPositionals(args, 1);
+  // Reject unknown flags so typos error loudly instead of being silently
+  // ignored, matching the other command handlers. These are every flag this
+  // path reads: json/cwd are consumed by sessionCommand, verify/auto/execute here.
+  assertAllowedFlags(args, ["json", "cwd", "verify", "auto", "execute"]);
+  const auto = flagBool(args.flags, "auto");
+  const execute = flagBool(args.flags, "execute");
+  const explicitCommands = flagArray(args.flags, "verify");
+
+  // Resolve the commands to run. --auto --execute resolves the recommended
+  // command; --auto alone (no --execute, no --verify) is detect/recommend only.
+  let commands = explicitCommands;
+  let detection: ReturnType<typeof detectVerifyCandidates> | null = null;
+  if (auto) {
+    detection = detectVerifyCandidates(cwd);
+    if (!execute && explicitCommands.length === 0) {
+      await verifyAutoRecommendCommand(cwd, json);
+      return;
+    }
+    if (explicitCommands.length === 0) {
+      if (!detection.recommended) {
+        throw new Error(detection.candidates.length > 0
+          ? "ambiguous_session_verification_command"
+          : "missing_session_verification_command");
+      }
+      commands = [detection.recommended];
+    }
+  }
+  if (commands.length === 0) throw new Error("missing_session_verification_command");
+
   const { config } = loadConfig({ cwd });
   const id = createVerificationId();
   const paths = sessionPaths(cwd);
@@ -135,6 +286,12 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
     verificationCommands: commands,
   });
   if (policy.status === "blocked") {
+    // Policy-blocked: nothing ran. We append a verification record (with a real,
+    // non-degraded workspace fingerprint) for the audit trail, but we do NOT
+    // update lastVerifiedFingerprint. Because lastVerifiedFingerprint is the only
+    // input the evidence model promotes to "fresh", no fresh evidence is produced
+    // by a blocked run.
+    const fingerprint = computeWorkspaceFingerprint(cwd);
     const createdAt = new Date().toISOString();
     const record = {
       id,
@@ -143,6 +300,7 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
       commands,
       path: verificationPath,
       artifactsDir,
+      workspaceFingerprint: fingerprint,
     };
     await writeJsonAtomic(verificationPath, {
       schemaVersion: 1,
@@ -155,7 +313,7 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
       ...value,
       verifications: [...value.verifications, record],
     }));
-    const result = { schemaVersion: 1, verification: record, policy, statePath: statePath(cwd), state };
+    const result = { schemaVersion: 1, mode: "execute" as const, executed: false, verification: record, policy, detection, statePath: statePath(cwd), state };
     if (json) {
       console.log(JSON.stringify(result, null, 2));
     } else {
@@ -171,6 +329,9 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
     artifactsDir,
     timeoutMs: config.verification.timeoutMs,
   });
+  // Compute the fingerprint immediately after the verification runs so it
+  // describes the workspace whose content was actually verified.
+  const fingerprint = computeWorkspaceFingerprint(cwd);
   const createdAt = new Date().toISOString();
   const record = {
     id,
@@ -179,6 +340,13 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
     commands,
     path: verificationPath,
     artifactsDir,
+    workspaceFingerprint: fingerprint,
+  };
+  const lastVerifiedFingerprint = {
+    verificationId: id,
+    status: verification.status,
+    recordedAt: createdAt,
+    fingerprint,
   };
   await writeJsonAtomic(verificationPath, {
     schemaVersion: 1,
@@ -190,8 +358,9 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
   const state = await updateSessionState(cwd, "session verify", (value) => ({
     ...value,
     verifications: [...value.verifications, record],
+    lastVerifiedFingerprint,
   }));
-  const result = { schemaVersion: 1, verification: record, result: verification, statePath: statePath(cwd), state };
+  const result = { schemaVersion: 1, mode: "execute" as const, executed: true, verification: record, result: verification, detection, statePath: statePath(cwd), state };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
     process.exitCode = verification.status === "passed" || verification.status === "skipped" ? 0 : 1;
