@@ -7,6 +7,38 @@ All notable changes to Codexus will be documented in this file.
 This project follows a practical pre-1.0 changelog format. Breaking changes can
 occur before 1.0, but they should be called out clearly.
 
+## 0.1.0-alpha.3 - 2026-05-31
+
+### Added
+
+- Always-on Codex session evidence now reports workspace-fingerprint-derived
+  dirty/stale state without running verification.
+- `cx session status` and `cx session hud` expose ambient evidence freshness
+  and compact change-evidence summaries.
+- `cx session verify --auto` can recommend likely verification commands without
+  executing them, while `--execute` keeps execution explicit and policy-gated.
+- Notify-hook heartbeats can record derived `heartbeatEvidence` and compact
+  `heartbeatChangeEvidence` snapshots without marking stale verification fresh.
+- Quality evidence guard commands now include `cx slop check` and
+  `cx session slop`, including `--gate` exit codes driven only by derivable
+  evidence.
+- Session subagent support is recorder-only: `record`, `attach`, and `status`
+  store unverified claims without launching workers or changing evidence
+  freshness.
+- Additional honest-gated surfaces report current limits for schema-engine
+  status, replay parity, worker launch, cron/gateway live dispatch, and OMX
+  injection approval.
+
+### Known Gaps
+
+- Desktop app-server attachment remains gated after Stage B produced negative
+  live-dispatch evidence in the tested environment.
+- Slop heuristics are advisory and partial; gate status is still derived only
+  from explicit evidence gaps.
+- Live app-server dispatch, cron/gateway live dispatch, full JSON Schema engine
+  enforcement, tmux worker launch, and automatic context injection remain
+  deferred.
+
 ## 0.1.0-alpha.2 - 2026-05-30
 
 ### Added

@@ -7,6 +7,36 @@ Codexus의 notable change를 이 파일에 기록합니다.
 이 프로젝트는 practical pre-1.0 changelog format을 따릅니다. 1.0 전에는 breaking
 change가 있을 수 있지만, 명확히 표시해야 합니다.
 
+## 0.1.0-alpha.3 - 2026-05-31
+
+### Added
+
+- Always-on Codex session evidence는 verification을 실행하지 않고
+  workspace fingerprint에서 파생한 dirty/stale 상태를 보고합니다.
+- `cx session status`와 `cx session hud`는 ambient evidence freshness와 compact
+  change-evidence summary를 노출합니다.
+- `cx session verify --auto`는 가능한 verification command를 실행 없이 추천할 수
+  있고, `--execute`는 명시 실행과 policy gate를 유지합니다.
+- Notify-hook heartbeat는 stale verification을 fresh로 바꾸지 않고 derived
+  `heartbeatEvidence`와 compact `heartbeatChangeEvidence` snapshot을 기록할 수
+  있습니다.
+- Quality evidence guard command에 `cx slop check`와 `cx session slop`이
+  추가됐고, `--gate` exit code는 derivable evidence로만 결정됩니다.
+- Session subagent support는 recorder-only입니다. `record`, `attach`, `status`는
+  worker를 실행하거나 evidence freshness를 바꾸지 않고 unverified claim을
+  저장합니다.
+- Schema-engine status, replay parity, worker launch, cron/gateway live dispatch,
+  OMX injection approval의 현재 한계를 honest-gated surface로 보고합니다.
+
+### Known Gaps
+
+- Desktop app-server attachment는 테스트된 환경에서 Stage B가 negative
+  live-dispatch evidence를 기록한 뒤에도 gated 상태입니다.
+- Slop heuristic은 advisory/partial입니다. Gate status는 여전히 explicit evidence
+  gap에서만 파생됩니다.
+- Live app-server dispatch, cron/gateway live dispatch, full JSON Schema engine
+  enforcement, tmux worker launch, automatic context injection은 deferred 상태입니다.
+
 ## 0.1.0-alpha.2 - 2026-05-30
 
 ### Added
