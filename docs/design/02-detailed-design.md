@@ -251,7 +251,7 @@ into a prompt-safe block for the current Codex session. It retrieves context but
 does not inject it automatically or create a separate chat loop.
 
 `--approve` writes a durable, non-injected context artifact under
-`.codex-harness/adapters/context/<id>/` with `context.md`, `context.json`, and a
+`.codexus/adapters/context/<id>/` with `context.md`, `context.json`, and a
 hash. This is an explicit handoff artifact, not automatic prompt mutation.
 
 ### `cx app-server roundtrip` and `cx app-server experiment`
@@ -315,7 +315,7 @@ current interactive Codex session, similar in feel to OMX.
 Adapter requirements:
 
 - call the same Codexus core used by `cx`,
-- share `.codex-harness` ledger, memory, and skill stores,
+- share `.codexus` ledger, memory, and skill stores,
 - avoid duplicating workflow kernel logic inside a skill or plugin wrapper,
 - support narrow commands first, such as status, memory retrieval, skill review,
   bounded context retrieval, checkpointing, and session verification,
@@ -337,8 +337,8 @@ Implemented first slice:
 Config precedence:
 
 1. CLI flags
-2. project `.codex-harness/config.json`
-3. user `~/.codex-harness/config.json`
+2. project `.codexus/config.json`
+3. user `~/.codexus/config.json`
 4. defaults
 
 Initial config:
@@ -384,7 +384,7 @@ Unknown config keys should produce warnings, not crashes, until the schema stabi
 Project-local root:
 
 ```text
-.codex-harness/
+.codexus/
   config.json
   runs/
   memory/
@@ -396,7 +396,7 @@ Project-local root:
 Run layout:
 
 ```text
-.codex-harness/runs/<run-id>/
+.codexus/runs/<run-id>/
   input.json
   state.json
   events.jsonl

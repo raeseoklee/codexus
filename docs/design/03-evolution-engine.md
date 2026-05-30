@@ -106,7 +106,7 @@ Memory is not raw transcript storage. Raw logs stay in run ledgers. Memory conta
 Layout:
 
 ```text
-.codex-harness/memory/
+.codexus/memory/
   entries.jsonl
   index.json
   summaries/
@@ -171,7 +171,7 @@ The prompt injection budget should start small: no more than 5 memory entries or
 Proposed skills live under:
 
 ```text
-.codex-harness/skills/proposed/<skill-id>/
+.codexus/skills/proposed/<skill-id>/
   skill.json
   SKILL.md
   evidence.json
@@ -279,7 +279,7 @@ cx skill promote <skill-id>
 Promotion writes to:
 
 ```text
-.codex-harness/skills/active/<name>/<version>/
+.codexus/skills/active/<name>/<version>/
 ```
 
 Optional explicit export targets:
@@ -288,7 +288,7 @@ Optional explicit export targets:
 - Codex project skill store
 - OMX-compatible skill store
 
-The first implementation should keep active skills inside `.codex-harness` only. External export should be a later command.
+The first implementation should keep active skills inside `.codexus` only. External export should be a later command.
 
 ## Versioning and Deprecation
 

@@ -66,7 +66,7 @@ Layered architecture:
 
 1. CLI and configuration
 - Commands: `cx doctor`, `cx run`, `cx cancel`, `cx plan`, `cx verify`, `cx resume`, `cx status`, `cx adapt omx`, `cx replay`.
-   - Config precedence: project `.codex-harness/config.json`, user `~/.codex-harness/config.json`, CLI flags.
+   - Config precedence: project `.codexus/config.json`, user `~/.codexus/config.json`, CLI flags.
    - Machine-readable output with `--json` on every command.
 
 2. Driver abstraction
@@ -76,7 +76,7 @@ Layered architecture:
    - `MockDriver`: deterministic local driver for contract tests and replay.
 
 3. Run state and event ledger
-   - Write to `.codex-harness/runs/<run-id>/`.
+   - Write to `.codexus/runs/<run-id>/`.
    - Persist `input.json`, `events.jsonl`, `state.json`, `artifacts/`, `verification.json`, and `report.md`.
    - Terminal outcomes: `complete`, `failed`, `blocked`, `cancelled`.
    - Nonterminal phases: `research`, `plan`, `execute`, `verify`, `repair`.
@@ -103,7 +103,7 @@ Layered architecture:
 
 7. Skill and memory loop
    - Summarize successful runs into reusable lessons.
-   - Propose skill candidates under `.codex-harness/skills/proposed/`.
+   - Propose skill candidates under `.codexus/skills/proposed/`.
    - Promote approved skills into Codex/OMX skill locations through explicit commands.
    - Maintain local memory as append-only JSONL plus summarized markdown, with redaction hooks before persistence.
 
@@ -146,7 +146,7 @@ Phase 1: Codex exec supervisor
 - Run `codex exec --json --skip-git-repo-check -C <cwd> <prompt>`.
 - Capture stdout JSONL and stderr separately.
 - Normalize run events into harness events.
-- Emit `.codex-harness/runs/<id>/report.md`.
+- Emit `.codexus/runs/<id>/report.md`.
 
 Phase 2: workflow state machine
 
@@ -209,7 +209,7 @@ Build only:
 
 1. `cx doctor`
 2. `CodexExecDriver`
-3. run ledger under `.codex-harness/runs/<run-id>/`
+3. run ledger under `.codexus/runs/<run-id>/`
 4. `cx run`
 5. mock-driver tests
 6. one real smoke test using `codex exec --json --skip-git-repo-check`

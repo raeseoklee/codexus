@@ -138,7 +138,7 @@ Installer는 Codexus marker region만 갱신하고 non-Codexus content를 보존
 Codexus는 기존 storage root 아래 session-native state 영역을 추가해야 합니다:
 
 ```text
-.codex-harness/session/
+.codexus/session/
   state.json
   checkpoints/
   verification/
@@ -190,7 +190,7 @@ optional runtime을 채택할 수 있습니다:
 Codex leader pane
   -> codexus team start
   -> tmux worker panes
-  -> shared .codex-harness/session/team state
+  -> shared .codexus/session/team state
 ```
 
 이는 Codex native subagent를 대체하지 않고 보완해야 합니다.
@@ -252,7 +252,7 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 - `cx session checkpoint <label> --json`은 같은 project에서 나중에 참조 가능한 local
   checkpoint artifact를 씁니다.
 - `cx session verify --verify <cmd> --json`은 verification을 실행하고
-  `.codex-harness/session/` 아래 artifact를 기록하며 typed result를 보고합니다.
+  `.codexus/session/` 아래 artifact를 기록하며 typed result를 보고합니다.
 - unsupported hook/statusline/tmux feature는 정직한 unavailable status를 반환합니다.
 - 외부 `cx run`은 변경 없이 계속 동작합니다.
 

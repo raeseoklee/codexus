@@ -5,6 +5,7 @@ import { redactSensitiveText } from "../policy/redaction.ts";
 import { assertSchemaValue } from "../validation/schemas.ts";
 import { withFileLock } from "../util/lock.ts";
 import { ensureDir } from "../util/fs.ts";
+import { harnessRoot, legacyHarnessRoot } from "../ledger/paths.ts";
 
 export interface MemoryEntry {
   schemaVersion: 1;
@@ -39,11 +40,18 @@ export function redactMemoryText(text: string): string {
 }
 
 export function memoryPath(cwd: string): string {
-  return join(cwd, ".codex-harness", "memory", "entries.jsonl");
+  return join(harnessRoot(cwd), "memory", "entries.jsonl");
 }
 
 export function memoryIndexPath(cwd: string): string {
-  return join(cwd, ".codex-harness", "memory", "index.json");
+  return join(harnessRoot(cwd), "memory", "index.json");
+}
+
+function readableMemoryPath(cwd: string): string {
+  const path = memoryPath(cwd);
+  if (existsSync(path)) return path;
+  const legacyPath = join(legacyHarnessRoot(cwd), "memory", "entries.jsonl");
+  return existsSync(legacyPath) ? legacyPath : path;
 }
 
 export function buildMemoryIndex(entries: MemoryEntry[]): MemoryIndex {
@@ -99,7 +107,7 @@ export function searchMemoryEntries(entries: MemoryEntry[], query: string, limit
 }
 
 export async function readMemoryEntries(cwd: string): Promise<MemoryEntry[]> {
-  const path = memoryPath(cwd);
+  const path = readableMemoryPath(cwd);
   if (!existsSync(path)) return [];
   const raw = await readFile(path, "utf8");
   return raw.split("\n").filter(Boolean).map((line) => {

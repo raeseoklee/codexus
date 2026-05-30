@@ -148,7 +148,7 @@ region.
 Codexus should add a session-native state area under the existing storage root:
 
 ```text
-.codex-harness/session/
+.codexus/session/
   state.json
   checkpoints/
   verification/
@@ -202,7 +202,7 @@ similar optional runtime later:
 Codex leader pane
   -> codexus team start
   -> tmux worker panes
-  -> shared .codex-harness/session/team state
+  -> shared .codexus/session/team state
 ```
 
 This should complement Codex native subagents, not replace them.
@@ -267,7 +267,7 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 - `cx session checkpoint <label> --json` writes a local checkpoint artifact that
   can be referenced later in the same project.
 - `cx session verify --verify <cmd> --json` runs verification, records the
-  artifact under `.codex-harness/session/`, and reports a typed result.
+  artifact under `.codexus/session/`, and reports a typed result.
 - Unsupported hooks/statusline/tmux features return truthful unavailable
   statuses.
 - External `cx run` continues to work unchanged.

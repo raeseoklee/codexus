@@ -1,8 +1,9 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { hostname } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join } from "node:path";
 import { ensureDir } from "./fs.ts";
+import { harnessRoot } from "../ledger/paths.ts";
 
 export interface LockMetadata {
   schemaVersion: 1;
@@ -29,7 +30,7 @@ const missingOwnerGraceMs = 5_000;
 
 export function lockPath(cwd: string, name: string): string {
   const safe = name.toLowerCase().replace(/[^a-z0-9_.-]+/g, "-").replace(/^-|-$/g, "") || "lock";
-  return join(resolve(cwd), ".codex-harness", "locks", `${safe}.lock`);
+  return join(harnessRoot(cwd), "locks", `${safe}.lock`);
 }
 
 function metadataPath(path: string): string {
@@ -90,7 +91,7 @@ export async function inspectLock(cwd: string, name: string): Promise<LockInfo> 
 }
 
 export async function listLocks(cwd: string): Promise<LockInfo[]> {
-  const root = join(resolve(cwd), ".codex-harness", "locks");
+  const root = join(harnessRoot(cwd), "locks");
   if (!existsSync(root)) return [];
   const entries = await readdir(root, { withFileTypes: true });
   const locks: LockInfo[] = [];

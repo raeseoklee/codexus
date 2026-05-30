@@ -82,7 +82,11 @@ state, Codexus skill 설치 상태를 보고합니다.
 node src/cli/main.ts run --driver mock --json "hello from codexus"
 ```
 
-명령은 `.codex-harness/runs/<run-id>/` 아래 run ledger를 기록합니다.
+명령은 `.codexus/runs/<run-id>/` 아래 run ledger를 기록합니다.
+
+Project에 이전 `.codex-harness/` directory가 있으면 다음 CLI command에서
+`.codexus/`로 이관하고 legacy directory를 제거합니다. 충돌 file은
+`.codexus/migration-conflicts/` 아래에 보존합니다.
 
 확인:
 
@@ -180,5 +184,5 @@ $codexus status <run-id> --json 확인해줘.
 cx init --with-docs --json
 ```
 
-이 명령은 관련 없는 tool state를 변경하지 않고 `.codex-harness/` directory와
+이 명령은 관련 없는 tool state를 변경하지 않고 `.codexus/` directory와
 config를 생성합니다.

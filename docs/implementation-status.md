@@ -58,7 +58,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `gateway status`
   - `gateway check`
 - Config loader with defaults, project/user config merge, unknown-key warnings, normalization, and focused schema enforcement.
-- Run ledger under `.codex-harness/runs/<run-id>/`.
+- Run ledger under `.codexus/runs/<run-id>/`.
 - Atomic `state.json` writes and append-only `events.jsonl` with focused read-path validation.
 - Typed JSON CLI error envelope for automation-facing failures when `--json` is set.
 - State corruption is surfaced as a typed JSON error.
@@ -132,13 +132,16 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   refresh or cloned-repository installs.
 - `doctor --json` diagnoses whether the installed Codexus skill tree matches this repository, and the installer writes source/installed tree hashes.
 - `doctor --json --strict` preserves the JSON diagnostic body while returning nonzero when a fail-level check is present.
+- `.codexus` is the canonical project runtime root. If the CLI finds legacy
+  `.codex-harness`, it migrates it into `.codexus` and removes the legacy
+  directory; conflicting files are preserved under `.codexus/migration-conflicts/`.
 - `cx setup codex-session` installs or refreshes a marker-bounded Codexus
   runtime overlay in project or user `AGENTS.md` without changing content
   outside the markers.
 - Codexus AGENTS overlay writes are atomic, create a one-time `.codexus.bak`
   backup, and append a fresh marker block when existing markers are damaged.
 - `cx session status`, `cx session checkpoint`, and `cx session verify` provide
-  the first Codex-native session surface under `.codex-harness/session/`.
+  the first Codex-native session surface under `.codexus/session/`.
 - `cx session verify` reuses the verification policy preflight and records
   blocked verification attempts instead of executing dangerous commands.
 - Session state reads perform focused structure validation, and mutable session
@@ -160,7 +163,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 78.
+- Current test count: 80.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -210,8 +213,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Codex-native adapter wrapper root discovery is covered by tests.
 - Codex skill structure is validated with the Codex skill validator.
 - Session-native setup, damaged-marker recovery, session-state shape
-  validation, session lock handling, status, checkpoint, verify, and
-  policy-blocked session verification commands are covered by CLI tests.
+  validation, session lock handling, legacy root migration, status,
+  checkpoint, verify, and policy-blocked session verification commands are
+  covered by CLI tests.
 
 ## Acceptance Coverage
 

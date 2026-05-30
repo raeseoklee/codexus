@@ -13,7 +13,7 @@ Use for environment readiness, Codex auth, driver capabilities, and Codexus
 state root checks.
 
 `setup codex-session` installs or refreshes only the Codexus marker block in
-`AGENTS.md` and initializes `.codex-harness/session/state.json`.
+`AGENTS.md` and initializes `.codexus/session/state.json`.
 
 ## Current Session
 
@@ -25,7 +25,7 @@ node codex/skills/codexus/scripts/cx.mjs session verify --verify "npm test" --js
 
 Use these first when the active Codex conversation needs durable session
 evidence. `session verify` writes command output under
-`.codex-harness/session/verification/`.
+`.codexus/session/verification/`.
 
 ## Run State
 
@@ -84,7 +84,7 @@ Live model replay is blocked unless the local experiment gate is explicitly enab
 node codex/skills/codexus/scripts/cx.mjs locks list --json
 node codex/skills/codexus/scripts/cx.mjs locks inspect memory --json
 node codex/skills/codexus/scripts/cx.mjs schema check --json
-node codex/skills/codexus/scripts/cx.mjs schema validate --type state --file .codex-harness/runs/<run-id>/state.json --json
+node codex/skills/codexus/scripts/cx.mjs schema validate --type state --file .codexus/runs/<run-id>/state.json --json
 node codex/skills/codexus/scripts/cx.mjs schema validate-run <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json
 node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --record --probe-process --supervise-fake --timeout-ms 30000 --json

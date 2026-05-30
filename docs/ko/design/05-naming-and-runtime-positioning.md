@@ -58,7 +58,7 @@ codexus
 현재 구현된 storage root:
 
 ```text
-.codex-harness/
+.codexus/
 ```
 
 이 경로는 compatibility 때문에 유지합니다. 향후 `.codexus/`를 도입한다면 backward-compatible read가 있는 명시적 migration으로 진행해야 합니다.

@@ -62,7 +62,7 @@ Current implementation note:
 Current MVP storage root:
 
 ```text
-.codex-harness/
+.codexus/
 ```
 
 This path is already implemented and should remain supported for compatibility. A future migration may introduce `.codexus/`, but that should be a deliberate storage migration with backward-compatible reads, not a silent rename.
@@ -118,7 +118,7 @@ Target behavior:
 - Codexus guidance can steer the current session toward checkpointing,
   verification, memory lookup, and evidence capture,
 - the adapter calls the same core runtime instead of duplicating logic,
-- the same `.codex-harness` state remains the source of truth,
+- the same `.codexus` state remains the source of truth,
 - Codex-native usage becomes the normal interactive UX while the external CLI
   remains the engine and automation path.
 

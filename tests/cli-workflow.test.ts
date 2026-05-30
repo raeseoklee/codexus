@@ -26,7 +26,7 @@ function runCli(cwd: string, args: string[]) {
 }
 
 async function waitForRunningRunId(cwd: string): Promise<string> {
-  const runsRoot = join(cwd, ".codex-harness", "runs");
+  const runsRoot = join(cwd, ".codexus", "runs");
   for (let attempt = 0; attempt < 100; attempt += 1) {
     try {
       const entries = await readdir(runsRoot, { withFileTypes: true });
@@ -78,7 +78,7 @@ test("run command repairs failed verification once and completes", async () => {
     const repairContextPath = state.artifacts.find((path: string) => path.endsWith("repair-context-001.md"));
     assert.ok(repairContextPath);
     assert.match(await readFile(repairContextPath, "utf8"), /CODEXUS_REPAIR_MARKER/);
-    const events = await readFile(join(cwd, ".codex-harness", "runs", parsed.runId, "events.jsonl"), "utf8");
+    const events = await readFile(join(cwd, ".codexus", "runs", parsed.runId, "events.jsonl"), "utf8");
     assert.match(events, /repair.started/);
     const eventRecords = events.trim().split(/\n/).map((line) => JSON.parse(line));
     const driverMessages = eventRecords.filter((event) => event.type === "driver.mock.message");
@@ -234,11 +234,11 @@ test("plan command writes harness and omx-compatible artifacts", async () => {
     const plan = runCli(cwd, ["plan", "--omx", "--json", "implement workflow kernel"]);
     assert.equal(plan.status, 0, plan.stderr);
     const output = JSON.parse(plan.stdout);
-    assert.match(output.path, /\.codex-harness\/plans\/plan_/);
+    assert.match(output.path, /\.codexus\/plans\/plan_/);
     assert.match(output.omxPath, /\.omx\/plans\/plan_/);
     const text = await readFile(output.omxPath, "utf8");
     assert.match(text, /implement workflow kernel/);
-    const metadata = await readFile(join(cwd, ".codex-harness", "omx", "last-plan.json"), "utf8");
+    const metadata = await readFile(join(cwd, ".codexus", "omx", "last-plan.json"), "utf8");
     assert.ok(metadata.includes("without mutating .omx/state"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
@@ -365,7 +365,7 @@ test("aborted run reaches a cancelled terminal ledger", async () => {
     const state = JSON.parse(await readFile(result.statePath, "utf8"));
     assert.equal(state.status, "terminal");
     assert.equal(state.outcome, "cancelled");
-    const events = await readFile(join(cwd, ".codex-harness", "runs", result.runId, "events.jsonl"), "utf8");
+    const events = await readFile(join(cwd, ".codexus", "runs", result.runId, "events.jsonl"), "utf8");
     assert.match(events, /run.terminal/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
@@ -403,7 +403,7 @@ test("cancel command requests live owner cancellation through the run ledger", a
     assert.equal(state.status, "terminal");
     assert.equal(state.outcome, "cancelled");
     assert.equal(state.error.code, "external_cancel_requested");
-    const events = await readFile(join(cwd, ".codex-harness", "runs", runId, "events.jsonl"), "utf8");
+    const events = await readFile(join(cwd, ".codexus", "runs", runId, "events.jsonl"), "utf8");
     assert.match(events, /run.cancel_requested/);
     assert.match(events, /run.terminal/);
   } finally {

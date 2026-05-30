@@ -82,7 +82,11 @@ Codexus state, and Codexus skill-install status.
 node src/cli/main.ts run --driver mock --json "hello from codexus"
 ```
 
-The command writes a run ledger under `.codex-harness/runs/<run-id>/`.
+The command writes a run ledger under `.codexus/runs/<run-id>/`.
+
+If an older `.codex-harness/` directory exists in the project, the CLI migrates
+it into `.codexus/` on the next command and removes the legacy directory.
+Conflicting files are preserved under `.codexus/migration-conflicts/`.
 
 Inspect it:
 
@@ -180,5 +184,5 @@ Inside a target project:
 cx init --with-docs --json
 ```
 
-This creates `.codex-harness/` directories and config without mutating unrelated
+This creates `.codexus/` directories and config without mutating unrelated
 tool state.

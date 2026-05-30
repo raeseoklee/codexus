@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 import { createRunId } from "../../util/id.ts";
+import { harnessRoot } from "../../ledger/paths.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 function planText(task: string, createdAt: string): string {
@@ -38,7 +39,7 @@ export async function planCommand(args: ParsedArgs): Promise<void> {
 
   const id = createRunId().replace(/^run_/, "plan_");
   const createdAt = new Date().toISOString();
-  const root = join(cwd, ".codex-harness", "plans");
+  const root = join(harnessRoot(cwd), "plans");
   await ensureDir(root);
   const path = join(root, `${id}.md`);
   const text = planText(task, createdAt);
@@ -50,7 +51,7 @@ export async function planCommand(args: ParsedArgs): Promise<void> {
     await ensureDir(omxRoot);
     omxPath = join(omxRoot, `${id}.md`);
     await writeFile(omxPath, text);
-    const adapterRoot = join(cwd, ".codex-harness", "omx");
+    const adapterRoot = join(harnessRoot(cwd), "omx");
     await ensureDir(adapterRoot);
     await writeJsonAtomic(join(adapterRoot, "last-plan.json"), {
       schemaVersion: 1,

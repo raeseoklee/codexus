@@ -74,8 +74,8 @@ orphan ledger를 `cancelled`로 닫습니다.
 우선순위:
 
 1. CLI flags
-2. project `.codex-harness/config.json`
-3. user `~/.codex-harness/config.json`
+2. project `.codexus/config.json`
+3. user `~/.codexus/config.json`
 4. defaults
 
 Config는 driver, Codex command/model/sandbox/approval/run timeout, verification
@@ -87,7 +87,7 @@ policy, optional interop preference, automation gates를 포함합니다. Local
 ## 저장소 레이아웃
 
 ```text
-.codex-harness/
+.codexus/
   config.json
   runs/
   memory/
@@ -99,7 +99,7 @@ policy, optional interop preference, automation gates를 포함합니다. Local
 Run layout:
 
 ```text
-.codex-harness/runs/<run-id>/
+.codexus/runs/<run-id>/
   input.json
   state.json
   events.jsonl
@@ -184,7 +184,7 @@ session 안에서 OMX처럼 호출할 수 있게 하는 Codex-native session run
 요구사항:
 
 - `cx`와 같은 core runtime 사용
-- `.codex-harness` ledger/memory/skill store 공유
+- `.codexus` ledger/memory/skill store 공유
 - workflow kernel 중복 구현 금지
 - status, memory retrieval, skill review, bounded context retrieval, checkpoint,
   session verification부터 시작
@@ -202,7 +202,7 @@ session 안에서 OMX처럼 호출할 수 있게 하는 Codex-native session run
 `cx adapt omx context`는 active index에서 approved/replay-passed 상태인
 `codexus:<skill-name>` skill과 memory를 bounded prompt-safe block으로
 formatting합니다. 자동 prompt injection이나 별도 chat loop는 만들지 않습니다.
-`--approve`를 사용하면 `.codex-harness/adapters/context/<id>/` 아래
+`--approve`를 사용하면 `.codexus/adapters/context/<id>/` 아래
 `context.md`, `context.json`, hash를 가진 durable artifact를 씁니다. 이것은
 명시적 handoff artifact이며 prompt를 자동 mutate하지 않습니다.
 

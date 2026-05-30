@@ -57,7 +57,7 @@ OMC와 OMX는 같은 계열의 하네스 아이디어입니다. OMC는 Claude Co
    - `MockDriver`: 테스트와 replay를 위한 deterministic driver입니다.
 
 3. Run ledger
-   - `.codex-harness/runs/<run-id>/` 아래에 `input.json`, `state.json`, `events.jsonl`, `artifacts/`, `verification.json`, `experience.json`, `report.md`를 저장합니다.
+   - `.codexus/runs/<run-id>/` 아래에 `input.json`, `state.json`, `events.jsonl`, `artifacts/`, `verification.json`, `experience.json`, `report.md`를 저장합니다.
 
 4. Workflow kernel
    - 실행, 검증, repair, terminal outcome을 관리합니다.
@@ -70,7 +70,7 @@ OMC와 OMX는 같은 계열의 하네스 아이디어입니다. OMC는 Claude Co
 
 6. Codex-native adapter
    - 향후 Codex 세션 안에서 Codexus를 호출할 수 있게 합니다.
-   - 같은 core runtime과 `.codex-harness` state를 재사용합니다.
+   - 같은 core runtime과 `.codexus` state를 재사용합니다.
 
 7. Evolution engine
    - 완료된 run에서 experience, memory, skill proposal을 생성합니다.

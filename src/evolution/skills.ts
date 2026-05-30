@@ -7,6 +7,7 @@ import { assertSchemaValue } from "../validation/schemas.ts";
 import { withFileLock } from "../util/lock.ts";
 import type { ExperienceRecord } from "./experience.ts";
 import { buildDefaultReplaySpec, evaluateReplaySpec, readReplaySpec, type ReplayResult } from "./replay.ts";
+import { harnessRoot, legacyHarnessRoot } from "../ledger/paths.ts";
 
 export interface SkillProposal {
   schemaVersion: 1;
@@ -196,7 +197,7 @@ export function buildSkillEvidence(skill: SkillProposal, experience: ExperienceR
 
 export async function writeSkillProposal(cwd: string, experience: ExperienceRecord): Promise<SkillProposal> {
   const proposal = buildSkillProposal(experience);
-  const dir = join(cwd, ".codex-harness", "skills", "proposed", proposal.id);
+  const dir = join(harnessRoot(cwd), "skills", "proposed", proposal.id);
   await ensureDir(dir);
   await writeJsonAtomic(join(dir, "skill.json"), proposal);
   await writeJsonAtomic(join(dir, "evidence.json"), buildSkillEvidence(proposal, experience));
@@ -221,23 +222,33 @@ ${proposal.safety.forbiddenActions.map((item) => `- ${item}`).join("\n")}
 }
 
 export function proposedSkillDir(cwd: string, skillId: string): string {
-  return join(cwd, ".codex-harness", "skills", "proposed", skillId);
+  const path = join(harnessRoot(cwd), "skills", "proposed", skillId);
+  if (existsSync(path)) return path;
+  const legacyPath = join(legacyHarnessRoot(cwd), "skills", "proposed", skillId);
+  return existsSync(legacyPath) ? legacyPath : path;
 }
 
 export function activeSkillDir(cwd: string, skill: SkillProposal): string {
-  return join(cwd, ".codex-harness", "skills", "active", skill.name, skill.version);
+  return join(harnessRoot(cwd), "skills", "active", skill.name, skill.version);
 }
 
 export function activeSkillsRoot(cwd: string): string {
-  return join(cwd, ".codex-harness", "skills", "active");
+  return join(harnessRoot(cwd), "skills", "active");
 }
 
 export function activeSkillIndexPath(cwd: string): string {
   return join(activeSkillsRoot(cwd), "index.json");
 }
 
-export async function readActiveSkillIndex(cwd: string): Promise<ActiveSkillIndexEntry[]> {
+function readableActiveSkillIndexPath(cwd: string): string {
   const path = activeSkillIndexPath(cwd);
+  if (existsSync(path)) return path;
+  const legacyPath = join(legacyHarnessRoot(cwd), "skills", "active", "index.json");
+  return existsSync(legacyPath) ? legacyPath : path;
+}
+
+export async function readActiveSkillIndex(cwd: string): Promise<ActiveSkillIndexEntry[]> {
+  const path = readableActiveSkillIndexPath(cwd);
   if (!existsSync(path)) return [];
   const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;
   if (!Array.isArray(parsed)) throw new Error(`schema_validation_failed:active-skill-index:${path}`);
@@ -269,26 +280,46 @@ async function readSkillJson(path: string): Promise<SkillProposal | null> {
 
 export async function listSkills(cwd: string): Promise<SkillListEntry[]> {
   const entries: SkillListEntry[] = [];
-  const proposedRoot = join(cwd, ".codex-harness", "skills", "proposed");
-  if (existsSync(proposedRoot)) {
-    for (const entry of await readdir(proposedRoot, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const path = join(proposedRoot, entry.name, "skill.json");
-      const skill = await readSkillJson(path);
-      if (skill) entries.push({ location: "proposed", path, skill });
+  const proposedRoots = [
+    join(harnessRoot(cwd), "skills", "proposed"),
+    join(legacyHarnessRoot(cwd), "skills", "proposed"),
+  ];
+  const seenProposed = new Set<string>();
+  for (const proposedRoot of proposedRoots) {
+    if (existsSync(proposedRoot)) {
+      for (const entry of await readdir(proposedRoot, { withFileTypes: true })) {
+        if (!entry.isDirectory() || seenProposed.has(entry.name)) continue;
+        const path = join(proposedRoot, entry.name, "skill.json");
+        const skill = await readSkillJson(path);
+        if (skill) {
+          seenProposed.add(entry.name);
+          entries.push({ location: "proposed", path, skill });
+        }
+      }
     }
   }
 
-  const activeRoot = activeSkillsRoot(cwd);
-  if (existsSync(activeRoot)) {
-    for (const nameEntry of await readdir(activeRoot, { withFileTypes: true })) {
-      if (!nameEntry.isDirectory()) continue;
-      const nameDir = join(activeRoot, nameEntry.name);
-      for (const versionEntry of await readdir(nameDir, { withFileTypes: true })) {
-        if (!versionEntry.isDirectory()) continue;
-        const path = join(nameDir, versionEntry.name, "skill.json");
-        const skill = await readSkillJson(path);
-        if (skill) entries.push({ location: "active", path, skill });
+  const activeRoots = [
+    activeSkillsRoot(cwd),
+    join(legacyHarnessRoot(cwd), "skills", "active"),
+  ];
+  const seenActive = new Set<string>();
+  for (const activeRoot of activeRoots) {
+    if (existsSync(activeRoot)) {
+      for (const nameEntry of await readdir(activeRoot, { withFileTypes: true })) {
+        if (!nameEntry.isDirectory()) continue;
+        const nameDir = join(activeRoot, nameEntry.name);
+        for (const versionEntry of await readdir(nameDir, { withFileTypes: true })) {
+          if (!versionEntry.isDirectory()) continue;
+          const key = `${nameEntry.name}/${versionEntry.name}`;
+          if (seenActive.has(key)) continue;
+          const path = join(nameDir, versionEntry.name, "skill.json");
+          const skill = await readSkillJson(path);
+          if (skill) {
+            seenActive.add(key);
+            entries.push({ location: "active", path, skill });
+          }
+        }
       }
     }
   }

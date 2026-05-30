@@ -17,7 +17,7 @@ Codex session
   -> $codexus skill
   -> codex/skills/codexus/scripts/cx.mjs
   -> Codexus core CLI
-  -> .codex-harness ledger / memory / skills
+  -> .codexus ledger / memory / skills
 ```
 
 The skill is intentionally thin. It delegates to the same core used by the external `cx` CLI.
@@ -117,4 +117,5 @@ This starts a separate non-interactive Codex process. It is useful for bounded s
 - Add app-server based turns only after supervised lifecycle and JSON-RPC
   roundtrip contracts are tested.
 - Add richer permission, approval, and policy-block event display.
-- Add a migration from `.codex-harness` to `.codexus` only with backward-compatible reads.
+- Keep `.codexus` as the canonical runtime root. Legacy `.codex-harness`
+  directories are migrated into `.codexus` and removed when the CLI sees them.

@@ -23,7 +23,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `skill propose/index/list/review/promote/export/improve/deprecate`
 - `cron status/run-now`, `gateway status/check`
 - config merge, normalization, focused schema enforcement
-- `.codex-harness/runs/<run-id>/` ledger
+- `.codexus/runs/<run-id>/` ledger
 - focused read-path validation이 붙은 atomic `state.json`, append-only `events.jsonl`
 - `--json` 자동화 실패를 위한 typed JSON CLI error envelope
 - state corruption typed JSON error
@@ -66,12 +66,15 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   install에 계속 사용합니다.
 - `doctor --json`의 installed Codexus skill tree match 진단과 installer source/installed tree hash metadata
 - `doctor --json --strict`는 JSON 진단 body를 유지하면서 fail-level check가 있을 때 nonzero exit code를 반환합니다.
+- `.codexus`가 canonical project runtime root입니다. CLI가 legacy `.codex-harness`를
+  발견하면 `.codexus`로 이관한 뒤 legacy directory를 제거합니다. 충돌 file은
+  `.codexus/migration-conflicts/` 아래에 보존합니다.
 - `cx setup codex-session`은 project 또는 user `AGENTS.md`에 marker-bounded Codexus
   runtime overlay를 설치/갱신하며 marker 밖 내용은 변경하지 않습니다.
 - Codexus AGENTS overlay write는 atomic이며 one-time `.codexus.bak` backup을 만들고,
   기존 marker가 손상된 경우 새 marker block을 append합니다.
 - `cx session status`, `cx session checkpoint`, `cx session verify`는
-  `.codex-harness/session/` 아래 첫 Codex-native session surface를 제공합니다.
+  `.codexus/session/` 아래 첫 Codex-native session surface를 제공합니다.
 - `cx session verify`는 verification policy preflight를 재사용해 위험한 command를
   실행하지 않고 blocked verification attempt로 기록합니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
@@ -110,7 +113,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 78 tests 통과
+- `npm test`: 80 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -130,8 +133,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Codex-native adapter wrapper root discovery 테스트
 - Codex skill validator로 skill 구조 검증
 - Session-native setup, damaged-marker recovery, session-state shape validation,
-  session lock handling, status/checkpoint/verify, policy-blocked session
-  verification command CLI 테스트
+  session lock handling, legacy root migration, status/checkpoint/verify,
+  policy-blocked session verification command CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트

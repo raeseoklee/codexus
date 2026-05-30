@@ -17,7 +17,7 @@ GitHub repository를 private에서 public으로 변경하기 전에 이 checklis
 - `git status --short`를 실행해 uncommitted secret이 없는지 확인합니다.
 - `rg -n "OPENAI_API_KEY|CODEX|token|secret|password|BEGIN .*PRIVATE KEY" .`를
   실행하고 match를 검토합니다.
-- `.codex-harness/`, log, generated runtime artifact, local state가 ignore되는지
+- `.codexus/`, log, generated runtime artifact, local state가 ignore되는지
   확인합니다.
 - private run ledger나 generated artifact를 공개하지 않습니다.
 

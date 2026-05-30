@@ -175,10 +175,10 @@ function overlayBody(): string {
     "- Use Codexus when durable evidence, session checkpoints, verification artifacts, memory, replay, or skill review are useful.",
     "- Prefer `cx session status --json`, `cx session checkpoint <label> --json`, and `cx session verify --verify <cmd> --json` before starting nested supervised runs.",
     "- Use `cx run --driver codex-exec` only for an explicit bounded supervised sub-run.",
-    "- Ground Codexus claims in command output, ledger state, or artifacts under `.codex-harness/`.",
+    "- Ground Codexus claims in command output, ledger state, or artifacts under `.codexus/`.",
     "- Treat unavailable hooks, statusline integration, or Codex private session APIs as unsupported instead of pretending they are active.",
     "",
-    "Session state lives under `.codex-harness/session/`.",
+    "Session state lives under `.codexus/session/`.",
     CODEXUS_OVERLAY_END,
   ].join("\n");
 }

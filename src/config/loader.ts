@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { defaultConfig, type HarnessConfig } from "./schema.ts";
 import { assertSchemaValue } from "../validation/schemas.ts";
+import { harnessRoot, legacyHarnessRoot, legacyUserHarnessRoot, userHarnessRoot } from "../ledger/paths.ts";
 
 type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
@@ -149,13 +149,15 @@ export interface LoadedConfig {
 
 export function loadConfig(options: LoadConfigOptions = {}): LoadedConfig {
   const cwd = resolve(options.cwd ?? process.cwd());
-  const userPath = join(homedir(), ".codex-harness", "config.json");
-  const projectPath = join(cwd, ".codex-harness", "config.json");
+  const legacyUserPath = join(legacyUserHarnessRoot(), "config.json");
+  const userPath = join(userHarnessRoot(), "config.json");
+  const legacyProjectPath = join(legacyHarnessRoot(cwd), "config.json");
+  const projectPath = join(harnessRoot(cwd), "config.json");
   let config = structuredClone(defaultConfig) as HarnessConfig;
   const filesRead: string[] = [];
   const warnings: string[] = [];
 
-  for (const path of [userPath, projectPath]) {
+  for (const path of [legacyUserPath, userPath, legacyProjectPath, projectPath]) {
     const value = readJsonFile(path);
     if (value) {
       for (const key of collectUnknownKeys(value, defaultConfig as unknown as Record<string, unknown>)) {

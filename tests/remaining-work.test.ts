@@ -35,7 +35,7 @@ test("init command bootstraps project harness without mutating omx state", async
     const output = JSON.parse(result.stdout);
     assert.ok(existsSync(output.configPath));
     assert.equal(await readFile(join(cwd, ".omx", "state"), "utf8"), "keep\n");
-    assert.ok(existsSync(join(cwd, ".codex-harness", "README.md")));
+    assert.ok(existsSync(join(cwd, ".codexus", "README.md")));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -86,7 +86,7 @@ test("observability commands list runs, tail events, and read reports", async ()
     assert.ok(invalidStateOutput.validation.errors.includes("runId:missing_string"));
     assert.ok(invalidStateOutput.artifactValidation.errors.includes("$.runId:required"));
 
-    const eventPath = join(cwd, ".codex-harness", "runs", runOutput.runId, "events.jsonl");
+    const eventPath = join(cwd, ".codexus", "runs", runOutput.runId, "events.jsonl");
     await writeFile(eventPath, `${JSON.stringify({
       schemaVersion: 1,
       eventId: "evt_bad",
@@ -114,7 +114,7 @@ test("remaining P0 json errors cover unexpected args, corrupt state, and disable
     assert.equal(unexpected.status, 1);
     assert.equal(JSON.parse(unexpected.stdout).code, "unexpected_argument");
 
-    const runDir = join(cwd, ".codex-harness", "runs", "run_bad");
+    const runDir = join(cwd, ".codexus", "runs", "run_bad");
     await mkdir(runDir, { recursive: true });
     await writeFile(join(runDir, "state.json"), "{ bad json");
     const corrupt = runCli(cwd, ["status", "run_bad", "--json"]);
@@ -137,7 +137,7 @@ test("driver failures are classified and written to the run ledger", async () =>
     const runOutput = JSON.parse(run.stdout);
     const state = JSON.parse(await readFile(runOutput.statePath, "utf8"));
     assert.equal(state.error.code, "driver_task_failed");
-    const events = await readFile(join(cwd, ".codex-harness", "runs", runOutput.runId, "events.jsonl"), "utf8");
+    const events = await readFile(join(cwd, ".codexus", "runs", runOutput.runId, "events.jsonl"), "utf8");
     assert.match(events, /driver\.failure_classified/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
@@ -148,7 +148,7 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
   const cwd = await tempDir();
   let schemaRoot: string | null = null;
   try {
-    const lockRoot = join(cwd, ".codex-harness", "locks");
+    const lockRoot = join(cwd, ".codexus", "locks");
     const staleDir = join(lockRoot, "memory.lock");
     const activeDir = join(lockRoot, "active.lock");
     await mkdir(staleDir, { recursive: true });
@@ -222,7 +222,7 @@ test("repairable driver failures can be retried behind an explicit driver-repair
     assert.equal(runOutput.outcome, "complete");
     const state = JSON.parse(await readFile(runOutput.statePath, "utf8"));
     assert.equal(state.driverRepairIteration, 1);
-    const events = await readFile(join(cwd, ".codex-harness", "runs", runOutput.runId, "events.jsonl"), "utf8");
+    const events = await readFile(join(cwd, ".codexus", "runs", runOutput.runId, "events.jsonl"), "utf8");
     assert.match(events, /driver\.repair\.started/);
     assert.match(events, /driver\.repair\.completed/);
   } finally {
@@ -377,8 +377,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.ok(appManifest.lifecycleIntent.includes("start_codex_app_server"));
     assert.deepEqual(appManifest.actualLifecycle, ["write_manifest"]);
     missingCodexCwd = await tempDir();
-    await mkdir(join(missingCodexCwd, ".codex-harness"), { recursive: true });
-    await writeFile(join(missingCodexCwd, ".codex-harness", "config.json"), JSON.stringify({
+    await mkdir(join(missingCodexCwd, ".codexus"), { recursive: true });
+    await writeFile(join(missingCodexCwd, ".codexus", "config.json"), JSON.stringify({
       codex: { command: "definitely-not-a-command-codexus-test" },
     }));
     const missingProbe = runCli(cwd, ["app-server", "experiment", "--dry-run", "--probe-process", "--cwd", missingCodexCwd, "--json"]);
@@ -444,8 +444,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
 test("enabled automation gates still block live dispatch until dispatcher exists", async () => {
   const cwd = await tempDir();
   try {
-    await mkdir(join(cwd, ".codex-harness"), { recursive: true });
-    await writeFile(join(cwd, ".codex-harness", "config.json"), `${JSON.stringify({
+    await mkdir(join(cwd, ".codexus"), { recursive: true });
+    await writeFile(join(cwd, ".codexus", "config.json"), `${JSON.stringify({
       automation: {
         cronEnabled: true,
         gatewayEnabled: true,

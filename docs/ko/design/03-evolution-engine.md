@@ -43,7 +43,7 @@ Memory는 raw transcript 저장소가 아닙니다. Raw log는 run ledger에 남
 기본 경로:
 
 ```text
-.codex-harness/memory/entries.jsonl
+.codexus/memory/entries.jsonl
 ```
 
 검색은 bounded retrieval을 사용하며 raw history를 무제한 prompt에 주입하지 않습니다.
@@ -62,7 +62,7 @@ Proposed skill은 다음을 포함해야 합니다:
 경로:
 
 ```text
-.codex-harness/skills/proposed/<skill-id>/
+.codexus/skills/proposed/<skill-id>/
 ```
 
 Codexus는 storage identity와 Codex-facing identity를 분리합니다. Storage id는
@@ -89,7 +89,7 @@ cx skill promote <skill-id>
 승격 결과:
 
 ```text
-.codex-harness/skills/active/<name>/<version>/
+.codexus/skills/active/<name>/<version>/
 ```
 
 잘못된 skill은 deprecated 상태와 deprecation record를 남겨 audit 가능해야 합니다.

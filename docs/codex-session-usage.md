@@ -14,7 +14,7 @@ schema, and skill evidence.
 
 Codexus is moving toward an OMX-like session-native runtime. The installed
 skill is the first layer; `cx setup codex-session` adds marker-bounded AGENTS
-guidance and `.codex-harness/session/` state. Explicit checkpoint and
+guidance and `.codexus/session/` state. Explicit checkpoint and
 verification commands are available now, while hook/status/tmux integration is
 still capability-gated. See
 [Session-native supervision](design/07-supervised-sessions.md).
@@ -74,7 +74,7 @@ cx setup codex-session --scope project --json
 ```
 
 This updates only the Codexus marker block in `AGENTS.md` and initializes
-`.codex-harness/session/state.json`. Use `--scope user` to install the overlay
+`.codexus/session/state.json`. Use `--scope user` to install the overlay
 in `${CODEX_HOME:-~/.codex}/AGENTS.md` instead.
 
 For safety, setup writes a one-time `AGENTS.md.codexus.bak` backup before the

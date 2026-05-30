@@ -176,7 +176,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "missing_session_verification_command":
       return "Pass at least one `--verify <cmd>` argument.";
     case "session_state_corrupt":
-      return "Inspect `.codex-harness/session/state.json` before continuing.";
+      return "Inspect `.codexus/session/state.json` before continuing.";
     case "missing_schema_file":
       return "Pass `--file <path>` with `cx schema validate`.";
     case "json_parse_failed":
@@ -186,7 +186,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "missing_prompt":
       return "Pass the prompt after `cx run`, for example `cx run --json \"inspect the project\"`.";
     case "missing_run_id":
-      return "Pass a run id from an existing `.codex-harness/runs/<run-id>` ledger.";
+      return "Pass a run id from an existing `.codexus/runs/<run-id>` ledger.";
     case "missing_skill_id":
       return "Pass the storage id of a proposed skill, for example `skill_document-parser`.";
     case "missing_memory_query":

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { parseArgs } from "./args.ts";
+import { flagString, parseArgs } from "./args.ts";
 import { emitCliError, isJsonRequested } from "./errors.ts";
 import { doctorCommand } from "./commands/doctor.ts";
 import { runCommand } from "./commands/run.ts";
@@ -22,6 +22,7 @@ import { locksCommand } from "./commands/locks.ts";
 import { schemaCommand } from "./commands/schema.ts";
 import { appServerCommand } from "./commands/app-server.ts";
 import { cancelCommand } from "./commands/cancel.ts";
+import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
   return `Codexus
@@ -79,6 +80,7 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
     console.log(helpText());
     return;
   }
+  await migrateLegacyHarnessRoot(flagString(args.flags, "cwd") ?? process.cwd());
   if (args.command === "doctor") {
     await doctorCommand(args);
     return;

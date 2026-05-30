@@ -104,7 +104,7 @@ test("session status reports initialized state and overlay status", async () => 
     assert.equal(output.status, "initialized");
     assert.equal(output.overlays.project.installed, true);
     assert.equal(output.state.status, "initialized");
-    assert.ok(output.paths.state.endsWith(".codex-harness/session/state.json"));
+    assert.ok(output.paths.state.endsWith(".codexus/session/state.json"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -115,8 +115,8 @@ test("session status rejects malformed session state", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();
   try {
-    await mkdir(join(cwd, ".codex-harness", "session"), { recursive: true });
-    await writeFile(join(cwd, ".codex-harness", "session", "state.json"), "{ \"schemaVersion\": 1 }\n");
+    await mkdir(join(cwd, ".codexus", "session"), { recursive: true });
+    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 1 }\n");
     const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
     assert.equal(status.status, 1);
     const output = JSON.parse(status.stdout);
@@ -132,8 +132,8 @@ test("doctor reports malformed session state as a failed check", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();
   try {
-    await mkdir(join(cwd, ".codex-harness", "session"), { recursive: true });
-    await writeFile(join(cwd, ".codex-harness", "session", "state.json"), "{ \"schemaVersion\": 1 }\n");
+    await mkdir(join(cwd, ".codexus", "session"), { recursive: true });
+    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 1 }\n");
     const doctor = runCli(cwd, ["doctor", "--json"], { CODEX_HOME: codexHome });
     assert.equal(doctor.status, 0, doctor.stderr);
     const output = JSON.parse(doctor.stdout);

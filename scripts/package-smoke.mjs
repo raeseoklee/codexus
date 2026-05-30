@@ -87,6 +87,8 @@ try {
 
   const mockRun = JSON.parse(run(codexus, ["run", "--driver", "mock", "--json", "package smoke"], { cwd: project }).stdout);
   assert(mockRun.outcome === "complete", "mock run did not complete from the installed package");
+  assert(String(mockRun.statePath).includes(".codexus"), "mock run did not write under .codexus");
+  assert(existsSync(join(project, ".codexus")), "mock run did not create .codexus");
 
   console.log("package smoke ok");
 } finally {

@@ -194,5 +194,5 @@ not remove the gates:
    setup/status/checkpoint/verify capability checks.
 7. Add tmux-backed Codexus workers only after the explicit session state
    protocol is stable.
-8. Add a versioned schema artifact for `.codex-harness/session/state.json` if
+8. Add a versioned schema artifact for `.codexus/session/state.json` if
    session state grows beyond the current focused read-path validation.

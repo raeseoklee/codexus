@@ -15,7 +15,7 @@ async function tempDir(): Promise<string> {
 test("doctor reports selected driver capabilities", async () => {
   const cwd = await tempDir();
   try {
-    await mkdir(join(cwd, ".codex-harness"), { recursive: true });
+    await mkdir(join(cwd, ".codexus"), { recursive: true });
     const fakeCodex = join(cwd, "fake-codex.mjs");
     await writeFile(fakeCodex, `#!/usr/bin/env node
 const args = process.argv.slice(2);
@@ -35,7 +35,7 @@ if (args[0] === "--version") {
 }
 `);
     await chmod(fakeCodex, 0o755);
-    await writeFile(join(cwd, ".codex-harness", "config.json"), JSON.stringify({
+    await writeFile(join(cwd, ".codexus", "config.json"), JSON.stringify({
       codex: { command: fakeCodex },
     }));
     const result = spawnSync(process.execPath, [cli, "doctor", "--cwd", cwd, "--json"], {
@@ -55,8 +55,8 @@ if (args[0] === "--version") {
 test("doctor reports missing codex command without crashing", async () => {
   const cwd = await tempDir();
   try {
-    await mkdir(join(cwd, ".codex-harness"), { recursive: true });
-    await writeFile(join(cwd, ".codex-harness", "config.json"), JSON.stringify({
+    await mkdir(join(cwd, ".codexus"), { recursive: true });
+    await writeFile(join(cwd, ".codexus", "config.json"), JSON.stringify({
       codex: { command: "definitely-not-a-command-codexus-test" },
     }));
     const result = spawnSync(process.execPath, [cli, "doctor", "--cwd", cwd, "--json"], {

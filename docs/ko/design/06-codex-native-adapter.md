@@ -17,7 +17,7 @@ Codex session
   -> $codexus skill
   -> codex/skills/codexus/scripts/cx.mjs
   -> Codexus core CLI
-  -> .codex-harness ledger / memory / skills
+  -> .codexus ledger / memory / skills
 ```
 
 Skill은 얇은 adapter입니다. 외부 `cx` CLI와 같은 core runtime을 호출합니다.
@@ -114,4 +114,5 @@ node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounde
   유지할 수 있을 때만 adapter injection 추가.
 - supervised lifecycle과 JSON-RPC roundtrip contract를 검증한 뒤 app-server turn 연결.
 - permission, approval, policy-block event display를 더 풍부하게 개선.
-- `.codex-harness`에서 `.codexus`로의 migration은 backward-compatible read와 함께 별도로 진행.
+- `.codexus`를 canonical runtime root로 유지합니다. Legacy `.codex-harness`
+  directory는 CLI가 발견하면 `.codexus`로 이관한 뒤 제거합니다.

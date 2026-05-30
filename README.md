@@ -31,7 +31,8 @@ User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
 
 ## What It Provides
 
-- Durable run ledgers under `.codex-harness/runs/<run-id>/`
+- Durable run ledgers under `.codexus/runs/<run-id>/`
+- Automatic migration from legacy `.codex-harness/` into `.codexus/`
 - Verification gates with bounded repair loops
 - Timeout, SIGINT, and external `cx cancel <run-id>` cancellation paths
 - Structured JSON error envelopes for automation

@@ -266,7 +266,7 @@ The run ledger is the source of truth for what happened. It is append-oriented a
 Default root:
 
 ```text
-.codex-harness/
+.codexus/
   runs/
     <run-id>/
       input.json
@@ -362,7 +362,7 @@ The adapter must not:
 ### Skill Proposal
 
 1. Evolution engine detects a reusable pattern.
-2. It writes a proposed skill under `.codex-harness/skills/proposed/<skill-id>/`.
+2. It writes a proposed skill under `.codexus/skills/proposed/<skill-id>/`.
 3. Replay tests are generated or linked.
 4. `cx skill review` presents scope, trigger, procedure, evidence, and risk.
 5. `cx skill promote` installs a versioned approved copy.

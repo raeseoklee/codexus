@@ -30,7 +30,7 @@ public issue에 exploit detail을 올리지 마세요.
 - Live app-server, cron, gateway, model replay behavior는 policy와 approval
   contract가 충분히 구현될 때까지 gated 상태를 유지해야 합니다.
 - Ledger, memory, skill artifact에는 task context가 포함될 수 있습니다.
-  `.codex-harness/` artifact를 공개하기 전에 반드시 검토하세요.
+  `.codexus/` artifact를 공개하기 전에 반드시 검토하세요.
 
 ## Secret Handling
 

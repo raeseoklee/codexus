@@ -1,3 +1,5 @@
+.codexus/
+.codexus-migration.lock/
 .codex-harness/
 .omc/
 .omx/

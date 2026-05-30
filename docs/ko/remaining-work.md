@@ -188,4 +188,4 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 7. 명시적 session state protocol이 안정된 뒤에만 tmux-backed Codexus worker를
    추가합니다.
 8. Session state가 현재 focused read-path validation보다 커지면
-   `.codex-harness/session/state.json`용 versioned schema artifact를 추가합니다.
+   `.codexus/session/state.json`용 versioned schema artifact를 추가합니다.

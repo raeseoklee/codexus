@@ -10,7 +10,7 @@ Codex-native adapter:
 Codex session -> $codexus skill -> Codexus core
 ```
 
-This skill implements the Codex-native adapter surface. It should call the same Codexus core as the external CLI and use the same `.codex-harness` ledger, memory, and skill stores.
+This skill implements the Codex-native adapter surface. It should call the same Codexus core as the external CLI and use the same `.codexus` ledger, memory, and skill stores.
 
 The first session-native slice is implemented through:
 

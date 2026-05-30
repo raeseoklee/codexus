@@ -92,7 +92,7 @@ test("memory read path validates records and curator flags duplicates", async ()
     const curation = await curateMemoryEntries(cwd);
     assert.equal(curation.duplicateCandidates[0].id, "mem_duplicate_2");
 
-    await writeFile(join(cwd, ".codex-harness", "memory", "entries.jsonl"), `${JSON.stringify({ bad: true })}\n`);
+    await writeFile(join(cwd, ".codexus", "memory", "entries.jsonl"), `${JSON.stringify({ bad: true })}\n`);
     await assert.rejects(() => curateMemoryEntries(cwd), /schema_validation_failed:memory-entry/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
@@ -114,12 +114,12 @@ test("skill proposal has promotion gate fields", async () => {
     assert.equal(proposal.promotion.requiredReplayStatus, "passed");
     assert.ok(proposal.procedure.some((step) => step.includes("npm test")));
     await writeSkillProposal(cwd, experience);
-    const raw = await readFile(join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "SKILL.md"), "utf8");
+    const raw = await readFile(join(cwd, ".codexus", "skills", "proposed", proposal.id, "SKILL.md"), "utf8");
     assert.match(raw, /Source run: run_evo/);
-    const evidence = JSON.parse(await readFile(join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "evidence.json"), "utf8"));
+    const evidence = JSON.parse(await readFile(join(cwd, ".codexus", "skills", "proposed", proposal.id, "evidence.json"), "utf8"));
     assert.equal(evidence.skillId, proposal.id);
     assert.equal(evidence.verificationStatus, "passed");
-    const replay = JSON.parse(await readFile(join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "replay.json"), "utf8"));
+    const replay = JSON.parse(await readFile(join(cwd, ".codexus", "skills", "proposed", proposal.id, "replay.json"), "utf8"));
     assert.equal(replay.skillId, proposal.id);
     assert.deepEqual(replay.scenarios[0].expected.requiresTests, ["npm test"]);
   } finally {
@@ -168,7 +168,7 @@ test("skill promotion requires replay and writes active skill", async () => {
     assert.match(promotion.activeDir, /skills\/active\/fix-parser-regression\/0\.1\.0$/);
 
     const proposedAfterPromotion = JSON.parse(
-      await readFile(join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "skill.json"), "utf8"),
+      await readFile(join(cwd, ".codexus", "skills", "proposed", proposal.id, "skill.json"), "utf8"),
     );
     assert.equal(proposedAfterPromotion.status, "active");
 
@@ -222,7 +222,7 @@ test("legacy skill proposals are normalized with Codexus display names", async (
       driverResult: { status: "succeeded", exitCode: 0 },
     });
     const proposal = await writeSkillProposal(cwd, experience);
-    const skillPath = join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "skill.json");
+    const skillPath = join(cwd, ".codexus", "skills", "proposed", proposal.id, "skill.json");
     const legacy = JSON.parse(await readFile(skillPath, "utf8"));
     delete legacy.displayName;
     await writeFile(skillPath, `${JSON.stringify(legacy, null, 2)}\n`);
@@ -246,7 +246,7 @@ test("skill review blocks promotion when replay is missing", async () => {
       driverResult: { status: "succeeded", exitCode: 0 },
     });
     const proposal = await writeSkillProposal(cwd, experience);
-    await rm(join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "replay.json"));
+    await rm(join(cwd, ".codexus", "skills", "proposed", proposal.id, "replay.json"));
     const review = await reviewSkill(cwd, proposal.id);
     assert.equal(review.promotable, false);
     assert.deepEqual(review.blockers, ["replay_missing"]);
@@ -269,7 +269,7 @@ test("skill deprecation records status and reason", async () => {
     const deprecated = await deprecateSkill(cwd, proposal.id, "superseded by broader parser skill");
     assert.equal(deprecated.status, "deprecated");
     const record = JSON.parse(
-      await readFile(join(cwd, ".codex-harness", "skills", "proposed", proposal.id, "deprecation.json"), "utf8"),
+      await readFile(join(cwd, ".codexus", "skills", "proposed", proposal.id, "deprecation.json"), "utf8"),
     );
     assert.equal(record.reason, "superseded by broader parser skill");
   } finally {
