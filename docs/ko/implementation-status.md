@@ -75,12 +75,21 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   기존 marker가 손상된 경우 새 marker block을 append합니다.
 - `cx session status`, `cx session checkpoint`, `cx session verify`는
   `.codexus/session/` 아래 첫 Codex-native session surface를 제공합니다.
+- `cx setup codex-session --enable-notify-hook`은 현재 project가 Codex config에서
+  trusted일 때만 Codex notify hook을 설치합니다. 기존 top-level `notify = [...]`
+  command는 `--previous-notify` chain으로 보존합니다.
+- `cx session notify --event <name>`은 internal notify-hook write surface이며
+  bounded hook event를 `.codexus/session/state.json`에 기록합니다.
 - `cx session verify`는 verification policy preflight를 재사용해 위험한 command를
   실행하지 않고 blocked verification attempt로 기록합니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
+- `schemas/session-state.schema.json`은 first-class schema artifact이며,
+  `cx schema validate --type session-state --file <path> --json`은 같은 local
+  schema-artifact subset engine으로 session state를 검증합니다.
 - `doctor --json`은 Codexus session state, project/user overlay 상태,
-  hook/statusline integration의 unavailable 상태를 정직하게 보고합니다.
+  notify-hook 설치 상태, statusline integration의 unavailable 상태를 정직하게
+  보고합니다.
 - Verification repair는 실패한 verification stdout/stderr tail을 bounded context
   artifact로 기록하고 repair prompt에 주입합니다.
 - Driver-failure repair는 raw driver log tail을 bounded context artifact로 기록하고
@@ -113,7 +122,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 80 tests 통과
+- `npm test`: 82 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -132,9 +141,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - static source check: private ChatGPT/Codex backend 직접 호출 없음
 - Codex-native adapter wrapper root discovery 테스트
 - Codex skill validator로 skill 구조 검증
-- Session-native setup, damaged-marker recovery, session-state shape validation,
-  session lock handling, legacy root migration, status/checkpoint/verify,
-  policy-blocked session verification command CLI 테스트
+- Session-native setup, damaged-marker recovery, session-state shape/schema
+  validation, session lock handling, legacy root migration, status/checkpoint/verify,
+  policy-blocked session verification, notify-hook trust refusal,
+  notify-chain preservation command CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
@@ -150,9 +160,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
 - Codex가 stable per-conversation id를 Codexus에 노출하지 않기 때문에 session state는
   현재 cwd-scoped singleton입니다.
-- Hook/statusline integration과 tmux-backed Codexus worker는 설계됐지만 아직
-  구현되지 않았습니다. 명시적 session setup/status/checkpoint/verify slice는
-  구현됐습니다.
+- Notify-hook integration은 explicit setup과 Codex project trust check 뒤에
+  구현됐습니다. Statusline integration과 tmux-backed Codexus worker는 설계됐지만
+  아직 구현되지 않았습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

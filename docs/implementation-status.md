@@ -142,12 +142,21 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   backup, and append a fresh marker block when existing markers are damaged.
 - `cx session status`, `cx session checkpoint`, and `cx session verify` provide
   the first Codex-native session surface under `.codexus/session/`.
+- `cx setup codex-session --enable-notify-hook` installs a Codex notify hook
+  only when the current project is trusted in Codex config; existing top-level
+  `notify = [...]` commands are preserved through `--previous-notify` chaining.
+- `cx session notify --event <name>` is the internal notify-hook write surface
+  and records bounded hook events in `.codexus/session/state.json`.
 - `cx session verify` reuses the verification policy preflight and records
   blocked verification attempts instead of executing dangerous commands.
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
+- `schemas/session-state.schema.json` is a first-class schema artifact, and
+  `cx schema validate --type session-state --file <path> --json` validates
+  session state through the same local schema-artifact subset engine.
 - `doctor --json` reports Codexus session state, project/user overlay status,
-  and truthful unavailable status for hook/statusline integration.
+  notify-hook installation status, and truthful unavailable status for
+  statusline integration.
 - GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
 - Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
 - Public repository readiness files are present: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue templates, and PR template.
@@ -163,7 +172,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 80.
+- Current test count: 82.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -212,10 +221,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Static source check found no direct HTTP/OpenAI/ChatGPT backend calls in `src`, `tests`, or `package.json`.
 - Codex-native adapter wrapper root discovery is covered by tests.
 - Codex skill structure is validated with the Codex skill validator.
-- Session-native setup, damaged-marker recovery, session-state shape
+- Session-native setup, damaged-marker recovery, session-state shape/schema
   validation, session lock handling, legacy root migration, status,
-  checkpoint, verify, and policy-blocked session verification commands are
-  covered by CLI tests.
+  checkpoint, verify, policy-blocked session verification, notify-hook trust
+  refusal, and notify-chain preservation commands are covered by CLI tests.
 
 ## Acceptance Coverage
 
@@ -250,9 +259,9 @@ review. Current high-level gaps:
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
 - Session state is currently a cwd-scoped singleton because Codex does not expose
   a stable per-conversation id to Codexus.
-- Hook/statusline integration and tmux-backed Codexus workers are designed but
-  not implemented; the explicit session setup/status/checkpoint/verify slice is
-  implemented.
+- Notify-hook integration is implemented behind explicit setup and Codex project
+  trust checks. Statusline integration and tmux-backed Codexus workers are
+  designed but not implemented.
 - Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

@@ -52,10 +52,13 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   owner/liveness 기반 `cx cancel <run-id>`, source-specific evolution
   lesson/replay gate, usage accounting, config option ignored event, reserved
   phase/gated tool expansion 문서 정리.
+- 이 review 이후 session-native follow-up 구현: 얇은 Codex-session walkthrough,
+  first-class `session-state` schema artifact validation, 기존 notify chain을
+  보존하고 Codex project trust 없이는 설치를 거부하는 explicit notify-hook attachment.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,
-  cancellation wait/remote-host UX 보강.
+  statusline/HUD integration, tmux-backed worker, cancellation wait/remote-host UX 보강.
 
 ### P0: Contract and Safety Hardening
 
@@ -183,9 +186,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    유지합니다.
 5. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고
    user-visible한 adapter injection 단계를 추가합니다.
-6. 구현된 session-native setup/status/checkpoint/verify capability check 뒤에
-   optional hook/statusline support를 추가합니다.
+6. Codex가 안정적인 supported configuration surface를 노출한 뒤에만 optional
+   statusline/HUD support를 추가합니다. Notify-hook attachment는 이미 구현됐으며
+   기존 notify command를 chain으로 계속 보존해야 합니다.
 7. 명시적 session state protocol이 안정된 뒤에만 tmux-backed Codexus worker를
    추가합니다.
-8. Session state가 현재 focused read-path validation보다 커지면
-   `.codexus/session/state.json`용 versioned schema artifact를 추가합니다.
+8. Versioned `.codexus/session/state.json` schema는 명시적 migration boundary를
+   통해서만 확장합니다.

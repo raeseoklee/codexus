@@ -162,13 +162,13 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_setup_command":
       return "Run `cx setup codex-session --scope project --json`.";
     case "unsupported_session_command":
-      return "Run `cx session status --json`, `cx session checkpoint <label> --json`, or `cx session verify --verify <cmd> --json`.";
+      return "Run `cx session status --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, or `cx session notify --event <name> --json`.";
     case "invalid_session_setup_scope":
       return "Use `--scope project` or `--scope user`.";
     case "missing_session_checkpoint_label":

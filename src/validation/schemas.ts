@@ -45,7 +45,7 @@ export interface SchemaArtifactStatus {
   error: string | null;
 }
 
-export type SchemaValidationType = "config" | "state" | "event" | "memory-entry" | "skill";
+export type SchemaValidationType = "config" | "state" | "event" | "memory-entry" | "skill" | "session-state";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -67,6 +67,7 @@ export const schemaArtifactNames = [
   "event.schema.json",
   "memory-entry.schema.json",
   "skill.schema.json",
+  "session-state.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -75,6 +76,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   event: "event.schema.json",
   "memory-entry": "memory-entry.schema.json",
   skill: "skill.schema.json",
+  "session-state": "session-state.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -326,6 +328,28 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       }
     }
     requireRecord(value.promotion, errors, "promotion");
+  }
+
+  if (type === "session-state") {
+    requireString(value, "sessionId", errors);
+    requireString(value, "cwd", errors);
+    requireOneOf(value, "status", ["initialized"], errors);
+    requireString(value, "createdAt", errors);
+    requireString(value, "updatedAt", errors);
+    if (!(value.lastCommand === null || typeof value.lastCommand === "string")) errors.push("lastCommand:invalid");
+    requireArray(value, "checkpoints", errors);
+    requireArray(value, "verifications", errors);
+    requireArray(value, "hookEvents", errors);
+    requireArray(value, "linkedRunIds", errors);
+    if (requireRecord(value.capabilities, errors, "capabilities")) {
+      requireOneOf(value.capabilities, "tmux", ["available", "unavailable"], errors, "capabilities.tmux");
+      requireOneOf(value.capabilities, "hooks", ["available", "unavailable"], errors, "capabilities.hooks");
+      requireOneOf(value.capabilities, "statusline", ["available", "unavailable"], errors, "capabilities.statusline");
+    }
+    if (requireRecord(value.overlays, errors, "overlays")) {
+      requireRecord(value.overlays.project, errors, "overlays.project");
+      requireRecord(value.overlays.user, errors, "overlays.user");
+    }
   }
 
   return { schemaVersion: 1, type, valid: errors.length === 0, errors };

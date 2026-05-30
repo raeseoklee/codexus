@@ -53,8 +53,10 @@ try {
   for (const required of [
     "package/dist/cli/main.js",
     "package/schemas/config.schema.json",
+    "package/schemas/session-state.schema.json",
     "package/fixtures/app-server/schema.fixture.json",
     "package/codex/skills/codexus/SKILL.md",
+    "package/scripts/codexus-notify-hook.mjs",
     "package/scripts/install-codex-skill.mjs",
     "package/scripts/postinstall.mjs",
     "package/install.sh",

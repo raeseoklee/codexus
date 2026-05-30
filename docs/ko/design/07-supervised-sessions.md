@@ -173,10 +173,14 @@ Codexus는 hook/status integration을 hard dependency가 아니라 optional capa
 목표 동작:
 
 - `codexus session status --json`은 session state를 읽습니다.
-- `codexus hud --json`은 mode, verification, checkpoint state를 compact하게 보고합니다.
-- Codex TUI statusline configuration이 Codexus state를 포함할 수 있으면 setup이 명시적인
-  user-visible configuration으로 활성화합니다.
-- Codex hook이 있으면 setup은 last-turn activity를 기록하고 state를 갱신할 수 있습니다.
+- `cx setup codex-session --enable-notify-hook --json`은 현재 project가 Codex에서
+  이미 trusted일 때만 Codex notify hook을 설치할 수 있습니다.
+- notify hook은 bounded turn activity를 `.codexus/session/state.json`에 기록하고,
+  기존 top-level `notify = [...]` command가 있으면 `--previous-notify`로 chain합니다.
+- `codexus hud --json`은 이후 mode, verification, checkpoint state를 compact하게
+  보고할 수 있습니다.
+- Codex TUI statusline configuration이 Codexus state를 포함할 수 있으면 이후 setup
+  slice에서 명시적인 user-visible configuration으로 활성화합니다.
 
 hook 또는 statusline path가 unavailable이면 `doctor`와 `session status`가 명확히 말해야
 합니다.
@@ -209,10 +213,11 @@ Codex leader pane
 구현된 첫 slice CLI surface:
 
 ```bash
-cx setup codex-session [--scope user|project] [--json]
+cx setup codex-session [--scope user|project] [--enable-notify-hook] [--json]
 cx session status [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
+cx session notify [--event <name>] [--json]
 ```
 
 이후 계획된 CLI surface:
@@ -253,7 +258,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   checkpoint artifact를 씁니다.
 - `cx session verify --verify <cmd> --json`은 verification을 실행하고
   `.codexus/session/` 아래 artifact를 기록하며 typed result를 보고합니다.
-- unsupported hook/statusline/tmux feature는 정직한 unavailable status를 반환합니다.
+- optional notify-hook attachment는 기존 notify chain을 보존하고, Codex project
+  trust가 설정되지 않았으면 설치를 거부합니다.
+- unsupported statusline/tmux feature는 정직한 unavailable status를 반환합니다.
 - 외부 `cx run`은 변경 없이 계속 동작합니다.
 
 ## 구현 Slice
@@ -265,6 +272,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 4. 완료: `checkpoint`와 `session verify` command를 추가합니다.
 5. 완료: Codexus skill instruction을 갱신해 nested `cx run`보다 session-native
    command를 먼저 선호하게 합니다.
-6. 다음: optional hook/statusline support를 capability check 뒤에 추가합니다.
-7. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
+6. 완료: session-state schema artifact validation과 Codex project trust check 뒤의
+   optional notify-hook attachment를 추가합니다.
+7. 다음: Codex가 안정적인 supported configuration surface를 노출할 때만 statusline/HUD
+   support를 추가합니다.
+8. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
    feature로 재검토합니다.

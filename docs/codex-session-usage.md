@@ -14,9 +14,9 @@ schema, and skill evidence.
 
 Codexus is moving toward an OMX-like session-native runtime. The installed
 skill is the first layer; `cx setup codex-session` adds marker-bounded AGENTS
-guidance and `.codexus/session/` state. Explicit checkpoint and
-verification commands are available now, while hook/status/tmux integration is
-still capability-gated. See
+guidance, `.codexus/session/` state, and optional notify-hook attachment.
+Explicit checkpoint and verification commands are available now. Statusline and
+tmux integration remain capability-gated. See
 [Session-native supervision](design/07-supervised-sessions.md).
 
 ## Install the Adapter
@@ -81,6 +81,49 @@ For safety, setup writes a one-time `AGENTS.md.codexus.bak` backup before the
 first Codexus rewrite and uses an atomic same-directory rename for the updated
 file. If existing Codexus markers are damaged or out of order, setup preserves
 the file and appends a fresh marker block instead of trying to splice it.
+
+To attach a Codex notify hook, opt in explicitly:
+
+```bash
+cx setup codex-session --scope project --enable-notify-hook --json
+```
+
+The notify-hook installer updates `${CODEX_HOME:-~/.codex}/config.toml` only
+after the current project is already trusted in Codex config. If an existing
+top-level `notify = [...]` command is present, Codexus wraps it as
+`--previous-notify` instead of replacing it. Statusline integration still
+reports `unavailable`.
+
+## Thin Walkthrough
+
+Use this flow to dogfood Codexus from inside a real Codex session:
+
+```text
+codexus session status 확인해줘.
+```
+
+Then create a project-local evidence boundary:
+
+```text
+codexus checkpoint "before parser cleanup" 기록해줘.
+```
+
+Run verification through the session surface:
+
+```text
+codexus verify "npm test" 결과를 현재 작업 증거로 붙여줘.
+```
+
+Check that Codexus recorded the state:
+
+```text
+codexus session status를 다시 보고 checkpoint, verification, hook 상태만 요약해줘.
+```
+
+If the notify hook is enabled, the latest state should include recent
+`hookEvents` under `.codexus/session/state.json`. The hook does not capture a
+transcript; it only records bounded turn activity and chains to the previous
+notify command when one existed.
 
 ## How to Invoke It in Codex
 

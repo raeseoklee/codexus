@@ -12,6 +12,7 @@ import type { DriverProbe } from "../../drivers/contract.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
 import { findCodexusPackageRoot } from "../../util/package-root.ts";
 import { overlayStatus, readSessionState, sessionPaths } from "../../session/state.ts";
+import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 
 interface Check {
   id: string;
@@ -183,6 +184,7 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   const session = sessionPaths(cwd);
   const projectOverlay = await overlayStatus(cwd, "project");
   const userOverlay = await overlayStatus(cwd, "user");
+  const notifyHook = await inspectNotifyHookConfig(cwd);
   const sessionStateExists = existsSync(session.state);
   let sessionStateInitialized = false;
   let sessionStateError: string | null = null;
@@ -216,10 +218,13 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   });
   checks.push({
     id: "codexus.session_hooks",
-    status: "warn",
-    summary: "Codex hook/statusline integration is not installed in this slice",
+    status: notifyHook.installed ? "pass" : "warn",
+    summary: notifyHook.installed
+      ? "Codexus notify hook is installed; statusline remains unavailable"
+      : "Codexus notify hook is not installed; statusline remains unavailable",
     details: {
-      hooks: "unavailable",
+      hooks: notifyHook.installed ? "available" : "unavailable",
+      notifyHook,
       statusline: "unavailable",
       fallback: "Use explicit `cx session checkpoint` and `cx session verify` commands.",
     },

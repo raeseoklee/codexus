@@ -53,10 +53,15 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   external owner/liveness-based `cx cancel <run-id>`, source-specific evolution
   lessons and replay gates, usage accounting, config option ignored events, and
   docs alignment for reserved phases/gated tool expansion.
+- Session-native follow-up implemented after this review: thin Codex-session
+  walkthrough, first-class `session-state` schema artifact validation, and
+  explicit notify-hook attachment that preserves existing notify chains and
+  refuses install without Codex project trust.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
-  automation dispatch, and richer wait/remote-host UX around cancellation.
+  automation dispatch, statusline/HUD integration, tmux-backed workers, and
+  richer wait/remote-host UX around cancellation.
 
 ### P0: Contract and Safety Hardening
 
@@ -190,9 +195,10 @@ not remove the gates:
    contract-compatible.
 5. Add an explicit, user-visible adapter injection step if retrieved
    `codexus:<skill-name>` context is ever inserted automatically.
-6. Add optional hook/statusline support behind the implemented session-native
-   setup/status/checkpoint/verify capability checks.
+6. Add optional statusline/HUD support only after Codex exposes a stable
+   supported configuration surface. Notify-hook attachment already exists and
+   must keep preserving any previous notify command through chaining.
 7. Add tmux-backed Codexus workers only after the explicit session state
    protocol is stable.
-8. Add a versioned schema artifact for `.codexus/session/state.json` if
-   session state grows beyond the current focused read-path validation.
+8. Extend the versioned `.codexus/session/state.json` schema only through an
+   explicit migration boundary.

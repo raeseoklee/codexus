@@ -24,6 +24,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     "probe-process",
     "supervise-fake",
     "strict",
+    "enable-notify-hook",
   ]);
 
   for (let index = 0; index < rest.length; index += 1) {

@@ -55,6 +55,81 @@ test("setup codex-session installs a marker-bounded project overlay idempotently
   }
 });
 
+test("setup codex-session chains an existing notify hook behind Codexus", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    const previousScript = join(cwd, "previous-notify.mjs");
+    const previousLog = join(cwd, "previous-notify.log");
+    await writeFile(previousScript, `import { writeFileSync } from "node:fs"; writeFileSync(${JSON.stringify(previousLog)}, "previous\\n");\n`);
+    await writeFile(join(codexHome, "config.toml"), [
+      `notify = ${JSON.stringify([process.execPath, previousScript])}`,
+      "",
+      `[projects.${JSON.stringify(resolve(cwd))}]`,
+      'trust_level = "trusted"',
+      "",
+    ].join("\n"));
+
+    const setup = runCli(cwd, ["setup", "codex-session", "--scope", "project", "--enable-notify-hook", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(setup.status, 0, setup.stderr);
+    const output = JSON.parse(setup.stdout);
+    assert.equal(output.notifyHook.status, "installed");
+    assert.equal(output.notifyHook.changed, true);
+    assert.deepEqual(output.notifyHook.previousNotify, [process.execPath, previousScript]);
+    assert.equal(output.state.capabilities.hooks, "available");
+
+    const config = await readFile(join(codexHome, "config.toml"), "utf8");
+    assert.match(config, /codexus-notify-hook\.mjs/);
+
+    const hook = spawnSync(process.execPath, [
+      output.notifyHook.scriptPath,
+      "--event",
+      "turn-ended",
+      "--previous-notify",
+      JSON.stringify([process.execPath, previousScript]),
+    ], {
+      cwd,
+      encoding: "utf8",
+      env: { ...process.env, CODEX_HOME: codexHome },
+    });
+    assert.equal(hook.status, 0, hook.stderr);
+    assert.equal(await readFile(previousLog, "utf8"), "previous\n");
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.state.capabilities.hooks, "available");
+    assert.equal(statusOutput.state.capabilities.statusline, "unavailable");
+    assert.equal(statusOutput.state.hookEvents.at(-1).event, "turn-ended");
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("setup codex-session refuses notify hook install when project is not trusted", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await mkdir(codexHome, { recursive: true });
+    await writeFile(join(codexHome, "config.toml"), "");
+    const setup = runCli(cwd, ["setup", "codex-session", "--enable-notify-hook", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(setup.status, 1);
+    const output = JSON.parse(setup.stdout);
+    assert.equal(output.notifyHook.status, "blocked");
+    assert.equal(output.notifyHook.reason, "project_not_found");
+    assert.equal(output.notifyHook.installed, false);
+    assert.doesNotMatch(await readFile(join(codexHome, "config.toml"), "utf8"), /codexus-notify-hook/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("setup codex-session writes a one-time backup and survives damaged markers", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();

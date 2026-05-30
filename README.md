@@ -23,7 +23,7 @@ runs, verification gates, recovery loops, memory, and replay-gated skills.
 Codexus is not a Codex replacement. It is an orchestration layer around the
 authenticated local Codex CLI. The stable engine is still `cx`, while the
 product direction is an OMX-like Codex-native session runtime through the
-installed `codexus` skill, guidance overlays, local state, and optional hooks.
+installed `codexus` skill, guidance overlays, local state, and optional notify hooks.
 
 ```text
 User -> cx/codexus -> Codexus core -> codex exec --json -> Codex
@@ -144,7 +144,7 @@ Codex-session usage: [Using Codexus inside Codex](docs/codex-session-usage.md).
 ```bash
 cx doctor --json
 cx init --with-docs --json
-cx setup codex-session --scope project --json
+cx setup codex-session --scope project --enable-notify-hook --json
 cx session status --json
 cx session checkpoint "before risky refactor" --json
 cx session verify --verify "npm test" --json

@@ -30,10 +30,11 @@ function helpText(): string {
 Usage:
   cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]
-  cx setup codex-session [--scope user|project] [--json]
+  cx setup codex-session [--scope user|project] [--enable-notify-hook] [--json]
   cx session status [--json]
   cx session checkpoint <label> [--json]
   cx session verify --verify <cmd> [--json]
+  cx session notify [--event <name>] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx cancel <run-id> [--reason <reason>] [--json]
   cx plan [--omx] <task> [--json]

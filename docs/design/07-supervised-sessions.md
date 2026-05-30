@@ -184,11 +184,15 @@ hard dependency.
 Target behavior:
 
 - `codexus session status --json` reads the session state.
-- `codexus hud --json` reports compact mode, verification, and checkpoint state.
-- If Codex TUI statusline configuration can include Codexus state, setup enables
-  it with explicit user-visible configuration.
-- If Codex hooks are available, setup can record last-turn activity and update
-  state.
+- `cx setup codex-session --enable-notify-hook --json` can install a Codex
+  notify hook only after the current project is already trusted by Codex.
+- The notify hook records bounded turn activity in `.codexus/session/state.json`
+  and chains to any previous top-level `notify = [...]` command through
+  `--previous-notify`.
+- `codexus hud --json` may later report compact mode, verification, and
+  checkpoint state.
+- If Codex TUI statusline configuration can include Codexus state, a later setup
+  slice can enable it with explicit user-visible configuration.
 
 If a hook or statusline path is unavailable, `doctor` and `session status` must
 say so clearly.
@@ -223,10 +227,11 @@ This should complement Codex native subagents, not replace them.
 Implemented first-slice CLI surface:
 
 ```bash
-cx setup codex-session [--scope user|project] [--json]
+cx setup codex-session [--scope user|project] [--enable-notify-hook] [--json]
 cx session status [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
+cx session notify [--event <name>] [--json]
 ```
 
 Planned later CLI surface:
@@ -268,8 +273,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   can be referenced later in the same project.
 - `cx session verify --verify <cmd> --json` runs verification, records the
   artifact under `.codexus/session/`, and reports a typed result.
-- Unsupported hooks/statusline/tmux features return truthful unavailable
-  statuses.
+- Optional notify-hook attachment preserves existing notify chains and refuses
+  install when Codex project trust is not configured.
+- Unsupported statusline/tmux features return truthful unavailable statuses.
 - External `cx run` continues to work unchanged.
 
 ## Implementation Slices
@@ -282,6 +288,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 4. Completed: add `checkpoint` and `session verify` commands.
 5. Completed: update the Codexus skill instructions so Codex prefers
    session-native commands before nested `cx run`.
-6. Next: add optional hook/statusline support behind capability checks.
-7. Later: revisit external `codex exec resume` as a separate advanced feature only
+6. Completed: add session-state schema artifact validation and optional
+   notify-hook attachment behind Codex project trust checks.
+7. Next: add statusline/HUD support only if Codex exposes a stable supported
+   configuration surface.
+8. Later: revisit external `codex exec resume` as a separate advanced feature only
    after the Codex-native path is useful.

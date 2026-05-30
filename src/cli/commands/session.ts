@@ -8,10 +8,12 @@ import {
   createCheckpointId,
   createVerificationId,
   overlayStatus,
+  recordSessionHookEvent,
   readSessionState,
   sessionPaths,
   updateSessionState,
 } from "../../session/state.ts";
+import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 
 function statePath(cwd: string): string {
@@ -30,6 +32,7 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
       project: await overlayStatus(cwd, "project"),
       user: await overlayStatus(cwd, "user"),
     },
+    notifyHook: await inspectNotifyHookConfig(cwd),
     state,
   };
   if (json) {
@@ -39,6 +42,7 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`Codexus session: ${result.status}`);
   console.log(`State: ${statePath(cwd)}`);
   console.log(`Project overlay: ${result.overlays.project.installed ? "installed" : "missing"}`);
+  console.log(`Notify hook: ${result.notifyHook.status}`);
 }
 
 async function checkpointCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
@@ -171,6 +175,23 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
   process.exitCode = verification.status === "passed" || verification.status === "skipped" ? 0 : 1;
 }
 
+async function notifyCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
+  assertMaxPositionals(args, 1);
+  const event = flagString(args.flags, "event") ?? "turn-ended";
+  const { record, state } = await recordSessionHookEvent(cwd, event);
+  const result = {
+    schemaVersion: 1,
+    notification: record,
+    statePath: statePath(cwd),
+    state,
+  };
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  console.log(`Session notification recorded: ${record.id}`);
+}
+
 export async function sessionCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "status";
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
@@ -186,6 +207,10 @@ export async function sessionCommand(args: ParsedArgs): Promise<void> {
   }
   if (subcommand === "verify") {
     await verifyCommand(args, cwd, json);
+    return;
+  }
+  if (subcommand === "notify") {
+    await notifyCommand(args, cwd, json);
     return;
   }
   throw new Error(`unsupported_session_command:${subcommand}`);

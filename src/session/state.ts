@@ -2,11 +2,11 @@ import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { withFileLock } from "../util/lock.ts";
+import { codexHome, inspectNotifyHookConfig } from "./hook-config.ts";
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
@@ -39,6 +39,14 @@ export interface SessionVerificationRecord {
   artifactsDir: string;
 }
 
+export interface SessionHookEventRecord {
+  id: string;
+  event: string;
+  observedAt: string;
+  source: "notify";
+  cwd: string;
+}
+
 export interface CodexusSessionState {
   schemaVersion: 1;
   sessionId: string;
@@ -49,6 +57,7 @@ export interface CodexusSessionState {
   lastCommand: string | null;
   checkpoints: SessionCheckpointRecord[];
   verifications: SessionVerificationRecord[];
+  hookEvents: SessionHookEventRecord[];
   linkedRunIds: string[];
   capabilities: {
     tmux: CapabilityStatus;
@@ -95,13 +104,21 @@ function isSessionState(value: unknown): value is CodexusSessionState {
   if (value.status !== "initialized") return false;
   if (typeof value.createdAt !== "string" || typeof value.updatedAt !== "string") return false;
   if (!(value.lastCommand === null || typeof value.lastCommand === "string")) return false;
-  if (!Array.isArray(value.checkpoints) || !Array.isArray(value.verifications) || !Array.isArray(value.linkedRunIds)) return false;
+  if (!Array.isArray(value.checkpoints) || !Array.isArray(value.verifications) || !Array.isArray(value.hookEvents) || !Array.isArray(value.linkedRunIds)) return false;
   if (!isRecord(value.capabilities)) return false;
   if (!(value.capabilities.tmux === "available" || value.capabilities.tmux === "unavailable")) return false;
   if (!(value.capabilities.hooks === "available" || value.capabilities.hooks === "unavailable")) return false;
   if (!(value.capabilities.statusline === "available" || value.capabilities.statusline === "unavailable")) return false;
   if (!isRecord(value.overlays)) return false;
   return isOverlayStatus(value.overlays.project) && isOverlayStatus(value.overlays.user);
+}
+
+function migrateSessionState(value: unknown): unknown {
+  if (!isRecord(value) || value.schemaVersion !== 1) return value;
+  return {
+    hookEvents: [],
+    ...value,
+  };
 }
 
 function nowIso(): string {
@@ -133,10 +150,6 @@ export function sessionPaths(cwd = process.cwd()): SessionPaths {
     verificationDir: join(sessionRoot, "verification"),
     contextDir: join(sessionRoot, "context"),
   };
-}
-
-export function codexHome(): string {
-  return process.env.CODEX_HOME ? resolve(process.env.CODEX_HOME) : join(homedir(), ".codex");
 }
 
 export function overlayPath(cwd: string, scope: OverlayScope): string {
@@ -233,11 +246,12 @@ export async function installOverlay(cwd: string, scope: OverlayScope): Promise<
   return { ...(await overlayStatus(cwd, scope)), changed };
 }
 
-export function detectSessionCapabilities(): CodexusSessionState["capabilities"] {
+export async function detectSessionCapabilities(cwd = process.cwd()): Promise<CodexusSessionState["capabilities"]> {
   const tmux = spawnSync("tmux", ["-V"], { encoding: "utf8" });
+  const notifyHook = await inspectNotifyHookConfig(cwd);
   return {
     tmux: tmux.status === 0 ? "available" : "unavailable",
-    hooks: "unavailable",
+    hooks: notifyHook.installed ? "available" : "unavailable",
     statusline: "unavailable",
   };
 }
@@ -254,8 +268,9 @@ async function defaultState(cwd: string): Promise<CodexusSessionState> {
     lastCommand: null,
     checkpoints: [],
     verifications: [],
+    hookEvents: [],
     linkedRunIds: [],
-    capabilities: detectSessionCapabilities(),
+    capabilities: await detectSessionCapabilities(cwd),
     overlays: {
       project: await overlayStatus(cwd, "project"),
       user: await overlayStatus(cwd, "user"),
@@ -268,8 +283,9 @@ export async function readSessionState(cwd: string): Promise<CodexusSessionState
   if (!existsSync(paths.state)) return null;
   try {
     const parsed = JSON.parse(await readFile(paths.state, "utf8")) as unknown;
-    if (!isSessionState(parsed)) throw new Error("invalid_shape");
-    return parsed;
+    const migrated = migrateSessionState(parsed);
+    if (!isSessionState(migrated)) throw new Error("invalid_shape");
+    return migrated;
   } catch (error) {
     throw new Error(`session_state_corrupt:${error instanceof Error ? error.message : String(error)}`);
   }
@@ -307,7 +323,7 @@ export async function refreshSessionState(cwd: string, state: CodexusSessionStat
     ...state,
     cwd: resolve(cwd),
     updatedAt: nowIso(),
-    capabilities: detectSessionCapabilities(),
+    capabilities: await detectSessionCapabilities(cwd),
     overlays: {
       project: await overlayStatus(cwd, "project"),
       user: await overlayStatus(cwd, "user"),
@@ -340,4 +356,23 @@ export function createCheckpointId(): string {
 
 export function createVerificationId(): string {
   return createId("verification");
+}
+
+export function createHookEventId(): string {
+  return createId("hook");
+}
+
+export async function recordSessionHookEvent(cwd: string, event: string): Promise<{ record: SessionHookEventRecord; state: CodexusSessionState }> {
+  const record: SessionHookEventRecord = {
+    id: createHookEventId(),
+    event,
+    observedAt: nowIso(),
+    source: "notify",
+    cwd: resolve(cwd),
+  };
+  const state = await updateSessionState(cwd, "session notify", (value) => ({
+    ...value,
+    hookEvents: [...value.hookEvents, record].slice(-20),
+  }));
+  return { record, state };
 }

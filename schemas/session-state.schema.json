@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/session-state.schema.json",
+  "title": "Codexus Session State",
+  "type": "object",
+  "required": ["schemaVersion", "sessionId", "cwd", "status", "createdAt", "updatedAt", "lastCommand", "checkpoints", "verifications", "hookEvents", "linkedRunIds", "capabilities", "overlays"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "cwd": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["initialized"] },
+    "createdAt": { "type": "string" },
+    "updatedAt": { "type": "string" },
+    "lastCommand": { "type": ["string", "null"] },
+    "checkpoints": { "type": "array", "items": { "type": "object" } },
+    "verifications": { "type": "array", "items": { "type": "object" } },
+    "hookEvents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "event", "observedAt", "source", "cwd"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "event": { "type": "string", "minLength": 1 },
+          "observedAt": { "type": "string" },
+          "source": { "enum": ["notify"] },
+          "cwd": { "type": "string" }
+        }
+      }
+    },
+    "linkedRunIds": { "type": "array", "items": { "type": "string" } },
+    "capabilities": {
+      "type": "object",
+      "required": ["tmux", "hooks", "statusline"],
+      "properties": {
+        "tmux": { "enum": ["available", "unavailable"] },
+        "hooks": { "enum": ["available", "unavailable"] },
+        "statusline": { "enum": ["available", "unavailable"] }
+      }
+    },
+    "overlays": {
+      "type": "object",
+      "required": ["project", "user"],
+      "properties": {
+        "project": { "type": "object" },
+        "user": { "type": "object" }
+      }
+    }
+  }
+}
