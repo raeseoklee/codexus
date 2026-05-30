@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { loadConfig } from "../../config/loader.ts";
 import { CodexAppServerDriver } from "../../drivers/codex-app-server.ts";
 import { superviseProcess } from "../../experiments/process-supervisor.ts";
+import { runIsolatedRealStageA } from "../../experiments/app-server-stage-a.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
@@ -11,6 +12,10 @@ import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 function liveEnabled(): boolean {
   return process.env.CODEXUS_ENABLE_APP_SERVER_LIVE === "1";
+}
+
+function isolatedRealEnabled(): boolean {
+  return process.env.CODEXUS_ENABLE_APP_SERVER_ISOLATED === "1";
 }
 
 function supervisedAppServerHelpProbe(command: string, timeoutMs: number) {
@@ -102,6 +107,28 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (topic === "experiment") {
+    if (flagBool(args.flags, "isolated-real")) {
+      if (!isolatedRealEnabled()) throw new Error("unsupported_feature:codex-app-server-isolated-real");
+      const timeoutMs = Number(flagString(args.flags, "timeout-ms") ?? "30000");
+      if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) throw new Error("invalid_timeout_ms");
+      const experimentId = `app_server_isolated_${Date.now()}`;
+      const experimentDir = resolve(harnessRoot(cwd), "experiments", "app-server", experimentId);
+      const { manifest } = await runIsolatedRealStageA({
+        command: config.codex.command,
+        cwd,
+        experimentDir,
+        experimentId,
+        timeoutMs,
+        fixtureMethods: fixture.methods,
+        record: flagBool(args.flags, "record"),
+      });
+      if (json) {
+        console.log(JSON.stringify(manifest, null, 2));
+        return;
+      }
+      console.log(`app-server experiment isolated-real: observerAttach=${manifest.observerAttach.observerAttach} capability=${manifest.conservativeCapability}`);
+      return;
+    }
     const dryRun = flagBool(args.flags, "dry-run") || !flagBool(args.flags, "live");
     if (!dryRun && !liveEnabled()) throw new Error("unsupported_feature:codex-app-server-live-experiment");
     if (!dryRun && flagBool(args.flags, "supervise-fake")) throw new Error("unsupported_feature:codex-app-server-live-fake-supervision");

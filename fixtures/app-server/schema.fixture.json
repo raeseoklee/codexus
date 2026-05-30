@@ -6,7 +6,7 @@
     "thread/start",
     "turn/start",
     "turn/steer",
-    "thread/items/read",
+    "thread/turns/items/list",
     "skills/list"
   ],
   "notes": [

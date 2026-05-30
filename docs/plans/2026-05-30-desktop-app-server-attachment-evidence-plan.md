@@ -54,9 +54,12 @@ Requirements:
 - Use a temporary workspace and temporary socket path.
 - Generate app-server JSON Schema into a temporary directory and record bounded
   drift evidence against the committed fixture.
-- If a daemon/proxy process is started, supervise it with timeout,
+- If an app-server/proxy process is started, supervise it with timeout,
   `SIGTERM -> short wait -> SIGKILL`, bounded stdout/stderr capture, and cleanup
   assertions.
+- Prefer an isolated direct `codex app-server --listen unix://...` process for
+  Stage A. Managed daemon start remains a later/live concern because it can
+  depend on a standalone Codex install under `CODEX_HOME`.
 - Do not initiate Codex/model turns. Stage A is limited to schema, lifecycle,
   control-socket, and observer-safety evidence.
 - Do not call `enable-remote-control` on the user's real daemon.
@@ -72,7 +75,7 @@ Output:
 Promotion gate from Stage A to Stage B:
 
 - Schema generation works.
-- Proxy/daemon lifecycle is either proven in isolation or the exact reason it
+- Proxy/app-server lifecycle is either proven in isolation or the exact reason it
   cannot be isolated is recorded.
 - Observer/concurrent-client behavior is proven in isolation when possible. If
   the control socket appears single-client or disruptive, Stage B must not
@@ -150,8 +153,9 @@ cx app-server experiment --isolated-real --record --json
 cx app-server experiment --live-read-only --record --sock <path> --json
 ```
 
-`--isolated-real` and `--live-read-only` should remain unsupported until their
-gates are implemented. Their errors must be structured and truthful.
+`--isolated-real` is implemented behind `CODEXUS_ENABLE_APP_SERVER_ISOLATED=1`.
+`--live-read-only` should remain unsupported until its consent and safety gates
+are implemented. Errors must be structured and truthful.
 
 ## Verification
 

@@ -31,6 +31,8 @@ export async function superviseProcess(options: {
   timeoutMs: number;
   stopAfterMs?: number;
   previewChars?: number;
+  env?: NodeJS.ProcessEnv;
+  keepStdinOpen?: boolean;
 }): Promise<SupervisedProcessResult> {
   const timeoutMs = options.timeoutMs;
   const stopAfterMs = options.stopAfterMs ?? Math.min(250, Math.max(50, Math.floor(timeoutMs / 4)));
@@ -46,7 +48,8 @@ export async function superviseProcess(options: {
   return await new Promise<SupervisedProcessResult>((resolve) => {
     const child = spawn(options.command, options.args, {
       cwd: options.cwd,
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: [options.keepStdinOpen ? "pipe" : "ignore", "pipe", "pipe"],
+      env: options.env ?? process.env,
     });
     const finish = (status: SupervisedProcessResult["status"], exitCode: number | null, signal: NodeJS.Signals | null, error: string | null) => {
       clearTimeout(stopTimer);

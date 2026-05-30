@@ -53,8 +53,11 @@ Stage A는 사용자 live Desktop daemon을 건드리지 않고 protocol과 life
 - 임시 workspace와 임시 socket path를 사용합니다.
 - app-server JSON Schema를 임시 directory에 생성하고 committed fixture와 비교한
   bounded drift evidence를 기록합니다.
-- daemon/proxy process를 시작한다면 timeout, `SIGTERM -> 짧은 대기 -> SIGKILL`,
+- app-server/proxy process를 시작한다면 timeout, `SIGTERM -> 짧은 대기 -> SIGKILL`,
   bounded stdout/stderr capture, cleanup assertion으로 supervise합니다.
+- Stage A에서는 격리된 direct `codex app-server --listen unix://...` process를
+  우선합니다. Managed daemon start는 `CODEX_HOME` 아래 standalone Codex install에
+  의존할 수 있으므로 later/live concern으로 둡니다.
 - Codex/model turn을 시작하지 않습니다. Stage A는 schema, lifecycle,
   control-socket, observer-safety evidence로 제한합니다.
 - 사용자 실제 daemon에 `enable-remote-control`을 호출하지 않습니다.
@@ -70,7 +73,7 @@ Stage A는 사용자 live Desktop daemon을 건드리지 않고 protocol과 life
 Stage A에서 Stage B로 넘어가는 gate:
 
 - Schema generation이 동작합니다.
-- Proxy/daemon lifecycle이 격리 상태에서 증명되거나, 격리가 불가능한 정확한 이유를
+- Proxy/app-server lifecycle이 격리 상태에서 증명되거나, 격리가 불가능한 정확한 이유를
   기록합니다.
 - 가능하면 observer/concurrent-client behavior를 격리 상태에서 증명합니다. Control
   socket이 single-client이거나 disruptive해 보이면 Stage B는 사용자 실제 daemon에
@@ -145,7 +148,8 @@ cx app-server experiment --isolated-real --record --json
 cx app-server experiment --live-read-only --record --sock <path> --json
 ```
 
-`--isolated-real`과 `--live-read-only`는 gate가 구현될 때까지 unsupported 상태로
+`--isolated-real`은 `CODEXUS_ENABLE_APP_SERVER_ISOLATED=1` 뒤에서 구현됐습니다.
+`--live-read-only`는 consent와 safety gate가 구현될 때까지 unsupported 상태로
 남겨야 합니다. 오류는 structured하고 truthful해야 합니다.
 
 ## 검증

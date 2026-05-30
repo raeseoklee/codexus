@@ -23,6 +23,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     "approve",
     "probe-process",
     "supervise-fake",
+    "isolated-real",
     "strict",
     "enable-notify-hook",
     "disable-notify-hook",
