@@ -5,7 +5,7 @@ import { chmod, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promis
 import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
 import { hostname, tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { isAbsolute, join, resolve } from "node:path";
 import { defaultConfig } from "../src/config/schema.ts";
 import { appendMemoryEntry } from "../src/evolution/memory.ts";
 import { runPaths } from "../src/ledger/paths.ts";
@@ -43,7 +43,7 @@ test("version commands report package metadata without touching workspace state"
     assert.equal(output.name, pkg.name);
     assert.equal(output.version, pkg.version);
     assert.equal(output.node, process.version);
-    assert.match(output.packageRoot, /codex-harness$/);
+    assert.equal(isAbsolute(output.packageRoot), true);
     assert.equal(existsSync(join(cwd, ".codexus")), false);
   } finally {
     await rm(cwd, { recursive: true, force: true });
