@@ -3,7 +3,7 @@
 [English](../../design/09-subagent-evidence-supervision.md)
 
 작성일: 2026-05-30
-상태: 제안된 설계
+상태: recorder slice 구현됨
 
 ## 결정
 
@@ -102,7 +102,7 @@ verification-only입니다.
 
 ## Bundle A: Recorder Only
 
-첫 구현 bundle은 기록 절반입니다:
+구현됨: 첫 구현 bundle은 기록 절반입니다:
 
 - subagent result envelope 정의,
 - `.codexus/session/subagents/` 아래 subagent artifact 기록,
@@ -202,10 +202,10 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
 
 ## 구현 슬라이스
 
-1. Read-only subagent artifact schema와 session-state link 추가.
-2. `.codexus/` artifact만 쓰는 `cx session subagent record/attach` command 추가.
-3. Status integration 추가: linked subagent id, claim count, limitation,
-   verification handoff hint, 명시적 `unverifiedClaims` section.
-4. `evidenceFresh`를 verification-only로 유지하고 이 invariant의 regression test 추가.
+1. 구현됨: read-only subagent artifact schema와 session-state link 추가.
+2. 구현됨: `.codexus/` artifact만 쓰는 `cx session subagent record/attach` command 추가.
+3. 구현됨: linked subagent id, claim count, limitation, evidence link, 명시적
+   `unverifiedClaims` section을 포함한 status integration.
+4. 구현됨: `evidenceFresh`를 verification-only로 유지하고 이 invariant의 regression test 추가.
 5. Native subagent capability detection, spawning, parallel planning은 recorder semantics가
    안정된 뒤로 defer.

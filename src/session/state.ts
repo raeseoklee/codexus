@@ -13,7 +13,7 @@ import { computeWorkspaceFingerprint, isWorkspaceFingerprint, type WorkspaceFing
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
-export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 3 as const;
+export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 4 as const;
 
 export type OverlayScope = "project" | "user";
 export type OverlayProfile = "default" | "always-on";
@@ -71,6 +71,17 @@ export interface SessionHookEventRecord {
   heartbeatEvidence?: EvidenceModel | null;
 }
 
+export interface SessionSubagentLink {
+  taskId: string;
+  role: string;
+  status: "recorded" | "attached";
+  recordedAt: string;
+  path: string;
+  claimCount: number;
+  limitationCount: number;
+  evidenceLinks: string[];
+}
+
 export interface NotifyDispatchState {
   status: NotifyDispatchStatus;
   lastTurnEndedAt: string | null;
@@ -91,6 +102,7 @@ export interface CodexusSessionState {
   verifications: SessionVerificationRecord[];
   lastVerifiedFingerprint: LastVerifiedFingerprint | null;
   hookEvents: SessionHookEventRecord[];
+  subagents: SessionSubagentLink[];
   linkedRunIds: string[];
   capabilities: {
     tmux: CapabilityStatus;
@@ -139,6 +151,7 @@ export interface SessionPaths {
   checkpointsDir: string;
   verificationDir: string;
   contextDir: string;
+  subagentsDir: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -184,6 +197,19 @@ function isSessionHookEventRecord(value: unknown): value is SessionHookEventReco
     );
 }
 
+function isSessionSubagentLink(value: unknown): value is SessionSubagentLink {
+  if (!isRecord(value)) return false;
+  return typeof value.taskId === "string"
+    && typeof value.role === "string"
+    && (value.status === "recorded" || value.status === "attached")
+    && typeof value.recordedAt === "string"
+    && typeof value.path === "string"
+    && typeof value.claimCount === "number"
+    && typeof value.limitationCount === "number"
+    && Array.isArray(value.evidenceLinks)
+    && value.evidenceLinks.every((item) => typeof item === "string");
+}
+
 function isSessionVerificationRecord(value: unknown): value is SessionVerificationRecord {
   if (!isRecord(value)) return false;
   if (typeof value.id !== "string" || typeof value.createdAt !== "string" || typeof value.status !== "string") return false;
@@ -208,10 +234,11 @@ function isSessionState(value: unknown): value is CodexusSessionState {
   if (value.status !== "initialized") return false;
   if (typeof value.createdAt !== "string" || typeof value.updatedAt !== "string") return false;
   if (!(value.lastCommand === null || typeof value.lastCommand === "string")) return false;
-  if (!Array.isArray(value.checkpoints) || !Array.isArray(value.verifications) || !Array.isArray(value.hookEvents) || !Array.isArray(value.linkedRunIds)) return false;
+  if (!Array.isArray(value.checkpoints) || !Array.isArray(value.verifications) || !Array.isArray(value.hookEvents) || !Array.isArray(value.subagents) || !Array.isArray(value.linkedRunIds)) return false;
   if (!value.verifications.every(isSessionVerificationRecord)) return false;
   if (!(value.lastVerifiedFingerprint === null || isLastVerifiedFingerprint(value.lastVerifiedFingerprint))) return false;
   if (!value.hookEvents.every(isSessionHookEventRecord)) return false;
+  if (!value.subagents.every(isSessionSubagentLink)) return false;
   if (!isRecord(value.capabilities)) return false;
   if (!(value.capabilities.tmux === "available" || value.capabilities.tmux === "unavailable")) return false;
   if (!(value.capabilities.hooks === "available" || value.capabilities.hooks === "configured" || value.capabilities.hooks === "unavailable")) return false;
@@ -381,14 +408,27 @@ function migrateV2SessionState(value: Record<string, unknown>, applied: string[]
   return next;
 }
 
+// v3 -> v4: introduce read-only subagent evidence links. Older session states
+// had no recorder surface, so the only honest migration is an empty list.
+function migrateV3SessionState(value: Record<string, unknown>, applied: string[]): Record<string, unknown> {
+  const next: Record<string, unknown> = {
+    ...value,
+    schemaVersion: 4,
+    subagents: Object.hasOwn(value, "subagents") ? value.subagents : [],
+  };
+  applied.push("session_state_v4.add_subagent_links");
+  return next;
+}
+
 function migrateSessionState(value: unknown): { value: unknown; report: SessionStateMigrationReport } {
   if (!isRecord(value)) return { value, report: migrationReport({ fromVersion: null, reason: "not_an_object" }) };
   const fromVersion = schemaVersionOf(value);
   const applied: string[] = [];
-  if (fromVersion === 1 || fromVersion === 2) {
+  if (fromVersion === 1 || fromVersion === 2 || fromVersion === 3) {
     let next: Record<string, unknown> = value;
     if (fromVersion === 1) next = migrateV1SessionState(next, applied);
-    next = migrateV2SessionState(next, applied);
+    if (fromVersion === 1 || fromVersion === 2) next = migrateV2SessionState(next, applied);
+    next = migrateV3SessionState(next, applied);
     return {
       value: next,
       report: migrationReport({
@@ -444,6 +484,7 @@ export function sessionPaths(cwd = process.cwd()): SessionPaths {
     checkpointsDir: join(sessionRoot, "checkpoints"),
     verificationDir: join(sessionRoot, "verification"),
     contextDir: join(sessionRoot, "context"),
+    subagentsDir: join(sessionRoot, "subagents"),
   };
 }
 
@@ -575,6 +616,7 @@ async function defaultState(cwd: string): Promise<CodexusSessionState> {
     verifications: [],
     lastVerifiedFingerprint: null,
     hookEvents: [],
+    subagents: [],
     linkedRunIds: [],
     capabilities: await detectSessionCapabilities(cwd, notifyDispatch),
     notifyDispatch,
@@ -620,6 +662,7 @@ async function loadOrCreateSessionStateUnlocked(cwd: string): Promise<CodexusSes
   await ensureDir(paths.checkpointsDir);
   await ensureDir(paths.verificationDir);
   await ensureDir(paths.contextDir);
+  await ensureDir(paths.subagentsDir);
   const existing = await readSessionStateWithMigration(cwd);
   if (existing.state) {
     const refreshed = await refreshSessionState(cwd, existing.state);
@@ -715,6 +758,10 @@ export function createVerificationId(): string {
 
 export function createHookEventId(): string {
   return createId("hook");
+}
+
+export function createSubagentId(): string {
+  return createId("subagent");
 }
 
 function runtimeSurfaceFromEnv(env: NodeJS.ProcessEnv): RuntimeSurface {

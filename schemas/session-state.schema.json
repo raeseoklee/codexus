@@ -3,9 +3,9 @@
   "$id": "https://codexus.local/schemas/session-state.schema.json",
   "title": "Codexus Session State",
   "type": "object",
-  "required": ["schemaVersion", "sessionId", "cwd", "status", "createdAt", "updatedAt", "lastCommand", "checkpoints", "verifications", "lastVerifiedFingerprint", "hookEvents", "linkedRunIds", "capabilities", "notifyDispatch", "overlays"],
+  "required": ["schemaVersion", "sessionId", "cwd", "status", "createdAt", "updatedAt", "lastCommand", "checkpoints", "verifications", "lastVerifiedFingerprint", "hookEvents", "subagents", "linkedRunIds", "capabilities", "notifyDispatch", "overlays"],
   "properties": {
-    "schemaVersion": { "const": 3 },
+    "schemaVersion": { "const": 4 },
     "sessionId": { "type": "string", "minLength": 1 },
     "cwd": { "type": "string", "minLength": 1 },
     "status": { "enum": ["initialized"] },
@@ -108,6 +108,23 @@
             }
           },
           "heartbeatEvidence": { "type": ["object", "null"] }
+        }
+      }
+    },
+    "subagents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["taskId", "role", "status", "recordedAt", "path", "claimCount", "limitationCount", "evidenceLinks"],
+        "properties": {
+          "taskId": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["recorded", "attached"] },
+          "recordedAt": { "type": "string" },
+          "path": { "type": "string", "minLength": 1 },
+          "claimCount": { "type": "number" },
+          "limitationCount": { "type": "number" },
+          "evidenceLinks": { "type": "array", "items": { "type": "string" } }
         }
       }
     },

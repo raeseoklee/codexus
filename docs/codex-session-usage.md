@@ -236,7 +236,11 @@ Prefer read-only or evidence-oriented commands first:
 session status --json
 session migrate --dry-run --json
 session checkpoint "before risky refactor" --json
+session verify --auto --json
+session verify --auto --execute --json
 session verify --verify "npm test" --json
+session slop --json
+session subagent record --file <result.json> --json
 doctor --json
 runs list --json
 cancel <run-id> --reason "<why>" --json
@@ -254,6 +258,12 @@ replay skill <skill-id> --json
 
 Prefer checkpoint and session verification commands before starting nested
 `cx run` sub-runs.
+
+Use `session slop --json` when you want Codex to summarize whether the current
+workspace has fresh verification, objective diff facts, declared-scope escapes,
+or advisory quality claims. Use `session subagent record/attach` only to record
+claim bundles; those claims remain unverified until a separate verification or
+review artifact supports them.
 
 Current session state is cwd-scoped. If two Codex windows operate on the same
 project at the same time, Codexus serializes writes with the `session` lock; a

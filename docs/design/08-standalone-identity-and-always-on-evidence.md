@@ -213,9 +213,9 @@ evidence snapshot, but verification is never executed by the hook and
    `workspaceFingerprint` versus the current fingerprint. Use git hashes first;
    use timestamp/mtime only as a degraded fallback that cannot claim strong
    freshness.
-2. Add verify auto-detection: `cx session verify --auto` (detect + recommend
-   always; execute only with an explicit run opt-in such as `--execute`; policy
-   preflight for danger).
+2. Completed: add verify auto-detection with `cx session verify --auto`
+   (detect + recommend always; execute only with an explicit run opt-in such as
+   `--execute`; policy preflight for danger).
 3. Completed: add the `--always-on` overlay profile and make the notify hook a
    heartbeat that records derived evidence state on `turn-ended`.
 4. Add the evidence-bearing-only rule to the design docs and to command

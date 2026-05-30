@@ -499,6 +499,7 @@ test("session migrate reports and persists explicit session-state migrations", a
       "session_state_v1.add_hook_events",
       "session_state_v2.add_notify_dispatch",
       "session_state_v3.add_workspace_fingerprint",
+      "session_state_v4.add_subagent_links",
     ]);
     assert.equal(Object.hasOwn(JSON.parse(await readFile(statePath, "utf8")), "hookEvents"), false);
 
@@ -508,8 +509,9 @@ test("session migrate reports and persists explicit session-state migrations", a
     assert.equal(migrateOutput.status, "migrated");
     assert.equal(migrateOutput.dryRun, false);
     const migratedState = JSON.parse(await readFile(statePath, "utf8"));
-    assert.equal(migratedState.schemaVersion, 3);
+    assert.equal(migratedState.schemaVersion, 4);
     assert.deepEqual(migratedState.hookEvents, []);
+    assert.deepEqual(migratedState.subagents, []);
     assert.equal(migratedState.notifyDispatch.status, "not_configured");
     assert.equal(migratedState.lastVerifiedFingerprint, null);
 
@@ -527,12 +529,12 @@ test("session migrate rejects unsupported future session-state versions", async 
   const codexHome = await tempDir();
   try {
     await mkdir(join(cwd, ".codexus", "session"), { recursive: true });
-    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 4 }\n");
+    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 5 }\n");
     const migrate = runCli(cwd, ["session", "migrate", "--json"], { CODEX_HOME: codexHome });
     assert.equal(migrate.status, 1);
     const output = JSON.parse(migrate.stdout);
     assert.equal(output.code, "session_state_corrupt");
-    assert.match(output.details.target, /unsupported_schema_version:4/);
+    assert.match(output.details.target, /unsupported_schema_version:5/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -646,6 +648,7 @@ test("session-state focused validator and schema artifact reject the same critic
     const baseline = JSON.parse(await readFile(JSON.parse(checkpoint.stdout).statePath, "utf8"));
     const invalidCases = [
       ["missing_hook_events", (value: Record<string, unknown>) => { delete value.hookEvents; }],
+      ["missing_subagents", (value: Record<string, unknown>) => { delete value.subagents; }],
       ["bad_status", (value: Record<string, unknown>) => { value.status = "running"; }],
       ["bad_capabilities_hooks", (value: Record<string, unknown>) => {
         (value.capabilities as Record<string, unknown>).hooks = "enabled";
@@ -716,7 +719,7 @@ test("session verify stores a workspace fingerprint and last-verified evidence",
     assert.equal(output.state.lastVerifiedFingerprint.verificationId, output.verification.id);
     assert.equal(output.state.lastVerifiedFingerprint.fingerprint.unstagedDiffHash, fingerprint.unstagedDiffHash);
 
-    // The persisted state must validate against the v3 schema artifact.
+    // The persisted state must validate against the v4 schema artifact.
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
@@ -865,6 +868,81 @@ test("session verify --auto --execute still enforces the policy preflight danger
     // Blocked path records a fingerprint but must NOT promote lastVerifiedFingerprint.
     assert.ok(output.verification.workspaceFingerprint);
     assert.equal(output.state.lastVerifiedFingerprint, null);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session subagent record stores unverified claims without changing evidence freshness", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const claimFile = join(cwd, "subagent-result.json");
+    await writeFile(claimFile, `${JSON.stringify({
+      taskId: "review-1",
+      role: "reviewer",
+      claims: [
+        {
+          kind: "risk",
+          text: "Parser change may need a boundary test.",
+          confidence: "low",
+          evidenceLinks: ["diff:parser.ts"],
+        },
+      ],
+      limitations: ["read-only review"],
+    }, null, 2)}\n`);
+
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 0, verify.stderr);
+
+    const record = runCli(cwd, ["session", "subagent", "record", "--file", claimFile, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(record.status, 0, record.stderr);
+    const output = JSON.parse(record.stdout);
+    assert.equal(output.artifact.taskId, "review-1");
+    assert.equal(output.artifact.claims.length, 1);
+    assert.equal(output.link.claimCount, 1);
+    assert.ok(existsSync(output.artifactPath));
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.subagents.count, 1);
+    assert.equal(statusOutput.subagents.unverifiedClaims[0].taskId, "review-1");
+    assert.equal(statusOutput.evidence.evidenceFresh, true);
+
+    const artifactStatus = runCli(cwd, ["session", "subagent", "status", "review-1", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(artifactStatus.status, 0, artifactStatus.stderr);
+    assert.equal(JSON.parse(artifactStatus.stdout).artifact.claims[0].text, "Parser change may need a boundary test.");
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session subagent attach records role-scoped claim bundles", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    const claimFile = join(cwd, "claims.json");
+    await writeFile(claimFile, `${JSON.stringify({
+      claims: ["Build output indicates the failure is in the parser fixture."],
+      evidenceLinks: ["verification:latest"],
+    }, null, 2)}\n`);
+
+    const attach = runCli(cwd, ["session", "subagent", "attach", "--role", "debugger", "--claim-file", claimFile, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(attach.status, 0, attach.stderr);
+    const output = JSON.parse(attach.stdout);
+    assert.equal(output.artifact.status, "attached");
+    assert.equal(output.artifact.role, "debugger");
+    assert.equal(output.artifact.claims.length, 1);
+    assert.equal(output.state.subagents[0].role, "debugger");
+    assert.deepEqual(output.state.subagents[0].evidenceLinks, ["verification:latest"]);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });

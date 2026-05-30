@@ -188,7 +188,7 @@ Overlay는 행동을 요청할 뿐, 행동을 증명하지 않습니다. Notify 
 1. `cx session status`를 ambient evidence 모델로 강화. `dirtySinceLastVerify`/`evidenceFresh`를
    저장된 `workspaceFingerprint`와 현재 fingerprint의 비교에서 도출. git hash를 우선하고,
    timestamp/mtime은 강한 freshness를 주장할 수 없는 degraded fallback으로만 사용.
-2. verify 자동 감지 추가: `cx session verify --auto`(감지+추천 항상; 실행 opt-in·bounded;
+2. 완료: `cx session verify --auto` 자동 감지 추가(감지+추천 항상; 실행 opt-in·bounded;
    실행은 `--execute` 같은 명시적 실행 opt-in에서만; danger는 policy preflight).
 3. 완료: `--always-on` overlay 프로필 추가, notify hook을 `turn-ended` 시 도출 evidence 상태를
    기록하는 heartbeat로.

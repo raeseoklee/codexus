@@ -199,7 +199,7 @@ function processIntervalsOverlap(first: SupervisedProcessResult, second: Supervi
 function proxyAttached(result: SupervisedProcessResult): boolean {
   if (result.status === "error" || result.status === "failed") return false;
   if (result.stderrPreview.toLowerCase().includes("failed to connect")) return false;
-  return result.status === "stopped" || result.status === "timed_out" || result.exitCode === 0;
+  return result.status === "stopped" || result.status === "timed_out";
 }
 
 export function buildObserverProbeEvidence(input: {

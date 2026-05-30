@@ -17,8 +17,10 @@ import {
 } from "../../session/state.ts";
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 import { deriveEvidenceModel } from "../../session/evidence.ts";
+import { buildChangeEvidenceReport } from "../../session/change-evidence.ts";
 import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
+import { readSubagentArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 
 function statePath(cwd: string): string {
@@ -34,12 +36,16 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   const evidence = state
     ? deriveEvidenceModel(state, computeWorkspaceFingerprint(cwd), detection.recommended)
     : null;
+  const changeEvidence = buildChangeEvidenceReport(cwd, state, {}).changeEvidence;
+  const subagents = summarizeSubagentClaims(state);
   const result = {
     schemaVersion: 1,
     status: state ? "initialized" : "not_initialized",
     cwd,
     paths,
     evidence,
+    changeEvidence,
+    subagents,
     verifyDetection: detection,
     overlays: {
       project: await overlayStatus(cwd, "project"),
@@ -304,6 +310,80 @@ async function notifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
   console.log(`Session notification recorded: ${record.id}`);
 }
 
+async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
+  const action = args.positionals[1] ?? "status";
+  if (action === "record") {
+    assertAllowedFlags(args, ["json", "cwd", "file"]);
+    assertMaxPositionals(args, 2);
+    const file = flagString(args.flags, "file");
+    if (!file) throw new Error("missing_subagent_file");
+    const result = await recordSubagentArtifact(cwd, { mode: "record", inputFile: file });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Subagent result recorded: ${result.artifact.taskId}`);
+    console.log(result.artifactPath);
+    return;
+  }
+  if (action === "attach") {
+    assertAllowedFlags(args, ["json", "cwd", "role", "claim-file"]);
+    assertMaxPositionals(args, 2);
+    const file = flagString(args.flags, "claim-file");
+    if (!file) throw new Error("missing_subagent_file");
+    const result = await recordSubagentArtifact(cwd, {
+      mode: "attach",
+      role: flagString(args.flags, "role") ?? "subagent",
+      inputFile: file,
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Subagent claims attached: ${result.artifact.taskId}`);
+    console.log(result.artifactPath);
+    return;
+  }
+  if (action === "status") {
+    assertAllowedFlags(args, ["json", "cwd"]);
+    const taskId = args.positionals[2];
+    if (!taskId) throw new Error("missing_subagent_id");
+    assertMaxPositionals(args, 3);
+    const artifact = await readSubagentArtifact(cwd, taskId);
+    if (json) {
+      console.log(JSON.stringify({ schemaVersion: 1, artifact }, null, 2));
+      return;
+    }
+    console.log(`Subagent ${artifact.taskId}: ${artifact.status}`);
+    console.log(`Claims: ${artifact.claims.length}`);
+    return;
+  }
+  throw new Error(`unsupported_session_subagent_command:${action}`);
+}
+
+async function slopCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
+  assertAllowedFlags(args, ["json", "cwd", "since", "scope"]);
+  assertMaxPositionals(args, 1);
+  const stateRead = await readSessionStateWithMigration(cwd);
+  const state = stateRead.state ? await refreshSessionState(cwd, stateRead.state) : null;
+  const report = {
+    ...buildChangeEvidenceReport(cwd, state, {
+      since: flagString(args.flags, "since"),
+      scope: flagString(args.flags, "scope"),
+    }),
+    migration: stateRead.migration,
+  };
+  if (json) {
+    console.log(JSON.stringify(report, null, 2));
+    return;
+  }
+  console.log(`Change evidence: ${report.changeEvidence.status}`);
+  console.log(`Verification: ${report.changeEvidence.verification}`);
+  console.log(`Evidence gaps: ${report.evidenceGaps.length}`);
+  console.log(`Derivable facts: ${report.derivableFacts.length}`);
+  console.log(`Heuristic claims: ${report.heuristicClaims.length}`);
+}
+
 export async function sessionCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "status";
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
@@ -323,6 +403,14 @@ export async function sessionCommand(args: ParsedArgs): Promise<void> {
   }
   if (subcommand === "notify") {
     await notifyCommand(args, cwd, json);
+    return;
+  }
+  if (subcommand === "subagent") {
+    await subagentCommand(args, cwd, json);
+    return;
+  }
+  if (subcommand === "slop") {
+    await slopCommand(args, cwd, json);
     return;
   }
   if (subcommand === "migrate") {

@@ -62,6 +62,10 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported setup command${target ? `: ${target}` : ""}.`;
     case "unsupported_session_command":
       return `Unsupported session command${target ? `: ${target}` : ""}.`;
+    case "unsupported_session_subagent_command":
+      return `Unsupported session subagent command${target ? `: ${target}` : ""}.`;
+    case "unsupported_slop_command":
+      return `Unsupported slop command${target ? `: ${target}` : ""}.`;
     case "invalid_session_setup_scope":
       return `Invalid Codex-session setup scope${target ? `: ${target}` : ""}.`;
     case "conflicting_notify_hook_flags":
@@ -100,6 +104,14 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing run prompt.";
     case "missing_app_server_socket":
       return "Missing app-server socket path.";
+    case "missing_subagent_file":
+      return "Missing subagent evidence file.";
+    case "missing_subagent_id":
+      return "Missing subagent id.";
+    case "subagent_not_found":
+      return `Subagent artifact not found${target ? `: ${target}` : ""}.`;
+    case "subagent_artifact_invalid":
+      return `Subagent artifact is invalid${target ? `: ${target}` : ""}.`;
     case "missing_run_id":
       return "Missing run id.";
     case "missing_skill_id":
@@ -178,7 +190,11 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_setup_command":
       return "Run `cx setup codex-session --scope project --json`.";
     case "unsupported_session_command":
-      return "Run `cx session status --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, or `cx session notify --event <name> --json`.";
+      return "Run `cx session status --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, `cx session slop --json`, or `cx session notify --event <name> --json`.";
+    case "unsupported_session_subagent_command":
+      return "Run `cx session subagent record --file <result.json> --json`, `cx session subagent attach --role <role> --claim-file <claims.json> --json`, or `cx session subagent status <task-id> --json`.";
+    case "unsupported_slop_command":
+      return "Run `cx slop check --json`.";
     case "invalid_session_setup_scope":
       return "Use `--scope project` or `--scope user`.";
     case "missing_session_checkpoint_label":
@@ -223,6 +239,11 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Use a positive integer for `--observe-ms` that is less than or equal to `--timeout-ms`.";
     case "missing_app_server_socket":
       return "Pass `--sock <path>` with `cx app-server experiment --live-read-only`.";
+    case "missing_subagent_file":
+      return "Pass `--file <result.json>` or `--claim-file <claims.json>` with `cx session subagent`.";
+    case "missing_subagent_id":
+    case "subagent_not_found":
+      return "Run `cx session status --json` to list linked subagent artifacts.";
     case "invalid_skill_export_target":
       return "Use `--target codex` or `--target omx`.";
     case "skill_not_active":

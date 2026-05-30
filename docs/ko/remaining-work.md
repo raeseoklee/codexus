@@ -2,7 +2,7 @@
 
 [English](../remaining-work.md)
 
-날짜: 2026-05-29
+날짜: 2026-05-31
 
 이 문서는 MVP spine과 high-risk promotion slice 이후의 현재 backlog입니다. 남은
 항목, 필요한 이유, 다음 구현에서 지켜야 할 설계 제약을 정리합니다.
@@ -64,6 +64,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   explicit opt-in 및 사용자 제공 socket이 필요한 Stage B read-only command
   surface까지 진행했습니다. 이 경로는 transcript 값이 아니라 method shape만
   기록하며 아직 product behavior를 활성화하지 않습니다.
+- Session-native evidence surface도 추가로 진행했습니다. `cx session verify --auto`는
+  실행 없이 verification 후보를 감지하고, quality evidence guard는 `cx slop check` /
+  `cx session slop`으로 사용할 수 있으며, subagent claim bundle은 completion evidence로
+  승격하지 않은 채 `.codexus/session/subagents/` 아래 기록할 수 있습니다.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,
@@ -192,10 +196,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    fixture coverage와 CLI replay evidence 없이 추가하지 않습니다.
 3. app-server product behavior를 활성화하기 전에 Desktop app-server attachment
    evidence loop를 마무리합니다. Stage A isolated temporary-state evidence는
-   구현됐고, Stage B는 gated read-only command surface를 갖췄습니다. 남은 evidence는
-   실제 Desktop daemon에서 user-visible turn boundary를 관측하는 것과, 그 뒤의 별도
-   session-event mapping 설계입니다. app-server driver 활성화는 별도 gate로 계속
-   분리합니다.
+   구현됐고, Stage B는 gated read-only command surface와 negative maintainer smoke
+   evidence를 갖췄습니다. 남은 evidence는 지원되는 실제 Desktop daemon에서 user-visible
+   turn boundary를 관측하는 것과, 그 뒤의 별도 session-event mapping 설계입니다.
+   app-server driver 활성화는 별도 gate로 계속 분리합니다.
 4. cron/gateway policy/approval dry-run contract를 policy-reviewed live
    dispatch contract로 승격하고, dry-run/live path의 contract compatibility를
    유지합니다.
@@ -208,3 +212,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    추가합니다.
 8. Versioned `.codexus/session/state.json` schema는 explicit `cx session migrate`
    migration boundary를 통해서만 확장합니다.
+9. Quality evidence guard는 derivable artifact에서만 확장합니다. Coverage,
+   lint/typecheck artifact, explicit review link는 나중에 추가할 수 있지만 heuristic finding은
+   계속 advisory여야 합니다.
+10. Active native-subagent spawning은 recorder semantics가 안정된 뒤에만 추가합니다.
+   Subagent claim은 verification freshness와 계속 분리해야 합니다.

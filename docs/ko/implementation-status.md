@@ -2,7 +2,7 @@
 
 [English](../implementation-status.md)
 
-날짜: 2026-05-29
+날짜: 2026-05-31
 
 제품명: Codexus
 
@@ -19,6 +19,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Source development entrypoint: `node src/cli/main.ts`
 - `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`
 - `locks list/inspect/clear`, `schema check/validate/validate-run`, `app-server status/roundtrip/experiment`
+- `slop check`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
 - `cron status/run-now`, `gateway status/check`
@@ -78,6 +79,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   기존 marker가 손상된 경우 새 marker block을 append합니다.
 - `cx session status`, `cx session checkpoint`, `cx session verify`는
   `.codexus/session/` 아래 첫 Codex-native session surface를 제공합니다.
+- `cx session verify --auto`는 보수적인 verification 후보를 감지하되 실행하지 않습니다.
+  추천 command 실행에는 기존 policy preflight를 통과하는 명시적 `--execute`가 필요합니다.
+- `cx slop check`와 `cx session slop`은 quality evidence guard를 제공합니다:
+  tri-state `changeEvidence`, derivable evidence gap, non-gating derivable fact,
+  advisory heuristic claim, 명시적 diff base metadata, optional declared-scope check.
+- `cx session subagent record/attach/status`는 subagent claim bundle을
+  `.codexus/session/subagents/` 아래 기록하고 session state에서 link하며, subagent claim을
+  verification freshness와 분리합니다.
 - `cx setup codex-session --enable-notify-hook`은 현재 project가 Codex config에서
   trusted일 때만 Codex notify hook을 설치합니다. 기존 top-level `notify = [...]`
   command는 `--previous-notify` chain으로 보존합니다.
@@ -90,8 +99,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - 실제 `turn-ended` dispatch에서 notify event는 derived evidence model의 bounded
   snapshot인 `heartbeatEvidence`를 포함할 수 있습니다. Hook은 verification을 실행하지
   않고 stale evidence를 fresh로 만들 수도 없습니다.
-- Session state schema v3는 notify 설치와 dispatch 관측을 분리하고
-  workspace-fingerprint evidence를 추가합니다.
+- Session state schema v4는 notify 설치와 dispatch 관측을 분리하고
+  workspace-fingerprint evidence 및 read-only subagent claim artifact link를 추가합니다.
   `capabilities.hooks`는 install 직후 `configured`이고 실제 `turn-ended` event가
   관측된 뒤에만 `available`입니다. 수동 smoke event는 dispatch observed로 인정하지
   않습니다.
@@ -102,7 +111,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   실행하지 않고 blocked verification attempt로 기록합니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
-- `schemas/session-state.schema.json`은 v3 session-state shape용 first-class schema
+- `schemas/session-state.schema.json`은 v4 session-state shape용 first-class schema
   artifact이며,
   `cx schema validate --type session-state --file <path> --json`은 같은 local
   schema-artifact subset engine으로 session state를 검증합니다.
@@ -141,7 +150,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 101 tests 통과
+- `npm test`: 137 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`

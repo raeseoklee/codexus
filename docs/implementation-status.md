@@ -2,7 +2,7 @@
 
 [Korean](ko/implementation-status.md)
 
-Date: 2026-05-29
+Date: 2026-05-31
 
 Product name: Codexus
 
@@ -36,6 +36,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `schema check`
   - `schema validate`
   - `schema validate-run`
+  - `slop check`
   - `app-server status`
   - `app-server roundtrip`
   - `app-server experiment`
@@ -145,6 +146,16 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   backup, and append a fresh marker block when existing markers are damaged.
 - `cx session status`, `cx session checkpoint`, and `cx session verify` provide
   the first Codex-native session surface under `.codexus/session/`.
+- `cx session verify --auto` detects conservative verification candidates
+  without execution; `--execute` is required before running the recommended
+  command through the existing policy preflight.
+- `cx slop check` and `cx session slop` expose the quality evidence guard:
+  tri-state `changeEvidence`, derivable evidence gaps, non-gating derivable
+  facts, advisory heuristic claims, explicit diff base metadata, and optional
+  declared-scope checks.
+- `cx session subagent record/attach/status` records subagent claim bundles
+  under `.codexus/session/subagents/`, links them from session state, and keeps
+  subagent claims separate from verification freshness.
 - `cx setup codex-session --enable-notify-hook` installs a Codex notify hook
   only when the current project is trusted in Codex config; existing top-level
   `notify = [...]` commands are preserved through `--previous-notify` chaining.
@@ -157,8 +168,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - On real `turn-ended` dispatch, notify events can include a bounded
   `heartbeatEvidence` snapshot of the derived evidence model. The hook never
   executes verification and cannot make stale evidence fresh.
-- Session state schema v3 separates notify installation from dispatch and adds
-  workspace-fingerprint evidence:
+- Session state schema v4 separates notify installation from dispatch, adds
+  workspace-fingerprint evidence, and links read-only subagent claim artifacts:
   `capabilities.hooks` is `configured` after install and `available` only after
   a real `turn-ended` event is observed. Manual smoke events do not mark
   dispatch observed.
@@ -170,7 +181,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
 - `schemas/session-state.schema.json` is a first-class schema artifact for the
-  v3 session-state shape, and
+  v4 session-state shape, and
   `cx schema validate --type session-state --file <path> --json` validates
   session state through the same local schema-artifact subset engine.
 - `doctor --json` reports Codexus session state, project/user overlay status,
@@ -191,7 +202,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 101.
+- Current test count: 137.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`

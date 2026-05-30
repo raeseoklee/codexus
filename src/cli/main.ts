@@ -22,6 +22,7 @@ import { locksCommand } from "./commands/locks.ts";
 import { schemaCommand } from "./commands/schema.ts";
 import { appServerCommand } from "./commands/app-server.ts";
 import { cancelCommand } from "./commands/cancel.ts";
+import { slopCommand } from "./commands/slop.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -35,7 +36,13 @@ Usage:
   cx session migrate [--dry-run] [--json]
   cx session checkpoint <label> [--json]
   cx session verify --verify <cmd> [--json]
+  cx session verify --auto [--execute] [--json]
   cx session notify [--event <name>] [--json]
+  cx session slop [--since <ref>] [--scope <glob>] [--json]
+  cx session subagent record --file <result.json> [--json]
+  cx session subagent attach --role <role> --claim-file <claims.json> [--json]
+  cx session subagent status <task-id> [--json]
+  cx slop check [--since <ref>] [--scope <glob>] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx cancel <run-id> [--reason <reason>] [--json]
   cx plan [--omx] <task> [--json]
@@ -99,6 +106,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "session") {
     await sessionCommand(args);
+    return;
+  }
+  if (args.command === "slop") {
+    await slopCommand(args);
     return;
   }
   if (args.command === "run") {

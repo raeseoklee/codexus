@@ -2,7 +2,7 @@
 
 [Korean](ko/remaining-work.md)
 
-Date: 2026-05-29
+Date: 2026-05-31
 
 This document is the current backlog after the MVP spine and the high-risk
 promotion slice. It lists what remains, why it matters, and what design
@@ -66,6 +66,11 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   real evidence and a Stage B read-only command surface that requires explicit
   opt-in and a user-provided socket. It records method shapes, not transcript
   values, and still does not enable product behavior.
+- Session-native evidence surfaces advanced further: `cx session verify --auto`
+  now detects verification candidates without execution, the quality evidence
+  guard is available as `cx slop check` / `cx session slop`, and subagent claim
+  bundles can be recorded under `.codexus/session/subagents/` without promoting
+  them to completion evidence.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
@@ -201,10 +206,11 @@ not remove the gates:
    label should be added without fixture coverage and CLI replay evidence.
 3. Complete the Desktop app-server attachment evidence loop before enabling any
    app-server product behavior: Stage A isolated temporary-state evidence is
-   implemented, and Stage B has a gated read-only command surface. The remaining
-   evidence is a real Desktop daemon observation with a user-visible turn
-   boundary, followed by a separate session-event mapping design. Keep app-server
-   driver enablement separate and still gated.
+   implemented, and Stage B has a gated read-only command surface plus negative
+   maintainer smoke evidence. The remaining evidence is a supported real Desktop
+   daemon observation with a user-visible turn boundary, followed by a separate
+   session-event mapping design. Keep app-server driver enablement separate and
+   still gated.
 4. Promote cron/gateway policy/approval dry-run contracts into a
    policy-reviewed live dispatch contract, then keep dry-run and live paths
    contract-compatible.
@@ -217,3 +223,8 @@ not remove the gates:
    protocol is stable.
 8. Extend the versioned `.codexus/session/state.json` schema only through the
    explicit `cx session migrate` migration boundary.
+9. Expand the quality evidence guard only from derivable artifacts: coverage,
+   lint/typecheck artifacts, and explicit review links can be added later, but
+   heuristic findings must stay advisory.
+10. Add active native-subagent spawning only after recorder semantics remain
+   stable; subagent claims must stay separate from verification freshness.

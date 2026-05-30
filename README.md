@@ -143,6 +143,7 @@ npm run package:smoke
 - Memory records, curation, and bounded retrieval
 - Replay-gated skill proposal, review, promotion, improvement, export, and deprecation
 - Codex-native `$codexus` adapter for using the same core inside a Codex session
+- Session-native quality evidence guard and subagent claim recorder
 - Schema artifact validation, stale-lock recovery, and local CI parity
 - Automatic migration from legacy `.codex-harness/` into `.codexus/`
 - Gated app-server, cron, gateway, and model-replay experiments that do not affect the stable `codex exec --json` path
@@ -175,7 +176,11 @@ cx init --with-docs --json
 cx setup codex-session --scope project --always-on --enable-notify-hook --json
 cx session status --json
 cx session checkpoint "before risky refactor" --json
+cx session verify --auto --json
 cx session verify --verify "npm test" --json
+cx session slop --json
+cx session subagent record --file <result.json> --json
+cx slop check --scope "src/**" --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json

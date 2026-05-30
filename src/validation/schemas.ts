@@ -246,7 +246,7 @@ function validateWorkspaceFingerprint(value: unknown, errors: string[], path: st
 export function validateSchemaValue(type: SchemaValidationType, value: unknown): SchemaValidationResult {
   const errors: string[] = [];
   if (!requireRecord(value, errors, type)) return { schemaVersion: 1, type, valid: false, errors };
-  const expectedSchemaVersion = type === "session-state" ? 3 : 1;
+  const expectedSchemaVersion = type === "session-state" ? 4 : 1;
   if (type !== "config" && value.schemaVersion !== expectedSchemaVersion) errors.push(`schemaVersion:not_${expectedSchemaVersion}`);
   if (type === "config" && value.schemaVersion !== undefined && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
 
@@ -409,6 +409,23 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       }
       if ("heartbeatEvidence" in item && !(item.heartbeatEvidence === null || isRecord(item.heartbeatEvidence))) {
         errors.push("hookEvents.heartbeatEvidence:invalid");
+      }
+    }
+    const subagents = requireArray(value, "subagents", errors);
+    for (const item of subagents) {
+      if (!isRecord(item)) {
+        errors.push("subagents:non_object_item");
+        continue;
+      }
+      requireString(item, "taskId", errors, "subagents.taskId");
+      requireString(item, "role", errors, "subagents.role");
+      requireOneOf(item, "status", ["recorded", "attached"], errors, "subagents.status");
+      requireString(item, "recordedAt", errors, "subagents.recordedAt");
+      requireString(item, "path", errors, "subagents.path");
+      requireNumber(item, "claimCount", errors, "subagents.claimCount");
+      requireNumber(item, "limitationCount", errors, "subagents.limitationCount");
+      if (requireArray(item, "evidenceLinks", errors, "subagents.evidenceLinks").some((link) => typeof link !== "string")) {
+        errors.push("subagents.evidenceLinks:non_string_item");
       }
     }
     requireArray(value, "linkedRunIds", errors);

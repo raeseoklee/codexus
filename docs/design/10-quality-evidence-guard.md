@@ -3,7 +3,7 @@
 [Korean](../ko/design/10-quality-evidence-guard.md)
 
 Date: 2026-05-30
-Status: proposed design
+Status: first slice implemented
 
 ## Decision
 
@@ -100,7 +100,8 @@ Declaration source (must exist for any scope finding to fire):
   if the always-on overlay should carry it across turns.
 
 Without a declared scope, scope findings are **not** produced (never fabricated).
-The first slice may ship without the scope lane at all (see First Slice).
+The first implemented slice supports the stateless `--scope` flag; persisted
+session intent remains deferred.
 
 ### 2. Diff lane
 
@@ -224,18 +225,19 @@ is `changeEvidence` (tri-state), not a `slopRisk` grade.
 
 ## First Slice
 
-`cx slop check --json` that reads the working-tree diff and the existing session
-verification/evidence model and conservatively reports only:
+Implemented: `cx slop check --json` and `cx session slop --json` read the
+working-tree diff plus the existing session verification/evidence model and
+conservatively report:
 
 - unverified/stale change (evidence gap, derivable, from the Bundle A model),
 - source changed with no test-file change in the same diff (derivable fact,
   non-gating by default),
 - behavior-change-likely / suspicious abstraction (heuristic claim, advisory),
+- out-of-declared-scope files when `--scope` is explicitly provided,
 
 plus a `changeEvidence` tri-state summary attached to `cx session status` that
-reflects derivable facts only. The declared-scope lane is deferred; ship it once
-`--scope` (or `cx session intent`) exists, so no out-of-scope finding is ever
-fabricated without a declaration.
+reflects derivable gateable facts only. Persisted `cx session intent` remains
+deferred; no out-of-scope finding is fabricated without an explicit declaration.
 
 ## Acceptance Criteria
 

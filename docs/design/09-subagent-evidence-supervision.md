@@ -3,7 +3,7 @@
 [Korean](../ko/design/09-subagent-evidence-supervision.md)
 
 Date: 2026-05-30
-Status: proposed design
+Status: recorder slice implemented
 
 ## Decision
 
@@ -105,7 +105,7 @@ freshness remains verification-only.
 
 ## Bundle A: Recorder Only
 
-The first implementation bundle is the recording half:
+Implemented: the first implementation bundle is the recording half:
 
 - define the subagent result envelope,
 - write subagent artifacts under `.codexus/session/subagents/`,
@@ -210,12 +210,12 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
 
 ## Implementation Slices
 
-1. Add a read-only subagent artifact schema and session-state links.
-2. Add `cx session subagent record/attach` commands that only write `.codexus/`
-   artifacts.
-3. Add status integration: linked subagent ids, claim count, limitations,
-   verification handoff hints, and an explicit `unverifiedClaims` section.
-4. Keep `evidenceFresh` verification-only and add regression tests for that
-   invariant.
+1. Implemented: add a read-only subagent artifact schema and session-state links.
+2. Implemented: add `cx session subagent record/attach` commands that only write
+   `.codexus/` artifacts.
+3. Implemented: add status integration with linked subagent ids, claim count,
+   limitations, evidence links, and an explicit `unverifiedClaims` section.
+4. Implemented: keep `evidenceFresh` verification-only and add regression tests
+   for that invariant.
 5. Defer native subagent capability detection, spawning, and parallel planning
    until recorder semantics are stable.
