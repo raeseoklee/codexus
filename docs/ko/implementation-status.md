@@ -66,6 +66,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   install에 계속 사용합니다.
 - `doctor --json`의 installed Codexus skill tree match 진단과 installer source/installed tree hash metadata
 - `doctor --json --strict`는 JSON 진단 body를 유지하면서 fail-level check가 있을 때 nonzero exit code를 반환합니다.
+- `cx setup codex-session`은 project 또는 user `AGENTS.md`에 marker-bounded Codexus
+  runtime overlay를 설치/갱신하며 marker 밖 내용은 변경하지 않습니다.
+- `cx session status`, `cx session checkpoint`, `cx session verify`는
+  `.codex-harness/session/` 아래 첫 Codex-native session surface를 제공합니다.
+- `cx session verify`는 verification policy preflight를 재사용해 위험한 command를
+  실행하지 않고 blocked verification attempt로 기록합니다.
+- `doctor --json`은 Codexus session state, project/user overlay 상태,
+  hook/statusline integration의 unavailable 상태를 정직하게 보고합니다.
 - Verification repair는 실패한 verification stdout/stderr tail을 bounded context
   artifact로 기록하고 repair prompt에 주입합니다.
 - Driver-failure repair는 raw driver log tail을 bounded context artifact로 기록하고
@@ -98,7 +106,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 69 tests 통과
+- `npm test`: 74 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -117,6 +125,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - static source check: private ChatGPT/Codex backend 직접 호출 없음
 - Codex-native adapter wrapper root discovery 테스트
 - Codex skill validator로 skill 구조 검증
+- Session-native setup/status/checkpoint/verify와 policy-blocked session
+  verification command CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
@@ -130,9 +140,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
 - app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision만 구현했습니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
-- Session-native setup, marker-bounded AGENTS overlay, checkpoint command,
-  session verification command, hook/status integration, tmux-backed Codexus
-  worker는 설계됐지만 아직 구현되지 않았습니다.
+- Hook/statusline integration과 tmux-backed Codexus worker는 설계됐지만 아직
+  구현되지 않았습니다. 명시적 session setup/status/checkpoint/verify slice는
+  구현됐습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

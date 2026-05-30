@@ -12,10 +12,11 @@ The Codex-native path keeps the current Codex conversation as the primary
 working loop. Codexus only adds durable status, verification, replay, memory,
 schema, and skill evidence.
 
-Design direction: Codexus is moving toward an OMX-like session-native runtime.
-The installed skill is the first layer. Future setup will add marker-bounded
-AGENTS guidance, session state, checkpoint/verification commands, and optional
-hook/status/tmux integration. See
+Codexus is moving toward an OMX-like session-native runtime. The installed
+skill is the first layer; `cx setup codex-session` adds marker-bounded AGENTS
+guidance and `.codex-harness/session/` state. Explicit checkpoint and
+verification commands are available now, while hook/status/tmux integration is
+still capability-gated. See
 [Session-native supervision](design/07-supervised-sessions.md).
 
 ## Install the Adapter
@@ -66,6 +67,16 @@ cx doctor --json
 Look for the `codexus.skill_install` check. It should report `pass`; stale or
 missing installs are warnings until you reinstall explicitly.
 
+Enable the session-native project overlay inside a target repository:
+
+```bash
+cx setup codex-session --scope project --json
+```
+
+This updates only the Codexus marker block in `AGENTS.md` and initializes
+`.codex-harness/session/state.json`. Use `--scope user` to install the overlay
+in `${CODEX_HOME:-~/.codex}/AGENTS.md` instead.
+
 ## How to Invoke It in Codex
 
 In an interactive Codex session, mention `codexus` or `$codexus` and describe
@@ -107,6 +118,9 @@ You do not need a global `cx` binary inside the Codex session.
 Prefer read-only or evidence-oriented commands first:
 
 ```bash
+session status --json
+session checkpoint "before risky refactor" --json
+session verify --verify "npm test" --json
 doctor --json
 runs list --json
 cancel <run-id> --reason "<why>" --json
@@ -122,8 +136,8 @@ skill review <skill-id> --json
 replay skill <skill-id> --json
 ```
 
-As the session-native command surface lands, prefer checkpoint and session
-verification commands before starting nested `cx run` sub-runs.
+Prefer checkpoint and session verification commands before starting nested
+`cx run` sub-runs.
 
 Use supervised runs deliberately:
 

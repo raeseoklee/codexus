@@ -143,6 +143,10 @@ Codex-session usage: [Using Codexus inside Codex](docs/codex-session-usage.md).
 ```bash
 cx doctor --json
 cx init --with-docs --json
+cx setup codex-session --scope project --json
+cx session status --json
+cx session checkpoint "before risky refactor" --json
+cx session verify --verify "npm test" --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json

@@ -11,6 +11,7 @@ import { createDriver } from "../../drivers/index.ts";
 import type { DriverProbe } from "../../drivers/contract.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
 import { findCodexusPackageRoot } from "../../util/package-root.ts";
+import { overlayStatus, readSessionState, sessionPaths } from "../../session/state.ts";
 
 interface Check {
   id: string;
@@ -178,6 +179,51 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
       summary: error instanceof Error ? error.message : String(error),
     });
   }
+
+  const session = sessionPaths(cwd);
+  const projectOverlay = await overlayStatus(cwd, "project");
+  const userOverlay = await overlayStatus(cwd, "user");
+  const sessionStateExists = existsSync(session.state);
+  let sessionStateInitialized = false;
+  let sessionStateError: string | null = null;
+  try {
+    sessionStateInitialized = (await readSessionState(cwd)) !== null;
+  } catch (error) {
+    sessionStateError = error instanceof Error ? error.message : String(error);
+  }
+  checks.push({
+    id: "codexus.session_state",
+    status: sessionStateError ? "fail" : sessionStateExists ? "pass" : "warn",
+    summary: sessionStateError ?? (sessionStateExists ? session.state : "Codexus session state has not been initialized"),
+    details: {
+      statePath: session.state,
+      sessionRoot: session.sessionRoot,
+      exists: sessionStateExists,
+      initialized: sessionStateInitialized,
+    },
+  });
+  checks.push({
+    id: "codexus.agents_overlay.project",
+    status: projectOverlay.installed ? "pass" : "warn",
+    summary: projectOverlay.installed ? "Project AGENTS.md has Codexus runtime overlay" : "Project AGENTS.md does not have Codexus runtime overlay",
+    details: projectOverlay,
+  });
+  checks.push({
+    id: "codexus.agents_overlay.user",
+    status: userOverlay.installed ? "pass" : "warn",
+    summary: userOverlay.installed ? "User AGENTS.md has Codexus runtime overlay" : "User AGENTS.md does not have Codexus runtime overlay",
+    details: userOverlay,
+  });
+  checks.push({
+    id: "codexus.session_hooks",
+    status: "warn",
+    summary: "Codex hook/statusline integration is not installed in this slice",
+    details: {
+      hooks: "unavailable",
+      statusline: "unavailable",
+      fallback: "Use explicit `cx session checkpoint` and `cx session verify` commands.",
+    },
+  });
 
   const ok = checks.every((check) => check.status !== "fail");
   const result = { ok, strict, checks, warnings, configFiles: filesRead, driverProbe };

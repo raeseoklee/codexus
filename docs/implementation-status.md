@@ -132,6 +132,15 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   refresh or cloned-repository installs.
 - `doctor --json` diagnoses whether the installed Codexus skill tree matches this repository, and the installer writes source/installed tree hashes.
 - `doctor --json --strict` preserves the JSON diagnostic body while returning nonzero when a fail-level check is present.
+- `cx setup codex-session` installs or refreshes a marker-bounded Codexus
+  runtime overlay in project or user `AGENTS.md` without changing content
+  outside the markers.
+- `cx session status`, `cx session checkpoint`, and `cx session verify` provide
+  the first Codex-native session surface under `.codex-harness/session/`.
+- `cx session verify` reuses the verification policy preflight and records
+  blocked verification attempts instead of executing dangerous commands.
+- `doctor --json` reports Codexus session state, project/user overlay status,
+  and truthful unavailable status for hook/statusline integration.
 - GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
 - Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
 - Public repository readiness files are present: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue templates, and PR template.
@@ -147,7 +156,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 69.
+- Current test count: 74.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -196,6 +205,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Static source check found no direct HTTP/OpenAI/ChatGPT backend calls in `src`, `tests`, or `package.json`.
 - Codex-native adapter wrapper root discovery is covered by tests.
 - Codex skill structure is validated with the Codex skill validator.
+- Session-native setup, status, checkpoint, verify, and policy-blocked session
+  verification commands are covered by CLI tests.
 
 ## Acceptance Coverage
 
@@ -228,9 +239,9 @@ review. Current high-level gaps:
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
 - Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, and deterministic fake lifecycle supervision are implemented.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
-- Session-native setup, marker-bounded AGENTS overlay, checkpoint command,
-  session verification command, hook/status integration, and tmux-backed
-  Codexus workers are designed but not implemented.
+- Hook/statusline integration and tmux-backed Codexus workers are designed but
+  not implemented; the explicit session setup/status/checkpoint/verify slice is
+  implemented.
 - Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

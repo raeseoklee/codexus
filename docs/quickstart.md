@@ -146,6 +146,20 @@ The installer writes the `codexus` skill into `${CODEX_HOME:-~/.codex}/skills`.
 Use it from an interactive Codex session when you need Codexus status, replay,
 memory, schema, or context evidence without starting a separate manual flow.
 
+Inside a target project, install the session-native overlay:
+
+```bash
+cx setup codex-session --scope project --json
+```
+
+Then prefer explicit session evidence before nested supervised runs:
+
+```bash
+cx session status --json
+cx session checkpoint "before risky refactor" --json
+cx session verify --verify "npm test" --json
+```
+
 In Codex, ask for it explicitly:
 
 ```text

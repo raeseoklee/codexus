@@ -200,13 +200,18 @@ Codex leader pane
 
 ## Command Surface 방향
 
-제안하는 future CLI surface:
+구현된 첫 slice CLI surface:
 
 ```bash
 cx setup codex-session [--scope user|project] [--json]
 cx session status [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
+```
+
+이후 계획된 CLI surface:
+
+```bash
 cx session hud [--json]
 cx session mode list [--json]
 cx session mode enable <mode> [--json]
@@ -247,13 +252,13 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 
 ## 구현 Slice
 
-1. 이전 exec-resume 우선순위를 문서에서 이 session-native 방향으로 교체합니다.
-2. skill, marker overlay, hook capability, statusline capability, session state root에 대한
-   setup/doctor check를 추가합니다.
-3. session state file과 read-only `cx session status`를 추가합니다.
-4. `checkpoint`와 `session verify` command를 추가합니다.
-5. Codexus skill instruction을 갱신해 nested `cx run`보다 session-native command를 먼저
-   선호하게 합니다.
-6. optional hook/statusline support를 capability check 뒤에 추가합니다.
-7. Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced feature로
-   재검토합니다.
+1. 완료: 이전 exec-resume 우선순위를 문서에서 이 session-native 방향으로 교체합니다.
+2. 완료: skill, marker overlay, unavailable hook/statusline capability,
+   session state root에 대한 setup/doctor check를 추가합니다.
+3. 완료: session state file과 read-only `cx session status`를 추가합니다.
+4. 완료: `checkpoint`와 `session verify` command를 추가합니다.
+5. 완료: Codexus skill instruction을 갱신해 nested `cx run`보다 session-native
+   command를 먼저 선호하게 합니다.
+6. 다음: optional hook/statusline support를 capability check 뒤에 추가합니다.
+7. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
+   feature로 재검토합니다.

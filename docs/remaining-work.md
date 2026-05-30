@@ -187,6 +187,7 @@ not remove the gates:
    contract-compatible.
 5. Add an explicit, user-visible adapter injection step if retrieved
    `codexus:<skill-name>` context is ever inserted automatically.
-6. Add the first session-native slice: marker-bounded AGENTS overlay setup,
-   read-only `cx session status`, explicit checkpoint artifacts, and session
-   verification evidence.
+6. Add optional hook/statusline support behind the implemented session-native
+   setup/status/checkpoint/verify capability checks.
+7. Add tmux-backed Codexus workers only after the explicit session state
+   protocol is stable.

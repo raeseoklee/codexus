@@ -12,6 +12,13 @@ Codex session -> $codexus skill -> Codexus core
 
 This skill implements the Codex-native adapter surface. It should call the same Codexus core as the external CLI and use the same `.codex-harness` ledger, memory, and skill stores.
 
+The first session-native slice is implemented through:
+
+- `setup codex-session` for marker-bounded AGENTS guidance,
+- `session status` for local state inspection,
+- `session checkpoint` for explicit session boundary artifacts,
+- `session verify` for current-session verification evidence.
+
 ## Reference-First Rule
 
 Before changing harness runtime behavior, consult
@@ -30,5 +37,5 @@ Mandatory references are:
 - This skill does not create a separate chat UI.
 - `run --driver codex-exec` launches a separate non-interactive Codex process.
 - The current Codex conversation remains the primary interactive context.
-- The adapter should prefer status, verify, replay, memory, and skill commands before starting a supervised run.
+- The adapter should prefer `session status`, `session checkpoint`, `session verify`, status, verify, replay, memory, and skill commands before starting a supervised run.
 - The app-server driver remains experimental and disabled unless the core explicitly enables it later.

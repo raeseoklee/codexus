@@ -21,13 +21,17 @@ If this skill has been installed into `$CODEX_HOME/skills`, the same wrapper sho
 
 - Use normal Codex interaction for direct code edits, explanations, and small one-off checks.
 - Use Codexus when the user asks for harness behavior: durable run ledger, status, cancellation, verification, replay, memory, skill proposal/review/promotion/export, bounded context retrieval, or supervised handoff.
-- Prefer read-only Codexus commands first inside an ongoing conversation: `status`, `events tail`, `verify`, `replay`, `memory search`, `memory review`, `skill review`, `skill index`, `locks list`, `schema check`, `schema validate-run`.
+- Prefer session-native and read-only Codexus commands first inside an ongoing conversation: `session status`, `session checkpoint`, `session verify`, `status`, `events tail`, `verify`, `replay`, `memory search`, `memory review`, `skill review`, `skill index`, `locks list`, `schema check`, `schema validate-run`.
 - Use `run --driver codex-exec` only when an explicit supervised sub-run is useful. It starts a separate `codex exec` process and should not replace the active conversation for ordinary edits.
 - Preserve the current conversation as the primary interaction surface. Codexus augments it; it does not create a competing chat loop.
 
 ## Common Commands
 
 ```bash
+node codex/skills/codexus/scripts/cx.mjs setup codex-session --scope project --json
+node codex/skills/codexus/scripts/cx.mjs session status --json
+node codex/skills/codexus/scripts/cx.mjs session checkpoint "before risky change" --json
+node codex/skills/codexus/scripts/cx.mjs session verify --verify "npm test" --json
 node codex/skills/codexus/scripts/cx.mjs doctor --json
 node codex/skills/codexus/scripts/cx.mjs runs list --json
 node codex/skills/codexus/scripts/cx.mjs cancel <run-id> --reason "<why>" --json

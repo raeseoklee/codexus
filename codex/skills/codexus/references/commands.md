@@ -5,11 +5,27 @@ Use this reference when choosing which Codexus command to call from inside a Cod
 ## Readiness
 
 ```bash
+node codex/skills/codexus/scripts/cx.mjs setup codex-session --scope project --json
 node codex/skills/codexus/scripts/cx.mjs doctor --json
 ```
 
 Use for environment readiness, Codex auth, driver capabilities, and Codexus
 state root checks.
+
+`setup codex-session` installs or refreshes only the Codexus marker block in
+`AGENTS.md` and initializes `.codex-harness/session/state.json`.
+
+## Current Session
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs session status --json
+node codex/skills/codexus/scripts/cx.mjs session checkpoint "before risky refactor" --json
+node codex/skills/codexus/scripts/cx.mjs session verify --verify "npm test" --json
+```
+
+Use these first when the active Codex conversation needs durable session
+evidence. `session verify` writes command output under
+`.codex-harness/session/verification/`.
 
 ## Run State
 

@@ -12,6 +12,8 @@ import { replayCommand } from "./commands/replay.ts";
 import { planCommand } from "./commands/plan.ts";
 import { resumeCommand } from "./commands/resume.ts";
 import { initCommand } from "./commands/init.ts";
+import { setupCommand } from "./commands/setup.ts";
+import { sessionCommand } from "./commands/session.ts";
 import { runsCommand } from "./commands/runs.ts";
 import { eventsCommand } from "./commands/events.ts";
 import { reportCommand } from "./commands/report.ts";
@@ -27,6 +29,10 @@ function helpText(): string {
 Usage:
   cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]
+  cx setup codex-session [--scope user|project] [--json]
+  cx session status [--json]
+  cx session checkpoint <label> [--json]
+  cx session verify --verify <cmd> [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx cancel <run-id> [--reason <reason>] [--json]
   cx plan [--omx] <task> [--json]
@@ -79,6 +85,14 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "init") {
     await initCommand(args);
+    return;
+  }
+  if (args.command === "setup") {
+    await setupCommand(args);
+    return;
+  }
+  if (args.command === "session") {
+    await sessionCommand(args);
     return;
   }
   if (args.command === "run") {

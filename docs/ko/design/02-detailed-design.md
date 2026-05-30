@@ -192,6 +192,13 @@ session 안에서 OMX처럼 호출할 수 있게 하는 Codex-native session run
 - transparent prompt injection 전에 marker-bounded AGENTS overlay와 local session state 추가
 - 외부 CLI는 automation/CI surface로 유지
 
+구현된 첫 slice:
+
+- `cx setup codex-session [--scope user|project] [--json]`
+- `cx session status [--json]`
+- `cx session checkpoint <label> [--json]`
+- `cx session verify --verify <cmd> [--json]`
+
 `cx adapt omx context`는 active index에서 approved/replay-passed 상태인
 `codexus:<skill-name>` skill과 memory를 bounded prompt-safe block으로
 formatting합니다. 자동 prompt injection이나 별도 chat loop는 만들지 않습니다.

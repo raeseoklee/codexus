@@ -325,6 +325,13 @@ Adapter requirements:
   transparent prompt injection,
 - preserve the external CLI as the automation and CI surface.
 
+Implemented first slice:
+
+- `cx setup codex-session [--scope user|project] [--json]`
+- `cx session status [--json]`
+- `cx session checkpoint <label> [--json]`
+- `cx session verify --verify <cmd> [--json]`
+
 ## Config
 
 Config precedence:

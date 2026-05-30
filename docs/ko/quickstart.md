@@ -146,6 +146,20 @@ installer는 `codexus` skill을 `${CODEX_HOME:-~/.codex}/skills`에 기록합니
 interactive Codex session 안에서 Codexus status, replay, memory, schema, context
 evidence가 필요할 때 사용합니다.
 
+대상 project 안에서 session-native overlay를 설치합니다:
+
+```bash
+cx setup codex-session --scope project --json
+```
+
+nested supervised run보다 먼저 명시적 session evidence를 남깁니다:
+
+```bash
+cx session status --json
+cx session checkpoint "before risky refactor" --json
+cx session verify --verify "npm test" --json
+```
+
 Codex 안에서는 명시적으로 요청합니다:
 
 ```text

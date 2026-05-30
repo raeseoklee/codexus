@@ -213,13 +213,18 @@ This should complement Codex native subagents, not replace them.
 
 ## Command Surface Direction
 
-Proposed future CLI surface:
+Implemented first-slice CLI surface:
 
 ```bash
 cx setup codex-session [--scope user|project] [--json]
 cx session status [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
+```
+
+Planned later CLI surface:
+
+```bash
 cx session hud [--json]
 cx session mode list [--json]
 cx session mode enable <mode> [--json]
@@ -261,14 +266,14 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 
 ## Implementation Slices
 
-1. Replace the previous exec-resume priority in docs with this session-native
-   direction.
-2. Add setup/doctor checks for skill, marker overlay, hook capability,
-   statusline capability, and session state root.
-3. Add session state files and read-only `cx session status`.
-4. Add `checkpoint` and `session verify` commands.
-5. Update the Codexus skill instructions so Codex prefers session-native
-   commands before nested `cx run`.
-6. Add optional hook/statusline support behind capability checks.
-7. Revisit external `codex exec resume` as a separate advanced feature only
+1. Completed: replace the previous exec-resume priority in docs with this
+   session-native direction.
+2. Completed: add setup/doctor checks for skill, marker overlay, unavailable
+   hook/statusline capability, and session state root.
+3. Completed: add session state files and read-only `cx session status`.
+4. Completed: add `checkpoint` and `session verify` commands.
+5. Completed: update the Codexus skill instructions so Codex prefers
+   session-native commands before nested `cx run`.
+6. Next: add optional hook/statusline support behind capability checks.
+7. Later: revisit external `codex exec resume` as a separate advanced feature only
    after the Codex-native path is useful.

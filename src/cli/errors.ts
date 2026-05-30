@@ -58,6 +58,18 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported schema validation type${target ? `: ${target}` : ""}.`;
     case "unsupported_app_server_command":
       return `Unsupported app-server command${target ? `: ${target}` : ""}.`;
+    case "unsupported_setup_command":
+      return `Unsupported setup command${target ? `: ${target}` : ""}.`;
+    case "unsupported_session_command":
+      return `Unsupported session command${target ? `: ${target}` : ""}.`;
+    case "invalid_session_setup_scope":
+      return `Invalid Codex-session setup scope${target ? `: ${target}` : ""}.`;
+    case "missing_session_checkpoint_label":
+      return "Missing session checkpoint label.";
+    case "missing_session_verification_command":
+      return "Missing session verification command.";
+    case "session_state_corrupt":
+      return `Codexus session state is corrupt${target ? `: ${target}` : ""}.`;
     case "missing_schema_file":
       return "Missing schema validation file.";
     case "json_parse_failed":
@@ -153,6 +165,18 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Use `--type config|state|event|memory-entry|skill`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
+    case "unsupported_setup_command":
+      return "Run `cx setup codex-session --scope project --json`.";
+    case "unsupported_session_command":
+      return "Run `cx session status --json`, `cx session checkpoint <label> --json`, or `cx session verify --verify <cmd> --json`.";
+    case "invalid_session_setup_scope":
+      return "Use `--scope project` or `--scope user`.";
+    case "missing_session_checkpoint_label":
+      return "Pass a short label after `cx session checkpoint`.";
+    case "missing_session_verification_command":
+      return "Pass at least one `--verify <cmd>` argument.";
+    case "session_state_corrupt":
+      return "Inspect `.codex-harness/session/state.json` before continuing.";
     case "missing_schema_file":
       return "Pass `--file <path>` with `cx schema validate`.";
     case "json_parse_failed":

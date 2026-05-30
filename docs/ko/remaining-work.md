@@ -180,6 +180,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    유지합니다.
 5. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고
    user-visible한 adapter injection 단계를 추가합니다.
-6. 첫 session-native slice를 추가합니다: marker-bounded AGENTS overlay setup,
-   read-only `cx session status`, explicit checkpoint artifact, session
-   verification evidence.
+6. 구현된 session-native setup/status/checkpoint/verify capability check 뒤에
+   optional hook/statusline support를 추가합니다.
+7. 명시적 session state protocol이 안정된 뒤에만 tmux-backed Codexus worker를
+   추가합니다.
