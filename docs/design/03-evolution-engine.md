@@ -144,6 +144,15 @@ Kinds:
 - `failure_pattern`
 - `tooling_note`
 
+Memory quality should use a lightweight curation profile, not standards
+compliance. Codexus may borrow requirement-quality characteristics such as
+traceability, singularity, unambiguity, scope boundedness, verifiability, and
+conflict review, but these are curator-derived tri-state findings
+(`pass/fail/unknown`), not self-asserted memory fields. Conflict detection should
+surface review candidates and possible supersession relationships without
+auto-rewriting memory. See
+[Memory quality curation plan](../plans/2026-05-30-memory-quality-curation-plan.md).
+
 ## Retrieval Rules
 
 Retrieval must be scoped and bounded.

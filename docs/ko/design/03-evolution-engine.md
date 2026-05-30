@@ -48,6 +48,15 @@ Memory는 raw transcript 저장소가 아닙니다. Raw log는 run ledger에 남
 
 검색은 bounded retrieval을 사용하며 raw history를 무제한 prompt에 주입하지 않습니다.
 
+Memory quality는 표준 준수가 아니라 경량 curation profile로 다룹니다. Codexus는
+traceability, singularity, unambiguity, scope boundedness, verifiability, conflict
+review 같은 요구사항 품질 특성을 차용할 수 있지만, 이 값은 memory entry가
+self-assert하는 field가 아니라 curator가 도출한 tri-state finding
+(`pass/fail/unknown`)이어야 합니다. Conflict detection은 review candidate와 가능한
+supersession 관계를 surface할 뿐 memory를 자동 rewrite하지 않습니다.
+[Memory quality curation plan](../plans/2026-05-30-memory-quality-curation-plan.md)을
+참조하세요.
+
 ## Skill proposal
 
 Proposed skill은 다음을 포함해야 합니다:

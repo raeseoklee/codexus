@@ -26,6 +26,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Harness remediation plan](plans/2026-05-29-harness-remediation-plan.md): accepted review findings and implemented remediation slices for repair, supervision, and evolution depth.
 - [npm packaging plan](plans/2026-05-30-npm-packaging-plan.md): bundled npm CLI entrypoint, package contents, installer strategy, and release gate.
 - [Desktop app-server attachment evidence plan](plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md): A/B evidence slice for Desktop attachment through Codex app-server with consent and read-only gates.
+- [Memory quality curation plan](plans/2026-05-30-memory-quality-curation-plan.md): 29148-inspired memory quality characteristics, tri-state curator findings, conflict detection, and supersession review boundaries.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.

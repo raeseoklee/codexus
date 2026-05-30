@@ -120,6 +120,9 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
    - `cx memory add/list/prune/review` surface를 추가합니다.
    - source link, redaction, bounded retrieval을 유지하면서 summary/index를
      추가합니다.
+   - 다음 quality slice: 표준 준수 주장을 하지 않고 advisory
+     conflict/contradiction detection과 curator-derived tri-state quality finding을
+     추가합니다.
 
 ### P2: Runtime Expansion
 
