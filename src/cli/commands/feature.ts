@@ -21,9 +21,13 @@ function automationPolicyContract(feature: GuardedFeature, enabled: boolean, dry
   const dispatchAllowed = enabled && !dryRun && liveDispatchImplemented;
   return {
     schemaVersion: 1,
+    contractVersion: "policy-reviewed-live-dispatch-v1",
     feature,
     featureGateEnabled: enabled,
+    liveDispatcherImplemented: liveDispatchImplemented,
     dispatchAllowed,
+    dryRunLiveContractCompatible: true,
+    approvalRequiredForLive: true,
     requestedMode: dryRun ? "dry-run" : "live",
     decision: dryRun ? "dry_run_allowed" : enabled ? "live_requires_unimplemented_dispatcher" : "live_blocked_by_feature_gate",
     reason: dryRun

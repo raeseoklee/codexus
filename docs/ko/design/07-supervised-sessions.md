@@ -240,16 +240,17 @@ Codex leader pane
 ```bash
 cx setup codex-session [--scope user|project] [--always-on] [--enable-notify-hook|--disable-notify-hook] [--json]
 cx session status [--json]
+cx session hud [--json]
 cx session migrate [--dry-run] [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
 cx session notify [--event <name>] [--json]
+cx session workers status [--json]
 ```
 
 이후 계획된 CLI surface:
 
 ```bash
-cx session hud [--json]
 cx session mode list [--json]
 cx session mode enable <mode> [--json]
 cx session mode disable <mode> [--json]
@@ -289,6 +290,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   checkpoint artifact를 씁니다.
 - `cx session verify --verify <cmd> --json`은 verification을 실행하고
   `.codexus/session/` 아래 artifact를 기록하며 typed result를 보고합니다.
+- `cx session hud --json`은 statusline integration을 주장하지 않고 compact read-only
+  status summary를 보고합니다.
 - optional notify-hook attachment는 기존 notify chain을 보존하고, Codex project
   trust가 설정되지 않았으면 설치를 거부합니다.
 - `notifyDispatch.status`는 실제 `turn-ended` event에서만 `observed`가 되며,
@@ -297,7 +300,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   또는 모호한 `cx session notify` 호출은 명시 tag가 없으면 `unknown`으로 둡니다.
 - notify-hook detach는 overlay를 install/refresh하지 않고 이전 notify command를
   복원하거나 Codexus-only notify line을 제거합니다.
-- unsupported statusline/tmux feature는 정직한 unavailable status를 반환합니다.
+- unsupported statusline/tmux launch feature는 정직한 unavailable 또는 gated status를
+  반환합니다.
 - 외부 `cx run`은 변경 없이 계속 동작합니다.
 
 ## 구현 Slice
@@ -317,11 +321,13 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    추가합니다.
 9. 완료: session state를 v2로 승격하고 truthful notify dispatch capability semantics를
    추가합니다.
-10. 다음:
+10. 완료:
    [Desktop app-server attachment evidence plan](../plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md)의
    A/B contract에 따라 Desktop app-server attachment evidence slice를 실행합니다.
-11. 이후: compact read-only session summary인 `cx session hud --json`을 추가합니다.
+11. 완료: compact read-only session summary인 `cx session hud --json`을 추가했습니다.
    Statusline integration은 Codex가 안정적인 supported configuration surface를 노출할
    때까지 계속 보류합니다.
-12. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
+12. 완료: worker pane을 시작하지 않는 truthful tmux worker launch gate인
+   `cx session workers status --json`을 추가했습니다.
+13. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
    feature로 재검토합니다.

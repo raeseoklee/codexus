@@ -186,6 +186,7 @@ non-gating `derivableFacts`와 heuristic claim은 보고·집계되지만 `chang
 cx slop check --json                       # 기본 working-tree
 cx slop check --since <ref> --json         # 명시적 커밋 범위
 cx slop check --scope "<glob>" --json      # out-of-scope finding용 scope 선언
+cx slop check --review <path> --json       # 명시적 review artifact 연결
 cx session slop --json
 ```
 
@@ -217,6 +218,8 @@ verification/evidence 모델을 읽어 보수적으로 다음을 보고합니다
 - 같은 diff에서 source 변경 ∧ test-file 무변경 (derivable fact, 기본 non-gating),
 - behavior-change-likely / suspicious abstraction (heuristic claim, advisory),
 - `--scope`가 명시적으로 제공된 경우 선언 scope 밖 파일,
+- `--review`가 존재하는 파일을 가리킬 때 linked explicit review artifact,
+- 선언된 `--review` 파일이 없을 때 missing review artifact evidence gap,
 
 그리고 derivable gateable fact만 반영하는 `changeEvidence` tri-state 요약을
 `cx session status`에 부착합니다. Persisted `cx session intent`는 deferred입니다. 명시적
@@ -237,5 +240,7 @@ verification/evidence 모델을 읽어 보수적으로 다음을 보고합니다
   보고하고, 출력은 `diffBase`/`includesStaged`/`includesUntracked`를 선언.
 - scope finding은 scope가 선언됐을 때만(`--scope` 또는 session intent) 발동; 선언 없이는
   날조하지 않음.
+- explicit review link는 파일이 존재할 때만 evidence입니다. 선언한 review artifact가
+  없으면 조용히 통과하지 않고 gate 가능한 evidence gap으로 보고합니다.
 - heuristic claim은 불확실하면 침묵(recall보다 precision)하고 자동 편집/fail 안 함.
 - 가드는 병렬 subsystem을 더하지 않음: 세션 evidence 모델 + focused diff 명령에서 파생.

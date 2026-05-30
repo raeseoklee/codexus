@@ -68,6 +68,12 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   실행 없이 verification 후보를 감지하고, quality evidence guard는 `cx slop check` /
   `cx session slop`으로 사용할 수 있으며, subagent claim bundle은 completion evidence로
   승격하지 않은 채 `.codexus/session/subagents/` 아래 기록할 수 있습니다.
+- 10개 evidence-contract pass는 gate를 제거하지 않는 방식으로 구현됐습니다:
+  schema engine status는 local subset engine과 unavailable full engine을 보고하고,
+  replay parity는 audit 가능하며, adapter injection은 자동 주입 없이 visible approval
+  artifact를 쓰고, HUD는 read-only JSON summary로 제공됩니다. tmux/native-subagent launch
+  surface는 truthful gate이고, automation live contract는 dispatcher가 생길 때까지 계속
+  blocked입니다.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,
@@ -187,33 +193,35 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 ## 제안하는 다음 slice
 
-다음 구현 slice는 gate를 제거하기보다 gated surface의 evidence를 더 깊게
-만드는 방향이 좋습니다:
+이전 10개 항목은 code-level gate와 evidence surface로 덮였습니다. 다음 구현 slice는
+supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방향이 좋습니다:
 
 1. dependency policy가 허용될 때만 local schema-artifact subset engine을 full JSON
-   Schema engine으로 교체합니다. Migration fixture는 regression boundary로 유지합니다.
+   Schema engine으로 교체합니다. `cx schema engine --json`은 현재 full-engine unavailable
+   상태를 보고합니다. Migration fixture는 regression boundary로 유지합니다.
 2. replay parity matrix를 contract로 유지합니다. 새 canonical parity label은
-   fixture coverage와 CLI replay evidence 없이 추가하지 않습니다.
+   fixture coverage와 CLI replay evidence 없이 추가하지 않습니다. `cx replay parity --json`이
+   canonical label coverage를 보고합니다.
 3. app-server product behavior를 활성화하기 전에 Desktop app-server attachment
    evidence loop를 마무리합니다. Stage A isolated temporary-state evidence는
    구현됐고, Stage B는 gated read-only command surface와 negative maintainer smoke
    evidence를 갖췄습니다. 남은 evidence는 지원되는 실제 Desktop daemon에서 user-visible
    turn boundary를 관측하는 것과, 그 뒤의 별도 session-event mapping 설계입니다.
    app-server driver 활성화는 별도 gate로 계속 분리합니다.
-4. cron/gateway policy/approval dry-run contract를 policy-reviewed live
-   dispatch contract로 승격하고, dry-run/live path의 contract compatibility를
-   유지합니다.
-5. retrieved `codexus:<skill-name>` context를 자동 삽입하려면 명시적이고
-   user-visible한 adapter injection 단계를 추가합니다.
-6. Codex가 안정적인 supported configuration surface를 노출한 뒤에만 optional
-   statusline/HUD support를 추가합니다. Notify-hook attachment는 이미 구현됐으며
-   기존 notify command를 chain으로 계속 보존해야 합니다.
-7. 명시적 session state protocol이 안정된 뒤에만 tmux-backed Codexus worker를
-   추가합니다.
+4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
+   공유합니다. Permission, approval, lock, dispatch, completion event가 실제로 준비되기
+   전에는 dispatcher를 구현하지 않습니다.
+5. Adapter injection은 `cx adapt omx injection --approve`가 필요하고 visible approval
+   artifact를 기록합니다. 여전히 prompt context를 자동 주입하지 않습니다.
+6. `cx session hud --json`이 지원되는 fallback입니다. Statusline integration은 Codex가
+   안정적인 supported configuration surface를 노출할 때까지 계속 보류합니다.
+7. `cx session workers status --json`은 tmux worker launch gate를 보고합니다. 명시적
+   session state protocol이 안정되기 전에는 launch를 추가하지 않습니다.
 8. Versioned `.codexus/session/state.json` schema는 explicit `cx session migrate`
    migration boundary를 통해서만 확장합니다.
-9. Quality evidence guard는 derivable artifact에서만 확장합니다. Coverage,
-   lint/typecheck artifact, explicit review link는 나중에 추가할 수 있지만 heuristic finding은
-   계속 advisory여야 합니다.
-10. Active native-subagent spawning은 recorder semantics가 안정된 뒤에만 추가합니다.
+9. Quality evidence guard는 explicit review artifact link를 받습니다. 추가 확장은 coverage,
+   lint/typecheck output 같은 derivable artifact에서만 해야 하며 heuristic finding은 계속
+   advisory입니다.
+10. Subagent support는 recorder-only로 유지합니다. Recorder semantics가 안정되고 지원되는
+   launch contract가 생기기 전까지 active native spawn launcher를 노출하지 않습니다.
    Subagent claim은 verification freshness와 계속 분리해야 합니다.

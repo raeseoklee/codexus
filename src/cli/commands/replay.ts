@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { loadConfig } from "../../config/loader.ts";
-import { evaluateModelReplay, evaluateReplaySpec, readReplaySpec, type ReplaySpec } from "../../evolution/replay.ts";
+import { buildReplayParityContract, evaluateModelReplay, evaluateReplaySpec, readReplaySpec, type ReplaySpec } from "../../evolution/replay.ts";
 import { reviewSkill } from "../../evolution/skills.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -26,6 +26,18 @@ export async function replayCommand(args: ParsedArgs): Promise<void> {
   if (!modeOrTarget) throw new Error("missing_replay_target");
 
   let result;
+  if (modeOrTarget === "parity") {
+    const parity = await buildReplayParityContract();
+    if (json) {
+      console.log(JSON.stringify(parity, null, 2));
+      process.exitCode = parity.status === "covered" || parity.status === "fixtures_unavailable" ? 0 : 1;
+      return;
+    }
+    console.log(`Replay parity: ${parity.status}`);
+    console.log(`covered: ${parity.coveredLabels.length}/${parity.labels.length}`);
+    process.exitCode = parity.status === "covered" || parity.status === "fixtures_unavailable" ? 0 : 1;
+    return;
+  }
   if (modeOrTarget === "skill") {
     const skillId = args.positionals[1];
     if (!skillId) throw new Error("missing_skill_id");

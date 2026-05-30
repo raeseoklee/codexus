@@ -229,6 +229,7 @@ Wrapper는 설치된 skill metadata에서 Codexus repository를 찾습니다. Co
 
 ```bash
 session status --json
+session hud --json
 session migrate --dry-run --json
 session checkpoint "before risky refactor" --json
 session verify --auto --json
@@ -236,6 +237,7 @@ session verify --auto --execute --json
 session verify --verify "npm test" --json
 session slop --json
 session subagent record --file <result.json> --json
+session workers status --json
 doctor --json
 runs list --json
 cancel <run-id> --reason "<why>" --json
@@ -243,21 +245,29 @@ status <run-id> --json
 events tail <run-id> --json
 verify <run-id> --json
 schema check --json
+schema engine --json
 schema validate-run <run-id> --json
 memory search "<query>" --json
 memory review --json
 skill index --json
 skill review <skill-id> --json
 replay skill <skill-id> --json
+replay parity --json
+adapt omx injection --task "parser cleanup" --approve --json
 ```
 
 nested `cx run` sub-run을 시작하기 전에 checkpoint와 session verification
 command를 우선 사용합니다.
 
-현재 workspace의 fresh verification, 객관적 diff fact, declared-scope 이탈,
-advisory quality claim을 Codex가 요약하게 하려면 `session slop --json`을 사용합니다.
-`session subagent record/attach`는 claim bundle 기록 전용입니다. 이 claim은 별도
-verification 또는 review artifact가 뒷받침하기 전까지 unverified로 남습니다.
+현재 chat의 compact status summary가 필요하면 `session hud --json`을 사용합니다.
+현재 workspace의 fresh verification, 객관적 diff fact, declared-scope 이탈, linked
+review artifact, advisory quality claim을 Codex가 요약하게 하려면 `session slop
+--json`을 사용합니다. `session subagent record/attach`는 claim bundle 기록 전용입니다.
+이 claim은 별도 verification 또는 review artifact가 뒷받침하기 전까지 unverified로
+남습니다. `session workers status --json`은 capability gate이며 tmux worker pane을
+시작하지 않습니다. Codexus는 현재 `session subagent spawn` launcher 대신 subagent
+recording command만 노출합니다. 지원되지 않는 launch 시도는 recorder-only hint를
+반환합니다.
 
 현재 session state는 cwd-scoped입니다. 같은 project에서 Codex window 두 개가 동시에
 작업하면 Codexus는 `session` lock으로 write를 직렬화합니다. 겹치는 checkpoint/verify

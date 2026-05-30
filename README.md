@@ -175,11 +175,16 @@ cx doctor --json
 cx init --with-docs --json
 cx setup codex-session --scope project --always-on --enable-notify-hook --json
 cx session status --json
+cx session hud --json
 cx session checkpoint "before risky refactor" --json
 cx session verify --auto --json
 cx session verify --verify "npm test" --json
 cx session slop --json
 cx session subagent record --file <result.json> --json
+cx session workers status --json
+cx schema engine --json
+cx replay parity --json
+cx adapt omx injection --task "parser cleanup" --approve --json
 cx slop check --scope "src/**" --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json

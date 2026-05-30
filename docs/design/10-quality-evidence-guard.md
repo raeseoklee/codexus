@@ -201,6 +201,7 @@ than a parallel subsystem:
 cx slop check --json                       # working-tree by default
 cx slop check --since <ref> --json         # explicit committed range
 cx slop check --scope "<glob>" --json      # declare scope for out-of-scope findings
+cx slop check --review <path> --json       # link an explicit review artifact
 cx session slop --json
 ```
 
@@ -234,6 +235,9 @@ conservatively report:
   non-gating by default),
 - behavior-change-likely / suspicious abstraction (heuristic claim, advisory),
 - out-of-declared-scope files when `--scope` is explicitly provided,
+- linked explicit review artifacts when `--review` points at an existing file,
+- missing review artifacts as evidence gaps when a declared `--review` file is
+  absent,
 
 plus a `changeEvidence` tri-state summary attached to `cx session status` that
 reflects derivable gateable facts only. Persisted `cx session intent` remains
@@ -256,6 +260,8 @@ deferred; no out-of-scope finding is fabricated without an explicit declaration.
   `diffBase`/`includesStaged`/`includesUntracked`.
 - Scope findings fire only when a scope was declared (`--scope` or session
   intent); without a declaration they are not fabricated.
+- Explicit review links are evidence only when the file exists. A missing
+  declared review artifact is a gateable evidence gap, not a silent pass.
 - Heuristic claims stay silent when uncertain (precision over recall) and never
   auto-edit or auto-fail.
 - The guard adds no parallel subsystem: it derives from the session evidence model

@@ -71,6 +71,12 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   guard is available as `cx slop check` / `cx session slop`, and subagent claim
   bundles can be recorded under `.codexus/session/subagents/` without promoting
   them to completion evidence.
+- The ten-item evidence-contract pass is implemented without removing gates:
+  schema engine status reports the local subset engine and unavailable full
+  engine, replay parity can be audited, adapter injection writes visible
+  approval artifacts without auto-injection, HUD is available as a read-only
+  JSON summary, tmux/native-subagent launch surfaces are truthful gates, and
+  automation live contracts remain blocked until a dispatcher exists.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
@@ -196,14 +202,15 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 
 ## Suggested Next Slice
 
-The next implementation slice should turn gated surfaces into deeper evidence,
-not remove the gates:
+The previous ten-item slice is now covered by code-level gates and evidence
+surfaces. The next implementation slice should turn those gates into deeper
+evidence only when the supporting runtime exists:
 
 1. Replace the local schema-artifact subset engine with a full JSON Schema
-   engine only if dependency policy allows it; keep migration fixtures as the
-   regression boundary.
-2. Preserve the replay parity matrix as a contract: no new canonical parity
-   label should be added without fixture coverage and CLI replay evidence.
+   engine only if dependency policy allows it; `cx schema engine --json` now
+   reports the current unavailable full-engine status.
+2. Preserve the replay parity matrix as a contract: `cx replay parity --json`
+   reports canonical label coverage and must stay green before new labels land.
 3. Complete the Desktop app-server attachment evidence loop before enabling any
    app-server product behavior: Stage A isolated temporary-state evidence is
    implemented, and Stage B has a gated read-only command surface plus negative
@@ -211,20 +218,21 @@ not remove the gates:
    daemon observation with a user-visible turn boundary, followed by a separate
    session-event mapping design. Keep app-server driver enablement separate and
    still gated.
-4. Promote cron/gateway policy/approval dry-run contracts into a
-   policy-reviewed live dispatch contract, then keep dry-run and live paths
-   contract-compatible.
-5. Add an explicit, user-visible adapter injection step if retrieved
-   `codexus:<skill-name>` context is ever inserted automatically.
-6. Add optional statusline/HUD support only after Codex exposes a stable
-   supported configuration surface. Notify-hook attachment already exists and
-   must keep preserving any previous notify command through chaining.
-7. Add tmux-backed Codexus workers only after the explicit session state
-   protocol is stable.
+4. Cron/gateway dry-run and live paths now share
+   `policy-reviewed-live-dispatch-v1`; implement the dispatcher only after
+   permission, approval, lock, dispatch, and completion events are live.
+5. Adapter injection now requires `cx adapt omx injection --approve`, records a
+   visible approval artifact, and still does not auto-inject prompt context.
+6. `cx session hud --json` is the supported fallback; statusline integration
+   remains blocked until Codex exposes a stable supported configuration surface.
+7. `cx session workers status --json` reports the tmux worker launch gate; do
+   not add launch until the session state protocol is stable.
 8. Extend the versioned `.codexus/session/state.json` schema only through the
    explicit `cx session migrate` migration boundary.
-9. Expand the quality evidence guard only from derivable artifacts: coverage,
-   lint/typecheck artifacts, and explicit review links can be added later, but
-   heuristic findings must stay advisory.
-10. Add active native-subagent spawning only after recorder semantics remain
-   stable; subagent claims must stay separate from verification freshness.
+9. The quality evidence guard now accepts explicit review artifact links.
+   Further expansion must still come only from derivable artifacts such as
+   coverage or lint/typecheck outputs; heuristics stay advisory.
+10. Subagent support remains recorder-only. Do not expose an active native
+   spawn launcher until recorder semantics remain stable and a supported launch
+   contract exists; subagent claims must stay separate from verification
+   freshness.

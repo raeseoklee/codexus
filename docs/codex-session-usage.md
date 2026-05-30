@@ -234,6 +234,7 @@ Prefer read-only or evidence-oriented commands first:
 
 ```bash
 session status --json
+session hud --json
 session migrate --dry-run --json
 session checkpoint "before risky refactor" --json
 session verify --auto --json
@@ -241,6 +242,7 @@ session verify --auto --execute --json
 session verify --verify "npm test" --json
 session slop --json
 session subagent record --file <result.json> --json
+session workers status --json
 doctor --json
 runs list --json
 cancel <run-id> --reason "<why>" --json
@@ -248,22 +250,30 @@ status <run-id> --json
 events tail <run-id> --json
 verify <run-id> --json
 schema check --json
+schema engine --json
 schema validate-run <run-id> --json
 memory search "<query>" --json
 memory review --json
 skill index --json
 skill review <skill-id> --json
 replay skill <skill-id> --json
+replay parity --json
+adapt omx injection --task "parser cleanup" --approve --json
 ```
 
 Prefer checkpoint and session verification commands before starting nested
 `cx run` sub-runs.
 
-Use `session slop --json` when you want Codex to summarize whether the current
-workspace has fresh verification, objective diff facts, declared-scope escapes,
-or advisory quality claims. Use `session subagent record/attach` only to record
-claim bundles; those claims remain unverified until a separate verification or
-review artifact supports them.
+Use `session hud --json` when you want a compact status summary for the current
+chat. Use `session slop --json` when you want Codex to summarize whether the
+current workspace has fresh verification, objective diff facts, declared-scope
+escapes, linked review artifacts, or advisory quality claims. Use
+`session subagent record/attach` only to record claim bundles; those claims
+remain unverified until a separate verification or review artifact supports
+them. `session workers status --json` is a capability gate; it does not start
+tmux worker panes. Codexus intentionally exposes subagent recording commands
+instead of a `session subagent spawn` launcher today; unsupported launch attempts
+return a recorder-only hint.
 
 Current session state is cwd-scoped. If two Codex windows operate on the same
 project at the same time, Codexus serializes writes with the `session` lock; a

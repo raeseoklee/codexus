@@ -9,7 +9,7 @@ import { detectVerifyCandidates } from "./verify-detect.ts";
 export type ChangeEvidenceStatus = "pass" | "fail" | "unknown";
 
 export interface EvidenceGap {
-  kind: "unverified_change" | "stale_verification" | "failed_verification" | "out_of_declared_scope";
+  kind: "unverified_change" | "stale_verification" | "failed_verification" | "out_of_declared_scope" | "missing_review_artifact";
   gate: true;
   verification: EvidenceModel["verification"] | "unknown";
   evidence: string | null;
@@ -18,7 +18,7 @@ export interface EvidenceGap {
 }
 
 export interface DerivableFact {
-  kind: "source_without_test_diff" | "new_dependency_added";
+  kind: "source_without_test_diff" | "new_dependency_added" | "explicit_review_linked";
   gate: boolean;
   evidence: string;
   files?: string[];
@@ -286,7 +286,7 @@ function scopeEvidenceGaps(diff: ChangeEvidenceReport["diff"], scope: string | u
 export function buildChangeEvidenceReport(
   cwd: string,
   state: CodexusSessionState | null,
-  options: { since?: string; scope?: string } = {},
+  options: { since?: string; scope?: string; reviews?: string[] } = {},
 ): ChangeEvidenceReport {
   const resolvedCwd = resolve(cwd);
   const diff = readDiffFiles(resolvedCwd, options.since);
@@ -317,6 +317,26 @@ export function buildChangeEvidenceReport(
       evidence: "package.json dependency diff",
       dependencies: deps,
     });
+  }
+  for (const review of options.reviews ?? []) {
+    const reviewPath = resolve(resolvedCwd, review);
+    if (existsSync(reviewPath)) {
+      derivableFacts.push({
+        kind: "explicit_review_linked",
+        gate: false,
+        evidence: reviewPath,
+        files: [reviewPath],
+      });
+    } else {
+      evidenceGaps.push({
+        kind: "missing_review_artifact",
+        gate: true,
+        verification: "unknown",
+        evidence: reviewPath,
+        recommendation: "create the declared review artifact or rerun without the review link",
+        files: [reviewPath],
+      });
+    }
   }
 
   const heuristicClaims: HeuristicClaim[] = [];

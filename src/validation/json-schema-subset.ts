@@ -11,6 +11,30 @@ export interface JsonSchemaSubsetValidation extends JsonSchemaSubsetInspection {
   valid: boolean;
 }
 
+export interface JsonSchemaEngineStatus {
+  schemaVersion: 1;
+  activeEngine: typeof jsonSchemaSubsetEngine;
+  fullJsonSchemaEngine: {
+    available: false;
+    dependency: null;
+    reason: string;
+  };
+  migrationFixtureBoundary: true;
+}
+
+export function schemaEngineStatus(): JsonSchemaEngineStatus {
+  return {
+    schemaVersion: 1,
+    activeEngine: jsonSchemaSubsetEngine,
+    fullJsonSchemaEngine: {
+      available: false,
+      dependency: null,
+      reason: "No full JSON Schema dependency is installed; Codexus keeps the local subset engine until dependency policy explicitly allows a replacement.",
+    },
+    migrationFixtureBoundary: true,
+  };
+}
+
 const supportedKeywords = new Set([
   "$schema",
   "$id",

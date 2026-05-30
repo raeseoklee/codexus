@@ -102,6 +102,20 @@ test("observability commands list runs, tail events, and read reports", async ()
     const invalidOutput = JSON.parse(invalidRun.stdout);
     assert.equal(invalidOutput.ok, false);
     assert.ok(invalidOutput.artifacts.find((artifact: { name: string }) => artifact.name === "events").errors.includes("line_1:runId_mismatch"));
+
+    const schemaEngine = runCli(cwd, ["schema", "engine", "--json"]);
+    assert.equal(schemaEngine.status, 0, schemaEngine.stderr);
+    const schemaEngineOutput = JSON.parse(schemaEngine.stdout);
+    assert.equal(schemaEngineOutput.activeEngine, "local-json-schema-subset");
+    assert.equal(schemaEngineOutput.fullJsonSchemaEngine.available, false);
+    assert.equal(schemaEngineOutput.migrationFixtureBoundary, true);
+
+    const replayParity = runCli(cwd, ["replay", "parity", "--json"]);
+    assert.equal(replayParity.status, 0, replayParity.stderr);
+    const replayParityOutput = JSON.parse(replayParity.stdout);
+    assert.equal(replayParityOutput.status, "covered");
+    assert.deepEqual(replayParityOutput.missingLabels, []);
+    assert.ok(replayParityOutput.coveredLabels.includes("usage_accounting"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -124,6 +138,30 @@ test("remaining P0 json errors cover unexpected args, corrupt state, and disable
     const disabled = runCli(cwd, ["run", "--driver", "codex-app-server", "--json", "disabled app server"]);
     assert.equal(disabled.status, 1);
     assert.equal(JSON.parse(disabled.stdout).code, "unsupported_feature");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("adapter injection requires visible approval and never auto-injects", async () => {
+  const cwd = await tempDir();
+  try {
+    const blocked = runCli(cwd, ["adapt", "omx", "injection", "--task", "parser cleanup", "--json"]);
+    assert.equal(blocked.status, 1);
+    const blockedOutput = JSON.parse(blocked.stdout);
+    assert.equal(blockedOutput.status, "approval_required");
+    assert.equal(blockedOutput.autoInjection, false);
+    assert.equal(blockedOutput.injection, null);
+
+    const approved = runCli(cwd, ["adapt", "omx", "injection", "--task", "parser cleanup", "--approve", "--json"]);
+    assert.equal(approved.status, 0, approved.stderr);
+    const approvedOutput = JSON.parse(approved.stdout);
+    assert.equal(approvedOutput.status, "approved_not_injected");
+    assert.equal(approvedOutput.injection.injection.automatic, false);
+    assert.equal(approvedOutput.injection.injection.applied, false);
+    assert.equal(approvedOutput.injection.approval.userVisibleApproval, true);
+    assert.ok(existsSync(approvedOutput.injection.paths.json));
+    assert.ok(existsSync(approvedOutput.injection.contextArtifact.paths.json));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -422,6 +460,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const gatewayDryRunOutput = JSON.parse(gatewayDryRun.stdout);
     assert.equal(gatewayDryRunOutput.status, "planned");
     assert.equal(gatewayDryRunOutput.policy.decision, "dry_run_allowed");
+    assert.equal(gatewayDryRunOutput.policy.contractVersion, "policy-reviewed-live-dispatch-v1");
+    assert.equal(gatewayDryRunOutput.policy.dryRunLiveContractCompatible, true);
     assert.ok(existsSync(gatewayDryRunOutput.record.path));
     const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
     assert.equal(cronLive.status, 1);
@@ -459,6 +499,8 @@ test("enabled automation gates still block live dispatch until dispatcher exists
     assert.equal(cronOutput.enabled, true);
     assert.equal(cronOutput.policy.decision, "live_requires_unimplemented_dispatcher");
     assert.equal(cronOutput.policy.dispatchAllowed, false);
+    assert.equal(cronOutput.policy.contractVersion, "policy-reviewed-live-dispatch-v1");
+    assert.equal(cronOutput.policy.liveDispatcherImplemented, false);
     assert.equal(cronOutput.approval.status, "required_but_not_requested");
     assert.ok(cronOutput.ledgerEvents.includes("automation.dispatch_skipped"));
 

@@ -1,8 +1,10 @@
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
 import { defaultConfig } from "../config/schema.ts";
 import { CodexExecDriver } from "../drivers/codex-exec.ts";
 import type { DriverResult } from "../drivers/contract.ts";
+import { findCodexusPackageRoot } from "../util/package-root.ts";
 
 export const replayParityCaseLabels = [
   "deterministic_pass",
@@ -122,6 +124,60 @@ export interface ModelReplayResult {
     driver: "codex-exec";
     finalMessage: string | null;
     exitCode: number | null;
+  };
+}
+
+export interface ReplayParityContract {
+  schemaVersion: 1;
+  status: "covered" | "missing_fixture_coverage" | "fixtures_unavailable";
+  fixtureRoot: string;
+  labels: string[];
+  coveredLabels: string[];
+  missingLabels: string[];
+  replayFiles: string[];
+  rule: string;
+}
+
+async function listReplayFiles(root: string, prefix = ""): Promise<string[]> {
+  if (!existsSync(join(root, prefix))) return [];
+  const entries = await readdir(join(root, prefix), { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries) {
+    const relative = join(prefix, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await listReplayFiles(root, relative));
+    } else if (entry.isFile() && entry.name === "replay.json") {
+      files.push(relative);
+    }
+  }
+  return files.sort();
+}
+
+export async function buildReplayParityContract(root = join(findCodexusPackageRoot(), "fixtures", "replay")): Promise<ReplayParityContract> {
+  const replayFiles = await listReplayFiles(root);
+  const covered = new Set<string>();
+  for (const file of replayFiles) {
+    const spec = await readReplaySpec(join(root, file));
+    if (!spec) continue;
+    for (const scenario of spec.scenarios) {
+      covered.add(scenario.parityCase ?? scenario.id);
+    }
+  }
+  const coveredLabels = replayParityCaseLabels.filter((label) => covered.has(label));
+  const missingLabels = replayParityCaseLabels.filter((label) => !covered.has(label));
+  return {
+    schemaVersion: 1,
+    status: !existsSync(root)
+      ? "fixtures_unavailable"
+      : missingLabels.length === 0
+        ? "covered"
+        : "missing_fixture_coverage",
+    fixtureRoot: root,
+    labels: [...replayParityCaseLabels],
+    coveredLabels,
+    missingLabels,
+    replayFiles,
+    rule: "No new canonical parity label should be added without fixture coverage and CLI replay evidence.",
   };
 }
 

@@ -17,8 +17,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 - Node 22+ npm-installed CLI entrypoint: `dist/cli/main.js`
 - Source development entrypoint: `node src/cli/main.ts`
-- `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`
-- `locks list/inspect/clear`, `schema check/validate/validate-run`, `app-server status/roundtrip/experiment`
+- `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`, `replay parity`
+- `locks list/inspect/clear`, `schema check/engine/validate/validate-run`, `app-server status/roundtrip/experiment`
 - `slop check`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
@@ -81,12 +81,18 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `.codexus/session/` 아래 첫 Codex-native session surface를 제공합니다.
 - `cx session verify --auto`는 보수적인 verification 후보를 감지하되 실행하지 않습니다.
   추천 command 실행에는 기존 policy preflight를 통과하는 명시적 `--execute`가 필요합니다.
+- `cx session hud --json`은 statusline integration이 unavailable인 동안 Codex
+  chat/status workflow용 compact read-only session summary를 보고합니다.
 - `cx slop check`와 `cx session slop`은 quality evidence guard를 제공합니다:
   tri-state `changeEvidence`, derivable evidence gap, non-gating derivable fact,
-  advisory heuristic claim, 명시적 diff base metadata, optional declared-scope check.
+  advisory heuristic claim, 명시적 diff base metadata, optional declared-scope 및
+  explicit review-artifact check.
 - `cx session subagent record/attach/status`는 subagent claim bundle을
   `.codexus/session/subagents/` 아래 기록하고 session state에서 link하며, subagent claim을
-  verification freshness와 분리합니다.
+  verification freshness와 분리합니다. 현재 recorder-only slice에서 Codexus는 native
+  subagent launcher를 노출하지 않습니다.
+- `cx session workers status --json`은 worker pane을 시작하지 않고 tmux-backed worker
+  launch gate를 보고합니다.
 - `cx setup codex-session --enable-notify-hook`은 현재 project가 Codex config에서
   trusted일 때만 Codex notify hook을 설치합니다. 기존 top-level `notify = [...]`
   command는 `--previous-notify` chain으로 보존합니다.
@@ -109,6 +115,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   persist합니다.
 - `cx session verify`는 verification policy preflight를 재사용해 위험한 command를
   실행하지 않고 blocked verification attempt로 기록합니다.
+- `cx schema engine --json`은 dependency를 추가하지 않고 active local schema subset
+  engine과 unavailable full JSON Schema engine을 보고합니다.
+- `cx replay parity --json`은 committed fixture 기반 canonical replay parity label
+  coverage를 보고하고 no-new-label-without-fixture contract를 보존합니다.
+- `cx adapt omx injection --approve --json`은 retrieved context에 대한 user-visible
+  approval artifact를 기록하되 automatic prompt injection은 계속 끕니다.
+- Cron/gateway live path는 `policy-reviewed-live-dispatch-v1` policy contract를 공유하고
+  dispatcher가 생길 때까지 blocked로 남습니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
 - `schemas/session-state.schema.json`은 v4 session-state shape용 first-class schema
@@ -150,7 +164,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 137 tests 통과
+- `npm test`: 141 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -175,6 +189,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   notify-chain preservation, notify-hook disable, config backup,
   focused/schema validator drift case, explicit session-state migration,
   manual-smoke dispatch false-positive protection CLI 테스트
+- Session HUD, quality evidence guard의 explicit review-artifact link, schema
+  engine status, replay parity status, adapter injection approval artifact,
+  session worker gate, recorder-only subagent launch rejection CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
@@ -195,8 +212,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Codex가 stable per-conversation id를 Codexus에 노출하지 않기 때문에 session state는
   현재 cwd-scoped singleton입니다.
 - Notify-hook integration은 explicit setup과 Codex project trust check 뒤에
-  구현됐습니다. Statusline integration과 tmux-backed Codexus worker는 설계됐지만
-  아직 구현되지 않았습니다.
+  구현됐습니다. `cx session hud --json`은 statusline fallback으로 사용할 수 있습니다.
+  Statusline integration과 tmux-backed worker launch는 설계됐지만 아직 구현되지
+  않았습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

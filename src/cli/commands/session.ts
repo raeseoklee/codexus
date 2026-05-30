@@ -27,7 +27,7 @@ function statePath(cwd: string): string {
   return sessionPaths(cwd).state;
 }
 
-async function statusCommand(cwd: string, json: boolean): Promise<void> {
+async function sessionStatusProjection(cwd: string) {
   const paths = sessionPaths(cwd);
   const stateRead = await readSessionStateWithMigration(cwd);
   const notifyHook = await inspectNotifyHookConfig(cwd);
@@ -38,7 +38,7 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
     : null;
   const changeEvidence = buildChangeEvidenceReport(cwd, state, {}).changeEvidence;
   const subagents = summarizeSubagentClaims(state);
-  const result = {
+  return {
     schemaVersion: 1,
     status: state ? "initialized" : "not_initialized",
     cwd,
@@ -64,6 +64,10 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
     migration: stateRead.migration,
     state,
   };
+}
+
+async function statusCommand(cwd: string, json: boolean): Promise<void> {
+  const result = await sessionStatusProjection(cwd);
   if (json) {
     console.log(JSON.stringify(result, null, 2));
     return;
@@ -72,11 +76,49 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`State: ${statePath(cwd)}`);
   console.log(`Project overlay: ${result.overlays.project.installed ? "installed" : "missing"}`);
   console.log(`Notify hook: ${result.notifyHook.status}`);
-  if (evidence) {
-    console.log(`Verification: ${evidence.verification} (evidenceFresh: ${evidence.evidenceFresh})`);
-    console.log(`Dirty since last verify: ${evidence.dirtySinceLastVerify}`);
-    console.log(`Recommended verify: ${evidence.recommendedVerify ?? "none"}`);
+  if (result.evidence) {
+    console.log(`Verification: ${result.evidence.verification} (evidenceFresh: ${result.evidence.evidenceFresh})`);
+    console.log(`Dirty since last verify: ${result.evidence.dirtySinceLastVerify}`);
+    console.log(`Recommended verify: ${result.evidence.recommendedVerify ?? "none"}`);
   }
+}
+
+async function hudCommand(cwd: string, json: boolean): Promise<void> {
+  const status = await sessionStatusProjection(cwd);
+  const lastCheckpoint = status.state?.checkpoints.at(-1) ?? null;
+  const lastVerification = status.state?.verifications.at(-1) ?? null;
+  const result = {
+    schemaVersion: 1,
+    cwd,
+    status: status.status,
+    evidence: status.evidence
+      ? {
+        verification: status.evidence.verification,
+        evidenceFresh: status.evidence.evidenceFresh,
+        dirtySinceLastVerify: status.evidence.dirtySinceLastVerify,
+        recommendedVerify: status.evidence.recommendedVerify,
+      }
+      : null,
+    changeEvidence: status.changeEvidence,
+    notifyDispatch: status.notifyDispatch,
+    capabilities: status.state?.capabilities ?? null,
+    counts: {
+      checkpoints: status.state?.checkpoints.length ?? 0,
+      verifications: status.state?.verifications.length ?? 0,
+      subagentClaims: status.subagents.count,
+      hookEvents: status.state?.hookEvents.length ?? 0,
+    },
+    lastCheckpoint,
+    lastVerification,
+  };
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  console.log(`Codexus HUD: ${result.status}`);
+  console.log(`Verification: ${result.evidence?.verification ?? "unknown"}`);
+  console.log(`Change evidence: ${result.changeEvidence.status}`);
+  console.log(`Notify: ${result.notifyDispatch.status}`);
 }
 
 async function migrateCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
@@ -362,7 +404,7 @@ async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Pr
 }
 
 async function slopCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
-  assertAllowedFlags(args, ["json", "cwd", "since", "scope"]);
+  assertAllowedFlags(args, ["json", "cwd", "since", "scope", "review"]);
   assertMaxPositionals(args, 1);
   const stateRead = await readSessionStateWithMigration(cwd);
   const state = stateRead.state ? await refreshSessionState(cwd, stateRead.state) : null;
@@ -370,6 +412,7 @@ async function slopCommand(args: ParsedArgs, cwd: string, json: boolean): Promis
     ...buildChangeEvidenceReport(cwd, state, {
       since: flagString(args.flags, "since"),
       scope: flagString(args.flags, "scope"),
+      reviews: flagArray(args.flags, "review"),
     }),
     migration: stateRead.migration,
   };
@@ -384,6 +427,30 @@ async function slopCommand(args: ParsedArgs, cwd: string, json: boolean): Promis
   console.log(`Heuristic claims: ${report.heuristicClaims.length}`);
 }
 
+async function workersCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
+  const action = args.positionals[1] ?? "status";
+  if (action !== "status") throw new Error(`unsupported_session_workers_command:${action}`);
+  assertAllowedFlags(args, ["json", "cwd"]);
+  assertMaxPositionals(args, 2);
+  const projection = await sessionStatusProjection(cwd);
+  const tmux = projection.state?.capabilities.tmux ?? "unavailable";
+  const result = {
+    schemaVersion: 1,
+    status: tmux === "available" ? "gated" : "unavailable",
+    tmux,
+    workerLaunchSupported: false,
+    reason: tmux === "available"
+      ? "tmux is present, but Codexus tmux-backed worker launch remains gated until the session protocol is stable."
+      : "tmux is not available; Codexus worker launch remains unavailable.",
+  };
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  console.log(`Session workers: ${result.status}`);
+  console.log(result.reason);
+}
+
 export async function sessionCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "status";
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
@@ -391,6 +458,11 @@ export async function sessionCommand(args: ParsedArgs): Promise<void> {
   if (subcommand === "status") {
     assertMaxPositionals(args, 1);
     await statusCommand(cwd, json);
+    return;
+  }
+  if (subcommand === "hud") {
+    assertMaxPositionals(args, 1);
+    await hudCommand(cwd, json);
     return;
   }
   if (subcommand === "checkpoint") {
@@ -407,6 +479,10 @@ export async function sessionCommand(args: ParsedArgs): Promise<void> {
   }
   if (subcommand === "subagent") {
     await subagentCommand(args, cwd, json);
+    return;
+  }
+  if (subcommand === "workers") {
+    await workersCommand(args, cwd, json);
     return;
   }
   if (subcommand === "slop") {

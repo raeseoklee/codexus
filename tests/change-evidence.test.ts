@@ -156,3 +156,26 @@ test("session slop is the Codex-session alias for the same evidence report", asy
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+test("slop check can link explicit review artifacts as derivable evidence", async () => {
+  const cwd = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const reviewPath = join(cwd, "review.json");
+    await writeFile(join(cwd, "parser.ts"), "export const value = 1;\n");
+    await writeFile(reviewPath, "{\"status\":\"reviewed\"}\n");
+
+    const linked = runCli(cwd, ["slop", "check", "--review", reviewPath, "--json"]);
+    assert.equal(linked.status, 0, linked.stderr);
+    const linkedOutput = JSON.parse(linked.stdout);
+    assert.equal(linkedOutput.derivableFacts.some((fact: { kind: string }) => fact.kind === "explicit_review_linked"), true);
+
+    const missing = runCli(cwd, ["slop", "check", "--review", "missing-review.json", "--json"]);
+    assert.equal(missing.status, 0, missing.stderr);
+    const missingOutput = JSON.parse(missing.stdout);
+    assert.equal(missingOutput.changeEvidence.status, "fail");
+    assert.equal(missingOutput.evidenceGaps.some((gap: { kind: string }) => gap.kind === "missing_review_artifact"), true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});

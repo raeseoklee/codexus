@@ -47,6 +47,29 @@ export interface AdapterContextArtifact {
   };
 }
 
+export interface AdapterInjectionArtifact {
+  schemaVersion: 1;
+  artifactId: string;
+  status: "approved_not_injected";
+  approval: {
+    approvedAt: string;
+    approvedBy: string;
+    contextHash: string;
+    userVisibleApproval: true;
+  };
+  injection: {
+    automatic: false;
+    applied: false;
+    reason: string;
+  };
+  paths: {
+    dir: string;
+    markdown: string;
+    json: string;
+  };
+  contextArtifact: AdapterContextArtifact;
+}
+
 function compactLine(text: string, maxChars: number): string {
   const normalized = text.replace(/\s+/g, " ").trim();
   if (normalized.length <= maxChars) return normalized;
@@ -156,6 +179,58 @@ export async function writeApprovedAdapterContext(options: {
   };
   await ensureDir(dir);
   await writeFile(markdown, options.context.contextBlock);
+  await writeJsonAtomic(json, {
+    schemaVersion: 1,
+    artifact,
+    context: options.context,
+  });
+  return artifact;
+}
+
+export async function writeApprovedAdapterInjection(options: {
+  cwd: string;
+  context: AdapterContextBlock;
+  approvedBy?: string;
+}): Promise<AdapterInjectionArtifact> {
+  const contextArtifact = await writeApprovedAdapterContext(options);
+  const approvedAt = new Date().toISOString();
+  const artifactId = `injection_${Date.now()}`;
+  const dir = join(harnessRoot(options.cwd), "adapters", "injection", artifactId);
+  const markdown = join(dir, "injection.md");
+  const json = join(dir, "injection.json");
+  const artifact: AdapterInjectionArtifact = {
+    schemaVersion: 1,
+    artifactId,
+    status: "approved_not_injected",
+    approval: {
+      approvedAt,
+      approvedBy: options.approvedBy ?? "codexus-adapter",
+      contextHash: sha256Text(options.context.contextBlock),
+      userVisibleApproval: true,
+    },
+    injection: {
+      automatic: false,
+      applied: false,
+      reason: "Codexus records a visible approval artifact but does not insert retrieved context into the active Codex prompt automatically.",
+    },
+    paths: {
+      dir,
+      markdown,
+      json,
+    },
+    contextArtifact,
+  };
+  await ensureDir(dir);
+  await writeFile(markdown, [
+    "# Codexus Adapter Injection Approval",
+    "",
+    "Status: approved_not_injected",
+    "",
+    "Codexus does not inject this context automatically. The active Codex session must read and apply the approved context explicitly.",
+    "",
+    `Context artifact: ${contextArtifact.paths.markdown}`,
+    "",
+  ].join("\n"));
   await writeJsonAtomic(json, {
     schemaVersion: 1,
     artifact,

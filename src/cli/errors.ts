@@ -64,6 +64,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported session command${target ? `: ${target}` : ""}.`;
     case "unsupported_session_subagent_command":
       return `Unsupported session subagent command${target ? `: ${target}` : ""}.`;
+    case "unsupported_session_workers_command":
+      return `Unsupported session workers command${target ? `: ${target}` : ""}.`;
     case "unsupported_slop_command":
       return `Unsupported slop command${target ? `: ${target}` : ""}.`;
     case "invalid_session_setup_scope":
@@ -182,7 +184,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_locks_command":
       return "Run `cx locks list`, `cx locks inspect <name>`, or `cx locks clear <name> --stale-only`.";
     case "unsupported_schema_command":
-      return "Run `cx schema check --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
+      return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
       return "Use `--type config|state|event|memory-entry|skill|session-state`.";
     case "unsupported_app_server_command":
@@ -190,9 +192,11 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_setup_command":
       return "Run `cx setup codex-session --scope project --json`.";
     case "unsupported_session_command":
-      return "Run `cx session status --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, `cx session slop --json`, or `cx session notify --event <name> --json`.";
+      return "Run `cx session status --json`, `cx session hud --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, `cx session slop --json`, or `cx session notify --event <name> --json`.";
     case "unsupported_session_subagent_command":
-      return "Run `cx session subagent record --file <result.json> --json`, `cx session subagent attach --role <role> --claim-file <claims.json> --json`, or `cx session subagent status <task-id> --json`.";
+      return "Codexus is recorder-only for subagents today; run `cx session subagent record --file <result.json> --json`, `cx session subagent attach --role <role> --claim-file <claims.json> --json`, or `cx session subagent status <task-id> --json`.";
+    case "unsupported_session_workers_command":
+      return "Run `cx session workers status --json`.";
     case "unsupported_slop_command":
       return "Run `cx slop check --json`.";
     case "invalid_session_setup_scope":

@@ -256,16 +256,17 @@ Implemented first-slice CLI surface:
 ```bash
 cx setup codex-session [--scope user|project] [--always-on] [--enable-notify-hook|--disable-notify-hook] [--json]
 cx session status [--json]
+cx session hud [--json]
 cx session migrate [--dry-run] [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
 cx session notify [--event <name>] [--json]
+cx session workers status [--json]
 ```
 
 Planned later CLI surface:
 
 ```bash
-cx session hud [--json]
 cx session mode list [--json]
 cx session mode enable <mode> [--json]
 cx session mode disable <mode> [--json]
@@ -306,6 +307,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   can be referenced later in the same project.
 - `cx session verify --verify <cmd> --json` runs verification, records the
   artifact under `.codexus/session/`, and reports a typed result.
+- `cx session hud --json` reports a compact read-only status summary without
+  claiming statusline integration.
 - Optional notify-hook attachment preserves existing notify chains and refuses
   install when Codex project trust is not configured.
 - `notifyDispatch.status` reports `observed` only from real `turn-ended`
@@ -315,7 +318,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   tagged.
 - Notify-hook detach restores the previous notify command or removes the
   Codexus-only notify line without installing or refreshing an overlay.
-- Unsupported statusline/tmux features return truthful unavailable statuses.
+- Unsupported statusline/tmux launch features return truthful unavailable or
+  gated statuses.
 - External `cx run` continues to work unchanged.
 
 ## Implementation Slices
@@ -336,11 +340,13 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    migrate` command.
 9. Completed: promote session state to v2 with truthful notify dispatch
    capability semantics.
-10. Next: run the Desktop app-server attachment evidence slice using the A/B
+10. Completed: run the Desktop app-server attachment evidence slice using the A/B
    contract in
    [Desktop app-server attachment evidence plan](../plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md).
-11. Later: add `cx session hud --json` as a compact read-only session summary;
-   statusline integration remains blocked until Codex exposes a stable supported
-   configuration surface.
-12. Later: revisit external `codex exec resume` as a separate advanced feature only
+11. Completed: add `cx session hud --json` as a compact read-only session
+   summary. Statusline integration remains blocked until Codex exposes a stable
+   supported configuration surface.
+12. Completed: add `cx session workers status --json` as a truthful tmux worker
+   launch gate without starting worker panes.
+13. Later: revisit external `codex exec resume` as a separate advanced feature only
    after the Codex-native path is useful.

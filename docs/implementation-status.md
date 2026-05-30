@@ -30,10 +30,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `resume`
   - `verify`
   - `replay`
+  - `replay parity`
   - `locks list`
   - `locks inspect`
   - `locks clear`
   - `schema check`
+  - `schema engine`
   - `schema validate`
   - `schema validate-run`
   - `slop check`
@@ -149,13 +151,18 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx session verify --auto` detects conservative verification candidates
   without execution; `--execute` is required before running the recommended
   command through the existing policy preflight.
+- `cx session hud --json` reports a compact read-only session summary for Codex
+  chat/status workflows while statusline integration remains unavailable.
 - `cx slop check` and `cx session slop` expose the quality evidence guard:
   tri-state `changeEvidence`, derivable evidence gaps, non-gating derivable
   facts, advisory heuristic claims, explicit diff base metadata, and optional
-  declared-scope checks.
+  declared-scope and explicit review-artifact checks.
 - `cx session subagent record/attach/status` records subagent claim bundles
   under `.codexus/session/subagents/`, links them from session state, and keeps
-  subagent claims separate from verification freshness.
+  subagent claims separate from verification freshness. Codexus does not expose
+  a native subagent launcher in the current recorder-only slice.
+- `cx session workers status --json` reports the tmux-backed worker launch gate
+  without starting worker panes.
 - `cx setup codex-session --enable-notify-hook` installs a Codex notify hook
   only when the current project is trusted in Codex config; existing top-level
   `notify = [...]` commands are preserved through `--previous-notify` chaining.
@@ -178,6 +185,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   them unless `--dry-run` is used.
 - `cx session verify` reuses the verification policy preflight and records
   blocked verification attempts instead of executing dangerous commands.
+- `cx schema engine --json` reports the active local schema subset engine and
+  the unavailable full JSON Schema engine without adding a dependency.
+- `cx replay parity --json` reports canonical replay parity label coverage from
+  committed fixtures and preserves the no-new-label-without-fixture contract.
+- `cx adapt omx injection --approve --json` records a user-visible approval
+  artifact for retrieved context while keeping automatic prompt injection off.
+- Cron/gateway live paths share the `policy-reviewed-live-dispatch-v1` policy
+  contract and remain blocked until a dispatcher exists.
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
 - `schemas/session-state.schema.json` is a first-class schema artifact for the
@@ -202,7 +217,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 137.
+- Current test count: 141.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -257,6 +272,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   refusal, notify-chain preservation, notify-hook disable, config backup, and
   focused/schema validator drift cases, explicit session-state migrations, and
   manual-smoke dispatch false-positive protection are covered by CLI tests.
+- Session HUD, explicit review-artifact links in the quality evidence guard,
+  schema engine status, replay parity status, adapter injection approval
+  artifacts, session worker gates, and recorder-only subagent launch rejection
+  are covered by CLI tests.
 
 ## Acceptance Coverage
 
@@ -296,8 +315,9 @@ review. Current high-level gaps:
 - Session state is currently a cwd-scoped singleton because Codex does not expose
   a stable per-conversation id to Codexus.
 - Notify-hook integration is implemented behind explicit setup and Codex project
-  trust checks. Statusline integration and tmux-backed Codexus workers are
-  designed but not implemented.
+  trust checks. `cx session hud --json` is available as the statusline fallback;
+  statusline integration and tmux-backed worker launch are designed but not
+  implemented.
 - Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

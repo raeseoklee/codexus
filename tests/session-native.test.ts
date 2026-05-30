@@ -948,3 +948,52 @@ test("session subagent attach records role-scoped claim bundles", async () => {
     await rm(codexHome, { recursive: true, force: true });
   }
 });
+
+test("session hud reports compact evidence without statusline support", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const checkpoint = runCli(cwd, ["session", "checkpoint", "before hud", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(checkpoint.status, 0, checkpoint.stderr);
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 0, verify.stderr);
+
+    const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(hud.status, 0, hud.stderr);
+    const output = JSON.parse(hud.stdout);
+    assert.equal(output.status, "initialized");
+    assert.equal(output.evidence.verification, "passed");
+    assert.equal(output.evidence.evidenceFresh, true);
+    assert.equal(output.capabilities.statusline, "unavailable");
+    assert.equal(output.counts.checkpoints, 1);
+    assert.equal(output.counts.verifications, 1);
+    assert.equal(output.lastCheckpoint.label, "before hud");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session workers gate launch while subagents stay recorder-only", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    const workers = runCli(cwd, ["session", "workers", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(workers.status, 0, workers.stderr);
+    const workerOutput = JSON.parse(workers.stdout);
+    assert.equal(workerOutput.workerLaunchSupported, false);
+    assert.ok(["gated", "unavailable"].includes(workerOutput.status));
+
+    const spawn = runCli(cwd, ["session", "subagent", "spawn", "--role", "reviewer", "--task", "review diff", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(spawn.status, 1);
+    const spawnOutput = JSON.parse(spawn.stdout);
+    assert.equal(spawnOutput.type, "error");
+    assert.equal(spawnOutput.code, "unsupported_session_subagent_command");
+    assert.match(spawnOutput.hint, /recorder-only/);
+    assert.match(spawnOutput.hint, /session subagent record/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});

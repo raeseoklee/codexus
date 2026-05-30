@@ -11,6 +11,7 @@ import {
   validateSchemaValue,
   type SchemaValidationType,
 } from "../../validation/schemas.ts";
+import { schemaEngineStatus } from "../../validation/json-schema-subset.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 const schemaValidationTypes = new Set<SchemaValidationType>(["config", "state", "event", "memory-entry", "skill", "session-state"]);
@@ -167,6 +168,17 @@ export async function schemaCommand(args: ParsedArgs): Promise<void> {
     for (const schema of schemas) console.log(`${schema.valid ? "OK" : "FAIL"} ${schema.name}`);
     console.log(`${appServerFixture.valid ? "OK" : "FAIL"} app-server fixture`);
     process.exitCode = ok ? 0 : 1;
+    return;
+  }
+
+  if (subcommand === "engine") {
+    const result = schemaEngineStatus();
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Schema engine: ${result.activeEngine}`);
+    console.log(`Full JSON Schema engine: ${result.fullJsonSchemaEngine.available ? "available" : "unavailable"}`);
     return;
   }
 
