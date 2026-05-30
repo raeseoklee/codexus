@@ -37,6 +37,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Session-native supervision](design/07-supervised-sessions.md): OMX-informed session-native integration using skills, AGENTS overlays, hooks/status state, and optional tmux workers inside the current Codex session.
 - [Standalone identity and always-on evidence](design/08-standalone-identity-and-always-on-evidence.md): evidence-first identity, OMX decoupling, the always-on evidence model (derived dirty/stale, verify auto-detection, evidence-bearing-only gate), and engine-agnostic invariants.
 - [Subagent evidence supervision](design/09-subagent-evidence-supervision.md): Codex-native subagents as bounded evidence-producing adapters, not completion authorities.
+- [Quality evidence guard (slop guard)](design/10-quality-evidence-guard.md): evidence-first change-quality gate that splits derivable evidence gaps from advisory heuristic claims, built on the session evidence model.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Public release checklist](public-release.md): metadata, safety, verification, and visibility checklist for open-source publication.

@@ -198,6 +198,7 @@ Public bin은 `cx`와 `codexus`입니다.
 - [세션 네이티브 감독](design/07-supervised-sessions.md)
 - [단독 정체성과 always-on evidence](design/08-standalone-identity-and-always-on-evidence.md)
 - [Subagent evidence supervision](design/09-subagent-evidence-supervision.md)
+- [품질 증거 가드 (slop guard)](design/10-quality-evidence-guard.md)
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)
