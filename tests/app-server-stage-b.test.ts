@@ -153,6 +153,7 @@ async function startFakeAppServer(socketPath: string, options: { sendTurnBoundar
       }
     });
     socket.on("close", () => sockets.delete(socket));
+    socket.on("error", () => sockets.delete(socket));
   });
   await new Promise<void>((resolveListen, rejectListen) => {
     server.once("error", rejectListen);
