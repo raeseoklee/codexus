@@ -42,6 +42,7 @@ sh install.sh
 Installer environment variable:
 
 - `CODEXUS_NPM_SPEC`: 설치할 npm package spec, 기본값 `codexus@next`
+- `CODEXUS_EXPECTED_VERSION`: optional installed package version check
 - `CODEXUS_NPM_PREFIX`: npm global prefix, 기본값 `~/.local`
 - `CODEXUS_BIN_DIR`: `cx`, `codexus`를 둘 bin directory, 기본값 `~/.local/bin`
 - `CODEXUS_INSTALL_CODEX_SKILL=0`: Codex skill adapter 설치 생략

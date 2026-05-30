@@ -5,6 +5,7 @@ package_spec="${CODEXUS_NPM_SPEC:-codexus@next}"
 npm_prefix="${CODEXUS_NPM_PREFIX:-$HOME/.local}"
 bin_dir="${CODEXUS_BIN_DIR:-$npm_prefix/bin}"
 install_skill="${CODEXUS_INSTALL_CODEX_SKILL:-1}"
+expected_version="${CODEXUS_EXPECTED_VERSION:-}"
 case "$install_skill" in
   0|false|False|FALSE|no|No|NO|off|Off|OFF) install_skill=0 ;;
   *) install_skill=1 ;;
@@ -42,6 +43,13 @@ if [ "$bin_dir" != "$prefix_bin" ]; then
 fi
 
 package_root="$(npm root -g --prefix "$npm_prefix")/codexus"
+package_json="$package_root/package.json"
+[ -f "$package_json" ] || fail "npm install succeeded but Codexus package root was not found: $package_root"
+package_version="$(node -e "const fs=require('fs'); const path=process.argv[1]; console.log(JSON.parse(fs.readFileSync(path, 'utf8')).version)" "$package_json")"
+if [ -n "$expected_version" ] && [ "$package_version" != "$expected_version" ]; then
+  fail "installed codexus@$package_version but expected $expected_version from $package_spec"
+fi
+
 if [ "$install_skill" != "0" ]; then
   if node "$package_root/scripts/install-codex-skill.mjs" --json >/dev/null 2>&1; then
     log "Installed Codexus skill adapter into CODEX_HOME."
@@ -50,7 +58,7 @@ if [ "$install_skill" != "0" ]; then
   fi
 fi
 
-log "Installed Codexus package to $package_root"
+log "Installed Codexus $package_version to $package_root"
 log "Linked cx and codexus into $prefix_bin"
 
 case ":$PATH:" in

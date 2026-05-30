@@ -42,6 +42,7 @@ sh install.sh
 Installer environment variables:
 
 - `CODEXUS_NPM_SPEC`: npm package spec to install, default `codexus@next`
+- `CODEXUS_EXPECTED_VERSION`: optional installed package version check
 - `CODEXUS_NPM_PREFIX`: npm global prefix, default `~/.local`
 - `CODEXUS_BIN_DIR`: bin directory for `cx` and `codexus`, default `~/.local/bin`
 - `CODEXUS_INSTALL_CODEX_SKILL=0`: skip Codex skill adapter installation

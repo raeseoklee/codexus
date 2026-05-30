@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { lstat, mkdir, mkdtemp, readdir, rm } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -35,6 +35,7 @@ test("install.sh delegates to npm install and links canonical bins", async () =>
   const packDir = join(cwd, "pack");
   try {
     const tarball = await packTarball(packDir);
+    const pkg = JSON.parse(await readFile(resolve("package.json"), "utf8")) as { version: string };
 
     const install = spawnSync("sh", [resolve("install.sh")], {
       cwd: root,
@@ -47,10 +48,11 @@ test("install.sh delegates to npm install and links canonical bins", async () =>
         CODEXUS_NPM_PREFIX: npmPrefix,
         CODEXUS_BIN_DIR: binDir,
         CODEXUS_INSTALL_CODEX_SKILL: "0",
+        CODEXUS_EXPECTED_VERSION: pkg.version,
       },
     });
     assert.equal(install.status, 0, install.stderr ?? install.error?.message);
-    assert.match(install.stdout, /Installed Codexus/);
+    assert.match(install.stdout, new RegExp(`Installed Codexus ${pkg.version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
 
     for (const name of ["cx", "codexus"]) {
       const stat = await lstat(join(binDir, name));

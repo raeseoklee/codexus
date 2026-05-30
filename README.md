@@ -86,8 +86,8 @@ curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
 ```
 
 The installer delegates to the npm package channel (`codexus@next` by default),
-installs the `codexus` and `cx` bins, and installs the Codex skill adapter
-unless `CODEXUS_INSTALL_CODEX_SKILL=0` is set.
+installs the `codexus` and `cx` bins, reports the installed package version, and
+installs the Codex skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is set.
 
 For a review-first install:
 
