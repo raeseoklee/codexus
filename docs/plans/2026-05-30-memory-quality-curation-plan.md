@@ -4,7 +4,7 @@
 
 Date: 2026-05-30
 
-Status: planned lightweight curation slice, not standards adoption.
+Status: implemented lightweight curation slice, not standards adoption.
 
 ## Decision
 
@@ -53,7 +53,7 @@ with a generated timestamp and curator version.
 
 ## Conflict Candidates
 
-Add `conflictCandidates` to `MemoryCurationResult`:
+`MemoryCurationResult` now reports `conflictCandidates`:
 
 ```json
 {
@@ -119,12 +119,12 @@ records.
 
 ## Implementation Slices
 
-1. Document this profile and keep existing memory schema unchanged.
-2. Extend `MemoryCurationResult` with `qualityFindings` and
+1. Completed: document this profile and keep existing memory schema unchanged.
+2. Completed: extend `MemoryCurationResult` with `qualityFindings` and
    `conflictCandidates`.
-3. Add rule-based conflict detection tests for clear contradictions and
+3. Completed: add rule-based conflict detection tests for clear contradictions and
    non-conflicting near-duplicates.
-4. Keep `cx memory curate --json` advisory and non-mutating.
+4. Completed: keep `cx memory curate --json` advisory and non-mutating.
 5. Consider a later review command that writes explicit supersession artifacts.
 
 ## Verification

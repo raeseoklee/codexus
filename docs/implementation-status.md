@@ -43,7 +43,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `memory search`
   - `memory list`
   - `memory review`
-  - `memory curate`
+  - `memory curate` with advisory conflict candidates and curator-derived tri-state quality findings
   - `memory prune`
   - `skill propose`
   - `skill index`
@@ -218,7 +218,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Skill proposal/review/promotion/deprecation workflow through both unit and CLI tests.
 - Structured JSON CLI error envelope for unknown commands and argument validation failures.
 - Structured JSON CLI error coverage for unexpected arguments, corrupt state, and disabled app-server driver.
-- Init, observability, active-skill index/export/improvement, adapter approved retrieval/context artifact recording, full replay parity fixture-matrix coverage, gated model replay, stale locks, schema validation/run-ledger validation, migration fixtures, driver-failure repair, app-server dry-run/experiment process-probe and fake-supervision recording, memory lifecycle/curation, packaging, installed-skill tree diagnosis, and feature-gate policy/audit-record tests.
+- Init, observability, active-skill index/export/improvement, adapter approved retrieval/context artifact recording, full replay parity fixture-matrix coverage, gated model replay, stale locks, schema validation/run-ledger validation, migration fixtures, driver-failure repair, app-server dry-run/experiment process-probe and fake-supervision recording, memory lifecycle/curation with conflict and quality findings, packaging, installed-skill tree diagnosis, and feature-gate policy/audit-record tests.
 - Real Codex exec smoke through ChatGPT-authenticated local Codex:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-CODEX-OK" --json`
   - observed final artifact: `CHX-CODEX-OK`

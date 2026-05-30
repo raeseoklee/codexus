@@ -126,9 +126,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
    - Add explicit `cx memory add/list/prune/review` surfaces.
    - Add summaries and indexes while preserving source links, redaction, and
      bounded retrieval.
-   - Next quality slice: add advisory conflict/contradiction detection and
-     curator-derived tri-state quality findings without claiming standards
-     compliance.
+   - Memory quality slice implemented: advisory conflict/contradiction
+     detection and curator-derived tri-state quality findings without claiming
+     standards compliance.
 
 ### P2: Runtime Expansion
 

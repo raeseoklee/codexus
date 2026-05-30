@@ -35,7 +35,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `codex exec --json` driver
 - verification runner와 bounded repair loop
 - explicit-budget repairable driver-failure repair loop
-- experience/memory 자동 기록과 memory lifecycle/curation command
+- experience/memory 자동 기록과 conflict/quality finding을 포함한 memory lifecycle/curation command
 - replay-gated skill promotion/export/improvement/deprecation과 active skill index
 - Codexus 생성 skill의 Codex-facing 표시명 `codexus:<skill-name>`
 - approved active skill/memory retrieval, replay approval metadata를 포함한 prompt-safe context formatting, 자동 주입 없는 approved context artifact 기록
@@ -161,7 +161,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   manual-smoke dispatch false-positive protection CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
-- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
+- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
 
 ## 남은 gap
 

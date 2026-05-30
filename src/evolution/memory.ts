@@ -26,11 +26,36 @@ export interface MemoryIndex {
   lastId: string | null;
 }
 
+export type MemoryQualityStatus = "pass" | "fail" | "unknown";
+
+export interface MemoryQualityCheck {
+  status: MemoryQualityStatus;
+  reason: string;
+}
+
+export interface MemoryQualityFinding {
+  id: string;
+  traceable: MemoryQualityCheck;
+  singular: MemoryQualityCheck;
+  unambiguous: MemoryQualityCheck;
+  scopeBounded: MemoryQualityCheck;
+  verifiable: MemoryQualityCheck;
+  conflictReviewed: MemoryQualityCheck;
+}
+
 export interface MemoryCurationResult {
   schemaVersion: 1;
   generatedAt: string;
   total: number;
   duplicateCandidates: Array<{ id: string; duplicateOf: string; reason: string }>;
+  conflictCandidates: Array<{
+    id: string;
+    conflictsWith: string;
+    reason: string;
+    confidence: "low" | "medium" | "high";
+    suggestedResolution: "review_for_supersession";
+  }>;
+  qualityFindings: MemoryQualityFinding[];
   staleLowConfidence: Array<{ id: string; ageDays: number; reason: string }>;
   invalidEntries: Array<{ id: string; reason: string }>;
 }
@@ -149,18 +174,187 @@ export async function pruneMemoryEntries(cwd: string, before: Date, dryRun = fal
   });
 }
 
+function normalizeMemoryText(text: string): string {
+  return text.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+const subjectStopWords = new Set([
+  "the",
+  "and",
+  "or",
+  "for",
+  "with",
+  "without",
+  "from",
+  "into",
+  "that",
+  "this",
+  "when",
+  "then",
+  "than",
+  "should",
+  "must",
+  "shall",
+  "only",
+  "always",
+  "never",
+  "use",
+  "uses",
+  "using",
+  "used",
+  "not",
+  "enabled",
+  "disabled",
+  "available",
+  "unavailable",
+  "supported",
+  "unsupported",
+  "allow",
+  "allows",
+  "allowed",
+  "deny",
+  "denies",
+  "denied",
+  "avoid",
+  "prefer",
+  "require",
+  "requires",
+  "required",
+]);
+
+function subjectTerms(entry: MemoryEntry): Set<string> {
+  const terms = `${entry.tags.join(" ")} ${entry.text}`
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((term) => term.length > 2 && !subjectStopWords.has(term));
+  return new Set(terms);
+}
+
+function hasOverlap(left: Set<string>, right: Set<string>): boolean {
+  for (const term of left) {
+    if (right.has(term)) return true;
+  }
+  return false;
+}
+
+function directiveMarkers(text: string): Set<string> {
+  const normalized = normalizeMemoryText(text);
+  const markers = new Set<string>();
+  const negativeUse = /\b(do not|don't|must not|never)\s+use\b/.test(normalized);
+  if (negativeUse) markers.add("not_use");
+  if (/\buse\b/.test(normalized) && !negativeUse) markers.add("use");
+  if (/\balways\b/.test(normalized)) markers.add("always");
+  if (/\bnever\b/.test(normalized)) markers.add("never");
+  if (/\benabled?\b/.test(normalized)) markers.add("enabled");
+  if (/\bdisabled?\b/.test(normalized)) markers.add("disabled");
+  if (/\bavailable\b/.test(normalized)) markers.add("available");
+  if (/\bunavailable\b/.test(normalized)) markers.add("unavailable");
+  if (/\bsupported\b/.test(normalized) && !/\bunsupported\b/.test(normalized)) markers.add("supported");
+  if (/\bunsupported\b/.test(normalized)) markers.add("unsupported");
+  if (/\ballow(?:ed|s)?\b/.test(normalized)) markers.add("allowed");
+  if (/\b(disallow(?:ed|s)?|deny|denied|denies)\b/.test(normalized)) markers.add("denied");
+  if (/\brequir(?:e|es|ed)\b/.test(normalized)) markers.add("required");
+  if (/\b(forbid(?:s|den)?|forbidden|prohibit(?:s|ed)?)\b/.test(normalized)) markers.add("forbidden");
+  return markers;
+}
+
+const oppositeDirectivePairs: Array<[string, string]> = [
+  ["use", "not_use"],
+  ["always", "never"],
+  ["enabled", "disabled"],
+  ["available", "unavailable"],
+  ["supported", "unsupported"],
+  ["allowed", "denied"],
+  ["required", "forbidden"],
+];
+
+function findOppositeDirective(left: Set<string>, right: Set<string>): string | null {
+  for (const [positive, negative] of oppositeDirectivePairs) {
+    if ((left.has(positive) && right.has(negative)) || (left.has(negative) && right.has(positive))) {
+      return `${positive}/${negative}`;
+    }
+  }
+  return null;
+}
+
+function buildConflictCandidates(entries: MemoryEntry[]): MemoryCurationResult["conflictCandidates"] {
+  const candidates: MemoryCurationResult["conflictCandidates"] = [];
+  const terms = new Map(entries.map((entry) => [entry.id, subjectTerms(entry)]));
+  const markers = new Map(entries.map((entry) => [entry.id, directiveMarkers(entry.text)]));
+
+  for (let leftIndex = 0; leftIndex < entries.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < entries.length; rightIndex += 1) {
+      const left = entries[leftIndex];
+      const right = entries[rightIndex];
+      if (left.kind !== right.kind) continue;
+      const leftTerms = terms.get(left.id) ?? new Set<string>();
+      const rightTerms = terms.get(right.id) ?? new Set<string>();
+      if (!hasOverlap(leftTerms, rightTerms)) continue;
+      const opposite = findOppositeDirective(markers.get(left.id) ?? new Set<string>(), markers.get(right.id) ?? new Set<string>());
+      if (!opposite) continue;
+      candidates.push({
+        id: right.id,
+        conflictsWith: left.id,
+        reason: `same kind with overlapping subject terms and opposite directive (${opposite})`,
+        confidence: left.tags.some((tag) => right.tags.includes(tag)) ? "high" : "medium",
+        suggestedResolution: "review_for_supersession",
+      });
+    }
+  }
+
+  return candidates;
+}
+
+function quality(status: MemoryQualityStatus, reason: string): MemoryQualityCheck {
+  return { status, reason };
+}
+
+function buildQualityFinding(entry: MemoryEntry, conflictingIds: Set<string>): MemoryQualityFinding {
+  const normalized = normalizeMemoryText(entry.text);
+  const sentenceCount = entry.text.split(/[.!?]+/).map((part) => part.trim()).filter(Boolean).length;
+  const vague = /\b(handle well|do better|improve things|as needed|etc\.?|stuff|things)\b/i.test(entry.text);
+  const verifiable = entry.kind === "verification_pattern" || entry.kind === "failure_pattern" || /\b(test|verify|verification|check|inspect|replay|observe|observed|evidence|artifact|run)\b/.test(normalized);
+
+  return {
+    id: entry.id,
+    traceable: entry.sourceRunId && entry.sourceRunId !== "manual"
+      ? quality("pass", "sourceRunId cites a non-manual run")
+      : quality("unknown", "sourceRunId is manual or unavailable; no artifact evidence is linked"),
+    singular: sentenceCount <= 1 && !/[;\n]/.test(entry.text)
+      ? quality("pass", "single sentence with no list separator")
+      : quality("unknown", "entry may contain multiple claims"),
+    unambiguous: vague
+      ? quality("fail", "entry contains vague guidance")
+      : entry.text.trim().length >= 12
+        ? quality("pass", "entry text is concrete enough for retrieval")
+        : quality("unknown", "entry text is too short to classify"),
+    scopeBounded: entry.tags.length > 0
+      ? quality("pass", "tags provide a retrieval scope")
+      : quality("fail", "missing tags"),
+    verifiable: verifiable
+      ? quality("pass", "entry mentions verification, evidence, observation, or has a verification/failure kind")
+      : quality("unknown", "no explicit observable check found"),
+    conflictReviewed: conflictingIds.has(entry.id)
+      ? quality("fail", "curation found a possible contradiction requiring review")
+      : quality("pass", "no rule-based contradiction found during curation"),
+  };
+}
+
 export async function curateMemoryEntries(cwd: string, options: { staleDays?: number } = {}): Promise<MemoryCurationResult> {
   const entries = await readMemoryEntries(cwd);
   const generatedAt = new Date().toISOString();
   const staleDays = options.staleDays ?? 60;
   const seen = new Map<string, MemoryEntry>();
   const duplicateCandidates: MemoryCurationResult["duplicateCandidates"] = [];
+  const conflictCandidates = buildConflictCandidates(entries);
+  const conflictingIds = new Set(conflictCandidates.flatMap((candidate) => [candidate.id, candidate.conflictsWith]));
+  const qualityFindings = entries.map((entry) => buildQualityFinding(entry, conflictingIds));
   const staleLowConfidence: MemoryCurationResult["staleLowConfidence"] = [];
   const invalidEntries: MemoryCurationResult["invalidEntries"] = [];
   const now = Date.now();
 
   for (const entry of entries) {
-    const normalized = entry.text.toLowerCase().replace(/\s+/g, " ").trim();
+    const normalized = normalizeMemoryText(entry.text);
     const existing = seen.get(normalized);
     if (existing) {
       duplicateCandidates.push({ id: entry.id, duplicateOf: existing.id, reason: "same normalized text" });
@@ -181,6 +375,8 @@ export async function curateMemoryEntries(cwd: string, options: { staleDays?: nu
     generatedAt,
     total: entries.length,
     duplicateCandidates,
+    conflictCandidates,
+    qualityFindings,
     staleLowConfidence,
     invalidEntries,
   };

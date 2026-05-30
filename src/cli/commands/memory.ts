@@ -77,6 +77,7 @@ export async function memoryCommand(args: ParsedArgs): Promise<void> {
     }
     console.log(`memory entries: ${curation.total}`);
     console.log(`duplicates: ${curation.duplicateCandidates.length}`);
+    console.log(`conflicts: ${curation.conflictCandidates.length}`);
     console.log(`stale low-confidence: ${curation.staleLowConfidence.length}`);
     return;
   }

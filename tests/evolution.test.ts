@@ -91,9 +91,78 @@ test("memory read path validates records and curator flags duplicates", async ()
     });
     const curation = await curateMemoryEntries(cwd);
     assert.equal(curation.duplicateCandidates[0].id, "mem_duplicate_2");
+    assert.equal(curation.conflictCandidates.length, 0);
+    assert.equal(curation.qualityFindings.length, 2);
 
     await writeFile(join(cwd, ".codexus", "memory", "entries.jsonl"), `${JSON.stringify({ bad: true })}\n`);
     await assert.rejects(() => curateMemoryEntries(cwd), /schema_validation_failed:memory-entry/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("memory curator reports conflicts and tri-state quality without trusting entry flags", async () => {
+  const cwd = await tempDir();
+  try {
+    await appendMemoryEntry(cwd, {
+      id: "mem_use_npm",
+      sourceRunId: "run_package_a",
+      kind: "workflow_lesson",
+      text: "Use npm for package scripts and run npm test.",
+      tags: ["package", "scripts"],
+      confidence: "high",
+    });
+    await appendMemoryEntry(cwd, {
+      id: "mem_do_not_use_npm",
+      sourceRunId: "run_package_b",
+      kind: "workflow_lesson",
+      text: "Do not use npm for package scripts.",
+      tags: ["package", "scripts"],
+      confidence: "high",
+    });
+    await appendMemoryEntry(cwd, {
+      id: "mem_use_npm_ci",
+      sourceRunId: "run_package_c",
+      kind: "workflow_lesson",
+      text: "Run npm ci for package installs.",
+      tags: ["package", "scripts"],
+      confidence: "medium",
+    });
+
+    const curation = await curateMemoryEntries(cwd);
+    assert.equal(curation.conflictCandidates.length, 1);
+    assert.deepEqual(curation.conflictCandidates[0], {
+      id: "mem_do_not_use_npm",
+      conflictsWith: "mem_use_npm",
+      reason: "same kind with overlapping subject terms and opposite directive (use/not_use)",
+      confidence: "high",
+      suggestedResolution: "review_for_supersession",
+    });
+    const useFinding = curation.qualityFindings.find((finding) => finding.id === "mem_use_npm");
+    const conflictFinding = curation.qualityFindings.find((finding) => finding.id === "mem_do_not_use_npm");
+    const nonConflictFinding = curation.qualityFindings.find((finding) => finding.id === "mem_use_npm_ci");
+    assert.equal(useFinding?.traceable.status, "pass");
+    assert.equal(useFinding?.verifiable.status, "pass");
+    assert.equal(useFinding?.conflictReviewed.status, "fail");
+    assert.equal(conflictFinding?.conflictReviewed.status, "fail");
+    assert.equal(nonConflictFinding?.conflictReviewed.status, "pass");
+
+    const path = join(cwd, ".codexus", "memory", "entries.jsonl");
+    const manual = {
+      schemaVersion: 1,
+      id: "mem_manual_quality_claim",
+      createdAt: "2026-05-30T00:00:00.000Z",
+      sourceRunId: "manual",
+      kind: "tooling_note",
+      text: "Handle well.",
+      tags: ["manual"],
+      confidence: "medium",
+      quality: { traceable: { status: "pass", reason: "self asserted" } },
+    };
+    await writeFile(path, `${JSON.stringify(manual)}\n`);
+    const manualCuration = await curateMemoryEntries(cwd);
+    assert.equal(manualCuration.qualityFindings[0].traceable.status, "unknown");
+    assert.equal(manualCuration.qualityFindings[0].unambiguous.status, "fail");
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

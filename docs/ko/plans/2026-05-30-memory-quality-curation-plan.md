@@ -4,7 +4,7 @@
 
 날짜: 2026-05-30
 
-상태: 계획된 경량 curation slice이며, 표준 도입이 아닙니다.
+상태: 구현된 경량 curation slice이며, 표준 도입이 아닙니다.
 
 ## 결정
 
@@ -53,7 +53,7 @@ evidence로 저장해야 합니다.
 
 ## Conflict Candidates
 
-`MemoryCurationResult`에 `conflictCandidates`를 추가합니다:
+`MemoryCurationResult`는 이제 `conflictCandidates`를 보고합니다:
 
 ```json
 {
@@ -118,11 +118,11 @@ confidence theater가 되면 안 됩니다.
 
 ## 구현 Slice
 
-1. 이 profile을 문서화하고 기존 memory schema는 유지합니다.
-2. `MemoryCurationResult`에 `qualityFindings`와 `conflictCandidates`를 추가합니다.
-3. 명확한 contradiction과 conflict가 아닌 near-duplicate에 대한 rule-based conflict
+1. 완료: 이 profile을 문서화하고 기존 memory schema는 유지합니다.
+2. 완료: `MemoryCurationResult`에 `qualityFindings`와 `conflictCandidates`를 추가합니다.
+3. 완료: 명확한 contradiction과 conflict가 아닌 near-duplicate에 대한 rule-based conflict
    detection test를 추가합니다.
-4. `cx memory curate --json`은 advisory/non-mutating 상태로 유지합니다.
+4. 완료: `cx memory curate --json`은 advisory/non-mutating 상태로 유지합니다.
 5. 나중에 explicit supersession artifact를 쓰는 review command를 검토합니다.
 
 ## 검증

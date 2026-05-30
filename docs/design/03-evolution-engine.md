@@ -144,8 +144,8 @@ Kinds:
 - `failure_pattern`
 - `tooling_note`
 
-Memory quality should use a lightweight curation profile, not standards
-compliance. Codexus may borrow requirement-quality characteristics such as
+Memory quality uses a lightweight curation profile, not standards compliance.
+Codexus borrows requirement-quality characteristics such as
 traceability, singularity, unambiguity, scope boundedness, verifiability, and
 conflict review, but these are curator-derived tri-state findings
 (`pass/fail/unknown`), not self-asserted memory fields. Conflict detection should
