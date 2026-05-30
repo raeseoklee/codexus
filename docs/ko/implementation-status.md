@@ -83,6 +83,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   추천 command 실행에는 기존 policy preflight를 통과하는 명시적 `--execute`가 필요합니다.
 - `cx session hud --json`은 statusline integration이 unavailable인 동안 Codex
   chat/status workflow용 compact read-only session summary를 보고합니다.
+- Notify-hook `turn-ended` heartbeat는 read-only `heartbeatEvidence`와 compact
+  `heartbeatChangeEvidence` snapshot을 기록할 수 있습니다. Verification을 실행하지 않고
+  stale evidence를 fresh로 만들 수 없습니다.
 - `cx slop check`와 `cx session slop`은 quality evidence guard를 제공합니다:
   tri-state `changeEvidence`, derivable evidence gap, non-gating derivable fact,
   advisory heuristic claim, 명시적 diff base metadata, optional declared-scope 및
@@ -165,7 +168,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 142 tests 통과
+- `npm test`: 143 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -194,6 +197,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   engine status, replay parity status, adapter injection approval artifact,
   session worker gate, recorder-only subagent launch rejection CLI 테스트
 - Slop guard gate mode의 pass, fail, unknown/blocked outcome 테스트
+- Always-on notify heartbeat quality snapshot은 session-native test와 session-state
+  schema validation으로 커버됩니다.
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트

@@ -107,7 +107,8 @@
               "bundleIdentifier": { "type": ["string", "null"] }
             }
           },
-          "heartbeatEvidence": { "type": ["object", "null"] }
+          "heartbeatEvidence": { "type": ["object", "null"] },
+          "heartbeatChangeEvidence": { "type": ["object", "null"] }
         }
       }
     },

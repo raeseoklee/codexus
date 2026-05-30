@@ -153,6 +153,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   command through the existing policy preflight.
 - `cx session hud --json` reports a compact read-only session summary for Codex
   chat/status workflows while statusline integration remains unavailable.
+- Notify-hook `turn-ended` heartbeats can record read-only `heartbeatEvidence`
+  and compact `heartbeatChangeEvidence` snapshots; they do not execute
+  verification and cannot refresh stale evidence.
 - `cx slop check` and `cx session slop` expose the quality evidence guard:
   tri-state `changeEvidence`, derivable evidence gaps, non-gating derivable
   facts, advisory heuristic claims, explicit diff base metadata, and optional
@@ -219,7 +222,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 142.
+- Current test count: 143.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -279,6 +282,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   artifacts, session worker gates, and recorder-only subagent launch rejection
   are covered by CLI tests.
 - Slop guard gate mode is covered for pass, fail, and unknown/blocked outcomes.
+- Always-on notify heartbeat quality snapshots are covered by session-native
+  tests and session-state schema validation.
 
 ## Acceptance Coverage
 

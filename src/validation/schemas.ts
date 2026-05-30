@@ -410,6 +410,9 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       if ("heartbeatEvidence" in item && !(item.heartbeatEvidence === null || isRecord(item.heartbeatEvidence))) {
         errors.push("hookEvents.heartbeatEvidence:invalid");
       }
+      if ("heartbeatChangeEvidence" in item && !(item.heartbeatChangeEvidence === null || isRecord(item.heartbeatChangeEvidence))) {
+        errors.push("hookEvents.heartbeatChangeEvidence:invalid");
+      }
     }
     const subagents = requireArray(value, "subagents", errors);
     for (const item of subagents) {

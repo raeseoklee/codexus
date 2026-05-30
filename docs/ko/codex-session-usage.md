@@ -136,10 +136,10 @@ Notify-hook installer는 현재 project가 Codex config에서 이미 trusted일 
 `notify = [...]` command가 있으면 Codexus가 `--previous-notify`로 감싸고
 교체하지 않습니다. Statusline integration은 계속 `unavailable`로 보고합니다.
 
-실제 CLI/TUI `turn-ended` dispatch에서 hook은 bounded heartbeat event와 derived
-evidence snapshot을 기록합니다. Verification을 실행하지 않고, stale evidence를 hook
-하나로 fresh로 바꾸지도 않습니다. 진실은 `cx session status --json`가 disk와 현재
-workspace fingerprint에서 다시 계산합니다.
+실제 CLI/TUI `turn-ended` dispatch에서 hook은 bounded heartbeat event, derived evidence
+snapshot, compact `changeEvidence`/gate summary를 기록합니다. Verification을 실행하지
+않고, stale evidence를 hook 하나로 fresh로 바꾸지도 않습니다. 진실은
+`cx session status --json`가 disk와 현재 workspace fingerprint에서 다시 계산합니다.
 
 첫 Codexus config rewrite 전에 setup은 one-time `config.toml.codexus.bak`
 backup을 쓰고 same-directory atomic rename으로 config를 갱신합니다. AGENTS overlay를
@@ -183,8 +183,9 @@ context도 기록합니다. 수동 smoke event는 hook event로 기록되지만 
 호출하지 않을 수 있으므로 `session status`는 config 설치 상태와 `notifyDispatch`를
 분리해 보고합니다. 이 hook은 transcript를 캡처하지 않습니다. bounded turn activity만
 기록하고, 기존 notify command가 있으면 그 command로 chain합니다. always-on mode에서는
-최신 `turn-ended` event에 `session status`가 on-demand로 재계산하는 derived status model의
-snapshot인 `heartbeatEvidence`가 포함될 수 있습니다.
+최신 `turn-ended` event에 `session status`와 `session slop`이 on-demand로 재계산하는
+derived status/quality evidence model의 compact snapshot인 `heartbeatEvidence`와
+`heartbeatChangeEvidence`가 포함될 수 있습니다.
 
 ## Codex 안에서 호출하는 방법
 

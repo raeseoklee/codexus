@@ -194,6 +194,9 @@ Target behavior:
 - The notify hook records bounded turn activity in `.codexus/session/state.json`
   and chains to any previous top-level `notify = [...]` command through
   `--previous-notify`.
+- On `turn-ended`, the notify hook may record derived `heartbeatEvidence` and
+  compact `heartbeatChangeEvidence` snapshots. These snapshots are read-only:
+  they never execute verification and never make stale evidence fresh.
 - Notify capability is split into config installation and observed dispatch:
   `capabilities.hooks` is `configured` after install, and becomes `available`
   only after a real `turn-ended` event is observed. Manual smoke events must not
@@ -297,6 +300,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 - `cx setup codex-session --scope project --always-on --json` installs the
   stronger always-on overlay profile. It requests checkpoints and verification
   in the current Codex session but does not prove that they happened.
+- Always-on heartbeat snapshots include a compact quality-evidence/gate summary
+  so Codex can surface stale or blocked change evidence after a turn without
+  running a verification command.
 - `cx doctor --json` reports skill install, overlay install, hook availability,
   statusline availability, tmux availability, and session-state health.
 - From inside Codex, asking for Codexus status causes the skill to call local

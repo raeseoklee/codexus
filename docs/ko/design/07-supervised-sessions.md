@@ -181,6 +181,9 @@ Codexus는 hook/status integration을 hard dependency가 아니라 optional capa
   이미 trusted일 때만 Codex notify hook을 설치할 수 있습니다.
 - notify hook은 bounded turn activity를 `.codexus/session/state.json`에 기록하고,
   기존 top-level `notify = [...]` command가 있으면 `--previous-notify`로 chain합니다.
+- `turn-ended`에서 notify hook은 derived `heartbeatEvidence`와 compact
+  `heartbeatChangeEvidence` snapshot을 기록할 수 있습니다. 이 snapshot은 read-only입니다:
+  verification을 실행하지 않고 stale evidence를 fresh로 만들지 않습니다.
 - Notify capability는 config 설치와 실제 dispatch 관측을 분리합니다.
   `capabilities.hooks`는 install 직후 `configured`이고, 실제 `turn-ended` event가
   관측된 뒤에만 `available`이 됩니다. 수동 smoke event는 dispatch observed로
@@ -280,6 +283,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
 - `cx setup codex-session --scope project --always-on --json`은 더 강한 always-on
   overlay profile을 설치합니다. 현재 Codex session에서 checkpoint와 verification을
   요청하지만, 그것만으로 실제 수행을 증명하지는 않습니다.
+- Always-on heartbeat snapshot은 compact quality-evidence/gate summary도 포함하므로,
+  Codex는 verification command를 실행하지 않고도 turn 이후 stale/blocked change evidence를
+  surface할 수 있습니다.
 - `cx doctor --json`은 skill install, overlay install, hook availability, statusline
   availability, tmux availability, session-state health를 보고합니다.
 - Codex 안에서 Codexus status를 요청하면 skill이 local Codexus core를 호출하고 grounded

@@ -10,6 +10,7 @@ import { codexHome, inspectNotifyHookConfig } from "./hook-config.ts";
 import { deriveEvidenceModel, type EvidenceModel } from "./evidence.ts";
 import { detectVerifyCandidates } from "./verify-detect.ts";
 import { computeWorkspaceFingerprint, isWorkspaceFingerprint, type WorkspaceFingerprint } from "./workspace-fingerprint.ts";
+import { buildChangeEvidenceReport, type ChangeEvidenceGate, type ChangeEvidenceSummary } from "./change-evidence.ts";
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
@@ -69,6 +70,17 @@ export interface SessionHookEventRecord {
     bundleIdentifier: string | null;
   };
   heartbeatEvidence?: EvidenceModel | null;
+  heartbeatChangeEvidence?: {
+    schemaVersion: 1;
+    changeEvidence: ChangeEvidenceSummary;
+    gate: ChangeEvidenceGate;
+    counts: {
+      evidenceGaps: number;
+      derivableFacts: number;
+      heuristicClaims: number;
+      files: number;
+    };
+  } | null;
 }
 
 export interface SessionSubagentLink {
@@ -194,6 +206,10 @@ function isSessionHookEventRecord(value: unknown): value is SessionHookEventReco
       value.heartbeatEvidence === undefined
       || value.heartbeatEvidence === null
       || isRecord(value.heartbeatEvidence)
+    ) && (
+      value.heartbeatChangeEvidence === undefined
+      || value.heartbeatChangeEvidence === null
+      || isRecord(value.heartbeatChangeEvidence)
     );
 }
 
@@ -787,6 +803,22 @@ export async function recordSessionHookEvent(cwd: string, event: string): Promis
       detectVerifyCandidates(cwd).recommended,
     )
     : null;
+  const heartbeatChangeReport = event === "turn-ended"
+    ? buildChangeEvidenceReport(cwd, base, { gate: true, includeHeuristics: false })
+    : null;
+  const heartbeatChangeEvidence = heartbeatChangeReport
+    ? {
+      schemaVersion: 1 as const,
+      changeEvidence: heartbeatChangeReport.changeEvidence,
+      gate: heartbeatChangeReport.gate,
+      counts: {
+        evidenceGaps: heartbeatChangeReport.evidenceGaps.length,
+        derivableFacts: heartbeatChangeReport.derivableFacts.length,
+        heuristicClaims: heartbeatChangeReport.heuristicClaims.length,
+        files: heartbeatChangeReport.diff.files.length,
+      },
+    }
+    : null;
   const record: SessionHookEventRecord = {
     id: createHookEventId(),
     event,
@@ -796,6 +828,7 @@ export async function recordSessionHookEvent(cwd: string, event: string): Promis
     runtimeSurface: runtimeSurfaceFromEnv(process.env),
     process: hookProcessContext(cwd),
     heartbeatEvidence,
+    heartbeatChangeEvidence,
   };
   const state = await updateSessionState(cwd, "session notify", (value) => ({
     ...value,

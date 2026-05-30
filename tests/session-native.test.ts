@@ -396,6 +396,10 @@ test("always-on notify heartbeat preserves stale evidence and previous notify ch
     assert.equal(latestHook.event, "turn-ended");
     assert.equal(latestHook.heartbeatEvidence.verification, "stale");
     assert.equal(latestHook.heartbeatEvidence.evidenceFresh, false);
+    assert.equal(latestHook.heartbeatChangeEvidence.changeEvidence.status, "fail");
+    assert.equal(latestHook.heartbeatChangeEvidence.gate.status, "failed");
+    assert.equal(latestHook.heartbeatChangeEvidence.counts.evidenceGaps, 1);
+    assert.equal(latestHook.heartbeatChangeEvidence.counts.heuristicClaims, 0);
     assert.equal(output.notifyDispatch.status, "observed");
     assert.equal(output.state.verifications.length, verificationCount);
     assert.equal(output.state.lastVerifiedFingerprint.verificationId, verificationId);

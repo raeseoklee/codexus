@@ -133,6 +133,34 @@ test("slop check --gate turns evidence status into an automation exit code", asy
   }
 });
 
+test("slop check --gate ignores heuristic claims when evidence is fresh", async () => {
+  const cwd = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    await writeFile(join(cwd, "parser.ts"), [
+      "export class Manager {",
+      "  parse(value: string) { return value.trim(); }",
+      "}",
+      "",
+    ].join("\n"));
+    git(cwd, ["add", "parser.ts"]);
+
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"]);
+    assert.equal(verify.status, 0, verify.stderr);
+
+    const result = runCli(cwd, ["slop", "check", "--gate", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.changeEvidence.status, "pass");
+    assert.equal(output.gate.status, "passed");
+    assert.equal(output.evidenceGaps.length, 0);
+    assert.equal(output.heuristicClaims.some((claim: { kind: string }) => claim.kind === "suspicious_abstraction"), true);
+    assert.equal(output.heuristicClaims.some((claim: { kind: string }) => claim.kind === "behavior_change_likely_needs_test"), true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("slop check --since inspects a committed range without staged or untracked scope", async () => {
   const cwd = await tempDir();
   try {

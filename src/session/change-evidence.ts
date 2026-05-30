@@ -327,7 +327,7 @@ function gateFor(status: ChangeEvidenceStatus, enabled: boolean): ChangeEvidence
 export function buildChangeEvidenceReport(
   cwd: string,
   state: CodexusSessionState | null,
-  options: { since?: string; scope?: string; reviews?: string[]; gate?: boolean } = {},
+  options: { since?: string; scope?: string; reviews?: string[]; gate?: boolean; includeHeuristics?: boolean } = {},
 ): ChangeEvidenceReport {
   const resolvedCwd = resolve(cwd);
   const diff = readDiffFiles(resolvedCwd, options.since);
@@ -381,29 +381,31 @@ export function buildChangeEvidenceReport(
   }
 
   const heuristicClaims: HeuristicClaim[] = [];
-  const sourceWithoutTests = derivableFacts.find((fact) => fact.kind === "source_without_test_diff");
-  if (sourceWithoutTests?.files && sourceWithoutTests.files.length > 0) {
-    heuristicClaims.push({
-      kind: "behavior_change_likely_needs_test",
-      confidence: "low",
-      evidence: "source files changed without a test-file change in the same diff",
-      recommendation: "add or run a verification that covers the change",
-      files: sourceWithoutTests.files,
-    });
-  }
-  const patch = patchText(resolvedCwd, options.since ?? null);
-  const abstractionLines = patch
-    .split(/\r?\n/)
-    .filter((line) => line.startsWith("+") && !line.startsWith("+++"))
-    .filter((line) => /\b(?:Manager|Coordinator|Factory|Orchestrator)\b/.test(line))
-    .slice(0, 5);
-  if (abstractionLines.length > 0) {
-    heuristicClaims.push({
-      kind: "suspicious_abstraction",
-      confidence: "low",
-      evidence: "added abstraction-like names: " + abstractionLines.map((line) => line.slice(1).trim()).join(" | "),
-      recommendation: "keep only if the abstraction removes real duplication or complexity",
-    });
+  if (options.includeHeuristics !== false) {
+    const sourceWithoutTests = derivableFacts.find((fact) => fact.kind === "source_without_test_diff");
+    if (sourceWithoutTests?.files && sourceWithoutTests.files.length > 0) {
+      heuristicClaims.push({
+        kind: "behavior_change_likely_needs_test",
+        confidence: "low",
+        evidence: "source files changed without a test-file change in the same diff",
+        recommendation: "add or run a verification that covers the change",
+        files: sourceWithoutTests.files,
+      });
+    }
+    const patch = patchText(resolvedCwd, options.since ?? null);
+    const abstractionLines = patch
+      .split(/\r?\n/)
+      .filter((line) => line.startsWith("+") && !line.startsWith("+++"))
+      .filter((line) => /\b(?:Manager|Coordinator|Factory|Orchestrator)\b/.test(line))
+      .slice(0, 5);
+    if (abstractionLines.length > 0) {
+      heuristicClaims.push({
+        kind: "suspicious_abstraction",
+        confidence: "low",
+        evidence: "added abstraction-like names: " + abstractionLines.map((line) => line.slice(1).trim()).join(" | "),
+        recommendation: "keep only if the abstraction removes real duplication or complexity",
+      });
+    }
   }
 
   const status: ChangeEvidenceStatus = evidenceGaps.length > 0
