@@ -78,6 +78,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `cx setup codex-session --enable-notify-hook`은 현재 project가 Codex config에서
   trusted일 때만 Codex notify hook을 설치합니다. 기존 top-level `notify = [...]`
   command는 `--previous-notify` chain으로 보존합니다.
+- Notify-hook setup은 `${CODEX_HOME:-~/.codex}/config.toml`을 atomically 쓰고,
+  one-time `config.toml.codexus.bak` backup을 만들며,
+  `--disable-notify-hook`은 이전 notify command를 복원하거나 Codexus-only notify
+  line을 AGENTS overlay refresh 없이 제거합니다.
 - `cx session notify --event <name>`은 internal notify-hook write surface이며
   bounded hook event를 `.codexus/session/state.json`에 기록합니다.
 - `cx session verify`는 verification policy preflight를 재사용해 위험한 command를
@@ -122,7 +126,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 82 tests 통과
+- `npm test`: 84 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -144,7 +148,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Session-native setup, damaged-marker recovery, session-state shape/schema
   validation, session lock handling, legacy root migration, status/checkpoint/verify,
   policy-blocked session verification, notify-hook trust refusal,
-  notify-chain preservation command CLI 테스트
+  notify-chain preservation, notify-hook disable, config backup,
+  focused/schema validator drift case CLI 테스트
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe 및 fake-supervision 기록, memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트

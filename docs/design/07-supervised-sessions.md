@@ -189,6 +189,10 @@ Target behavior:
 - The notify hook records bounded turn activity in `.codexus/session/state.json`
   and chains to any previous top-level `notify = [...]` command through
   `--previous-notify`.
+- Config rewrites must be atomic, must create a one-time
+  `config.toml.codexus.bak` backup, and must support `--disable-notify-hook`
+  to restore the previous notify command or remove Codexus when no previous
+  command existed without refreshing the AGENTS overlay.
 - `codexus hud --json` may later report compact mode, verification, and
   checkpoint state.
 - If Codex TUI statusline configuration can include Codexus state, a later setup
@@ -227,7 +231,7 @@ This should complement Codex native subagents, not replace them.
 Implemented first-slice CLI surface:
 
 ```bash
-cx setup codex-session [--scope user|project] [--enable-notify-hook] [--json]
+cx setup codex-session [--scope user|project] [--enable-notify-hook|--disable-notify-hook] [--json]
 cx session status [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
@@ -275,6 +279,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   artifact under `.codexus/session/`, and reports a typed result.
 - Optional notify-hook attachment preserves existing notify chains and refuses
   install when Codex project trust is not configured.
+- Notify-hook detach restores the previous notify command or removes the
+  Codexus-only notify line without installing or refreshing an overlay.
 - Unsupported statusline/tmux features return truthful unavailable statuses.
 - External `cx run` continues to work unchanged.
 
@@ -290,7 +296,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    session-native commands before nested `cx run`.
 6. Completed: add session-state schema artifact validation and optional
    notify-hook attachment behind Codex project trust checks.
-7. Next: add statusline/HUD support only if Codex exposes a stable supported
+7. Completed: harden Codex config rewrites with atomic writes, one-time backup,
+   and notify-hook detach.
+8. Next: add statusline/HUD support only if Codex exposes a stable supported
    configuration surface.
-8. Later: revisit external `codex exec resume` as a separate advanced feature only
+9. Later: revisit external `codex exec resume` as a separate advanced feature only
    after the Codex-native path is useful.

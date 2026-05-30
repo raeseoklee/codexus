@@ -145,6 +145,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx setup codex-session --enable-notify-hook` installs a Codex notify hook
   only when the current project is trusted in Codex config; existing top-level
   `notify = [...]` commands are preserved through `--previous-notify` chaining.
+- Notify-hook setup writes `${CODEX_HOME:-~/.codex}/config.toml` atomically,
+  creates a one-time `config.toml.codexus.bak` backup, and
+  `--disable-notify-hook` restores the previous notify command or removes a
+  Codexus-only notify line without refreshing the AGENTS overlay.
 - `cx session notify --event <name>` is the internal notify-hook write surface
   and records bounded hook events in `.codexus/session/state.json`.
 - `cx session verify` reuses the verification policy preflight and records
@@ -172,7 +176,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 82.
+- Current test count: 84.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -224,7 +228,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Session-native setup, damaged-marker recovery, session-state shape/schema
   validation, session lock handling, legacy root migration, status,
   checkpoint, verify, policy-blocked session verification, notify-hook trust
-  refusal, and notify-chain preservation commands are covered by CLI tests.
+  refusal, notify-chain preservation, notify-hook disable, config backup, and
+  focused/schema validator drift cases are covered by CLI tests.
 
 ## Acceptance Coverage
 

@@ -1,7 +1,7 @@
 import { existsSync, realpathSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { findCodexusPackageRoot } from "../util/package-root.ts";
 
 export type NotifyHookStatus = "installed" | "missing" | "blocked";
@@ -27,6 +27,7 @@ export interface NotifyHookConfigStatus {
 
 export interface NotifyHookInstallResult extends NotifyHookConfigStatus {
   changed: boolean;
+  backupPath: string | null;
 }
 
 interface NotifyLine {
@@ -155,6 +156,27 @@ function statusFromText(text: string, cwd: string, configPath = codexConfigPath(
   };
 }
 
+async function writeTextAtomic(path: string, text: string): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  const tmp = join(dirname(path), `.${basename(path)}.${process.pid}.${Date.now()}.tmp`);
+  await writeFile(tmp, text);
+  await rename(tmp, path);
+}
+
+async function writeBackupOnce(path: string, text: string): Promise<string | null> {
+  if (!existsSync(path) || text.length === 0) return null;
+  const backupPath = `${path}.codexus.bak`;
+  if (existsSync(backupPath)) return backupPath;
+  await writeTextAtomic(backupPath, text);
+  return backupPath;
+}
+
+async function writeCodexConfig(path: string, previousText: string, nextText: string): Promise<string | null> {
+  const backupPath = await writeBackupOnce(path, previousText);
+  await writeTextAtomic(path, nextText);
+  return backupPath;
+}
+
 export async function inspectNotifyHookConfig(cwd: string): Promise<NotifyHookConfigStatus> {
   const path = codexConfigPath();
   const text = existsSync(path) ? await readFile(path, "utf8") : "";
@@ -173,6 +195,7 @@ export async function installNotifyHookConfig(cwd: string): Promise<NotifyHookIn
       trust,
       reason: trust.reason,
       changed: false,
+      backupPath: null,
     };
   }
 
@@ -184,10 +207,11 @@ export async function installNotifyHookConfig(cwd: string): Promise<NotifyHookIn
       status: "blocked",
       reason: line.error,
       changed: false,
+      backupPath: null,
     };
   }
   if (isCodexusNotifyCommand(line?.command ?? null)) {
-    return { ...statusFromText(text, cwd, path), changed: false };
+    return { ...statusFromText(text, cwd, path), changed: false, backupPath: null };
   }
 
   const nextCommand = notifyCommand(line?.command ?? null);
@@ -203,7 +227,37 @@ export async function installNotifyHookConfig(cwd: string): Promise<NotifyHookIn
         ? `${insertion}\n\n${text}`
         : `${insertion}\n${text.startsWith("\n") ? text : `\n${text}`}`;
   }
-  await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, next);
-  return { ...statusFromText(next, cwd, path), changed: true };
+  const backupPath = await writeCodexConfig(path, text, next);
+  return { ...statusFromText(next, cwd, path), changed: true, backupPath };
+}
+
+export async function disableNotifyHookConfig(cwd: string): Promise<NotifyHookInstallResult> {
+  const path = codexConfigPath();
+  const text = existsSync(path) ? await readFile(path, "utf8") : "";
+  const line = readTopLevelNotify(text);
+  if (line?.error) {
+    return {
+      ...statusFromText(text, cwd, path),
+      status: "blocked",
+      reason: line.error,
+      changed: false,
+      backupPath: null,
+    };
+  }
+  if (!isCodexusNotifyCommand(line?.command ?? null)) {
+    return { ...statusFromText(text, cwd, path), changed: false, backupPath: null };
+  }
+
+  const lines = text.split(/\r?\n/);
+  const restored = previousNotify(line?.command ?? null);
+  if (restored) {
+    lines[line!.index] = formatNotify(restored);
+  } else {
+    lines.splice(line!.index, 1);
+  }
+  let next = lines.join("\n");
+  if (next.trim().length === 0) next = "";
+  else if (!next.endsWith("\n")) next = `${next}\n`;
+  const backupPath = await writeCodexConfig(path, text, next);
+  return { ...statusFromText(next, cwd, path), changed: true, backupPath };
 }

@@ -56,7 +56,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 - Session-native follow-up implemented after this review: thin Codex-session
   walkthrough, first-class `session-state` schema artifact validation, and
   explicit notify-hook attachment that preserves existing notify chains and
-  refuses install without Codex project trust.
+  refuses install without Codex project trust. The follow-up hardening pass also
+  added atomic config writes, one-time config backup, notify-hook detach, and
+  validator/schema drift tests.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway

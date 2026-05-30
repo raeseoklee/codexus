@@ -94,6 +94,15 @@ top-level `notify = [...]` command is present, Codexus wraps it as
 `--previous-notify` instead of replacing it. Statusline integration still
 reports `unavailable`.
 
+Before the first Codexus config rewrite, setup writes a one-time
+`config.toml.codexus.bak` backup and updates the config with an atomic
+same-directory rename. To detach the notify hook and restore the previous
+notify command without refreshing the AGENTS overlay:
+
+```bash
+cx setup codex-session --scope project --disable-notify-hook --json
+```
+
 ## Thin Walkthrough
 
 Use this flow to dogfood Codexus from inside a real Codex session:

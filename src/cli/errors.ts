@@ -64,6 +64,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported session command${target ? `: ${target}` : ""}.`;
     case "invalid_session_setup_scope":
       return `Invalid Codex-session setup scope${target ? `: ${target}` : ""}.`;
+    case "conflicting_notify_hook_flags":
+      return "Cannot enable and disable the Codex notify hook in the same command.";
     case "missing_session_checkpoint_label":
       return "Missing session checkpoint label.";
     case "missing_session_verification_command":

@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 import { hostname, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { lockPath } from "../src/util/lock.ts";
+import { validateSchemaArtifactValue, validateSchemaValue } from "../src/validation/schemas.ts";
 
 const cli = resolve("src/cli/main.ts");
 
@@ -75,11 +76,19 @@ test("setup codex-session chains an existing notify hook behind Codexus", async 
     const output = JSON.parse(setup.stdout);
     assert.equal(output.notifyHook.status, "installed");
     assert.equal(output.notifyHook.changed, true);
+    assert.equal(output.notifyHook.backupPath, join(codexHome, "config.toml.codexus.bak"));
     assert.deepEqual(output.notifyHook.previousNotify, [process.execPath, previousScript]);
     assert.equal(output.state.capabilities.hooks, "available");
 
     const config = await readFile(join(codexHome, "config.toml"), "utf8");
     assert.match(config, /codexus-notify-hook\.mjs/);
+    assert.equal(await readFile(join(codexHome, "config.toml.codexus.bak"), "utf8"), [
+      `notify = ${JSON.stringify([process.execPath, previousScript])}`,
+      "",
+      `[projects.${JSON.stringify(resolve(cwd))}]`,
+      'trust_level = "trusted"',
+      "",
+    ].join("\n"));
 
     const hook = spawnSync(process.execPath, [
       output.notifyHook.scriptPath,
@@ -105,6 +114,54 @@ test("setup codex-session chains an existing notify hook behind Codexus", async 
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const disabled = runCli(cwd, ["setup", "codex-session", "--disable-notify-hook", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(disabled.status, 0, disabled.stderr);
+    const disabledOutput = JSON.parse(disabled.stdout);
+    assert.equal(disabledOutput.notifyHook.changed, true);
+    assert.equal(disabledOutput.notifyHook.installed, false);
+    assert.deepEqual(disabledOutput.notifyHook.command, [process.execPath, previousScript]);
+    assert.equal(await readFile(join(codexHome, "config.toml"), "utf8"), [
+      `notify = ${JSON.stringify([process.execPath, previousScript])}`,
+      "",
+      `[projects.${JSON.stringify(resolve(cwd))}]`,
+      'trust_level = "trusted"',
+      "",
+    ].join("\n"));
+    assert.equal(await readFile(join(codexHome, "config.toml.codexus.bak"), "utf8"), [
+      `notify = ${JSON.stringify([process.execPath, previousScript])}`,
+      "",
+      `[projects.${JSON.stringify(resolve(cwd))}]`,
+      'trust_level = "trusted"',
+      "",
+    ].join("\n"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("disable notify hook removes a Codexus-only notify line", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await writeFile(join(codexHome, "config.toml"), [
+      `notify = ${JSON.stringify([process.execPath, join(cwd, "codexus-notify-hook.mjs"), "--event", "turn-ended"])}`,
+      "",
+      `[projects.${JSON.stringify(resolve(cwd))}]`,
+      'trust_level = "trusted"',
+      "",
+    ].join("\n"));
+
+    const disabled = runCli(cwd, ["setup", "codex-session", "--disable-notify-hook", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(disabled.status, 0, disabled.stderr);
+    const output = JSON.parse(disabled.stdout);
+    assert.equal(output.overlay.changed, false);
+    assert.equal(output.overlay.installed, false);
+    const config = await readFile(join(codexHome, "config.toml"), "utf8");
+    assert.doesNotMatch(config, /codexus-notify-hook/);
+    assert.match(config, /trust_level = "trusted"/);
+    assert.equal(existsSync(join(cwd, "AGENTS.md")), false);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -295,6 +352,34 @@ test("session state updates honor the session lock instead of clobbering writes"
     const checkpoint = runCli(cwd, ["session", "checkpoint", "concurrent checkpoint", "--json"], { CODEX_HOME: codexHome });
     assert.equal(checkpoint.status, 1);
     assert.equal(JSON.parse(checkpoint.stdout).code, "lock_unavailable");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session-state focused validator and schema artifact reject the same critical drift cases", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    const checkpoint = runCli(cwd, ["session", "checkpoint", "schema drift baseline", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(checkpoint.status, 0, checkpoint.stderr);
+    const baseline = JSON.parse(await readFile(JSON.parse(checkpoint.stdout).statePath, "utf8"));
+    const invalidCases = [
+      ["missing_hook_events", (value: Record<string, unknown>) => { delete value.hookEvents; }],
+      ["bad_status", (value: Record<string, unknown>) => { value.status = "running"; }],
+      ["bad_capabilities_hooks", (value: Record<string, unknown>) => {
+        (value.capabilities as Record<string, unknown>).hooks = "enabled";
+      }],
+    ] as const;
+    for (const [name, mutate] of invalidCases) {
+      const candidate = structuredClone(baseline) as Record<string, unknown>;
+      mutate(candidate);
+      const focused = validateSchemaValue("session-state", candidate);
+      const artifact = await validateSchemaArtifactValue("session-state", candidate);
+      assert.equal(focused.valid, false, `${name}: focused validator should reject`);
+      assert.equal(artifact.valid, false, `${name}: schema artifact should reject`);
+    }
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });

@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
-import { installOverlay, loadOrCreateSessionState, sessionPaths, type OverlayScope } from "../../session/state.ts";
-import { installNotifyHookConfig, inspectNotifyHookConfig } from "../../session/hook-config.ts";
+import { installOverlay, loadOrCreateSessionState, overlayStatus, sessionPaths, type OverlayScope } from "../../session/state.ts";
+import { disableNotifyHookConfig, installNotifyHookConfig, inspectNotifyHookConfig } from "../../session/hook-config.ts";
 
 function parseScope(value: string | undefined): OverlayScope {
   if (value === undefined || value === "project") return "project";
@@ -18,8 +18,16 @@ export async function setupCommand(args: ParsedArgs): Promise<void> {
   const json = flagBool(args.flags, "json");
   const scope = parseScope(flagString(args.flags, "scope"));
   const enableNotifyHook = flagBool(args.flags, "enable-notify-hook");
-  const overlay = await installOverlay(cwd, scope);
-  const notifyHook = enableNotifyHook ? await installNotifyHookConfig(cwd) : await inspectNotifyHookConfig(cwd);
+  const disableNotifyHook = flagBool(args.flags, "disable-notify-hook");
+  if (enableNotifyHook && disableNotifyHook) throw new Error("conflicting_notify_hook_flags");
+  const overlay = disableNotifyHook
+    ? { ...(await overlayStatus(cwd, scope)), changed: false }
+    : await installOverlay(cwd, scope);
+  const notifyHook = enableNotifyHook
+    ? await installNotifyHookConfig(cwd)
+    : disableNotifyHook
+      ? await disableNotifyHookConfig(cwd)
+      : await inspectNotifyHookConfig(cwd);
   const state = await loadOrCreateSessionState(cwd);
   const result = {
     schemaVersion: 1,
@@ -33,12 +41,12 @@ export async function setupCommand(args: ParsedArgs): Promise<void> {
 
   if (json) {
     console.log(JSON.stringify(result, null, 2));
-    process.exitCode = enableNotifyHook && notifyHook.status === "blocked" ? 1 : 0;
+    process.exitCode = (enableNotifyHook || disableNotifyHook) && notifyHook.status === "blocked" ? 1 : 0;
     return;
   }
   console.log(`Codexus Codex-session setup complete (${scope})`);
   console.log(`Overlay: ${overlay.path}`);
   console.log(`Notify hook: ${notifyHook.status}`);
   console.log(`Session state: ${result.statePath}`);
-  process.exitCode = enableNotifyHook && notifyHook.status === "blocked" ? 1 : 0;
+  process.exitCode = (enableNotifyHook || disableNotifyHook) && notifyHook.status === "blocked" ? 1 : 0;
 }

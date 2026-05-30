@@ -177,6 +177,10 @@ Codexus는 hook/status integration을 hard dependency가 아니라 optional capa
   이미 trusted일 때만 Codex notify hook을 설치할 수 있습니다.
 - notify hook은 bounded turn activity를 `.codexus/session/state.json`에 기록하고,
   기존 top-level `notify = [...]` command가 있으면 `--previous-notify`로 chain합니다.
+- Config rewrite는 atomic이어야 하고 one-time `config.toml.codexus.bak` backup을
+  만들어야 하며, `--disable-notify-hook`으로 이전 notify command를 복원하거나
+  previous command가 없을 때 AGENTS overlay를 refresh하지 않고 Codexus-only notify
+  line을 제거해야 합니다.
 - `codexus hud --json`은 이후 mode, verification, checkpoint state를 compact하게
   보고할 수 있습니다.
 - Codex TUI statusline configuration이 Codexus state를 포함할 수 있으면 이후 setup
@@ -213,7 +217,7 @@ Codex leader pane
 구현된 첫 slice CLI surface:
 
 ```bash
-cx setup codex-session [--scope user|project] [--enable-notify-hook] [--json]
+cx setup codex-session [--scope user|project] [--enable-notify-hook|--disable-notify-hook] [--json]
 cx session status [--json]
 cx session checkpoint <label> [--json]
 cx session verify --verify <cmd> [--json]
@@ -260,6 +264,8 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
   `.codexus/session/` 아래 artifact를 기록하며 typed result를 보고합니다.
 - optional notify-hook attachment는 기존 notify chain을 보존하고, Codex project
   trust가 설정되지 않았으면 설치를 거부합니다.
+- notify-hook detach는 overlay를 install/refresh하지 않고 이전 notify command를
+  복원하거나 Codexus-only notify line을 제거합니다.
 - unsupported statusline/tmux feature는 정직한 unavailable status를 반환합니다.
 - 외부 `cx run`은 변경 없이 계속 동작합니다.
 
@@ -274,7 +280,9 @@ codexus memory search로 이 버그와 관련된 lesson 찾아줘.
    command를 먼저 선호하게 합니다.
 6. 완료: session-state schema artifact validation과 Codex project trust check 뒤의
    optional notify-hook attachment를 추가합니다.
-7. 다음: Codex가 안정적인 supported configuration surface를 노출할 때만 statusline/HUD
+7. 완료: Codex config rewrite를 atomic write, one-time backup, notify-hook detach로
+   하드닝합니다.
+8. 다음: Codex가 안정적인 supported configuration surface를 노출할 때만 statusline/HUD
    support를 추가합니다.
-8. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
+9. 이후: Codex-native path가 유용해진 뒤에만 외부 `codex exec resume`을 별도 advanced
    feature로 재검토합니다.

@@ -91,6 +91,14 @@ Notify-hook installer는 현재 project가 Codex config에서 이미 trusted일 
 `notify = [...]` command가 있으면 Codexus가 `--previous-notify`로 감싸고
 교체하지 않습니다. Statusline integration은 계속 `unavailable`로 보고합니다.
 
+첫 Codexus config rewrite 전에 setup은 one-time `config.toml.codexus.bak`
+backup을 쓰고 same-directory atomic rename으로 config를 갱신합니다. AGENTS overlay를
+refresh하지 않고 notify hook을 분리하고 이전 notify command를 복원하려면:
+
+```bash
+cx setup codex-session --scope project --disable-notify-hook --json
+```
+
 ## Thin Walkthrough
 
 실제 Codex session 안에서 Codexus를 dogfooding할 때는 이 흐름을 사용합니다:
