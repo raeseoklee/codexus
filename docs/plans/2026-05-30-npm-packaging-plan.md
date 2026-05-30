@@ -49,10 +49,11 @@ JavaScript entrypoint is therefore a release prerequisite, not an optimization.
 - postinstall Codex skill adapter installation into a temporary `CODEX_HOME`
 - `codexus run --driver mock --json "package smoke"`
 
-The first npm release should use:
+Npm release should use the guarded helper:
 
 ```bash
-npm publish --tag next
+npm run publish:next
 ```
 
-Do not publish the first package as `latest`.
+The helper publishes with `--tag next`, updates `latest` to the same version,
+and verifies `latest >= next`.

@@ -48,10 +48,11 @@ Publish 전 `npm run package:smoke`는 필수입니다. 이 command는 다음을
 - temporary `CODEX_HOME`에 postinstall Codex skill adapter 설치
 - `codexus run --driver mock --json "package smoke"`
 
-첫 npm release는 다음 형태를 사용합니다:
+npm release는 guarded helper를 사용합니다:
 
 ```bash
-npm publish --tag next
+npm run publish:next
 ```
 
-첫 package를 `latest`로 publish하지 않습니다.
+이 helper는 `--tag next`로 publish한 뒤 `latest`를 같은 version으로 갱신하고
+`latest >= next`를 검증합니다.

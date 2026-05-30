@@ -51,13 +51,14 @@ The npm package is the primary install artifact. Before publishing:
 - Confirm `npm run package:smoke` passes. This runs `npm pack`, installs the
   tarball into a temporary global prefix, checks the public bins, validates
   runtime schema assets, and executes a mock run.
-- Publish the first release with a prerelease tag:
+- Publish through the guarded helper so `next` and `latest` cannot diverge:
 
 ```bash
-npm publish --tag next
+npm run publish:next
 ```
 
-Do not publish the first public package with the `latest` tag.
+The helper publishes with `--tag next`, then updates `latest` to the same
+version and verifies `latest >= next`.
 
 ## GitHub Pages Installer
 

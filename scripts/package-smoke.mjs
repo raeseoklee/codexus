@@ -58,6 +58,7 @@ try {
     "package/codex/skills/codexus/SKILL.md",
     "package/scripts/codexus-notify-hook.mjs",
     "package/scripts/install-codex-skill.mjs",
+    "package/scripts/publish-next.mjs",
     "package/scripts/postinstall.mjs",
     "package/install.sh",
   ]) {

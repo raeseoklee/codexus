@@ -123,3 +123,11 @@ test("npm local install postinstall does not mutate Codex home by default", asyn
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+test("publish helper enforces latest not older than next", async () => {
+  const { compareVersions, assertLatestAtLeastNext } = await import("../scripts/publish-next.mjs");
+  assert.ok(compareVersions("0.1.0-alpha.2", "0.1.0-alpha.1") > 0);
+  assert.ok(compareVersions("0.1.0", "0.1.0-alpha.9") > 0);
+  assert.doesNotThrow(() => assertLatestAtLeastNext({ latest: "0.1.0-alpha.2", next: "0.1.0-alpha.2" }));
+  assert.throws(() => assertLatestAtLeastNext({ latest: "0.1.0-alpha.1", next: "0.1.0-alpha.2" }), /latest 0\.1\.0-alpha\.1 is older than next 0\.1\.0-alpha\.2/);
+});
