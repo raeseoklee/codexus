@@ -154,4 +154,17 @@ test("release workflow is wired for trusted publishing and stable-only tag publi
   assert.match(workflow, /npm run publish:stable/);
   assert.match(workflow, /npm run publish:next/);
   assert.match(workflow, /Prerelease tags must publish via workflow_dispatch mode=next/);
+  assert.match(workflow, /actions\/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd/);
+  assert.match(workflow, /actions\/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/);
+  assert.doesNotMatch(workflow, /actions\/checkout@v\d/);
+  assert.doesNotMatch(workflow, /actions\/setup-node@v\d/);
+});
+
+test("ci verifies the minimum supported Node version", async () => {
+  const workflow = await readFile(resolve(".github/workflows/ci.yml"), "utf8");
+  assert.match(workflow, /name:\s*Node 22 compatibility/);
+  assert.match(workflow, /node-version:\s*"22"/);
+  assert.match(workflow, /npm run package:smoke/);
+  assert.match(workflow, /actions\/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd/);
+  assert.match(workflow, /actions\/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/);
 });

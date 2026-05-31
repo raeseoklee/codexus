@@ -39,6 +39,10 @@ canonical verification path로 둡니다.
 
 - CI는 least-privilege read permission을 사용합니다.
 - CI는 committed whitespace, static syntax, test를 확인합니다.
+- CI는 현재 runtime에서 release lane을 검증하고, 최소 지원 runtime(`Node.js 22`)에서
+  package smoke를 실행해 `engines.node >=22` 설치본 약속에 증거를 둡니다.
+- trusted-publishing workflow는 `id-token: write`를 가지므로 GitHub Actions를 commit
+  SHA로 pin합니다.
 - Public repository visibility는 Actions billing behavior를 바꿀 수 있으므로
   공개 후 첫 run을 확인합니다.
 

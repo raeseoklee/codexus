@@ -40,6 +40,11 @@ availability is blocked.
 
 - CI uses least-privilege read permissions.
 - CI checks committed whitespace, static syntax, and tests.
+- CI verifies the release lane on the current runtime and runs package smoke on
+  the minimum supported runtime (`Node.js 22`) so the `engines.node >=22`
+  installed-artifact promise has evidence.
+- The trusted-publishing workflow pins GitHub Actions by commit SHA because it
+  owns `id-token: write`.
 - Public repository visibility may change Actions billing behavior; verify the
   first run after publication.
 
