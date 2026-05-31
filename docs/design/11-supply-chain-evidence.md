@@ -88,6 +88,7 @@ implementation checking Codexus itself:
         "dist/cli/main.js", "package.json", "README.md", "LICENSE",
         "CHANGELOG.md", "schemas/config.schema.json",
         "schemas/session-state.schema.json",
+        "schemas/supply-chain-policy.schema.json",
         "fixtures/app-server/schema.fixture.json",
         "codex/skills/codexus/SKILL.md", "scripts/postinstall.mjs",
         "scripts/install-codex-skill.mjs", "scripts/codexus-notify-hook.mjs",
@@ -191,6 +192,11 @@ packing an arbitrary package would execute its code. Defaults:
   **not** claimed to be byte-identical to npm packing), `"npm-pack-ignore-scripts"`,
   or `"npm-pack-lifecycle"` (release gate only). Static projection is best-effort
   and must say so rather than imply it equals npm's packing semantics.
+- Current implementation supports only `projectionMode: "static"` and derives a
+  best-effort file list from `files[]`, public `bin` targets, and common
+  npm-included metadata files. It does not yet resolve `.npmignore` or
+  `.gitignore`. The `npm-pack-ignore-scripts` and `npm-pack-lifecycle` modes are
+  deferred until their trust and execution boundaries are explicitly implemented.
 
 ## Surface (minimize subsystem)
 
@@ -229,8 +235,10 @@ produces the full evidence report.
 - runtime dependency count versus the declared `runtimeDependenciesMax`
   (derivable; gates only when the policy is declared),
 - a static file-list / secret-pattern leak scan (derivable; `.env`, `.codexus`,
-  `tests`, `src`, key/token patterns reused from the redaction/packaging checks) —
-  built-in safety invariant for secret leaks,
+  `tests`, `src`, high-confidence key/token patterns) — built-in safety invariant
+  for secret leaks. Redaction-only assignment heuristics such as `token = value`
+  are intentionally not gateable by default because they are too noisy for a
+  release blocker,
 - network imports in shipped code (derivable **fact**; gates only against
   `allowRuntimeNetworkImports` policy),
 - lockfile presence and integrity hashes (derivable),

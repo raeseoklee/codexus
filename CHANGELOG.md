@@ -13,6 +13,10 @@ occur before 1.0, but they should be called out clearly.
 
 - CLI version reporting via `cx --version` and `cx version --json`, covered by
   source CLI tests and installed package smoke tests.
+- Supply-chain evidence policy and `cx supply-chain check`, including
+  report-only JSON output, `--gate` exit codes, lifecycle-safe static package
+  projection, policy validation, package-smoke single-source file assertions,
+  and a schema artifact for `codexus.supplyChain`.
 
 ## 0.1.0-alpha.3 - 2026-05-31
 

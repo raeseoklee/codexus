@@ -68,6 +68,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported session workers command${target ? `: ${target}` : ""}.`;
     case "unsupported_slop_command":
       return `Unsupported slop command${target ? `: ${target}` : ""}.`;
+    case "unsupported_supply_chain_command":
+      return `Unsupported supply-chain command${target ? `: ${target}` : ""}.`;
     case "invalid_session_setup_scope":
       return `Invalid Codex-session setup scope${target ? `: ${target}` : ""}.`;
     case "conflicting_notify_hook_flags":
@@ -186,7 +188,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_setup_command":
@@ -199,6 +201,8 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Run `cx session workers status --json`.";
     case "unsupported_slop_command":
       return "Run `cx slop check --json` or `cx slop check --gate --json`.";
+    case "unsupported_supply_chain_command":
+      return "Run `cx supply-chain check --json` or `cx supply-chain check --gate --json`.";
     case "invalid_session_setup_scope":
       return "Use `--scope project` or `--scope user`.";
     case "missing_session_checkpoint_label":

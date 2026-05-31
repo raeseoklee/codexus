@@ -13,6 +13,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 - `cx --version`과 `cx version --json`을 통한 CLI version reporting을
   추가했습니다. Source CLI test와 installed package smoke test로 커버합니다.
+- Supply-chain evidence policy와 `cx supply-chain check`를 추가했습니다.
+  Report-only JSON output, `--gate` exit code, lifecycle-safe static package
+  projection, policy validation, package-smoke의 단일 출처 file assertion,
+  `codexus.supplyChain` schema artifact를 포함합니다.
 
 ## 0.1.0-alpha.3 - 2026-05-31
 

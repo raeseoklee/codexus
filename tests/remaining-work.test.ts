@@ -228,13 +228,13 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 6);
+    assert.equal(schemaOutput.schemas.length, 7);
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
 
     schemaRoot = await tempDir();
-    for (const name of ["config.schema.json", "state.schema.json", "event.schema.json", "memory-entry.schema.json", "skill.schema.json", "session-state.schema.json"]) {
+    for (const name of ["config.schema.json", "state.schema.json", "event.schema.json", "memory-entry.schema.json", "skill.schema.json", "session-state.schema.json", "supply-chain-policy.schema.json"]) {
       await writeFile(join(schemaRoot, name), await readFile(resolve("schemas", name), "utf8"));
     }
     const unsupportedConfig = JSON.parse(await readFile(join(schemaRoot, "config.schema.json"), "utf8"));
@@ -370,9 +370,16 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(pkg.files.includes("src"), false);
     assert.equal(pkg.files.includes("fixtures"), false);
     assert.equal(pkg.scripts.prepublishOnly, "npm run release:check");
+    assert.equal(pkg.scripts["supply-chain:report"], "node src/cli/main.ts supply-chain check --json");
+    assert.match(pkg.scripts["release:check"], /supply-chain:report/);
     assert.equal(pkg.scripts.postinstall, "node scripts/postinstall.mjs");
     assert.ok(pkg.files.includes("scripts/postinstall.mjs"));
     assert.ok(pkg.files.includes("scripts/codexus-notify-hook.mjs"));
+    assert.equal(pkg.codexus.supplyChain.runtimeDependenciesMax, 0);
+    assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/supply-chain-policy.schema.json"));
+    assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("scripts/publish-next.mjs"));
+    assert.ok(pkg.codexus.supplyChain.forbiddenPackageFiles.includes("src/**"));
+    assert.equal(pkg.codexus.supplyChain.binTargetsMustBeBuiltArtifacts, true);
 
     const install = spawnSync(process.execPath, [resolve("scripts/install-codex-skill.mjs"), "--json"], {
       cwd,

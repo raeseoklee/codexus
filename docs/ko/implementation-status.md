@@ -45,14 +45,16 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - runs/events/report observability command
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled
 - cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
-- config/state/event/memory/skill versioned schema artifact, durable read-path focused enforcement, single-record/run-ledger schema artifact subset validation
+- config/state/event/memory/skill/session-state/supply-chain-policy versioned
+  schema artifact, durable read-path focused enforcement, single-record/run-ledger
+  schema artifact subset validation
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
   `dist/cli/main.js`를 만듭니다.
 - `npm run package:smoke`는 `npm pack`, 임시 global install,
   `codexus --help`, `cx --help`, runtime schema asset, postinstall Codex skill
   adapter 설치, mock run을 검증합니다.
-- `prepublishOnly`는 local CI와 package smoke를 묶은 `npm run release:check`를
-  실행합니다.
+- `prepublishOnly`는 local CI, package smoke, report-only supply-chain dogfood를
+  묶은 `npm run release:check`를 실행합니다.
 - npm tarball은 `dist`, `schemas`, Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, top-level release metadata만 싣고 source, tests, docs,
@@ -121,6 +123,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   실행하지 않고 blocked verification attempt로 기록합니다.
 - `cx schema engine --json`은 dependency를 추가하지 않고 active local schema subset
   engine과 unavailable full JSON Schema engine을 보고합니다.
+- `cx supply-chain check --json`은 로컬 derivable package evidence를
+  `evidenceGaps`, `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
+  `informationalUnknowns`로 보고합니다. `--gate`는 evidence gap과 blocking
+  unknown만 exit code에 반영하며, 기본 경로는 static package projection을 사용하고
+  package lifecycle script를 실행하지 않습니다.
 - `cx replay parity --json`은 committed fixture 기반 canonical replay parity label
   coverage를 보고하고 no-new-label-without-fixture contract를 보존합니다.
 - `cx adapt omx injection --approve --json`은 retrieved context에 대한 user-visible
@@ -168,7 +175,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 144 tests 통과
+- `npm test`: 152 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -197,6 +204,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   engine status, replay parity status, adapter injection approval artifact,
   session worker gate, recorder-only subagent launch rejection CLI 테스트
 - Slop guard gate mode의 pass, fail, unknown/blocked outcome 테스트
+- Supply-chain evidence의 report-only/gate mode, policy validation, lifecycle
+  미실행, package artifact secret leak, Codexus package dogfood 테스트
 - Always-on notify heartbeat quality snapshot은 session-native test와 session-state
   schema validation으로 커버됩니다.
 - CLI version reporting은 source CLI test와 installed package smoke test로

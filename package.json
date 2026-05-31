@@ -48,7 +48,8 @@
     "build": "node scripts/build.mjs",
     "typecheck": "node scripts/check-syntax.mjs",
     "package:smoke": "node scripts/package-smoke.mjs",
-    "release:check": "npm run ci && npm run package:smoke",
+    "supply-chain:report": "node src/cli/main.ts supply-chain check --json",
+    "release:check": "npm run ci && npm run package:smoke && npm run supply-chain:report",
     "publish:next": "node scripts/publish-next.mjs",
     "prepack": "npm run build",
     "prepublishOnly": "npm run release:check",
@@ -57,6 +58,55 @@
     "install:codex-skill": "node scripts/install-codex-skill.mjs",
     "cx": "node src/cli/main.ts",
     "codexus": "node src/cli/main.ts"
+  },
+  "codexus": {
+    "supplyChain": {
+      "runtimeDependenciesMax": 0,
+      "allowedLifecycleScripts": [
+        "postinstall",
+        "prepack",
+        "prepublishOnly"
+      ],
+      "allowedDevDependencyInstallScripts": [
+        "esbuild"
+      ],
+      "allowRuntimeNetworkImports": [
+        "node:net"
+      ],
+      "forbiddenPackageFiles": [
+        ".env",
+        ".env.*",
+        ".codexus/**",
+        ".codex-harness/**",
+        ".omx/**",
+        ".omc/**",
+        "node_modules/**",
+        "src/**",
+        "tests/**",
+        "docs/**",
+        "fixtures/replay/**",
+        "fixtures/migrations/**"
+      ],
+      "requiredPackageFiles": [
+        "dist/cli/main.js",
+        "package.json",
+        "README.md",
+        "LICENSE",
+        "CHANGELOG.md",
+        "schemas/config.schema.json",
+        "schemas/session-state.schema.json",
+        "schemas/supply-chain-policy.schema.json",
+        "fixtures/app-server/schema.fixture.json",
+        "codex/skills/codexus/SKILL.md",
+        "scripts/postinstall.mjs",
+        "scripts/install-codex-skill.mjs",
+        "scripts/codexus-notify-hook.mjs",
+        "scripts/publish-next.mjs",
+        "install.sh"
+      ],
+      "binTargetsMustBeBuiltArtifacts": true,
+      "lockfileIntegrityRequired": true
+    }
   },
   "engines": {
     "node": ">=22"

@@ -13,6 +13,7 @@ import { trimmedProcessOutput } from "../../util/process-output.ts";
 import { findCodexusPackageRoot } from "../../util/package-root.ts";
 import { overlayStatus, readSessionStateWithMigration, refreshSessionState, sessionPaths, type NotifyDispatchState, type SessionStateMigrationReport } from "../../session/state.ts";
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
+import { buildSupplyChainEvidenceReport } from "../../supply-chain/check.ts";
 
 interface Check {
   id: string;
@@ -174,12 +175,27 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
     await access(existsSync(root) ? root : cwd, constants.W_OK);
     checks.push({ id: "harness.state_root", status: "pass", summary: root, details: { exists: existsSync(root), createsOnDemand: true } });
   } catch (error) {
-    checks.push({
-      id: "harness.state_root",
+  checks.push({
+    id: "harness.state_root",
       status: "fail",
       summary: error instanceof Error ? error.message : String(error),
     });
   }
+
+  const supplyChain = buildSupplyChainEvidenceReport(cwd);
+  checks.push({
+    id: "codexus.supply_chain",
+    status: supplyChain.supplyChain.status === "fail" ? "fail" : supplyChain.supplyChain.status === "unknown" ? "warn" : "pass",
+    summary: `Supply-chain evidence ${supplyChain.supplyChain.status} (${supplyChain.supplyChain.policyMode}, ${supplyChain.evidenceGaps.length} gaps, ${supplyChain.blockingUnknowns.length} blocking unknowns)`,
+    details: {
+      policy: supplyChain.policy,
+      lifecycleExecuted: supplyChain.lifecycleExecuted,
+      projectionMode: supplyChain.projectionMode,
+      evidenceGaps: supplyChain.evidenceGaps.length,
+      blockingUnknowns: supplyChain.blockingUnknowns.length,
+      informationalUnknowns: supplyChain.informationalUnknowns.length,
+    },
+  });
 
   const session = sessionPaths(cwd);
   const projectOverlay = await overlayStatus(cwd, "project");

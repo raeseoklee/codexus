@@ -14,7 +14,7 @@ import {
 import { schemaEngineStatus } from "../../validation/json-schema-subset.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
-const schemaValidationTypes = new Set<SchemaValidationType>(["config", "state", "event", "memory-entry", "skill", "session-state"]);
+const schemaValidationTypes = new Set<SchemaValidationType>(["config", "state", "event", "memory-entry", "skill", "session-state", "supply-chain-policy"]);
 
 function parseSchemaType(value: string | undefined): SchemaValidationType {
   if (!value || !schemaValidationTypes.has(value as SchemaValidationType)) {

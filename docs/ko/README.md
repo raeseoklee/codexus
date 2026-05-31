@@ -182,6 +182,7 @@ cx schema engine --json
 cx replay parity --json
 cx adapt omx injection --task "parser cleanup" --approve --json
 cx slop check --scope "src/**" --gate --json
+cx supply-chain check --gate --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json

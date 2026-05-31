@@ -187,6 +187,7 @@ cx schema engine --json
 cx replay parity --json
 cx adapt omx injection --task "parser cleanup" --approve --json
 cx slop check --scope "src/**" --gate --json
+cx supply-chain check --gate --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json
@@ -212,6 +213,7 @@ Public bins: `cx` and `codexus` are canonical.
 - [Evolution engine](docs/design/03-evolution-engine.md)
 - [Codex-native adapter](docs/design/06-codex-native-adapter.md)
 - [Session-native supervision](docs/design/07-supervised-sessions.md)
+- [Supply-chain evidence](docs/design/11-supply-chain-evidence.md)
 - [Reference governance](docs/references/README.md)
 - [Implementation status](docs/implementation-status.md)
 - [Remaining work](docs/remaining-work.md)

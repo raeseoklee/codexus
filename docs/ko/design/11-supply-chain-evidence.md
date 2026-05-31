@@ -75,6 +75,7 @@ forbidden/required 파일 리스트는 `scripts/package-smoke.mjs`가 이미 강
         "dist/cli/main.js", "package.json", "README.md", "LICENSE",
         "CHANGELOG.md", "schemas/config.schema.json",
         "schemas/session-state.schema.json",
+        "schemas/supply-chain-policy.schema.json",
         "fixtures/app-server/schema.fixture.json",
         "codex/skills/codexus/SKILL.md", "scripts/postinstall.mjs",
         "scripts/install-codex-skill.mjs", "scripts/codexus-notify-hook.mjs",
@@ -157,6 +158,10 @@ exit code를 **절대** 못 움직임 — change-evidence gate처럼 gate 함수
   `files[]` + `.npmignore` projection — npm packing과 byte-동일이라 주장하지 **않음**),
   `"npm-pack-ignore-scripts"`, `"npm-pack-lifecycle"`(release gate 전용). static projection은
   best-effort이며 npm packing semantics와 같다고 암시하지 말고 그렇게 명시해야 함.
+- 현재 구현은 `projectionMode: "static"`만 지원하며, `files[]`, public `bin` target, npm이
+  흔히 포함하는 metadata 파일에서 best-effort file list를 도출합니다. 아직 `.npmignore`나
+  `.gitignore`는 해소하지 않습니다. `npm-pack-ignore-scripts`와 `npm-pack-lifecycle`은
+  trust/execution 경계가 명시 구현될 때까지 deferred입니다.
 
 ## 표면 (subsystem 최소화)
 
@@ -187,8 +192,10 @@ cx supply-chain check --gate --json
 
 - 이 패키지와 (정적 해소 가능 시) 직접 dependency의 install script 존재(derivable fact),
 - 선언된 `runtimeDependenciesMax` 대비 런타임 dependency 개수(derivable; policy 선언 시만 gate),
-- 정적 file-list / secret 패턴 유출 스캔(derivable; `.env`/`.codexus`/`tests`/`src`/key·token,
-  redaction/packaging 체크와 같은 집합) — secret 유출은 built-in 안전 invariant,
+- 정적 file-list / secret 패턴 유출 스캔(derivable; `.env`/`.codexus`/`tests`/`src`/
+  고신뢰 key·token 패턴) — secret 유출은 built-in 안전 invariant. `token = value` 같은
+  redaction 전용 assignment heuristic은 release blocker로 쓰기엔 너무 noisy하므로 기본 gate에
+  사용하지 않음,
 - shipped code의 network import(derivable **fact**; `allowRuntimeNetworkImports` policy로만 gate),
 - lockfile 존재와 integrity hash(derivable),
 

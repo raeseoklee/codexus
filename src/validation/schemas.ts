@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
 import { findCodexusPackageRoot } from "../util/package-root.ts";
 import { inspectJsonSchemaSubset, jsonSchemaSubsetEngine, validateJsonSchemaSubset } from "./json-schema-subset.ts";
 
@@ -45,7 +46,7 @@ export interface SchemaArtifactStatus {
   error: string | null;
 }
 
-export type SchemaValidationType = "config" | "state" | "event" | "memory-entry" | "skill" | "session-state";
+export type SchemaValidationType = "config" | "state" | "event" | "memory-entry" | "skill" | "session-state" | "supply-chain-policy";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -68,6 +69,7 @@ export const schemaArtifactNames = [
   "memory-entry.schema.json",
   "skill.schema.json",
   "session-state.schema.json",
+  "supply-chain-policy.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -77,6 +79,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "memory-entry": "memory-entry.schema.json",
   skill: "skill.schema.json",
   "session-state": "session-state.schema.json",
+  "supply-chain-policy": "supply-chain-policy.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -247,7 +250,7 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
   const errors: string[] = [];
   if (!requireRecord(value, errors, type)) return { schemaVersion: 1, type, valid: false, errors };
   const expectedSchemaVersion = type === "session-state" ? 4 : 1;
-  if (type !== "config" && value.schemaVersion !== expectedSchemaVersion) errors.push(`schemaVersion:not_${expectedSchemaVersion}`);
+  if (type !== "config" && type !== "supply-chain-policy" && value.schemaVersion !== expectedSchemaVersion) errors.push(`schemaVersion:not_${expectedSchemaVersion}`);
   if (type === "config" && value.schemaVersion !== undefined && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
 
   if (type === "config") {
@@ -448,6 +451,11 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       requireRecord(value.overlays.project, errors, "overlays.project");
       requireRecord(value.overlays.user, errors, "overlays.user");
     }
+  }
+
+  if (type === "supply-chain-policy") {
+    const validation = validateSupplyChainPolicy(value);
+    errors.push(...validation.errors);
   }
 
   return { schemaVersion: 1, type, valid: errors.length === 0, errors };

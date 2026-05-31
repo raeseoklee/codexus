@@ -23,6 +23,7 @@ import { schemaCommand } from "./commands/schema.ts";
 import { appServerCommand } from "./commands/app-server.ts";
 import { cancelCommand } from "./commands/cancel.ts";
 import { slopCommand } from "./commands/slop.ts";
+import { supplyChainCommand } from "./commands/supply-chain.ts";
 import { versionCommand } from "./commands/version.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
@@ -48,6 +49,7 @@ Usage:
   cx session subagent status <task-id> [--json]
   cx session workers status [--json]
   cx slop check [--since <ref>] [--scope <glob>] [--review <path>] [--gate] [--json]
+  cx supply-chain check [--gate] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx cancel <run-id> [--reason <reason>] [--json]
   cx plan [--omx] <task> [--json]
@@ -58,7 +60,7 @@ Usage:
   cx locks list|inspect|clear [name] [--stale-only] [--json]
   cx schema check [--json]
   cx schema engine [--json]
-  cx schema validate --type <config|state|event|memory-entry|skill|session-state> --file <path> [--json]
+  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy> --file <path> [--json]
   cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|experiment [--dry-run|--live] [--json]
   cx app-server experiment --dry-run --record [--probe-process] [--supervise-fake] [--timeout-ms <n>] [--json]
@@ -126,6 +128,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "slop") {
     await slopCommand(args);
+    return;
+  }
+  if (args.command === "supply-chain") {
+    await supplyChainCommand(args);
     return;
   }
   if (args.command === "run") {

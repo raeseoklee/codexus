@@ -108,7 +108,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Run observability commands list runs, tail events, and preview reports.
 - App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, and explicit opt-in Stage B read-only socket observation are present, while live app-server execution remains gated off.
 - Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records with policy/approval contract fields for future dispatch.
-- Versioned schema artifacts exist for config, state, events, memory entries, and skills, with focused enforcement plus zero-dependency schema-artifact subset validation on single-record and run-ledger checks.
+- Versioned schema artifacts exist for config, state, events, memory entries,
+  skills, session state, and supply-chain policy, with focused enforcement plus
+  zero-dependency schema-artifact subset validation on single-record and
+  run-ledger checks.
 - Codex JSONL usage is captured when present and terminal state records usage or
   `{ "available": false }`.
 - Unsupported Codex exec config options emit `config.option_ignored` ledger
@@ -118,8 +121,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `npm run package:smoke` runs `npm pack`, installs the tarball into a temporary
   global prefix, and verifies `codexus --help`, `cx --help`, runtime schema
   assets, postinstall Codex skill adapter installation, and a mock run.
-- `prepublishOnly` runs `npm run release:check`, which combines local CI and
-  package smoke verification.
+- `prepublishOnly` runs `npm run release:check`, which combines local CI,
+  package smoke verification, and report-only supply-chain dogfood.
 - The npm tarball ships `dist`, `schemas`, the Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, and top-level release metadata. It excludes source, tests, docs,
@@ -192,6 +195,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   blocked verification attempts instead of executing dangerous commands.
 - `cx schema engine --json` reports the active local schema subset engine and
   the unavailable full JSON Schema engine without adding a dependency.
+- `cx supply-chain check --json` reports local derivable package evidence with
+  `evidenceGaps`, `derivableFacts`, `heuristicClaims`, `blockingUnknowns`, and
+  `informationalUnknowns`; `--gate` exits only from evidence gaps and blocking
+  unknowns. The default path uses static package projection and does not execute
+  package lifecycle scripts.
 - `cx replay parity --json` reports canonical replay parity label coverage from
   committed fixtures and preserves the no-new-label-without-fixture contract.
 - `cx adapt omx injection --approve --json` records a user-visible approval
@@ -222,7 +230,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 144.
+- Current test count: 152.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`

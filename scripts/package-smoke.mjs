@@ -8,6 +8,68 @@ import { join } from "node:path";
 const root = process.cwd();
 const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
 
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function stringArray(value, key) {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== "string" || item.trim() === "")) {
+    throw new Error(`codexus.supplyChain.${key} must be an array of non-empty strings`);
+  }
+  return value;
+}
+
+function readSupplyChainPolicy() {
+  const policy = pkg.codexus?.supplyChain;
+  if (!isRecord(policy)) throw new Error("codexus.supplyChain policy missing or invalid");
+  if (!Number.isInteger(policy.runtimeDependenciesMax) || policy.runtimeDependenciesMax < 0) {
+    throw new Error("codexus.supplyChain.runtimeDependenciesMax must be a non-negative integer");
+  }
+  for (const key of [
+    "allowedLifecycleScripts",
+    "allowedDevDependencyInstallScripts",
+    "allowRuntimeNetworkImports",
+    "forbiddenPackageFiles",
+    "requiredPackageFiles",
+  ]) {
+    stringArray(policy[key], key);
+  }
+  for (const key of ["binTargetsMustBeBuiltArtifacts", "lockfileIntegrityRequired"]) {
+    if (typeof policy[key] !== "boolean") throw new Error(`codexus.supplyChain.${key} must be boolean`);
+  }
+  return policy;
+}
+
+function normalizePath(path) {
+  return path.replace(/\\/g, "/").replace(/^package\//, "");
+}
+
+function globToRegExp(pattern) {
+  const normalized = pattern.replace(/\\/g, "/").replace(/^\.\/+/, "");
+  let out = "^";
+  for (let index = 0; index < normalized.length; index += 1) {
+    const char = normalized[index];
+    const next = normalized[index + 1];
+    if (char === "*" && next === "*") {
+      out += ".*";
+      index += 1;
+    } else if (char === "*") {
+      out += "[^/]*";
+    } else {
+      out += char.replace(/[\\^$+?.()|[\]{}]/g, "\\$&");
+    }
+  }
+  return new RegExp(`${out}$`);
+}
+
+function matchesPattern(path, pattern) {
+  const normalizedPath = normalizePath(path);
+  const normalizedPattern = pattern.replace(/\\/g, "/").replace(/^\.\/+/, "");
+  if (normalizedPattern.includes("*")) return globToRegExp(normalizedPattern).test(normalizedPath);
+  const withoutSlash = normalizedPattern.replace(/\/+$/, "");
+  return normalizedPath === withoutSlash || normalizedPath.startsWith(`${withoutSlash}/`);
+}
+
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd ?? root,
@@ -51,29 +113,17 @@ try {
   const tarball = join(packDir, packed[0]);
 
   const tarEntries = run("tar", ["-tf", tarball]).stdout.split(/\n/).filter(Boolean);
-  for (const required of [
-    "package/dist/cli/main.js",
-    "package/schemas/config.schema.json",
-    "package/schemas/session-state.schema.json",
-    "package/fixtures/app-server/schema.fixture.json",
-    "package/codex/skills/codexus/SKILL.md",
-    "package/scripts/codexus-notify-hook.mjs",
-    "package/scripts/install-codex-skill.mjs",
-    "package/scripts/publish-next.mjs",
-    "package/scripts/postinstall.mjs",
-    "package/install.sh",
-  ]) {
-    assert(tarEntries.includes(required), `packed tarball missing ${required}`);
+  const policy = readSupplyChainPolicy();
+  for (const required of policy.requiredPackageFiles) {
+    assert(tarEntries.some((entry) => matchesPattern(entry, required)), `packed tarball missing package/${required}`);
   }
-  for (const forbiddenPrefix of [
-    "package/src/",
-    "package/tests/",
-    "package/docs/",
-    "package/fixtures/replay/",
-    "package/fixtures/migrations/",
-  ]) {
-    assert(!tarEntries.some((entry) => entry.startsWith(forbiddenPrefix)), `packed tarball should not contain ${forbiddenPrefix}`);
+  for (const forbidden of policy.forbiddenPackageFiles) {
+    const matched = tarEntries.filter((entry) => matchesPattern(entry, forbidden));
+    assert(matched.length === 0, `packed tarball should not contain ${forbidden}: ${matched.join(", ")}`);
   }
+  assert(tarEntries.includes("package/dist/cli/main.js"), "packed tarball missing built CLI backstop");
+  assert(!tarEntries.some((entry) => entry.startsWith("package/src/")), "packed tarball should not contain source backstop");
+  assert(run("tar", ["-xOf", tarball, "package/dist/cli/main.js"]).stdout.length > 0, "built CLI backstop is empty");
 
   run("npm", ["install", "-g", tarball, "--prefix", prefix], {
     env: { CODEX_HOME: codexHome },
