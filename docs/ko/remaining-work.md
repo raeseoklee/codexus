@@ -156,9 +156,9 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
     compatibility, stable-readiness smoke coverage 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 현재 npm baseline은 `0.1.0-alpha.4`입니다. Prerelease는 `publish:next`를
-      통해 배포하고, `0.1.0` stable은 trusted publishing rehearsal, release evidence,
-      `v0.1.0` tag 뒤에만 갑니다.
+    - 현재 npm baseline은 `0.1.0-alpha.5`입니다. Prerelease는 fallback/dev path인
+      `publish:next`를 통해 배포할 수 있습니다. `0.1.0` stable은 successful
+      trusted-publishing rehearsal, release evidence, `v0.1.0` tag 뒤에만 갑니다.
     - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,
       runtime asset, strict doctor, supply-chain gate, mock
       pass/fail/repair/resume/cancel/events, postinstall skill adapter behavior를
@@ -235,3 +235,26 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 11. Autopilot은 0.2/0.3 design track으로 유지합니다. `cx autopilot run`을 노출하기 전
    schema artifact와 report-only scope gate부터 시작해야 하며, human-approved,
    worktree-isolated, `stability: experimental`이어야 합니다.
+
+## 구현 잔여
+
+0.1.0 readiness 정리 이후 남은 구현 트랙입니다:
+
+1. Desktop app-server attachment: 지원되는 실제 Desktop daemon 관측 경로를 증명한 뒤
+   session-event mapping을 설계합니다. 아직 live app-server product behavior는 켜지지
+   않습니다.
+2. Cron/gateway dispatcher: permission, approval, lock, dispatch, completion event가
+   실제로 준비된 뒤에만 구현합니다.
+3. Full JSON Schema engine: dependency policy가 허용될 때만 local subset engine을
+   교체합니다. 현재 schema artifact는 regression fixture로 유지합니다.
+4. Statusline integration: Codex가 안정적인 supported configuration surface를 제공할 때까지
+   기다립니다. 그 전까지는 `cx session hud --json`이 fallback입니다.
+5. tmux-backed worker launch: session state protocol과 launch contract가 안정될 때까지
+   `session workers status`를 gate report로 유지합니다.
+6. Native subagent launcher: 지원되는 launch contract가 생기고 claim과 verification
+   freshness 분리가 유지될 때까지 recorder-only로 둡니다.
+7. Automatic adapter injection: 명시적이고 되돌릴 수 있는 injection path를 설계하기 전까지
+   visible approval artifact만 기록하고 auto-injection은 하지 않습니다.
+8. Routine live model replay: opt-in, budget-gated로 유지하고 기본 stable path 밖에 둡니다.
+9. Autopilot contract layer: `cx autopilot run` 전에 schema artifact와 report-only scope
+   gate부터 시작하는 0.2/0.3 experimental track으로 진행합니다.

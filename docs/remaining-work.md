@@ -162,9 +162,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     guarded alpha publish, trusted-publishing release workflow, Node 22 package
     smoke compatibility, and stable-readiness smoke coverage implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current npm baseline is `0.1.0-alpha.4`; prereleases publish through
-      `publish:next`, while `0.1.0` stable is gated on trusted publishing
-      rehearsal, release evidence, and `v0.1.0`.
+    - Current npm baseline is `0.1.0-alpha.5`; prereleases publish through
+      `publish:next` as a fallback/dev path. `0.1.0` stable is gated on a
+      successful trusted-publishing rehearsal, release evidence, and `v0.1.0`.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin
       paths, runtime assets, strict doctor, supply-chain gate, mock
       pass/fail/repair/resume/cancel/events, and postinstall skill adapter
@@ -244,5 +244,29 @@ evidence only when the supporting runtime exists:
    contract exists; subagent claims must stay separate from verification
    freshness.
 11. Autopilot remains a 0.2/0.3 design track. Start with schema artifacts and a
-   report-only scope gate before exposing `cx autopilot run`; it must remain
-   human-approved, worktree-isolated, and `stability: experimental`.
+    report-only scope gate before exposing `cx autopilot run`; it must remain
+    human-approved, worktree-isolated, and `stability: experimental`.
+
+## Implementation Residue
+
+These are the remaining implementation tracks after the 0.1.0 readiness cleanup:
+
+1. Desktop app-server attachment: prove a supported real Desktop daemon
+   observation path, then design the session-event mapping. Do not enable live
+   app-server product behavior yet.
+2. Cron/gateway dispatcher: implement only after permission, approval, lock,
+   dispatch, and completion events are live.
+3. Full JSON Schema engine: replace the local subset engine only if dependency
+   policy allows it; keep current schema artifacts as regression fixtures.
+4. Statusline integration: wait for a stable Codex-supported configuration
+   surface; keep `cx session hud --json` as the fallback.
+5. tmux-backed worker launch: keep `session workers status` as a gate report
+   until the session state protocol and launch contract are stable.
+6. Native subagent launcher: keep recorder-only support until a supported launch
+   contract exists and claims remain separate from verification freshness.
+7. Automatic adapter injection: keep approval artifacts visible and no
+   auto-injection until an explicit, reversible injection path is designed.
+8. Routine live model replay: keep it opt-in, budget-gated, and outside the
+   default stable path.
+9. Autopilot contract layer: start as a 0.2/0.3 experimental track with schema
+   artifacts and report-only scope gates before any `cx autopilot run`.
