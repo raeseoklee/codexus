@@ -137,8 +137,6 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   package lifecycle script를 실행하지 않습니다.
 - `cx replay parity --json`은 committed fixture 기반 canonical replay parity label
   coverage를 보고하고 no-new-label-without-fixture contract를 보존합니다.
-- `cx adapt omx injection --approve --json`은 retrieved context에 대한 user-visible
-  approval artifact를 기록하되 automatic prompt injection은 계속 끕니다.
 - Cron/gateway live path는 `policy-reviewed-live-dispatch-v1` policy contract를 공유하고
   dispatcher가 생길 때까지 blocked로 남습니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
@@ -177,7 +175,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   위임하고, canonical bin link와 `CODEXUS_INSTALL_CODEX_SKILL=0`이 아닐 때 Codex
   skill adapter 설치를 수행합니다.
 - User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.
-- Session-native supervision 설계는 OMX에서 배운 in-Codex usage를 제품 방향으로
+- Session-native supervision 설계는 Codex-native in-Codex usage를 제품 방향으로
   정리했고, `codex exec resume`은 별도 external multi-turn feature로 deferred했습니다.
 
 ## 검증

@@ -279,10 +279,6 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       requireBoolean(value.evolution, "autoPromote", errors, "evolution.autoPromote");
       requireBoolean(value.evolution, "redactBeforeMemory", errors, "evolution.redactBeforeMemory");
     }
-    if (requireRecord(value.omx, errors, "omx")) {
-      if (!(value.omx.enabled === "auto" || typeof value.omx.enabled === "boolean")) errors.push("omx.enabled:invalid");
-      requireBoolean(value.omx, "preferSparkshellForVerification", errors, "omx.preferSparkshellForVerification");
-    }
     if (requireRecord(value.automation, errors, "automation")) {
       requireBoolean(value.automation, "cronEnabled", errors, "automation.cronEnabled");
       requireBoolean(value.automation, "gatewayEnabled", errors, "automation.gatewayEnabled");

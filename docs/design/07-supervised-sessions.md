@@ -7,9 +7,9 @@ Status: proposed direction change
 
 ## Decision
 
-Codexus should move toward an OMX-informed, Codex-session-native runtime as the
-primary user experience. OMX is prior art for session-native integration; it is
-not Codexus' identity.
+Codexus should move toward a Codex-session-native runtime as the
+primary user experience. Session-native integration is informed by prior harness
+work; it is not Codexus' identity.
 
 The previous external thread proposal used
 `codex exec resume <thread-id>` to create a separate multi-turn non-interactive
@@ -35,7 +35,7 @@ commands and session guidance.
 
 ## Why This Is Feasible
 
-OMX shows the viable integration pattern. It does not need to replace Codex or
+This is a viable integration pattern. It does not need to replace Codex or
 own a second chat UI. It augments Codex through local, installable surfaces:
 
 - skills under `${CODEX_HOME:-~/.codex}/skills`,
@@ -224,7 +224,7 @@ say so clearly.
 
 ### Tmux and Workers
 
-OMX's durable team behavior comes from tmux-backed workers. Codexus can adopt a
+Durable team behavior can come from tmux-backed workers. Codexus can adopt a
 similar optional runtime later:
 
 ```text

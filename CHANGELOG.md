@@ -9,6 +9,15 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Removed
+
+- Removed the OMX (oh-my-codex) adapter and every `cx adapt omx ...` command, the
+  `omx` config block (`omx.enabled`, `omx.preferSparkshellForVerification`), the
+  `plan --omx` flag, and the `skill export --target omx` option. Codexus has no
+  OMX dependency or adapter; sibling harnesses stay references only. Stale `omx`
+  config keys are treated as removed/deprecated (ignored with a notice), never as
+  unknown-key errors.
+
 ### Added
 
 - `cx session subagent launch --role <role> --task <task> --json` now records a

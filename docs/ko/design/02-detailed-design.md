@@ -43,7 +43,6 @@ contract를 가져야 합니다. Human prose는 projection이지 source of truth
 - `cx app-server status/roundtrip/experiment`
 - `cx memory add/search/list/review/curate/prune`
 - `cx skill propose/index/review/promote/export/improve/deprecate/list`
-- `cx adapt omx status/retrieve/context`
 - `cx cron status/run-now`
 - `cx gateway status/check`
 
@@ -93,7 +92,6 @@ policy, optional interop preference, automation gates를 포함합니다. Local
   memory/
   skills/
   replay/
-  omx/
 ```
 
 Run layout:
@@ -179,7 +177,7 @@ verification/experience artifact를 검사합니다.
 ## Codex-native adapter
 
 외부 CLI는 구현된 engine path입니다. 제품 방향은 Codexus를 현재 interactive Codex
-session 안에서 OMX처럼 호출할 수 있게 하는 Codex-native session runtime입니다.
+session 안에서 자연스럽게 호출할 수 있게 하는 Codex-native session runtime입니다.
 
 요구사항:
 
@@ -200,7 +198,7 @@ session 안에서 OMX처럼 호출할 수 있게 하는 Codex-native session run
 - `cx session checkpoint <label> [--json]`
 - `cx session verify --verify <cmd> [--json]`
 
-`cx adapt omx context`는 active index에서 approved/replay-passed 상태인
+Adapter context retrieval은 active index에서 approved/replay-passed 상태인
 `codexus:<skill-name>` skill과 memory를 bounded prompt-safe block으로
 formatting합니다. 자동 prompt injection이나 별도 chat loop는 만들지 않습니다.
 `--approve`를 사용하면 `.codexus/adapters/context/<id>/` 아래

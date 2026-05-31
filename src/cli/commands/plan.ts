@@ -1,9 +1,9 @@
 import { writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
+import { ensureDir } from "../../util/fs.ts";
 import { createRunId } from "../../util/id.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
-import { flagBool, flagString, type ParsedArgs } from "../args.ts";
+import { assertAllowedFlags, flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 function planText(task: string, createdAt: string): string {
   return `# Harness Plan
@@ -31,9 +31,9 @@ ${task}
 }
 
 export async function planCommand(args: ParsedArgs): Promise<void> {
+  assertAllowedFlags(args, ["json", "cwd"]);
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
   const json = flagBool(args.flags, "json");
-  const writeOmx = flagBool(args.flags, "omx");
   const task = args.positionals.join(" ").trim();
   if (!task) throw new Error("missing_plan_task");
 
@@ -45,28 +45,9 @@ export async function planCommand(args: ParsedArgs): Promise<void> {
   const text = planText(task, createdAt);
   await writeFile(path, text);
 
-  let omxPath: string | null = null;
-  if (writeOmx) {
-    const omxRoot = join(cwd, ".omx", "plans");
-    await ensureDir(omxRoot);
-    omxPath = join(omxRoot, `${id}.md`);
-    await writeFile(omxPath, text);
-    const adapterRoot = join(harnessRoot(cwd), "omx");
-    await ensureDir(adapterRoot);
-    await writeJsonAtomic(join(adapterRoot, "last-plan.json"), {
-      schemaVersion: 1,
-      id,
-      createdAt,
-      path,
-      omxPath,
-      note: "Plan exported without mutating .omx/state.",
-    });
-  }
-
   if (json) {
-    console.log(JSON.stringify({ id, path, omxPath }, null, 2));
+    console.log(JSON.stringify({ id, path }, null, 2));
   } else {
     console.log(`${id}: ${path}`);
-    if (omxPath) console.log(`omx: ${omxPath}`);
   }
 }

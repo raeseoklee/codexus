@@ -4,7 +4,6 @@ import { emitCliError, isJsonRequested } from "./errors.ts";
 import { doctorCommand } from "./commands/doctor.ts";
 import { runCommand } from "./commands/run.ts";
 import { statusCommand } from "./commands/status.ts";
-import { adaptOmxCommand } from "./commands/adapt-omx.ts";
 import { memoryCommand } from "./commands/memory.ts";
 import { skillCommand } from "./commands/skill.ts";
 import { verifyCommand } from "./commands/verify.ts";
@@ -54,7 +53,7 @@ Usage:
   cx supply-chain check [--gate] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx cancel <run-id> [--reason <reason>] [--json]
-  cx plan [--omx] <task> [--json]
+  cx plan <task> [--json]
   cx runs list [--json]
   cx status <run-id> [--json]
   cx events tail <run-id> [--lines <n>] [--json]
@@ -82,14 +81,10 @@ Usage:
   cx skill propose <run-id> [--json]
   cx skill review <skill-id> [--json]
   cx skill promote <skill-id> [--json]
-  cx skill export <skill-id> --target codex|omx [--json]
+  cx skill export <skill-id> --target codex [--json]
   cx skill improve <skill-id> [--reason <reason>] [--json]
   cx skill deprecate <skill-id> [reason] [--json]
   cx skill list [--json]
-  cx adapt omx status [--json]
-  cx adapt omx retrieve --task <task> [--json]
-  cx adapt omx context --task <task> [--approve] [--json]
-  cx adapt omx injection --task <task> [--approve] [--json]
   cx cron status|run-now [--dry-run] [--record] [--json]
   cx gateway status|check [--dry-run] [--record] [--json]
 
@@ -187,13 +182,6 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   if (args.command === "plan") {
     await planCommand(args);
     return;
-  }
-  if (args.command === "adapt") {
-    if (args.positionals[0] === "omx") {
-      await adaptOmxCommand({ ...args, positionals: args.positionals.slice(1) });
-      return;
-    }
-    throw new Error(`unsupported_adapt_target:${args.positionals[0] ?? "missing"}`);
   }
   if (args.command === "memory") {
     await memoryCommand(args);

@@ -34,10 +34,6 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
   switch (code) {
     case "unknown_command":
       return `Unknown command${target ? `: ${target}` : ""}.`;
-    case "unsupported_adapt_target":
-      return `Unsupported adapt target${target ? `: ${target}` : ""}.`;
-    case "unsupported_adapt_omx_command":
-      return `Unsupported OMX adapter command${target ? `: ${target}` : ""}.`;
     case "unsupported_feature":
       return `Unsupported feature${target ? `: ${target}` : ""}.`;
     case "unexpected_argument":
@@ -174,9 +170,6 @@ function hintFor({ code }: ParsedCliError): string | null {
   switch (code) {
     case "unknown_command":
       return "Run `cx --help` to see supported commands.";
-    case "unsupported_adapt_target":
-    case "unsupported_adapt_omx_command":
-      return "Run `cx adapt omx status --json` for the currently supported adapter surface.";
     case "unsupported_feature":
       return "Use `cx doctor --json` to inspect supported local capabilities before enabling this feature.";
     case "unexpected_argument":
@@ -265,7 +258,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "invalid_subagent_confidence":
       return "Use `--confidence low|medium|high|unknown`.";
     case "invalid_skill_export_target":
-      return "Use `--target codex` or `--target omx`.";
+      return "Use `--target codex`.";
     case "skill_not_active":
       return "Promote the skill first with `cx skill promote <skill-id> --json`.";
     case "skill_export_validation_failed":

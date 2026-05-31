@@ -9,6 +9,14 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Removed
+
+- OMX(oh-my-codex) adapter와 모든 `cx adapt omx ...` 명령, `omx` config 블록
+  (`omx.enabled`, `omx.preferSparkshellForVerification`), `plan --omx` 플래그,
+  `skill export --target omx` 옵션을 제거했습니다. Codexus는 OMX 의존이나 adapter가
+  없으며 sibling harness는 참고로만 남습니다. 남아있는 `omx` config 키는 unknown-key
+  에러가 아니라 removed/deprecated(notice와 함께 무시)로 처리됩니다.
+
 ### Added
 
 - `cx session subagent launch --role <role> --task <task> --json`가

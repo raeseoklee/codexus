@@ -27,8 +27,8 @@ For user-facing invocation examples, see
 
 The adapter is the first installed piece of the broader
 [session-native supervision](07-supervised-sessions.md) direction. The target is
-not a separate chat surface or an external `codex exec resume` thread; it is an
-OMX-informed session-native harness that the current Codex TUI session can
+not a separate chat surface or an external `codex exec resume` thread; it is a
+Codex-native session harness that the current Codex TUI session can
 explicitly call through skills, marker-bounded AGENTS guidance, local state,
 optional hooks/status, and optional tmux workers.
 
@@ -78,7 +78,6 @@ node codex/skills/codexus/scripts/cx.mjs memory review --json
 node codex/skills/codexus/scripts/cx.mjs skill review <skill-id> --json
 node codex/skills/codexus/scripts/cx.mjs skill index --json
 node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --json
-node codex/skills/codexus/scripts/cx.mjs adapt omx retrieve --task "<task>" --json
 ```
 
 Supervised handoff is supported but should be deliberate:

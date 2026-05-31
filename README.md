@@ -197,7 +197,6 @@ cx session subagent record --file <result.json> --json
 cx session workers status --json
 cx schema engine --json
 cx replay parity --json
-cx adapt omx injection --task "parser cleanup" --approve --json
 cx slop check --scope "src/**" --gate --json
 cx supply-chain check --gate --json
 cx run --verify "npm test" "fix the failing parser tests"

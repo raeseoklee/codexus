@@ -103,7 +103,7 @@ Strengths:
 
 ### Codex-Native Session Runtime
 
-This is the primary product direction, closer to how OMX feels inside Codex.
+This is the primary product direction, a Codex-native session feel.
 
 ```text
 Codex interactive session
@@ -122,11 +122,7 @@ Target behavior:
 - Codex-native usage becomes the normal interactive UX while the external CLI
   remains the engine and automation path.
 
-## Relationship to OMX
-
-OMX is session-native: it augments a running Codex session with skills, prompts, modes, tmux workers, HUD, and helper commands.
-
-Codexus started from the opposite edge: an external supervisor CLI that drives
+Codexus started from an external supervisor CLI that drives
 `codex exec --json` and records durable evidence around it. The direction now
 changes from "CLI first, in-session later" to "shared core with in-session UX as
 the primary product shape."

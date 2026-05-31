@@ -7,27 +7,27 @@ Status: proposed product principles
 
 ## Decision
 
-Codexus evolves on its own axis. It keeps an OMX-informed, Codex-native session
+Codexus evolves on its own axis. It keeps a Codex-native session
 experience as the near-term product surface, but its identity is
-**evidence-first**, not "a sibling of OMX." Concretely:
+**evidence-first**. Concretely:
 
 - The product copy and near-term UX focus stay Codex-native.
 - The core (kernel, ledger, verification, event/state schema) stays
   engine-agnostic.
-- Codexus stops defining itself relative to OMX. It still learns from OMX (and
-  the other harness references), but it does not market itself as an OMX clone, and
-  the `cx adapt omx` bridge stays optional and out of the identity.
+- Codexus does not define itself relative to any sibling harness. It learns from
+  prior harness work, but it has no dependency on or adapter for another harness;
+  its identity is the evidence axis.
 
-The differentiator Codexus owns — and OMX does not pursue — is verifiable
+The differentiator Codexus owns is verifiable
 completion, reproducible run evidence, honest capability reporting, and an
 engine-agnostic driver boundary.
 
 ## Why a Standalone Identity
 
-OMX optimizes workflow and runtime breadth (escalation flow, tmux team,
-worktrees, HUD, a wide skill vocabulary). It is more mature and broader on that
-axis. Trying to match that breadth as a solo alpha would lose to OMX on its own
-ground and dilute what makes Codexus distinct.
+Workflow-first harnesses optimize runtime breadth (escalation flow, tmux teams,
+worktrees, HUD, a wide skill vocabulary). They are broader on that axis. Trying
+to match that breadth as a solo alpha would lose on their ground and dilute what
+makes Codexus distinct.
 
 Codexus is distinct on a different axis:
 
@@ -39,17 +39,17 @@ Codexus is distinct on a different axis:
 3. **Durable evidence ledger and replay.** Runs and session state reconstruct
    from disk after a crash.
 4. **Engine-agnostic driver boundary.** The driver abstraction keeps a second
-   engine (for example Claude Code) open without a kernel rewrite — something
-   OMX is structurally not built for.
+   engine (for example Claude Code) open without a kernel rewrite — something a
+   workflow-first harness is structurally not built for.
 
-Standalone evolution means owning this axis, not replicating OMX.
+Standalone evolution means owning this axis, not replicating breadth.
 
 ## Non-Goals
 
-- Do not replicate OMX breadth to "look like OMX": no large mode/skill/role
-  catalog, no tmux team runtime, worktree parallelism, or workflow-escalation
-  vocabulary as a near-term goal. These return only later, and only where they
-  serve the evidence axis.
+- Do not replicate workflow-first breadth to "look broad": no large
+  mode/skill/role catalog, no tmux team runtime, worktree parallelism, or
+  workflow-escalation vocabulary as a near-term goal. These return only later,
+  and only where they serve the evidence axis.
 - Do not bake Codex-specific assumptions into the kernel, ledger, verification,
   or normalized event/state schema. Codex specifics live in the driver only.
 - Do not promise that evidence actions always happen. The overlay can request
@@ -241,10 +241,9 @@ evidence snapshot, but verification is never executed by the hook and
   normalized event/state schema, and descriptor fields (`engine`, `driverId`,
   `capabilities`) are introduced before broadening beyond Codex.
 
-## Relationship to OMX
+## Relationship to Sibling Harnesses
 
-Codexus moves from "OMX sibling" to an independent, evidence-first identity.
-It keeps OMX (and the other harness references) as prior art to learn from, and
-the optional `cx adapt omx` bridge may remain, but neither defines Codexus.
-Independence here is identity, not hostility: Codexus stops being measured
-against OMX by owning an axis OMX does not pursue.
+Codexus holds an independent, evidence-first identity. It treats other harnesses
+(workflow-first or session-native) as prior art to learn from, but depends on
+none of them and ships no cross-harness adapter. Independence here is identity,
+not hostility: Codexus is defined by owning the evidence axis, not by comparison.

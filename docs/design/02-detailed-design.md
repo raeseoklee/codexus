@@ -20,7 +20,6 @@ src/
       replay.ts
       memory.ts
       skill.ts
-      adapt-omx.ts
   config/
     loader.ts
     schema.ts
@@ -49,8 +48,6 @@ src/
     memory.ts
     skills.ts
     replay.ts
-  adapters/
-    omx.ts
 ```
 
 This layout keeps command parsing thin. The workflow kernel and driver contracts should be testable without invoking the real CLI.
@@ -101,8 +98,6 @@ Checks:
 - `codex exec --help`
 - `codex app-server --help`
 - `codex features list`
-- `omx --version`
-- `omx doctor` availability
 - `git rev-parse --show-toplevel`
 - `tmux -V`
 - writable harness state root
@@ -244,16 +239,6 @@ both focused local validators and the local schema-artifact subset engine.
 event/run id consistency, terminal event consistency, and optional
 verification/experience artifacts based on the run state and input config.
 
-### `cx adapt omx context`
-
-Purpose: format bounded active `codexus:<skill-name>` skills and memory entries
-into a prompt-safe block for the current Codex session. It retrieves context but
-does not inject it automatically or create a separate chat loop.
-
-`--approve` writes a durable, non-injected context artifact under
-`.codexus/adapters/context/<id>/` with `context.md`, `context.json`, and a
-hash. This is an explicit handoff artifact, not automatic prompt mutation.
-
 ### `cx app-server roundtrip` and `cx app-server experiment`
 
 Purpose: expose an app-server dry-run roundtrip contract before any live
@@ -287,7 +272,7 @@ Subcommands:
 - `propose <run-id>`
 - `review <skill-id>`
 - `promote <skill-id>`
-- `export <skill-id> --target codex|omx`
+- `export <skill-id> --target codex`
 - `improve <skill-id>`
 - `deprecate <skill-id>`
 - `index`
@@ -301,16 +286,11 @@ The stable storage id remains filesystem-safe, while the displayed identity uses
 `codexus:<skill-name>` so generated Codexus skills are visually distinct in
 Codex-oriented surfaces.
 
-### `cx adapt omx ...`
-
-Purpose: inspect available OMX interop capabilities and retrieve bounded active
-skill/memory context without requiring OMX for core use.
-
 ## Codex-Native Adapter Contract
 
 The external CLI is the implemented engine path. The product direction is now a
 Codex-native session runtime that makes Codexus invokable from inside the
-current interactive Codex session, similar in feel to OMX.
+current interactive Codex session.
 
 Adapter requirements:
 
@@ -367,10 +347,6 @@ Initial config:
     "autoPromote": false,
     "redactBeforeMemory": true
   },
-  "omx": {
-    "enabled": "auto",
-    "preferSparkshellForVerification": true
-  },
   "automation": {
     "cronEnabled": false,
     "gatewayEnabled": false
@@ -391,7 +367,6 @@ Project-local root:
   memory/
   skills/
   replay/
-  omx/
 ```
 
 Run layout:
@@ -746,31 +721,6 @@ Errors should include:
 Typed errors should be emitted in JSON by automation-facing commands. Invalid
 suffix arguments should fail at parse time instead of falling through to prompt
 dispatch.
-
-## OMX Adapter Contract
-
-`cx adapt omx status --json`:
-
-```json
-{
-  "available": true,
-  "version": "0.11.9",
-  "features": {
-    "explore": true,
-    "sparkshell": true,
-    "team": true,
-    "agents": true
-  },
-  "warnings": [
-    {
-      "code": "omx_older_than_research_baseline",
-      "message": "Local OMX is older than the researched upstream baseline."
-    }
-  ]
-}
-```
-
-The adapter may call read-only commands automatically. Mutating OMX commands require explicit user command or workflow policy.
 
 ## App-Server Driver Gate
 

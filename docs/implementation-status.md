@@ -210,8 +210,6 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   package lifecycle scripts.
 - `cx replay parity --json` reports canonical replay parity label coverage from
   committed fixtures and preserves the no-new-label-without-fixture contract.
-- `cx adapt omx injection --approve --json` records a user-visible approval
-  artifact for retrieved context while keeping automatic prompt injection off.
 - Cron/gateway live paths share the `policy-reviewed-live-dispatch-v1` policy
   contract and remain blocked until a dispatcher exists.
 - Session state reads perform focused structure validation, and mutable session
@@ -231,7 +229,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   installing the Codex skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is
   set.
 - User-facing Codex-session usage docs now explain how to invoke the `$codexus` skill, what commands to prefer, and when to stay with normal Codex interaction.
-- The session-native supervision design now makes OMX-informed in-Codex usage the
+- The session-native supervision design now makes Codex-native in-Codex usage the
   product direction, with `codex exec resume` deferred as a separate external
   multi-turn feature.
 - The autopilot contract is documented as a proposed 0.2/0.3 experimental

@@ -30,7 +30,7 @@ metadata.
 ## Non-Goals
 
 - No silent prompt mutation.
-- No automatic installation into Codex or OMX skill directories.
+- No automatic installation into Codex skill directories.
 - No unbounded transcript injection into future prompts.
 - No memory writes before redaction policy.
 - No skill promotion without scope and replay evidence.
@@ -231,7 +231,7 @@ example `codexus:parser-regression-tests`. This makes generated Codexus skills
 visibly distinct from user-authored Codex skills and plugin-provided skills while
 preserving reversible local storage.
 
-`SKILL.md` should be human-readable and compatible with future installation into a Codex/OMX skill surface when explicitly promoted.
+`SKILL.md` should be human-readable and compatible with future installation into a Codex skill surface when explicitly promoted.
 
 ## Replay Validation
 
@@ -295,7 +295,6 @@ Optional explicit export targets:
 
 - Codex user skill store
 - Codex project skill store
-- OMX-compatible skill store
 
 The first implementation should keep active skills inside `.codexus` only. External export should be a later command.
 

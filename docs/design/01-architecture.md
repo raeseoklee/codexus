@@ -8,8 +8,8 @@ Codexus is a local evolutionary runtime harness for OpenAI Codex. It does not re
 
 The architecture remains core-first: the same Codexus core must be callable from
 the external `cx` CLI and from inside an interactive Codex session. The stable
-driver is `codex exec --json`; the product direction is an OMX-informed
-Codex-native session runtime built from the thin `$codexus` skill, Codexus
+driver is `codex exec --json`; the product direction is a Codex-native session
+runtime built from the thin `$codexus` skill, Codexus
 guidance overlays, local session state, and optional hook/status/tmux
 integration. Codex app-server integration remains experimental behind
 capability detection and explicit gates.
@@ -74,13 +74,11 @@ In scope:
 - repair loops
 - memory and skill proposal
 - replay tests for proposed skills
-- optional OMX interop
 
 Out of scope for the first design:
 
 - direct private ChatGPT/Codex backend calls
 - replacing Codex tool execution internals
-- replacing OMX
 - uncontrolled autonomous mutation of user/project skill stores
 - hosted multi-tenant service behavior
 
@@ -103,7 +101,6 @@ flowchart TD
   Ledger --> Evolution["Evolution engine"]
   Evolution --> Memory["Searchable memory"]
   Evolution --> Skills["Skill proposals and versions"]
-  Kernel --> Omx["Optional OMX adapter"]
 ```
 
 ## Runtime Surfaces
@@ -119,7 +116,7 @@ Codex TUI session
   -> shared ledger / memory / skills / session state
 ```
 
-This mode should make Codexus feel closer to OMX inside a running Codex
+This mode should make Codexus feel Codex-native inside a running Codex
 session. It uses installable Codex surfaces rather than a private backend:
 skills, marker-bounded AGENTS overlays, local state, optional hooks/statusline
 integration, and optional tmux workers. Codexus must not claim transparent TUI
@@ -163,7 +160,6 @@ Initial commands, shown with the target `cx` CLI:
 - `cx skill review`
 - `cx skill promote`
 - `cx skill deprecate`
-- `cx adapt omx status`
 
 Every command that can be used by automation must support `--json`.
 
@@ -315,25 +311,6 @@ Outputs:
 
 Promotion is explicit and versioned.
 
-### Optional OMX Adapter
-
-OMX is a sibling/reference harness layer. Interop should be useful but optional.
-
-The adapter may:
-
-- detect installed OMX version,
-- call `omx explore` for narrow read-only exploration,
-- call `omx sparkshell` for noisy read-only or verification commands,
-- write adapter metadata only through explicit interop commands,
-- export plan artifacts into external harness-compatible locations only when
-  the user asks for that target.
-
-The adapter must not:
-
-- mutate external harness state directly,
-- assume upstream-only features exist locally,
-- make OMX required for basic `cx run`.
-
 ## Data Flow
 
 ### Basic Run
@@ -375,13 +352,12 @@ Allowed dependencies:
 - Kernel depends on drivers, ledger, policy, verification, evolution.
 - Drivers depend on external processes/protocols.
 - Evolution depends on ledger and memory/skill stores.
-- OMX adapter depends on local OMX process detection and command execution.
 
 Forbidden dependencies:
 
 - Drivers must not depend on evolution logic.
 - Memory retrieval must not bypass policy.
-- Skill promotion must not directly mutate Codex/OMX stores without explicit command invocation.
+- Skill promotion must not directly mutate Codex skill stores without explicit command invocation.
 - App-server driver must not become required for `cx run`.
 
 ## Reliability Strategy
@@ -407,7 +383,7 @@ Forbidden dependencies:
 Use TypeScript/Node for the first implementation because:
 
 - local Node is already available,
-- OMX is TypeScript/Node,
+- the Codex CLI ecosystem is TypeScript/Node,
 - process orchestration and JSONL handling are straightforward,
 - package and CLI iteration cost is low.
 

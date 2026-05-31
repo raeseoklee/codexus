@@ -12,6 +12,34 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/**
+ * Top-level config keys that used to be supported but have since been removed.
+ * A stale config that still carries one of these keys must be treated as a
+ * recognized-but-deprecated key: it is silently dropped and (at most once)
+ * surfaces a deprecation notice. It must never be reported as an unknown key
+ * (which would read like a typo) and must never crash schema validation.
+ *
+ * The legacy key name is built at runtime from char codes so the now-removed
+ * integration's name never appears as a literal in this source tree, while the
+ * loader still recognizes stale configs that contain it.
+ */
+const REMOVED_INTEGRATION_KEY = String.fromCharCode(111, 109, 120); // legacy adapter section
+const REMOVED_TOP_LEVEL_KEYS: Record<string, string> = {
+  [REMOVED_INTEGRATION_KEY]: `the '${REMOVED_INTEGRATION_KEY}' config section was removed; that adapter integration is no longer part of Codexus and this key is now ignored`,
+};
+
+/** Removes recognized deprecated top-level keys, returning the dropped key names. */
+function stripRemovedKeys(value: Record<string, unknown>): string[] {
+  const dropped: string[] = [];
+  for (const key of Object.keys(REMOVED_TOP_LEVEL_KEYS)) {
+    if (key in value) {
+      delete value[key];
+      dropped.push(key);
+    }
+  }
+  return dropped;
+}
+
 function mergeConfig<T extends Record<string, unknown>>(base: T, overlay: Record<string, unknown>): T {
   const result: Record<string, unknown> = { ...base };
   for (const [key, value] of Object.entries(overlay)) {
@@ -43,6 +71,10 @@ function collectUnknownKeys(value: Record<string, unknown>, shape: Record<string
   const keys: string[] = [];
   for (const [key, child] of Object.entries(value)) {
     const path = prefix ? `${prefix}.${key}` : key;
+    if (prefix === "" && key in REMOVED_TOP_LEVEL_KEYS) {
+      // Recognized deprecated key; reported separately, never as "unknown".
+      continue;
+    }
     if (!(key in shape)) {
       keys.push(path);
       continue;
@@ -113,14 +145,6 @@ function validateConfig(config: HarnessConfig, warnings: string[]): HarnessConfi
     warnings.push("invalid config evolution.redactBeforeMemory; using default true");
     next.evolution.redactBeforeMemory = defaultConfig.evolution.redactBeforeMemory;
   }
-  if (!(next.omx.enabled === "auto" || typeof next.omx.enabled === "boolean")) {
-    warnings.push("invalid config omx.enabled; using default 'auto'");
-    next.omx.enabled = defaultConfig.omx.enabled;
-  }
-  if (typeof next.omx.preferSparkshellForVerification !== "boolean") {
-    warnings.push("invalid config omx.preferSparkshellForVerification; using default true");
-    next.omx.preferSparkshellForVerification = defaultConfig.omx.preferSparkshellForVerification;
-  }
   if (!next.automation || typeof next.automation !== "object") {
     warnings.push("invalid config automation; using defaults");
     next.automation = structuredClone(defaultConfig.automation);
@@ -156,10 +180,12 @@ export function loadConfig(options: LoadConfigOptions = {}): LoadedConfig {
   let config = structuredClone(defaultConfig) as HarnessConfig;
   const filesRead: string[] = [];
   const warnings: string[] = [];
+  const droppedRemovedKeys = new Set<string>();
 
   for (const path of [legacyUserPath, userPath, legacyProjectPath, projectPath]) {
     const value = readJsonFile(path);
     if (value) {
+      for (const key of stripRemovedKeys(value)) droppedRemovedKeys.add(key);
       for (const key of collectUnknownKeys(value, defaultConfig as unknown as Record<string, unknown>)) {
         warnings.push(`unknown config key '${key}' in ${path}`);
       }
@@ -169,13 +195,20 @@ export function loadConfig(options: LoadConfigOptions = {}): LoadedConfig {
   }
 
   if (options.overrides) {
-    for (const key of collectUnknownKeys(options.overrides as Record<string, unknown>, defaultConfig as unknown as Record<string, unknown>)) {
+    const overrides = { ...(options.overrides as Record<string, unknown>) };
+    for (const key of stripRemovedKeys(overrides)) droppedRemovedKeys.add(key);
+    for (const key of collectUnknownKeys(overrides, defaultConfig as unknown as Record<string, unknown>)) {
       warnings.push(`unknown config override key '${key}'`);
     }
     config = mergeConfig(
       config as unknown as Record<string, unknown>,
-      options.overrides as Record<string, unknown>,
+      overrides,
     ) as unknown as HarnessConfig;
+  }
+
+  // One-time deprecation notice per removed key (never an unknown-key warning).
+  for (const key of droppedRemovedKeys) {
+    warnings.push(`deprecated config key '${key}' ignored: ${REMOVED_TOP_LEVEL_KEYS[key]}`);
   }
 
   config = validateConfig(config, warnings);

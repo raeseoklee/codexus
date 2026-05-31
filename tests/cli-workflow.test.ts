@@ -253,18 +253,21 @@ test("json commands return typed error envelopes for cli failures", async () => 
   }
 });
 
-test("plan command writes harness and omx-compatible artifacts", async () => {
+test("plan command writes a harness plan artifact", async () => {
   const cwd = await tempDir();
   try {
-    const plan = runCli(cwd, ["plan", "--omx", "--json", "implement workflow kernel"]);
+    const plan = runCli(cwd, ["plan", "--json", "implement workflow kernel"]);
     assert.equal(plan.status, 0, plan.stderr);
     const output = JSON.parse(plan.stdout);
     assert.match(output.path, /\.codexus\/plans\/plan_/);
-    assert.match(output.omxPath, /\.omx\/plans\/plan_/);
-    const text = await readFile(output.omxPath, "utf8");
+    const text = await readFile(output.path, "utf8");
     assert.match(text, /implement workflow kernel/);
-    const metadata = await readFile(join(cwd, ".codexus", "omx", "last-plan.json"), "utf8");
-    assert.ok(metadata.includes("without mutating .omx/state"));
+
+    const removedFlag = runCli(cwd, ["plan", "--omx", "--json", "legacy adapter export"]);
+    assert.equal(removedFlag.status, 1);
+    const removedOutput = JSON.parse(removedFlag.stdout);
+    assert.equal(removedOutput.code, "unexpected_argument");
+    assert.equal(removedOutput.details.target, "--omx");
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

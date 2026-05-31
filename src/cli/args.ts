@@ -12,7 +12,6 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const booleanFlags = new Set([
     "json",
     "help",
-    "omx",
     "force",
     "with-docs",
     "with-model-replay",

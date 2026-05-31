@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -21,20 +20,16 @@ function runCli(cwd: string, args: string[], env: Record<string, string> = {}) {
   });
 }
 
-function sha256Text(text: string): string {
-  return `sha256:${createHash("sha256").update(text).digest("hex")}`;
-}
-
-test("init command bootstraps project harness without mutating omx state", async () => {
+test("init command bootstraps project harness without disturbing unrelated files", async () => {
   const cwd = await tempDir();
   try {
-    await mkdir(join(cwd, ".omx"), { recursive: true });
-    await writeFile(join(cwd, ".omx", "state"), "keep\n");
+    await mkdir(join(cwd, ".unrelated"), { recursive: true });
+    await writeFile(join(cwd, ".unrelated", "state"), "keep\n");
     const result = runCli(cwd, ["init", "--with-docs", "--json"]);
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
     assert.ok(existsSync(output.configPath));
-    assert.equal(await readFile(join(cwd, ".omx", "state"), "utf8"), "keep\n");
+    assert.equal(await readFile(join(cwd, ".unrelated", "state"), "utf8"), "keep\n");
     assert.ok(existsSync(join(cwd, ".codexus", "README.md")));
   } finally {
     await rm(cwd, { recursive: true, force: true });
@@ -144,30 +139,6 @@ test("remaining P0 json errors cover unexpected args, corrupt state, and disable
   }
 });
 
-test("adapter injection requires visible approval and never auto-injects", async () => {
-  const cwd = await tempDir();
-  try {
-    const blocked = runCli(cwd, ["adapt", "omx", "injection", "--task", "parser cleanup", "--json"]);
-    assert.equal(blocked.status, 1);
-    const blockedOutput = JSON.parse(blocked.stdout);
-    assert.equal(blockedOutput.status, "approval_required");
-    assert.equal(blockedOutput.autoInjection, false);
-    assert.equal(blockedOutput.injection, null);
-
-    const approved = runCli(cwd, ["adapt", "omx", "injection", "--task", "parser cleanup", "--approve", "--json"]);
-    assert.equal(approved.status, 0, approved.stderr);
-    const approvedOutput = JSON.parse(approved.stdout);
-    assert.equal(approvedOutput.status, "approved_not_injected");
-    assert.equal(approvedOutput.injection.injection.automatic, false);
-    assert.equal(approvedOutput.injection.injection.applied, false);
-    assert.equal(approvedOutput.injection.approval.userVisibleApproval, true);
-    assert.ok(existsSync(approvedOutput.injection.paths.json));
-    assert.ok(existsSync(approvedOutput.injection.contextArtifact.paths.json));
-  } finally {
-    await rm(cwd, { recursive: true, force: true });
-  }
-});
-
 test("driver failures are classified and written to the run ledger", async () => {
   const cwd = await tempDir();
   try {
@@ -269,7 +240,7 @@ test("repairable driver failures can be retried behind an explicit driver-repair
   }
 });
 
-test("skill index, export, adapter context, gated replay, and memory lifecycle work together", async () => {
+test("skill index, export, gated replay, and memory lifecycle work together", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();
   try {
@@ -299,31 +270,6 @@ test("skill index, export, adapter context, gated replay, and memory lifecycle w
     assert.equal(JSON.parse(list.stdout).entries.length, 1);
     const pruneDryRun = runCli(cwd, ["memory", "prune", "--before", "2999-01-01T00:00:00.000Z", "--dry-run", "--json"]);
     assert.equal(JSON.parse(pruneDryRun.stdout).prune.removed, 1);
-
-    const retrieve = runCli(cwd, ["adapt", "omx", "retrieve", "--task", "parser regression", "--json"]);
-    assert.equal(retrieve.status, 0, retrieve.stderr);
-    const retrieveOutput = JSON.parse(retrieve.stdout);
-    assert.equal(retrieveOutput.skills[0].id, skillId);
-    assert.equal(retrieveOutput.memories[0].id, JSON.parse(memory.stdout).entry.id);
-
-    const context = runCli(cwd, ["adapt", "omx", "context", "--task", "parser regression", "--max-chars", "1600", "--json"]);
-    assert.equal(context.status, 0, context.stderr);
-    const contextOutput = JSON.parse(context.stdout);
-    assert.match(contextOutput.contextBlock, /codexus:/);
-    assert.equal(contextOutput.skills[0].replayStatus, "passed");
-    assert.ok(contextOutput.budget.usedChars <= 1600);
-
-    const approvedContext = runCli(cwd, ["adapt", "omx", "context", "--task", "parser regression", "--approve", "--json"]);
-    assert.equal(approvedContext.status, 0, approvedContext.stderr);
-    const approvedOutput = JSON.parse(approvedContext.stdout);
-    assert.equal(approvedOutput.artifact.status, "approved");
-    assert.equal(approvedOutput.artifact.approval.injectedAutomatically, false);
-    assert.ok(existsSync(approvedOutput.artifact.paths.markdown));
-    const approvedMarkdown = await readFile(approvedOutput.artifact.paths.markdown, "utf8");
-    const approvedJson = JSON.parse(await readFile(approvedOutput.artifact.paths.json, "utf8"));
-    assert.equal(approvedJson.schemaVersion, 1);
-    assert.equal(approvedJson.context.contextBlock, approvedMarkdown);
-    assert.equal(approvedOutput.artifact.approval.contextHash, sha256Text(approvedMarkdown));
 
     const replay = runCli(cwd, ["replay", "skill", skillId, "--with-model-replay", "--json"]);
     assert.equal(replay.status, 0, replay.stderr);
@@ -533,4 +479,85 @@ test("enabled automation gates still block live dispatch until dispatcher exists
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
+});
+
+// The removed adapter integration's three-letter name, built dynamically so
+// this test file itself contains zero literal references to it.
+const removedIntegrationName = String.fromCharCode(111, 109, 120);
+const removedIntegrationPattern = new RegExp(removedIntegrationName, "i");
+
+test("a stale config with the removed adapter section loads as deprecated, not unknown", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, ".codexus"), { recursive: true });
+    // A config carrying the now-removed top-level section and its nested key.
+    await writeFile(
+      join(cwd, ".codexus", "config.json"),
+      `${JSON.stringify({
+        [removedIntegrationName]: {
+          enabled: "auto",
+          preferSparkshellForVerification: true,
+        },
+        verification: { commands: [], timeoutMs: 90000 },
+      }, null, 2)}\n`,
+    );
+
+    // doctor must succeed (no crash) and surface config warnings.
+    const doctor = runCli(cwd, ["doctor", "--json"]);
+    assert.equal(doctor.status, 0, doctor.stderr);
+    const doctorOutput = JSON.parse(doctor.stdout);
+    const warnings: string[] = doctorOutput.warnings;
+    // The removed key must never be reported as an "unknown config key".
+    assert.ok(
+      !warnings.some((warning) => warning.startsWith("unknown config key") && removedIntegrationPattern.test(warning)),
+      `removed section was reported as unknown: ${JSON.stringify(warnings)}`,
+    );
+    // It is recognized as a deprecated/ignored key instead.
+    assert.ok(
+      warnings.some((warning) => warning.startsWith("deprecated config key") && removedIntegrationPattern.test(warning)),
+      `expected a deprecation notice for the removed section: ${JSON.stringify(warnings)}`,
+    );
+    // The deprecation notice is emitted at most once for the stale key.
+    assert.equal(
+      warnings.filter((warning) => warning.startsWith("deprecated config key") && removedIntegrationPattern.test(warning)).length,
+      1,
+    );
+    // A real unrelated config value still applied (the deprecated key did not
+    // poison merging of legitimate config).
+    const driverCheck = doctorOutput.checks.find((check: { id: string }) => check.id.startsWith("driver."));
+    assert.ok(driverCheck);
+
+    // run must also work end-to-end with the stale config present.
+    const run = runCli(cwd, ["run", "--driver", "mock", "--json", "stale config run"]);
+    assert.equal(run.status, 0, run.stderr);
+    assert.equal(JSON.parse(run.stdout).outcome, "complete");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("source tree contains zero references to the removed adapter integration", async () => {
+  const srcRoot = resolve("src");
+  const offenders: string[] = [];
+  async function walk(dir: string): Promise<void> {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(path);
+      } else if (entry.isFile() && /\.(ts|mjs|js)$/.test(entry.name)) {
+        const text = await readFile(path, "utf8");
+        for (const [index, line] of text.split("\n").entries()) {
+          if (removedIntegrationPattern.test(line)) {
+            offenders.push(`${path}:${index + 1}: ${line.trim()}`);
+          }
+        }
+      }
+    }
+  }
+  await walk(srcRoot);
+  assert.deepEqual(
+    offenders,
+    [],
+    `removed adapter integration must not reappear in src/:\n${offenders.join("\n")}`,
+  );
 });

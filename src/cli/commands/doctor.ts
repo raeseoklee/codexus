@@ -148,7 +148,6 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   checks.push(commandCheck("codex.app_server_help", config.codex.command, ["app-server", "--help"], "codex app-server help ok"));
   checks.push(commandCheck("codex.features", config.codex.command, ["features", "list"], "codex features listed", "warn"));
   checks.push(await codexusSkillInstallCheck());
-  checks.push(commandCheck("omx.version", "omx", ["--version"], "omx available", "warn"));
   checks.push(commandCheck("git.root", "git", ["-C", cwd, "rev-parse", "--show-toplevel"], "git root detected", "warn"));
   checks.push(commandCheck("tmux.version", "tmux", ["-V"], "tmux available", "warn"));
 

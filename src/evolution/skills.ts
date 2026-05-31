@@ -495,9 +495,8 @@ async function findActiveSkillEntry(cwd: string, skillId: string): Promise<Skill
   return active;
 }
 
-function exportRoot(target: "codex" | "omx"): string {
-  if (target === "codex") return join(process.env.CODEX_HOME ?? join(homedir(), ".codex"), "skills");
-  return join(process.env.OMX_HOME ?? join(homedir(), ".omx"), "skills");
+function exportRoot(target: "codex"): string {
+  return join(process.env.CODEX_HOME ?? join(homedir(), ".codex"), "skills");
 }
 
 function exportDirName(skill: SkillProposal): string {
@@ -510,8 +509,8 @@ function validateSkillForExternalTarget(skill: SkillProposal): void {
   if (!skill.safety.requiresVerification) throw new Error(`skill_export_validation_failed:${skill.id}`);
 }
 
-export async function exportActiveSkill(cwd: string, skillId: string, target: "codex" | "omx", force = false): Promise<{ skillId: string; target: "codex" | "omx"; path: string; writtenAt: string }> {
-  if (target !== "codex" && target !== "omx") throw new Error(`invalid_skill_export_target:${target}`);
+export async function exportActiveSkill(cwd: string, skillId: string, target: "codex", force = false): Promise<{ skillId: string; target: "codex"; path: string; writtenAt: string }> {
+  if (target !== "codex") throw new Error(`invalid_skill_export_target:${target}`);
   const entry = await findActiveSkillEntry(cwd, skillId);
   const skill = entry.skill;
   validateSkillForExternalTarget(skill);

@@ -181,7 +181,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 ## 이번 재검토의 방향 변경
 
-- custom chat surface를 먼저 만들지 않습니다. 다음 제품 방향은 OMX에서 배운
+- custom chat surface를 먼저 만들지 않습니다. 다음 제품 방향은
   Codex-native session runtime입니다: skill adapter, marker-bounded AGENTS
   overlay, local session state, 명시적 checkpoint/verification, optional
   hook/status, optional tmux worker를 같은 core runtime 위에 둡니다.
@@ -218,7 +218,7 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
    공유합니다. Permission, approval, lock, dispatch, completion event가 실제로 준비되기
    전에는 dispatcher를 구현하지 않습니다.
-5. Adapter injection은 `cx adapt omx injection --approve`가 필요하고 visible approval
+5. Adapter injection은 명시적 approval이 필요하고 visible approval
    artifact를 기록합니다. 여전히 prompt context를 자동 주입하지 않습니다.
 6. `cx session hud --json`이 지원되는 fallback입니다. Statusline integration은 Codex가
    안정적인 supported configuration surface를 노출할 때까지 계속 보류합니다.

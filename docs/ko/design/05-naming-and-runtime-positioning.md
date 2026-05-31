@@ -63,9 +63,9 @@ codexus
 
 이 경로는 compatibility 때문에 유지합니다. 향후 `.codexus/`를 도입한다면 backward-compatible read가 있는 명시적 migration으로 진행해야 합니다.
 
-## OMX와의 관계
+## 런타임 포지셔닝
 
-OMX는 Codex session-native harness입니다. Codexus는 현재 외부 supervisor CLI에서 출발합니다.
+Codexus는 현재 외부 supervisor CLI에서 출발합니다.
 
 목표 상태:
 
@@ -75,7 +75,7 @@ Codexus Core
   + External CLI engine: cx run / verify / replay / status
 ```
 
-이 구조는 Codexus의 durable supervisor 장점을 유지하면서, OMX처럼 현재 Codex session
+이 구조는 Codexus의 durable supervisor 장점을 유지하면서, 현재 Codex session
 안에서 자연스럽게 호출되는 UX를 primary product shape로 만듭니다. 외부 `cx` surface는
 automation, bounded sub-run, recovery에 필수인 engine path로 남습니다.
 

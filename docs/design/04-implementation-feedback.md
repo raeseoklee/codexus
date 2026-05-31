@@ -113,7 +113,7 @@ Not required:
 - No need to move away from `codex exec --json`.
 - No need to make app-server the primary path.
 - No need to introduce a server daemon yet.
-- No need to depend on OMX for core runtime.
+- Core runtime has no external-harness dependency.
 - No need to abandon the Hermes-style evolution loop.
 
 ## Next Implementation Priority

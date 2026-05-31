@@ -108,7 +108,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     const skillId = args.positionals[1];
     if (!skillId) throw new Error("missing_skill_id");
     const target = flagString(args.flags, "target");
-    if (target !== "codex" && target !== "omx") throw new Error(`invalid_skill_export_target:${target ?? "missing"}`);
+    if (target !== "codex") throw new Error(`invalid_skill_export_target:${target ?? "missing"}`);
     const result = await exportActiveSkill(cwd, skillId, target, flagBool(args.flags, "force"));
     if (json) {
       console.log(JSON.stringify({ export: result }, null, 2));

@@ -189,7 +189,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 ## Direction Changes From This Review
 
 - Do not build a custom chat surface first. The next product direction is an
-  OMX-informed, Codex-native session runtime: skill adapter, marker-bounded AGENTS
+  Codex-native session runtime: skill adapter, marker-bounded AGENTS
   overlay, local session state, explicit checkpoints/verification, optional
   hooks/status, and optional tmux workers over the same core runtime.
 - Treat `codex exec resume` sessions as a deferred external multi-turn feature,
@@ -227,8 +227,8 @@ evidence only when the supporting runtime exists:
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`; implement the dispatcher only after
    permission, approval, lock, dispatch, and completion events are live.
-5. Adapter injection now requires `cx adapt omx injection --approve`, records a
-   visible approval artifact, and still does not auto-inject prompt context.
+5. Retrieved context surfaces only as approved, user-visible artifacts, with no
+   auto-injection of prompt context.
 6. `cx session hud --json` is the supported fallback; statusline integration
    remains blocked until Codex exposes a stable supported configuration surface.
 7. `cx session workers status --json` reports the tmux worker launch gate; do

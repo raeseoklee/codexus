@@ -3,7 +3,7 @@
   "$id": "https://codexus.local/schemas/config.schema.json",
   "title": "Codexus Config",
   "type": "object",
-  "required": ["driver", "codex", "verification", "repair", "evolution", "omx", "automation"],
+  "required": ["driver", "codex", "verification", "repair", "evolution", "automation"],
   "properties": {
     "driver": { "enum": ["codex-exec", "mock", "codex-app-server"] },
     "codex": {
@@ -40,14 +40,6 @@
         "enabled": { "type": "boolean" },
         "autoPromote": { "type": "boolean" },
         "redactBeforeMemory": { "type": "boolean" }
-      }
-    },
-    "omx": {
-      "type": "object",
-      "required": ["enabled", "preferSparkshellForVerification"],
-      "properties": {
-        "enabled": { "type": ["boolean", "string"] },
-        "preferSparkshellForVerification": { "type": "boolean" }
       }
     },
     "automation": {

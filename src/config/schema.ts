@@ -20,10 +20,6 @@ export interface HarnessConfig {
     autoPromote: boolean;
     redactBeforeMemory: boolean;
   };
-  omx: {
-    enabled: "auto" | boolean;
-    preferSparkshellForVerification: boolean;
-  };
   automation: {
     cronEnabled: boolean;
     gatewayEnabled: boolean;
@@ -51,10 +47,6 @@ export const defaultConfig: HarnessConfig = {
     enabled: true,
     autoPromote: false,
     redactBeforeMemory: true,
-  },
-  omx: {
-    enabled: "auto",
-    preferSparkshellForVerification: true,
   },
   automation: {
     cronEnabled: false,

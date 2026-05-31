@@ -47,8 +47,9 @@ mandatory reference set below and record the mapping.
   compare OpenClaude's terminal-first workflow and Hermes' conversation/gateway
   loops. Do not create a second chat loop unless the design explicitly says why
   Codex-native operation is insufficient.
-- OMX interop: use OMX as a sibling Codex-side reference, but do not let OMX
-  replace the three mandatory harness references above.
+- Sibling harnesses are references only: Codexus has no dependency on or adapter
+  for them, and sibling Codex-side harnesses must not replace the three mandatory
+  harness references above.
 
 ## Required Process
 

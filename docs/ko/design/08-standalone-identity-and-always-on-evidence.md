@@ -7,23 +7,22 @@
 
 ## 결정
 
-Codexus는 자기 축으로 진화합니다. 근시일 제품 표면은 OMX에서 배운 Codex-native 세션
-경험을 유지하되, 정체성은 "OMX의 형제"가 아니라 **evidence-first**입니다. 구체적으로:
+Codexus는 자기 축으로 진화합니다. 근시일 제품 표면은 Codex-native 세션
+경험을 유지하되, 정체성은 **evidence-first**입니다. 구체적으로:
 
 - 제품 문구와 근시일 UX 초점은 Codex-native로 유지.
 - 코어(kernel, ledger, verification, event/state schema)는 engine-agnostic 유지.
-- Codexus는 OMX를 기준으로 자기를 정의하길 멈춥니다. OMX(및 다른 harness reference)에서
-  계속 *배우되*, OMX clone처럼 마케팅하지 않고, `cx adapt omx` bridge는 옵셔널로 두며
-  정체성 밖에 둡니다.
+- Codexus는 어떤 sibling harness를 기준으로도 자기를 정의하지 않습니다. prior harness
+  work에서 배우되, 다른 harness에 대한 의존이나 adapter가 없습니다; 정체성은 evidence 축입니다.
 
-Codexus가 소유하는 차별점 — OMX가 추구하지 않는 것 — 은 검증 가능한 완료, 재현 가능한
+Codexus가 소유하는 차별점은 검증 가능한 완료, 재현 가능한
 실행 증거, 정직한 capability 보고, engine-agnostic driver 경계입니다.
 
 ## 왜 단독 정체성인가
 
-OMX는 워크플로와 런타임의 넓이(에스컬레이션 흐름, tmux team, worktree, HUD, 넓은 skill
-어휘)를 최적화합니다. 그 축에서 더 성숙하고 넓습니다. 1인 알파가 그 넓이를 따라가려 하면
-OMX의 안방에서 지고 Codexus의 차별점이 희석됩니다.
+Workflow-first harness는 런타임의 넓이(에스컬레이션 흐름, tmux team, worktree, HUD, 넓은 skill
+어휘)를 최적화합니다. 그 축에서 더 넓습니다. 1인 알파가 그 넓이를 따라가려 하면
+그들의 안방에서 지고 Codexus의 차별점이 희석됩니다.
 
 Codexus는 다른 축에서 또렷합니다:
 
@@ -33,13 +32,13 @@ Codexus는 다른 축에서 또렷합니다:
    내며, 가정에서 내지 않습니다.
 3. **durable evidence ledger와 replay.** run과 세션 상태가 크래시 후 디스크에서 재구성됩니다.
 4. **engine-agnostic driver 경계.** driver 추상화가 두 번째 엔진(예: Claude Code)을 kernel
-   재작성 없이 열어둡니다 — OMX는 구조적으로 그렇게 만들어져 있지 않습니다.
+   재작성 없이 열어둡니다 — workflow-first harness는 구조적으로 그렇게 만들어져 있지 않습니다.
 
-단독 진화 = 이 축을 소유하는 것이지 OMX를 복제하는 것이 아닙니다.
+단독 진화 = 이 축을 소유하는 것이지 넓이를 복제하는 것이 아닙니다.
 
 ## 비목표 (Non-Goals)
 
-- "OMX처럼 보이려고" OMX 넓이를 복제하지 않습니다: 큰 mode/skill/role 카탈로그, tmux team
+- "넓어 보이려고" workflow-first 넓이를 복제하지 않습니다: 큰 mode/skill/role 카탈로그, tmux team
   런타임, worktree 병렬, 워크플로 에스컬레이션 어휘를 근시일 목표로 두지 않습니다. 이들은
   나중에, 그리고 evidence 축에 봉사할 때만 돌아옵니다.
 - kernel/ledger/verification/normalized event·state schema에 Codex 특수 가정을 박지 않습니다.
@@ -212,9 +211,9 @@ Overlay는 행동을 요청할 뿐, 행동을 증명하지 않습니다. Notify 
   Codex-specific 가정이 kernel·ledger·verification·normalized event/state schema에 들어가지 않고,
   Codex 밖으로 넓히기 전 `engine`/`driverId`/`capabilities` descriptor field가 도입됨.
 
-## OMX와의 관계
+## Sibling Harness와의 관계
 
-Codexus는 "OMX 형제"에서 독립적 evidence-first 정체성으로 이동합니다. OMX(및 다른
-harness reference)는 배울 prior art로 유지하고, 옵셔널 `cx adapt omx` bridge는 남을 수 있지만,
-둘 중 무엇도 Codexus를 정의하지 않습니다. 여기서 독립은 적대가 아니라 정체성입니다: Codexus는
-OMX가 추구하지 않는 축을 소유함으로써 OMX와 비교되길 멈춥니다.
+Codexus는 독립적 evidence-first 정체성을 가집니다. 다른 harness(workflow-first 또는
+session-native)를 배울 prior art로 대하되, 그중 무엇에도 의존하지 않고 cross-harness adapter도
+싣지 않습니다. 여기서 독립은 적대가 아니라 정체성입니다: Codexus는 evidence 축을 소유함으로써
+정의되지, 비교로 정의되지 않습니다.

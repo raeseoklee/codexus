@@ -37,8 +37,8 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Implementation feedback](design/04-implementation-feedback.md): decisions made after MVP implementation blockers and whether the architecture direction changes.
 - [Naming and runtime positioning](design/05-naming-and-runtime-positioning.md): Codexus name, `cx` CLI target, external CLI runtime, and Codex-native session direction.
 - [Codex-native adapter](design/06-codex-native-adapter.md): `$codexus` skill adapter, installation, supported first commands, and design rules.
-- [Session-native supervision](design/07-supervised-sessions.md): OMX-informed session-native integration using skills, AGENTS overlays, hooks/status state, and optional tmux workers inside the current Codex session.
-- [Standalone identity and always-on evidence](design/08-standalone-identity-and-always-on-evidence.md): evidence-first identity, OMX decoupling, the always-on evidence model (derived dirty/stale, verify auto-detection, evidence-bearing-only gate), and engine-agnostic invariants.
+- [Session-native supervision](design/07-supervised-sessions.md): Codex-native session integration using skills, AGENTS overlays, hooks/status state, and optional tmux workers inside the current Codex session.
+- [Standalone identity and always-on evidence](design/08-standalone-identity-and-always-on-evidence.md): evidence-first identity, standalone identity, the always-on evidence model (derived dirty/stale, verify auto-detection, evidence-bearing-only gate), and engine-agnostic invariants.
 - [Subagent evidence supervision](design/09-subagent-evidence-supervision.md): Codex-native subagents as bounded evidence-producing adapters, not completion authorities.
 - [Quality evidence guard (slop guard)](design/10-quality-evidence-guard.md): evidence-first change-quality gate that splits derivable evidence gaps from advisory heuristic claims, built on the session evidence model.
 - [Supply-chain evidence](design/11-supply-chain-evidence.md): local, derivable supply-chain facts and an optional pre-publish gate, reusing the change-evidence model — not a CVE/network scanner.
