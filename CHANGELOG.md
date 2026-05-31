@@ -9,6 +9,8 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.0-alpha.4 - 2026-05-31
+
 ### Added
 
 - CLI version reporting via `cx --version` and `cx version --json`, covered by
@@ -17,6 +19,12 @@ occur before 1.0, but they should be called out clearly.
   report-only JSON output, `--gate` exit codes, lifecycle-safe static package
   projection, policy validation, package-smoke single-source file assertions,
   and a schema artifact for `codexus.supplyChain`.
+
+### Fixed
+
+- Supply-chain secret leak gates now use only high-confidence token/key patterns;
+  broad redaction heuristics such as ordinary `token = value` assignments remain
+  non-gating to avoid false-positive publish blockers.
 
 ## 0.1.0-alpha.3 - 2026-05-31
 

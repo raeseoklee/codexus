@@ -9,6 +9,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.0-alpha.4 - 2026-05-31
+
 ### Added
 
 - `cx --version`과 `cx version --json`을 통한 CLI version reporting을
@@ -17,6 +19,12 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   Report-only JSON output, `--gate` exit code, lifecycle-safe static package
   projection, policy validation, package-smoke의 단일 출처 file assertion,
   `codexus.supplyChain` schema artifact를 포함합니다.
+
+### Fixed
+
+- Supply-chain secret leak gate는 이제 고신뢰 token/key 패턴만 사용합니다.
+  일반적인 `token = value` assignment 같은 broad redaction heuristic은
+  false-positive publish blocker를 피하기 위해 gate에 사용하지 않습니다.
 
 ## 0.1.0-alpha.3 - 2026-05-31
 
