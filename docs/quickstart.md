@@ -212,3 +212,20 @@ cx init --with-docs --json
 
 This creates `.codexus/` directories and config without mutating unrelated
 tool state.
+
+## Troubleshooting
+
+- **Node version:** npm-installed Codexus requires Node.js 22 or newer. Run
+  `node --version` when `cx` fails before rendering JSON.
+- **Missing `codex` CLI:** real `codex-exec` runs require the local `codex`
+  command. `cx doctor --json` reports this as a failed Codex check; mock-driver
+  tests still work without it.
+- **Codex auth:** real runs require an authenticated local Codex CLI session.
+  Run `codex login status` directly if `doctor` reports an auth failure.
+- **Notify hook not observed:** `cx setup codex-session --enable-notify-hook`
+  installs configuration, but `cx session status --json` only reports dispatch
+  as observed after a real CLI/TUI `turn-ended` event. Desktop/app-server
+  sessions may not invoke the CLI notify hook.
+- **npm install path:** global npm installs may place `cx` outside your shell
+  `PATH`. Use `npm prefix -g` or install with `CODEXUS_NPM_PREFIX` /
+  `CODEXUS_BIN_DIR` through `install.sh` when you need a specific bin directory.

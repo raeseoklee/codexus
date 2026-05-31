@@ -210,3 +210,20 @@ cx init --with-docs --json
 
 이 명령은 관련 없는 tool state를 변경하지 않고 `.codexus/` directory와
 config를 생성합니다.
+
+## Troubleshooting
+
+- **Node version:** npm-installed Codexus는 Node.js 22 이상이 필요합니다.
+  `cx`가 JSON을 출력하기 전에 실패하면 `node --version`을 먼저 확인하세요.
+- **`codex` CLI 없음:** 실제 `codex-exec` run에는 local `codex` command가
+  필요합니다. `cx doctor --json`은 이를 Codex check failure로 보고합니다. Mock
+  driver test는 `codex` 없이도 동작합니다.
+- **Codex auth:** 실제 run에는 인증된 local Codex CLI session이 필요합니다.
+  `doctor`가 auth failure를 보고하면 `codex login status`를 직접 확인하세요.
+- **Notify hook 미관측:** `cx setup codex-session --enable-notify-hook`은
+  configuration을 설치하지만, `cx session status --json`은 실제 CLI/TUI
+  `turn-ended` event가 한 번 관측된 뒤에만 dispatch observed로 보고합니다.
+  Desktop/app-server session은 CLI notify hook을 호출하지 않을 수 있습니다.
+- **npm install path:** global npm install은 `cx`를 현재 shell `PATH` 밖에 둘 수
+  있습니다. 특정 bin directory가 필요하면 `npm prefix -g`를 확인하거나
+  `install.sh`에서 `CODEXUS_NPM_PREFIX` / `CODEXUS_BIN_DIR`를 지정하세요.
