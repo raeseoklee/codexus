@@ -158,7 +158,7 @@ replay, automatic prompt injection, live cron/gateway dispatch는 의도적으�
 | `codex exec --json` supervised run, verification/repair, run ledger, resume/cancel/status/events | 안정 경로 |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | 안정적인 session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | 안정적인 local evidence/gate surface |
-| app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; dry-run, status, record-only 또는 명시적 gate 뒤 |
+| app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; dry-run, status, record-only, launch-contract 또는 명시적 gate 뒤 |
 | autopilot contract layer | 제안된 설계, 0.2/0.3 트랙으로 deferred |
 
 정확한 coverage와 gap은 [구현 상태](implementation-status.md)와
@@ -187,6 +187,7 @@ cx session checkpoint "before risky refactor" --json
 cx session verify --auto --json
 cx session verify --verify "npm test" --json
 cx session slop --json
+cx session subagent launch --role reviewer --task "review the staged diff" --json
 cx session subagent record --file <result.json> --json
 cx session workers status --json
 cx schema engine --json

@@ -9,6 +9,18 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- `cx session subagent launch --role <role> --task <task> --json` now records a
+  deferred native-subagent launcher contract with `launcher.supported: false`,
+  a verification-only completion policy, and a handoff command for later claim
+  recording.
+
+### Changed
+
+- Session state moved to schema v5 so subagent state can link launcher-contract
+  artifacts without treating them as verification evidence.
+
 ## 0.1.0-alpha.5 - 2026-05-31
 
 ### Added

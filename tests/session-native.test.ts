@@ -505,6 +505,7 @@ test("session migrate reports and persists explicit session-state migrations", a
       "session_state_v2.add_notify_dispatch",
       "session_state_v3.add_workspace_fingerprint",
       "session_state_v4.add_subagent_links",
+      "session_state_v5.add_subagent_launcher_contract",
     ]);
     assert.equal(Object.hasOwn(JSON.parse(await readFile(statePath, "utf8")), "hookEvents"), false);
 
@@ -514,7 +515,7 @@ test("session migrate reports and persists explicit session-state migrations", a
     assert.equal(migrateOutput.status, "migrated");
     assert.equal(migrateOutput.dryRun, false);
     const migratedState = JSON.parse(await readFile(statePath, "utf8"));
-    assert.equal(migratedState.schemaVersion, 4);
+    assert.equal(migratedState.schemaVersion, 5);
     assert.deepEqual(migratedState.hookEvents, []);
     assert.deepEqual(migratedState.subagents, []);
     assert.equal(migratedState.notifyDispatch.status, "not_configured");
@@ -534,12 +535,12 @@ test("session migrate rejects unsupported future session-state versions", async 
   const codexHome = await tempDir();
   try {
     await mkdir(join(cwd, ".codexus", "session"), { recursive: true });
-    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 5 }\n");
+    await writeFile(join(cwd, ".codexus", "session", "state.json"), "{ \"schemaVersion\": 99 }\n");
     const migrate = runCli(cwd, ["session", "migrate", "--json"], { CODEX_HOME: codexHome });
     assert.equal(migrate.status, 1);
     const output = JSON.parse(migrate.stdout);
     assert.equal(output.code, "session_state_corrupt");
-    assert.match(output.details.target, /unsupported_schema_version:5/);
+    assert.match(output.details.target, /unsupported_schema_version:99/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -724,7 +725,7 @@ test("session verify stores a workspace fingerprint and last-verified evidence",
     assert.equal(output.state.lastVerifiedFingerprint.verificationId, output.verification.id);
     assert.equal(output.state.lastVerifiedFingerprint.fingerprint.unstagedDiffHash, fingerprint.unstagedDiffHash);
 
-    // The persisted state must validate against the v4 schema artifact.
+    // The persisted state must validate against the current session-state schema artifact.
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
@@ -954,6 +955,52 @@ test("session subagent attach records role-scoped claim bundles", async () => {
   }
 });
 
+test("session subagent launch records unavailable launcher contract without promoting evidence", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 0, verify.stderr);
+
+    const launch = runCli(cwd, ["session", "subagent", "launch", "--role", "reviewer", "--task", "review the staged diff", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(launch.status, 0, launch.stderr);
+    const output = JSON.parse(launch.stdout);
+    assert.equal(output.stability, "deferred");
+    assert.equal(output.launch.type, "codexus.session.subagent_launch_contract");
+    assert.equal(output.launch.status, "unavailable");
+    assert.equal(output.launch.launcher.supported, false);
+    assert.equal(output.launch.launcher.capability, "unavailable");
+    assert.equal(output.launch.policy.maySpawn, false);
+    assert.equal(output.launch.policy.completionAuthority, "verification");
+    assert.match(output.launch.handoff.recordCommand, /session subagent attach/);
+    assert.equal(output.link.status, "launch_unavailable");
+    assert.equal(output.link.claimCount, 0);
+    assert.ok(existsSync(output.artifactPath));
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.subagents.count, 0);
+    assert.equal(statusOutput.subagents.unverifiedClaims[0].taskId, output.launch.taskId);
+    assert.equal(statusOutput.subagents.unverifiedClaims[0].status, "launch_unavailable");
+    assert.equal(statusOutput.evidence.evidenceFresh, true);
+
+    const launchStatus = runCli(cwd, ["session", "subagent", "status", output.launch.taskId, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(launchStatus.status, 0, launchStatus.stderr);
+    const launchStatusOutput = JSON.parse(launchStatus.stdout);
+    assert.equal(launchStatusOutput.kind, "launch");
+    assert.equal(launchStatusOutput.launch.task, "review the staged diff");
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("session hud reports compact evidence without statusline support", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();
@@ -996,7 +1043,8 @@ test("session workers gate launch while subagents stay recorder-only", async () 
     const spawnOutput = JSON.parse(spawn.stdout);
     assert.equal(spawnOutput.type, "error");
     assert.equal(spawnOutput.code, "unsupported_session_subagent_command");
-    assert.match(spawnOutput.hint, /recorder-only/);
+    assert.match(spawnOutput.hint, /does not directly spawn/);
+    assert.match(spawnOutput.hint, /session subagent launch/);
     assert.match(spawnOutput.hint, /session subagent record/);
   } finally {
     await rm(cwd, { recursive: true, force: true });

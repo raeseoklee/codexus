@@ -14,7 +14,7 @@ import { buildChangeEvidenceReport, type ChangeEvidenceGate, type ChangeEvidence
 
 export const CODEXUS_OVERLAY_START = "<!-- CODEXUS:RUNTIME:START -->";
 export const CODEXUS_OVERLAY_END = "<!-- CODEXUS:RUNTIME:END -->";
-export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 4 as const;
+export const CURRENT_SESSION_STATE_SCHEMA_VERSION = 5 as const;
 
 export type OverlayScope = "project" | "user";
 export type OverlayProfile = "default" | "always-on";
@@ -86,7 +86,7 @@ export interface SessionHookEventRecord {
 export interface SessionSubagentLink {
   taskId: string;
   role: string;
-  status: "recorded" | "attached";
+  status: "recorded" | "attached" | "launch_unavailable";
   recordedAt: string;
   path: string;
   claimCount: number;
@@ -217,7 +217,7 @@ function isSessionSubagentLink(value: unknown): value is SessionSubagentLink {
   if (!isRecord(value)) return false;
   return typeof value.taskId === "string"
     && typeof value.role === "string"
-    && (value.status === "recorded" || value.status === "attached")
+    && (value.status === "recorded" || value.status === "attached" || value.status === "launch_unavailable")
     && typeof value.recordedAt === "string"
     && typeof value.path === "string"
     && typeof value.claimCount === "number"
@@ -436,15 +436,27 @@ function migrateV3SessionState(value: Record<string, unknown>, applied: string[]
   return next;
 }
 
+// v4 -> v5: introduce launcher-contract links. Existing recorder links remain
+// valid; v5 only extends the allowed subagent link status set.
+function migrateV4SessionState(value: Record<string, unknown>, applied: string[]): Record<string, unknown> {
+  const next: Record<string, unknown> = {
+    ...value,
+    schemaVersion: 5,
+  };
+  applied.push("session_state_v5.add_subagent_launcher_contract");
+  return next;
+}
+
 function migrateSessionState(value: unknown): { value: unknown; report: SessionStateMigrationReport } {
   if (!isRecord(value)) return { value, report: migrationReport({ fromVersion: null, reason: "not_an_object" }) };
   const fromVersion = schemaVersionOf(value);
   const applied: string[] = [];
-  if (fromVersion === 1 || fromVersion === 2 || fromVersion === 3) {
+  if (fromVersion === 1 || fromVersion === 2 || fromVersion === 3 || fromVersion === 4) {
     let next: Record<string, unknown> = value;
     if (fromVersion === 1) next = migrateV1SessionState(next, applied);
     if (fromVersion === 1 || fromVersion === 2) next = migrateV2SessionState(next, applied);
-    next = migrateV3SessionState(next, applied);
+    if (fromVersion === 1 || fromVersion === 2 || fromVersion === 3) next = migrateV3SessionState(next, applied);
+    next = migrateV4SessionState(next, applied);
     return {
       value: next,
       report: migrationReport({

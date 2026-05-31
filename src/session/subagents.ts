@@ -12,6 +12,7 @@ import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 
 export type SubagentRecordMode = "record" | "attach";
 export type SubagentClaimConfidence = "low" | "medium" | "high" | "unknown";
+export type SubagentLaunchMode = "read_only";
 
 export interface SubagentClaim {
   kind: string;
@@ -40,6 +41,47 @@ export interface SubagentResultArtifact {
   };
 }
 
+export interface SubagentLaunchContractArtifact {
+  schemaVersion: 1;
+  type: "codexus.session.subagent_launch_contract";
+  taskId: string;
+  role: string;
+  task: string;
+  mode: SubagentLaunchMode;
+  requestedAt: string;
+  stability: "deferred";
+  status: "unavailable";
+  launcher: {
+    driverId: "native-subagent";
+    supported: false;
+    capability: "unavailable";
+    reason: string;
+    recoveryHint: string;
+  };
+  policy: {
+    maySpawn: false;
+    mayModifyWorkspace: false;
+    mayApplyPatch: false;
+    verificationRequired: true;
+    completionAuthority: "verification";
+  };
+  handoff: {
+    recordCommand: string;
+    claimFileShape: {
+      taskId: string;
+      role: string;
+      claims: Array<{
+        kind: string;
+        text: string;
+        confidence: SubagentClaimConfidence;
+        evidenceLinks: string[];
+      }>;
+      limitations: string[];
+      evidenceLinks: string[];
+    };
+  };
+}
+
 export interface SubagentRecordResult {
   schemaVersion: 1;
   artifact: SubagentResultArtifact;
@@ -50,12 +92,31 @@ export interface SubagentRecordResult {
   state: CodexusSessionState;
 }
 
+export interface SubagentLaunchContractResult {
+  schemaVersion: 1;
+  stability: "deferred";
+  launch: SubagentLaunchContractArtifact;
+  link: SessionSubagentLink;
+  artifactDir: string;
+  artifactPath: string;
+  statePath: string;
+  state: CodexusSessionState;
+}
+
+export type SubagentStatusArtifact =
+  | { kind: "result"; artifact: SubagentResultArtifact }
+  | { kind: "launch"; launch: SubagentLaunchContractArtifact };
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function safeSegment(value: string): string {
   return value.replace(/[^A-Za-z0-9_.-]/g, "-").slice(0, 120) || createSubagentId();
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
 function stringArray(value: unknown): string[] {
@@ -202,6 +263,92 @@ export async function recordSubagentArtifact(cwd: string, options: {
   };
 }
 
+export async function createSubagentLaunchContract(cwd: string, options: {
+  role?: string;
+  task: string;
+}): Promise<SubagentLaunchContractResult> {
+  const task = options.task.trim();
+  if (!task) throw new Error("missing_subagent_task");
+  const role = options.role?.trim() || "subagent";
+  const taskId = createSubagentId();
+  const requestedAt = new Date().toISOString();
+  const claimFile = `.codexus/session/subagents/${taskId}/claims.json`;
+  const artifact: SubagentLaunchContractArtifact = {
+    schemaVersion: 1,
+    type: "codexus.session.subagent_launch_contract",
+    taskId,
+    role,
+    task,
+    mode: "read_only",
+    requestedAt,
+    stability: "deferred",
+    status: "unavailable",
+    launcher: {
+      driverId: "native-subagent",
+      supported: false,
+      capability: "unavailable",
+      reason: "Codexus CLI cannot call Codex native subagent tools from outside the active Codex runtime.",
+      recoveryHint: "Launch a native Codex subagent from the current Codex session when available, write its claim bundle to the suggested claims file, then run the record command.",
+    },
+    policy: {
+      maySpawn: false,
+      mayModifyWorkspace: false,
+      mayApplyPatch: false,
+      verificationRequired: true,
+      completionAuthority: "verification",
+    },
+    handoff: {
+      recordCommand: `cx session subagent attach --role ${shellQuote(role)} --claim-file ${shellQuote(claimFile)} --json`,
+      claimFileShape: {
+        taskId,
+        role,
+        claims: [
+          {
+            kind: "claim",
+            text: "<bounded claim from the subagent>",
+            confidence: "unknown",
+            evidenceLinks: [],
+          },
+        ],
+        limitations: ["native subagent launch was performed outside Codexus or was unavailable"],
+        evidenceLinks: [],
+      },
+    },
+  };
+  const paths = sessionPaths(cwd);
+  const artifactDir = join(paths.subagentsDir, taskId);
+  const artifactPath = join(artifactDir, "launch.json");
+  await ensureDir(artifactDir);
+  await writeJsonAtomic(artifactPath, artifact);
+  const link: SessionSubagentLink = {
+    taskId,
+    role,
+    status: "launch_unavailable",
+    recordedAt: requestedAt,
+    path: artifactPath,
+    claimCount: 0,
+    limitationCount: 1,
+    evidenceLinks: [],
+  };
+  const state = await updateSessionState(cwd, "session subagent launch", (value) => ({
+    ...value,
+    subagents: [
+      ...value.subagents.filter((item) => item.taskId !== taskId),
+      link,
+    ].slice(-50),
+  }));
+  return {
+    schemaVersion: 1,
+    stability: "deferred",
+    launch: artifact,
+    link,
+    artifactDir,
+    artifactPath,
+    statePath: paths.state,
+    state,
+  };
+}
+
 export async function readSubagentArtifact(cwd: string, taskId: string): Promise<SubagentResultArtifact> {
   const safeTaskId = safeSegment(taskId);
   const path = join(sessionPaths(cwd).subagentsDir, safeTaskId, "result.json");
@@ -213,11 +360,28 @@ export async function readSubagentArtifact(cwd: string, taskId: string): Promise
   return parsed as unknown as SubagentResultArtifact;
 }
 
+export async function readSubagentStatusArtifact(cwd: string, taskId: string): Promise<SubagentStatusArtifact> {
+  const safeTaskId = safeSegment(taskId);
+  const paths = sessionPaths(cwd);
+  const resultPath = join(paths.subagentsDir, safeTaskId, "result.json");
+  if (existsSync(resultPath)) {
+    return { kind: "result", artifact: await readSubagentArtifact(cwd, safeTaskId) };
+  }
+  const launchPath = join(paths.subagentsDir, safeTaskId, "launch.json");
+  if (!existsSync(launchPath)) throw new Error(`subagent_not_found:${safeTaskId}`);
+  const parsed = await parseJsonFile(launchPath);
+  if (!isRecord(parsed) || parsed.type !== "codexus.session.subagent_launch_contract" || parsed.schemaVersion !== 1) {
+    throw new Error(`subagent_artifact_invalid:${safeTaskId}`);
+  }
+  return { kind: "launch", launch: parsed as unknown as SubagentLaunchContractArtifact };
+}
+
 export function summarizeSubagentClaims(state: CodexusSessionState | null): {
   count: number;
   unverifiedClaims: Array<{
     taskId: string;
     role: string;
+    status: SessionSubagentLink["status"];
     claimCount: number;
     limitationCount: number;
     evidenceLinks: string[];
@@ -227,6 +391,7 @@ export function summarizeSubagentClaims(state: CodexusSessionState | null): {
   const unverifiedClaims = (state?.subagents ?? []).map((item) => ({
     taskId: item.taskId,
     role: item.role,
+    status: item.status,
     claimCount: item.claimCount,
     limitationCount: item.limitationCount,
     evidenceLinks: item.evidenceLinks,

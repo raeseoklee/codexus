@@ -5,7 +5,7 @@
   "type": "object",
   "required": ["schemaVersion", "sessionId", "cwd", "status", "createdAt", "updatedAt", "lastCommand", "checkpoints", "verifications", "lastVerifiedFingerprint", "hookEvents", "subagents", "linkedRunIds", "capabilities", "notifyDispatch", "overlays"],
   "properties": {
-    "schemaVersion": { "const": 4 },
+    "schemaVersion": { "const": 5 },
     "sessionId": { "type": "string", "minLength": 1 },
     "cwd": { "type": "string", "minLength": 1 },
     "status": { "enum": ["initialized"] },
@@ -120,7 +120,7 @@
         "properties": {
           "taskId": { "type": "string", "minLength": 1 },
           "role": { "type": "string", "minLength": 1 },
-          "status": { "enum": ["recorded", "attached"] },
+          "status": { "enum": ["recorded", "attached", "launch_unavailable"] },
           "recordedAt": { "type": "string" },
           "path": { "type": "string", "minLength": 1 },
           "claimCount": { "type": "number" },

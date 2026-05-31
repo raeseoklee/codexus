@@ -162,7 +162,7 @@ prompt injection, and live cron/gateway dispatch remain intentionally gated.
 | Supervised `codex exec --json` runs, verification/repair, run ledger, resume/cancel/status/events | Stable path |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence/gate surface |
-| app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; dry-run, status, record-only, or explicitly gated |
+| app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; dry-run, status, record-only, launch-contract, or explicitly gated |
 | autopilot contract layer | Proposed design, deferred to the 0.2/0.3 track |
 
 See [Implementation status](docs/implementation-status.md) and
@@ -191,6 +191,7 @@ cx session checkpoint "before risky refactor" --json
 cx session verify --auto --json
 cx session verify --verify "npm test" --json
 cx session slop --json
+cx session subagent launch --role reviewer --task "review the staged diff" --json
 cx session subagent record --file <result.json> --json
 cx session workers status --json
 cx schema engine --json

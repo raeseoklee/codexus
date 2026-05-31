@@ -171,8 +171,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   heuristics fail a change.
 - `cx session subagent record/attach/status` records subagent claim bundles
   under `.codexus/session/subagents/`, links them from session state, and keeps
-  subagent claims separate from verification freshness. Codexus does not expose
-  a native subagent launcher in the current recorder-only slice.
+  subagent claims separate from verification freshness. `cx session subagent
+  launch` records a deferred launcher contract with `launcher.supported: false`;
+  Codexus still does not spawn native subagents from the CLI.
 - `cx session workers status --json` reports the tmux-backed worker launch gate
   without starting worker panes.
 - `cx setup codex-session --enable-notify-hook` installs a Codex notify hook
@@ -187,8 +188,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - On real `turn-ended` dispatch, notify events can include a bounded
   `heartbeatEvidence` snapshot of the derived evidence model. The hook never
   executes verification and cannot make stale evidence fresh.
-- Session state schema v4 separates notify installation from dispatch, adds
-  workspace-fingerprint evidence, and links read-only subagent claim artifacts:
+- Session state schema v5 separates notify installation from dispatch, adds
+  workspace-fingerprint evidence, and links read-only subagent claim and launch
+  contract artifacts:
   `capabilities.hooks` is `configured` after install and `available` only after
   a real `turn-ended` event is observed. Manual smoke events do not mark
   dispatch observed.
@@ -213,7 +215,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
 - `schemas/session-state.schema.json` is a first-class schema artifact for the
-  v4 session-state shape, and
+  v5 session-state shape, and
   `cx schema validate --type session-state --file <path> --json` validates
   session state through the same local schema-artifact subset engine.
 - `doctor --json` reports Codexus session state, project/user overlay status,
@@ -298,8 +300,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   manual-smoke dispatch false-positive protection are covered by CLI tests.
 - Session HUD, explicit review-artifact links in the quality evidence guard,
   schema engine status, replay parity status, adapter injection approval
-  artifacts, session worker gates, and recorder-only subagent launch rejection
-  are covered by CLI tests.
+  artifacts, session worker gates, recorder-only subagent spawn rejection, and
+  deferred launcher-contract behavior are covered by CLI tests.
 - Slop guard gate mode is covered for pass, fail, and unknown/blocked outcomes.
 - Always-on notify heartbeat quality snapshots are covered by session-native
   tests and session-state schema validation.

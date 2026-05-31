@@ -249,7 +249,7 @@ function validateWorkspaceFingerprint(value: unknown, errors: string[], path: st
 export function validateSchemaValue(type: SchemaValidationType, value: unknown): SchemaValidationResult {
   const errors: string[] = [];
   if (!requireRecord(value, errors, type)) return { schemaVersion: 1, type, valid: false, errors };
-  const expectedSchemaVersion = type === "session-state" ? 4 : 1;
+  const expectedSchemaVersion = type === "session-state" ? 5 : 1;
   if (type !== "config" && type !== "supply-chain-policy" && value.schemaVersion !== expectedSchemaVersion) errors.push(`schemaVersion:not_${expectedSchemaVersion}`);
   if (type === "config" && value.schemaVersion !== undefined && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
 
@@ -425,7 +425,7 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       }
       requireString(item, "taskId", errors, "subagents.taskId");
       requireString(item, "role", errors, "subagents.role");
-      requireOneOf(item, "status", ["recorded", "attached"], errors, "subagents.status");
+      requireOneOf(item, "status", ["recorded", "attached", "launch_unavailable"], errors, "subagents.status");
       requireString(item, "recordedAt", errors, "subagents.recordedAt");
       requireString(item, "path", errors, "subagents.path");
       requireNumber(item, "claimCount", errors, "subagents.claimCount");

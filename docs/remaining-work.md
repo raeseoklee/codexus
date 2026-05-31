@@ -239,10 +239,9 @@ evidence only when the supporting runtime exists:
    `--gate` automation mode. Further expansion must still come only from
    derivable artifacts such as coverage or lint/typecheck outputs; heuristics
    stay advisory.
-10. Subagent support remains recorder-only. Do not expose an active native
-   spawn launcher until recorder semantics remain stable and a supported launch
-   contract exists; subagent claims must stay separate from verification
-   freshness.
+10. Subagent support remains recorder/contract-only. Do not expose an active
+   native spawn launcher until a supported Codex bridge exists; subagent claims
+   must stay separate from verification freshness.
 11. Autopilot remains a 0.2/0.3 design track. Start with schema artifacts and a
     report-only scope gate before exposing `cx autopilot run`; it must remain
     human-approved, worktree-isolated, and `stability: experimental`.
@@ -262,8 +261,9 @@ These are the remaining implementation tracks after the 0.1.0 readiness cleanup:
    surface; keep `cx session hud --json` as the fallback.
 5. tmux-backed worker launch: keep `session workers status` as a gate report
    until the session state protocol and launch contract are stable.
-6. Native subagent launcher: keep recorder-only support until a supported launch
-   contract exists and claims remain separate from verification freshness.
+6. Native subagent launcher: keep recorder/contract-only support until a
+   supported Codex bridge exists and claims remain separate from verification
+   freshness.
 7. Automatic adapter injection: keep approval artifacts visible and no
    auto-injection until an explicit, reversible injection path is designed.
 8. Routine live model replay: keep it opt-in, budget-gated, and outside the

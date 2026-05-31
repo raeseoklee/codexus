@@ -20,7 +20,7 @@ import { deriveEvidenceModel } from "../../session/evidence.ts";
 import { buildChangeEvidenceReport } from "../../session/change-evidence.ts";
 import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
-import { readSubagentArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
+import { createSubagentLaunchContract, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 
 function statePath(cwd: string): string {
@@ -388,18 +388,41 @@ async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Pr
     console.log(result.artifactPath);
     return;
   }
+  if (action === "launch") {
+    assertAllowedFlags(args, ["json", "cwd", "role", "task"]);
+    assertMaxPositionals(args, 2);
+    const task = flagString(args.flags, "task");
+    if (!task) throw new Error("missing_subagent_task");
+    const result = await createSubagentLaunchContract(cwd, {
+      role: flagString(args.flags, "role") ?? "subagent",
+      task,
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Subagent launch unavailable; contract recorded: ${result.launch.taskId}`);
+    console.log(result.artifactPath);
+    console.log(result.launch.launcher.recoveryHint);
+    return;
+  }
   if (action === "status") {
     assertAllowedFlags(args, ["json", "cwd"]);
     const taskId = args.positionals[2];
     if (!taskId) throw new Error("missing_subagent_id");
     assertMaxPositionals(args, 3);
-    const artifact = await readSubagentArtifact(cwd, taskId);
+    const status = await readSubagentStatusArtifact(cwd, taskId);
     if (json) {
-      console.log(JSON.stringify({ schemaVersion: 1, artifact }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, ...status }, null, 2));
       return;
     }
-    console.log(`Subagent ${artifact.taskId}: ${artifact.status}`);
-    console.log(`Claims: ${artifact.claims.length}`);
+    if (status.kind === "result") {
+      console.log(`Subagent ${status.artifact.taskId}: ${status.artifact.status}`);
+      console.log(`Claims: ${status.artifact.claims.length}`);
+      return;
+    }
+    console.log(`Subagent ${status.launch.taskId}: launch ${status.launch.status}`);
+    console.log(status.launch.launcher.reason);
     return;
   }
   throw new Error(`unsupported_session_subagent_command:${action}`);

@@ -98,8 +98,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   automation exit code로 변환하지만 heuristic으로 change를 fail시키지는 않습니다.
 - `cx session subagent record/attach/status`는 subagent claim bundle을
   `.codexus/session/subagents/` 아래 기록하고 session state에서 link하며, subagent claim을
-  verification freshness와 분리합니다. 현재 recorder-only slice에서 Codexus는 native
-  subagent launcher를 노출하지 않습니다.
+  verification freshness와 분리합니다. `cx session subagent launch`는
+  `launcher.supported: false`인 deferred launcher contract를 기록합니다. Codexus는 여전히
+  CLI에서 native subagent를 spawn하지 않습니다.
 - `cx session workers status --json`은 worker pane을 시작하지 않고 tmux-backed worker
   launch gate를 보고합니다.
 - `cx setup codex-session --enable-notify-hook`은 현재 project가 Codex config에서
@@ -114,8 +115,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - 실제 `turn-ended` dispatch에서 notify event는 derived evidence model의 bounded
   snapshot인 `heartbeatEvidence`를 포함할 수 있습니다. Hook은 verification을 실행하지
   않고 stale evidence를 fresh로 만들 수도 없습니다.
-- Session state schema v4는 notify 설치와 dispatch 관측을 분리하고
-  workspace-fingerprint evidence 및 read-only subagent claim artifact link를 추가합니다.
+- Session state schema v5는 notify 설치와 dispatch 관측을 분리하고
+  workspace-fingerprint evidence 및 read-only subagent claim/launch contract artifact link를
+  추가합니다.
   `capabilities.hooks`는 install 직후 `configured`이고 실제 `turn-ended` event가
   관측된 뒤에만 `available`입니다. 수동 smoke event는 dispatch observed로 인정하지
   않습니다.
@@ -139,7 +141,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   dispatcher가 생길 때까지 blocked로 남습니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
-- `schemas/session-state.schema.json`은 v4 session-state shape용 first-class schema
+- `schemas/session-state.schema.json`은 v5 session-state shape용 first-class schema
   artifact이며,
   `cx schema validate --type session-state --file <path> --json`은 같은 local
   schema-artifact subset engine으로 session state를 검증합니다.
@@ -209,7 +211,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   manual-smoke dispatch false-positive protection CLI 테스트
 - Session HUD, quality evidence guard의 explicit review-artifact link, schema
   engine status, replay parity status, adapter injection approval artifact,
-  session worker gate, recorder-only subagent launch rejection CLI 테스트
+  session worker gate, recorder-only subagent spawn rejection과 deferred launcher-contract
+  CLI 테스트
 - Slop guard gate mode의 pass, fail, unknown/blocked outcome 테스트
 - Supply-chain evidence의 report-only/gate mode, policy validation, lifecycle
   미실행, package artifact secret leak, Codexus package dogfood 테스트

@@ -9,6 +9,18 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- `cx session subagent launch --role <role> --task <task> --json`가
+  `launcher.supported: false`, verification-only completion policy, 나중의 claim
+  recording handoff command를 포함한 deferred native-subagent launcher contract를
+  기록합니다.
+
+### Changed
+
+- Subagent state가 launcher-contract artifact를 link하되 verification evidence로
+  취급하지 않도록 session state schema를 v5로 올렸습니다.
+
 ## 0.1.0-alpha.5 - 2026-05-31
 
 ### Added

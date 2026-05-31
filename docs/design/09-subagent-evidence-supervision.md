@@ -3,7 +3,7 @@
 [Korean](../ko/design/09-subagent-evidence-supervision.md)
 
 Date: 2026-05-30
-Status: recorder slice implemented
+Status: recorder slice and launcher contract implemented; active spawn deferred
 
 ## Decision
 
@@ -114,15 +114,42 @@ Implemented: the first implementation bundle is the recording half:
   verification evidence,
 - keep `evidenceFresh` driven only by session verification.
 
-The generation half is deferred:
+The active generation half is still deferred:
 
-- Codexus does not spawn subagents automatically,
+- Codexus does not spawn subagents from the CLI,
 - Codexus does not schedule parallel work,
 - Codexus does not apply patches from subagents,
 - Codexus does not treat a subagent result as completion.
 
 Active subagent drivers or delegation commands can come later, after recorder
 semantics are stable.
+
+## Bundle B: Launcher Contract
+
+Implemented: `cx session subagent launch --role <role> --task <task> --json`
+records a launcher contract artifact without claiming native launch support.
+
+The command writes:
+
+```text
+.codexus/session/subagents/<task-id>/launch.json
+```
+
+and links it from session state with `status: "launch_unavailable"`. The JSON
+payload is intentionally explicit:
+
+- `stability: "deferred"`,
+- `launcher.supported: false`,
+- `launcher.capability: "unavailable"`,
+- `policy.maySpawn: false`,
+- `policy.mayModifyWorkspace: false`,
+- `policy.completionAuthority: "verification"`,
+- `handoff.recordCommand` for recording a later externally produced claim
+  bundle.
+
+This is a contract, not a launcher bridge. It makes the unsupported state
+auditable and gives the current Codex session a reversible handoff path if a
+human or native Codex tool runs a subagent outside Codexus.
 
 ## Automation Policy
 
@@ -181,6 +208,7 @@ First slice:
 ```bash
 cx session subagent record --file <result.json> --json
 cx session subagent attach --role explore --claim-file <claims.json> --json
+cx session subagent launch --role explore --task "review the staged diff" --json
 cx session subagent status <task-id> --json
 ```
 
@@ -204,7 +232,8 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
 - `session status` distinguishes unverified subagent claims from verification
   evidence.
 - Active spawning commands are capability-gated: if Codex native subagents are
-  unavailable, Codexus reports `unavailable` with a recovery hint.
+  unavailable, Codexus reports `unavailable` with a recovery hint and records
+  only launcher-contract evidence.
 - No fixed frontier model names are hardcoded; inherit/default routing is
   preferred unless the caller explicitly chooses otherwise.
 
@@ -217,5 +246,7 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
    limitations, evidence links, and an explicit `unverifiedClaims` section.
 4. Implemented: keep `evidenceFresh` verification-only and add regression tests
    for that invariant.
-5. Defer native subagent capability detection, spawning, and parallel planning
-   until recorder semantics are stable.
+5. Implemented: add a launcher-contract command that records unavailable native
+   launch state without claiming support or changing evidence freshness.
+6. Deferred: native subagent capability detection, spawning, and parallel
+   planning until a supported Codex bridge exists.

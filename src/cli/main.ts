@@ -46,6 +46,7 @@ Usage:
   cx session slop [--since <ref>] [--scope <glob>] [--review <path>] [--gate] [--json]
   cx session subagent record --file <result.json> [--json]
   cx session subagent attach --role <role> --claim-file <claims.json> [--json]
+  cx session subagent launch --role <role> --task <task> [--json]
   cx session subagent status <task-id> [--json]
   cx session workers status [--json]
   cx slop check [--since <ref>] [--scope <glob>] [--review <path>] [--gate] [--json]

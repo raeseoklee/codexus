@@ -180,6 +180,22 @@ if (args[0] === "--version") {
   assert(supplyChain.stability === "stable", "supply-chain check did not report stable JSON stability");
   assert(supplyChain.gate?.status === "passed", "installed supply-chain gate did not pass");
 
+  const subagentLaunch = parseJsonRun(codexus, [
+    "session",
+    "subagent",
+    "launch",
+    "--cwd",
+    project,
+    "--role",
+    "reviewer",
+    "--task",
+    "package smoke review",
+    "--json",
+  ]);
+  assert(subagentLaunch.stability === "deferred", "subagent launch contract did not report deferred stability");
+  assert(subagentLaunch.launch?.launcher?.supported === false, "subagent launch contract falsely reported support");
+  assert(subagentLaunch.link?.status === "launch_unavailable", "subagent launch contract did not link unavailable launch state");
+
   const passRun = parseJsonRun(codexus, ["run", "--driver", "mock", "--verify", "node -e \"process.exit(0)\"", "--json", "package smoke pass"], { cwd: project });
   assert(passRun.outcome === "complete", "mock pass run did not complete from the installed package");
   assert(String(passRun.statePath).includes(".codexus"), "mock pass run did not write under .codexus");

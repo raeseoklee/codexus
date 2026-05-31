@@ -112,6 +112,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing subagent evidence file.";
     case "missing_subagent_id":
       return "Missing subagent id.";
+    case "missing_subagent_task":
+      return "Missing subagent task.";
     case "subagent_not_found":
       return `Subagent artifact not found${target ? `: ${target}` : ""}.`;
     case "subagent_artifact_invalid":
@@ -196,7 +198,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_session_command":
       return "Run `cx session status --json`, `cx session hud --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, `cx session slop --json`, or `cx session notify --event <name> --json`.";
     case "unsupported_session_subagent_command":
-      return "Codexus is recorder-only for subagents today; run `cx session subagent record --file <result.json> --json`, `cx session subagent attach --role <role> --claim-file <claims.json> --json`, or `cx session subagent status <task-id> --json`.";
+      return "Codexus does not directly spawn native subagents from the CLI; run `cx session subagent launch --role <role> --task <task> --json` to record a capability-gated launcher contract, `cx session subagent record --file <result.json> --json`, `cx session subagent attach --role <role> --claim-file <claims.json> --json`, or `cx session subagent status <task-id> --json`.";
     case "unsupported_session_workers_command":
       return "Run `cx session workers status --json`.";
     case "unsupported_slop_command":
@@ -252,6 +254,8 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "missing_subagent_id":
     case "subagent_not_found":
       return "Run `cx session status --json` to list linked subagent artifacts.";
+    case "missing_subagent_task":
+      return "Pass `--task <bounded task>` with `cx session subagent launch`.";
     case "invalid_skill_export_target":
       return "Use `--target codex` or `--target omx`.";
     case "skill_not_active":

@@ -245,6 +245,7 @@ session verify --auto --execute --json
 session verify --verify "npm test" --json
 session slop --json
 session slop --gate --json
+session subagent launch --role reviewer --task "review the staged diff" --json
 session subagent record --file <result.json> --json
 session workers status --json
 doctor --json
@@ -273,13 +274,14 @@ chat. Use `session slop --json` when you want Codex to summarize whether the
 current workspace has fresh verification, objective diff facts, declared-scope
 escapes, linked review artifacts, or advisory quality claims. Use
 `session slop --gate --json` when an automation step should return nonzero
-unless the current change has passing evidence. Use
-`session subagent record/attach` only to record claim bundles; those claims
-remain unverified until a separate verification or review artifact supports
-them. `session workers status --json` is a capability gate; it does not start
-tmux worker panes. Codexus intentionally exposes subagent recording commands
-instead of a `session subagent spawn` launcher today; unsupported launch attempts
-return a recorder-only hint.
+unless the current change has passing evidence. `session subagent launch`
+records a launcher contract and the current `unavailable` native-spawn
+capability state; it does not spawn a subagent from the CLI. Use `session
+subagent record/attach` only to record claim bundles; those claims remain
+unverified until a separate verification or review artifact supports them.
+`session workers status --json` is a capability gate; it does not start tmux
+worker panes. Unsupported `spawn` attempts return a hint that points to the
+contract/recording commands.
 
 Current session state is cwd-scoped. If two Codex windows operate on the same
 project at the same time, Codexus serializes writes with the `session` lock; a
