@@ -119,10 +119,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `npm run build` bundles the TypeScript source with esbuild into
   `dist/cli/main.js` for npm installation.
 - `npm run package:smoke` runs `npm pack`, installs the tarball into a temporary
-  global prefix, and verifies `codexus --help`, `cx --help`, runtime schema
-  assets, postinstall Codex skill adapter installation, and a mock run.
+  global prefix, and verifies `codexus` / `cx` help and version output,
+  runtime schema assets, postinstall Codex skill adapter installation,
+  `doctor --json --strict` through a fake Codex fixture, `supply-chain check
+  --gate`, and installed-package mock pass/fail/repair/status/events/resume/
+  cancel flows.
 - `prepublishOnly` runs `npm run release:check`, which combines local CI,
-  package smoke verification, and report-only supply-chain dogfood.
+  package smoke verification, and report-only supply-chain dogfood. Package
+  smoke includes the gate-mode supply-chain check for the installed package.
 - The npm tarball ships `dist`, `schemas`, the Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, and top-level release metadata. It excludes source, tests, docs,
@@ -226,6 +230,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - The session-native supervision design now makes OMX-informed in-Codex usage the
   product direction, with `codex exec resume` deferred as a separate external
   multi-turn feature.
+- The autopilot contract is documented as a proposed 0.2/0.3 experimental
+  surface. It is not implemented and is excluded from the 0.1.0 stable
+  contract.
 
 ## Verified
 
@@ -238,6 +245,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Node 22 installed-package smoke: `codexus --help`, `codexus schema check
   --json`, and a mock run executed through Node 22.22.3 against a packed and
   temporary globally installed tarball.
+- Installed package release smoke: `codexus` / `cx` help and version,
+  postinstall Codex skill adapter install, `doctor --json --strict` with a fake
+  Codex fixture, `supply-chain check --gate`, mock pass/fail/repair,
+  status/events/resume, and terminal cancel behavior.
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor strict smoke: missing command diagnostics return `ok: false` and exit 1 with `--strict`.
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.
@@ -338,4 +349,6 @@ review. Current high-level gaps:
   implemented.
 - Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
+- Autopilot is design-only for the 0.2/0.3 track. There is no `cx autopilot`
+  implementation in the 0.1.0 stable surface.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

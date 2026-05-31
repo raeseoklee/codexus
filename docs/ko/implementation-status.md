@@ -51,10 +51,13 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
   `dist/cli/main.js`를 만듭니다.
 - `npm run package:smoke`는 `npm pack`, 임시 global install,
-  `codexus --help`, `cx --help`, runtime schema asset, postinstall Codex skill
-  adapter 설치, mock run을 검증합니다.
+  `codexus` / `cx` help와 version 출력, runtime schema asset, postinstall Codex
+  skill adapter 설치, fake Codex fixture를 통한 `doctor --json --strict`,
+  `supply-chain check --gate`, installed-package mock pass/fail/repair/status/
+  events/resume/cancel 흐름을 검증합니다.
 - `prepublishOnly`는 local CI, package smoke, report-only supply-chain dogfood를
-  묶은 `npm run release:check`를 실행합니다.
+  묶은 `npm run release:check`를 실행합니다. Package smoke에는 설치된 package에
+  대한 gate-mode supply-chain check가 포함됩니다.
 - npm tarball은 `dist`, `schemas`, Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, top-level release metadata만 싣고 source, tests, docs,
@@ -182,6 +185,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Package smoke: `npm run package:smoke`
 - Node 22 installed-package smoke: packed tarball을 임시 global install한 뒤
   Node 22.22.3으로 `codexus --help`, `codexus schema check --json`, mock run 실행
+- Installed package release smoke: `codexus` / `cx` help와 version, postinstall
+  Codex skill adapter 설치, fake Codex fixture를 통한 `doctor --json --strict`,
+  `supply-chain check --gate`, mock pass/fail/repair, status/events/resume,
+  terminal cancel behavior
 - `doctor --json`: Codex auth/version/features, git, tmux, driver capability,
   optional advanced interop readiness 확인
 - `doctor --json --strict`: missing command 진단이 `ok:false`와 exit 1을 반환함을 확인
@@ -210,6 +217,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   schema validation으로 커버됩니다.
 - CLI version reporting은 source CLI test와 installed package smoke test로
   커버됩니다.
+- Autopilot contract는 0.2/0.3 experimental surface로만 문서화되어 있습니다.
+  아직 구현되지 않았고 0.1.0 stable contract에는 포함되지 않습니다.
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
@@ -235,4 +244,6 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   않았습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
+- Autopilot은 0.2/0.3 트랙의 설계 문서만 있습니다. 0.1.0 stable surface에는
+  `cx autopilot` 구현이 없습니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

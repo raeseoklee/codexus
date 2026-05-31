@@ -42,6 +42,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Subagent evidence supervision](design/09-subagent-evidence-supervision.md): Codex-native subagents as bounded evidence-producing adapters, not completion authorities.
 - [Quality evidence guard (slop guard)](design/10-quality-evidence-guard.md): evidence-first change-quality gate that splits derivable evidence gaps from advisory heuristic claims, built on the session evidence model.
 - [Supply-chain evidence](design/11-supply-chain-evidence.md): local, derivable supply-chain facts and an optional pre-publish gate, reusing the change-evidence model — not a CVE/network scanner.
+- [Autopilot contract](design/12-autopilot-contract.md): proposed 0.2/0.3 contract layer for long supervised runs — human-approved scope, worktree isolation, detect-then-stop enforcement, and evidence-gated acceptance.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Public release checklist](public-release.md): metadata, safety, verification, and visibility checklist for open-source publication.

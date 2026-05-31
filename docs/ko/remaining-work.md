@@ -78,6 +78,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,
   statusline/HUD integration, tmux-backed worker, cancellation wait/remote-host UX 보강.
+  Autopilot contract layer도 0.2/0.3 트랙으로 deferred이며 0.1.0에서는 설계 문서만
+  있습니다.
 
 ### P0: Contract and Safety Hardening
 
@@ -150,12 +152,17 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - config, ignored state directory, optional project docs snippet을 만들되
       unrelated tool state는 mutate하지 않습니다.
 
-12. packaging과 alias migration 마무리. 상태: npm-installed CLI packaging과
-    smoke coverage 구현.
+12. packaging과 alias migration 마무리. 상태: npm-installed CLI packaging, guarded
+    alpha publish, trusted-publishing release workflow, Node 22 package smoke
+    compatibility, stable-readiness smoke coverage 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 첫 package는 `0.1.0-alpha.0`과 `--tag next`로 publish합니다.
-    - `npm run package:smoke`를 bin path, runtime asset, mock-run execution
-      release gate로 유지합니다.
+    - 현재 npm baseline은 `0.1.0-alpha.4`입니다. Prerelease는 `publish:next`를
+      통해 배포하고, `0.1.0` stable은 trusted publishing rehearsal, release evidence,
+      `v0.1.0` tag 뒤에만 갑니다.
+    - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,
+      runtime asset, strict doctor, supply-chain gate, mock
+      pass/fail/repair/resume/cancel/events, postinstall skill adapter behavior를
+      검증합니다.
 
 13. TypeScript/static verification 추가. 상태: local syntax/static check,
     esbuild release bundle, versioned schema artifact, zero-dependency schema
@@ -225,3 +232,6 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 10. Subagent support는 recorder-only로 유지합니다. Recorder semantics가 안정되고 지원되는
    launch contract가 생기기 전까지 active native spawn launcher를 노출하지 않습니다.
    Subagent claim은 verification freshness와 계속 분리해야 합니다.
+11. Autopilot은 0.2/0.3 design track으로 유지합니다. `cx autopilot run`을 노출하기 전
+   schema artifact와 report-only scope gate부터 시작해야 하며, human-approved,
+   worktree-isolated, `stability: experimental`이어야 합니다.

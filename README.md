@@ -155,6 +155,16 @@ Codexus is usable as an early local harness. The stable path is the CLI around
 `codex exec --json`; live app-server turns, routine live model replay, automatic
 prompt injection, and live cron/gateway dispatch remain intentionally gated.
 
+## Support Matrix
+
+| Surface | 0.1.0 status |
+| --- | --- |
+| Supervised `codex exec --json` runs, verification/repair, run ledger, resume/cancel/status/events | Stable path |
+| Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
+| `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence/gate surface |
+| app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; dry-run, status, record-only, or explicitly gated |
+| autopilot contract layer | Proposed design, deferred to the 0.2/0.3 track |
+
 See [Implementation status](docs/implementation-status.md) and
 [Remaining work](docs/remaining-work.md) for exact coverage and gaps.
 
@@ -214,6 +224,7 @@ Public bins: `cx` and `codexus` are canonical.
 - [Codex-native adapter](docs/design/06-codex-native-adapter.md)
 - [Session-native supervision](docs/design/07-supervised-sessions.md)
 - [Supply-chain evidence](docs/design/11-supply-chain-evidence.md)
+- [Autopilot contract](docs/design/12-autopilot-contract.md)
 - [Reference governance](docs/references/README.md)
 - [Implementation status](docs/implementation-status.md)
 - [Remaining work](docs/remaining-work.md)

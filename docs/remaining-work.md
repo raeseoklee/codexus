@@ -81,7 +81,8 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
   automation dispatch, statusline/HUD integration, tmux-backed workers, and
-  richer wait/remote-host UX around cancellation.
+  richer wait/remote-host UX around cancellation. The autopilot contract layer
+  is also deferred to the 0.2/0.3 track and is design-only in 0.1.0.
 
 ### P0: Contract and Safety Hardening
 
@@ -157,12 +158,17 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     - Create config, ignored state directories, and optional project docs
       snippets without mutating unrelated tool state.
 
-12. Finish packaging and alias migration. Status: npm-installed CLI packaging
-    and smoke coverage implemented.
+12. Finish packaging and alias migration. Status: npm-installed CLI packaging,
+    guarded alpha publish, trusted-publishing release workflow, Node 22 package
+    smoke compatibility, and stable-readiness smoke coverage implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Publish the first package as `0.1.0-alpha.0` with `--tag next`.
-    - Keep `npm run package:smoke` as the release gate for bin paths, runtime
-      assets, and mock-run execution.
+    - Current npm baseline is `0.1.0-alpha.4`; prereleases publish through
+      `publish:next`, while `0.1.0` stable is gated on trusted publishing
+      rehearsal, release evidence, and `v0.1.0`.
+    - Keep `npm run package:smoke` as the installed-tarball release gate for bin
+      paths, runtime assets, strict doctor, supply-chain gate, mock
+      pass/fail/repair/resume/cancel/events, and postinstall skill adapter
+      behavior.
 
 13. Add TypeScript/static verification. Status: local syntax/static check,
     esbuild release bundle, versioned schema artifacts, and zero-dependency
@@ -237,3 +243,6 @@ evidence only when the supporting runtime exists:
    spawn launcher until recorder semantics remain stable and a supported launch
    contract exists; subagent claims must stay separate from verification
    freshness.
+11. Autopilot remains a 0.2/0.3 design track. Start with schema artifacts and a
+   report-only scope gate before exposing `cx autopilot run`; it must remain
+   human-approved, worktree-isolated, and `stability: experimental`.
