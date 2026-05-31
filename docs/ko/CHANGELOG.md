@@ -9,6 +9,23 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.0-alpha.5 - 2026-05-31
+
+### Added
+
+- 0.1.0 준비 문서에 stable, experimental, deferred surface를 구분하는 README
+  support matrix를 추가했습니다.
+- Autopilot contract 설계를 0.2/0.3 deferred track으로 추가했습니다. Worktree 격리,
+  사람이 승인한 scope, detect-then-stop 경계를 명시합니다.
+
+### Changed
+
+- 구현 상태와 남은 작업 문서는 현재 installed-package release smoke,
+  `0.1.0-alpha.4` npm baseline, stable release gate를 반영하도록 갱신했습니다.
+  더 이상 초기 alpha.0 packaging plan처럼 읽히지 않습니다.
+- 한국어 README 첫 문장은 "with evidence"의 직역투를 피하고, Codexus가 Codex CLI
+  작업을 테스트로 확인하고 결과를 기록한다는 표현으로 바꿨습니다.
+
 ## 0.1.0-alpha.4 - 2026-05-31
 
 ### Added

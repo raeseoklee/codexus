@@ -9,6 +9,24 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.0-alpha.5 - 2026-05-31
+
+### Added
+
+- 0.1.0 readiness docs now include a README support matrix that separates
+  stable, experimental, and deferred surfaces.
+- Autopilot contract design docs were added as a deferred 0.2/0.3 track with
+  worktree isolation, human-approved scope, and detect-then-stop boundaries.
+
+### Changed
+
+- Implementation status and remaining-work docs now reflect the current
+  installed-package release smoke, `0.1.0-alpha.4` npm baseline, and stable
+  release gates instead of the original alpha.0 packaging plan.
+- Korean README copy now describes Codexus as checking Codex CLI work with tests
+  and recording the result, avoiding the stiff direct translation of "with
+  evidence."
+
 ## 0.1.0-alpha.4 - 2026-05-31
 
 ### Added
