@@ -15,6 +15,9 @@ occur before 1.0, but they should be called out clearly.
   deferred native-subagent launcher contract with `launcher.supported: false`,
   a verification-only completion policy, and a handoff command for later claim
   recording.
+- `cx session subagent complete --task-id <id> --claim <text> --json` records
+  the final claims from a native subagent used in the current Codex session
+  without claiming Codexus spawned it or refreshing verification evidence.
 
 ### Changed
 

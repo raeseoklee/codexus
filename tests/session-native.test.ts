@@ -974,6 +974,7 @@ test("session subagent launch records unavailable launcher contract without prom
     assert.equal(output.launch.policy.maySpawn, false);
     assert.equal(output.launch.policy.completionAuthority, "verification");
     assert.match(output.launch.handoff.recordCommand, /session subagent attach/);
+    assert.match(output.launch.handoff.completeCommand, /session subagent complete/);
     assert.equal(output.link.status, "launch_unavailable");
     assert.equal(output.link.claimCount, 0);
     assert.ok(existsSync(output.artifactPath));
@@ -991,6 +992,83 @@ test("session subagent launch records unavailable launcher contract without prom
     const launchStatusOutput = JSON.parse(launchStatus.stdout);
     assert.equal(launchStatusOutput.kind, "launch");
     assert.equal(launchStatusOutput.launch.task, "review the staged diff");
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session subagent complete records hosted subagent claims without promoting evidence", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+
+    const launch = runCli(cwd, ["session", "subagent", "launch", "--role", "reviewer", "--task", "review the staged diff", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(launch.status, 0, launch.stderr);
+    const launchOutput = JSON.parse(launch.stdout);
+
+    const complete = runCli(cwd, [
+      "session",
+      "subagent",
+      "complete",
+      "--task-id",
+      launchOutput.launch.taskId,
+      "--claim",
+      "The staged diff changes only session subagent routing.",
+      "--claim",
+      "No verification evidence has been produced by this subagent.",
+      "--limitation",
+      "Read-only review; no commands were run.",
+      "--evidence-link",
+      "manual-review:subagent",
+      "--confidence",
+      "medium",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(complete.status, 0, complete.stderr);
+    const output = JSON.parse(complete.stdout);
+    assert.equal(output.artifact.taskId, launchOutput.launch.taskId);
+    assert.equal(output.artifact.role, "reviewer");
+    assert.equal(output.artifact.source.mode, "complete");
+    assert.equal(output.artifact.source.inputFile, null);
+    assert.equal(output.artifact.claims.length, 2);
+    assert.equal(output.artifact.claims[0].confidence, "medium");
+    assert.deepEqual(output.artifact.evidenceLinks, ["manual-review:subagent"]);
+    assert.equal(output.link.status, "attached");
+    assert.equal(output.link.claimCount, 2);
+    assert.equal(output.launch.taskId, launchOutput.launch.taskId);
+
+    const invalid = runCli(cwd, [
+      "session",
+      "subagent",
+      "complete",
+      "--claim",
+      "invalid confidence should not be recorded",
+      "--confidence",
+      "certain",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(invalid.status, 1);
+    assert.equal(JSON.parse(invalid.stdout).code, "invalid_subagent_confidence");
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.subagents.count, 2);
+    assert.equal(statusOutput.subagents.unverifiedClaims[0].taskId, launchOutput.launch.taskId);
+    assert.equal(statusOutput.subagents.unverifiedClaims[0].status, "attached");
+    assert.equal(statusOutput.evidence.evidenceFresh, false);
+
+    const artifactStatus = runCli(cwd, ["session", "subagent", "status", launchOutput.launch.taskId, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(artifactStatus.status, 0, artifactStatus.stderr);
+    const artifactStatusOutput = JSON.parse(artifactStatus.stdout);
+    assert.equal(artifactStatusOutput.kind, "result");
+    assert.equal(artifactStatusOutput.artifact.source.mode, "complete");
 
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
@@ -1027,7 +1105,7 @@ test("session hud reports compact evidence without statusline support", async ()
   }
 });
 
-test("session workers gate launch while subagents stay recorder-only", async () => {
+test("session workers gate launch while subagents reject direct spawn honestly", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();
   try {
@@ -1045,6 +1123,7 @@ test("session workers gate launch while subagents stay recorder-only", async () 
     assert.equal(spawnOutput.code, "unsupported_session_subagent_command");
     assert.match(spawnOutput.hint, /does not directly spawn/);
     assert.match(spawnOutput.hint, /session subagent launch/);
+    assert.match(spawnOutput.hint, /session subagent complete/);
     assert.match(spawnOutput.hint, /session subagent record/);
   } finally {
     await rm(cwd, { recursive: true, force: true });

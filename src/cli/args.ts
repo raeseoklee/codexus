@@ -8,6 +8,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const [command = "help", ...rest] = argv;
   const positionals: string[] = [];
   const flags: ParsedArgs["flags"] = {};
+  const repeatedStringFlags = new Set(["verify", "claim", "limitation", "evidence-link"]);
   const booleanFlags = new Set([
     "json",
     "help",
@@ -49,7 +50,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     const value = next && !next.startsWith("--") ? next : true;
     if (value !== true) index += 1;
 
-    if (key === "verify") {
+    if (repeatedStringFlags.has(key)) {
       const existing = flags[key];
       flags[key] = Array.isArray(existing)
         ? [...existing, String(value)]

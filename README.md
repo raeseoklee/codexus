@@ -144,7 +144,7 @@ npm run package:smoke
 - Memory records, curation, and bounded retrieval
 - Replay-gated skill proposal, review, promotion, improvement, export, and deprecation
 - Codex-native `$codexus` adapter for using the same core inside a Codex session
-- Session-native quality evidence guard and subagent claim recorder
+- Session-native quality evidence guard and subagent claim recorder/completion handoff
 - Schema artifact validation, stale-lock recovery, and local CI parity
 - Automatic migration from legacy `.codex-harness/` into `.codexus/`
 - Gated app-server, cron, gateway, and model-replay experiments that do not affect the stable `codex exec --json` path
@@ -162,7 +162,7 @@ prompt injection, and live cron/gateway dispatch remain intentionally gated.
 | Supervised `codex exec --json` runs, verification/repair, run ledger, resume/cancel/status/events | Stable path |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence/gate surface |
-| app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; dry-run, status, record-only, launch-contract, or explicitly gated |
+| app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; dry-run, status, record/attach/complete, launch-contract, or explicitly gated |
 | autopilot contract layer | Proposed design, deferred to the 0.2/0.3 track |
 
 See [Implementation status](docs/implementation-status.md) and
@@ -192,6 +192,7 @@ cx session verify --auto --json
 cx session verify --verify "npm test" --json
 cx session slop --json
 cx session subagent launch --role reviewer --task "review the staged diff" --json
+cx session subagent complete --task-id <id> --claim "review found no API drift" --json
 cx session subagent record --file <result.json> --json
 cx session workers status --json
 cx schema engine --json

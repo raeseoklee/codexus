@@ -229,9 +229,9 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 9. Quality evidence guard는 explicit review artifact link와 `--gate` automation mode를
    받습니다. 추가 확장은 coverage, lint/typecheck output 같은 derivable artifact에서만
    해야 하며 heuristic finding은 계속 advisory입니다.
-10. Subagent support는 recorder/contract-only로 유지합니다. 지원되는 Codex bridge가
-   생기기 전까지 active native spawn launcher를 노출하지 않습니다. Subagent claim은
-   verification freshness와 계속 분리해야 합니다.
+10. Subagent support는 recorder/handoff/contract-only로 유지합니다. 지원되는 Codex
+   bridge가 생기기 전까지 active native spawn launcher를 노출하지 않습니다. Subagent
+   claim은 verification freshness와 계속 분리해야 합니다.
 11. Autopilot은 0.2/0.3 design track으로 유지합니다. `cx autopilot run`을 노출하기 전
    schema artifact와 report-only scope gate부터 시작해야 하며, human-approved,
    worktree-isolated, `stability: experimental`이어야 합니다.
@@ -251,8 +251,9 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    기다립니다. 그 전까지는 `cx session hud --json`이 fallback입니다.
 5. tmux-backed worker launch: session state protocol과 launch contract가 안정될 때까지
    `session workers status`를 gate report로 유지합니다.
-6. Native subagent launcher: 지원되는 Codex bridge가 생기고 claim과 verification
-   freshness 분리가 유지될 때까지 recorder/contract-only로 둡니다.
+6. Native subagent active launcher: 지원되는 Codex bridge가 생기고 claim과
+   verification freshness 분리가 유지될 때까지 record/attach/complete와
+   launcher-contract support로 둡니다.
 7. Automatic adapter injection: 명시적이고 되돌릴 수 있는 injection path를 설계하기 전까지
    visible approval artifact만 기록하고 auto-injection은 하지 않습니다.
 8. Routine live model replay: opt-in, budget-gated로 유지하고 기본 stable path 밖에 둡니다.

@@ -3,7 +3,7 @@
 [Korean](../ko/design/09-subagent-evidence-supervision.md)
 
 Date: 2026-05-30
-Status: recorder slice and launcher contract implemented; active spawn deferred
+Status: recorder, completion handoff, and launcher contract implemented; active spawn deferred
 
 ## Decision
 
@@ -144,12 +144,35 @@ payload is intentionally explicit:
 - `policy.maySpawn: false`,
 - `policy.mayModifyWorkspace: false`,
 - `policy.completionAuthority: "verification"`,
+- `handoff.completeCommand` for recording final claims produced by a hosted
+  native subagent,
 - `handoff.recordCommand` for recording a later externally produced claim
   bundle.
 
 This is a contract, not a launcher bridge. It makes the unsupported state
 auditable and gives the current Codex session a reversible handoff path if a
 human or native Codex tool runs a subagent outside Codexus.
+
+## Bundle C: Hosted Completion Handoff
+
+Implemented: `cx session subagent complete --task-id <id> --claim <text>
+--json` records the final claims produced by a native subagent that ran in the
+current Codex session or another supported host surface.
+
+This command deliberately does not launch the subagent. It closes the handoff
+loop created by `launch`: the launcher contract records the bounded task and
+unsupported spawn capability, the current Codex session may run a native
+subagent if the runtime supports it, and `complete` writes the resulting claims
+to:
+
+```text
+.codexus/session/subagents/<task-id>/result.json
+```
+
+The result uses `source.mode: "complete"` and replaces the
+`launch_unavailable` session link with an attached claim link. It still does not
+promote `evidenceFresh`; claims remain unverified until a separate verification,
+replay, or explicit review artifact supports them.
 
 ## Automation Policy
 
@@ -209,6 +232,7 @@ First slice:
 cx session subagent record --file <result.json> --json
 cx session subagent attach --role explore --claim-file <claims.json> --json
 cx session subagent launch --role explore --task "review the staged diff" --json
+cx session subagent complete --task-id <id> --claim "bounded claim" --json
 cx session subagent status <task-id> --json
 ```
 
@@ -229,6 +253,8 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
 - A subagent claim can link to `session verify`, `replay`, or manual review
   evidence, but cannot replace it.
 - All subagent artifacts are reconstructable from `.codexus/session/subagents/`.
+- Hosted completion handoff can turn a launcher contract into a recorded claim
+  artifact without claiming Codexus performed the native spawn.
 - `session status` distinguishes unverified subagent claims from verification
   evidence.
 - Active spawning commands are capability-gated: if Codex native subagents are
@@ -248,5 +274,8 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
    for that invariant.
 5. Implemented: add a launcher-contract command that records unavailable native
    launch state without claiming support or changing evidence freshness.
-6. Deferred: native subagent capability detection, spawning, and parallel
+6. Implemented: add a hosted completion handoff command that records final
+   claims from a subagent run by the current Codex session without changing
+   evidence freshness.
+7. Deferred: native subagent capability detection, spawning, and parallel
    planning until a supported Codex bridge exists.

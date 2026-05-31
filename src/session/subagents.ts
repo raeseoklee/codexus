@@ -10,7 +10,7 @@ import {
 } from "./state.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 
-export type SubagentRecordMode = "record" | "attach";
+export type SubagentRecordMode = "record" | "attach" | "complete";
 export type SubagentClaimConfidence = "low" | "medium" | "high" | "unknown";
 export type SubagentLaunchMode = "read_only";
 
@@ -67,6 +67,7 @@ export interface SubagentLaunchContractArtifact {
   };
   handoff: {
     recordCommand: string;
+    completeCommand: string;
     claimFileShape: {
       taskId: string;
       role: string;
@@ -90,6 +91,10 @@ export interface SubagentRecordResult {
   artifactPath: string;
   statePath: string;
   state: CodexusSessionState;
+}
+
+export interface SubagentCompleteResult extends SubagentRecordResult {
+  launch: SubagentLaunchContractArtifact | null;
 }
 
 export interface SubagentLaunchContractResult {
@@ -125,6 +130,12 @@ function stringArray(value: unknown): string[] {
 
 function confidence(value: unknown): SubagentClaimConfidence {
   return value === "low" || value === "medium" || value === "high" ? value : "unknown";
+}
+
+function assertConfidence(value: string | undefined): SubagentClaimConfidence {
+  if (value === undefined) return "unknown";
+  if (value === "low" || value === "medium" || value === "high" || value === "unknown") return value;
+  throw new Error(`invalid_subagent_confidence:${value}`);
 }
 
 function normalizeClaim(value: unknown): SubagentClaim | null {
@@ -187,6 +198,10 @@ function taskIdFrom(parsed: unknown): string {
   return isRecord(parsed) && typeof parsed.taskId === "string" && parsed.taskId.trim()
     ? safeSegment(parsed.taskId.trim())
     : createSubagentId();
+}
+
+function taskIdFromString(value: string | undefined): string {
+  return value && value.trim() ? safeSegment(value.trim()) : createSubagentId();
 }
 
 async function parseJsonFile(path: string): Promise<unknown> {
@@ -263,6 +278,92 @@ export async function recordSubagentArtifact(cwd: string, options: {
   };
 }
 
+async function readLaunchContractIfPresent(cwd: string, taskId: string): Promise<SubagentLaunchContractArtifact | null> {
+  const launchPath = join(sessionPaths(cwd).subagentsDir, taskId, "launch.json");
+  if (!existsSync(launchPath)) return null;
+  const parsed = await parseJsonFile(launchPath);
+  if (!isRecord(parsed) || parsed.type !== "codexus.session.subagent_launch_contract" || parsed.schemaVersion !== 1) {
+    throw new Error(`subagent_artifact_invalid:${taskId}`);
+  }
+  return parsed as unknown as SubagentLaunchContractArtifact;
+}
+
+export async function completeSubagentArtifact(cwd: string, options: {
+  role?: string;
+  taskId?: string;
+  claims: string[];
+  limitations?: string[];
+  evidenceLinks?: string[];
+  confidence?: string;
+}): Promise<SubagentCompleteResult> {
+  const claimTexts = options.claims.map((item) => item.trim()).filter(Boolean);
+  if (claimTexts.length === 0) throw new Error("missing_subagent_claim");
+  const taskId = taskIdFromString(options.taskId);
+  const launch = await readLaunchContractIfPresent(cwd, taskId);
+  const role = options.role?.trim() || launch?.role || "subagent";
+  const claimConfidence = assertConfidence(options.confidence);
+  const evidenceLinks = [...new Set((options.evidenceLinks ?? []).map((item) => item.trim()).filter(Boolean))].sort();
+  const limitations = (options.limitations ?? []).map((item) => item.trim()).filter(Boolean);
+  const claims = claimTexts.map((text): SubagentClaim => ({
+    kind: "claim",
+    text,
+    confidence: claimConfidence,
+    evidenceLinks,
+  }));
+  const recordedAt = new Date().toISOString();
+  const artifact: SubagentResultArtifact = {
+    schemaVersion: 1,
+    type: "codexus.session.subagent_result",
+    taskId,
+    role,
+    status: "attached",
+    recordedAt,
+    source: {
+      mode: "complete",
+      inputFile: null,
+    },
+    claims,
+    limitations,
+    evidenceLinks,
+    rawShape: {
+      type: "cli-completion",
+      keys: ["claim", "limitation", "evidence-link", "confidence"].sort(),
+    },
+  };
+  const paths = sessionPaths(cwd);
+  const artifactDir = join(paths.subagentsDir, taskId);
+  const artifactPath = join(artifactDir, "result.json");
+  await ensureDir(artifactDir);
+  await writeJsonAtomic(artifactPath, artifact);
+  const link: SessionSubagentLink = {
+    taskId,
+    role,
+    status: "attached",
+    recordedAt,
+    path: artifactPath,
+    claimCount: claims.length,
+    limitationCount: limitations.length,
+    evidenceLinks,
+  };
+  const state = await updateSessionState(cwd, "session subagent complete", (value) => ({
+    ...value,
+    subagents: [
+      ...value.subagents.filter((item) => item.taskId !== taskId),
+      link,
+    ].slice(-50),
+  }));
+  return {
+    schemaVersion: 1,
+    artifact,
+    link,
+    artifactDir,
+    artifactPath,
+    statePath: paths.state,
+    state,
+    launch,
+  };
+}
+
 export async function createSubagentLaunchContract(cwd: string, options: {
   role?: string;
   task: string;
@@ -299,6 +400,7 @@ export async function createSubagentLaunchContract(cwd: string, options: {
     },
     handoff: {
       recordCommand: `cx session subagent attach --role ${shellQuote(role)} --claim-file ${shellQuote(claimFile)} --json`,
+      completeCommand: `cx session subagent complete --task-id ${shellQuote(taskId)} --claim ${shellQuote("<bounded claim from the subagent>")} --json`,
       claimFileShape: {
         taskId,
         role,

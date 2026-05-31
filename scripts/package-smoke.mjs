@@ -195,6 +195,26 @@ if (args[0] === "--version") {
   assert(subagentLaunch.stability === "deferred", "subagent launch contract did not report deferred stability");
   assert(subagentLaunch.launch?.launcher?.supported === false, "subagent launch contract falsely reported support");
   assert(subagentLaunch.link?.status === "launch_unavailable", "subagent launch contract did not link unavailable launch state");
+  assert(String(subagentLaunch.launch?.handoff?.completeCommand ?? "").includes("session subagent complete"), "subagent launch contract missing complete handoff");
+  const subagentComplete = parseJsonRun(codexus, [
+    "session",
+    "subagent",
+    "complete",
+    "--cwd",
+    project,
+    "--task-id",
+    subagentLaunch.launch.taskId,
+    "--claim",
+    "package smoke captured a hosted subagent claim",
+    "--limitation",
+    "package smoke did not launch a native subagent",
+    "--confidence",
+    "medium",
+    "--json",
+  ]);
+  assert(subagentComplete.artifact?.source?.mode === "complete", "subagent completion did not use complete source mode");
+  assert(subagentComplete.link?.status === "attached", "subagent completion did not attach claims");
+  assert(subagentComplete.artifact?.claims?.length === 1, "subagent completion did not record exactly one claim");
 
   const passRun = parseJsonRun(codexus, ["run", "--driver", "mock", "--verify", "node -e \"process.exit(0)\"", "--json", "package smoke pass"], { cwd: project });
   assert(passRun.outcome === "complete", "mock pass run did not complete from the installed package");

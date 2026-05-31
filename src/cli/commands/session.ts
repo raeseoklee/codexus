@@ -20,7 +20,7 @@ import { deriveEvidenceModel } from "../../session/evidence.ts";
 import { buildChangeEvidenceReport } from "../../session/change-evidence.ts";
 import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
-import { createSubagentLaunchContract, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
+import { completeSubagentArtifact, createSubagentLaunchContract, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 
 function statePath(cwd: string): string {
@@ -404,6 +404,25 @@ async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Pr
     console.log(`Subagent launch unavailable; contract recorded: ${result.launch.taskId}`);
     console.log(result.artifactPath);
     console.log(result.launch.launcher.recoveryHint);
+    return;
+  }
+  if (action === "complete") {
+    assertAllowedFlags(args, ["json", "cwd", "role", "task-id", "claim", "limitation", "evidence-link", "confidence"]);
+    assertMaxPositionals(args, 2);
+    const result = await completeSubagentArtifact(cwd, {
+      role: flagString(args.flags, "role"),
+      taskId: flagString(args.flags, "task-id"),
+      claims: flagArray(args.flags, "claim"),
+      limitations: flagArray(args.flags, "limitation"),
+      evidenceLinks: flagArray(args.flags, "evidence-link"),
+      confidence: flagString(args.flags, "confidence"),
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Subagent completion claims recorded: ${result.artifact.taskId}`);
+    console.log(result.artifactPath);
     return;
   }
   if (action === "status") {

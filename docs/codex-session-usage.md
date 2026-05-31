@@ -246,6 +246,7 @@ session verify --verify "npm test" --json
 session slop --json
 session slop --gate --json
 session subagent launch --role reviewer --task "review the staged diff" --json
+session subagent complete --task-id <id> --claim "review found no API drift" --json
 session subagent record --file <result.json> --json
 session workers status --json
 doctor --json
@@ -277,7 +278,9 @@ escapes, linked review artifacts, or advisory quality claims. Use
 unless the current change has passing evidence. `session subagent launch`
 records a launcher contract and the current `unavailable` native-spawn
 capability state; it does not spawn a subagent from the CLI. Use `session
-subagent record/attach` only to record claim bundles; those claims remain
+subagent complete` after a native subagent has run in the current Codex session
+to record its final claims against the launch id. Use `session subagent
+record/attach` for file-based claim bundles. All of these claims remain
 unverified until a separate verification or review artifact supports them.
 `session workers status --json` is a capability gate; it does not start tmux
 worker panes. Unsupported `spawn` attempts return a hint that points to the

@@ -15,6 +15,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   `launcher.supported: false`, verification-only completion policy, 나중의 claim
   recording handoff command를 포함한 deferred native-subagent launcher contract를
   기록합니다.
+- `cx session subagent complete --task-id <id> --claim <text> --json`가 현재
+  Codex session에서 사용한 native subagent의 최종 claim을 기록합니다. Codexus가 spawn했다고
+  주장하거나 verification evidence를 fresh로 바꾸지는 않습니다.
 
 ### Changed
 

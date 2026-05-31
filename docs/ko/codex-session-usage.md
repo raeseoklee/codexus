@@ -240,6 +240,7 @@ session verify --verify "npm test" --json
 session slop --json
 session slop --gate --json
 session subagent launch --role reviewer --task "review the staged diff" --json
+session subagent complete --task-id <id> --claim "review found no API drift" --json
 session subagent record --file <result.json> --json
 session workers status --json
 doctor --json
@@ -269,11 +270,12 @@ review artifact, advisory quality claim을 Codex가 요약하게 하려면 `sess
 사용합니다. Automation step에서 현재 change가 passing evidence를 갖지 않으면 nonzero를
 반환해야 할 때는 `session slop --gate --json`을 사용합니다. `session subagent launch`는
 launcher contract와 현재 `unavailable` native-spawn capability 상태를 기록합니다. CLI에서
-subagent를 spawn하지는 않습니다. `session subagent record/attach`는 claim bundle 기록
-전용입니다. 이 claim은 별도 verification 또는 review artifact가 뒷받침하기 전까지
-unverified로 남습니다. `session workers status --json`은 capability gate이며 tmux worker
-pane을 시작하지 않습니다. 지원되지 않는 `spawn` 시도는 contract/recording command를
-안내하는 hint를 반환합니다.
+subagent를 spawn하지는 않습니다. 현재 Codex session에서 native subagent를 실행했다면
+`session subagent complete`로 launch id에 최종 claim을 기록합니다. File 기반 claim
+bundle에는 `session subagent record/attach`를 사용합니다. 이 claim은 별도 verification
+또는 review artifact가 뒷받침하기 전까지 unverified로 남습니다. `session workers status
+--json`은 capability gate이며 tmux worker pane을 시작하지 않습니다. 지원되지 않는 `spawn`
+시도는 contract/recording command를 안내하는 hint를 반환합니다.
 
 현재 session state는 cwd-scoped입니다. 같은 project에서 Codex window 두 개가 동시에
 작업하면 Codexus는 `session` lock으로 write를 직렬화합니다. 겹치는 checkpoint/verify

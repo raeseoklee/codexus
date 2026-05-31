@@ -173,7 +173,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   under `.codexus/session/subagents/`, links them from session state, and keeps
   subagent claims separate from verification freshness. `cx session subagent
   launch` records a deferred launcher contract with `launcher.supported: false`;
-  Codexus still does not spawn native subagents from the CLI.
+  `cx session subagent complete` records final claims from a native subagent
+  used in the current Codex session without claiming Codexus spawned it. Codexus
+  still does not spawn native subagents from the CLI.
 - `cx session workers status --json` reports the tmux-backed worker launch gate
   without starting worker panes.
 - `cx setup codex-session --enable-notify-hook` installs a Codex notify hook
@@ -300,8 +302,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   manual-smoke dispatch false-positive protection are covered by CLI tests.
 - Session HUD, explicit review-artifact links in the quality evidence guard,
   schema engine status, replay parity status, adapter injection approval
-  artifacts, session worker gates, recorder-only subagent spawn rejection, and
-  deferred launcher-contract behavior are covered by CLI tests.
+  artifacts, session worker gates, subagent spawn rejection, deferred
+  launcher-contract behavior, and hosted completion handoff are covered by CLI
+  tests.
 - Slop guard gate mode is covered for pass, fail, and unknown/blocked outcomes.
 - Always-on notify heartbeat quality snapshots are covered by session-native
   tests and session-state schema validation.
