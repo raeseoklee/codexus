@@ -13,6 +13,7 @@ export interface JsonSchemaSubsetValidation extends JsonSchemaSubsetInspection {
 
 export interface JsonSchemaEngineStatus {
   schemaVersion: 1;
+  stability: "stable";
   activeEngine: typeof jsonSchemaSubsetEngine;
   fullJsonSchemaEngine: {
     available: false;
@@ -25,6 +26,7 @@ export interface JsonSchemaEngineStatus {
 export function schemaEngineStatus(): JsonSchemaEngineStatus {
   return {
     schemaVersion: 1,
+    stability: "stable",
     activeEngine: jsonSchemaSubsetEngine,
     fullJsonSchemaEngine: {
       available: false,

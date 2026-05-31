@@ -214,6 +214,8 @@ Public bin은 `cx`와 `codexus`입니다.
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)
+- [0.1.0 stable 준비 계획](plans/2026-05-31-0.1.0-stable-readiness-plan.md)
+- [JSON contract](json-contract.md)
 - [Public release checklist](public-release.md)
 - [Roadmap](ROADMAP.md)
 - [Changelog](CHANGELOG.md)

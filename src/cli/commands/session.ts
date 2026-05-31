@@ -40,6 +40,7 @@ async function sessionStatusProjection(cwd: string) {
   const subagents = summarizeSubagentClaims(state);
   return {
     schemaVersion: 1,
+    stability: "stable" as const,
     status: state ? "initialized" : "not_initialized",
     cwd,
     paths,
@@ -89,6 +90,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
   const lastVerification = status.state?.verifications.at(-1) ?? null;
   const result = {
     schemaVersion: 1,
+    stability: "stable" as const,
     cwd,
     status: status.status,
     evidence: status.evidence
@@ -440,6 +442,7 @@ async function workersCommand(args: ParsedArgs, cwd: string, json: boolean): Pro
   const tmux = projection.state?.capabilities.tmux ?? "unavailable";
   const result = {
     schemaVersion: 1,
+    stability: "deferred" as const,
     status: tmux === "available" ? "gated" : "unavailable",
     tmux,
     workerLaunchSupported: false,

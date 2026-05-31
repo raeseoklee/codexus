@@ -106,6 +106,7 @@ test("observability commands list runs, tail events, and read reports", async ()
     const schemaEngine = runCli(cwd, ["schema", "engine", "--json"]);
     assert.equal(schemaEngine.status, 0, schemaEngine.stderr);
     const schemaEngineOutput = JSON.parse(schemaEngine.stdout);
+    assert.equal(schemaEngineOutput.stability, "stable");
     assert.equal(schemaEngineOutput.activeEngine, "local-json-schema-subset");
     assert.equal(schemaEngineOutput.fullJsonSchemaEngine.available, false);
     assert.equal(schemaEngineOutput.migrationFixtureBoundary, true);
@@ -397,13 +398,19 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(typecheck.status, 0, typecheck.stderr);
 
     const cron = runCli(cwd, ["cron", "status", "--json"]);
-    assert.equal(JSON.parse(cron.stdout).enabled, false);
+    const cronStatus = JSON.parse(cron.stdout);
+    assert.equal(cronStatus.stability, "deferred");
+    assert.equal(cronStatus.enabled, false);
     const gateway = runCli(cwd, ["gateway", "status", "--json"]);
-    assert.equal(JSON.parse(gateway.stdout).enabled, false);
+    const gatewayStatus = JSON.parse(gateway.stdout);
+    assert.equal(gatewayStatus.stability, "deferred");
+    assert.equal(gatewayStatus.enabled, false);
 
     const appStatus = runCli(cwd, ["app-server", "status", "--json"]);
     assert.equal(appStatus.status, 0, appStatus.stderr);
-    assert.equal(JSON.parse(appStatus.stdout).schemaFixture.valid, true);
+    const appStatusOutput = JSON.parse(appStatus.stdout);
+    assert.equal(appStatusOutput.stability, "experimental");
+    assert.equal(appStatusOutput.schemaFixture.valid, true);
     const appStatusOutsideRepo = runCli(featureCwd, ["app-server", "status", "--json"]);
     assert.equal(appStatusOutsideRepo.status, 0, appStatusOutsideRepo.stderr);
     assert.equal(JSON.parse(appStatusOutsideRepo.stdout).schemaFixture.valid, true);
@@ -450,6 +457,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const cronDryRun = runCli(cwd, ["cron", "run-now", "--dry-run", "--record", "--cwd", featureCwd, "--task", "memory review", "--json"]);
     assert.equal(cronDryRun.status, 0, cronDryRun.stderr);
     const cronDryRunOutput = JSON.parse(cronDryRun.stdout);
+    assert.equal(cronDryRunOutput.stability, "deferred");
     assert.equal(cronDryRunOutput.status, "planned");
     assert.equal(cronDryRunOutput.policy.decision, "dry_run_allowed");
     assert.equal(cronDryRunOutput.policy.dispatchAllowed, false);
@@ -473,12 +481,14 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
     assert.equal(cronLive.status, 1);
     const cronLiveOutput = JSON.parse(cronLive.stdout);
+    assert.equal(cronLiveOutput.stability, "deferred");
     assert.equal(cronLiveOutput.status, "blocked");
     assert.equal(cronLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(cronLiveOutput.policy.dispatchAllowed, false);
     const gatewayLive = runCli(cwd, ["gateway", "check", "--json"]);
     assert.equal(gatewayLive.status, 1);
     const gatewayLiveOutput = JSON.parse(gatewayLive.stdout);
+    assert.equal(gatewayLiveOutput.stability, "deferred");
     assert.equal(gatewayLiveOutput.status, "blocked");
     assert.equal(gatewayLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(gatewayLiveOutput.policy.dispatchAllowed, false);
@@ -502,6 +512,7 @@ test("enabled automation gates still block live dispatch until dispatcher exists
     const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
     assert.equal(cronLive.status, 1);
     const cronOutput = JSON.parse(cronLive.stdout);
+    assert.equal(cronOutput.stability, "deferred");
     assert.equal(cronOutput.status, "blocked");
     assert.equal(cronOutput.enabled, true);
     assert.equal(cronOutput.policy.decision, "live_requires_unimplemented_dispatcher");
@@ -514,6 +525,7 @@ test("enabled automation gates still block live dispatch until dispatcher exists
     const gatewayLive = runCli(cwd, ["gateway", "check", "--json"]);
     assert.equal(gatewayLive.status, 1);
     const gatewayOutput = JSON.parse(gatewayLive.stdout);
+    assert.equal(gatewayOutput.stability, "deferred");
     assert.equal(gatewayOutput.status, "blocked");
     assert.equal(gatewayOutput.enabled, true);
     assert.equal(gatewayOutput.policy.decision, "live_requires_unimplemented_dispatcher");

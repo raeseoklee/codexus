@@ -426,6 +426,7 @@ test("session status reports initialized state and overlay status", async () => 
     const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
     assert.equal(status.status, 0, status.stderr);
     const output = JSON.parse(status.stdout);
+    assert.equal(output.stability, "stable");
     assert.equal(output.status, "initialized");
     assert.equal(output.overlays.project.installed, true);
     assert.equal(output.state.status, "initialized");
@@ -986,6 +987,7 @@ test("session workers gate launch while subagents stay recorder-only", async () 
     const workers = runCli(cwd, ["session", "workers", "status", "--json"], { CODEX_HOME: codexHome });
     assert.equal(workers.status, 0, workers.stderr);
     const workerOutput = JSON.parse(workers.stdout);
+    assert.equal(workerOutput.stability, "deferred");
     assert.equal(workerOutput.workerLaunchSupported, false);
     assert.ok(["gated", "unavailable"].includes(workerOutput.status));
 

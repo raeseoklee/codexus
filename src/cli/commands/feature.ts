@@ -91,6 +91,7 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
     const policy = automationPolicyContract(feature, status.enabled, dryRun);
     const plan = {
       schemaVersion: 1,
+      stability: "deferred" as const,
       feature,
       action: topic,
       mode: dryRun ? "dry-run" : "live",

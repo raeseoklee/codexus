@@ -217,6 +217,8 @@ Public bins: `cx` and `codexus` are canonical.
 - [Reference governance](docs/references/README.md)
 - [Implementation status](docs/implementation-status.md)
 - [Remaining work](docs/remaining-work.md)
+- [0.1.0 stable readiness plan](docs/plans/2026-05-31-0.1.0-stable-readiness-plan.md)
+- [JSON contract](docs/json-contract.md)
 - [Public release checklist](docs/public-release.md)
 
 Selected documents have Korean translations under `docs/ko/`, and English

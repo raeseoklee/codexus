@@ -125,9 +125,33 @@ test("npm local install postinstall does not mutate Codex home by default", asyn
 });
 
 test("publish helper enforces latest not older than next", async () => {
-  const { compareVersions, assertLatestAtLeastNext } = await import("../scripts/publish-next.mjs");
+  const { compareVersions, assertLatestAtLeastNext, publishPlanForArgs } = await import("../scripts/publish-next.mjs");
   assert.ok(compareVersions("0.1.0-alpha.2", "0.1.0-alpha.1") > 0);
   assert.ok(compareVersions("0.1.0", "0.1.0-alpha.9") > 0);
   assert.doesNotThrow(() => assertLatestAtLeastNext({ latest: "0.1.0-alpha.2", next: "0.1.0-alpha.2" }));
   assert.throws(() => assertLatestAtLeastNext({ latest: "0.1.0-alpha.1", next: "0.1.0-alpha.2" }), /latest 0\.1\.0-alpha\.1 is older than next 0\.1\.0-alpha\.2/);
+
+  const nextPlan = publishPlanForArgs([], { name: "codexus", version: "0.1.0-alpha.5" });
+  assert.equal(nextPlan.mode, "next");
+  assert.deepEqual(nextPlan.expectedTags, { latest: "0.1.0-alpha.5", next: "0.1.0-alpha.5" });
+  assert.deepEqual(nextPlan.publishArgs, ["publish", "--access", "public", "--tag", "next"]);
+
+  const stablePlan = publishPlanForArgs(["--stable"], { name: "codexus", version: "0.1.0" });
+  assert.equal(stablePlan.mode, "stable");
+  assert.deepEqual(stablePlan.expectedTags, { latest: "0.1.0", next: "0.1.0" });
+  assert.deepEqual(stablePlan.publishArgs, ["publish", "--access", "public"]);
+  assert.throws(
+    () => publishPlanForArgs(["--stable"], { name: "codexus", version: "0.1.0-alpha.5" }),
+    /stable publish requires a non-prerelease package version/
+  );
+  assert.doesNotThrow(() => publishPlanForArgs(["--stable", "--dry-run"], { name: "codexus", version: "0.1.0-alpha.5" }));
+});
+
+test("release workflow is wired for trusted publishing and stable-only tag publish", async () => {
+  const workflow = await readFile(resolve(".github/workflows/release.yml"), "utf8");
+  assert.match(workflow, /id-token:\s*write/);
+  assert.match(workflow, /registry-url:\s*"https:\/\/registry\.npmjs\.org"/);
+  assert.match(workflow, /npm run publish:stable/);
+  assert.match(workflow, /npm run publish:next/);
+  assert.match(workflow, /Prerelease tags must publish via workflow_dispatch mode=next/);
 });

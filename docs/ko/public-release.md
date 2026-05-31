@@ -26,6 +26,7 @@ GitHub repository를 private에서 public으로 변경하기 전에 이 checklis
 ```bash
 npm run ci
 npm run package:smoke
+cx supply-chain check --gate --json
 node src/cli/main.ts doctor --json
 node src/cli/main.ts schema check --json
 ```
@@ -41,16 +42,11 @@ canonical verification path로 둡니다.
 - Public repository visibility는 Actions billing behavior를 바꿀 수 있으므로
   공개 후 첫 run을 확인합니다.
 
-## npm Alpha Package
+## npm Package Release Channel
 
-npm package가 기본 설치 artifact입니다. Publish 전에 다음을 확인합니다:
+npm package가 기본 설치 artifact입니다.
 
-- `package.json`이 의도한 prerelease version인지 확인합니다. 예:
-  `0.1.0-alpha.0`.
-- `npm run package:smoke`가 통과하는지 확인합니다. 이 command는 `npm pack`,
-  임시 global prefix install, public bin 확인, runtime schema asset 검증, mock
-  run을 실행합니다.
-- `next`와 `latest`가 어긋나지 않도록 guarded helper로 publish합니다:
+alpha/prerelease build는 guarded `next` helper로 publish합니다:
 
 ```bash
 npm run publish:next
@@ -58,6 +54,31 @@ npm run publish:next
 
 이 helper는 `--tag next`로 publish한 뒤 `latest`를 같은 version으로 갱신하고
 `latest >= next`를 검증합니다.
+
+`0.1.0` stable의 canonical path는 local npm token이 아니라
+`.github/workflows/release.yml`의 GitHub Actions trusted-publishing workflow입니다.
+Stable cut 전에 다음을 확인합니다:
+
+- npm trusted publishing이 repository `raeseoklee/codexus`, workflow filename
+  `release.yml`을 가리키도록 설정.
+- `workflow_dispatch mode=next`로 `0.1.0-alpha.5` 같은 prerelease rehearsal을 1회
+  수행해 workflow publish를 증명.
+- `npm run package:smoke` 통과. 이 command는 `npm pack`, 임시 global prefix install,
+  public bin 확인, runtime schema asset 검증, mock run/resume/cancel/status/event
+  flow, supply-chain gate를 실행합니다.
+- manual release evidence checklist가 완료된 뒤에만 `v0.1.0` tag를 push.
+
+Local stable publish는 fallback/dev path로만 사용합니다:
+
+```bash
+npm run publish:stable
+```
+
+stable helper는 non-dry-run prerelease version을 거부합니다. `0.1.0-alpha.*`는
+`npm run publish:next`를 사용합니다.
+
+두 helper 모두 npm registry read-after-write lag를 고려해 dist-tag read를 retry하며,
+마지막에 `latest`와 `next`를 published version으로 강제 정렬합니다.
 
 ## GitHub Pages Installer
 

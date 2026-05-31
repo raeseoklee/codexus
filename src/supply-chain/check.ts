@@ -82,6 +82,7 @@ export interface SupplyChainGate {
 
 export interface SupplyChainEvidenceReport {
   schemaVersion: 1;
+  stability: "stable";
   cwd: string;
   packageRoot: string | null;
   packageJsonPath: string | null;
@@ -438,6 +439,7 @@ export function buildSupplyChainEvidenceReport(cwd: string, options: { gate?: bo
     const status: SupplyChainEvidenceStatus = "unknown";
     return {
       schemaVersion: 1,
+      stability: "stable",
       cwd: resolvedCwd,
       packageRoot: null,
       packageJsonPath: null,
@@ -510,6 +512,7 @@ export function buildSupplyChainEvidenceReport(cwd: string, options: { gate?: bo
     const status: SupplyChainEvidenceStatus = evidenceGaps.length > 0 ? "fail" : "unknown";
     return {
       schemaVersion: 1,
+      stability: "stable",
       cwd: resolvedCwd,
       packageRoot,
       packageJsonPath,
@@ -796,6 +799,7 @@ export function buildSupplyChainEvidenceReport(cwd: string, options: { gate?: bo
 
   return {
     schemaVersion: 1,
+    stability: "stable",
     cwd: resolvedCwd,
     packageRoot,
     packageJsonPath,

@@ -27,6 +27,7 @@ public.
 ```bash
 npm run ci
 npm run package:smoke
+cx supply-chain check --gate --json
 node src/cli/main.ts doctor --json
 node src/cli/main.ts schema check --json
 ```
@@ -42,16 +43,11 @@ availability is blocked.
 - Public repository visibility may change Actions billing behavior; verify the
   first run after publication.
 
-## npm Alpha Package
+## npm Package Release Channels
 
-The npm package is the primary install artifact. Before publishing:
+The npm package is the primary install artifact.
 
-- Confirm `package.json` is on the intended prerelease version, for example
-  `0.1.0-alpha.0`.
-- Confirm `npm run package:smoke` passes. This runs `npm pack`, installs the
-  tarball into a temporary global prefix, checks the public bins, validates
-  runtime schema assets, and executes a mock run.
-- Publish through the guarded helper so `next` and `latest` cannot diverge:
+For alpha/prerelease builds, publish through the guarded `next` helper:
 
 ```bash
 npm run publish:next
@@ -59,6 +55,33 @@ npm run publish:next
 
 The helper publishes with `--tag next`, then updates `latest` to the same
 version and verifies `latest >= next`.
+
+For `0.1.0` stable, the canonical path is the GitHub Actions trusted-publishing
+workflow at `.github/workflows/release.yml`, not a local npm token. Before the
+stable cut:
+
+- Configure npm trusted publishing for repository `raeseoklee/codexus` and
+  workflow filename `release.yml`.
+- Prove the workflow with a prerelease rehearsal, for example
+  `0.1.0-alpha.5` using `workflow_dispatch` with `mode=next`.
+- Confirm `npm run package:smoke` passes. This runs `npm pack`, installs the
+  tarball into a temporary global prefix, checks the public bins, validates
+  runtime schema assets, executes mock run/resume/cancel/status/event flows,
+  and verifies the supply-chain gate.
+- Push `v0.1.0` only after the manual release evidence checklist is complete.
+
+Local stable publish remains a fallback/dev path only:
+
+```bash
+npm run publish:stable
+```
+
+The stable helper refuses non-dry-run prerelease versions; use
+`npm run publish:next` for `0.1.0-alpha.*`.
+
+Both helpers retry dist-tag reads to avoid failing on npm registry
+read-after-write lag, and both finish by forcing `latest` and `next` to the
+published version.
 
 ## GitHub Pages Installer
 

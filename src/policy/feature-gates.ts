@@ -7,6 +7,8 @@ export function featureEnabled(config: HarnessConfig, feature: GuardedFeature): 
 }
 
 export function featureStatus(config: HarnessConfig, feature: GuardedFeature): {
+  schemaVersion: 1;
+  stability: "deferred";
   feature: GuardedFeature;
   enabled: boolean;
   status: "enabled" | "disabled";
@@ -14,6 +16,8 @@ export function featureStatus(config: HarnessConfig, feature: GuardedFeature): {
 } {
   const enabled = featureEnabled(config, feature);
   return {
+    schemaVersion: 1,
+    stability: "deferred",
     feature,
     enabled,
     status: enabled ? "enabled" : "disabled",

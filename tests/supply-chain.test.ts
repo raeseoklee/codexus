@@ -51,6 +51,7 @@ test("supply-chain check is report-only when no policy is declared", async () =>
     const result = runCli(cwd, ["supply-chain", "check", "--json"]);
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
+    assert.equal(output.stability, "stable");
     assert.equal(output.lifecycleExecuted, false);
     assert.equal(output.projectionMode, "static");
     assert.equal(output.policy.declared, false);

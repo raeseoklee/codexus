@@ -51,6 +51,7 @@
     "supply-chain:report": "node src/cli/main.ts supply-chain check --json",
     "release:check": "npm run ci && npm run package:smoke && npm run supply-chain:report",
     "publish:next": "node scripts/publish-next.mjs",
+    "publish:stable": "node scripts/publish-next.mjs --stable",
     "prepack": "npm run build",
     "prepublishOnly": "npm run release:check",
     "postinstall": "node scripts/postinstall.mjs",

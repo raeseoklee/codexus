@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -71,21 +71,22 @@ function matchesPattern(path, pattern) {
 }
 
 function run(command, args, options = {}) {
+  const { allowFailure = false, ...spawnOptions } = options;
   const result = spawnSync(command, args, {
-    cwd: options.cwd ?? root,
+    cwd: spawnOptions.cwd ?? root,
     env: {
       ...process.env,
       npm_config_dry_run: "false",
       NPM_CONFIG_DRY_RUN: "false",
-      ...(options.env ?? {}),
+      ...(spawnOptions.env ?? {}),
     },
     encoding: "utf8",
   });
-  if (result.status !== 0) {
+  if (result.status !== 0 && !allowFailure) {
     const rendered = [result.stdout, result.stderr].filter(Boolean).join("\n");
     throw new Error(`${command} ${args.join(" ")} failed with ${result.status}\n${rendered}`);
   }
-  return { stdout: result.stdout.trim(), stderr: result.stderr.trim() };
+  return { status: result.status, stdout: result.stdout.trim(), stderr: result.stderr.trim() };
 }
 
 function assert(condition, message) {
@@ -94,6 +95,10 @@ function assert(condition, message) {
 
 function binPath(prefix, name) {
   return process.platform === "win32" ? join(prefix, `${name}.cmd`) : join(prefix, "bin", name);
+}
+
+function parseJsonRun(command, args, options = {}) {
+  return JSON.parse(run(command, args, options).stdout);
 }
 
 const workspace = await mkdtemp(join(tmpdir(), "codexus-package-smoke-"));
@@ -106,6 +111,28 @@ try {
   await mkdir(packDir, { recursive: true });
   await mkdir(project, { recursive: true });
   await mkdir(codexHome, { recursive: true });
+  await mkdir(join(project, ".codexus"), { recursive: true });
+
+  const fakeCodex = join(workspace, "fake-codex.mjs");
+  await writeFile(fakeCodex, `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === "--version") {
+  console.log("codex-cli package-smoke");
+} else if (args[0] === "login" && args[1] === "status") {
+  console.log("logged in");
+} else if (args[0] === "exec" && args[1] === "--help") {
+  console.log("Usage: codex exec --json --sandbox --model --output-last-message");
+} else if (args[0] === "app-server" && args[1] === "--help") {
+  console.log("Usage: codex app-server");
+} else if (args[0] === "features" && args[1] === "list") {
+  console.log("mock stable true");
+} else {
+  console.error("unexpected codex args", args.join(" "));
+  process.exit(2);
+}
+`);
+  await chmod(fakeCodex, 0o755);
+  await writeFile(join(project, ".codexus", "config.json"), `${JSON.stringify({ codex: { command: fakeCodex } }, null, 2)}\n`);
 
   run("npm", ["pack", "--pack-destination", packDir]);
   const packed = (await readdir(packDir)).filter((name) => name.endsWith(".tgz"));
@@ -135,17 +162,52 @@ try {
   assert(run(codexus, ["--help"]).stdout.includes("Codexus"), "codexus --help did not render help");
   assert(run(cx, ["--help"]).stdout.includes("Codexus"), "cx --help did not render help");
   assert(run(codexus, ["--version"]).stdout === pkg.version, "codexus --version did not report package version");
-  const installedVersion = JSON.parse(run(cx, ["version", "--json"]).stdout);
+  const installedVersion = parseJsonRun(cx, ["version", "--json"]);
   assert(installedVersion.version === pkg.version, "cx version --json did not report package version");
   assert(installedVersion.name === "codexus", "cx version --json did not report package name");
 
-  const schema = JSON.parse(run(codexus, ["schema", "check", "--json"]).stdout);
+  const doctor = parseJsonRun(codexus, ["doctor", "--cwd", project, "--json", "--strict"], {
+    env: { CODEX_HOME: codexHome },
+  });
+  assert(doctor.stability === "stable", "doctor did not report stable JSON stability");
+  assert(doctor.ok === true, "doctor --strict did not pass with fake codex fixture");
+
+  const schema = parseJsonRun(codexus, ["schema", "check", "--json"]);
   assert(schema.ok === true, "codexus schema check did not return ok=true");
   assert(schema.appServerFixture?.valid === true, "app-server runtime fixture was not readable from the installed package");
 
-  const mockRun = JSON.parse(run(codexus, ["run", "--driver", "mock", "--json", "package smoke"], { cwd: project }).stdout);
-  assert(mockRun.outcome === "complete", "mock run did not complete from the installed package");
-  assert(String(mockRun.statePath).includes(".codexus"), "mock run did not write under .codexus");
+  const supplyChain = parseJsonRun(codexus, ["supply-chain", "check", "--gate", "--json"]);
+  assert(supplyChain.stability === "stable", "supply-chain check did not report stable JSON stability");
+  assert(supplyChain.gate?.status === "passed", "installed supply-chain gate did not pass");
+
+  const passRun = parseJsonRun(codexus, ["run", "--driver", "mock", "--verify", "node -e \"process.exit(0)\"", "--json", "package smoke pass"], { cwd: project });
+  assert(passRun.outcome === "complete", "mock pass run did not complete from the installed package");
+  assert(String(passRun.statePath).includes(".codexus"), "mock pass run did not write under .codexus");
+
+  const failRunResult = run(codexus, ["run", "--driver", "mock", "--max-repairs", "0", "--verify", "node -e \"process.exit(1)\"", "--json", "package smoke fail"], {
+    cwd: project,
+    allowFailure: true,
+  });
+  assert(failRunResult.status === 1, "mock failing verification run should return nonzero");
+  const failRun = JSON.parse(failRunResult.stdout);
+  assert(failRun.outcome === "failed", "mock failing verification run did not report failed outcome");
+
+  const repairVerify = "node -e \"const fs=require('fs'); if(!fs.existsSync('smoke-marker')){fs.writeFileSync('smoke-marker','1'); process.exit(1)}\"";
+  const repairRun = parseJsonRun(codexus, ["run", "--driver", "mock", "--max-repairs", "1", "--verify", repairVerify, "--json", "package smoke repair"], { cwd: project });
+  assert(repairRun.outcome === "complete", "mock repair run did not complete");
+  const repairState = JSON.parse(await readFile(repairRun.statePath, "utf8"));
+  assert(repairState.repairIteration === 1, "mock repair run did not exercise one repair iteration");
+
+  const status = parseJsonRun(codexus, ["status", repairRun.runId, "--json"], { cwd: project });
+  assert(status.state?.runId === repairRun.runId, "installed status did not read the repair run");
+  assert(status.state?.repairIteration === 1, "installed status did not expose the repair iteration");
+  const events = parseJsonRun(codexus, ["events", "tail", repairRun.runId, "--lines", "5", "--json"], { cwd: project });
+  assert(events.events?.length > 0, "installed events tail returned no events");
+  const resume = parseJsonRun(codexus, ["resume", repairRun.runId, "--json", "package smoke resume"], { cwd: project });
+  assert(resume.resumedFrom === repairRun.runId, "installed resume did not reference the original run");
+  assert(resume.outcome === "complete", "installed resume did not complete");
+  const cancel = parseJsonRun(codexus, ["cancel", failRun.runId, "--reason", "package smoke cancel", "--json"], { cwd: project });
+  assert(cancel.status === "already_terminal", "installed cancel did not exercise terminal cancel path");
   assert(existsSync(join(project, ".codexus")), "mock run did not create .codexus");
 
   console.log("package smoke ok");

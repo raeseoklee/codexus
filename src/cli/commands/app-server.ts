@@ -62,6 +62,7 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
     const probe = await new CodexAppServerDriver().probe();
     const status = {
       schemaVersion: 1,
+      stability: "experimental" as const,
       cwd,
       feature: "codex-app-server",
       status: liveEnabled() ? "live_gate_enabled" : "dry_run_only",
@@ -83,6 +84,7 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
     if (!dryRun && !liveEnabled()) throw new Error("unsupported_feature:codex-app-server-live-roundtrip");
     const result = {
       schemaVersion: 1,
+      stability: "experimental" as const,
       cwd,
       mode: dryRun ? "dry-run" : "live",
       status: dryRun ? "passed" : "blocked",
@@ -179,6 +181,7 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
       : null;
     const manifest = {
       schemaVersion: 1,
+      stability: "experimental" as const,
       experimentId,
       mode: dryRun ? "dry-run" : "live",
       status: dryRun ? "planned" : "prepared",

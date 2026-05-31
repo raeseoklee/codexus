@@ -269,7 +269,7 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   });
 
   const ok = checks.every((check) => check.status !== "fail");
-  const result = { ok, strict, checks, warnings, configFiles: filesRead, driverProbe };
+  const result = { stability: "stable" as const, ok, strict, checks, warnings, configFiles: filesRead, driverProbe };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
     process.exitCode = strict && !ok ? 1 : 0;
