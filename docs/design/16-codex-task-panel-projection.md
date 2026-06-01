@@ -239,4 +239,3 @@ and conflict check.
 5. Add tests proving task status cannot complete a run when verification fails.
 6. Dogfood with a docs-only autopilot plan before connecting it to code-writing
    autopilot.
-

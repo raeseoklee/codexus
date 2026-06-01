@@ -229,4 +229,3 @@ Codexus task state -> host panel projection
 4. plan tool이 있을 때 adapter가 task를 host plan panel에 mirror하도록 Codexus skill guidance 갱신.
 5. task status만으로 verification 실패 run을 complete할 수 없음을 테스트로 증명.
 6. code-writing autopilot에 연결하기 전에 docs-only autopilot plan으로 dogfood.
-
