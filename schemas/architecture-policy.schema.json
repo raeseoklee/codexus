@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/architecture-policy.schema.json",
+  "title": "Codexus Architecture Policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "type": { "const": "codexus.architecture.policy" },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "from", "forbidden"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "kind": { "const": "forbidden-import" },
+          "from": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forbidden": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "allow": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  },
+  "required": ["rules"]
+}

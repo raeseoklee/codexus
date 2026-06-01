@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { validateArchitecturePolicy } from "../architecture/policy.ts";
 import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
 import { findCodexusPackageRoot } from "../util/package-root.ts";
 import { inspectJsonSchemaSubset, jsonSchemaSubsetEngine, validateJsonSchemaSubset } from "./json-schema-subset.ts";
@@ -46,7 +47,7 @@ export interface SchemaArtifactStatus {
   error: string | null;
 }
 
-export type SchemaValidationType = "config" | "state" | "event" | "memory-entry" | "skill" | "session-state" | "supply-chain-policy";
+export type SchemaValidationType = "config" | "state" | "event" | "memory-entry" | "skill" | "session-state" | "supply-chain-policy" | "architecture-policy";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -70,6 +71,7 @@ export const schemaArtifactNames = [
   "skill.schema.json",
   "session-state.schema.json",
   "supply-chain-policy.schema.json",
+  "architecture-policy.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -80,6 +82,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   skill: "skill.schema.json",
   "session-state": "session-state.schema.json",
   "supply-chain-policy": "supply-chain-policy.schema.json",
+  "architecture-policy": "architecture-policy.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -250,7 +253,9 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
   const errors: string[] = [];
   if (!requireRecord(value, errors, type)) return { schemaVersion: 1, type, valid: false, errors };
   const expectedSchemaVersion = type === "session-state" ? 5 : 1;
-  if (type !== "config" && type !== "supply-chain-policy" && value.schemaVersion !== expectedSchemaVersion) errors.push(`schemaVersion:not_${expectedSchemaVersion}`);
+  if (type !== "config" && type !== "supply-chain-policy" && type !== "architecture-policy" && value.schemaVersion !== expectedSchemaVersion) {
+    errors.push(`schemaVersion:not_${expectedSchemaVersion}`);
+  }
   if (type === "config" && value.schemaVersion !== undefined && value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
 
   if (type === "config") {
@@ -451,6 +456,11 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
 
   if (type === "supply-chain-policy") {
     const validation = validateSupplyChainPolicy(value);
+    errors.push(...validation.errors);
+  }
+
+  if (type === "architecture-policy") {
+    const validation = validateArchitecturePolicy(value);
     errors.push(...validation.errors);
   }
 

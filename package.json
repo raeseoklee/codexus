@@ -95,6 +95,7 @@
         "schemas/config.schema.json",
         "schemas/session-state.schema.json",
         "schemas/supply-chain-policy.schema.json",
+        "schemas/architecture-policy.schema.json",
         "fixtures/app-server/schema.fixture.json",
         "codex/skills/codexus/SKILL.md",
         "scripts/postinstall.mjs",
@@ -105,6 +106,27 @@
       ],
       "binTargetsMustBeBuiltArtifacts": true,
       "lockfileIntegrityRequired": true
+    },
+    "architecture": {
+      "schemaVersion": 1,
+      "type": "codexus.architecture.policy",
+      "rules": [
+        {
+          "id": "no-runtime-package-imports-in-src",
+          "kind": "forbidden-import",
+          "from": [
+            "src/**"
+          ],
+          "forbidden": [
+            "**"
+          ],
+          "allow": [
+            "node:**",
+            "./**",
+            "../**"
+          ]
+        }
+      ]
     }
   },
   "engines": {

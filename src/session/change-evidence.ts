@@ -5,6 +5,7 @@ import { deriveEvidenceModel, type EvidenceModel } from "./evidence.ts";
 import type { CodexusSessionState } from "./state.ts";
 import { computeWorkspaceFingerprint } from "./workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "./verify-detect.ts";
+import { matchesPattern, normalizeGlobPath } from "../util/glob.ts";
 
 export type ChangeEvidenceStatus = "pass" | "fail" | "unknown";
 
@@ -123,39 +124,16 @@ function isSourceFile(path: string): boolean {
   return [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".py", ".rs", ".go", ".rb", ".java", ".kt", ".swift", ".c", ".cc", ".cpp", ".h", ".hpp", ".cs", ".php"].includes(ext);
 }
 
-function globToRegExp(pattern: string): RegExp {
-  const normalized = pattern.replace(/\\/g, "/");
-  let out = "^";
-  for (let i = 0; i < normalized.length; i++) {
-    const char = normalized[i];
-    const next = normalized[i + 1];
-    if (char === "*" && next === "*") {
-      out += ".*";
-      i++;
-    } else if (char === "*") {
-      out += "[^/]*";
-    } else {
-      out += char.replace(/[\\^$+?.()|[\]{}]/g, "\\$&");
-    }
-  }
-  return new RegExp(`${out}$`);
-}
-
 function splitScopes(scope: string | undefined): string[] {
   return (scope ?? "")
     .split(",")
-    .map((part) => part.trim().replace(/\\/g, "/"))
+    .map((part) => normalizeGlobPath(part.trim()))
     .filter(Boolean);
 }
 
 function inScope(path: string, scopes: string[]): boolean {
   if (scopes.length === 0) return true;
-  const normalized = path.replace(/\\/g, "/");
-  return scopes.some((scope) => {
-    if (scope.includes("*")) return globToRegExp(scope).test(normalized);
-    const withoutSlash = scope.replace(/\/+$/, "");
-    return normalized === withoutSlash || normalized.startsWith(`${withoutSlash}/`);
-  });
+  return scopes.some((scope) => matchesPattern(path, scope));
 }
 
 function readDiffFiles(cwd: string, since?: string): ChangeEvidenceReport["diff"] {

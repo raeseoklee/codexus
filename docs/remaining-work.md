@@ -245,10 +245,10 @@ evidence only when the supporting runtime exists:
 11. Autopilot remains a 0.2/0.3 design track. Start with schema artifacts and a
     report-only scope gate before exposing `cx autopilot run`; it must remain
     human-approved, worktree-isolated, and `stability: experimental`.
-12. Harness-engineering alignment adds three small 0.2 tracks before broader
-    autonomy: `cx architecture check` for derivable architecture invariants,
-    `cx repo map/check` for mechanical repository-knowledge validation, and
-    behavior evidence expansion in `cx slop check`. See
+12. Harness-engineering alignment adds small 0.2 tracks before broader
+    autonomy: `cx architecture check` now covers the first derivable import
+    invariant, with `cx repo map/check` for mechanical repository-knowledge
+    validation and behavior evidence expansion in `cx slop check` still open. See
     [doc 13](design/13-harness-engineering-alignment.md).
 
 ## Implementation Residue
@@ -257,10 +257,11 @@ These are the remaining implementation tracks after the 0.1.0 readiness cleanup:
 
 Harness-engineering alignment adds these evidence-first tracks:
 
-- Architecture check: add a schema-validated `codexus.architecture.policy` and
-  `cx architecture check --json`; dogfood first with the no sibling-harness
-  import invariant. Gate only derivable facts such as forbidden imports,
-  required files, and simple layer edges.
+- Architecture check follow-up: first-slice `cx architecture check --json` now
+  exists with schema-validated `codexus.architecture.policy`, `scanAccuracy:
+  "best_effort"`, and a dogfood `forbidden-import` rule. Future rule kinds such
+  as required files or simple layer edges must keep the same derivable-fact gate
+  model.
 - Repository knowledge map/check: validate required docs, index links, and
   English/Korean counterparts mechanically. Keep semantic staleness advisory.
 - Behavior evidence: extend `cx slop check` and subagent claim artifacts with

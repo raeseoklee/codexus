@@ -16,6 +16,10 @@ occur before 1.0, but they should be called out clearly.
   architecture, repository-knowledge, slop, subagent, and observability gates.
 - Added top-level JSON `stability` markers across the remaining supported stable
   command outputs, with package smoke coverage for installed CLI surfaces.
+- Added experimental `cx architecture check --json/--gate` with a
+  schema-validated `codexus.architecture.policy`, best-effort static import
+  evidence, and a dogfood rule that keeps Codexus source free of runtime package
+  imports.
 
 ### Fixed
 

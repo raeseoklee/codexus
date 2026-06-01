@@ -16,6 +16,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   repository-knowledge, slop, subagent, observability gate 방향을 정리합니다.
 - 남은 supported stable command output에 top-level JSON `stability` marker를
   추가하고, installed CLI surface에 대한 package smoke coverage를 보강했습니다.
+- Experimental `cx architecture check --json/--gate`를 추가했습니다.
+  Schema-validated `codexus.architecture.policy`, best-effort static import
+  evidence, Codexus source의 runtime package import 금지 dogfood rule을 포함합니다.
 
 ### Fixed
 

@@ -190,24 +190,6 @@
         <p class="summary">Deferred runtime을 켜지 않고도 구현할 수 있는 작고 도출 가능한 gate입니다.</p>
 
         <article class="card">
-          <h3>Architecture Check</h3>
-          <div class="tags">
-            <span class="tag ready">0.2 첫 slice</span>
-            <span class="tag evidence">gate 가능</span>
-          </div>
-          <p><code>cx architecture check --json</code>과 <code>--gate</code>, schema-validated <code>codexus.architecture.policy</code>를 추가합니다.</p>
-          <span class="label">완료 조건</span>
-          <ul>
-            <li>Static text-based import scan이 <code>scanAccuracy: "best_effort"</code>를 보고합니다.</li>
-            <li>Gate는 evidence gap과 blocking unknown으로만 움직입니다.</li>
-            <li>첫 dogfood rule은 Codexus core의 external harness import 금지입니다.</li>
-            <li>Zero-dependency glob matcher를 공유합니다.</li>
-          </ul>
-          <span class="label">근거</span>
-          <p><a href="design/13-harness-engineering-alignment.md">doc 13</a>, <a href="remaining-work.md">remaining work</a></p>
-        </article>
-
-        <article class="card">
           <h3>Repository Map / Check</h3>
           <div class="tags">
             <span class="tag ready">repo knowledge</span>

@@ -191,24 +191,6 @@
         <p class="summary">Small, derivable gates that can be implemented without enabling deferred runtime behavior.</p>
 
         <article class="card">
-          <h3>Architecture Check</h3>
-          <div class="tags">
-            <span class="tag ready">0.2 first slice</span>
-            <span class="tag evidence">gateable</span>
-          </div>
-          <p>Add <code>cx architecture check --json</code> and <code>--gate</code> with a schema-validated <code>codexus.architecture.policy</code>.</p>
-          <span class="label">Acceptance</span>
-          <ul>
-            <li>Static text-based import scan reports <code>scanAccuracy: "best_effort"</code>.</li>
-            <li>Gate moves only on evidence gaps and blocking unknowns.</li>
-            <li>First dogfood rule: no external harness imports in Codexus core.</li>
-            <li>Use a shared zero-dependency glob matcher.</li>
-          </ul>
-          <span class="label">Sources</span>
-          <p><a href="design/13-harness-engineering-alignment.md">doc 13</a>, <a href="remaining-work.md">remaining work</a></p>
-        </article>
-
-        <article class="card">
           <h3>Repository Map / Check</h3>
           <div class="tags">
             <span class="tag ready">repo knowledge</span>

@@ -117,18 +117,18 @@ Karpathy-style rule은 큰 always-on prompt가 아니라 Codexus **behavior cont
 
 ## Architecture invariant가 첫 작은 gate
 
-다음 작은 code gate는 architecture check가 적합합니다. Import와 layering fact는 로컬에서
-도출 가능하기 때문입니다. 새 judgment system을 만들지 않고 harness engineering을 enforceable
-behavior로 바꾸는 가장 작은 경로입니다.
+첫 작은 code gate는 architecture check입니다. Import fact는 로컬에서 도출 가능하기
+때문입니다. 새 judgment system을 만들지 않고 harness engineering을 enforceable behavior로
+바꾸는 가장 작은 경로입니다.
 
-제안 surface:
+구현된 first-slice surface:
 
 ```bash
 cx architecture check --json
 cx architecture check --gate --json
 ```
 
-제안 policy file:
+구현된 policy shape:
 
 ```json
 {
@@ -136,18 +136,20 @@ cx architecture check --gate --json
   "type": "codexus.architecture.policy",
   "rules": [
     {
-      "id": "no-sibling-harness-imports",
+      "id": "no-runtime-package-imports-in-src",
       "kind": "forbidden-import",
-      "from": ["src/**", "tests/**"],
-      "forbidden": ["@external-harness/*", "external-harness-internals/**"]
+      "from": ["src/**"],
+      "forbidden": ["**"],
+      "allow": ["node:**", "./**", "../**"]
     }
   ]
 }
 ```
 
-첫 dogfood 규칙은 **no sibling-harness import invariant**가 좋습니다. Codexus core는
-다른 harness runtime의 내부에 의존하면 안 됩니다. Compatibility reference가 runtime
-dependency로 변하는 것을 막기 위한 규칙입니다.
+첫 dogfood 규칙은 **source의 runtime package import 금지** invariant입니다. Codexus
+source는 Node built-in과 local module은 import할 수 있지만, runtime package coupling을
+조용히 늘리면 안 됩니다. 이 규칙은 Codexus의 standalone boundary를 보존하고,
+compatibility reference가 runtime dependency로 변하는 것도 막습니다.
 
 Import scan은 **static, text-based best-effort scan이며 full type-aware import graph가
 아닙니다**. Output에는 supply-chain의 `projectionAccuracy`와 같은 성격의
@@ -166,12 +168,12 @@ Architecture check는 기존 evidence shape를 재사용합니다:
 - `informationalUnknowns`: local checker가 알 수 없는 항목;
 - `gate`: evidence gap과 blocking unknown만 exit code를 움직임.
 
-초기 rule kind는 좁게 유지합니다:
+첫 구현 rule kind는 의도적으로 좁습니다:
 
 - `forbidden-import`;
-- `required-file`;
-- `forbidden-file`;
-- `from` -> `mayImport` 형태의 단순 layer direction.
+
+향후 `required-file`, `forbidden-file`, `from` -> `mayImport` 형태의 단순 layer
+direction도 같은 facts-vs-heuristics gate model을 사용해야 합니다.
 
 Semantic taste rule을 gate mode에 넣지 않습니다. 명시적 local evidence가 생길 때까지
 advisory output에 둡니다.
@@ -289,8 +291,9 @@ Codexus is a harness engineering layer for OpenAI Codex CLI.
 
 1. **문서 정렬**: 이 문서 추가, documentation index link, README/doc 05 positioning 정렬,
    remaining-work 갱신. 이 slice는 문서 전용입니다.
-2. **Architecture check 설계/구현**: `codexus.architecture.policy` schema와
-   `cx architecture check --json` 추가. 첫 규칙은 no sibling-harness import invariant.
+2. **Architecture check first slice**: `codexus.architecture.policy` schema와
+   `cx architecture check --json` 구현. 첫 규칙은 Codexus source의 runtime package
+   import 금지입니다.
 3. **Repo map/check**: mechanical docs/index validation 추가. Semantic staleness는
    advisory로 유지.
 4. **Behavior evidence 확장**: `cx slop check`에 surgical-change와 abstraction-risk

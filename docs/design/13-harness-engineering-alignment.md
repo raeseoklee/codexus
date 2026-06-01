@@ -126,18 +126,18 @@ This preserves the project's core rule: **facts can gate; judgment advises**.
 
 ## Architecture Invariants Are The First Small Gate
 
-The next small code gate should be an architecture check, because import and
-layering facts are locally derivable. This is the cleanest way to turn harness
-engineering into enforceable behavior without inventing a new judgment system.
+The first small code gate is an architecture check, because import facts are
+locally derivable. This is the cleanest way to turn harness engineering into
+enforceable behavior without inventing a new judgment system.
 
-Proposed surface:
+Implemented first-slice surface:
 
 ```bash
 cx architecture check --json
 cx architecture check --gate --json
 ```
 
-Proposed policy file:
+Implemented policy shape:
 
 ```json
 {
@@ -145,19 +145,21 @@ Proposed policy file:
   "type": "codexus.architecture.policy",
   "rules": [
     {
-      "id": "no-sibling-harness-imports",
+      "id": "no-runtime-package-imports-in-src",
       "kind": "forbidden-import",
-      "from": ["src/**", "tests/**"],
-      "forbidden": ["@external-harness/*", "external-harness-internals/**"]
+      "from": ["src/**"],
+      "forbidden": ["**"],
+      "allow": ["node:**", "./**", "../**"]
     }
   ]
 }
 ```
 
-The first dogfood rule should be the **no sibling-harness import invariant**:
-Codexus core must not depend on another harness runtime's internals. This keeps
-Codexus standalone and prevents compatibility references from turning into a
-runtime dependency.
+The first dogfood rule is the **no runtime package imports in source**
+invariant. Codexus source may import Node built-ins and local modules, but it
+must not silently grow runtime package coupling. This preserves Codexus's
+standalone boundary and also prevents compatibility references from turning into
+runtime dependencies.
 
 The import scan is a **static, text-based best-effort scan, not a full
 type-aware import graph**. The output must carry `scanAccuracy: "best_effort"`
@@ -179,12 +181,13 @@ The architecture check should reuse the established evidence shape:
 - `informationalUnknowns`: things the local checker cannot know;
 - `gate`: exit code moved only by evidence gaps and blocking unknowns.
 
-Initial rule kinds should stay narrow:
+The first implemented rule kind is intentionally narrow:
 
-- `forbidden-import`;
-- `required-file`;
-- `forbidden-file`;
-- simple layer direction such as `from` -> `mayImport`.
+- `forbidden-import`.
+
+Future rule kinds such as `required-file`, `forbidden-file`, or simple layer
+directions such as `from` -> `mayImport` should use the same facts-vs-heuristics
+gate model.
 
 Do not add semantic "taste" rules to gate mode. They belong in advisory output
 until they are backed by explicit, local evidence.
@@ -310,9 +313,9 @@ Avoid ungrounded claims:
 1. **Documentation alignment**: add this doc, link it from the documentation
    index, align README/doc 05 positioning, and update remaining-work. This
    slice is documentation only.
-2. **Architecture check design and implementation**: add
+2. **Architecture check first slice**: implemented
    `codexus.architecture.policy` schema and `cx architecture check --json`.
-   First rule: no sibling-harness import invariant.
+   First rule: no runtime package imports in Codexus source.
 3. **Repo map/check**: add mechanical docs/index validation; keep semantic
    staleness advisory.
 4. **Behavior evidence expansion**: extend `cx slop check` with surgical-change

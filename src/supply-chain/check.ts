@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
+import { matchesPattern, normalizeGlobPath as normalizePath } from "../util/glob.ts";
 import { readSupplyChainPolicy, type SupplyChainPolicy, type SupplyChainPolicyResolution } from "./policy.ts";
 
 export type SupplyChainEvidenceStatus = "pass" | "fail" | "unknown";
@@ -168,36 +169,6 @@ function stringRecord(value: unknown): Record<string, string> {
 
 function stringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
-}
-
-function normalizePath(path: string): string {
-  return path.replace(/\\/g, "/").replace(/^\.\/+/, "");
-}
-
-function globToRegExp(pattern: string): RegExp {
-  const normalized = normalizePath(pattern);
-  let out = "^";
-  for (let index = 0; index < normalized.length; index += 1) {
-    const char = normalized[index];
-    const next = normalized[index + 1];
-    if (char === "*" && next === "*") {
-      out += ".*";
-      index += 1;
-    } else if (char === "*") {
-      out += "[^/]*";
-    } else {
-      out += char.replace(/[\\^$+?.()|[\]{}]/g, "\\$&");
-    }
-  }
-  return new RegExp(`${out}$`);
-}
-
-function matchesPattern(path: string, pattern: string): boolean {
-  const normalizedPath = normalizePath(path);
-  const normalizedPattern = normalizePath(pattern);
-  if (normalizedPattern.includes("*")) return globToRegExp(normalizedPattern).test(normalizedPath);
-  const withoutSlash = normalizedPattern.replace(/\/+$/, "");
-  return normalizedPath === withoutSlash || normalizedPath.startsWith(`${withoutSlash}/`);
 }
 
 function listFiles(root: string, relative: string): string[] {

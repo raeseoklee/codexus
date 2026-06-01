@@ -182,6 +182,11 @@ if (args[0] === "--version") {
   assert(supplyChain.stability === "stable", "supply-chain check did not report stable JSON stability");
   assert(supplyChain.gate?.status === "passed", "installed supply-chain gate did not pass");
 
+  const architecture = parseJsonRun(codexus, ["architecture", "check", "--gate", "--json"]);
+  assert(architecture.stability === "experimental", "architecture check did not report experimental JSON stability");
+  assert(architecture.scanAccuracy === "best_effort", "architecture check did not report best-effort scan accuracy");
+  assert(architecture.gate?.status === "passed", "installed architecture gate did not pass");
+
   const subagentLaunch = parseJsonRun(codexus, [
     "session",
     "subagent",
