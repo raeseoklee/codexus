@@ -133,13 +133,23 @@ test("publish helper enforces latest not older than next", async () => {
 
   const nextPlan = publishPlanForArgs([], { name: "codexus", version: "0.1.0-alpha.5" });
   assert.equal(nextPlan.mode, "next");
+  assert.equal(nextPlan.syncDistTags, true);
   assert.deepEqual(nextPlan.expectedTags, { latest: "0.1.0-alpha.5", next: "0.1.0-alpha.5" });
   assert.deepEqual(nextPlan.publishArgs, ["publish", "--access", "public", "--tag", "next"]);
 
+  const trustedNextPlan = publishPlanForArgs(["--no-dist-tag-sync"], { name: "codexus", version: "0.1.0-alpha.5" });
+  assert.equal(trustedNextPlan.syncDistTags, false);
+  assert.deepEqual(trustedNextPlan.expectedTags, { next: "0.1.0-alpha.5" });
+  assert.deepEqual(trustedNextPlan.publishArgs, ["publish", "--access", "public", "--tag", "next"]);
+
   const stablePlan = publishPlanForArgs(["--stable"], { name: "codexus", version: "0.1.0" });
   assert.equal(stablePlan.mode, "stable");
+  assert.equal(stablePlan.syncDistTags, true);
   assert.deepEqual(stablePlan.expectedTags, { latest: "0.1.0", next: "0.1.0" });
   assert.deepEqual(stablePlan.publishArgs, ["publish", "--access", "public"]);
+  const trustedStablePlan = publishPlanForArgs(["--stable", "--no-dist-tag-sync"], { name: "codexus", version: "0.1.0" });
+  assert.equal(trustedStablePlan.syncDistTags, false);
+  assert.deepEqual(trustedStablePlan.expectedTags, { latest: "0.1.0" });
   assert.throws(
     () => publishPlanForArgs(["--stable"], { name: "codexus", version: "0.1.0-alpha.5" }),
     /stable publish requires a non-prerelease package version/
@@ -153,6 +163,7 @@ test("release workflow is wired for trusted publishing and stable-only tag publi
   assert.match(workflow, /registry-url:\s*"https:\/\/registry\.npmjs\.org"/);
   assert.match(workflow, /npm run publish:stable/);
   assert.match(workflow, /npm run publish:next/);
+  assert.match(workflow, /--no-dist-tag-sync/);
   assert.match(workflow, /Prerelease tags must publish via workflow_dispatch mode=next/);
   assert.match(workflow, /actions\/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd/);
   assert.match(workflow, /actions\/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/);

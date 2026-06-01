@@ -49,6 +49,10 @@ function readJson(command, args) {
   return JSON.parse(result.stdout);
 }
 
+function tagsMatch(tags, expectedTags) {
+  return Object.entries(expectedTags).every(([key, value]) => tags[key] === value);
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -63,20 +67,24 @@ export function assertLatestAtLeastNext(tags) {
 export function publishPlanForArgs(args, pkg) {
   const dryRun = args.includes("--dry-run");
   const stable = args.includes("--stable");
+  const syncDistTags = !args.includes("--no-dist-tag-sync");
   if (stable && !dryRun && String(pkg.version).includes("-")) {
     throw new Error("stable publish requires a non-prerelease package version; use publish:next for prereleases");
   }
   const publishArgs = ["publish", "--access", "public"];
   if (!stable) publishArgs.push("--tag", "next");
   if (dryRun) publishArgs.push("--dry-run");
+  const expectedTags = syncDistTags
+    ? { latest: pkg.version, next: pkg.version }
+    : stable
+      ? { latest: pkg.version }
+      : { next: pkg.version };
   return {
     mode: stable ? "stable" : "next",
     dryRun,
+    syncDistTags,
     publishArgs,
-    expectedTags: {
-      latest: pkg.version,
-      next: pkg.version,
-    },
+    expectedTags,
   };
 }
 
@@ -85,7 +93,7 @@ async function readDistTagsWithRetry(name, expectedTags, attempts = 6) {
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     const tags = readJson("npm", ["view", name, "dist-tags", "--json", "--prefer-online"]);
     latestTags = tags;
-    if (tags.latest === expectedTags.latest && tags.next === expectedTags.next) return tags;
+    if (tagsMatch(tags, expectedTags)) return tags;
     if (attempt < attempts - 1) await sleep(2 ** attempt * 1000);
   }
   return latestTags;
@@ -98,14 +106,19 @@ async function main() {
   run("npm", plan.publishArgs);
   if (plan.dryRun) return;
 
-  run("npm", ["dist-tag", "add", `${pkg.name}@${pkg.version}`, "latest"]);
-  run("npm", ["dist-tag", "add", `${pkg.name}@${pkg.version}`, "next"]);
+  if (plan.syncDistTags) {
+    run("npm", ["dist-tag", "add", `${pkg.name}@${pkg.version}`, "latest"]);
+    run("npm", ["dist-tag", "add", `${pkg.name}@${pkg.version}`, "next"]);
+  }
   const tags = await readDistTagsWithRetry(pkg.name, plan.expectedTags);
-  if (!tags || tags.next !== pkg.version || tags.latest !== pkg.version) {
+  if (!tags || !tagsMatch(tags, plan.expectedTags)) {
     throw new Error(`published ${pkg.version}, but dist-tags are ${JSON.stringify(tags)}`);
   }
-  assertLatestAtLeastNext(tags);
-  console.log(`Published ${pkg.name}@${pkg.version} (${plan.mode}); latest and next both point to ${pkg.version}.`);
+  if (plan.syncDistTags) {
+    assertLatestAtLeastNext(tags);
+  }
+  const expected = Object.entries(plan.expectedTags).map(([key, value]) => `${key}=${value}`).join(", ");
+  console.log(`Published ${pkg.name}@${pkg.version} (${plan.mode}); verified ${expected}.`);
 }
 
 const entrypoint = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";

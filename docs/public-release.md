@@ -58,8 +58,10 @@ For alpha/prerelease builds, publish through the guarded `next` helper:
 npm run publish:next
 ```
 
-The helper publishes with `--tag next`, then updates `latest` to the same
-version and verifies `latest >= next`.
+The local fallback helper publishes with `--tag next`, then updates `latest` to
+the same version and verifies `latest >= next`. The GitHub Actions trusted
+publisher path uses `--no-dist-tag-sync`: it verifies the tag created by
+`npm publish` itself and does not require extra `npm dist-tag add` permission.
 
 For `0.1.0` stable, the canonical path is the GitHub Actions trusted-publishing
 workflow at `.github/workflows/release.yml`, not a local npm token. Before the
@@ -85,8 +87,10 @@ The stable helper refuses non-dry-run prerelease versions; use
 `npm run publish:next` for `0.1.0-alpha.*`.
 
 Both helpers retry dist-tag reads to avoid failing on npm registry
-read-after-write lag, and both finish by forcing `latest` and `next` to the
-published version.
+read-after-write lag. Local fallback publishes can force `latest` and `next` to
+the published version; trusted-publishing runs keep the npm trusted-publisher
+permission surface to `npm publish` and only verify the tag that publish
+created.
 
 ## GitHub Pages Installer
 

@@ -11,6 +11,15 @@ occur before 1.0, but they should be called out clearly.
 
 No changes yet.
 
+## 0.1.0-alpha.7 - 2026-06-01
+
+### Fixed
+
+- Trusted-publishing workflow publishes no longer require post-publish
+  `npm dist-tag add` permission. GitHub Actions verifies the tag created by
+  `npm publish` itself, keeping the npm trusted-publisher permission surface to
+  publish-only.
+
 ## 0.1.0-alpha.6 - 2026-06-01
 
 ### Removed

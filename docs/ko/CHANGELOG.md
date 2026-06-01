@@ -11,6 +11,14 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 아직 변경 사항이 없습니다.
 
+## 0.1.0-alpha.7 - 2026-06-01
+
+### Fixed
+
+- Trusted-publishing workflow publish가 post-publish `npm dist-tag add` 권한을
+  요구하지 않도록 수정했습니다. GitHub Actions는 `npm publish` 자체가 만든 tag만
+  검증하고, npm trusted-publisher 권한 표면은 publish-only로 유지합니다.
+
 ## 0.1.0-alpha.6 - 2026-06-01
 
 ### Removed

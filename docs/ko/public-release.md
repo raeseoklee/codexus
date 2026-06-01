@@ -56,8 +56,10 @@ alpha/prerelease build는 guarded `next` helper로 publish합니다:
 npm run publish:next
 ```
 
-이 helper는 `--tag next`로 publish한 뒤 `latest`를 같은 version으로 갱신하고
-`latest >= next`를 검증합니다.
+로컬 fallback helper는 `--tag next`로 publish한 뒤 `latest`를 같은 version으로
+갱신하고 `latest >= next`를 검증합니다. GitHub Actions trusted publisher 경로는
+`--no-dist-tag-sync`를 사용합니다. 이 경로는 `npm publish` 자체가 만든 tag만
+검증하고, 별도 `npm dist-tag add` 권한을 요구하지 않습니다.
 
 `0.1.0` stable의 canonical path는 local npm token이 아니라
 `.github/workflows/release.yml`의 GitHub Actions trusted-publishing workflow입니다.
@@ -81,8 +83,10 @@ npm run publish:stable
 stable helper는 non-dry-run prerelease version을 거부합니다. `0.1.0-alpha.*`는
 `npm run publish:next`를 사용합니다.
 
-두 helper 모두 npm registry read-after-write lag를 고려해 dist-tag read를 retry하며,
-마지막에 `latest`와 `next`를 published version으로 강제 정렬합니다.
+두 helper 모두 npm registry read-after-write lag를 고려해 dist-tag read를 retry합니다.
+로컬 fallback publish는 `latest`와 `next`를 published version으로 강제 정렬할 수
+있고, trusted-publishing run은 npm trusted-publisher 권한 표면을 `npm publish`로
+좁힌 채 publish가 만든 tag만 검증합니다.
 
 ## GitHub Pages Installer
 
