@@ -43,6 +43,8 @@ canonical verification path로 둡니다.
   package smoke를 실행해 `engines.node >=22` 설치본 약속에 증거를 둡니다.
 - trusted-publishing workflow는 `id-token: write`를 가지므로 GitHub Actions를 commit
   SHA로 pin합니다.
+- Stable tag release는 별도 job에서 `contents: write`로 matching GitHub Release를
+  생성/갱신합니다. npm publish job은 `contents: read`와 `id-token: write`만 유지합니다.
 - Public repository visibility는 Actions billing behavior를 바꿀 수 있으므로
   공개 후 첫 run을 확인합니다.
 
@@ -74,6 +76,9 @@ Stable release의 canonical path는 local npm token이 아니라
   flow, supply-chain gate를 실행합니다.
 - release evidence checklist가 완료되고 release commit의 `main` CI가 green인 경우에만
   `v<version>` tag를 push.
+- tag-triggered workflow가 `v<version>` GitHub Release를 만들고 `install.sh`를
+  첨부했는지 확인합니다. GitHub `/releases/latest` route는 npm `latest`와 같은 stable
+  version을 가리켜야 합니다.
 
 Local stable publish는 fallback/dev path로만 사용합니다:
 
@@ -99,6 +104,13 @@ Pages source를 `main` branch와 `/` root로 활성화합니다:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
+```
+
+Stable GitHub Release도 같은 `install.sh`를 asset으로 첨부하므로 이 route는 최신 GitHub
+Release를 따라갑니다:
+
+```bash
+curl -fsSL https://github.com/raeseoklee/codexus/releases/latest/download/install.sh | sh
 ```
 
 Project Pages root인 `https://raeseoklee.github.io/codexus/`는 `index.html`의

@@ -9,6 +9,12 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Fixed
+
+- Stable tag publishes now create or refresh the matching GitHub Release and
+  attach `install.sh`, keeping GitHub's latest release route aligned with npm
+  `latest`.
+
 ## 0.1.1 - 2026-06-01
 
 ### Added

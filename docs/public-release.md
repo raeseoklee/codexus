@@ -45,6 +45,9 @@ availability is blocked.
   installed-artifact promise has evidence.
 - The trusted-publishing workflow pins GitHub Actions by commit SHA because it
   owns `id-token: write`.
+- Stable tag releases create or refresh the matching GitHub Release in a
+  separate job with `contents: write`; the npm publish job keeps only
+  `contents: read` and `id-token: write`.
 - Public repository visibility may change Actions billing behavior; verify the
   first run after publication.
 
@@ -78,6 +81,9 @@ token. Before each stable cut:
   and verifies the supply-chain gate.
 - Push `v<version>` only after the release evidence checklist is complete and
   the release commit is green on `main`.
+- Confirm the tag-triggered workflow created a GitHub Release for `v<version>`
+  and attached `install.sh`. GitHub's `/releases/latest` route must point at
+  the same stable version as npm `latest`.
 
 Local stable publish remains a fallback/dev path only:
 
@@ -105,6 +111,13 @@ URL works:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
+```
+
+Stable GitHub Releases also attach the same `install.sh` so this route follows
+the latest GitHub Release:
+
+```bash
+curl -fsSL https://github.com/raeseoklee/codexus/releases/latest/download/install.sh | sh
 ```
 
 The project Pages root, `https://raeseoklee.github.io/codexus/`, serves a small

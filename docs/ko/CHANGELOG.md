@@ -9,6 +9,12 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Fixed
+
+- Stable tag publish가 matching GitHub Release를 생성/갱신하고 `install.sh`를
+  첨부하도록 수정했습니다. GitHub latest release route가 npm `latest`와 같은 version을
+  가리키게 됩니다.
+
 ## 0.1.1 - 2026-06-01
 
 ### Added

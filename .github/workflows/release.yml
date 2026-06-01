@@ -32,6 +32,9 @@ jobs:
   publish:
     name: Trusted npm publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -84,3 +87,42 @@ jobs:
       - name: Verify dist-tags
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)
         run: npm view codexus dist-tags --json --prefer-online
+
+  github-release:
+    name: GitHub Release
+    needs: publish
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Create or refresh GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          notes_file="docs/release-evidence/${version}.md"
+          notes_args=(--generate-notes)
+          if [ -f "$notes_file" ]; then
+            notes_args=(--notes-file "$notes_file")
+          fi
+
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" \
+              --title "Codexus ${GITHUB_REF_NAME}" \
+              --latest \
+              "${notes_args[@]}"
+            gh release upload "$GITHUB_REF_NAME" install.sh --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" install.sh \
+              --verify-tag \
+              --latest \
+              --title "Codexus ${GITHUB_REF_NAME}" \
+              "${notes_args[@]}"
+          fi
