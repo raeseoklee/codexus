@@ -9,6 +9,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.1 - 2026-06-01
+
 ### Added
 
 - OpenAI harness-engineering guidance와 Karpathy-style behavior contract를 종합한
