@@ -9,6 +9,10 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+No changes yet.
+
+## 0.1.0-alpha.6 - 2026-06-01
+
 ### Removed
 
 - Removed the OMX (oh-my-codex) adapter and every `cx adapt omx ...` command, the

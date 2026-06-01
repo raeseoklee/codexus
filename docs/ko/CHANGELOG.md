@@ -9,6 +9,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+아직 변경 사항이 없습니다.
+
+## 0.1.0-alpha.6 - 2026-06-01
+
 ### Removed
 
 - OMX(oh-my-codex) adapter와 모든 `cx adapt omx ...` 명령, `omx` config 블록
