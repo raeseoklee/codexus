@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codexus Roadmap Kanban</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #18202a;
+      --muted: #5f6b7a;
+      --line: #d8dee8;
+      --blue: #2457c5;
+      --green: #247a4d;
+      --amber: #93610f;
+      --red: #a33b32;
+      --violet: #6750a4;
+      --shadow: 0 10px 28px rgba(25, 34, 45, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      padding: 28px 32px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 0;
+      line-height: 1.05;
+    }
+
+    header p {
+      max-width: 980px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    main { padding: 24px 24px 40px; overflow-x: auto; }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(285px, 1fr));
+      gap: 16px;
+      min-width: 1180px;
+    }
+
+    .column {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .column h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .column .summary {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 54px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 0 0 12px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 650;
+      border: 1px solid transparent;
+    }
+
+    .ready { color: var(--blue); background: #eaf0ff; border-color: #c7d6ff; }
+    .evidence { color: var(--green); background: #e9f7ef; border-color: #bfebd0; }
+    .gated { color: var(--amber); background: #fff3d9; border-color: #f0d18d; }
+    .blocked { color: var(--red); background: #ffe8e5; border-color: #f5b8b1; }
+    .later { color: var(--violet); background: #f0ebff; border-color: #d8ccff; }
+
+    .card p { margin: 0 0 8px; }
+    .card ul { margin: 0 0 8px 18px; padding: 0; }
+    .card li { margin: 3px 0; }
+    .label {
+      display: block;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    footer {
+      padding: 0 32px 32px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media print {
+      body { background: #fff; }
+      main { padding: 16px; overflow: visible; }
+      .board { min-width: 0; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+      .column { box-shadow: none; break-inside: avoid; }
+      .card { break-inside: avoid; }
+      header, footer { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Codexus Roadmap Kanban</h1>
+    <p>
+      A four-column view of the remaining Codexus work after the 0.1.0 stable cut.
+      Cards are intentionally framed as evidence-first tasks: local facts may gate,
+      judgment-heavy claims stay advisory, and experimental surfaces remain blocked
+      until their runtime contract exists.
+    </p>
+    <div class="meta">
+      <span class="pill">Updated: 2026-06-01</span>
+      <span class="pill">Baseline: npm 0.1.0 stable</span>
+      <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
+      <span class="pill"><a href="remaining-work.md">Remaining work</a></span>
+      <span class="pill"><a href="design/13-harness-engineering-alignment.md">Harness alignment</a></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="board" aria-label="Codexus roadmap kanban">
+      <section class="column" aria-labelledby="ready-now">
+        <h2 id="ready-now">1. Ready Now</h2>
+        <p class="summary">Small, derivable gates that can be implemented without enabling deferred runtime behavior.</p>
+
+        <article class="card">
+          <h3>Architecture Check</h3>
+          <div class="tags">
+            <span class="tag ready">0.2 first slice</span>
+            <span class="tag evidence">gateable</span>
+          </div>
+          <p>Add <code>cx architecture check --json</code> and <code>--gate</code> with a schema-validated <code>codexus.architecture.policy</code>.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Static text-based import scan reports <code>scanAccuracy: "best_effort"</code>.</li>
+            <li>Gate moves only on evidence gaps and blocking unknowns.</li>
+            <li>First dogfood rule: no sibling-harness imports in Codexus core.</li>
+            <li>Use a shared zero-dependency glob matcher.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/13-harness-engineering-alignment.md">doc 13</a>, <a href="remaining-work.md">remaining work</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Repository Map / Check</h3>
+          <div class="tags">
+            <span class="tag ready">repo knowledge</span>
+            <span class="tag evidence">mechanical</span>
+          </div>
+          <p>Add <code>cx repo map --json</code> and <code>cx repo check --json/--gate</code> for repository knowledge hygiene.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Required docs exist and docs index links resolve.</li>
+            <li>English/Korean counterparts are checked where project policy requires them.</li>
+            <li>Semantic freshness remains advisory, never a default gate.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/13-harness-engineering-alignment.md#repository-knowledge-system">doc 13 repository knowledge</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Behavior Evidence Expansion</h3>
+          <div class="tags">
+            <span class="tag ready">slop guard</span>
+            <span class="tag evidence">facts vs heuristics</span>
+          </div>
+          <p>Extend <code>cx slop check</code> with surgicality, simplicity, assumption, and verification evidence lanes.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Derivable diff facts can gate only when scope is declared.</li>
+            <li>Abstraction/taste claims stay advisory.</li>
+            <li>Explicit review artifacts can be linked as evidence.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/10-quality-evidence-guard.md">quality evidence guard</a>, <a href="design/13-harness-engineering-alignment.md#behavior-contract">behavior contract</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Subagent Behavior Checklist</h3>
+          <div class="tags">
+            <span class="tag ready">recorder-only</span>
+            <span class="tag evidence">claim artifact</span>
+          </div>
+          <p>Add optional checklist fields to recorded subagent completion artifacts without claiming Codexus launched the subagent.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Checklist supports <code>pass|fail|unknown</code>.</li>
+            <li>Subagent assertions never refresh verification freshness.</li>
+            <li>Recorded claims remain review inputs, not completion authority.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/09-subagent-evidence-supervision.md">subagent evidence</a>, <a href="design/13-harness-engineering-alignment.md#subagent-and-review-alignment">doc 13 subagents</a></p>
+        </article>
+      </section>
+
+      <section class="column" aria-labelledby="next-evidence">
+        <h2 id="next-evidence">2. Next Evidence Slices</h2>
+        <p class="summary">Evidence-producing work that should happen before any broader runtime is turned on.</p>
+
+        <article class="card">
+          <h3>Desktop App-Server Real Observation</h3>
+          <div class="tags">
+            <span class="tag evidence">Stage B evidence</span>
+            <span class="tag gated">read-only</span>
+          </div>
+          <p>Prove a supported real Desktop daemon observation path with explicit socket input and a visible turn boundary.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>No transcript values captured.</li>
+            <li>Connection is proven non-disruptive before live use.</li>
+            <li>Negative results remain supported outcomes.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
+        </article>
+
+        <article class="card">
+          <h3>App-Server Session Event Mapping</h3>
+          <div class="tags">
+            <span class="tag evidence">design after observation</span>
+          </div>
+          <p>Only after real observation, map app-server turn events into Codexus session evidence without enabling product execution.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Method shapes are versioned and bounded.</li>
+            <li>Runtime surface becomes <code>desktop-app-server</code> only from observed evidence.</li>
+            <li>CLI notify absence is never used as Desktop proof.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Cron / Gateway Dispatcher Contract</h3>
+          <div class="tags">
+            <span class="tag gated">policy-reviewed-live-dispatch-v1</span>
+          </div>
+          <p>Implement the dispatcher only after permission, approval, lock, dispatch, and completion events are live.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Dry-run and live paths share the same policy contract.</li>
+            <li>Dispatch writes typed ledger events.</li>
+            <li>No unattended execution without explicit policy and approval records.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="remaining-work.md">remaining work item 4</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Full JSON Schema Engine Decision</h3>
+          <div class="tags">
+            <span class="tag ready">dependency policy</span>
+            <span class="tag gated">optional</span>
+          </div>
+          <p>Replace the local subset schema artifact engine only if dependency policy allows it.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li><code>cx schema engine --json</code> continues to report current status truthfully.</li>
+            <li>Existing schema artifacts stay as regression fixtures.</li>
+            <li>No runtime dependency is added without explicit policy approval.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Observability Adapters</h3>
+          <div class="tags">
+            <span class="tag evidence">adapter descriptors</span>
+          </div>
+          <p>Add dev-server, browser, log, screenshot, trace, or metric evidence descriptors after architecture and repo gates are stable.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Stack-specific behavior stays outside the workflow kernel.</li>
+            <li>Evidence is bounded, redacted, and disposable by default.</li>
+            <li>Codexus never claims Codex read evidence unless it was passed or cited.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/13-harness-engineering-alignment.md#observability-track">doc 13 observability</a></p>
+        </article>
+      </section>
+
+      <section class="column" aria-labelledby="gated">
+        <h2 id="gated">3. Gated / Blocked</h2>
+        <p class="summary">Known valuable features that must stay visibly unavailable until the upstream or local contract exists.</p>
+
+        <article class="card">
+          <h3>Live App-Server Turn Execution</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">experimental</span>
+          </div>
+          <p>Do not enable live turn execution until Desktop observation and session-event mapping are proven separately.</p>
+          <span class="label">Gate</span>
+          <p>Supported daemon observation + non-disruptive attach + event mapping + separate enablement design.</p>
+        </article>
+
+        <article class="card">
+          <h3>Real Cron / Gateway Dispatch</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">automation</span>
+          </div>
+          <p>Current surfaces may report status and dry-run audit records only.</p>
+          <span class="label">Gate</span>
+          <p>Permission, approval, lock, dispatch, completion, and recovery events must be live.</p>
+        </article>
+
+        <article class="card">
+          <h3>Statusline Integration</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked upstream</span>
+          </div>
+          <p>Keep <code>cx session hud --json</code> as the supported fallback until Codex exposes a stable statusline configuration surface.</p>
+          <span class="label">Gate</span>
+          <p>Supported Codex configuration surface with documented lifecycle and failure behavior.</p>
+        </article>
+
+        <article class="card">
+          <h3>tmux-Backed Worker Launch</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">launch contract</span>
+          </div>
+          <p><code>session workers status</code> should remain a gate report until session state and launch protocol are stable.</p>
+          <span class="label">Gate</span>
+          <p>Stable worker protocol, ownership model, cancellation behavior, and evidence separation.</p>
+        </article>
+
+        <article class="card">
+          <h3>Native Subagent Active Launcher</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">bridge required</span>
+          </div>
+          <p>Keep record/attach/complete/launch-contract surfaces, but do not claim Codexus can spawn native subagents yet.</p>
+          <span class="label">Gate</span>
+          <p>A supported Codex bridge plus verification-only completion policy.</p>
+        </article>
+
+        <article class="card">
+          <h3>Automatic Context Injection</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">approval required</span>
+          </div>
+          <p>Retrieved context stays as visible approval artifacts until a reversible injection path is designed.</p>
+          <span class="label">Gate</span>
+          <p>User-visible approval, audit artifact, disable path, and no silent prompt mutation.</p>
+        </article>
+      </section>
+
+      <section class="column" aria-labelledby="later">
+        <h2 id="later">4. Later / 0.2-0.3</h2>
+        <p class="summary">Larger product tracks that need the evidence foundations above before implementation.</p>
+
+        <article class="card">
+          <h3>Autopilot Contract Layer</h3>
+          <div class="tags">
+            <span class="tag later">0.2 / 0.3</span>
+            <span class="tag gated">experimental</span>
+          </div>
+          <p>Start with schema artifacts and report-only scope gates before exposing <code>cx autopilot run</code>.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Human-approved scope.</li>
+            <li>Worktree isolation.</li>
+            <li>Detect-then-stop enforcement.</li>
+            <li>Evidence-gated acceptance.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/12-autopilot-contract.md">autopilot contract</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Routine Live Model Replay</h3>
+          <div class="tags">
+            <span class="tag later">cost-sensitive</span>
+            <span class="tag gated">budget gated</span>
+          </div>
+          <p>Keep live replay opt-in and outside the stable path; deterministic replay remains first.</p>
+          <span class="label">Gate</span>
+          <p>Explicit budget, policy approval, replay parity, and cost UX.</p>
+        </article>
+
+        <article class="card">
+          <h3>Richer Cancellation UX</h3>
+          <div class="tags">
+            <span class="tag later">operator UX</span>
+          </div>
+          <p>Improve wait/remote-host behavior around cancellation after the owner/liveness protocol remains stable in normal use.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Clear owner state.</li>
+            <li>Bounded wait behavior.</li>
+            <li>No destructive cleanup of unrelated processes.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Schema Migrations Beyond 0.1.x</h3>
+          <div class="tags">
+            <span class="tag later">contract line</span>
+          </div>
+          <p>Extend state and JSON contracts only through explicit migration boundaries.</p>
+          <span class="label">Gate</span>
+          <p>0.1.x frozen fields remain additive-only; breaking changes wait for 0.2.0.</p>
+        </article>
+
+        <article class="card">
+          <h3>Memory / Skill Evolution Depth</h3>
+          <div class="tags">
+            <span class="tag later">evolution</span>
+            <span class="tag evidence">replay-gated</span>
+          </div>
+          <p>Deepen memory quality, skill improvement, and replay coverage after behavior evidence fields are available.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Curator-derived tri-state findings.</li>
+            <li>Conflict and supersession links.</li>
+            <li>No silent behavior mutation.</li>
+          </ul>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    Source documents: <a href="remaining-work.md">remaining-work.md</a>,
+    <a href="design/13-harness-engineering-alignment.md">design/13</a>,
+    <a href="plans/2026-05-31-0.1.0-stable-readiness-plan.md">0.1.0 stable readiness</a>.
+    This board is a planning artifact; command contracts in the linked design docs remain authoritative.
+  </footer>
+</body>
+</html>

@@ -46,6 +46,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Harness engineering alignment](design/13-harness-engineering-alignment.md): synthesis of OpenAI harness engineering and Karpathy-style behavior contracts for repository maps, architecture gates, behavior evidence, and non-goals.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
+- [Roadmap Kanban](roadmap-kanban.html): four-column HTML board of the remaining ready, evidence, gated, and later work.
 - [Public release checklist](public-release.md): metadata, safety, verification, and visibility checklist for open-source publication.
 - [Roadmap](../ROADMAP.md): public-facing project direction.
 - [Changelog](../CHANGELOG.md): release notes.

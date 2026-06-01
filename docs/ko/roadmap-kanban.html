@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codexus 로드맵 칸반</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #18202a;
+      --muted: #5f6b7a;
+      --line: #d8dee8;
+      --blue: #2457c5;
+      --green: #247a4d;
+      --amber: #93610f;
+      --red: #a33b32;
+      --violet: #6750a4;
+      --shadow: 0 10px 28px rgba(25, 34, 45, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      padding: 28px 32px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 0;
+      line-height: 1.05;
+    }
+
+    header p {
+      max-width: 980px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    main { padding: 24px 24px 40px; overflow-x: auto; }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(285px, 1fr));
+      gap: 16px;
+      min-width: 1180px;
+    }
+
+    .column {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .column h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .column .summary {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 54px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 0 0 12px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 650;
+      border: 1px solid transparent;
+    }
+
+    .ready { color: var(--blue); background: #eaf0ff; border-color: #c7d6ff; }
+    .evidence { color: var(--green); background: #e9f7ef; border-color: #bfebd0; }
+    .gated { color: var(--amber); background: #fff3d9; border-color: #f0d18d; }
+    .blocked { color: var(--red); background: #ffe8e5; border-color: #f5b8b1; }
+    .later { color: var(--violet); background: #f0ebff; border-color: #d8ccff; }
+
+    .card p { margin: 0 0 8px; }
+    .card ul { margin: 0 0 8px 18px; padding: 0; }
+    .card li { margin: 3px 0; }
+    .label {
+      display: block;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    footer {
+      padding: 0 32px 32px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media print {
+      body { background: #fff; }
+      main { padding: 16px; overflow: visible; }
+      .board { min-width: 0; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+      .column { box-shadow: none; break-inside: avoid; }
+      .card { break-inside: avoid; }
+      header, footer { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Codexus 로드맵 칸반</h1>
+    <p>
+      0.1.0 stable 이후 남은 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
+      evidence-first 원칙에 맞춰 작성했습니다. 로컬 fact는 gate할 수 있고, 판단이 필요한
+      항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
+    </p>
+    <div class="meta">
+      <span class="pill">갱신일: 2026-06-01</span>
+      <span class="pill">기준: npm 0.1.0 stable</span>
+      <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
+      <span class="pill"><a href="remaining-work.md">남은 작업</a></span>
+      <span class="pill"><a href="design/13-harness-engineering-alignment.md">하네스 정렬 문서</a></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="board" aria-label="Codexus roadmap kanban">
+      <section class="column" aria-labelledby="ready-now">
+        <h2 id="ready-now">1. 바로 가능</h2>
+        <p class="summary">Deferred runtime을 켜지 않고도 구현할 수 있는 작고 도출 가능한 gate입니다.</p>
+
+        <article class="card">
+          <h3>Architecture Check</h3>
+          <div class="tags">
+            <span class="tag ready">0.2 첫 slice</span>
+            <span class="tag evidence">gate 가능</span>
+          </div>
+          <p><code>cx architecture check --json</code>과 <code>--gate</code>, schema-validated <code>codexus.architecture.policy</code>를 추가합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Static text-based import scan이 <code>scanAccuracy: "best_effort"</code>를 보고합니다.</li>
+            <li>Gate는 evidence gap과 blocking unknown으로만 움직입니다.</li>
+            <li>첫 dogfood rule은 no sibling-harness imports입니다.</li>
+            <li>Zero-dependency glob matcher를 공유합니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/13-harness-engineering-alignment.md">doc 13</a>, <a href="remaining-work.md">remaining work</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Repository Map / Check</h3>
+          <div class="tags">
+            <span class="tag ready">repo knowledge</span>
+            <span class="tag evidence">mechanical</span>
+          </div>
+          <p>Repository knowledge hygiene를 위해 <code>cx repo map --json</code>, <code>cx repo check --json/--gate</code>를 추가합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>필수 docs 존재와 docs index link resolve를 확인합니다.</li>
+            <li>정책상 필요한 EN/KO counterpart를 확인합니다.</li>
+            <li>Semantic freshness는 advisory로 유지하고 기본 gate로 쓰지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/13-harness-engineering-alignment.md#repository-knowledge-system">doc 13 repository knowledge</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Behavior Evidence 확장</h3>
+          <div class="tags">
+            <span class="tag ready">slop guard</span>
+            <span class="tag evidence">fact vs heuristic</span>
+          </div>
+          <p><code>cx slop check</code>에 surgicality, simplicity, assumption, verification evidence lane을 확장합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Declared scope가 있을 때만 diff fact가 gate에 영향을 줍니다.</li>
+            <li>Abstraction/taste claim은 advisory로 유지합니다.</li>
+            <li>명시적 review artifact를 evidence로 연결할 수 있습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/10-quality-evidence-guard.md">quality evidence guard</a>, <a href="design/13-harness-engineering-alignment.md#behavior-contract">behavior contract</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Subagent Behavior Checklist</h3>
+          <div class="tags">
+            <span class="tag ready">recorder-only</span>
+            <span class="tag evidence">claim artifact</span>
+          </div>
+          <p>Recorded subagent completion artifact에 optional checklist field를 추가하되 Codexus가 subagent를 launch했다고 주장하지 않습니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Checklist는 <code>pass|fail|unknown</code>을 지원합니다.</li>
+            <li>Subagent assertion은 verification freshness를 갱신하지 않습니다.</li>
+            <li>Recorded claim은 review input이지 completion authority가 아닙니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/09-subagent-evidence-supervision.md">subagent evidence</a>, <a href="design/13-harness-engineering-alignment.md#subagent-and-review-alignment">doc 13 subagents</a></p>
+        </article>
+      </section>
+
+      <section class="column" aria-labelledby="next-evidence">
+        <h2 id="next-evidence">2. 다음 Evidence Slice</h2>
+        <p class="summary">더 큰 runtime을 켜기 전에 먼저 증거를 만들어야 하는 작업입니다.</p>
+
+        <article class="card">
+          <h3>Desktop App-Server 실제 관측</h3>
+          <div class="tags">
+            <span class="tag evidence">Stage B evidence</span>
+            <span class="tag gated">read-only</span>
+          </div>
+          <p>명시적 socket 입력과 사용자가 볼 수 있는 turn boundary로 실제 Desktop daemon 관측 경로를 증명합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Transcript value를 저장하지 않습니다.</li>
+            <li>연결이 사용자 세션을 방해하지 않음을 먼저 증명합니다.</li>
+            <li>Negative result도 정상 결과로 기록합니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
+        </article>
+
+        <article class="card">
+          <h3>App-Server Session Event Mapping</h3>
+          <div class="tags">
+            <span class="tag evidence">관측 이후 설계</span>
+          </div>
+          <p>실제 관측 이후에만 app-server turn event를 Codexus session evidence로 매핑합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Method shape가 versioned/bounded입니다.</li>
+            <li><code>desktop-app-server</code> runtime surface는 관측 증거에서만 나옵니다.</li>
+            <li>CLI notify 부재를 Desktop 증거로 쓰지 않습니다.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Cron / Gateway Dispatcher Contract</h3>
+          <div class="tags">
+            <span class="tag gated">policy-reviewed-live-dispatch-v1</span>
+          </div>
+          <p>Permission, approval, lock, dispatch, completion event가 살아난 뒤에만 dispatcher를 구현합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Dry-run/live path가 같은 policy contract를 씁니다.</li>
+            <li>Dispatch가 typed ledger event를 씁니다.</li>
+            <li>명시적 policy/approval record 없이는 unattended execution을 하지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="remaining-work.md">remaining work item 4</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Full JSON Schema Engine 결정</h3>
+          <div class="tags">
+            <span class="tag ready">dependency policy</span>
+            <span class="tag gated">optional</span>
+          </div>
+          <p>Dependency policy가 허용할 때만 local subset schema artifact engine을 full engine으로 교체합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li><code>cx schema engine --json</code>이 현재 상태를 정직하게 보고합니다.</li>
+            <li>기존 schema artifact는 regression fixture로 유지합니다.</li>
+            <li>명시적 policy 승인 없이 runtime dependency를 추가하지 않습니다.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Observability Adapter</h3>
+          <div class="tags">
+            <span class="tag evidence">adapter descriptor</span>
+          </div>
+          <p>Architecture/repo gate가 안정된 뒤 dev-server, browser, log, screenshot, trace, metric evidence descriptor를 추가합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Stack-specific behavior는 workflow kernel 밖에 둡니다.</li>
+            <li>Evidence는 기본적으로 bounded/redacted/disposable입니다.</li>
+            <li>전달되거나 인용되지 않은 evidence를 Codex가 읽었다고 주장하지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/13-harness-engineering-alignment.md#observability-track">doc 13 observability</a></p>
+        </article>
+      </section>
+
+      <section class="column" aria-labelledby="gated">
+        <h2 id="gated">3. Gated / Blocked</h2>
+        <p class="summary">가치는 있지만 upstream 또는 local contract가 생길 때까지 unavailable로 보여야 하는 기능입니다.</p>
+
+        <article class="card">
+          <h3>Live App-Server Turn Execution</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">experimental</span>
+          </div>
+          <p>Desktop 관측과 session-event mapping이 별도로 증명되기 전까지 live turn execution을 켜지 않습니다.</p>
+          <span class="label">Gate</span>
+          <p>지원되는 daemon 관측, non-disruptive attach, event mapping, 별도 enablement 설계.</p>
+        </article>
+
+        <article class="card">
+          <h3>Real Cron / Gateway Dispatch</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">automation</span>
+          </div>
+          <p>현재 surface는 status와 dry-run audit record까지만 지원합니다.</p>
+          <span class="label">Gate</span>
+          <p>Permission, approval, lock, dispatch, completion, recovery event가 필요합니다.</p>
+        </article>
+
+        <article class="card">
+          <h3>Statusline Integration</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked upstream</span>
+          </div>
+          <p>Codex가 안정적인 statusline configuration surface를 제공할 때까지 <code>cx session hud --json</code>을 fallback으로 유지합니다.</p>
+          <span class="label">Gate</span>
+          <p>문서화된 lifecycle/failure behavior를 가진 Codex 지원 설정면.</p>
+        </article>
+
+        <article class="card">
+          <h3>tmux-backed Worker Launch</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">launch contract</span>
+          </div>
+          <p>Session state와 launch protocol이 안정될 때까지 <code>session workers status</code>는 gate report로 유지합니다.</p>
+          <span class="label">Gate</span>
+          <p>Worker protocol, ownership model, cancellation behavior, evidence separation.</p>
+        </article>
+
+        <article class="card">
+          <h3>Native Subagent Active Launcher</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">bridge 필요</span>
+          </div>
+          <p>Record/attach/complete/launch-contract surface는 유지하지만, Codexus가 native subagent를 spawn한다고 주장하지 않습니다.</p>
+          <span class="label">Gate</span>
+          <p>지원되는 Codex bridge와 verification-only completion policy.</p>
+        </article>
+
+        <article class="card">
+          <h3>Automatic Context Injection</h3>
+          <div class="tags">
+            <span class="tag blocked">blocked</span>
+            <span class="tag gated">approval 필요</span>
+          </div>
+          <p>Retrieved context는 reversible injection path가 설계되기 전까지 visible approval artifact로만 둡니다.</p>
+          <span class="label">Gate</span>
+          <p>User-visible approval, audit artifact, disable path, no silent prompt mutation.</p>
+        </article>
+      </section>
+
+      <section class="column" aria-labelledby="later">
+        <h2 id="later">4. Later / 0.2-0.3</h2>
+        <p class="summary">위 evidence foundation이 안정된 뒤 들어갈 더 큰 제품 트랙입니다.</p>
+
+        <article class="card">
+          <h3>Autopilot Contract Layer</h3>
+          <div class="tags">
+            <span class="tag later">0.2 / 0.3</span>
+            <span class="tag gated">experimental</span>
+          </div>
+          <p><code>cx autopilot run</code>을 노출하기 전 schema artifact와 report-only scope gate부터 시작합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Human-approved scope.</li>
+            <li>Worktree isolation.</li>
+            <li>Detect-then-stop enforcement.</li>
+            <li>Evidence-gated acceptance.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/12-autopilot-contract.md">autopilot contract</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Routine Live Model Replay</h3>
+          <div class="tags">
+            <span class="tag later">비용 민감</span>
+            <span class="tag gated">budget gated</span>
+          </div>
+          <p>Live replay는 opt-in으로 유지하고 stable path 밖에 둡니다. Deterministic replay가 항상 먼저입니다.</p>
+          <span class="label">Gate</span>
+          <p>Explicit budget, policy approval, replay parity, cost UX.</p>
+        </article>
+
+        <article class="card">
+          <h3>Cancellation UX 확장</h3>
+          <div class="tags">
+            <span class="tag later">operator UX</span>
+          </div>
+          <p>Owner/liveness protocol이 안정된 뒤 wait/remote-host cancellation behavior를 개선합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>명확한 owner state.</li>
+            <li>Bounded wait behavior.</li>
+            <li>무관한 process를 정리하지 않음.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>0.1.x 이후 Schema Migration</h3>
+          <div class="tags">
+            <span class="tag later">contract line</span>
+          </div>
+          <p>State와 JSON contract는 explicit migration boundary를 통해서만 확장합니다.</p>
+          <span class="label">Gate</span>
+          <p>0.1.x frozen field는 additive-only입니다. Breaking change는 0.2.0까지 기다립니다.</p>
+        </article>
+
+        <article class="card">
+          <h3>Memory / Skill Evolution Depth</h3>
+          <div class="tags">
+            <span class="tag later">evolution</span>
+            <span class="tag evidence">replay-gated</span>
+          </div>
+          <p>Behavior evidence field가 생긴 뒤 memory quality, skill improvement, replay coverage를 깊게 확장합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Curator-derived tri-state finding.</li>
+            <li>Conflict와 supersession link.</li>
+            <li>Silent behavior mutation 금지.</li>
+          </ul>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    Source documents: <a href="remaining-work.md">remaining-work.md</a>,
+    <a href="design/13-harness-engineering-alignment.md">design/13</a>,
+    <a href="plans/2026-05-31-0.1.0-stable-readiness-plan.md">0.1.0 stable readiness</a>.
+    이 보드는 planning artifact이며, 실제 command contract는 링크된 design 문서를 기준으로 합니다.
+  </footer>
+</body>
+</html>
