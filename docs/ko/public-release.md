@@ -61,18 +61,19 @@ npm run publish:next
 `--no-dist-tag-sync`를 사용합니다. 이 경로는 `npm publish` 자체가 만든 tag만
 검증하고, 별도 `npm dist-tag add` 권한을 요구하지 않습니다.
 
-`0.1.0` stable의 canonical path는 local npm token이 아니라
+Stable release의 canonical path는 local npm token이 아니라
 `.github/workflows/release.yml`의 GitHub Actions trusted-publishing workflow입니다.
-Stable cut 전에 다음을 확인합니다:
+각 stable cut 전에 다음을 확인합니다:
 
 - npm trusted publishing이 repository `raeseoklee/codexus`, workflow filename
   `release.yml`을 가리키도록 설정.
-- `workflow_dispatch mode=next`로 `0.1.0-alpha.7` 같은 prerelease rehearsal을 1회
-  수행해 workflow publish를 증명.
+- workflow나 publish 배선이 바뀐 경우 `workflow_dispatch mode=next`로
+  `0.1.0-alpha.7` 같은 prerelease rehearsal을 수행해 workflow publish를 증명.
 - `npm run package:smoke` 통과. 이 command는 `npm pack`, 임시 global prefix install,
   public bin 확인, runtime schema asset 검증, mock run/resume/cancel/status/event
   flow, supply-chain gate를 실행합니다.
-- manual release evidence checklist가 완료된 뒤에만 `v0.1.0` tag를 push.
+- release evidence checklist가 완료되고 release commit의 `main` CI가 green인 경우에만
+  `v<version>` tag를 push.
 
 Local stable publish는 fallback/dev path로만 사용합니다:
 
@@ -80,7 +81,7 @@ Local stable publish는 fallback/dev path로만 사용합니다:
 npm run publish:stable
 ```
 
-stable helper는 non-dry-run prerelease version을 거부합니다. `0.1.0-alpha.*`는
+stable helper는 non-dry-run prerelease version을 거부합니다. Prerelease build는
 `npm run publish:next`를 사용합니다.
 
 두 helper 모두 npm registry read-after-write lag를 고려해 dist-tag read를 retry합니다.

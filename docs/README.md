@@ -30,6 +30,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [0.1.0 stable readiness plan](plans/2026-05-31-0.1.0-stable-readiness-plan.md): the 0.1.0 cut — supported vs deferred surface, contract-frozen 0.1.x JSON, trusted publishing, E2E smoke matrix, and the release procedure.
 - [JSON contract](json-contract.md): frozen `0.1.x` JSON fields, stability markers, and breaking-change rules for automation consumers.
 - [0.1.0 release evidence](release-evidence/0.1.0.md): redacted manual sign-off template for the stable cut.
+- [0.1.1 release evidence](release-evidence/0.1.1.md): trusted-publishing evidence and installed-package smoke for the harness-engineering first pass.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.

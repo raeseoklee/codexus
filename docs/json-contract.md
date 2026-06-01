@@ -2,7 +2,7 @@
 
 [Korean](ko/json-contract.md)
 
-Status: 0.1.0 readiness contract
+Status: 0.1.x stable contract, introduced in 0.1.0 and expanded in 0.1.1
 
 Codexus is an automation-facing harness, so JSON output stability is part of the
 product contract. `0.1.0` is not 1.0, but it freezes the supported command JSON

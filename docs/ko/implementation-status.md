@@ -2,13 +2,15 @@
 
 [English](../implementation-status.md)
 
-날짜: 2026-05-31
+날짜: 2026-06-01
 
 제품명: Codexus
 
 목표 CLI: `cx`
 
 Public bins: `cx`, `codexus`
+
+현재 stable baseline: `0.1.1`
 
 Npm package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. 기존 `chx`
 alias는 공개 npm bin으로 배포하지 않습니다.
@@ -222,7 +224,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - CLI version reporting은 source CLI test와 installed package smoke test로
   커버됩니다.
 - Autopilot contract는 0.2/0.3 experimental surface로만 문서화되어 있습니다.
-  아직 구현되지 않았고 0.1.0 stable contract에는 포함되지 않습니다.
+  아직 구현되지 않았고 0.1.x stable contract에는 포함되지 않습니다.
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
@@ -248,6 +250,6 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   않았습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
-- Autopilot은 0.2/0.3 트랙의 설계 문서만 있습니다. 0.1.0 stable surface에는
+- Autopilot은 0.2/0.3 트랙의 설계 문서만 있습니다. 0.1.x stable surface에는
   `cx autopilot` 구현이 없습니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

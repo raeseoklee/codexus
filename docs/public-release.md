@@ -63,19 +63,21 @@ the same version and verifies `latest >= next`. The GitHub Actions trusted
 publisher path uses `--no-dist-tag-sync`: it verifies the tag created by
 `npm publish` itself and does not require extra `npm dist-tag add` permission.
 
-For `0.1.0` stable, the canonical path is the GitHub Actions trusted-publishing
-workflow at `.github/workflows/release.yml`, not a local npm token. Before the
-stable cut:
+For stable releases, the canonical path is the GitHub Actions
+trusted-publishing workflow at `.github/workflows/release.yml`, not a local npm
+token. Before each stable cut:
 
 - Configure npm trusted publishing for repository `raeseoklee/codexus` and
   workflow filename `release.yml`.
-- Prove the workflow with a prerelease rehearsal, for example
-  `0.1.0-alpha.7` using `workflow_dispatch` with `mode=next`.
+- Prove the workflow with a prerelease rehearsal when the workflow or publish
+  plumbing changes, for example `0.1.0-alpha.7` using `workflow_dispatch` with
+  `mode=next`.
 - Confirm `npm run package:smoke` passes. This runs `npm pack`, installs the
   tarball into a temporary global prefix, checks the public bins, validates
   runtime schema assets, executes mock run/resume/cancel/status/event flows,
   and verifies the supply-chain gate.
-- Push `v0.1.0` only after the manual release evidence checklist is complete.
+- Push `v<version>` only after the release evidence checklist is complete and
+  the release commit is green on `main`.
 
 Local stable publish remains a fallback/dev path only:
 
@@ -84,7 +86,7 @@ npm run publish:stable
 ```
 
 The stable helper refuses non-dry-run prerelease versions; use
-`npm run publish:next` for `0.1.0-alpha.*`.
+`npm run publish:next` for prerelease builds.
 
 Both helpers retry dist-tag reads to avoid failing on npm registry
 read-after-write lag. Local fallback publishes can force `latest` and `next` to

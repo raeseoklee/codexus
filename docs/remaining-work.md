@@ -162,7 +162,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     guarded alpha publish, trusted-publishing release workflow, Node 22 package
     smoke compatibility, and stable-readiness smoke coverage implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current npm baseline is `0.1.0`; prereleases publish through
+    - Current npm baseline is `0.1.1`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
       trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin
@@ -254,7 +254,8 @@ evidence only when the supporting runtime exists:
 
 ## Implementation Residue
 
-These are the remaining implementation tracks after the 0.1.0 readiness cleanup:
+These are the remaining implementation tracks after the 0.1.1
+harness-engineering first pass:
 
 Harness-engineering alignment adds these evidence-first tracks:
 
@@ -269,9 +270,9 @@ Harness-engineering alignment adds these evidence-first tracks:
   staleness advisory.
 - Behavior evidence follow-up: `cx slop check` now records first-slice
   surgicality, simplicity, assumption, verification-artifact, and diff-surface
-  evidence while preserving the facts-vs-heuristics boundary. Remaining work is
-  the subagent claim checklist counterpart plus optional future artifacts such as
-  lint/typecheck/coverage reports.
+  evidence while preserving the facts-vs-heuristics boundary. The subagent
+  behavior checklist counterpart is implemented; remaining work is optional
+  future artifacts such as lint/typecheck/coverage reports.
 - Observability adapters: add dev-server/browser/log evidence descriptors only
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.

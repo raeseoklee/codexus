@@ -156,7 +156,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
     compatibility, stable-readiness smoke coverage 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 현재 npm baseline은 `0.1.0`입니다. Prerelease는 fallback/dev path인
+    - 현재 npm baseline은 `0.1.1`입니다. Prerelease는 fallback/dev path인
       `publish:next`를 통해 배포할 수 있고, stable release는 trusted GitHub Actions
       tag run에서 배포합니다.
     - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,
@@ -243,7 +243,7 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 
 ## 구현 잔여
 
-0.1.0 readiness 정리 이후 남은 구현 트랙입니다:
+0.1.1 harness-engineering first pass 이후 남은 구현 트랙입니다:
 
 Harness-engineering alignment에서 추가된 evidence-first track:
 
@@ -257,8 +257,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   유지합니다.
 - Behavior evidence follow-up: `cx slop check`는 첫 surgicality, simplicity,
   assumption, verification-artifact, diff-surface evidence를 기록합니다. Fact-vs-heuristic
-  경계는 유지했고, 남은 작업은 subagent claim checklist counterpart와 선택적
-  lint/typecheck/coverage artifact입니다.
+  경계는 유지했고, subagent behavior checklist counterpart는 구현됐습니다. 남은 작업은
+  선택적 lint/typecheck/coverage artifact입니다.
 - Observability adapter: architecture와 repo-knowledge gate가 안정된 뒤
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.

@@ -2,7 +2,7 @@
 
 [English](../json-contract.md)
 
-상태: 0.1.0 readiness contract
+상태: 0.1.x stable contract. 0.1.0에서 도입했고 0.1.1에서 확장했습니다.
 
 Codexus는 automation-facing harness이므로 JSON 출력 안정성 자체가 제품 contract입니다.
 `0.1.0`은 1.0은 아니지만, supported command의 JSON contract를 `0.1.x` patch line

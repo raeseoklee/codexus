@@ -44,9 +44,9 @@ Codexus runs Codex, then runs `npm test`. If the test fails, Codexus gives Codex
 the real failing output and retries within the configured repair budget. The run
 is `complete` only when the verification command passes.
 
-> 0.1.0 is intentionally narrow: live app-server turns, routine live model
-> replay, automatic prompt injection, and live cron/gateway dispatch remain
-> gated off. See [Status](#status).
+> The 0.1.x stable line is intentionally narrow: live app-server turns, routine
+> live model replay, automatic prompt injection, and live cron/gateway dispatch
+> remain gated off. See [Status](#status).
 
 ## Use It In Codex CLI Chat
 
@@ -153,14 +153,14 @@ npm run package:smoke
 
 ## Status
 
-Codexus 0.1.0 is usable as a local harness with a narrow stable path around
+Codexus 0.1.1 is usable as a local harness with a narrow stable path around
 `codex exec --json`; live app-server turns, routine live model replay,
 automatic prompt injection, and live cron/gateway dispatch remain intentionally
 gated.
 
 ## Support Matrix
 
-| Surface | 0.1.0 status |
+| Surface | 0.1.x status |
 | --- | --- |
 | Supervised `codex exec --json` runs, verification/repair, run ledger, resume/cancel/status/events | Stable path |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
@@ -233,6 +233,7 @@ Public bins: `cx` and `codexus` are canonical.
 - [Implementation status](docs/implementation-status.md)
 - [Remaining work](docs/remaining-work.md)
 - [0.1.0 stable readiness plan](docs/plans/2026-05-31-0.1.0-stable-readiness-plan.md)
+- [0.1.1 release evidence](docs/release-evidence/0.1.1.md)
 - [JSON contract](docs/json-contract.md)
 - [Public release checklist](docs/public-release.md)
 
