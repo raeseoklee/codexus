@@ -2,7 +2,8 @@
 
 [Korean](../ko/design/14-repository-knowledge-graph.md)
 
-Status: proposed 0.2/0.3 design track.
+Status: experimental first slice implemented; external import, search/explain,
+and context injection remain deferred.
 
 This document defines the repository knowledge graph track that grows out of the
 mechanical repo-knowledge slice in [doc 13](13-harness-engineering-alignment.md).
@@ -28,17 +29,17 @@ whose confidence, scope, freshness, and judgment boundaries are explicit.
 
 ## Command Surface
 
-First slice:
+Implemented first slice:
 
 ```bash
 cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
-cx repo graph import --graph-provider understand-anything --source .understand-anything/knowledge-graph.json --scope "src/**" --json
 cx repo graph check --graph <graph-id-or-path> --gate --json
 ```
 
-Later slices may add read-only retrieval commands:
+Deferred import and retrieval slices:
 
 ```bash
+cx repo graph import --graph-provider understand-anything --source .understand-anything/knowledge-graph.json --scope "src/**" --json
 cx repo graph search --graph <graph-id-or-path> "<query>" --json
 cx repo graph explain --graph <graph-id-or-path> <node-or-edge-id> --json
 ```
@@ -245,9 +246,11 @@ Codexus already derives:
 - counterpart checks become doc relationship edges;
 - change-evidence and slop evidence may later annotate affected nodes or edges.
 
-Implementation should first extract the private import-scan helpers from the
-architecture checker into a shared internal module. Do not add tree-sitter,
-graphology, or dashboard dependencies to make this projection richer.
+The initial `codexus-lite` projection emits scoped file nodes and static
+import-specifier edges with `best_effort_text` accuracy. Later slices may
+extract the private import-scan helpers from the architecture checker into a
+shared internal module. Do not add tree-sitter, graphology, or dashboard
+dependencies to make this projection richer.
 
 The scoped equality model remains graph-specific, but low-level primitives such
 as SHA-256 hashing, path normalization, bounded file reads, and git diff
@@ -294,12 +297,16 @@ from external tools must be sanitized before persistence.
 ## Implementation Order
 
 1. Add shared canonical serialization and hash primitives for graph identity
-   payloads.
+   payloads. Status: implemented.
 2. Add the graph schema and JSON validation for Codexus-owned graph artifacts.
-3. Add scoped workspace fingerprinting for graph scopes.
-4. Add `cx repo graph import --graph-provider understand-anything` as JSON-only.
-5. Add `cx repo graph check --gate` for structural invariants.
-6. Add `codexus-lite` by projecting existing architecture/repo evidence.
+   Status: implemented.
+3. Add scoped workspace fingerprinting for graph scopes. Status: implemented.
+4. Add `cx repo graph check --gate` for structural invariants. Status:
+   implemented.
+5. Add `codexus-lite` by projecting existing architecture/repo evidence. Status:
+   initial file/import projection implemented.
+6. Add `cx repo graph import --graph-provider understand-anything` as JSON-only.
+   Status: deferred.
 7. Add read-only search/explain commands after graph artifacts and freshness are
    stable.
 

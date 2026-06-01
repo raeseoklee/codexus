@@ -258,17 +258,17 @@
         </article>
 
         <article class="card">
-          <h3>Repository Knowledge Graph 첫 Slice</h3>
+          <h3>Repository Graph Import와 Retrieval</h3>
           <div class="tags">
-            <span class="tag evidence">graph schema</span>
+            <span class="tag evidence">첫 slice 이후</span>
             <span class="tag gated">experimental</span>
           </div>
-          <p>Graph context를 run에 주입하기 전에 canonical graph identity hashing, schema validation, scoped freshness, structural check부터 시작합니다.</p>
+          <p>구현된 codexus-lite graph build/check foundation 위에 JSON-only external import와 read-only search/explain을 올립니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li><code>graphId</code>는 volatile gate/check output을 제외하고 deterministic serialization을 사용합니다.</li>
             <li>External graph import는 sanitized source provenance와 bounded source hash를 기록합니다.</li>
-            <li>Scoped freshness는 false-stale일 수 있지만 false-fresh를 만들면 안 됩니다.</li>
+            <li>Search/explain은 read-only advisory context로 유지합니다.</li>
+            <li>Approved artifact와 fresh structural check 없이 graph context를 run에 주입하지 않습니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/14-repository-knowledge-graph.md">repository knowledge graph</a></p>

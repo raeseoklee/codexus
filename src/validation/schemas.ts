@@ -47,7 +47,16 @@ export interface SchemaArtifactStatus {
   error: string | null;
 }
 
-export type SchemaValidationType = "config" | "state" | "event" | "memory-entry" | "skill" | "session-state" | "supply-chain-policy" | "architecture-policy";
+export type SchemaValidationType =
+  | "config"
+  | "state"
+  | "event"
+  | "memory-entry"
+  | "skill"
+  | "session-state"
+  | "supply-chain-policy"
+  | "architecture-policy"
+  | "repo-graph";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -72,6 +81,7 @@ export const schemaArtifactNames = [
   "session-state.schema.json",
   "supply-chain-policy.schema.json",
   "architecture-policy.schema.json",
+  "repo-graph.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -83,6 +93,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "session-state": "session-state.schema.json",
   "supply-chain-policy": "supply-chain-policy.schema.json",
   "architecture-policy": "architecture-policy.schema.json",
+  "repo-graph": "repo-graph.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -243,6 +254,30 @@ function validateWorkspaceFingerprint(value: unknown, errors: string[], path: st
     requireNumber(value.untracked, "count", errors, `${path}.untracked.count`);
     requireBoolean(value.untracked, "partial", errors, `${path}.untracked.partial`);
   }
+  requireString(value, "cwd", errors, `${path}.cwd`);
+  requireString(value, "computedAt", errors, `${path}.computedAt`);
+  requireBoolean(value, "degraded", errors, `${path}.degraded`);
+  if (!(value.degradedReason === null || typeof value.degradedReason === "string")) errors.push(`${path}.degradedReason:invalid`);
+}
+
+function validateScopedWorkspaceFingerprint(value: unknown, errors: string[], path: string): void {
+  if (!requireRecord(value, errors, path)) return;
+  if (value.schemaVersion !== 1) errors.push(`${path}.schemaVersion:not_1`);
+  requireOneOf(value, "kind", ["scoped"], errors, `${path}.kind`);
+  requireOneOf(value, "root", ["."], errors, `${path}.root`);
+  if (requireArray(value, "patterns", errors, `${path}.patterns`).some((item) => typeof item !== "string")) {
+    errors.push(`${path}.patterns:non_string_item`);
+  }
+  requireString(value, "scopeHash", errors, `${path}.scopeHash`);
+  if (!(value.trackedContentHash === null || typeof value.trackedContentHash === "string")) errors.push(`${path}.trackedContentHash:invalid`);
+  if (!(value.stagedDiffHash === null || typeof value.stagedDiffHash === "string")) errors.push(`${path}.stagedDiffHash:invalid`);
+  if (!(value.unstagedDiffHash === null || typeof value.unstagedDiffHash === "string")) errors.push(`${path}.unstagedDiffHash:invalid`);
+  if (requireRecord(value.untracked, errors, `${path}.untracked`)) {
+    requireString(value.untracked, "hash", errors, `${path}.untracked.hash`);
+    requireNumber(value.untracked, "count", errors, `${path}.untracked.count`);
+    requireBoolean(value.untracked, "partial", errors, `${path}.untracked.partial`);
+  }
+  if (!(value.head === null || typeof value.head === "string")) errors.push(`${path}.head:invalid`);
   requireString(value, "cwd", errors, `${path}.cwd`);
   requireString(value, "computedAt", errors, `${path}.computedAt`);
   requireBoolean(value, "degraded", errors, `${path}.degraded`);
@@ -462,6 +497,71 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
   if (type === "architecture-policy") {
     const validation = validateArchitecturePolicy(value);
     errors.push(...validation.errors);
+  }
+
+  if (type === "repo-graph") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "type", ["codexus.repo.graph"], errors);
+    requireString(value, "graphId", errors);
+    if (requireRecord(value.provider, errors, "provider")) {
+      requireOneOf(value.provider, "type", ["codexus.repo.graph.provider"], errors, "provider.type");
+      requireString(value.provider, "id", errors, "provider.id");
+      requireBoolean(value.provider, "external", errors, "provider.external");
+      requireBoolean(value.provider, "runtimeDeps", errors, "provider.runtimeDeps");
+      requireString(value.provider, "accuracy", errors, "provider.accuracy");
+      if (requireRecord(value.provider.capabilities, errors, "provider.capabilities")) {
+        requireBoolean(value.provider.capabilities, "build", errors, "provider.capabilities.build");
+        requireBoolean(value.provider.capabilities, "import", errors, "provider.capabilities.import");
+        requireBoolean(value.provider.capabilities, "check", errors, "provider.capabilities.check");
+        requireBoolean(value.provider.capabilities, "semanticClaims", errors, "provider.capabilities.semanticClaims");
+      }
+    }
+    if (requireRecord(value.scope, errors, "scope")) {
+      requireOneOf(value.scope, "root", ["."], errors, "scope.root");
+      if (requireArray(value.scope, "patterns", errors, "scope.patterns").some((item) => typeof item !== "string")) {
+        errors.push("scope.patterns:non_string_item");
+      }
+    }
+    validateScopedWorkspaceFingerprint(value.sourceWorkspaceFingerprint, errors, "sourceWorkspaceFingerprint");
+    if (requireRecord(value.source, errors, "source")) {
+      requireString(value.source, "kind", errors, "source.kind");
+      if (!(value.source.path === null || typeof value.source.path === "string")) errors.push("source.path:invalid");
+      if (!(value.source.hash === null || typeof value.source.hash === "string")) errors.push("source.hash:invalid");
+      requireBoolean(value.source, "sanitized", errors, "source.sanitized");
+    }
+    const nodes = requireArray(value, "nodes", errors);
+    for (const item of nodes) {
+      if (!isRecord(item)) {
+        errors.push("nodes:non_object_item");
+        continue;
+      }
+      requireString(item, "id", errors, "nodes.id");
+      requireString(item, "kind", errors, "nodes.kind");
+    }
+    const edges = requireArray(value, "edges", errors);
+    for (const item of edges) {
+      if (!isRecord(item)) {
+        errors.push("edges:non_object_item");
+        continue;
+      }
+      requireString(item, "id", errors, "edges.id");
+      requireString(item, "kind", errors, "edges.kind");
+      requireString(item, "from", errors, "edges.from");
+      requireString(item, "to", errors, "edges.to");
+    }
+    requireArray(value, "layers", errors);
+    requireArray(value, "tour", errors);
+    requireArray(value, "evidenceGaps", errors);
+    requireArray(value, "derivableFacts", errors);
+    requireArray(value, "heuristicClaims", errors);
+    requireArray(value, "blockingUnknowns", errors);
+    requireArray(value, "informationalUnknowns", errors);
+    if (requireRecord(value.gate, errors, "gate")) {
+      requireBoolean(value.gate, "enabled", errors, "gate.enabled");
+      requireOneOf(value.gate, "status", ["not_requested", "passed", "failed", "blocked"], errors, "gate.status");
+      requireNumber(value.gate, "exitCode", errors, "gate.exitCode");
+      requireString(value.gate, "reason", errors, "gate.reason");
+    }
   }
 
   return { schemaVersion: 1, type, valid: errors.length === 0, errors };

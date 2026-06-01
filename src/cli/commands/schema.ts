@@ -23,6 +23,7 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "session-state",
   "supply-chain-policy",
   "architecture-policy",
+  "repo-graph",
 ]);
 
 function parseSchemaType(value: string | undefined): SchemaValidationType {

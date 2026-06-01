@@ -227,8 +227,9 @@ Public bin은 `cx`와 `codexus`입니다.
 - [공급망 증거](design/11-supply-chain-evidence.md)
 - [Autopilot 계약](design/12-autopilot-contract.md): 장시간 supervised run을 위한 0.2/0.3 제안 설계. 사람이 승인한 scope, worktree 격리, detect-then-stop, evidence-gated acceptance를 다룹니다.
 - [하네스 엔지니어링 정렬](design/13-harness-engineering-alignment.md): OpenAI harness engineering 글과 Karpathy-style behavior contract를 종합한 정렬 문서. repository map, architecture gate, behavior evidence, non-goal을 정의합니다.
-- [Repository knowledge graph](design/14-repository-knowledge-graph.md): codexus-lite와 Understand-Anything JSON import를 위한 graph-provider boundary, scoped freshness, structural graph gate를 정의하는 0.2/0.3 제안 설계입니다.
+- [Repository knowledge graph](design/14-repository-knowledge-graph.md): experimental codexus-lite graph build/check 첫 slice와, deferred Understand-Anything JSON import용 graph-provider boundary, scoped freshness, structural graph gate를 정의합니다.
 - [Multi-engine relay autopilot](design/15-multi-engine-relay-autopilot.md): autopilot을 위한 author/reviewer-engine relay 제안 설계입니다. convergence는 advisory로 기록하고 완료는 evidence gate에 유지합니다.
+- [Codex task panel projection](design/16-codex-task-panel-projection.md): durable Codexus task state를 native Codex task panel로 projection하되, host UI를 source of truth로 만들지 않는 0.2 제안 설계입니다.
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)

@@ -260,17 +260,17 @@
         </article>
 
         <article class="card">
-          <h3>Repository Knowledge Graph First Slice</h3>
+          <h3>Repository Graph Import and Retrieval</h3>
           <div class="tags">
-            <span class="tag evidence">graph schema</span>
+            <span class="tag evidence">after first slice</span>
             <span class="tag gated">experimental</span>
           </div>
-          <p>Start the graph track with canonical graph identity hashing, schema validation, scoped freshness, and structural checks before any graph context is injected into runs.</p>
+          <p>Build on the implemented codexus-lite graph build/check foundation with JSON-only external import and read-only search/explain.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li><code>graphId</code> excludes volatile gate/check output and uses deterministic serialization.</li>
             <li>External graph imports record sanitized source provenance and bounded source hashes.</li>
-            <li>Scoped freshness may false-stale, but must not false-fresh.</li>
+            <li>Search/explain stays read-only advisory context.</li>
+            <li>No graph context is injected into runs without an approved artifact and fresh structural check.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/14-repository-knowledge-graph.md">repository knowledge graph</a></p>

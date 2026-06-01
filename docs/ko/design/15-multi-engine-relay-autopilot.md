@@ -207,6 +207,16 @@ Advisory-only claim:
 `convergenceAgreement`는 다음 stage 진입을 열 수 있지만, run을 complete로 만들지는 않습니다.
 최종 완료는 승인된 verification과 evidence gate가 필요합니다.
 
+## Task Projection
+
+Relay stage는 [16번 문서](16-codex-task-panel-projection.md)의 durable task model로
+projection할 수 있습니다:
+
+- `issue`, `design`, `plan`, `implementation`은 stage task로 표시 가능;
+- `delta-check`와 `full-gate` round는 review task를 갱신 가능;
+- convergence는 stage task를 workflow state로만 완료 표시 가능;
+- 최종 run completion은 host task panel이 아니라 Codexus gate에 계속 의존.
+
 ## Acceptance Criteria To Verification Matrix
 
 Relay는 implementation 전에 verification matrix를 요구해 `acceptanceCriteria`를 실행 가능한

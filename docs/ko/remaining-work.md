@@ -78,8 +78,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,
   statusline/HUD integration, tmux-backed worker, cancellation wait/remote-host UX 보강.
-  Autopilot contract layer, repository knowledge graph, multi-engine relay
-  autopilot은 0.2/0.3 트랙으로 deferred이며 0.1.x에서는 설계 문서만 있습니다.
+  Repository knowledge graph는 이제 codexus-lite graph artifact, scoped freshness,
+  structural gate를 위한 experimental 첫 slice(`cx repo graph build/check`)가 있습니다.
+  Autopilot, graph import/search/explain/context injection, multi-engine relay autopilot은
+  계속 0.2/0.3 track으로 deferred입니다.
 
 ### P0: Contract and Safety Hardening
 
@@ -235,9 +237,10 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 11. Autopilot은 0.2/0.3 design track으로 유지합니다. `cx autopilot run`을 노출하기 전
    schema artifact와 report-only scope gate부터 시작해야 하며, human-approved,
    worktree-isolated, `stability: experimental`이어야 합니다.
-12. Repository knowledge graph는 0.2/0.3 design track으로 유지합니다. Search/explain 또는
-   context injection을 노출하기 전에 canonical graph identity hashing, graph schema
-   validation, scoped freshness부터 시작합니다.
+12. Repository knowledge graph는 canonical graph identity hashing, graph schema
+   validation, scoped freshness, structural graph gate를 포함한 experimental 첫 slice가
+   있습니다. External import, search/explain, context injection은 freshness, sanitization,
+   gate behavior가 안정될 때까지 deferred로 유지합니다.
 13. Multi-engine relay autopilot은 0.2/0.3 design track으로 유지합니다. 첫 slice는 external
    review artifact import, 같은 artifact hash에 대한 convergence agreement validation,
    verification 실패 시 convergence가 run을 complete하지 못함을 증명하는 데서 시작합니다.
@@ -262,10 +265,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   schema/artifact link check를 추가할 수 있습니다. Semantic staleness는 advisory로
   유지합니다.
 - Repository knowledge graph follow-up: [14번 문서](design/14-repository-knowledge-graph.md)는
-  향후 graph-provider boundary를 정의합니다. 첫 구현은 experimental로 유지하고 canonical
-  graph identity hashing, graph schema validation, scoped freshness, structural graph gate부터
-  시작해야 합니다. Freshness, sanitization, gate behavior가 안정되기 전에는 graph context
-  injection을 노출하지 않습니다.
+  이제 `cx repo graph build/check`, canonical graph identity hashing, graph schema
+  validation, scoped freshness, persisted Codexus graph artifact, structural graph gate를
+  포함한 experimental 첫 slice를 갖습니다. 다음 작업은 JSON-only external import,
+  read-only search/explain, context artifact approval입니다. Freshness, sanitization,
+  gate behavior가 안정되기 전에는 graph context injection을 노출하지 않습니다.
 - Behavior evidence follow-up: `cx slop check`는 첫 surgicality, simplicity,
   assumption, verification-artifact, diff-surface evidence를 기록합니다. Fact-vs-heuristic
   경계는 유지했고, subagent behavior checklist counterpart는 구현됐습니다. 남은 작업은

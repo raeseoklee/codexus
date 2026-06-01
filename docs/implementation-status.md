@@ -238,14 +238,16 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - The autopilot contract is documented as a proposed 0.2/0.3 experimental
   surface. It is not implemented and is excluded from the 0.1.x stable
   contract.
-- The repository knowledge graph and multi-engine relay autopilot are documented
-  as proposed 0.2/0.3 experimental tracks. There is no `cx repo graph` or
-  `cx autopilot relay` implementation in the 0.1.x stable contract.
+- The repository knowledge graph has an experimental first slice:
+  `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
+  scoped freshness, deterministic graph identity, and structural gates. External
+  graph import, search/explain, context injection, and multi-engine relay
+  autopilot remain deferred outside the 0.1.x stable contract.
 
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 152.
+- Current test count: 172.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -284,6 +286,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Structured JSON CLI error envelope for unknown commands and argument validation failures.
 - Structured JSON CLI error coverage for unexpected arguments, corrupt state, and disabled app-server driver.
 - Init, observability, active-skill index/export/improvement, adapter approved retrieval/context artifact recording, full replay parity fixture-matrix coverage, gated model replay, stale locks, schema validation/run-ledger validation, migration fixtures, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision recording, Stage A isolated real evidence, Stage B read-only evidence, memory lifecycle/curation with conflict and quality findings, packaging, installed-skill tree diagnosis, and feature-gate policy/audit-record tests.
+- Repository graph foundation tests cover `cx repo graph build/check`, repo-graph schema validation, scoped freshness that ignores out-of-scope changes, stale detection for in-scope changes, dangling edge failure, and stable graph ids that ignore volatile gate output.
 - Real Codex exec smoke through ChatGPT-authenticated local Codex:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-CODEX-OK" --json`
   - observed final artifact: `CHX-CODEX-OK`
@@ -358,8 +361,8 @@ review. Current high-level gaps:
   implemented.
 - Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
-- Autopilot, repository knowledge graph, and multi-engine relay autopilot are
-  design-only for the 0.2/0.3 track. There is no `cx autopilot`,
-  `cx autopilot relay`, or `cx repo graph` implementation in the 0.1.x stable
-  surface.
+- Autopilot and multi-engine relay autopilot remain design-only for the 0.2/0.3
+  track. `cx repo graph build/check` exists as an experimental graph foundation,
+  but graph import/search/explain/context injection remains deferred outside the
+  0.1.x stable surface.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

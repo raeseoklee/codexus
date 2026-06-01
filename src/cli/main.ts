@@ -55,6 +55,8 @@ Usage:
   cx supply-chain check [--gate] [--json]
   cx architecture check [--policy <path>] [--gate] [--json]
   cx repo map|check [--gate] [--json]
+  cx repo graph build --graph-provider codexus-lite [--scope <glob>] [--json]
+  cx repo graph check --graph <graph-id-or-path> [--gate] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx cancel <run-id> [--reason <reason>] [--json]
   cx plan <task> [--json]
@@ -65,7 +67,7 @@ Usage:
   cx locks list|inspect|clear [name] [--stale-only] [--json]
   cx schema check [--json]
   cx schema engine [--json]
-  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy> --file <path> [--json]
+  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph> --file <path> [--json]
   cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|experiment [--dry-run|--live] [--json]
   cx app-server experiment --dry-run --record [--probe-process] [--supervise-fake] [--timeout-ms <n>] [--json]

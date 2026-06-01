@@ -81,9 +81,11 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
   automation dispatch, statusline/HUD integration, tmux-backed workers, and
-  richer wait/remote-host UX around cancellation. The autopilot contract layer,
-  repository knowledge graph, and multi-engine relay autopilot are deferred to
-  the 0.2/0.3 track and design-only in 0.1.x.
+  richer wait/remote-host UX around cancellation. The repository knowledge graph
+  now has an experimental first slice (`cx repo graph build/check`) for
+  codexus-lite graph artifacts, scoped freshness, and structural gates. Autopilot,
+  graph import/search/explain/context injection, and multi-engine relay autopilot
+  remain deferred to the 0.2/0.3 track.
 
 ### P0: Contract and Safety Hardening
 
@@ -246,9 +248,11 @@ evidence only when the supporting runtime exists:
 11. Autopilot remains a 0.2/0.3 design track. Start with schema artifacts and a
     report-only scope gate before exposing `cx autopilot run`; it must remain
     human-approved, worktree-isolated, and `stability: experimental`.
-12. Repository knowledge graph remains a 0.2/0.3 design track. Start with
-    canonical graph identity hashing, graph schema validation, and scoped
-    freshness before exposing search/explain or context injection.
+12. Repository knowledge graph now has an experimental first slice: canonical
+    graph identity hashing, graph schema validation, scoped freshness, and
+    structural graph gates. Keep external import, search/explain, and context
+    injection deferred until freshness, sanitization, and gate behavior are
+    stable.
 13. Multi-engine relay autopilot remains a 0.2/0.3 design track. First slices
     should import external review artifacts, validate convergence agreements over
     the same artifact hash, and prove convergence cannot complete a run when
@@ -277,10 +281,12 @@ Harness-engineering alignment adds these evidence-first tracks:
   Future expansion can add referenced schema/artifact link checks. Keep semantic
   staleness advisory.
 - Repository knowledge graph follow-up: [doc 14](design/14-repository-knowledge-graph.md)
-  defines a future graph-provider boundary. First implementation work should
-  stay experimental and start with canonical graph identity hashing, graph schema
-  validation, scoped freshness, and structural graph gates. Do not expose graph
-  context injection before freshness, sanitization, and gate behavior are stable.
+  now has an experimental first slice with `cx repo graph build/check`,
+  canonical graph identity hashing, graph schema validation, scoped freshness,
+  persisted Codexus graph artifacts, and structural graph gates. Next work is
+  JSON-only external import, read-only search/explain, and context artifact
+  approval. Do not expose graph context injection before freshness, sanitization,
+  and gate behavior are stable.
 - Behavior evidence follow-up: `cx slop check` now records first-slice
   surgicality, simplicity, assumption, verification-artifact, and diff-surface
   evidence while preserving the facts-vs-heuristics boundary. The subagent

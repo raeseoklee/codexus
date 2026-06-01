@@ -2,7 +2,8 @@
 
 [English](../../design/14-repository-knowledge-graph.md)
 
-상태: 제안된 0.2/0.3 설계 트랙.
+상태: experimental 첫 slice 구현됨. 외부 import, search/explain, context injection은
+계속 deferred입니다.
 
 이 문서는 [13번 문서](13-harness-engineering-alignment.md)의 기계적
 repo-knowledge slice에서 이어지는 repository knowledge graph 트랙을 정의합니다. 13번
@@ -28,17 +29,17 @@ boundary가 명시된 신뢰 가능한 graph artifact입니다.
 
 ## Command Surface
 
-첫 slice:
+구현된 첫 slice:
 
 ```bash
 cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
-cx repo graph import --graph-provider understand-anything --source .understand-anything/knowledge-graph.json --scope "src/**" --json
 cx repo graph check --graph <graph-id-or-path> --gate --json
 ```
 
-이후 slice는 read-only retrieval command를 추가할 수 있습니다:
+Deferred import/retrieval slice:
 
 ```bash
+cx repo graph import --graph-provider understand-anything --source .understand-anything/knowledge-graph.json --scope "src/**" --json
 cx repo graph search --graph <graph-id-or-path> "<query>" --json
 cx repo graph explain --graph <graph-id-or-path> <node-or-edge-id> --json
 ```
@@ -235,9 +236,10 @@ graph로 투영합니다:
 - counterpart check를 doc relationship edge로 변환;
 - change-evidence와 slop evidence는 이후 affected node/edge annotation으로 확장 가능.
 
-구현은 먼저 architecture checker 안의 private import-scan helper를 shared internal module로
-추출해야 합니다. 이 projection을 풍부하게 만들기 위해 tree-sitter, graphology, dashboard
-dependency를 추가하면 안 됩니다.
+초기 `codexus-lite` projection은 scoped file node와 static import-specifier edge를
+`best_effort_text` accuracy로 내보냅니다. 이후 slice에서 architecture checker 안의 private
+import-scan helper를 shared internal module로 추출할 수 있습니다. 이 projection을 풍부하게
+만들기 위해 tree-sitter, graphology, dashboard dependency를 추가하면 안 됩니다.
 
 Scoped equality model은 graph-specific으로 유지하지만, SHA-256 hashing, path normalization,
 bounded file read, git diff filtering 같은 low-level primitive는 shared internal utility에
@@ -282,12 +284,15 @@ path는 persistence 전에 sanitize해야 합니다.
 
 ## Implementation Order
 
-1. Graph identity payload용 shared canonical serialization과 hash primitive 추가.
-2. Codexus-owned graph artifact의 graph schema와 JSON validation 추가.
-3. Graph scope용 scoped workspace fingerprinting 추가.
-4. `cx repo graph import --graph-provider understand-anything`을 JSON-only로 추가.
-5. Structural invariant용 `cx repo graph check --gate` 추가.
-6. 기존 architecture/repo evidence를 projection하는 `codexus-lite` 추가.
+1. Graph identity payload용 shared canonical serialization과 hash primitive 추가. 상태:
+   구현됨.
+2. Codexus-owned graph artifact의 graph schema와 JSON validation 추가. 상태: 구현됨.
+3. Graph scope용 scoped workspace fingerprinting 추가. 상태: 구현됨.
+4. Structural invariant용 `cx repo graph check --gate` 추가. 상태: 구현됨.
+5. 기존 architecture/repo evidence를 projection하는 `codexus-lite` 추가. 상태: 초기
+   file/import projection 구현됨.
+6. `cx repo graph import --graph-provider understand-anything`을 JSON-only로 추가. 상태:
+   deferred.
 7. Graph artifact와 freshness가 안정된 뒤 read-only search/explain command 추가.
 
 Graph freshness, path sanitization, gate behavior가 안정되고 기록되기 전에는 automatic context

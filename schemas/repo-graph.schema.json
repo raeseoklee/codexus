@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/repo-graph.schema.json",
+  "title": "Codexus Repository Graph",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.repo.graph" },
+    "graphId": { "type": "string", "minLength": 1 },
+    "provider": {
+      "type": "object",
+      "required": ["id", "type", "external", "runtimeDeps", "accuracy", "capabilities"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "const": "codexus.repo.graph.provider" },
+        "external": { "type": "boolean" },
+        "runtimeDeps": { "type": "boolean" },
+        "accuracy": { "type": "string", "minLength": 1 },
+        "capabilities": {
+          "type": "object",
+          "required": ["build", "import", "check", "semanticClaims"],
+          "properties": {
+            "build": { "type": "boolean" },
+            "import": { "type": "boolean" },
+            "check": { "type": "boolean" },
+            "semanticClaims": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "required": ["patterns", "root"],
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "root": { "const": "." }
+      }
+    },
+    "sourceWorkspaceFingerprint": {
+      "type": "object",
+      "required": ["schemaVersion", "kind", "root", "patterns", "scopeHash", "trackedContentHash", "stagedDiffHash", "unstagedDiffHash", "untracked", "head", "cwd", "computedAt", "degraded", "degradedReason"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "scoped" },
+        "root": { "const": "." },
+        "patterns": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "scopeHash": { "type": "string", "minLength": 1 },
+        "trackedContentHash": { "type": ["string", "null"] },
+        "stagedDiffHash": { "type": ["string", "null"] },
+        "unstagedDiffHash": { "type": ["string", "null"] },
+        "untracked": {
+          "type": "object",
+          "required": ["hash", "count", "partial"],
+          "properties": {
+            "hash": { "type": "string", "minLength": 1 },
+            "count": { "type": "number", "minimum": 0 },
+            "partial": { "type": "boolean" }
+          }
+        },
+        "head": { "type": ["string", "null"] },
+        "cwd": { "type": "string", "minLength": 1 },
+        "computedAt": { "type": "string", "minLength": 1 },
+        "degraded": { "type": "boolean" },
+        "degradedReason": { "type": ["string", "null"] }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["kind", "path", "hash", "sanitized"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "path": { "type": ["string", "null"] },
+        "hash": { "type": ["string", "null"] },
+        "sanitized": { "type": "boolean" }
+      }
+    },
+    "nodes": { "type": "array" },
+    "edges": { "type": "array" },
+    "layers": { "type": "array" },
+    "tour": { "type": "array" },
+    "evidenceGaps": { "type": "array" },
+    "derivableFacts": { "type": "array" },
+    "heuristicClaims": { "type": "array" },
+    "blockingUnknowns": { "type": "array" },
+    "informationalUnknowns": { "type": "array" },
+    "gate": {
+      "type": "object",
+      "required": ["enabled", "status", "exitCode", "reason"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "status": {
+          "enum": ["not_requested", "passed", "failed", "blocked"]
+        },
+        "exitCode": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "graphId", "provider", "scope", "sourceWorkspaceFingerprint", "source", "nodes", "edges", "layers", "tour", "evidenceGaps", "derivableFacts", "heuristicClaims", "blockingUnknowns", "informationalUnknowns", "gate"]
+}

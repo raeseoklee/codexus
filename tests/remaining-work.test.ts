@@ -213,7 +213,7 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 8);
+    assert.equal(schemaOutput.schemas.length, 9);
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
@@ -228,6 +228,7 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
       "session-state.schema.json",
       "supply-chain-policy.schema.json",
       "architecture-policy.schema.json",
+      "repo-graph.schema.json",
     ]) {
       await writeFile(join(schemaRoot, name), await readFile(resolve("schemas", name), "utf8"));
     }
@@ -369,6 +370,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(pkg.codexus.supplyChain.runtimeDependenciesMax, 0);
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/supply-chain-policy.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/architecture-policy.schema.json"));
+    assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/repo-graph.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("scripts/publish-next.mjs"));
     assert.ok(pkg.codexus.supplyChain.forbiddenPackageFiles.includes("src/**"));
     assert.equal(pkg.codexus.supplyChain.binTargetsMustBeBuiltArtifacts, true);

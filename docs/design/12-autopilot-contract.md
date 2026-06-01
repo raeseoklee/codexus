@@ -223,6 +223,15 @@ author/reviewer rounds, stage full-gate evidence, and convergence agreements, bu
 keeps convergence advisory: final completion still requires the verification and
 evidence gates in this contract.
 
+## Task Panel Projection
+
+The future native Codex task-panel UX is split into
+[doc 16](16-codex-task-panel-projection.md). Autopilot may derive visible task
+rows from the approved contract, implementation plan, verification matrix, and
+gate checks, but those task rows are workflow state only. A checked-off item in
+the host panel does not replace verification, scope, slop, supply-chain, or graph
+evidence.
+
 ## Surface
 
 ```bash

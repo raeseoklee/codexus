@@ -96,6 +96,7 @@
         "schemas/session-state.schema.json",
         "schemas/supply-chain-policy.schema.json",
         "schemas/architecture-policy.schema.json",
+        "schemas/repo-graph.schema.json",
         "fixtures/app-server/schema.fixture.json",
         "codex/skills/codexus/SKILL.md",
         "scripts/postinstall.mjs",

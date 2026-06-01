@@ -216,6 +216,16 @@ Advisory-only claims:
 complete. Final completion still requires the approved verification and evidence
 gates.
 
+## Task Projection
+
+Relay stages should project into the durable task model described in
+[doc 16](16-codex-task-panel-projection.md):
+
+- `issue`, `design`, `plan`, and `implementation` can appear as stage tasks;
+- `delta-check` and `full-gate` rounds can update review tasks;
+- convergence can complete a stage task only as workflow state;
+- final run completion still depends on Codexus gates, not the host task panel.
+
 ## Acceptance Criteria To Verification Matrix
 
 The relay should make `acceptanceCriteria` executable by requiring a verification
