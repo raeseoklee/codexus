@@ -27,6 +27,7 @@ import { versionCommand } from "./commands/version.ts";
 import { architectureCommand } from "./commands/architecture.ts";
 import { repoCommand } from "./commands/repo.ts";
 import { autopilotCommand } from "./commands/autopilot.ts";
+import { releaseCommand } from "./commands/release.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -54,6 +55,7 @@ Usage:
   cx session workers status [--json]
   cx slop check [--since <ref>] [--scope <glob>] [--review <path>] [--gate] [--json]
   cx supply-chain check [--gate] [--json]
+  cx release check [--version <version>] [--live] [--gate] [--json]
   cx architecture check [--policy <path>] [--gate] [--json]
   cx repo map|check [--gate] [--json]
   cx repo graph build --graph-provider codexus-lite [--scope <glob>] [--json]
@@ -140,6 +142,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "supply-chain") {
     await supplyChainCommand(args);
+    return;
+  }
+  if (args.command === "release") {
+    await releaseCommand(args);
     return;
   }
   if (args.command === "architecture") {

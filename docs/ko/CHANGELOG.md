@@ -14,6 +14,11 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Stable tag publish가 matching GitHub Release를 생성/갱신하고 `install.sh`를
   첨부하도록 수정했습니다. GitHub latest release route가 npm `latest`와 같은 version을
   가리키게 됩니다.
+- Experimental `cx release check --json/--gate`를 추가하고
+  `npm run release:check`에 연결했습니다. Stable release candidate는 tag publish 전에
+  installer default, trusted-publishing wiring, GitHub Release `install.sh` attachment
+  wiring, release-evidence doc을 로컬에서 증명합니다. npm/GitHub live reconciliation은
+  `--live`로 명시적으로 실행합니다.
 
 ## 0.1.1 - 2026-06-01
 

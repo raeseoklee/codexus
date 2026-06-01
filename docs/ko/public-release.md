@@ -27,6 +27,7 @@ GitHub repository를 private에서 public으로 변경하기 전에 이 checklis
 npm run ci
 npm run package:smoke
 cx supply-chain check --gate --json
+cx release check --gate --json
 node src/cli/main.ts doctor --json
 node src/cli/main.ts schema check --json
 ```
@@ -79,6 +80,10 @@ Stable release의 canonical path는 local npm token이 아니라
 - tag-triggered workflow가 `v<version>` GitHub Release를 만들고 `install.sh`를
   첨부했는지 확인합니다. GitHub `/releases/latest` route는 npm `latest`와 같은 stable
   version을 가리켜야 합니다.
+- tag-triggered workflow가 완료된 뒤 source checkout에서
+  `cx release check --version <version> --live --gate --json`을 실행해 npm `latest`,
+  GitHub latest, GitHub Release의 `install.sh` asset hash가 checked-in installer와
+  일치하는지 확인합니다.
 
 Local stable publish는 fallback/dev path로만 사용합니다:
 

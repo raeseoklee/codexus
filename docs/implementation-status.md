@@ -127,8 +127,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   --gate`, and installed-package mock pass/fail/repair/status/events/resume/
   cancel flows.
 - `prepublishOnly` runs `npm run release:check`, which combines local CI,
-  package smoke verification, and report-only supply-chain dogfood. Package
-  smoke includes the gate-mode supply-chain check for the installed package.
+  package smoke verification, report-only supply-chain dogfood, and
+  `cx release check --gate --json`. Package smoke includes the gate-mode
+  supply-chain check for the installed package.
+- `cx release check --json` reports experimental release-integrity evidence for
+  the source checkout: stable installer default, expected-version guard, pinned
+  trusted-publishing workflow, GitHub Release `install.sh` asset wiring, and
+  local release-evidence docs. `--live` is an explicit post-publish sign-off for
+  npm `latest`, GitHub latest, and installer asset hash identity.
 - The npm tarball ships `dist`, `schemas`, the Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, and top-level release metadata. It excludes source, tests, docs,

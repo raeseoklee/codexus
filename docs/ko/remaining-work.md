@@ -156,7 +156,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 
 12. packaging과 alias migration 마무리. 상태: npm-installed CLI packaging, guarded
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
-    compatibility, stable-readiness smoke coverage 구현.
+    compatibility, stable-readiness smoke coverage, local release integrity gate 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
     - 현재 npm baseline은 `0.1.1`입니다. Prerelease는 fallback/dev path인
       `publish:next`를 통해 배포할 수 있고, stable release는 trusted GitHub Actions
@@ -165,6 +165,11 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
       runtime asset, strict doctor, supply-chain gate, mock
       pass/fail/repair/resume/cancel/events, postinstall skill adapter behavior를
       검증합니다.
+    - `cx release check --gate --json`은 `npm run release:check` 안에 유지합니다.
+      Stable release candidate는 tag publish 전에 installer default, expected-version
+      guard, trusted-publishing workflow, GitHub Release asset wiring, release
+      evidence doc을 증명해야 합니다. `--live`는 npm/GitHub를 상대로 하는 명시적
+      post-publish sign-off에만 사용합니다.
 
 13. TypeScript/static verification 추가. 상태: local syntax/static check,
     esbuild release bundle, versioned schema artifact, zero-dependency schema

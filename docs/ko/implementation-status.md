@@ -57,9 +57,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   skill adapter 설치, fake Codex fixture를 통한 `doctor --json --strict`,
   `supply-chain check --gate`, installed-package mock pass/fail/repair/status/
   events/resume/cancel 흐름을 검증합니다.
-- `prepublishOnly`는 local CI, package smoke, report-only supply-chain dogfood를
-  묶은 `npm run release:check`를 실행합니다. Package smoke에는 설치된 package에
-  대한 gate-mode supply-chain check가 포함됩니다.
+- `prepublishOnly`는 local CI, package smoke, report-only supply-chain dogfood,
+  `cx release check --gate --json`을 묶은 `npm run release:check`를 실행합니다.
+  Package smoke에는 설치된 package에 대한 gate-mode supply-chain check가 포함됩니다.
+- `cx release check --json`은 source checkout의 experimental release-integrity
+  evidence를 보고합니다. Stable installer default, expected-version guard,
+  pinned trusted-publishing workflow, GitHub Release `install.sh` asset wiring,
+  local release-evidence doc을 확인합니다. `--live`는 npm `latest`, GitHub latest,
+  installer asset hash identity를 확인하는 명시적 post-publish sign-off입니다.
 - npm tarball은 `dist`, `schemas`, Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, top-level release metadata만 싣고 source, tests, docs,

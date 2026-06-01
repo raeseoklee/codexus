@@ -246,6 +246,21 @@
         </article>
 
         <article class="card">
+          <h3>Release Integrity Live Sign-Off</h3>
+          <div class="tags">
+            <span class="tag evidence">post-publish</span>
+            <span class="tag gated">explicit live</span>
+          </div>
+          <p>After a stable tag publishes, run the live release-integrity check to prove npm latest, GitHub latest, and the GitHub Release installer asset all point at the same version.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li><code>cx release check --version &lt;version&gt; --live --gate --json</code> passes.</li>
+            <li>The GitHub Release <code>install.sh</code> hash matches the checked-in installer.</li>
+            <li>Live network failures are blocking only for this explicit sign-off, not for local release candidates.</li>
+          </ul>
+        </article>
+
+        <article class="card">
           <h3>App-Server Session Event Mapping</h3>
           <div class="tags">
             <span class="tag evidence">design after observation</span>

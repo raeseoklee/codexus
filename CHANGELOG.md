@@ -14,6 +14,11 @@ occur before 1.0, but they should be called out clearly.
 - Stable tag publishes now create or refresh the matching GitHub Release and
   attach `install.sh`, keeping GitHub's latest release route aligned with npm
   `latest`.
+- Added experimental `cx release check --json/--gate` and wired it into
+  `npm run release:check`, so stable release candidates locally prove installer
+  defaults, trusted-publishing wiring, GitHub Release `install.sh` attachment
+  wiring, and release-evidence docs before tag publish. Live npm/GitHub
+  reconciliation remains explicit via `--live`.
 
 ## 0.1.1 - 2026-06-01
 

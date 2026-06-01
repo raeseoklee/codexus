@@ -28,6 +28,7 @@ public.
 npm run ci
 npm run package:smoke
 cx supply-chain check --gate --json
+cx release check --gate --json
 node src/cli/main.ts doctor --json
 node src/cli/main.ts schema check --json
 ```
@@ -84,6 +85,10 @@ token. Before each stable cut:
 - Confirm the tag-triggered workflow created a GitHub Release for `v<version>`
   and attached `install.sh`. GitHub's `/releases/latest` route must point at
   the same stable version as npm `latest`.
+- After the tag-triggered workflow completes, run
+  `cx release check --version <version> --live --gate --json` from the source
+  checkout to verify npm `latest`, GitHub latest, and the GitHub Release
+  `install.sh` asset hash against the checked-in installer.
 
 Local stable publish remains a fallback/dev path only:
 

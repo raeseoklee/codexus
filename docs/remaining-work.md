@@ -163,7 +163,8 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 
 12. Finish packaging and alias migration. Status: npm-installed CLI packaging,
     guarded alpha publish, trusted-publishing release workflow, Node 22 package
-    smoke compatibility, and stable-readiness smoke coverage implemented.
+    smoke compatibility, stable-readiness smoke coverage, and local release
+    integrity gating implemented.
     - Keep `cx` and `codexus` as canonical public bins.
     - Current npm baseline is `0.1.1`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
@@ -172,6 +173,11 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
       paths, runtime assets, strict doctor, supply-chain gate, mock
       pass/fail/repair/resume/cancel/events, and postinstall skill adapter
       behavior.
+    - Keep `cx release check --gate --json` in `npm run release:check` so stable
+      release candidates prove the installer default, expected-version guard,
+      trusted-publishing workflow, GitHub Release asset wiring, and release
+      evidence docs before tag publish. Use `--live` only for explicit
+      post-publish sign-off against npm and GitHub.
 
 13. Add TypeScript/static verification. Status: local syntax/static check,
     esbuild release bundle, versioned schema artifacts, and zero-dependency
