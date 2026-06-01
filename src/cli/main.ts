@@ -25,6 +25,7 @@ import { slopCommand } from "./commands/slop.ts";
 import { supplyChainCommand } from "./commands/supply-chain.ts";
 import { versionCommand } from "./commands/version.ts";
 import { architectureCommand } from "./commands/architecture.ts";
+import { repoCommand } from "./commands/repo.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -53,6 +54,7 @@ Usage:
   cx slop check [--since <ref>] [--scope <glob>] [--review <path>] [--gate] [--json]
   cx supply-chain check [--gate] [--json]
   cx architecture check [--policy <path>] [--gate] [--json]
+  cx repo map|check [--gate] [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx cancel <run-id> [--reason <reason>] [--json]
   cx plan <task> [--json]
@@ -135,6 +137,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "architecture") {
     await architectureCommand(args);
+    return;
+  }
+  if (args.command === "repo") {
+    await repoCommand(args);
     return;
   }
   if (args.command === "run") {

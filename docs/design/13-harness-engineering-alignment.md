@@ -194,8 +194,8 @@ until they are backed by explicit, local evidence.
 
 ## Repository Knowledge System
 
-Codexus should add a repo-knowledge track after the architecture gate, but its
-first checks must stay mechanical:
+Codexus now has a first repo-knowledge slice after the architecture gate. Its
+checks stay mechanical:
 
 Derivable and gateable:
 
@@ -216,7 +216,7 @@ Advisory only:
 Those advisory findings may be useful, but they should not fail automation
 without a declared review artifact or maintainer-approved policy.
 
-Possible future surfaces:
+Implemented first-slice surfaces:
 
 ```bash
 cx repo map --json
@@ -224,8 +224,10 @@ cx repo check --json
 cx repo check --gate --json
 ```
 
-This is the repository equivalent of the OpenAI article's "map, not a giant
-manual" lesson.
+The first slice validates required documentation indexes, resolves local links
+from those indexes, checks English/Korean counterparts for the project docs
+policy, and records semantic freshness as advisory-only. This is the repository
+equivalent of the OpenAI article's "map, not a giant manual" lesson.
 
 ## Observability Track
 
@@ -316,8 +318,8 @@ Avoid ungrounded claims:
 2. **Architecture check first slice**: implemented
    `codexus.architecture.policy` schema and `cx architecture check --json`.
    First rule: no runtime package imports in Codexus source.
-3. **Repo map/check**: add mechanical docs/index validation; keep semantic
-   staleness advisory.
+3. **Repo map/check first slice**: implemented mechanical docs/index validation;
+   semantic staleness remains advisory.
 4. **Behavior evidence expansion**: extend `cx slop check` with surgical-change
    and abstraction-risk facts/heuristics.
 5. **Subagent checklist**: add optional behavior checklist fields to recorded

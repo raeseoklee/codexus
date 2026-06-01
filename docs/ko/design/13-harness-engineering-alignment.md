@@ -180,8 +180,8 @@ advisory output에 둡니다.
 
 ## Repository knowledge system
 
-Architecture gate 이후 repo-knowledge track을 추가할 수 있습니다. 첫 check는 기계적인
-항목만 gate해야 합니다.
+Architecture gate 이후 첫 repo-knowledge slice가 구현되었습니다. Check는 기계적인
+항목만 gate합니다.
 
 Derivable이며 gate 가능한 것:
 
@@ -201,7 +201,7 @@ Advisory 전용:
 이런 advisory finding은 유용하지만, declared review artifact나 maintainer-approved policy
 없이 automation을 실패시키면 안 됩니다.
 
-가능한 future surface:
+구현된 first-slice surface:
 
 ```bash
 cx repo map --json
@@ -209,6 +209,8 @@ cx repo check --json
 cx repo check --gate --json
 ```
 
+첫 slice는 필수 documentation index, index의 local link resolve, project docs policy의
+English/Korean counterpart를 검증하고, semantic freshness는 advisory-only로 기록합니다.
 이것이 OpenAI 글의 "거대한 매뉴얼이 아니라 map"이라는 교훈을 Codexus식으로 구현하는
 방식입니다.
 
@@ -294,8 +296,8 @@ Codexus is a harness engineering layer for OpenAI Codex CLI.
 2. **Architecture check first slice**: `codexus.architecture.policy` schema와
    `cx architecture check --json` 구현. 첫 규칙은 Codexus source의 runtime package
    import 금지입니다.
-3. **Repo map/check**: mechanical docs/index validation 추가. Semantic staleness는
-   advisory로 유지.
+3. **Repo map/check first slice**: mechanical docs/index validation 구현. Semantic
+   staleness는 advisory로 유지.
 4. **Behavior evidence 확장**: `cx slop check`에 surgical-change와 abstraction-risk
    fact/heuristic 추가.
 5. **Subagent checklist**: recorded claim artifact에 optional behavior checklist field 추가.

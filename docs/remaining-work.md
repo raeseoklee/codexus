@@ -247,8 +247,8 @@ evidence only when the supporting runtime exists:
     human-approved, worktree-isolated, and `stability: experimental`.
 12. Harness-engineering alignment adds small 0.2 tracks before broader
     autonomy: `cx architecture check` now covers the first derivable import
-    invariant, with `cx repo map/check` for mechanical repository-knowledge
-    validation and behavior evidence expansion in `cx slop check` still open. See
+    invariant, `cx repo map/check` now covers mechanical repository-knowledge
+    validation, and behavior evidence expansion in `cx slop check` remains open. See
     [doc 13](design/13-harness-engineering-alignment.md).
 
 ## Implementation Residue
@@ -262,8 +262,10 @@ Harness-engineering alignment adds these evidence-first tracks:
   "best_effort"`, and a dogfood `forbidden-import` rule. Future rule kinds such
   as required files or simple layer edges must keep the same derivable-fact gate
   model.
-- Repository knowledge map/check: validate required docs, index links, and
-  English/Korean counterparts mechanically. Keep semantic staleness advisory.
+- Repository knowledge follow-up: first-slice `cx repo map/check` now validates
+  required indexes, index links, and English/Korean counterparts mechanically.
+  Future expansion can add referenced schema/artifact link checks. Keep semantic
+  staleness advisory.
 - Behavior evidence: extend `cx slop check` and subagent claim artifacts with
   Karpathy-style surgicality, simplicity, assumption, and verification checklist
   fields while preserving the facts-vs-heuristics boundary.

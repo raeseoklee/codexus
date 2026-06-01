@@ -236,9 +236,9 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    schema artifact와 report-only scope gate부터 시작해야 하며, human-approved,
    worktree-isolated, `stability: experimental`이어야 합니다.
 12. Harness-engineering alignment는 더 넓은 autonomy 전에 작은 0.2 track을 추가합니다:
-    첫 derivable import invariant는 이제 `cx architecture check`가 다루며, 기계적인
-    repository-knowledge validation을 위한 `cx repo map/check`와 `cx slop check`의 behavior
-    evidence 확장은 아직 열려 있습니다. 자세한 내용은 [doc 13](design/13-harness-engineering-alignment.md)을
+    첫 derivable import invariant는 이제 `cx architecture check`가 다루고, 기계적인
+    repository-knowledge validation은 `cx repo map/check`가 다룹니다. `cx slop check`의
+    behavior evidence 확장은 아직 열려 있습니다. 자세한 내용은 [doc 13](design/13-harness-engineering-alignment.md)을
     봅니다.
 
 ## 구현 잔여
@@ -251,8 +251,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   schema-validated `codexus.architecture.policy`, `scanAccuracy: "best_effort"`,
   dogfood `forbidden-import` rule을 갖습니다. 향후 required file이나 단순 layer edge
   같은 rule kind도 같은 derivable-fact gate model을 유지해야 합니다.
-- Repository knowledge map/check: required docs, index link, English/Korean
-  counterpart를 기계적으로 검증합니다. Semantic staleness는 advisory로 둡니다.
+- Repository knowledge follow-up: first-slice `cx repo map/check`는 required index,
+  index link, English/Korean counterpart를 기계적으로 검증합니다. 향후 referenced
+  schema/artifact link check를 추가할 수 있습니다. Semantic staleness는 advisory로
+  유지합니다.
 - Behavior evidence: `cx slop check`와 subagent claim artifact에 Karpathy-style
   surgicality, simplicity, assumption, verification checklist field를 추가하되
   fact-vs-heuristic 경계는 유지합니다.

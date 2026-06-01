@@ -19,6 +19,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Experimental `cx architecture check --json/--gate`를 추가했습니다.
   Schema-validated `codexus.architecture.policy`, best-effort static import
   evidence, Codexus source의 runtime package import 금지 dogfood rule을 포함합니다.
+- Experimental `cx repo map/check --json`과 `cx repo check --gate`를 추가했습니다.
+  Required docs index, index link resolution, English/Korean counterpart를
+  기계적으로 검증하고 semantic freshness는 advisory로 유지합니다.
 
 ### Fixed
 

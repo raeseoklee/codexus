@@ -20,6 +20,10 @@ occur before 1.0, but they should be called out clearly.
   schema-validated `codexus.architecture.policy`, best-effort static import
   evidence, and a dogfood rule that keeps Codexus source free of runtime package
   imports.
+- Added experimental `cx repo map/check --json` and `cx repo check --gate` for
+  mechanical repository-knowledge evidence: required docs indexes, index link
+  resolution, and English/Korean counterpart checks, with semantic freshness kept
+  advisory.
 
 ### Fixed
 
