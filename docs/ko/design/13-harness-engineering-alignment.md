@@ -298,8 +298,9 @@ Codexus is a harness engineering layer for OpenAI Codex CLI.
    import 금지입니다.
 3. **Repo map/check first slice**: mechanical docs/index validation 구현. Semantic
    staleness는 advisory로 유지.
-4. **Behavior evidence 확장**: `cx slop check`에 surgical-change와 abstraction-risk
-   fact/heuristic 추가.
+4. **Behavior evidence 확장**: `cx slop check`의 첫 surgicality, simplicity,
+   assumption, verification-artifact, diff-surface lane을 구현했고 heuristic은 advisory로
+   유지합니다.
 5. **Subagent checklist**: recorded claim artifact에 optional behavior checklist field 추가.
 6. **Observability adapter**: 위 gate들이 안정된 뒤 dev-server/browser/log evidence descriptor
    추가.

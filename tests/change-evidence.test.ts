@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -47,8 +47,8 @@ test("slop check reports unknown without session state and separates derivable f
     assert.equal(output.changeEvidence.verification, "unknown");
     assert.equal(output.changeEvidence.includesUntracked, true);
     assert.deepEqual(output.evidenceGaps, []);
-    assert.equal(output.derivableFacts[0].kind, "source_without_test_diff");
-    assert.equal(output.derivableFacts[0].gate, false);
+    const sourceFact = output.derivableFacts.find((fact: { kind: string }) => fact.kind === "source_without_test_diff");
+    assert.equal(sourceFact.gate, false);
     assert.equal(output.heuristicClaims[0].kind, "behavior_change_likely_needs_test");
   } finally {
     await rm(cwd, { recursive: true, force: true });
@@ -90,8 +90,8 @@ test("slop check fails on stale verification after workspace change", async () =
     assert.equal(output.changeEvidence.status, "fail");
     assert.equal(output.changeEvidence.verification, "stale");
     assert.equal(output.evidenceGaps[0].kind, "stale_verification");
-    assert.equal(output.derivableFacts[0].kind, "source_without_test_diff");
-    assert.equal(output.derivableFacts[0].gate, false);
+    const sourceFact = output.derivableFacts.find((fact: { kind: string }) => fact.kind === "source_without_test_diff");
+    assert.equal(sourceFact.gate, false);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -176,7 +176,7 @@ test("slop check --since inspects a committed range without staged or untracked 
     assert.equal(output.diff.includesStaged, false);
     assert.equal(output.diff.includesUntracked, false);
     assert.ok(output.diff.files.includes("parser.ts"));
-    assert.equal(output.derivableFacts[0].kind, "source_without_test_diff");
+    assert.equal(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "source_without_test_diff"), true);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -203,6 +203,64 @@ test("slop check --scope fails when the diff escapes the declared scope", async 
   }
 });
 
+test("slop check records surgicality and verification facts without promoting them to gates", async () => {
+  const cwd = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    await mkdir(join(cwd, "src"), { recursive: true });
+    await mkdir(join(cwd, "tests"), { recursive: true });
+    await writeFile(join(cwd, "src/parser.ts"), "export const parse = (value: string) => value.trim();\n");
+    await writeFile(join(cwd, "tests/parser.test.ts"), "import test from 'node:test';\n");
+
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"]);
+    assert.equal(verify.status, 0, verify.stderr);
+
+    const result = runCli(cwd, ["slop", "check", "--scope", "src/**,tests/**", "--gate", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.changeEvidence.status, "pass");
+    assert.equal(output.gate.status, "passed");
+    assert.deepEqual(output.evidenceGaps, []);
+    assert.equal(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "declared_scope_respected" && fact.gate === false), true);
+    assert.equal(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "test_diff_present" && fact.gate === false), true);
+    assert.equal(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "verification_artifact_linked" && fact.gate === false), true);
+    assert.equal(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "diff_surface_area" && fact.gate === false), true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("slop check keeps assumption and simplicity lanes advisory under a fresh gate", async () => {
+  const cwd = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    for (let index = 0; index < 5; index += 1) {
+      await writeFile(join(cwd, `module-${index}.ts`), [
+        `export function value${index}() {`,
+        "  const marker = 'TODO: replace placeholder after review';",
+        "  return marker;",
+        "}",
+        "",
+      ].join("\n"));
+    }
+
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"]);
+    assert.equal(verify.status, 0, verify.stderr);
+
+    const result = runCli(cwd, ["slop", "check", "--gate", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.changeEvidence.status, "pass");
+    assert.equal(output.gate.status, "passed");
+    assert.deepEqual(output.evidenceGaps, []);
+    assert.equal(output.heuristicClaims.some((claim: { kind: string }) => claim.kind === "unresolved_assumption_marker"), true);
+    assert.equal(output.heuristicClaims.some((claim: { kind: string }) => claim.kind === "simplicity_review_suggested"), true);
+    assert.equal(output.heuristicClaims.some((claim: { kind: string }) => claim.kind === "multi_area_change_without_scope"), true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("session slop is the Codex-session alias for the same evidence report", async () => {
   const cwd = await tempDir();
   try {
@@ -214,7 +272,7 @@ test("session slop is the Codex-session alias for the same evidence report", asy
     const output = JSON.parse(result.stdout);
     assert.equal(output.schemaVersion, 1);
     assert.equal(output.changeEvidence.status, "unknown");
-    assert.equal(output.derivableFacts[0].kind, "source_without_test_diff");
+    assert.equal(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "source_without_test_diff"), true);
     assert.equal(output.migration.reason, "not_initialized");
   } finally {
     await rm(cwd, { recursive: true, force: true });

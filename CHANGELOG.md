@@ -24,6 +24,9 @@ occur before 1.0, but they should be called out clearly.
   mechanical repository-knowledge evidence: required docs indexes, index link
   resolution, and English/Korean counterpart checks, with semantic freshness kept
   advisory.
+- Expanded `cx slop check` behavior evidence with non-gating surgicality,
+  verification-artifact, test-diff, and diff-surface facts plus advisory
+  simplicity and unresolved-assumption heuristics that never affect `--gate`.
 
 ### Fixed
 

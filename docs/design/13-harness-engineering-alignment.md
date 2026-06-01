@@ -320,8 +320,9 @@ Avoid ungrounded claims:
    First rule: no runtime package imports in Codexus source.
 3. **Repo map/check first slice**: implemented mechanical docs/index validation;
    semantic staleness remains advisory.
-4. **Behavior evidence expansion**: extend `cx slop check` with surgical-change
-   and abstraction-risk facts/heuristics.
+4. **Behavior evidence expansion**: implemented first-slice `cx slop check`
+   surgicality, simplicity, assumption, verification-artifact, and diff-surface
+   lanes while keeping heuristics advisory.
 5. **Subagent checklist**: add optional behavior checklist fields to recorded
    claim artifacts.
 6. **Observability adapters**: add dev-server/browser/log evidence descriptors

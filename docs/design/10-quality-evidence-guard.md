@@ -237,7 +237,11 @@ conservatively report:
 - unverified/stale change (evidence gap, derivable, from the Bundle A model),
 - source changed with no test-file change in the same diff (derivable fact,
   non-gating by default),
-- behavior-change-likely / suspicious abstraction (heuristic claim, advisory),
+- test-file changes, declared-scope-respected facts, verification artifact links,
+  and diff surface area as non-gating derivable evidence,
+- behavior-change-likely, suspicious abstraction, multi-area change without
+  scope, simplicity review, and unresolved assumption markers as heuristic
+  claims (advisory),
 - out-of-declared-scope files when `--scope` is explicitly provided,
 - linked explicit review artifacts when `--review` points at an existing file,
 - missing review artifacts as evidence gaps when a declared `--review` file is
@@ -264,6 +268,9 @@ deferred; no out-of-scope finding is fabricated without an explicit declaration.
   no coverage artifact) is reported as `unknown`, not as a gap or fail.
 - "Behavior change needs a test" is a heuristic claim; the only derivable
   test-related fact is "source changed with no test-file change in the diff."
+- Surgicality and simplicity signals stay tiered: declared scope compliance is a
+  derivable fact, out-of-declared-scope files are gateable only when scope was
+  declared, and taste/abstraction/assumption markers remain advisory.
 - An unverified or stale change is reported as an evidence gap, reusing the
   Bundle A fingerprint/verification model, and the output declares its
   `diffBase`/`includesStaged`/`includesUntracked`.

@@ -248,7 +248,8 @@ evidence only when the supporting runtime exists:
 12. Harness-engineering alignment adds small 0.2 tracks before broader
     autonomy: `cx architecture check` now covers the first derivable import
     invariant, `cx repo map/check` now covers mechanical repository-knowledge
-    validation, and behavior evidence expansion in `cx slop check` remains open. See
+    validation, and `cx slop check` now includes the first behavior evidence
+    expansion while keeping heuristic lanes advisory. See
     [doc 13](design/13-harness-engineering-alignment.md).
 
 ## Implementation Residue
@@ -266,9 +267,11 @@ Harness-engineering alignment adds these evidence-first tracks:
   required indexes, index links, and English/Korean counterparts mechanically.
   Future expansion can add referenced schema/artifact link checks. Keep semantic
   staleness advisory.
-- Behavior evidence: extend `cx slop check` and subagent claim artifacts with
-  Karpathy-style surgicality, simplicity, assumption, and verification checklist
-  fields while preserving the facts-vs-heuristics boundary.
+- Behavior evidence follow-up: `cx slop check` now records first-slice
+  surgicality, simplicity, assumption, verification-artifact, and diff-surface
+  evidence while preserving the facts-vs-heuristics boundary. Remaining work is
+  the subagent claim checklist counterpart plus optional future artifacts such as
+  lint/typecheck/coverage reports.
 - Observability adapters: add dev-server/browser/log evidence descriptors only
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.

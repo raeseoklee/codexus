@@ -22,6 +22,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Experimental `cx repo map/check --json`과 `cx repo check --gate`를 추가했습니다.
   Required docs index, index link resolution, English/Korean counterpart를
   기계적으로 검증하고 semantic freshness는 advisory로 유지합니다.
+- `cx slop check` behavior evidence를 확장했습니다. Non-gating surgicality,
+  verification-artifact, test-diff, diff-surface fact와 advisory simplicity/
+  unresolved-assumption heuristic을 추가하되, 이 heuristic은 `--gate`에 영향을 주지
+  않습니다.
 
 ### Fixed
 

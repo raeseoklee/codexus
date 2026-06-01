@@ -219,7 +219,10 @@ verification/evidence 모델을 읽어 보수적으로 다음을 보고합니다
 
 - unverified/stale 변경 (evidence gap, derivable, Bundle A 모델에서),
 - 같은 diff에서 source 변경 ∧ test-file 무변경 (derivable fact, 기본 non-gating),
-- behavior-change-likely / suspicious abstraction (heuristic claim, advisory),
+- test-file 변경, declared-scope-respected fact, verification artifact link, diff surface
+  area를 non-gating derivable evidence로 보고,
+- behavior-change-likely, suspicious abstraction, scope 없는 multi-area change,
+  simplicity review, unresolved assumption marker를 heuristic claim(advisory)으로 보고,
 - `--scope`가 명시적으로 제공된 경우 선언 scope 밖 파일,
 - `--review`가 존재하는 파일을 가리킬 때 linked explicit review artifact,
 - 선언된 `--review` 파일이 없을 때 missing review artifact evidence gap,
@@ -244,6 +247,9 @@ verification/evidence 모델을 읽어 보수적으로 다음을 보고합니다
   gap/fail이 아니라 `unknown`으로 보고.
 - "behavior change엔 test 필요"는 heuristic claim; derivable한 test 관련 사실은 "같은 diff에서
   source 변경 ∧ test-file 무변경"뿐.
+- Surgicality와 simplicity signal은 계속 tier를 분리합니다. Declared scope 준수는
+  derivable fact, declared scope 밖 파일은 scope가 선언된 경우에만 gate 가능, taste/
+  abstraction/assumption marker는 advisory입니다.
 - unverified/stale 변경은 Bundle A fingerprint/verification 모델을 재사용해 evidence gap으로
   보고하고, 출력은 `diffBase`/`includesStaged`/`includesUntracked`를 선언.
 - scope finding은 scope가 선언됐을 때만(`--scope` 또는 session intent) 발동; 선언 없이는

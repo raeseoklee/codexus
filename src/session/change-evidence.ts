@@ -19,15 +19,31 @@ export interface EvidenceGap {
 }
 
 export interface DerivableFact {
-  kind: "source_without_test_diff" | "new_dependency_added" | "explicit_review_linked";
+  kind:
+    | "source_without_test_diff"
+    | "test_diff_present"
+    | "new_dependency_added"
+    | "explicit_review_linked"
+    | "declared_scope_respected"
+    | "verification_artifact_linked"
+    | "diff_surface_area";
   gate: boolean;
   evidence: string;
   files?: string[];
   dependencies?: string[];
+  areas?: string[];
+  addedLines?: number;
+  deletedLines?: number;
+  fileCount?: number;
 }
 
 export interface HeuristicClaim {
-  kind: "behavior_change_likely_needs_test" | "suspicious_abstraction";
+  kind:
+    | "behavior_change_likely_needs_test"
+    | "suspicious_abstraction"
+    | "multi_area_change_without_scope"
+    | "simplicity_review_suggested"
+    | "unresolved_assumption_marker";
   confidence: "low" | "medium" | "high";
   evidence: string;
   recommendation: string;
@@ -219,7 +235,60 @@ function patchText(cwd: string, since: string | null): string {
   const root = gitTopLevel(cwd);
   if (!root) return "";
   if (since) return git(root, ["diff", since, "HEAD"]).stdout;
-  return `${git(root, ["diff", "--cached"]).stdout}\n${git(root, ["diff"]).stdout}`;
+  return `${git(root, ["diff", "--cached"]).stdout}\n${git(root, ["diff"]).stdout}\n${untrackedPatchText(root)}`;
+}
+
+function untrackedPatchText(root: string): string {
+  const untracked = git(root, ["ls-files", "--others", "--exclude-standard"]);
+  if (!untracked.ok) return "";
+  const chunks: string[] = [];
+  for (const file of splitLines(untracked.stdout).filter((item) => !excludedPath(item)).slice(0, 100)) {
+    try {
+      const text = readFileSync(join(root, file), "utf8");
+      if (text.includes("\0")) continue;
+      chunks.push(`+++ ${file}`);
+      for (const line of text.split(/\r?\n/).slice(0, 1000)) {
+        chunks.push(`+${line}`);
+      }
+    } catch {
+      // Advisory analysis should stay quiet when an untracked file cannot be read.
+    }
+  }
+  return chunks.join("\n");
+}
+
+interface PatchStats {
+  addedLines: number;
+  deletedLines: number;
+  addedMeaningfulLines: string[];
+}
+
+function patchStats(patch: string): PatchStats {
+  const addedMeaningfulLines: string[] = [];
+  let addedLines = 0;
+  let deletedLines = 0;
+  for (const line of patch.split(/\r?\n/)) {
+    if (line.startsWith("+++") || line.startsWith("---")) continue;
+    if (line.startsWith("+")) {
+      addedLines += 1;
+      const content = line.slice(1).trim();
+      if (content && !content.startsWith("//") && !content.startsWith("*")) {
+        addedMeaningfulLines.push(content);
+      }
+    } else if (line.startsWith("-")) {
+      deletedLines += 1;
+    }
+  }
+  return { addedLines, deletedLines, addedMeaningfulLines };
+}
+
+function diffAreas(files: string[]): string[] {
+  return [...new Set(files.map((file) => {
+    const normalized = file.replace(/\\/g, "/");
+    const [first, second] = normalized.split("/");
+    if (!second) return first;
+    return first === "src" || first === "tests" || first === "docs" ? `${first}/${second}` : first;
+  }))].sort();
 }
 
 function evidenceGapsFor(evidence: EvidenceModel | null): EvidenceGap[] {
@@ -321,12 +390,51 @@ export function buildChangeEvidenceReport(
   const sourceFiles = diff.files.filter(isSourceFile);
   const testFiles = diff.files.filter(isTestFile);
   const derivableFacts: DerivableFact[] = [];
+  const patch = patchText(resolvedCwd, options.since ?? null);
+  const stats = patchStats(patch);
+  const areas = diffAreas(diff.files);
+  if (diff.files.length > 0) {
+    derivableFacts.push({
+      kind: "diff_surface_area",
+      gate: false,
+      evidence: diff.diffBase,
+      files: diff.files.slice(0, 50),
+      areas: areas.slice(0, 20),
+      addedLines: stats.addedLines,
+      deletedLines: stats.deletedLines,
+      fileCount: diff.files.length,
+    });
+  }
+  if (options.scope && diff.files.length > 0 && scopeEvidenceGaps(diff, options.scope).length === 0) {
+    derivableFacts.push({
+      kind: "declared_scope_respected",
+      gate: false,
+      evidence: options.scope,
+      files: diff.files.slice(0, 50),
+    });
+  }
   if (sourceFiles.length > 0 && testFiles.length === 0) {
     derivableFacts.push({
       kind: "source_without_test_diff",
       gate: false,
       evidence: "working-tree diff",
       files: sourceFiles.slice(0, 50),
+    });
+  }
+  if (testFiles.length > 0) {
+    derivableFacts.push({
+      kind: "test_diff_present",
+      gate: false,
+      evidence: "working-tree diff",
+      files: testFiles.slice(0, 50),
+    });
+  }
+  if (evidence?.lastVerification?.path) {
+    derivableFacts.push({
+      kind: "verification_artifact_linked",
+      gate: false,
+      evidence: evidence.lastVerification.path,
+      files: [evidence.lastVerification.path],
     });
   }
   const deps = newDependencies(resolvedCwd, options.since ?? null);
@@ -371,7 +479,35 @@ export function buildChangeEvidenceReport(
         files: sourceWithoutTests.files,
       });
     }
-    const patch = patchText(resolvedCwd, options.since ?? null);
+    if (!options.scope && areas.length >= 3) {
+      heuristicClaims.push({
+        kind: "multi_area_change_without_scope",
+        confidence: "low",
+        evidence: `changed areas without a declared scope: ${areas.slice(0, 10).join(", ")}`,
+        recommendation: "declare a scope when evaluating whether the change stayed surgical",
+        files: diff.files.slice(0, 50),
+      });
+    }
+    if (sourceFiles.length >= 5 || stats.addedMeaningfulLines.length >= 200) {
+      heuristicClaims.push({
+        kind: "simplicity_review_suggested",
+        confidence: "low",
+        evidence: `${sourceFiles.length} source files and ${stats.addedMeaningfulLines.length} added non-comment lines changed`,
+        recommendation: "review whether the change can be split, deleted, or simplified before completion",
+        files: sourceFiles.slice(0, 50),
+      });
+    }
+    const assumptionLines = stats.addedMeaningfulLines
+      .filter((line) => /\b(?:TODO|FIXME|HACK|assume|assuming|temporary|workaround|placeholder)\b/i.test(line))
+      .slice(0, 5);
+    if (assumptionLines.length > 0) {
+      heuristicClaims.push({
+        kind: "unresolved_assumption_marker",
+        confidence: "low",
+        evidence: "added assumption markers: " + assumptionLines.join(" | "),
+        recommendation: "resolve the assumption or link a review artifact before relying on this change",
+      });
+    }
     const abstractionLines = patch
       .split(/\r?\n/)
       .filter((line) => line.startsWith("+") && !line.startsWith("+++"))

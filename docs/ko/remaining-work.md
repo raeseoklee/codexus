@@ -237,9 +237,9 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    worktree-isolated, `stability: experimental`이어야 합니다.
 12. Harness-engineering alignment는 더 넓은 autonomy 전에 작은 0.2 track을 추가합니다:
     첫 derivable import invariant는 이제 `cx architecture check`가 다루고, 기계적인
-    repository-knowledge validation은 `cx repo map/check`가 다룹니다. `cx slop check`의
-    behavior evidence 확장은 아직 열려 있습니다. 자세한 내용은 [doc 13](design/13-harness-engineering-alignment.md)을
-    봅니다.
+    repository-knowledge validation은 `cx repo map/check`가 다룹니다. `cx slop check`는
+    첫 behavior evidence 확장을 포함하며 heuristic lane은 계속 advisory로 유지합니다.
+    자세한 내용은 [doc 13](design/13-harness-engineering-alignment.md)을 봅니다.
 
 ## 구현 잔여
 
@@ -255,9 +255,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   index link, English/Korean counterpart를 기계적으로 검증합니다. 향후 referenced
   schema/artifact link check를 추가할 수 있습니다. Semantic staleness는 advisory로
   유지합니다.
-- Behavior evidence: `cx slop check`와 subagent claim artifact에 Karpathy-style
-  surgicality, simplicity, assumption, verification checklist field를 추가하되
-  fact-vs-heuristic 경계는 유지합니다.
+- Behavior evidence follow-up: `cx slop check`는 첫 surgicality, simplicity,
+  assumption, verification-artifact, diff-surface evidence를 기록합니다. Fact-vs-heuristic
+  경계는 유지했고, 남은 작업은 subagent claim checklist counterpart와 선택적
+  lint/typecheck/coverage artifact입니다.
 - Observability adapter: architecture와 repo-knowledge gate가 안정된 뒤
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.
