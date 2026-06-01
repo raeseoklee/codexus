@@ -105,16 +105,25 @@ This starts a separate non-interactive Codex process. It is useful for bounded s
   app-server path, return a truthful status envelope instead of implying support
   from command presence.
 
-## Next Steps
+## Implemented Session-Native Slices
 
-- Add a marker-bounded project/user AGENTS overlay documenting session-native
-  `$codexus` usage.
-- Add `cx setup codex-session`, `cx session status`, `cx session checkpoint`,
-  and `cx session verify` as the first session-native command slice.
-- Add explicit adapter injection only if the user-visible approval step and
-  non-injected context artifact contract are preserved.
-- Add app-server based turns only after supervised lifecycle and JSON-RPC
-  roundtrip contracts are tested.
+- Marker-bounded project/user AGENTS overlays document session-native Codexus
+  usage.
+- `cx setup codex-session`, `cx session status`, `cx session hud`,
+  `cx session migrate`, `cx session checkpoint`, `cx session verify`,
+  `cx session notify`, and `cx session workers status` provide the first
+  session-native command surface.
+- Notify-hook setup is trust-gated, chain-preserving, atomic, reversible, and
+  distinguishes configured hooks from observed `turn-ended` dispatch.
+- Adapter context remains approval-artifact based; automatic prompt injection is
+  intentionally unsupported.
+- `.codexus` is the canonical runtime root. Legacy `.codex-harness` directories
+  are migrated into `.codexus` and removed when the CLI sees them.
+
+## Remaining Steps
+
+- Add app-server based turns only after supervised lifecycle, non-disruptive
+  attachment, and JSON-RPC event contracts are tested.
 - Add richer permission, approval, and policy-block event display.
-- Keep `.codexus` as the canonical runtime root. Legacy `.codex-harness`
-  directories are migrated into `.codexus` and removed when the CLI sees them.
+- Keep unsupported protocol paths visible as truthful status envelopes rather
+  than implying support from command presence.

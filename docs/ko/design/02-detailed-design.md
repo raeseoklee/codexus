@@ -2,6 +2,13 @@
 
 [English](../../design/02-detailed-design.md)
 
+## 문서 범위
+
+이 문서는 초기 상세 설계에서 시작한 기록입니다. 아키텍처 rationale로는 여전히
+유효하지만, 현재 public command surface는 초기 구현 snapshot보다 넓습니다. 현재
+명령 계약은 `cx --help`, [JSON contract](../json-contract.md), 그리고 각 focused
+design 문서를 기준으로 합니다.
+
 ## CLI 계약
 
 정식 public CLI는 `cx`와 long-form `codexus`입니다.

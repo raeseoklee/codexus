@@ -3,7 +3,7 @@
 [Korean](../ko/design/08-standalone-identity-and-always-on-evidence.md)
 
 Date: 2026-05-30
-Status: proposed product principles
+Status: accepted product principles; always-on evidence first slices implemented; driver descriptor migration deferred
 
 ## Decision
 
@@ -208,7 +208,7 @@ evidence snapshot, but verification is never executed by the hook and
 
 ## Implementation Slices
 
-1. Strengthen `cx session status` into the ambient evidence model, with
+1. Completed: strengthen `cx session status` into the ambient evidence model, with
    `dirtySinceLastVerify` / `evidenceFresh` derived from a saved
    `workspaceFingerprint` versus the current fingerprint. Use git hashes first;
    use timestamp/mtime only as a degraded fallback that cannot claim strong
@@ -218,7 +218,7 @@ evidence snapshot, but verification is never executed by the hook and
    `--execute`; policy preflight for danger).
 3. Completed: add the `--always-on` overlay profile and make the notify hook a
    heartbeat that records derived evidence state on `turn-ended`.
-4. Add the evidence-bearing-only rule to the design docs and to command
+4. Completed: add the evidence-bearing-only rule to the design docs and to command
    acceptance criteria.
 5. Begin isolating Codex-bound assumptions from the driver/kernel/event schema
    (descriptor-based driver identity), without changing product focus.

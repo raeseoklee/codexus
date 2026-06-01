@@ -104,15 +104,25 @@ node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounde
   노출한다면, command 존재로 support를 암시하지 말고 truthful status envelope를
   반환합니다.
 
-## 다음 단계
+## 구현된 Session-Native Slice
 
-- session-native `$codexus` 사용법을 설명하는 marker-bounded project/user AGENTS
-  overlay 추가.
-- 첫 session-native command slice로 `cx setup codex-session`,
-  `cx session status`, `cx session checkpoint`, `cx session verify` 추가.
-- 명시적 user-visible approval step과 non-injected context artifact contract를
-  유지할 수 있을 때만 adapter injection 추가.
-- supervised lifecycle과 JSON-RPC roundtrip contract를 검증한 뒤 app-server turn 연결.
-- permission, approval, policy-block event display를 더 풍부하게 개선.
-- `.codexus`를 canonical runtime root로 유지합니다. Legacy `.codex-harness`
-  directory는 CLI가 발견하면 `.codexus`로 이관한 뒤 제거합니다.
+- Marker-bounded project/user AGENTS overlay가 session-native Codexus 사용법을
+  문서화합니다.
+- `cx setup codex-session`, `cx session status`, `cx session hud`,
+  `cx session migrate`, `cx session checkpoint`, `cx session verify`,
+  `cx session notify`, `cx session workers status`가 첫 session-native command
+  surface를 제공합니다.
+- Notify-hook setup은 trust-gated, chain-preserving, atomic, reversible이며,
+  configured hook과 실제 `turn-ended` dispatch 관측을 구분합니다.
+- Adapter context는 approval artifact 기반으로 남아 있고, automatic prompt
+  injection은 의도적으로 지원하지 않습니다.
+- `.codexus`가 canonical runtime root입니다. Legacy `.codex-harness` directory는
+  CLI가 발견하면 `.codexus`로 이관한 뒤 제거합니다.
+
+## 남은 단계
+
+- supervised lifecycle, non-disruptive attachment, JSON-RPC event contract가
+  검증된 뒤에만 app-server 기반 turn을 추가합니다.
+- permission, approval, policy-block event display를 더 풍부하게 개선합니다.
+- unsupported protocol path는 command 존재만으로 support를 암시하지 말고
+  truthful status envelope로 유지합니다.

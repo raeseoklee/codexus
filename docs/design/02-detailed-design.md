@@ -2,9 +2,17 @@
 
 [Korean](../ko/design/02-detailed-design.md)
 
+## Document Scope
+
+This document started as the initial detailed design. It remains useful as the
+architecture rationale, but the current public command surface is broader than
+the first implementation snapshot below. Treat `cx --help`,
+[JSON contract](../json-contract.md), and the focused design documents as the
+authoritative current command contracts.
+
 ## Runtime Package Shape
 
-Initial source layout:
+Historical initial source layout:
 
 ```text
 src/

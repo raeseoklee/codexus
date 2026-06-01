@@ -3,7 +3,7 @@
 [English](../../design/07-supervised-sessions.md)
 
 작성일: 2026-05-30
-상태: 제안된 방향 전환
+상태: 채택된 방향; 첫 session-native slice 구현 완료; live app-server, statusline, worker launch는 gated
 
 ## 결정
 

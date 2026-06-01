@@ -200,7 +200,7 @@
           <ul>
             <li>Static text-based import scan이 <code>scanAccuracy: "best_effort"</code>를 보고합니다.</li>
             <li>Gate는 evidence gap과 blocking unknown으로만 움직입니다.</li>
-            <li>첫 dogfood rule은 no sibling-harness imports입니다.</li>
+            <li>첫 dogfood rule은 Codexus core의 external harness import 금지입니다.</li>
             <li>Zero-dependency glob matcher를 공유합니다.</li>
           </ul>
           <span class="label">근거</span>
@@ -292,6 +292,23 @@
             <li><code>desktop-app-server</code> runtime surface는 관측 증거에서만 나옵니다.</li>
             <li>CLI notify 부재를 Desktop 증거로 쓰지 않습니다.</li>
           </ul>
+        </article>
+
+        <article class="card">
+          <h3>Subagent Bridge Evidence 조사</h3>
+          <div class="tags">
+            <span class="tag evidence">bridge probe</span>
+            <span class="tag gated">spawn claim 금지</span>
+          </div>
+          <p>Codexus를 recorder-only에서 launcher로 바꾸기 전에 Codex가 지원되는 native subagent bridge를 노출하는지 조사합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Probe한 surface, version, outcome을 evidence로 기록합니다.</li>
+            <li>Negative 또는 unavailable result도 정상 outcome입니다.</li>
+            <li>지원되는 bridge가 생기기 전에는 active launch를 주장하지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/09-subagent-evidence-supervision.md">subagent evidence</a></p>
         </article>
 
         <article class="card">
@@ -467,6 +484,36 @@
           <p>State와 JSON contract는 explicit migration boundary를 통해서만 확장합니다.</p>
           <span class="label">Gate</span>
           <p>0.1.x frozen field는 additive-only입니다. Breaking change는 0.2.0까지 기다립니다.</p>
+        </article>
+
+        <article class="card">
+          <h3>Supply-Chain Advisory 후속</h3>
+          <div class="tags">
+            <span class="tag later">advisory lane</span>
+            <span class="tag evidence">report-only</span>
+          </div>
+          <p>Typosquat heuristic, registry/published-artifact 비교, 외부 audit tool 링크를 추가하되 기본 gate로 승격하지 않습니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>Network 또는 registry check는 명시적 opt-in입니다.</li>
+            <li>Heuristic dependency claim은 advisory로 유지합니다.</li>
+            <li>Local derivable supply-chain gate는 기존 authority model을 유지합니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/11-supply-chain-evidence.md">supply-chain evidence</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Second-Engine Driver Track</h3>
+          <div class="tags">
+            <span class="tag later">engine-agnostic</span>
+            <span class="tag gated">descriptor first</span>
+          </div>
+          <p>두 번째 engine 구현을 추가하기 전에 driver descriptor 경계를 먼저 준비합니다.</p>
+          <span class="label">Gate</span>
+          <p>Engine-neutral event/state schema audit, <code>engine</code>/<code>driverId</code>/<code>capabilities</code> descriptor field, driver가 생기기 전 product copy support 암시 금지.</p>
+          <span class="label">근거</span>
+          <p><a href="design/08-standalone-identity-and-always-on-evidence.md">standalone identity</a></p>
         </article>
 
         <article class="card">

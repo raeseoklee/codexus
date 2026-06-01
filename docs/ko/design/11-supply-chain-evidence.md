@@ -3,7 +3,7 @@
 [English](../../design/11-supply-chain-evidence.md)
 
 작성일: 2026-05-31
-상태: 제안된 설계
+상태: 첫 slice 구현 및 출시 완료; advisory/network 후속은 deferred
 
 ## 결정
 

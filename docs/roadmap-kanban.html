@@ -201,7 +201,7 @@
           <ul>
             <li>Static text-based import scan reports <code>scanAccuracy: "best_effort"</code>.</li>
             <li>Gate moves only on evidence gaps and blocking unknowns.</li>
-            <li>First dogfood rule: no sibling-harness imports in Codexus core.</li>
+            <li>First dogfood rule: no external harness imports in Codexus core.</li>
             <li>Use a shared zero-dependency glob matcher.</li>
           </ul>
           <span class="label">Sources</span>
@@ -293,6 +293,23 @@
             <li>Runtime surface becomes <code>desktop-app-server</code> only from observed evidence.</li>
             <li>CLI notify absence is never used as Desktop proof.</li>
           </ul>
+        </article>
+
+        <article class="card">
+          <h3>Subagent Bridge Evidence Investigation</h3>
+          <div class="tags">
+            <span class="tag evidence">bridge probe</span>
+            <span class="tag gated">no spawn claim</span>
+          </div>
+          <p>Investigate whether Codex exposes a supported native subagent bridge before changing Codexus from recorder-only to launcher.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Evidence records the probed surface, version, and outcome.</li>
+            <li>Negative or unavailable results are accepted outcomes.</li>
+            <li>No command claims active launch until a supported bridge exists.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/09-subagent-evidence-supervision.md">subagent evidence</a></p>
         </article>
 
         <article class="card">
@@ -468,6 +485,36 @@
           <p>Extend state and JSON contracts only through explicit migration boundaries.</p>
           <span class="label">Gate</span>
           <p>0.1.x frozen fields remain additive-only; breaking changes wait for 0.2.0.</p>
+        </article>
+
+        <article class="card">
+          <h3>Supply-Chain Advisory Follow-Up</h3>
+          <div class="tags">
+            <span class="tag later">advisory lane</span>
+            <span class="tag evidence">report-only</span>
+          </div>
+          <p>Add typosquat heuristics, registry/published-artifact comparison, and links to external audit tools without turning them into default gates.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Network or registry checks are explicit opt-in.</li>
+            <li>Heuristic dependency claims remain advisory.</li>
+            <li>Local derivable supply-chain gates keep the existing authority model.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/11-supply-chain-evidence.md">supply-chain evidence</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Second-Engine Driver Track</h3>
+          <div class="tags">
+            <span class="tag later">engine-agnostic</span>
+            <span class="tag gated">descriptor first</span>
+          </div>
+          <p>Prepare the driver descriptor boundary before adding any second engine implementation.</p>
+          <span class="label">Gate</span>
+          <p>Engine-neutral event/state schema audit, <code>engine</code>/<code>driverId</code>/<code>capabilities</code> descriptor fields, and no product copy implying support before a driver exists.</p>
+          <span class="label">Sources</span>
+          <p><a href="design/08-standalone-identity-and-always-on-evidence.md">standalone identity</a></p>
         </article>
 
         <article class="card">

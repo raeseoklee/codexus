@@ -3,7 +3,7 @@
 [Korean](../ko/design/07-supervised-sessions.md)
 
 Date: 2026-05-30
-Status: proposed direction change
+Status: accepted direction; first session-native slices implemented; live app-server, statusline, and worker launch remain gated
 
 ## Decision
 

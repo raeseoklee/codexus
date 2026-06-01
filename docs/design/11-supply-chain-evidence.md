@@ -3,7 +3,7 @@
 [Korean](../ko/design/11-supply-chain-evidence.md)
 
 Date: 2026-05-31
-Status: proposed design
+Status: first slice implemented and shipped; advisory/network follow-ups deferred
 
 ## Decision
 

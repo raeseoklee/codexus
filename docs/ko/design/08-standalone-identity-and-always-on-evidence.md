@@ -3,7 +3,7 @@
 [English](../../design/08-standalone-identity-and-always-on-evidence.md)
 
 작성일: 2026-05-30
-상태: 제안된 제품 원칙
+상태: 채택된 제품 원칙; always-on evidence 첫 slice 구현 완료; driver descriptor migration은 deferred
 
 ## 결정
 
@@ -184,14 +184,15 @@ Overlay는 행동을 요청할 뿐, 행동을 증명하지 않습니다. Notify 
 
 ## 구현 슬라이스
 
-1. `cx session status`를 ambient evidence 모델로 강화. `dirtySinceLastVerify`/`evidenceFresh`를
+1. 완료: `cx session status`를 ambient evidence 모델로 강화.
+   `dirtySinceLastVerify`/`evidenceFresh`를
    저장된 `workspaceFingerprint`와 현재 fingerprint의 비교에서 도출. git hash를 우선하고,
    timestamp/mtime은 강한 freshness를 주장할 수 없는 degraded fallback으로만 사용.
 2. 완료: `cx session verify --auto` 자동 감지 추가(감지+추천 항상; 실행 opt-in·bounded;
    실행은 `--execute` 같은 명시적 실행 opt-in에서만; danger는 policy preflight).
 3. 완료: `--always-on` overlay 프로필 추가, notify hook을 `turn-ended` 시 도출 evidence 상태를
    기록하는 heartbeat로.
-4. evidence-bearing-only 규칙을 설계 문서와 command 수용 기준에 추가.
+4. 완료: evidence-bearing-only 규칙을 설계 문서와 command 수용 기준에 추가.
 5. Codex-bound 가정을 driver/kernel/event schema에서 분리 시작(descriptor 기반 driver 정체성),
    제품 초점은 바꾸지 않고.
 
