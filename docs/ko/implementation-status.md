@@ -171,7 +171,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - GitHub Actions CI는 main push와 pull request에서 committed whitespace check, static syntax validation, unit test를 실행합니다.
 - Local CI parity는 `npm run ci`로 실행할 수 있습니다. Remote Actions 실행은 repository/account runner availability에 의존합니다.
 - Public repository readiness file이 추가되었습니다: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue template, PR template.
-- Root `install.sh`는 GitHub Pages `curl | sh` 설치에서 npm(`codexus@next` 기본값)에
+- Root `install.sh`는 GitHub Pages `curl | sh` 설치에서 npm(`codexus` 기본값)에
   위임하고, canonical bin link와 `CODEXUS_INSTALL_CODEX_SKILL=0`이 아닐 때 Codex
   skill adapter 설치를 수행합니다.
 - User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.

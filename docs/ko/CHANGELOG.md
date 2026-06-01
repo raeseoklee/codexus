@@ -11,6 +11,19 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 아직 변경 사항이 없습니다.
 
+## 0.1.0 - 2026-06-01
+
+### Added
+
+- 첫 stable 0.1.x release line입니다. Supported JSON surface는 0.1.x 동안 freeze되고,
+  experimental/deferred surface는 계속 자신의 stability를 명시합니다.
+
+### Changed
+
+- Public install path는 prerelease `codexus@next` channel 대신 stable npm
+  channel(`codexus`)을 기본으로 사용합니다.
+- Stable publish는 GitHub Actions trusted publishing과 npm provenance를 사용합니다.
+
 ## 0.1.0-alpha.7 - 2026-06-01
 
 ### Fixed

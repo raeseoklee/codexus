@@ -70,6 +70,12 @@ test("install.sh delegates to npm install and links canonical bins", async () =>
   }
 });
 
+test("install.sh defaults to the stable npm channel", async () => {
+  const text = await readFile(resolve("install.sh"), "utf8");
+  assert.match(text, /CODEXUS_NPM_SPEC:-codexus}/);
+  assert.doesNotMatch(text, /CODEXUS_NPM_SPEC:-codexus@next}/);
+});
+
 test("npm global install postinstall installs the Codex skill adapter", async () => {
   const cwd = await tempDir();
   const npmPrefix = join(cwd, "prefix");

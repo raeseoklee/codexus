@@ -24,7 +24,7 @@ tmux integration remain capability-gated. See
 Run setup once from a shell in the project you want Codex to work on:
 
 ```bash
-npm install -g codexus@next
+npm install -g codexus
 codexus setup codex-session --scope project --enable-notify-hook --json
 ```
 
@@ -65,14 +65,14 @@ The published npm package installs the CLI and the Codex skill adapter by
 default on global installs:
 
 ```bash
-npm install -g codexus@next
+npm install -g codexus
 codexus --version
 ```
 
 For a CLI-only global install, opt out explicitly:
 
 ```bash
-CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus@next
+CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus
 ```
 
 To refresh or reinstall the Codex skill adapter from that global package:

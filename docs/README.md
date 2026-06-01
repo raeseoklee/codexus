@@ -27,7 +27,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [npm packaging plan](plans/2026-05-30-npm-packaging-plan.md): bundled npm CLI entrypoint, package contents, installer strategy, and release gate.
 - [Desktop app-server attachment evidence plan](plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md): A/B evidence slice for Desktop attachment through Codex app-server with consent and read-only gates.
 - [Memory quality curation plan](plans/2026-05-30-memory-quality-curation-plan.md): 29148-inspired memory quality characteristics, tri-state curator findings, conflict detection, and supersession review boundaries.
-- [0.1.0 stable readiness plan](plans/2026-05-31-0.1.0-stable-readiness-plan.md): the alpha.7 → 0.1.0 cut — supported vs deferred surface, contract-frozen 0.1.x JSON, trusted publishing, E2E smoke matrix, and the release procedure.
+- [0.1.0 stable readiness plan](plans/2026-05-31-0.1.0-stable-readiness-plan.md): the 0.1.0 cut — supported vs deferred surface, contract-frozen 0.1.x JSON, trusted publishing, E2E smoke matrix, and the release procedure.
 - [JSON contract](json-contract.md): frozen `0.1.x` JSON fields, stability markers, and breaking-change rules for automation consumers.
 - [0.1.0 release evidence](release-evidence/0.1.0.md): redacted manual sign-off template for the stable cut.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.

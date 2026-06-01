@@ -34,7 +34,7 @@ truthful status around the work.
 From a shell:
 
 ```bash
-npm install -g codexus@next
+npm install -g codexus
 codexus run --verify "npm test" "fix the failing parser tests"
 ```
 
@@ -42,9 +42,9 @@ Codexus runs Codex, then runs `npm test`. If the test fails, Codexus gives Codex
 the real failing output and retries within the configured repair budget. The run
 is `complete` only when the verification command passes.
 
-> Early alpha, and intentionally honest about it: live app-server turns, routine
-> live model replay, automatic prompt injection, and live cron/gateway dispatch
-> remain gated off. See [Status](#status).
+> 0.1.0 is intentionally narrow: live app-server turns, routine live model
+> replay, automatic prompt injection, and live cron/gateway dispatch remain
+> gated off. See [Status](#status).
 
 ## Use It In Codex CLI Chat
 
@@ -84,10 +84,10 @@ Full guide: [Using Codexus inside Codex](docs/codex-session-usage.md).
 
 ## Quick Start
 
-Install the current alpha package:
+Install the current stable package:
 
 ```bash
-npm install -g codexus@next
+npm install -g codexus
 codexus --version
 codexus doctor --json
 ```
@@ -109,7 +109,7 @@ Detailed setup: [Quick start](docs/quickstart.md).
 Install from npm:
 
 ```bash
-npm install -g codexus@next
+npm install -g codexus
 ```
 
 Install with GitHub Pages if you prefer a reviewable shell installer:
@@ -151,9 +151,10 @@ npm run package:smoke
 
 ## Status
 
-Codexus is usable as an early local harness. The stable path is the CLI around
-`codex exec --json`; live app-server turns, routine live model replay, automatic
-prompt injection, and live cron/gateway dispatch remain intentionally gated.
+Codexus 0.1.0 is usable as a local harness with a narrow stable path around
+`codex exec --json`; live app-server turns, routine live model replay,
+automatic prompt injection, and live cron/gateway dispatch remain intentionally
+gated.
 
 ## Support Matrix
 

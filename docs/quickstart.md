@@ -7,10 +7,10 @@ model and network access; real Codex execution is covered after that.
 
 ## npm Install
 
-Codexus is published on npm as an alpha package:
+Codexus is published on npm:
 
 ```bash
-npm install -g codexus@next
+npm install -g codexus
 codexus doctor --json
 ```
 
@@ -19,7 +19,7 @@ adapter into `${CODEX_HOME:-~/.codex}/skills/codexus` by default. Set
 `CODEXUS_INSTALL_CODEX_SKILL=0` for a CLI-only install:
 
 ```bash
-CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus@next
+CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus
 ```
 
 ## Install Script
@@ -41,7 +41,7 @@ sh install.sh
 
 Installer environment variables:
 
-- `CODEXUS_NPM_SPEC`: npm package spec to install, default `codexus@next`
+- `CODEXUS_NPM_SPEC`: npm package spec to install, default `codexus`
 - `CODEXUS_EXPECTED_VERSION`: optional installed package version check
 - `CODEXUS_NPM_PREFIX`: npm global prefix, default `~/.local`
 - `CODEXUS_BIN_DIR`: bin directory for `cx` and `codexus`, default `~/.local/bin`

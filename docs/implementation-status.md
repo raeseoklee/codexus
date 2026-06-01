@@ -225,7 +225,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
 - Public repository readiness files are present: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue templates, and PR template.
 - Root `install.sh` supports GitHub Pages `curl | sh` installation by
-  delegating to npm (`codexus@next` by default), linking canonical bins, and
+  delegating to npm (`codexus` by default), linking canonical bins, and
   installing the Codex skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is
   set.
 - User-facing Codex-session usage docs now explain how to invoke the `$codexus` skill, what commands to prefer, and when to stay with normal Codex interaction.

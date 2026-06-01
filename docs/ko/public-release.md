@@ -91,7 +91,7 @@ stable helper는 non-dry-run prerelease version을 거부합니다. `0.1.0-alpha
 ## GitHub Pages Installer
 
 Codexus는 repository root의 `install.sh`를 제공합니다. 이 script는 npm package
-channel(`codexus@next` 기본값)에 위임한 뒤 `CODEXUS_INSTALL_CODEX_SKILL=0`이
+channel(`codexus` 기본값)에 위임한 뒤 `CODEXUS_INSTALL_CODEX_SKILL=0`이
 아니면 Codex-native skill adapter를 설치합니다. Direct global npm install도 package
 postinstall을 통해 같은 adapter install을 수행합니다. 다음 URL이 동작하도록 GitHub
 Pages source를 `main` branch와 `/` root로 활성화합니다:

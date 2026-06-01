@@ -23,7 +23,7 @@ tmux integration은 아직 capability gate 뒤에 있습니다.
 Codex가 작업할 project에서 shell로 setup을 한 번 실행합니다:
 
 ```bash
-npm install -g codexus@next
+npm install -g codexus
 codexus setup codex-session --scope project --enable-notify-hook --json
 ```
 
@@ -63,14 +63,14 @@ Published npm package는 global install 시 CLI와 Codex skill adapter를 기본
 함께 설치합니다:
 
 ```bash
-npm install -g codexus@next
+npm install -g codexus
 codexus --version
 ```
 
 CLI만 설치하려면 명시적으로 opt out합니다:
 
 ```bash
-CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus@next
+CODEXUS_INSTALL_CODEX_SKILL=0 npm install -g codexus
 ```
 
 그 global package에서 Codex skill adapter를 갱신하거나 재설치합니다:

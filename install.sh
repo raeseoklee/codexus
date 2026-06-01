@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-package_spec="${CODEXUS_NPM_SPEC:-codexus@next}"
+package_spec="${CODEXUS_NPM_SPEC:-codexus}"
 npm_prefix="${CODEXUS_NPM_PREFIX:-$HOME/.local}"
 bin_dir="${CODEXUS_BIN_DIR:-$npm_prefix/bin}"
 install_skill="${CODEXUS_INSTALL_CODEX_SKILL:-1}"

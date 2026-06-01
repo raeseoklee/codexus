@@ -11,6 +11,20 @@ occur before 1.0, but they should be called out clearly.
 
 No changes yet.
 
+## 0.1.0 - 2026-06-01
+
+### Added
+
+- First stable 0.1.x release line. The supported JSON surfaces are frozen for
+  0.1.x, while experimental/deferred surfaces continue to self-report their
+  stability.
+
+### Changed
+
+- The public install path now targets the stable npm channel (`codexus`) instead
+  of the prerelease `codexus@next` channel.
+- Stable publishes use GitHub Actions trusted publishing with npm provenance.
+
 ## 0.1.0-alpha.7 - 2026-06-01
 
 ### Fixed
