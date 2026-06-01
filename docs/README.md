@@ -2,12 +2,12 @@
 
 [Korean](ko/README.md)
 
-Codexus is a local runtime harness for Codex orchestration. It keeps OpenAI Codex as the model/runtime engine, then adds the harness engineering layer that makes Codex feel more durable, observable, recoverable, and self-improving.
+Codexus is a harness engineering layer for OpenAI Codex CLI. It keeps the local Codex engine and authentication boundary, then adds durable run ledgers, verification gates, bounded repair loops, session evidence, memory, and truthful status reporting.
 
 Category:
 
 ```text
-Codex execution harness
+Codex harness engineering layer
 ```
 
 Target CLI:
@@ -43,6 +43,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Quality evidence guard (slop guard)](design/10-quality-evidence-guard.md): evidence-first change-quality gate that splits derivable evidence gaps from advisory heuristic claims, built on the session evidence model.
 - [Supply-chain evidence](design/11-supply-chain-evidence.md): local, derivable supply-chain facts and an optional pre-publish gate, reusing the change-evidence model — not a CVE/network scanner.
 - [Autopilot contract](design/12-autopilot-contract.md): proposed 0.2/0.3 contract layer for long supervised runs — human-approved scope, worktree isolation, detect-then-stop enforcement, and evidence-gated acceptance.
+- [Harness engineering alignment](design/13-harness-engineering-alignment.md): synthesis of OpenAI harness engineering and Karpathy-style behavior contracts for repository maps, architecture gates, behavior evidence, and non-goals.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Public release checklist](public-release.md): metadata, safety, verification, and visibility checklist for open-source publication.
@@ -51,9 +52,9 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 
 ## Positioning
 
-Codexus is a standalone Codex execution harness. It should be used alongside
-Codex, not instead of Codex. The first stable model access boundary is the
-local authenticated `codex` CLI, especially `codex exec --json`.
+Codexus is a standalone harness engineering layer for Codex. It should be used
+alongside Codex, not instead of Codex. The first stable model access boundary is
+the local authenticated `codex` CLI, especially `codex exec --json`.
 
 Some design notes compare Codexus with sibling harness projects, and the CLI has
 optional advanced interop surfaces. Those are compatibility paths, not product

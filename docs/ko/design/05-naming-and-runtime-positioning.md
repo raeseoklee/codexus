@@ -13,24 +13,25 @@ Codexus
 포지셔닝:
 
 ```text
-Codexus is a local runtime harness for Codex orchestration.
+Codexus is a harness engineering layer for OpenAI Codex CLI.
 ```
 
 한국어 설명:
 
 ```text
-Codexus는 Codex를 감싸 durable supervision, verification, recovery, memory,
-replay-gated skills를 제공하는 로컬 런타임 하네스입니다.
+Codexus는 Codex를 로컬 실행 엔진으로 유지하면서 durable supervision,
+verification, recovery, session evidence, memory, replay-gated skills를 더하는
+harness engineering layer입니다.
 ```
 
 ## 카테고리
 
 ```text
-Codex execution harness
+Codex harness engineering layer
 ```
 
-Codexus는 모델, IDE, hosted agent를 대체하지 않습니다. Codex 실행을 감싸 상태
-기록, 검증, supervision, 복구, memory/skill화를 담당하는 runtime layer입니다.
+Codexus는 모델, IDE, hosted agent를 대체하지 않습니다. Codex를 실행 엔진으로 유지하면서
+상태 기록, 검증, supervision, 복구, memory/skill화를 담당하는 local runtime layer입니다.
 Tool/MCP expansion은 policy와 approval contract가 활성화될 때까지 gated 상태로
 둡니다.
 
@@ -61,7 +62,9 @@ codexus
 .codexus/
 ```
 
-이 경로는 compatibility 때문에 유지합니다. 향후 `.codexus/`를 도입한다면 backward-compatible read가 있는 명시적 migration으로 진행해야 합니다.
+이 경로가 canonical storage namespace입니다. 기존 `.codex-harness/` state는
+legacy compatibility surface로 취급하고, backward-compatible read와 함께
+`.codexus/`로 이관해야 합니다. 근거 없이 조용히 무시하거나 덮어쓰지 않습니다.
 
 ## 런타임 포지셔닝
 

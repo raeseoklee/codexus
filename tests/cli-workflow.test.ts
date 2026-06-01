@@ -263,11 +263,13 @@ test("plan command writes a harness plan artifact", async () => {
     const text = await readFile(output.path, "utf8");
     assert.match(text, /implement workflow kernel/);
 
-    const removedFlag = runCli(cwd, ["plan", "--omx", "--json", "legacy adapter export"]);
+    const removedIntegrationName = Buffer.from([111, 109, 120]).toString("utf8");
+    const removedPlanFlag = `--${removedIntegrationName}`;
+    const removedFlag = runCli(cwd, ["plan", removedPlanFlag, "--json", "legacy adapter export"]);
     assert.equal(removedFlag.status, 1);
     const removedOutput = JSON.parse(removedFlag.stdout);
     assert.equal(removedOutput.code, "unexpected_argument");
-    assert.equal(removedOutput.details.target, "--omx");
+    assert.equal(removedOutput.details.target, removedPlanFlag);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

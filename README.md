@@ -6,12 +6,14 @@
 
 [Korean](docs/ko/README.md)
 
-**Codexus runs OpenAI's Codex CLI with evidence.**
+**Codexus is a harness engineering layer for OpenAI's Codex CLI.**
 
-Tell it what to change and how to verify it. Codexus runs the local authenticated
-Codex CLI, runs your verification command, feeds real failure output back into a
-bounded repair loop when the check fails, and reports `complete` only when the
-check passes.
+It keeps the same local Codex engine and auth, then adds durable run ledgers,
+verification gates, bounded repair loops, session evidence, memory, and truthful
+status around the work. Tell it what to change and how to verify it; Codexus
+runs the local authenticated Codex CLI, runs your verification command, feeds
+real failure output back into a bounded repair loop when the check fails, and
+reports `complete` only when the check passes.
 
 Every run is saved under `.codexus/runs/<id>`, so you can inspect, resume,
 verify, or cancel it even after a terminal closes or a process crashes.

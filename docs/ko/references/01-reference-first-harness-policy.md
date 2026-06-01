@@ -4,11 +4,20 @@
 
 상태: active
 
-Codexus는 Codex 실행 하네스입니다. 하네스와 관련된 결정은 관련 upstream
-harness가 이미 존재할 때 자체 판단을 우선하지 않습니다. 아키텍처, 런타임
-동작, 오케스트레이션 정책, 메모리, 스킬, provider/auth 처리, Codex-native
-adapter 동작을 바꾸기 전에 아래 필수 레퍼런스를 확인하고 매핑을 기록해야
-합니다.
+Codexus는 OpenAI Codex CLI를 위한 harness engineering layer입니다. 하네스와
+관련된 결정은 관련 upstream harness가 이미 존재할 때 자체 판단을 우선하지
+않습니다. 아키텍처, 런타임 동작, 오케스트레이션 정책, 메모리, 스킬,
+provider/auth 처리, Codex-native adapter 동작을 바꾸기 전에 아래 필수
+레퍼런스를 확인하고 매핑을 기록해야 합니다.
+
+## 레퍼런스 유형
+
+아래 세 source는 **구현 레퍼런스**입니다. 실제 harness 구현체와 behavior를 비교하며,
+이 문서의 audit/mapping 절차를 따릅니다. 별도로 OpenAI harness-engineering 글과
+Karpathy-style behavior rubric 같은 **철학/행동 레퍼런스**는 positioning과 behavior
+contract에 영향을 주지만, mandatory implementation reference는 아니며 아래 audit
+절차를 요구하지 않습니다. 자세한 정렬은 [doc 13](../../design/13-harness-engineering-alignment.md)을
+봅니다.
 
 ## 필수 레퍼런스
 

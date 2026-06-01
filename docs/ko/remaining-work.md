@@ -235,10 +235,30 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 11. Autopilot은 0.2/0.3 design track으로 유지합니다. `cx autopilot run`을 노출하기 전
    schema artifact와 report-only scope gate부터 시작해야 하며, human-approved,
    worktree-isolated, `stability: experimental`이어야 합니다.
+12. Harness-engineering alignment는 더 넓은 autonomy 전에 세 개의 작은 0.2 track을
+    추가합니다: derivable architecture invariant를 위한 `cx architecture check`, 기계적인
+    repository-knowledge validation을 위한 `cx repo map/check`, `cx slop check`의 behavior
+    evidence 확장. 자세한 내용은 [doc 13](design/13-harness-engineering-alignment.md)을
+    봅니다.
 
 ## 구현 잔여
 
 0.1.0 readiness 정리 이후 남은 구현 트랙입니다:
+
+Harness-engineering alignment에서 추가된 evidence-first track:
+
+- Architecture check: schema-validated `codexus.architecture.policy`와
+  `cx architecture check --json`을 추가합니다. 첫 dogfood 규칙은 no sibling-harness
+  import invariant입니다. Forbidden import, required file, 단순 layer edge처럼
+  derivable fact만 gate합니다.
+- Repository knowledge map/check: required docs, index link, English/Korean
+  counterpart를 기계적으로 검증합니다. Semantic staleness는 advisory로 둡니다.
+- Behavior evidence: `cx slop check`와 subagent claim artifact에 Karpathy-style
+  surgicality, simplicity, assumption, verification checklist field를 추가하되
+  fact-vs-heuristic 경계는 유지합니다.
+- Observability adapter: architecture와 repo-knowledge gate가 안정된 뒤
+  dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
+  workflow kernel 밖에 둡니다.
 
 1. Desktop app-server attachment: 지원되는 실제 Desktop daemon 관측 경로를 증명한 뒤
    session-event mapping을 설계합니다. 아직 live app-server product behavior는 켜지지

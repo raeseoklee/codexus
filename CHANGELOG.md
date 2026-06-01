@@ -9,6 +9,12 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added the harness-engineering alignment design note, synthesizing OpenAI's
+  harness-engineering guidance with Karpathy-style behavior contracts for future
+  architecture, repository-knowledge, slop, subagent, and observability gates.
+
 ### Fixed
 
 - `install.sh` now reports the actual `CODEXUS_BIN_DIR` when users install into
@@ -41,12 +47,10 @@ occur before 1.0, but they should be called out clearly.
 
 ### Removed
 
-- Removed the OMX (oh-my-codex) adapter and every `cx adapt omx ...` command, the
-  `omx` config block (`omx.enabled`, `omx.preferSparkshellForVerification`), the
-  `plan --omx` flag, and the `skill export --target omx` option. Codexus has no
-  OMX dependency or adapter; sibling harnesses stay references only. Stale `omx`
-  config keys are treated as removed/deprecated (ignored with a notice), never as
-  unknown-key errors.
+- Removed the legacy external-harness adapter surface, its config block, the
+  related planning flag, and the non-Codex skill export target. Codexus has no
+  dependency on another harness runtime. Stale legacy config keys are treated as
+  removed/deprecated (ignored with a notice), never as unknown-key errors.
 
 ### Added
 
@@ -117,8 +121,8 @@ occur before 1.0, but they should be called out clearly.
   store unverified claims without launching workers or changing evidence
   freshness.
 - Additional honest-gated surfaces report current limits for schema-engine
-  status, replay parity, worker launch, cron/gateway live dispatch, and OMX
-  injection approval.
+  status, replay parity, worker launch, cron/gateway live dispatch, and external
+  context injection approval.
 
 ### Known Gaps
 

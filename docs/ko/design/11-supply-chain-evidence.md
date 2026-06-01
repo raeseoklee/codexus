@@ -67,8 +67,8 @@ forbidden/required 파일 리스트는 `scripts/package-smoke.mjs`가 이미 강
       "allowedDevDependencyInstallScripts": ["esbuild"],
       "allowRuntimeNetworkImports": ["node:net"],
       "forbiddenPackageFiles": [
-        ".env", ".env.*", ".codexus/**", ".codex-harness/**", ".omx/**",
-        ".omc/**", "node_modules/**", "src/**", "tests/**", "docs/**",
+        ".env", ".env.*", ".codexus/**", ".codex-harness/**",
+        "node_modules/**", "src/**", "tests/**", "docs/**",
         "fixtures/replay/**", "fixtures/migrations/**"
       ],
       "requiredPackageFiles": [

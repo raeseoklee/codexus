@@ -2,11 +2,13 @@
 
 [English](../../README.md)
 
-**Codexus는 OpenAI Codex CLI 작업을 테스트로 확인하고 기록으로 남깁니다.**
+**Codexus는 OpenAI Codex CLI를 위한 harness engineering layer입니다.**
 
-무엇을 고칠지와 통과해야 할 확인 명령을 알려주면, Codexus는 로컬에 로그인된 Codex
-CLI를 실행하고 그 명령을 돌립니다. 확인이 실패하면 실제 실패 출력을 Codex에 다시
-전달해 제한된 repair loop를 수행하고, 확인 명령이 통과했을 때만 `complete`라고
+같은 로컬 Codex engine과 auth를 유지하면서, 그 주변에 durable run ledger,
+verification gate, bounded repair loop, session evidence, memory, 정직한 상태 보고를
+더합니다. 무엇을 고칠지와 통과해야 할 확인 명령을 알려주면, Codexus는 로컬에 로그인된
+Codex CLI를 실행하고 그 명령을 돌립니다. 확인이 실패하면 실제 실패 출력을 Codex에
+다시 전달해 제한된 repair loop를 수행하고, 확인 명령이 통과했을 때만 `complete`라고
 보고합니다.
 
 모든 실행은 `.codexus/runs/<id>` 아래에 저장됩니다. 터미널이 닫히거나 프로세스가
@@ -224,6 +226,7 @@ Public bin은 `cx`와 `codexus`입니다.
 - [품질 증거 가드 (slop guard)](design/10-quality-evidence-guard.md)
 - [공급망 증거](design/11-supply-chain-evidence.md)
 - [Autopilot 계약](design/12-autopilot-contract.md): 장시간 supervised run을 위한 0.2/0.3 제안 설계. 사람이 승인한 scope, worktree 격리, detect-then-stop, evidence-gated acceptance를 다룹니다.
+- [하네스 엔지니어링 정렬](design/13-harness-engineering-alignment.md): OpenAI harness engineering 글과 Karpathy-style behavior contract를 종합한 정렬 문서. repository map, architecture gate, behavior evidence, non-goal을 정의합니다.
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)

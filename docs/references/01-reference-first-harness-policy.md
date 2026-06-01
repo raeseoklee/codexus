@@ -4,11 +4,22 @@
 
 Status: active
 
-Codexus is a Codex execution harness. Harness-related decisions must not rely
-primarily on local intuition when a relevant upstream harness already exists.
-Before changing architecture, runtime behavior, orchestration policy, memory,
-skills, provider/auth handling, or Codex-native adapter behavior, consult the
-mandatory reference set below and record the mapping.
+Codexus is a harness engineering layer for OpenAI Codex CLI. Harness-related
+decisions must not rely primarily on local intuition when a relevant upstream
+harness already exists. Before changing architecture, runtime behavior,
+orchestration policy, memory, skills, provider/auth handling, or Codex-native
+adapter behavior, consult the mandatory reference set below and record the
+mapping.
+
+## Reference Types
+
+The three sources below are **implementation references**: concrete harnesses to
+compare behavior against, governed by the audit/mapping process in this document.
+Separately, **philosophy/behavior references** — OpenAI's harness-engineering
+article and the Karpathy-style behavior rubric (see
+[doc 13](../design/13-harness-engineering-alignment.md)) — inform positioning and
+behavior contracts, but they are not mandatory implementation references and do
+not require the audit process below.
 
 ## Mandatory References
 

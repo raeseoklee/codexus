@@ -80,8 +80,8 @@ implementation checking Codexus itself:
       "allowedDevDependencyInstallScripts": ["esbuild"],
       "allowRuntimeNetworkImports": ["node:net"],
       "forbiddenPackageFiles": [
-        ".env", ".env.*", ".codexus/**", ".codex-harness/**", ".omx/**",
-        ".omc/**", "node_modules/**", "src/**", "tests/**", "docs/**",
+        ".env", ".env.*", ".codexus/**", ".codex-harness/**",
+        "node_modules/**", "src/**", "tests/**", "docs/**",
         "fixtures/replay/**", "fixtures/migrations/**"
       ],
       "requiredPackageFiles": [

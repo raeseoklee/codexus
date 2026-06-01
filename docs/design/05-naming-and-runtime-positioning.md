@@ -13,13 +13,13 @@ Codexus
 Positioning line:
 
 ```text
-Codexus is a local runtime harness for Codex orchestration.
+Codexus is a harness engineering layer for OpenAI Codex CLI.
 ```
 
 Long description:
 
 ```text
-Codexus wraps Codex with durable supervision, verification, recovery, memory, and replay-gated skills.
+Codexus keeps Codex as the local execution engine, then wraps it with durable supervision, verification, recovery, session evidence, memory, and replay-gated skills.
 ```
 
 The name combines the Codex execution engine with a nexus layer: the place where run state, verification evidence, memory, skills, and optional advanced interop connect.
@@ -29,13 +29,13 @@ The name combines the Codex execution engine with a nexus layer: the place where
 Codexus is not a replacement model, IDE, or hosted agent product. Its category is:
 
 ```text
-Codex execution harness
+Codex harness engineering layer
 ```
 
 More explicitly:
 
 ```text
-An execution/runtime harness that wraps Codex, records state, verifies outcomes, supervises and recovers runs, and turns reusable experience into auditable memory and skills. Tool/MCP expansion remains gated until its policy and approval contracts are enabled.
+A local execution/runtime harness that keeps Codex as the engine, records state, verifies outcomes, supervises and recovers runs, and turns reusable experience into auditable memory and skills. Tool/MCP expansion remains gated until its policy and approval contracts are enabled.
 ```
 
 ## CLI Naming
@@ -65,7 +65,10 @@ Current MVP storage root:
 .codexus/
 ```
 
-This path is already implemented and should remain supported for compatibility. A future migration may introduce `.codexus/`, but that should be a deliberate storage migration with backward-compatible reads, not a silent rename.
+This path is the canonical storage namespace. Historical `.codex-harness/`
+state is a legacy compatibility surface and should be migrated forward to
+`.codexus/` with backward-compatible reads, not silently ignored or rewritten
+without evidence.
 
 Examples:
 

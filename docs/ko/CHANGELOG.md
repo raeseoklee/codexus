@@ -9,6 +9,12 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- OpenAI harness-engineering guidance와 Karpathy-style behavior contract를 종합한
+  harness-engineering alignment 설계 문서를 추가했습니다. 향후 architecture,
+  repository-knowledge, slop, subagent, observability gate 방향을 정리합니다.
+
 ### Fixed
 
 - `install.sh`가 custom bin directory로 설치할 때 실제 `CODEXUS_BIN_DIR` 경로를
@@ -39,11 +45,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ### Removed
 
-- OMX(oh-my-codex) adapter와 모든 `cx adapt omx ...` 명령, `omx` config 블록
-  (`omx.enabled`, `omx.preferSparkshellForVerification`), `plan --omx` 플래그,
-  `skill export --target omx` 옵션을 제거했습니다. Codexus는 OMX 의존이나 adapter가
-  없으며 sibling harness는 참고로만 남습니다. 남아있는 `omx` config 키는 unknown-key
-  에러가 아니라 removed/deprecated(notice와 함께 무시)로 처리됩니다.
+- 기존 external-harness adapter surface, 관련 config block, planning flag, non-Codex
+  skill export target을 제거했습니다. Codexus는 다른 harness runtime에 의존하지
+  않습니다. 남아있는 legacy config key는 unknown-key 에러가 아니라
+  removed/deprecated(notice와 함께 무시)로 처리됩니다.
 
 ### Added
 
@@ -113,7 +118,7 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   worker를 실행하거나 evidence freshness를 바꾸지 않고 unverified claim을
   저장합니다.
 - Schema-engine status, replay parity, worker launch, cron/gateway live dispatch,
-  OMX injection approval의 현재 한계를 honest-gated surface로 보고합니다.
+  external context injection approval의 현재 한계를 honest-gated surface로 보고합니다.
 
 ### Known Gaps
 

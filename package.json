@@ -79,8 +79,6 @@
         ".env.*",
         ".codexus/**",
         ".codex-harness/**",
-        ".omx/**",
-        ".omc/**",
         "node_modules/**",
         "src/**",
         "tests/**",

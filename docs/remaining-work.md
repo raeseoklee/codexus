@@ -245,10 +245,30 @@ evidence only when the supporting runtime exists:
 11. Autopilot remains a 0.2/0.3 design track. Start with schema artifacts and a
     report-only scope gate before exposing `cx autopilot run`; it must remain
     human-approved, worktree-isolated, and `stability: experimental`.
+12. Harness-engineering alignment adds three small 0.2 tracks before broader
+    autonomy: `cx architecture check` for derivable architecture invariants,
+    `cx repo map/check` for mechanical repository-knowledge validation, and
+    behavior evidence expansion in `cx slop check`. See
+    [doc 13](design/13-harness-engineering-alignment.md).
 
 ## Implementation Residue
 
 These are the remaining implementation tracks after the 0.1.0 readiness cleanup:
+
+Harness-engineering alignment adds these evidence-first tracks:
+
+- Architecture check: add a schema-validated `codexus.architecture.policy` and
+  `cx architecture check --json`; dogfood first with the no sibling-harness
+  import invariant. Gate only derivable facts such as forbidden imports,
+  required files, and simple layer edges.
+- Repository knowledge map/check: validate required docs, index links, and
+  English/Korean counterparts mechanically. Keep semantic staleness advisory.
+- Behavior evidence: extend `cx slop check` and subagent claim artifacts with
+  Karpathy-style surgicality, simplicity, assumption, and verification checklist
+  fields while preserving the facts-vs-heuristics boundary.
+- Observability adapters: add dev-server/browser/log evidence descriptors only
+  after the architecture and repo-knowledge gates are stable; keep stack-specific
+  behavior outside the workflow kernel.
 
 1. Desktop app-server attachment: prove a supported real Desktop daemon
    observation path, then design the session-event mapping. Do not enable live

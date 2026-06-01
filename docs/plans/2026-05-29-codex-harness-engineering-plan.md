@@ -8,11 +8,11 @@ Status: migrated from an earlier external harness planning artifact into project
 
 ## Goal
 
-Build Codexus, an evolutionary execution harness that keeps OpenAI Codex as the model/runtime engine and is used alongside Codex the way OMC/OMX-style tooling is used alongside its base agent. OMC and OMX are the same family of harness idea: OMC targets Claude Code, while OMX targets Codex. Codexus should learn from that pattern while remaining its own Codex-side runtime layer. It should close the practical gaps users feel versus Claude Code-style harnesses: durable orchestration, workflow state, explicit verification gates, multi-agent supervision, recoverability, skill/memory loops, and operator-visible runtime diagnostics.
+Build Codexus, an evolutionary execution harness that keeps OpenAI Codex as the model/runtime engine. Codexus should remain its own Codex-side runtime layer and close practical harness gaps: durable orchestration, workflow state, explicit verification gates, multi-agent supervision, recoverability, skill/memory loops, and operator-visible runtime diagnostics.
 
 The target is closer to Hermes Agent's "agent that grows with you" than a static command wrapper: each completed run should leave behind structured experience, searchable memory, reusable procedures, and evidence that can improve future runs without silently mutating behavior.
 
-The first implementation should be a separate CLI, not a Codex App-only feature. It should use the authenticated local `codex` command so it can benefit from the user's ChatGPT-backed Codex access without depending on private ChatGPT backend APIs. A later Codex-native adapter should let users invoke Codexus from inside a Codex session, closer to the OMX feel, while reusing the same core runtime.
+The first implementation should be a separate CLI, not a Codex App-only feature. It should use the authenticated local `codex` command so it can benefit from the user's ChatGPT-backed Codex access without depending on private ChatGPT backend APIs. A later Codex-native adapter should let users invoke Codexus from inside a Codex session while reusing the same core runtime.
 
 ## Research Baseline
 
@@ -20,7 +20,6 @@ Local environment:
 
 - `codex-cli 0.135.0`
 - `codex login status`: logged in using ChatGPT
-- `oh-my-codex v0.11.9`
 - Current workspace contains only external harness runtime files; no git repo or app scaffold exists yet.
 
 Reference findings:
@@ -31,11 +30,6 @@ Reference findings:
   `NousResearch/hermes-agent`, and `Gitlawb/openclaude`.
 - OpenAI Codex supports local CLI use, `codex exec --json`, plugins, hooks, app server tooling, MCP server mode, and ChatGPT sign-in. Official docs say Codex is included in eligible ChatGPT plans and can be used from Codex CLI/App/IDE/Web.
 - The generated Codex app-server protocol exposes useful JSON-RPC surfaces such as `thread/start`, `turn/start`, `turn/steer`, thread turns/items reads, skills/plugins lists, command execution, filesystem tools, MCP server calls, account/rate-limit reads, and model listing. This is useful but should be treated as optional/experimental until proven stable.
-- The Codex-side sibling harness reference has moved to a CLI/JSON-first
-  contract, external state/artifacts, skills, prompts, team runtime, durable
-  goals, sparkshell/explore, Hermes/OpenClaw adapters, and an optional Hermes
-  MCP bridge. Local installed tooling is behind the researched upstream
-  baseline, so compatibility detection matters.
 - `ultraworkers/claw-code` is the mandatory parity-first CLI/harness reference. The corrected 2026-05-29 audit cloned and inspected the source at HEAD `4d3dc5b`. Key patterns: canonical Rust CLI under `rust/`, `doctor/status/sandbox/version --output-format json`, structured `init` and `state` output, permission modes and `--allowedTools`, broad slash/direct command surfaces, a deterministic mock parity harness, explicit event/report contracts, and truthful unsupported status for ACP/Zed/JSON-RPC surfaces.
 - Hermes Agent contributes the strongest ideas for self-improvement: skill creation, skill improvement, persistent memory, session search, cron, gateways, toolsets, terminal backends, and isolated subagents. For this project, the evolutionary loop should be adapted as local artifacts and workflows around Codex, not copied as a model provider layer.
 - OpenClaude contributes the strongest ideas for provider/session runtime: provider profiles, Codex OAuth, existing Codex CLI auth reuse through `~/.codex/auth.json`, terminal-first tool loops, MCP/slash-command workflows, permission requests, headless gRPC streaming, and descriptor-first provider metadata. For Codexus, this reinforces local Codex auth reuse and capability-driven driver metadata instead of private backend calls or broad hardcoded provider branches.
@@ -45,10 +39,9 @@ Reference findings:
 - Do not call undocumented/private ChatGPT or Codex backend endpoints directly.
 - Use `codex` CLI as the stable model access boundary for MVP.
 - Treat `codex app-server` as an optional advanced driver behind capability detection.
-- Treat OMC/OMX as sibling/reference orchestration layers in the same family; OMX is the Codex-side reference, but this harness should not require, fork, or replace it.
 - Make self-improvement explicit, inspectable, and reversible. The harness may propose memories, skills, routing rules, and workflow changes, but promotion must be gated by evidence and policy.
 - Keep state auditable and portable under repo-local directories.
-- No new dependencies until implementation explicitly needs them; start with Node/TypeScript because it aligns with OMX and local Node is available.
+- No new dependencies until implementation explicitly needs them; start with Node/TypeScript because local Node is available.
 - Every mutating workflow needs a resumable state record, explicit terminal outcome, and verification evidence.
 
 ## Proposed System
@@ -65,7 +58,7 @@ The implementation package/bin rename is complete for the public npm surface:
 Layered architecture:
 
 1. CLI and configuration
-- Commands: `cx doctor`, `cx run`, `cx cancel`, `cx plan`, `cx verify`, `cx resume`, `cx status`, `cx adapt omx`, `cx replay`.
+- Commands: `cx doctor`, `cx run`, `cx cancel`, `cx plan`, `cx verify`, `cx resume`, `cx status`, `cx replay`.
    - Config precedence: project `.codexus/config.json`, user `~/.codexus/config.json`, CLI flags.
    - Machine-readable output with `--json` on every command.
 
@@ -88,26 +81,18 @@ Layered architecture:
    - Repair loop when verification fails.
    - Explicit stop conditions to prevent false completion.
 
-5. OMX adapter
-   - Detect optional external harness version, doctor support, local state,
-     tmux availability, and upstream-compatible features.
-   - Prefer `omx explore` and `omx sparkshell` for bounded read-only repo exploration and noisy verification output.
-   - Optionally launch `omx team` only for work that benefits from coordinated parallel execution.
-   - Keep interop metadata under Codexus-owned state and avoid direct mutation
-     of external harness state.
-
-6. Codex-native adapter
+5. Codex-native adapter
    - Provide a future Codex skill/plugin/command surface so Codexus can be invoked from inside an interactive Codex session.
    - Reuse the same Codexus core, ledger, verification, memory, and skill stores.
    - Do not duplicate orchestration logic inside the adapter.
 
-7. Skill and memory loop
+6. Skill and memory loop
    - Summarize successful runs into reusable lessons.
    - Propose skill candidates under `.codexus/skills/proposed/`.
-   - Promote approved skills into Codex/OMX skill locations through explicit commands.
+   - Promote approved skills into Codex skill locations through explicit commands.
    - Maintain local memory as append-only JSONL plus summarized markdown, with redaction hooks before persistence.
 
-8. Evolution engine
+7. Evolution engine
    - Convert run ledgers into structured experience records: task shape, repo context, decisions, failed attempts, final fix, verification evidence, and reusable heuristics.
    - Maintain searchable memory over prior runs, plans, failures, and accepted skills.
    - Generate skill proposals with a trigger, scope, procedure, required tools, safety constraints, and regression examples.
@@ -115,12 +100,12 @@ Layered architecture:
    - Track skill versions and deprecations so bad procedures can be rolled back.
    - Add periodic review jobs that find repeated failures, stale memories, over-broad skills, and missing verification patterns.
 
-9. Policy and safety
+8. Policy and safety
    - Reuse Codex sandbox/approval settings.
    - Add a harness-side policy preflight for destructive shell patterns, broad filesystem targets, secret-looking content, and non-git workspaces.
    - Never auto-approve irreversible actions outside configured safe roots.
 
-10. Verification and parity harness
+9. Verification and parity harness
    - Contract tests for each driver using recorded JSONL fixtures.
    - Scenario tests modeled after Claw's parity harness: success, tool failure, permission block, verification fail-then-repair, resume, cancelled run, large output truncation.
    - Golden reports for `doctor`, `run --json`, `status --json`, and `verify --json`.
@@ -135,8 +120,6 @@ Phase 0: repository bootstrap
   - `codex --version`
   - `codex login status`
   - `codex exec --help`
-  - `omx --version`
-  - `omx doctor` availability
   - git/workspace detection
   - tmux detection
 
@@ -156,14 +139,7 @@ Phase 2: workflow state machine
 - Add configurable verification commands.
 - Add repair loop with bounded iterations.
 
-Phase 3: OMX interop
-
-- Implement `cx adapt omx doctor/status`.
-- Prefer `omx sparkshell` for noisy verification commands when available.
-- Support explicit compatibility export for plan artifacts.
-- Add version-gated warnings because local OMX is currently `0.11.9` while upstream research baseline is `0.18.6`.
-
-Phase 4: evolutionary learning loop
+Phase 3: evolutionary learning loop
 
 - Add run summarization artifacts.
 - Add `cx skill propose <run-id>`.
@@ -172,7 +148,7 @@ Phase 4: evolutionary learning loop
 - Add `cx skill review/promote/deprecate`.
 - Add replay tests for proposed skills before promotion.
 
-Phase 5: app-server driver experiment
+Phase 4: app-server driver experiment
 
 - Generate schema in CI from installed `codex app-server generate-json-schema`.
 - Implement a gated prototype that can start a thread and turn via JSON-RPC.
@@ -180,7 +156,7 @@ Phase 5: app-server driver experiment
 
 ## Acceptance Criteria
 
-- `cx doctor --json` reports Codex auth, Codex version, OMX version, git status, tmux, and feature availability.
+- `cx doctor --json` reports Codex auth, Codex version, git status, tmux, and feature availability.
 - `cx run "Reply exactly OK"` completes through ChatGPT-authenticated local Codex and writes a run ledger.
 - `cx run --verify "npm test" ...` cannot report `complete` when verification fails.
 - A failed verification run can enter a repair iteration and preserve both failure and fix evidence.
@@ -197,7 +173,6 @@ Phase 5: app-server driver experiment
 - Codex JSONL event schema may drift; mitigate with tolerant parsing, fixture tests, and raw event preservation.
 - App-server JSON-RPC is useful but experimental; keep it optional.
 - ChatGPT plan usage limits can throttle long multi-agent runs; add concurrency and iteration budgets.
-- Local OMX is older than upstream; design adapters with capability probes, not hardcoded assumptions.
 - Skill/memory loops can persist sensitive data; add redaction and explicit promotion.
 - Self-improvement can amplify bad habits; mitigate with replay tests, versioned skill promotion, deprecation, and human-readable diffs.
 - Memory can poison prompts or create bloat; mitigate with scoped retrieval, summaries, TTL/deprecation, and source citations back to run artifacts.
@@ -214,7 +189,7 @@ Build only:
 5. mock-driver tests
 6. one real smoke test using `codex exec --json --skip-git-repo-check`
 
-This gives a stable spine before adding planning, OMX team integration, app-server control, or the full evolutionary learning loop.
+This gives a stable spine before adding planning, app-server control, or the full evolutionary learning loop.
 
 ## Sources Consulted
 
@@ -223,5 +198,4 @@ This gives a stable spine before adding planning, OMX team integration, app-serv
 - `ultraworkers/claw-code` README, USAGE, PARITY, Rust README, mock parity harness, local provider docs, event/report contract, and ACP status contract
 - `NousResearch/hermes-agent` README and source tree
 - `Gitlawb/openclaude` README, advanced setup, integrations architecture, and source tree
-- `Yeachan-Heo/oh-my-codex` README, adapt docs, Hermes MCP bridge docs, CLI-first MCP taxonomy, plugin bundle contract
-- Local CLI help for `codex`, `codex exec`, `codex login`, `codex app-server`, `codex mcp-server`, `codex features`, `omx`, and `omx agents`
+- Local CLI help for `codex`, `codex exec`, `codex login`, `codex app-server`, `codex mcp-server`, and `codex features`

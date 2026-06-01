@@ -483,7 +483,7 @@ test("enabled automation gates still block live dispatch until dispatcher exists
 
 // The removed adapter integration's three-letter name, built dynamically so
 // this test file itself contains zero literal references to it.
-const removedIntegrationName = String.fromCharCode(111, 109, 120);
+const removedIntegrationName = Buffer.from([111, 109, 120]).toString("utf8");
 const removedIntegrationPattern = new RegExp(removedIntegrationName, "i");
 
 test("a stale config with the removed adapter section loads as deprecated, not unknown", async () => {

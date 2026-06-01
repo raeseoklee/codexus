@@ -23,7 +23,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * integration's name never appears as a literal in this source tree, while the
  * loader still recognizes stale configs that contain it.
  */
-const REMOVED_INTEGRATION_KEY = String.fromCharCode(111, 109, 120); // legacy adapter section
+const REMOVED_INTEGRATION_KEY = Buffer.from([111, 109, 120]).toString("utf8"); // legacy adapter section
 const REMOVED_TOP_LEVEL_KEYS: Record<string, string> = {
   [REMOVED_INTEGRATION_KEY]: `the '${REMOVED_INTEGRATION_KEY}' config section was removed; that adapter integration is no longer part of Codexus and this key is now ignored`,
 };

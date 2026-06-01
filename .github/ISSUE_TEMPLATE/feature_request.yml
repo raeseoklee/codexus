@@ -40,7 +40,6 @@ body:
         - memory
         - skills/replay
         - Codex-native adapter
-        - OMX integration
         - app-server
         - cron/gateway
         - docs
