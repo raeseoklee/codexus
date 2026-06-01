@@ -78,8 +78,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, real cron/gateway automation dispatch,
   statusline/HUD integration, tmux-backed worker, cancellation wait/remote-host UX 보강.
-  Autopilot contract layer도 0.2/0.3 트랙으로 deferred이며 0.1.0에서는 설계 문서만
-  있습니다.
+  Autopilot contract layer, repository knowledge graph, multi-engine relay
+  autopilot은 0.2/0.3 트랙으로 deferred이며 0.1.x에서는 설계 문서만 있습니다.
 
 ### P0: Contract and Safety Hardening
 
@@ -235,7 +235,13 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 11. Autopilot은 0.2/0.3 design track으로 유지합니다. `cx autopilot run`을 노출하기 전
    schema artifact와 report-only scope gate부터 시작해야 하며, human-approved,
    worktree-isolated, `stability: experimental`이어야 합니다.
-12. Harness-engineering alignment는 더 넓은 autonomy 전에 작은 0.2 track을 추가합니다:
+12. Repository knowledge graph는 0.2/0.3 design track으로 유지합니다. Search/explain 또는
+   context injection을 노출하기 전에 canonical graph identity hashing, graph schema
+   validation, scoped freshness부터 시작합니다.
+13. Multi-engine relay autopilot은 0.2/0.3 design track으로 유지합니다. 첫 slice는 external
+   review artifact import, 같은 artifact hash에 대한 convergence agreement validation,
+   verification 실패 시 convergence가 run을 complete하지 못함을 증명하는 데서 시작합니다.
+14. Harness-engineering alignment는 더 넓은 autonomy 전에 작은 0.2 track을 추가합니다:
     첫 derivable import invariant는 이제 `cx architecture check`가 다루고, 기계적인
     repository-knowledge validation은 `cx repo map/check`가 다룹니다. `cx slop check`는
     첫 behavior evidence 확장을 포함하며 heuristic lane은 계속 advisory로 유지합니다.
@@ -255,6 +261,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   index link, English/Korean counterpart를 기계적으로 검증합니다. 향후 referenced
   schema/artifact link check를 추가할 수 있습니다. Semantic staleness는 advisory로
   유지합니다.
+- Repository knowledge graph follow-up: [14번 문서](design/14-repository-knowledge-graph.md)는
+  향후 graph-provider boundary를 정의합니다. 첫 구현은 experimental로 유지하고 canonical
+  graph identity hashing, graph schema validation, scoped freshness, structural graph gate부터
+  시작해야 합니다. Freshness, sanitization, gate behavior가 안정되기 전에는 graph context
+  injection을 노출하지 않습니다.
 - Behavior evidence follow-up: `cx slop check`는 첫 surgicality, simplicity,
   assumption, verification-artifact, diff-surface evidence를 기록합니다. Fact-vs-heuristic
   경계는 유지했고, subagent behavior checklist counterpart는 구현됐습니다. 남은 작업은
@@ -282,3 +293,7 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 8. Routine live model replay: opt-in, budget-gated로 유지하고 기본 stable path 밖에 둡니다.
 9. Autopilot contract layer: `cx autopilot run` 전에 schema artifact와 report-only scope
    gate부터 시작하는 0.2/0.3 experimental track으로 진행합니다.
+10. Multi-engine relay autopilot: report-only author/reviewer artifact recording,
+    stage-gate evidence, convergence validation부터 시작합니다. 지원되는 adapter가 생기기 전
+    review engine은 artifact import-only로 두고, convergence가 verification을 대체하지 않게
+    합니다.

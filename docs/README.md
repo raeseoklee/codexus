@@ -45,6 +45,8 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Supply-chain evidence](design/11-supply-chain-evidence.md): local, derivable supply-chain facts and an optional pre-publish gate, reusing the change-evidence model — not a CVE/network scanner.
 - [Autopilot contract](design/12-autopilot-contract.md): proposed 0.2/0.3 contract layer for long supervised runs — human-approved scope, worktree isolation, detect-then-stop enforcement, and evidence-gated acceptance.
 - [Harness engineering alignment](design/13-harness-engineering-alignment.md): synthesis of OpenAI harness engineering and Karpathy-style behavior contracts for repository maps, architecture gates, behavior evidence, and non-goals.
+- [Repository knowledge graph](design/14-repository-knowledge-graph.md): proposed graph-provider boundary for codexus-lite and Understand-Anything JSON import, scoped freshness, and structural graph gates.
+- [Multi-engine relay autopilot](design/15-multi-engine-relay-autopilot.md): proposed author/reviewer-engine relay for autopilot, with convergence recorded as advisory and completion kept evidence-gated.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Roadmap Kanban](roadmap-kanban.html): four-column HTML board of the remaining ready, evidence, gated, and later work.

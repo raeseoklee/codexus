@@ -229,6 +229,11 @@ from those indexes, checks English/Korean counterparts for the project docs
 policy, and records semantic freshness as advisory-only. This is the repository
 equivalent of the OpenAI article's "map, not a giant manual" lesson.
 
+The repository knowledge graph extension is intentionally split into
+[doc 14](14-repository-knowledge-graph.md). It defines the graph-provider
+boundary, codexus-lite projection, Understand-Anything JSON import, scoped graph
+freshness, and structural graph gates.
+
 ## Observability Track
 
 OpenAI's article describes making UI, logs, metrics, and traces readable to

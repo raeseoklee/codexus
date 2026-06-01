@@ -215,6 +215,14 @@ The final artifact is a **PR-ready evidence bundle**: the approved contract, the
 run ledger, the four gate results, the diff, and the criteria-satisfaction
 evidence — enough to review and open a PR without trusting the agent's prose.
 
+## Multi-engine relay extension
+
+The future Codex-author / reviewer-engine workflow is split into
+[doc 15](15-multi-engine-relay-autopilot.md). That extension records
+author/reviewer rounds, stage full-gate evidence, and convergence agreements, but
+keeps convergence advisory: final completion still requires the verification and
+evidence gates in this contract.
+
 ## Surface
 
 ```bash

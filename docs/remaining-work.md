@@ -81,8 +81,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, real cron/gateway
   automation dispatch, statusline/HUD integration, tmux-backed workers, and
-  richer wait/remote-host UX around cancellation. The autopilot contract layer
-  is also deferred to the 0.2/0.3 track and is design-only in 0.1.0.
+  richer wait/remote-host UX around cancellation. The autopilot contract layer,
+  repository knowledge graph, and multi-engine relay autopilot are deferred to
+  the 0.2/0.3 track and design-only in 0.1.x.
 
 ### P0: Contract and Safety Hardening
 
@@ -245,7 +246,14 @@ evidence only when the supporting runtime exists:
 11. Autopilot remains a 0.2/0.3 design track. Start with schema artifacts and a
     report-only scope gate before exposing `cx autopilot run`; it must remain
     human-approved, worktree-isolated, and `stability: experimental`.
-12. Harness-engineering alignment adds small 0.2 tracks before broader
+12. Repository knowledge graph remains a 0.2/0.3 design track. Start with
+    canonical graph identity hashing, graph schema validation, and scoped
+    freshness before exposing search/explain or context injection.
+13. Multi-engine relay autopilot remains a 0.2/0.3 design track. First slices
+    should import external review artifacts, validate convergence agreements over
+    the same artifact hash, and prove convergence cannot complete a run when
+    verification fails.
+14. Harness-engineering alignment adds small 0.2 tracks before broader
     autonomy: `cx architecture check` now covers the first derivable import
     invariant, `cx repo map/check` now covers mechanical repository-knowledge
     validation, and `cx slop check` now includes the first behavior evidence
@@ -268,6 +276,11 @@ Harness-engineering alignment adds these evidence-first tracks:
   required indexes, index links, and English/Korean counterparts mechanically.
   Future expansion can add referenced schema/artifact link checks. Keep semantic
   staleness advisory.
+- Repository knowledge graph follow-up: [doc 14](design/14-repository-knowledge-graph.md)
+  defines a future graph-provider boundary. First implementation work should
+  stay experimental and start with canonical graph identity hashing, graph schema
+  validation, scoped freshness, and structural graph gates. Do not expose graph
+  context injection before freshness, sanitization, and gate behavior are stable.
 - Behavior evidence follow-up: `cx slop check` now records first-slice
   surgicality, simplicity, assumption, verification-artifact, and diff-surface
   evidence while preserving the facts-vs-heuristics boundary. The subagent
@@ -297,3 +310,7 @@ Harness-engineering alignment adds these evidence-first tracks:
    default stable path.
 9. Autopilot contract layer: start as a 0.2/0.3 experimental track with schema
    artifacts and report-only scope gates before any `cx autopilot run`.
+10. Multi-engine relay autopilot: start with report-only author/reviewer
+    artifact recording, stage-gate evidence, and convergence validation. Keep
+    review engines artifact-import-only until a supported adapter exists, and do
+    not let convergence replace verification.

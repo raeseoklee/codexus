@@ -238,6 +238,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - The autopilot contract is documented as a proposed 0.2/0.3 experimental
   surface. It is not implemented and is excluded from the 0.1.x stable
   contract.
+- The repository knowledge graph and multi-engine relay autopilot are documented
+  as proposed 0.2/0.3 experimental tracks. There is no `cx repo graph` or
+  `cx autopilot relay` implementation in the 0.1.x stable contract.
 
 ## Verified
 
@@ -355,6 +358,8 @@ review. Current high-level gaps:
   implemented.
 - Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
-- Autopilot is design-only for the 0.2/0.3 track. There is no `cx autopilot`
-  implementation in the 0.1.x stable surface.
+- Autopilot, repository knowledge graph, and multi-engine relay autopilot are
+  design-only for the 0.2/0.3 track. There is no `cx autopilot`,
+  `cx autopilot relay`, or `cx repo graph` implementation in the 0.1.x stable
+  surface.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

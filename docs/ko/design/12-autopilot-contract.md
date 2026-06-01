@@ -191,6 +191,13 @@ reason, 올린 한도, 새 approval record를 이어받아야 합니다. 기존 
 최종 산출물은 **PR-ready evidence bundle**: 승인된 계약, run ledger, 네 gate 결과, diff,
 criteria 충족 증거 — 에이전트의 산문을 믿지 않고도 검토하고 PR을 열기에 충분.
 
+## Multi-engine relay extension
+
+향후 Codex-author / reviewer-engine workflow는 [15번 문서](15-multi-engine-relay-autopilot.md)로
+분리합니다. 해당 확장은 author/reviewer round, stage full-gate evidence, convergence
+agreement를 기록하지만, convergence는 advisory로 유지합니다. 최종 완료는 여전히 이 계약의
+verification/evidence gate가 필요합니다.
+
 ## 표면 (Surface)
 
 ```bash

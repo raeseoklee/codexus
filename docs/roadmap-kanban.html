@@ -260,6 +260,23 @@
         </article>
 
         <article class="card">
+          <h3>Repository Knowledge Graph First Slice</h3>
+          <div class="tags">
+            <span class="tag evidence">graph schema</span>
+            <span class="tag gated">experimental</span>
+          </div>
+          <p>Start the graph track with canonical graph identity hashing, schema validation, scoped freshness, and structural checks before any graph context is injected into runs.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li><code>graphId</code> excludes volatile gate/check output and uses deterministic serialization.</li>
+            <li>External graph imports record sanitized source provenance and bounded source hashes.</li>
+            <li>Scoped freshness may false-stale, but must not false-fresh.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/14-repository-knowledge-graph.md">repository knowledge graph</a></p>
+        </article>
+
+        <article class="card">
           <h3>Subagent Bridge Evidence Investigation</h3>
           <div class="tags">
             <span class="tag evidence">bridge probe</span>
@@ -417,6 +434,23 @@
         </article>
 
         <article class="card">
+          <h3>Multi-Engine Relay Autopilot</h3>
+          <div class="tags">
+            <span class="tag later">0.2 / 0.3</span>
+            <span class="tag gated">artifact import first</span>
+          </div>
+          <p>Turn the Codex-author / external-reviewer workflow into a durable relay protocol without letting model convergence replace verification.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>First slice records external review artifacts; it does not spawn a second engine.</li>
+            <li>Convergence declarations must reference the same stage artifact hash.</li>
+            <li>Valid convergence cannot complete a run when verification or evidence gates fail.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/15-multi-engine-relay-autopilot.md">multi-engine relay autopilot</a></p>
+        </article>
+
+        <article class="card">
           <h3>Routine Live Model Replay</h3>
           <div class="tags">
             <span class="tag later">cost-sensitive</span>
@@ -502,6 +536,8 @@
   <footer>
     Source documents: <a href="remaining-work.md">remaining-work.md</a>,
     <a href="design/13-harness-engineering-alignment.md">design/13</a>,
+    <a href="design/14-repository-knowledge-graph.md">design/14</a>,
+    <a href="design/15-multi-engine-relay-autopilot.md">design/15</a>,
     <a href="plans/2026-05-31-0.1.0-stable-readiness-plan.md">0.1.0 stable readiness</a>,
     <a href="release-evidence/0.1.1.md">0.1.1 release evidence</a>.
     This board is a planning artifact; command contracts in the linked design docs remain authoritative.
