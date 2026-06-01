@@ -53,6 +53,7 @@ export interface ChangeEvidenceGate {
 
 export interface ChangeEvidenceReport {
   schemaVersion: 1;
+  stability: "stable";
   cwd: string;
   diff: {
     diffBase: string;
@@ -416,6 +417,7 @@ export function buildChangeEvidenceReport(
   const gate = gateFor(status, options.gate === true);
   return {
     schemaVersion: 1,
+    stability: "stable",
     cwd: resolvedCwd,
     diff,
     evidence,

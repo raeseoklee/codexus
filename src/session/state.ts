@@ -149,6 +149,7 @@ export interface SessionStateReadResult {
 
 export interface SessionStateMigrationFileResult {
   schemaVersion: 1;
+  stability: "stable";
   status: "not_initialized" | "current" | "migrated";
   dryRun: boolean;
   statePath: string;
@@ -715,6 +716,7 @@ export async function migrateSessionStateFile(cwd: string, options: { dryRun?: b
     if (!result.state) {
       return {
         schemaVersion: 1,
+        stability: "stable",
         status: "not_initialized",
         dryRun: options.dryRun ?? false,
         statePath: paths.state,
@@ -727,6 +729,7 @@ export async function migrateSessionStateFile(cwd: string, options: { dryRun?: b
     }
     return {
       schemaVersion: 1,
+      stability: "stable",
       status: result.migration.migrated ? "migrated" : "current",
       dryRun: options.dryRun ?? false,
       statePath: paths.state,

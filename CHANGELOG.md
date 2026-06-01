@@ -14,6 +14,8 @@ occur before 1.0, but they should be called out clearly.
 - Added the harness-engineering alignment design note, synthesizing OpenAI's
   harness-engineering guidance with Karpathy-style behavior contracts for future
   architecture, repository-knowledge, slop, subagent, and observability gates.
+- Added top-level JSON `stability` markers across the remaining supported stable
+  command outputs, with package smoke coverage for installed CLI surfaces.
 
 ### Fixed
 

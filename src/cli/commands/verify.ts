@@ -59,7 +59,7 @@ export async function verifyCommand(args: ParsedArgs): Promise<void> {
     };
     await writeState(paths.state, next);
     if (json) {
-      console.log(JSON.stringify({ runId, status: "blocked", findings: preflight.findings, statePath: paths.state }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, runId, status: "blocked", findings: preflight.findings, statePath: paths.state }, null, 2));
       return;
     }
     console.log(`${runId}: blocked`);
@@ -99,7 +99,7 @@ export async function verifyCommand(args: ParsedArgs): Promise<void> {
   });
 
   if (json) {
-    console.log(JSON.stringify({ runId, status: verification.status, verificationPath: paths.verification }, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, runId, status: verification.status, verificationPath: paths.verification }, null, 2));
   } else {
     console.log(`${runId}: verification ${verification.status}`);
     console.log(paths.verification);

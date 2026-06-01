@@ -14,6 +14,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - OpenAI harness-engineering guidance와 Karpathy-style behavior contract를 종합한
   harness-engineering alignment 설계 문서를 추가했습니다. 향후 architecture,
   repository-knowledge, slop, subagent, observability gate 방향을 정리합니다.
+- 남은 supported stable command output에 top-level JSON `stability` marker를
+  추가하고, installed CLI surface에 대한 package smoke coverage를 보강했습니다.
 
 ### Fixed
 

@@ -15,7 +15,7 @@ export async function memoryCommand(args: ParsedArgs): Promise<void> {
     const entries = await readMemoryEntries(cwd);
     const matches = searchMemoryEntries(entries, query, limit);
     if (flagBool(args.flags, "json")) {
-      console.log(JSON.stringify({ query, matches }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, query, matches }, null, 2));
       return;
     }
     for (const entry of matches) {
@@ -39,7 +39,7 @@ export async function memoryCommand(args: ParsedArgs): Promise<void> {
       confidence: (flagString(args.flags, "confidence") as MemoryEntry["confidence"] | undefined) ?? "medium",
     });
     if (flagBool(args.flags, "json")) {
-      console.log(JSON.stringify({ entry }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, entry }, null, 2));
       return;
     }
     console.log(`${entry.id} [${entry.kind}] ${entry.text}`);
@@ -49,7 +49,7 @@ export async function memoryCommand(args: ParsedArgs): Promise<void> {
   if (subcommand === "list") {
     const entries = await listMemoryEntries(cwd, limit);
     if (flagBool(args.flags, "json")) {
-      console.log(JSON.stringify({ entries }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, entries }, null, 2));
       return;
     }
     for (const entry of entries) console.log(`${entry.id} [${entry.kind}] ${entry.text}`);
@@ -59,7 +59,7 @@ export async function memoryCommand(args: ParsedArgs): Promise<void> {
   if (subcommand === "review") {
     const index = await readMemoryIndex(cwd);
     if (flagBool(args.flags, "json")) {
-      console.log(JSON.stringify({ index }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, index }, null, 2));
       return;
     }
     console.log(`memory entries: ${index.total}`);
@@ -72,7 +72,7 @@ export async function memoryCommand(args: ParsedArgs): Promise<void> {
     if (!Number.isInteger(staleDays) || staleDays <= 0) throw new Error("invalid_memory_prune_window");
     const curation = await curateMemoryEntries(cwd, { staleDays });
     if (flagBool(args.flags, "json")) {
-      console.log(JSON.stringify({ curation }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, curation }, null, 2));
       return;
     }
     console.log(`memory entries: ${curation.total}`);
@@ -95,7 +95,7 @@ export async function memoryCommand(args: ParsedArgs): Promise<void> {
     if (!before || Number.isNaN(before.getTime())) throw new Error("invalid_memory_prune_window");
     const result = await pruneMemoryEntries(cwd, before, flagBool(args.flags, "dry-run"));
     if (flagBool(args.flags, "json")) {
-      console.log(JSON.stringify({ prune: result }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, prune: result }, null, 2));
       return;
     }
     console.log(`removed ${result.removed}; remaining ${result.remaining}`);

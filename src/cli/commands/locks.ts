@@ -10,7 +10,7 @@ export async function locksCommand(args: ParsedArgs): Promise<void> {
   if (subcommand === "list") {
     const locks = await listLocks(cwd);
     if (json) {
-      console.log(JSON.stringify({ locks }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, locks }, null, 2));
       return;
     }
     for (const lock of locks) console.log(`${lock.name}: ${lock.stale ? "stale" : "active"}`);
@@ -22,7 +22,7 @@ export async function locksCommand(args: ParsedArgs): Promise<void> {
     if (!name) throw new Error("missing_lock_name");
     const lock = await inspectLock(cwd, name);
     if (json) {
-      console.log(JSON.stringify({ lock }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, lock }, null, 2));
       return;
     }
     console.log(`${lock.name}: ${lock.exists ? (lock.stale ? "stale" : "active") : "missing"}`);
@@ -34,7 +34,7 @@ export async function locksCommand(args: ParsedArgs): Promise<void> {
     if (!name) throw new Error("missing_lock_name");
     const lock = await clearLock(cwd, name, { staleOnly: flagBool(args.flags, "stale-only") });
     if (json) {
-      console.log(JSON.stringify({ lock }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, lock }, null, 2));
       return;
     }
     console.log(`${name}: cleared`);

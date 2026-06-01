@@ -21,7 +21,7 @@ export async function eventsCommand(args: ParsedArgs): Promise<void> {
     return event;
   });
   if (flagBool(args.flags, "json")) {
-    console.log(JSON.stringify({ runId, events }, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, runId, events }, null, 2));
     return;
   }
   for (const event of events as Array<{ type?: string; timestamp?: string }>) console.log(`${event.timestamp ?? ""} ${event.type ?? "event"}`.trim());

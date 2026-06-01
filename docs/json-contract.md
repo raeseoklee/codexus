@@ -27,17 +27,22 @@ Allowed values:
 
 Consumers must ignore unknown additive fields.
 
-Before `0.1.0`, the minimum self-describing set is `doctor`, `session status`,
-`app-server status`, `cron status`, `gateway status`, `schema engine`, and
-`supply-chain check`. Other stable surfaces may gain the same marker as
-additive `0.1.x` changes.
+As of the `0.1.1` stabilization slice, supported stable JSON command outputs
+include a top-level `schemaVersion: 1` and `stability: "stable"` marker.
+Experimental and deferred command outputs continue to self-report
+`"experimental"` or `"deferred"` instead of appearing stable.
+
+`schemaVersion` is scoped to each command output, not to the Codexus package as
+a whole. A breaking change to one command's JSON contract bumps that command's
+schema version; additive fields do not require a bump.
 
 ## Frozen In 0.1.x
 
 For supported commands, these top-level field names are frozen through `0.1.x`:
 
-- Common schema-bearing payloads: `schemaVersion`, `stability` when present.
-- Run outputs: `runId`, `outcome`, `statePath`, `reportPath`, `state`.
+- Common supported JSON payloads: `schemaVersion`, `stability`.
+- Run outputs: `schemaVersion`, `stability`, `runId`, `outcome`,
+  `statePath`, `reportPath`, `state`.
 - Run status/report outputs: `state`, `paths`, `verification`, `experience`,
   `eventTail`.
 - Doctor output: `stability`, `ok`, `strict`, `checks`, `warnings`,
@@ -54,7 +59,7 @@ For supported commands, these top-level field names are frozen through `0.1.x`:
   `paths`, `evidence`, `changeEvidence`, `subagents`, `verifyDetection`,
   `overlays`, `notifyHook`, `notifyDispatch`, `migration`, `state`.
 - Quality evidence output (`slop check`, `session slop`): `schemaVersion`,
-  `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
+  `stability`, `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
   `derivableFacts`, `heuristicClaims`, `gate`.
 
 Removing or redefining these fields requires `0.2.0`. Adding fields is allowed

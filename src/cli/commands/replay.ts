@@ -29,7 +29,7 @@ export async function replayCommand(args: ParsedArgs): Promise<void> {
   if (modeOrTarget === "parity") {
     const parity = await buildReplayParityContract();
     if (json) {
-      console.log(JSON.stringify(parity, null, 2));
+      console.log(JSON.stringify({ stability: "stable" as const, ...parity }, null, 2));
       process.exitCode = parity.status === "covered" || parity.status === "fixtures_unavailable" ? 0 : 1;
       return;
     }
@@ -58,7 +58,7 @@ export async function replayCommand(args: ParsedArgs): Promise<void> {
       codexCommand: config.codex.command,
       codexModel: config.codex.model,
     });
-    console.log(JSON.stringify({ replay: result, modelReplay }, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, replay: result, modelReplay }, null, 2));
     process.exitCode = result.status === "passed" && !["blocked", "failed", "error"].includes(modelReplay.status) ? 0 : 1;
     return;
   } else {

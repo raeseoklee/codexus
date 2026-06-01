@@ -66,6 +66,7 @@ export interface StageAIsolation {
 
 export interface StageAManifest {
   schemaVersion: 1;
+  stability: "experimental";
   experimentId: string;
   mode: "isolated-real";
   cwd: string;
@@ -267,6 +268,7 @@ export function buildStageAManifest(input: {
     : "unobserved";
   return {
     schemaVersion: 1,
+    stability: "experimental",
     experimentId: input.experimentId,
     mode: "isolated-real",
     cwd: input.cwd,

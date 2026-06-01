@@ -5,6 +5,7 @@ import { flagBool, type ParsedArgs } from "../args.ts";
 
 export interface CodexusVersionInfo {
   schemaVersion: 1;
+  stability: "stable";
   name: string;
   version: string;
   node: string;
@@ -25,6 +26,7 @@ export function readCodexusVersionInfo(): CodexusVersionInfo {
   if (!isPackageMetadata(parsed)) throw new Error("codexus_package_metadata_invalid");
   return {
     schemaVersion: 1,
+    stability: "stable",
     name: parsed.name,
     version: parsed.version,
     node: process.version,

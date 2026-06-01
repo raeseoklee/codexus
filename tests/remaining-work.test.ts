@@ -28,6 +28,7 @@ test("init command bootstraps project harness without disturbing unrelated files
     const result = runCli(cwd, ["init", "--with-docs", "--json"]);
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
+    assert.equal(output.stability, "stable");
     assert.ok(existsSync(output.configPath));
     assert.equal(await readFile(join(cwd, ".unrelated", "state"), "utf8"), "keep\n");
     assert.ok(existsSync(join(cwd, ".codexus", "README.md")));
@@ -42,30 +43,39 @@ test("observability commands list runs, tail events, and read reports", async ()
     const run = runCli(cwd, ["run", "--driver", "mock", "--json", "observability run"]);
     assert.equal(run.status, 0, run.stderr);
     const runOutput = JSON.parse(run.stdout);
+    assert.equal(runOutput.stability, "stable");
 
     const runs = runCli(cwd, ["runs", "list", "--json"]);
     assert.equal(runs.status, 0, runs.stderr);
-    assert.equal(JSON.parse(runs.stdout).runs[0].runId, runOutput.runId);
+    const runsOutput = JSON.parse(runs.stdout);
+    assert.equal(runsOutput.stability, "stable");
+    assert.equal(runsOutput.runs[0].runId, runOutput.runId);
 
     const events = runCli(cwd, ["events", "tail", runOutput.runId, "--lines", "20", "--json"]);
     assert.equal(events.status, 0, events.stderr);
-    const eventTypes = JSON.parse(events.stdout).events.map((event: { type: string }) => event.type);
+    const eventsOutput = JSON.parse(events.stdout);
+    assert.equal(eventsOutput.stability, "stable");
+    const eventTypes = eventsOutput.events.map((event: { type: string }) => event.type);
     assert.ok(eventTypes.includes("permission.checked"));
     assert.ok(eventTypes.includes("run.terminal"));
 
     const report = runCli(cwd, ["report", runOutput.runId, "--json"]);
     assert.equal(report.status, 0, report.stderr);
-    assert.match(JSON.parse(report.stdout).preview, /Outcome: complete/);
+    const reportOutput = JSON.parse(report.stdout);
+    assert.equal(reportOutput.stability, "stable");
+    assert.match(reportOutput.preview, /Outcome: complete/);
 
     const validateRun = runCli(cwd, ["schema", "validate-run", runOutput.runId, "--json"]);
     assert.equal(validateRun.status, 0, validateRun.stderr);
     const validation = JSON.parse(validateRun.stdout);
+    assert.equal(validation.stability, "stable");
     assert.equal(validation.ok, true);
     assert.equal(validation.artifacts.find((artifact: { name: string }) => artifact.name === "events").count > 0, true);
 
     const validateState = runCli(cwd, ["schema", "validate", "--type", "state", "--file", runOutput.statePath, "--json"]);
     assert.equal(validateState.status, 0, validateState.stderr);
     const stateValidation = JSON.parse(validateState.stdout);
+    assert.equal(stateValidation.stability, "stable");
     assert.equal(stateValidation.ok, true);
     assert.equal(stateValidation.artifactValidation.engine, "local-json-schema-subset");
     assert.equal(stateValidation.artifactValidation.valid, true);
@@ -77,6 +87,7 @@ test("observability commands list runs, tail events, and read reports", async ()
     const invalidState = runCli(cwd, ["schema", "validate", "--type", "state", "--file", invalidStatePath, "--json"]);
     assert.equal(invalidState.status, 1);
     const invalidStateOutput = JSON.parse(invalidState.stdout);
+    assert.equal(invalidStateOutput.stability, "stable");
     assert.equal(invalidStateOutput.ok, false);
     assert.ok(invalidStateOutput.validation.errors.includes("runId:missing_string"));
     assert.ok(invalidStateOutput.artifactValidation.errors.includes("$.runId:required"));
@@ -95,6 +106,7 @@ test("observability commands list runs, tail events, and read reports", async ()
     const invalidRun = runCli(cwd, ["schema", "validate-run", runOutput.runId, "--json"]);
     assert.equal(invalidRun.status, 1);
     const invalidOutput = JSON.parse(invalidRun.stdout);
+    assert.equal(invalidOutput.stability, "stable");
     assert.equal(invalidOutput.ok, false);
     assert.ok(invalidOutput.artifacts.find((artifact: { name: string }) => artifact.name === "events").errors.includes("line_1:runId_mismatch"));
 
@@ -109,6 +121,7 @@ test("observability commands list runs, tail events, and read reports", async ()
     const replayParity = runCli(cwd, ["replay", "parity", "--json"]);
     assert.equal(replayParity.status, 0, replayParity.stderr);
     const replayParityOutput = JSON.parse(replayParity.stdout);
+    assert.equal(replayParityOutput.stability, "stable");
     assert.equal(replayParityOutput.status, "covered");
     assert.deepEqual(replayParityOutput.missingLabels, []);
     assert.ok(replayParityOutput.coveredLabels.includes("usage_accounting"));
@@ -247,11 +260,15 @@ test("skill index, export, gated replay, and memory lifecycle work together", as
     const run = runCli(cwd, ["run", "--driver", "mock", "--json", "parser regression behavior"]);
     assert.equal(run.status, 0, run.stderr);
     const runOutput = JSON.parse(run.stdout);
+    assert.equal(runOutput.stability, "stable");
     const propose = runCli(cwd, ["skill", "propose", runOutput.runId, "--json"]);
     assert.equal(propose.status, 0, propose.stderr);
-    const skillId = JSON.parse(propose.stdout).proposal.id;
+    const proposeOutput = JSON.parse(propose.stdout);
+    assert.equal(proposeOutput.stability, "stable");
+    const skillId = proposeOutput.proposal.id;
     const promote = runCli(cwd, ["skill", "promote", skillId, "--json"]);
     assert.equal(promote.status, 0, promote.stderr);
+    assert.equal(JSON.parse(promote.stdout).stability, "stable");
 
     const memory = runCli(cwd, [
       "memory",
@@ -264,37 +281,55 @@ test("skill index, export, gated replay, and memory lifecycle work together", as
       "Parser regression work should retrieve active parser skills.",
     ]);
     assert.equal(memory.status, 0, memory.stderr);
+    assert.equal(JSON.parse(memory.stdout).stability, "stable");
     const review = runCli(cwd, ["memory", "review", "--json"]);
-    assert.equal(JSON.parse(review.stdout).index.total, 1);
+    const reviewOutput = JSON.parse(review.stdout);
+    assert.equal(reviewOutput.stability, "stable");
+    assert.equal(reviewOutput.index.total, 1);
     const list = runCli(cwd, ["memory", "list", "--json"]);
-    assert.equal(JSON.parse(list.stdout).entries.length, 1);
+    const listOutput = JSON.parse(list.stdout);
+    assert.equal(listOutput.stability, "stable");
+    assert.equal(listOutput.entries.length, 1);
     const pruneDryRun = runCli(cwd, ["memory", "prune", "--before", "2999-01-01T00:00:00.000Z", "--dry-run", "--json"]);
-    assert.equal(JSON.parse(pruneDryRun.stdout).prune.removed, 1);
+    const pruneOutput = JSON.parse(pruneDryRun.stdout);
+    assert.equal(pruneOutput.stability, "stable");
+    assert.equal(pruneOutput.prune.removed, 1);
 
     const replay = runCli(cwd, ["replay", "skill", skillId, "--with-model-replay", "--json"]);
     assert.equal(replay.status, 0, replay.stderr);
-    assert.equal(JSON.parse(replay.stdout).modelReplay.status, "not_run");
+    const replayOutput = JSON.parse(replay.stdout);
+    assert.equal(replayOutput.stability, "stable");
+    assert.equal(replayOutput.modelReplay.status, "not_run");
 
     const gatedReplay = runCli(cwd, ["replay", "skill", skillId, "--with-model-replay", "--allow-live-model-replay", "--model-budget", "1", "--json"]);
     assert.equal(gatedReplay.status, 1);
-    assert.equal(JSON.parse(gatedReplay.stdout).modelReplay.status, "blocked");
+    const gatedReplayOutput = JSON.parse(gatedReplay.stdout);
+    assert.equal(gatedReplayOutput.stability, "stable");
+    assert.equal(gatedReplayOutput.modelReplay.status, "blocked");
 
     const exported = runCli(cwd, ["skill", "export", skillId, "--target", "codex", "--force", "--json"], { CODEX_HOME: codexHome });
     assert.equal(exported.status, 0, exported.stderr);
-    const exportPath = JSON.parse(exported.stdout).export.path;
+    const exportedOutput = JSON.parse(exported.stdout);
+    assert.equal(exportedOutput.stability, "stable");
+    const exportPath = exportedOutput.export.path;
     assert.ok(existsSync(join(exportPath, "SKILL.md")));
     const index = runCli(cwd, ["skill", "index", "--json"]);
     const indexOutput = JSON.parse(index.stdout);
+    assert.equal(indexOutput.stability, "stable");
     assert.equal(indexOutput.activeIndex[0].exportState.codex.path, exportPath);
     assert.equal(indexOutput.activeIndex[0].scenarioCount, 2);
 
     const improve = runCli(cwd, ["skill", "improve", skillId, "--reason", "tighten parser regression trigger", "--json"]);
     assert.equal(improve.status, 0, improve.stderr);
-    assert.match(JSON.parse(improve.stdout).improvement.proposal.displayName, /^codexus:/);
+    const improveOutput = JSON.parse(improve.stdout);
+    assert.equal(improveOutput.stability, "stable");
+    assert.match(improveOutput.improvement.proposal.displayName, /^codexus:/);
 
     const curate = runCli(cwd, ["memory", "curate", "--json"]);
     assert.equal(curate.status, 0, curate.stderr);
-    assert.equal(JSON.parse(curate.stdout).curation.total, 1);
+    const curateOutput = JSON.parse(curate.stdout);
+    assert.equal(curateOutput.stability, "stable");
+    assert.equal(curateOutput.curation.total, 1);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -337,7 +372,9 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.ok(existsSync(join(codexHome, "skills", "codexus", "SKILL.md")));
     const doctor = runCli(cwd, ["doctor", "--json"], { CODEX_HOME: codexHome });
     assert.equal(doctor.status, 0, doctor.stderr);
-    const skillInstallCheck = JSON.parse(doctor.stdout).checks.find((check: { id: string }) => check.id === "codexus.skill_install");
+    const doctorOutput = JSON.parse(doctor.stdout);
+    assert.equal(doctorOutput.stability, "stable");
+    const skillInstallCheck = doctorOutput.checks.find((check: { id: string }) => check.id === "codexus.skill_install");
     assert.equal(skillInstallCheck.status, "pass");
 
     const typecheck = spawnSync("npm", ["run", "typecheck"], { cwd, encoding: "utf8" });
@@ -359,17 +396,23 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(appStatusOutput.schemaFixture.valid, true);
     const appStatusOutsideRepo = runCli(featureCwd, ["app-server", "status", "--json"]);
     assert.equal(appStatusOutsideRepo.status, 0, appStatusOutsideRepo.stderr);
-    assert.equal(JSON.parse(appStatusOutsideRepo.stdout).schemaFixture.valid, true);
+    const appStatusOutsideRepoOutput = JSON.parse(appStatusOutsideRepo.stdout);
+    assert.equal(appStatusOutsideRepoOutput.stability, "experimental");
+    assert.equal(appStatusOutsideRepoOutput.schemaFixture.valid, true);
     const appRoundtrip = runCli(cwd, ["app-server", "roundtrip", "--dry-run", "--json"]);
     assert.equal(appRoundtrip.status, 0, appRoundtrip.stderr);
-    assert.equal(JSON.parse(appRoundtrip.stdout).status, "passed");
+    const appRoundtripOutput = JSON.parse(appRoundtrip.stdout);
+    assert.equal(appRoundtripOutput.stability, "experimental");
+    assert.equal(appRoundtripOutput.status, "passed");
     const appExperiment = runCli(cwd, ["app-server", "experiment", "--dry-run", "--timeout-ms", "1000", "--record", "--probe-process", "--cwd", featureCwd, "--json"]);
     assert.equal(appExperiment.status, 0, appExperiment.stderr);
     const appExperimentOutput = JSON.parse(appExperiment.stdout);
+    assert.equal(appExperimentOutput.stability, "experimental");
     assert.equal(appExperimentOutput.status, "planned");
     assert.ok(existsSync(join(appExperimentOutput.experimentDir, "manifest.json")));
     const appManifest = JSON.parse(await readFile(join(appExperimentOutput.experimentDir, "manifest.json"), "utf8"));
     assert.equal(appManifest.schemaVersion, 1);
+    assert.equal(appManifest.stability, "experimental");
     assert.equal(appManifest.process.supervised, false);
     assert.equal(appManifest.process.probe.command, "codex");
     assert.ok(["passed", "failed", "timed_out"].includes(appManifest.process.probe.status));
@@ -383,11 +426,13 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const missingProbe = runCli(cwd, ["app-server", "experiment", "--dry-run", "--probe-process", "--cwd", missingCodexCwd, "--json"]);
     assert.equal(missingProbe.status, 0, missingProbe.stderr);
     const missingProbeOutput = JSON.parse(missingProbe.stdout);
+    assert.equal(missingProbeOutput.stability, "experimental");
     assert.equal(missingProbeOutput.process.probe.status, "failed");
     assert.match(missingProbeOutput.process.probe.error, /ENOENT/);
     const supervisedExperiment = runCli(cwd, ["app-server", "experiment", "--dry-run", "--timeout-ms", "1000", "--record", "--supervise-fake", "--cwd", featureCwd, "--json"]);
     assert.equal(supervisedExperiment.status, 0, supervisedExperiment.stderr);
     const supervisedOutput = JSON.parse(supervisedExperiment.stdout);
+    assert.equal(supervisedOutput.stability, "experimental");
     assert.equal(supervisedOutput.process.supervised, true);
     assert.equal(supervisedOutput.process.supervisor.status, "stopped");
     assert.equal(supervisedOutput.process.supervisor.cleanup.completed, true);

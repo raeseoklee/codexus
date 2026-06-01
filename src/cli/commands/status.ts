@@ -35,7 +35,7 @@ export async function statusCommand(args: ParsedArgs): Promise<void> {
   const experience = await readJsonIfExists(paths.experience);
   const eventTail = await readEventTail(paths.events);
   if (json) {
-    console.log(JSON.stringify({ state, paths, verification, experience, eventTail }, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, state, paths, verification, experience, eventTail }, null, 2));
     return;
   }
   console.log(`${state.runId}: ${state.outcome ?? state.phase}`);

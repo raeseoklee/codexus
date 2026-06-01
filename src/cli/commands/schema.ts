@@ -159,7 +159,7 @@ export async function schemaCommand(args: ParsedArgs): Promise<void> {
     const schemas = await readSchemaArtifactStatus(root);
     const appServerFixture = await readAppServerSchemaFixture();
     const ok = schemas.every((schema) => schema.valid) && appServerFixture.valid;
-    const result = { ok, schemas, appServerFixture };
+    const result = { schemaVersion: 1, stability: "stable" as const, ok, schemas, appServerFixture };
     if (json) {
       console.log(JSON.stringify(result, null, 2));
       process.exitCode = ok ? 0 : 1;
@@ -189,7 +189,7 @@ export async function schemaCommand(args: ParsedArgs): Promise<void> {
     const result = await validateJsonFile(type, resolve(file), root);
     const ok = result.validation.valid && result.artifactValidation.valid;
     if (json) {
-      console.log(JSON.stringify({ ok, ...result }, null, 2));
+      console.log(JSON.stringify({ stability: "stable" as const, ok, ...result }, null, 2));
       process.exitCode = ok ? 0 : 1;
       return;
     }
@@ -208,7 +208,7 @@ export async function schemaCommand(args: ParsedArgs): Promise<void> {
     const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
     const result = await validateRunLedger(cwd, runId, root);
     if (json) {
-      console.log(JSON.stringify(result, null, 2));
+      console.log(JSON.stringify({ stability: "stable" as const, ...result }, null, 2));
       process.exitCode = result.ok ? 0 : 1;
       return;
     }

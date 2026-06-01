@@ -46,7 +46,7 @@ export async function planCommand(args: ParsedArgs): Promise<void> {
   await writeFile(path, text);
 
   if (json) {
-    console.log(JSON.stringify({ id, path }, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, id, path }, null, 2));
   } else {
     console.log(`${id}: ${path}`);
   }

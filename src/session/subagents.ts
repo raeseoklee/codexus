@@ -85,6 +85,7 @@ export interface SubagentLaunchContractArtifact {
 
 export interface SubagentRecordResult {
   schemaVersion: 1;
+  stability: "stable";
   artifact: SubagentResultArtifact;
   link: SessionSubagentLink;
   artifactDir: string;
@@ -269,6 +270,7 @@ export async function recordSubagentArtifact(cwd: string, options: {
   }));
   return {
     schemaVersion: 1,
+    stability: "stable",
     artifact,
     link,
     artifactDir,
@@ -354,6 +356,7 @@ export async function completeSubagentArtifact(cwd: string, options: {
   }));
   return {
     schemaVersion: 1,
+    stability: "stable",
     artifact,
     link,
     artifactDir,

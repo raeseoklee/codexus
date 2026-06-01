@@ -21,6 +21,8 @@ export async function cancelCommand(args: ParsedArgs): Promise<void> {
 
   if (state.status === "terminal") {
     const output = {
+      schemaVersion: 1,
+      stability: "stable" as const,
       runId,
       status: "already_terminal",
       outcome: state.outcome,
@@ -39,6 +41,8 @@ export async function cancelCommand(args: ParsedArgs): Promise<void> {
 
   if (owner.live) {
     const output = {
+      schemaVersion: 1,
+      stability: "stable" as const,
       runId,
       status: "requested",
       request,
@@ -90,6 +94,8 @@ export async function cancelCommand(args: ParsedArgs): Promise<void> {
   await removeRunOwner(paths);
 
   const output = {
+    schemaVersion: 1,
+    stability: "stable" as const,
     runId,
     status: "cancelled",
     request,

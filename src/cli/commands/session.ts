@@ -173,7 +173,7 @@ async function checkpointCommand(args: ParsedArgs, cwd: string, json: boolean): 
     ...value,
     checkpoints: [...value.checkpoints, record],
   }));
-  const result = { schemaVersion: 1, checkpoint: record, statePath: statePath(cwd), state };
+  const result = { schemaVersion: 1, stability: "stable" as const, checkpoint: record, statePath: statePath(cwd), state };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
     return;
@@ -188,6 +188,7 @@ async function verifyAutoRecommendCommand(cwd: string, json: boolean): Promise<v
   const detection = detectVerifyCandidates(cwd);
   const result = {
     schemaVersion: 1,
+    stability: "stable" as const,
     mode: "recommend" as const,
     executed: false,
     detection,
@@ -279,7 +280,7 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
       ...value,
       verifications: [...value.verifications, record],
     }));
-    const result = { schemaVersion: 1, mode: "execute" as const, executed: false, verification: record, policy, detection, statePath: statePath(cwd), state };
+    const result = { schemaVersion: 1, stability: "stable" as const, mode: "execute" as const, executed: false, verification: record, policy, detection, statePath: statePath(cwd), state };
     if (json) {
       console.log(JSON.stringify(result, null, 2));
     } else {
@@ -326,7 +327,7 @@ async function verifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
     verifications: [...value.verifications, record],
     lastVerifiedFingerprint,
   }));
-  const result = { schemaVersion: 1, mode: "execute" as const, executed: true, verification: record, result: verification, detection, statePath: statePath(cwd), state };
+  const result = { schemaVersion: 1, stability: "stable" as const, mode: "execute" as const, executed: true, verification: record, result: verification, detection, statePath: statePath(cwd), state };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
     process.exitCode = verification.status === "passed" || verification.status === "skipped" ? 0 : 1;
@@ -343,6 +344,7 @@ async function notifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
   const { record, state } = await recordSessionHookEvent(cwd, event);
   const result = {
     schemaVersion: 1,
+    stability: "stable" as const,
     notification: record,
     statePath: statePath(cwd),
     state,
@@ -432,7 +434,8 @@ async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Pr
     assertMaxPositionals(args, 3);
     const status = await readSubagentStatusArtifact(cwd, taskId);
     if (json) {
-      console.log(JSON.stringify({ schemaVersion: 1, ...status }, null, 2));
+      const stability = status.kind === "launch" ? "deferred" : "stable";
+      console.log(JSON.stringify({ schemaVersion: 1, stability, ...status }, null, 2));
       return;
     }
     if (status.kind === "result") {

@@ -25,17 +25,22 @@ JSON payload에는 다음 필드가 포함될 수 있습니다:
 
 소비자는 알 수 없는 additive field를 무시해야 합니다.
 
-`0.1.0` 전 최소 자기서술 적용 대상은 `doctor`, `session status`,
-`app-server status`, `cron status`, `gateway status`, `schema engine`,
-`supply-chain check`입니다. 다른 stable surface는 `0.1.x` additive 변경으로 같은
-마커를 얻을 수 있습니다.
+`0.1.1` 안정화 slice부터 지원되는 stable JSON command output은 top-level
+`schemaVersion: 1`과 `stability: "stable"` marker를 포함합니다. Experimental/deferred
+command output은 stable처럼 보이지 않도록 계속 `"experimental"` 또는 `"deferred"`를
+자기보고합니다.
+
+`schemaVersion`은 Codexus package 전체가 아니라 각 command output별 contract에
+적용됩니다. 특정 command의 JSON contract에 breaking change가 생길 때만 그 command의
+schema version을 올리며, additive field 추가는 bump 대상이 아닙니다.
 
 ## 0.1.x에서 Frozen
 
 Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen입니다:
 
-- 공통 schema payload: `schemaVersion`, 존재하는 경우 `stability`.
-- Run output: `runId`, `outcome`, `statePath`, `reportPath`, `state`.
+- 공통 supported JSON payload: `schemaVersion`, `stability`.
+- Run output: `schemaVersion`, `stability`, `runId`, `outcome`,
+  `statePath`, `reportPath`, `state`.
 - Run status/report output: `state`, `paths`, `verification`, `experience`,
   `eventTail`.
 - Doctor output: `stability`, `ok`, `strict`, `checks`, `warnings`,
@@ -52,7 +57,7 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
   `paths`, `evidence`, `changeEvidence`, `subagents`, `verifyDetection`,
   `overlays`, `notifyHook`, `notifyDispatch`, `migration`, `state`.
 - Quality evidence output(`slop check`, `session slop`): `schemaVersion`,
-  `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
+  `stability`, `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
   `derivableFacts`, `heuristicClaims`, `gate`.
 
 이 필드를 제거하거나 의미를 재정의하려면 `0.2.0`이 필요합니다. `0.1.x`에서 field

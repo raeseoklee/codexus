@@ -14,7 +14,7 @@ export async function reportCommand(args: ParsedArgs): Promise<void> {
   const text = await readFile(paths.report, "utf8");
   const preview = text.slice(0, Number.isInteger(chars) && chars > 0 ? chars : 4000);
   if (flagBool(args.flags, "json")) {
-    console.log(JSON.stringify({ runId, path: paths.report, preview }, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, runId, path: paths.report, preview }, null, 2));
     return;
   }
   console.log(preview);

@@ -24,7 +24,7 @@ export async function runsCommand(args: ParsedArgs): Promise<void> {
     }
   }
   if (flagBool(args.flags, "json")) {
-    console.log(JSON.stringify({ runs }, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, runs }, null, 2));
     return;
   }
   for (const run of runs) console.log(`${run.runId}: ${run.outcome ?? run.phase}`);

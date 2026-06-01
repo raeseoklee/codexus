@@ -2,6 +2,7 @@ import type { JsonValue } from "../types.ts";
 
 export interface CliErrorEnvelope {
   schemaVersion: 1;
+  stability: "stable";
   type: "error";
   code: string;
   message: string;
@@ -302,6 +303,7 @@ export function buildCliErrorEnvelope(error: unknown, options: {
   const parsed = parseCliError(error);
   return {
     schemaVersion: 1,
+    stability: "stable",
     type: "error",
     code: parsed.code,
     message: messageFor(parsed),

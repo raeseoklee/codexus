@@ -74,7 +74,7 @@ export async function runCommand(args: ParsedArgs): Promise<void> {
   });
 
   if (json) {
-    console.log(JSON.stringify(result, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, ...result }, null, 2));
   } else {
     console.log(`${result.runId}: ${result.outcome}`);
     console.log(result.reportPath);

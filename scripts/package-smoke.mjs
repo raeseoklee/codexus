@@ -163,6 +163,7 @@ if (args[0] === "--version") {
   assert(run(cx, ["--help"]).stdout.includes("Codexus"), "cx --help did not render help");
   assert(run(codexus, ["--version"]).stdout === pkg.version, "codexus --version did not report package version");
   const installedVersion = parseJsonRun(cx, ["version", "--json"]);
+  assert(installedVersion.stability === "stable", "cx version --json did not report stable JSON stability");
   assert(installedVersion.version === pkg.version, "cx version --json did not report package version");
   assert(installedVersion.name === "codexus", "cx version --json did not report package name");
 
@@ -173,6 +174,7 @@ if (args[0] === "--version") {
   assert(doctor.ok === true, "doctor --strict did not pass with fake codex fixture");
 
   const schema = parseJsonRun(codexus, ["schema", "check", "--json"]);
+  assert(schema.stability === "stable", "schema check did not report stable JSON stability");
   assert(schema.ok === true, "codexus schema check did not return ok=true");
   assert(schema.appServerFixture?.valid === true, "app-server runtime fixture was not readable from the installed package");
 
@@ -212,11 +214,13 @@ if (args[0] === "--version") {
     "medium",
     "--json",
   ]);
+  assert(subagentComplete.stability === "stable", "subagent complete did not report stable JSON stability");
   assert(subagentComplete.artifact?.source?.mode === "complete", "subagent completion did not use complete source mode");
   assert(subagentComplete.link?.status === "attached", "subagent completion did not attach claims");
   assert(subagentComplete.artifact?.claims?.length === 1, "subagent completion did not record exactly one claim");
 
   const passRun = parseJsonRun(codexus, ["run", "--driver", "mock", "--verify", "node -e \"process.exit(0)\"", "--json", "package smoke pass"], { cwd: project });
+  assert(passRun.stability === "stable", "mock pass run did not report stable JSON stability");
   assert(passRun.outcome === "complete", "mock pass run did not complete from the installed package");
   assert(String(passRun.statePath).includes(".codexus"), "mock pass run did not write under .codexus");
 
@@ -235,14 +239,18 @@ if (args[0] === "--version") {
   assert(repairState.repairIteration === 1, "mock repair run did not exercise one repair iteration");
 
   const status = parseJsonRun(codexus, ["status", repairRun.runId, "--json"], { cwd: project });
+  assert(status.stability === "stable", "installed status did not report stable JSON stability");
   assert(status.state?.runId === repairRun.runId, "installed status did not read the repair run");
   assert(status.state?.repairIteration === 1, "installed status did not expose the repair iteration");
   const events = parseJsonRun(codexus, ["events", "tail", repairRun.runId, "--lines", "5", "--json"], { cwd: project });
+  assert(events.stability === "stable", "installed events tail did not report stable JSON stability");
   assert(events.events?.length > 0, "installed events tail returned no events");
   const resume = parseJsonRun(codexus, ["resume", repairRun.runId, "--json", "package smoke resume"], { cwd: project });
+  assert(resume.stability === "stable", "installed resume did not report stable JSON stability");
   assert(resume.resumedFrom === repairRun.runId, "installed resume did not reference the original run");
   assert(resume.outcome === "complete", "installed resume did not complete");
   const cancel = parseJsonRun(codexus, ["cancel", failRun.runId, "--reason", "package smoke cancel", "--json"], { cwd: project });
+  assert(cancel.stability === "stable", "installed cancel did not report stable JSON stability");
   assert(cancel.status === "already_terminal", "installed cancel did not exercise terminal cancel path");
   assert(existsSync(join(project, ".codexus")), "mock run did not create .codexus");
 

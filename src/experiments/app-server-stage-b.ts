@@ -33,6 +33,7 @@ export interface AppServerMessageEvidence {
 
 export interface StageBManifest {
   schemaVersion: 1;
+  stability: "experimental";
   experimentId: string;
   mode: "live-read-only";
   cwd: string;
@@ -426,6 +427,7 @@ export async function runLiveReadOnlyStageB(input: {
       : "inconclusive";
   const manifest: StageBManifest = {
     schemaVersion: 1,
+    stability: "experimental",
     experimentId: input.experimentId,
     mode: "live-read-only",
     cwd: input.cwd,

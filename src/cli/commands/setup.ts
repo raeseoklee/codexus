@@ -34,6 +34,7 @@ export async function setupCommand(args: ParsedArgs): Promise<void> {
   const state = await loadOrCreateSessionState(cwd);
   const result = {
     schemaVersion: 1,
+    stability: "stable" as const,
     setup: "codex-session",
     scope,
     alwaysOn,

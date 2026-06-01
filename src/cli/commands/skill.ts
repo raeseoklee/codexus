@@ -22,7 +22,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     if (!runId) throw new Error("missing_run_id");
     const proposal = await writeSkillProposal(cwd, await readExperienceForRun(cwd, runId));
     if (json) {
-      console.log(JSON.stringify({ proposal }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, proposal }, null, 2));
       return;
     }
     console.log(`${proposal.displayName}: proposed (${proposal.id})`);
@@ -34,7 +34,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     if (!skillId) throw new Error("missing_skill_id");
     const review = await reviewSkill(cwd, skillId);
     if (json) {
-      console.log(JSON.stringify({ review }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, review }, null, 2));
       return;
     }
     console.log(`${skillId}: ${review.promotable ? "promotable" : `blocked (${review.blockers.join(", ")})`}`);
@@ -46,7 +46,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     const proposals = skills.filter((entry) => entry.location === "proposed").map((entry) => entry.skill);
     const active = skills.filter((entry) => entry.location === "active").map((entry) => entry.skill);
     if (json) {
-      console.log(JSON.stringify({ skills, proposals, active }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, skills, proposals, active }, null, 2));
       return;
     }
     for (const entry of skills) {
@@ -58,7 +58,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
   if (subcommand === "index") {
     const activeIndex = await readActiveSkillIndex(cwd);
     if (json) {
-      console.log(JSON.stringify({ activeIndex }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, activeIndex }, null, 2));
       return;
     }
     for (const entry of activeIndex) console.log(`${entry.displayName}: ${entry.status} (${entry.version})`);
@@ -70,7 +70,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     if (!skillId) throw new Error("missing_skill_id");
     const result = await promoteSkill(cwd, skillId);
     if (json) {
-      console.log(JSON.stringify({ promotion: result }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, promotion: result }, null, 2));
       return;
     }
     console.log(`${result.skill.displayName}: active at ${result.activeDir}`);
@@ -83,7 +83,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     const reason = args.positionals.slice(2).join(" ").trim() || undefined;
     const skill = await deprecateSkill(cwd, skillId, reason);
     if (json) {
-      console.log(JSON.stringify({ skill }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, skill }, null, 2));
       return;
     }
     console.log(`${skillId}: deprecated`);
@@ -97,7 +97,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     const reason = reasonText || undefined;
     const result = await proposeSkillImprovement(cwd, skillId, reason);
     if (json) {
-      console.log(JSON.stringify({ improvement: result }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, improvement: result }, null, 2));
       return;
     }
     console.log(`${result.proposal.displayName}: proposed from ${skillId}`);
@@ -111,7 +111,7 @@ export async function skillCommand(args: ParsedArgs): Promise<void> {
     if (target !== "codex") throw new Error(`invalid_skill_export_target:${target ?? "missing"}`);
     const result = await exportActiveSkill(cwd, skillId, target, flagBool(args.flags, "force"));
     if (json) {
-      console.log(JSON.stringify({ export: result }, null, 2));
+      console.log(JSON.stringify({ schemaVersion: 1, stability: "stable" as const, export: result }, null, 2));
       return;
     }
     console.log(`${skillId}: exported to ${result.path}`);

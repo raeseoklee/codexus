@@ -34,7 +34,7 @@ export async function initCommand(args: ParsedArgs): Promise<void> {
       created.push(docsPath);
     }
   }
-  const result = { root, configPath, docsPath, created };
+  const result = { schemaVersion: 1, stability: "stable" as const, root, configPath, docsPath, created };
   if (flagBool(args.flags, "json")) {
     console.log(JSON.stringify(result, null, 2));
     return;
