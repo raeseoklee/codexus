@@ -189,7 +189,24 @@
     <section class="board" aria-label="Codexus roadmap kanban">
       <section class="column" aria-labelledby="ready-now">
         <h2 id="ready-now">1. Ready Now</h2>
-        <p class="summary">Small, derivable gates that can be implemented without enabling deferred runtime behavior.</p>
+        <p class="summary">Small, derivable maintenance and evidence gates that can be implemented without enabling deferred runtime behavior.</p>
+
+        <article class="card">
+          <h3>Pages Deployment Runtime Warning</h3>
+          <div class="tags">
+            <span class="tag ready">maintenance</span>
+            <span class="tag evidence">CI observed</span>
+          </div>
+          <p>GitHub Pages deploys still succeed, but the latest Pages run emitted a Node.js 20 action deprecation annotation from the managed Pages workflow.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Confirm whether the warning is fully GitHub-managed or controllable through repository Pages workflow settings.</li>
+            <li>If controllable, move Pages deployment to Node 24-compatible pinned actions.</li>
+            <li>If managed by GitHub, document the warning as non-blocking and keep CI/release workflows pinned separately.</li>
+          </ul>
+          <span class="label">Evidence</span>
+          <p>Pages run <code>26761711327</code> succeeded with a Node.js 20 deprecation annotation.</p>
+        </article>
 
         <article class="card">
           <h3>0.1.x Patch Queue</h3>
@@ -197,7 +214,7 @@
             <span class="tag ready">triage</span>
             <span class="tag evidence">contract safe</span>
           </div>
-          <p>No active Ready Now card is open. New 0.1.x work should stay additive for stable surfaces or self-report as experimental/deferred.</p>
+          <p>Use this holding lane for small 0.1.x work after the Pages warning is classified. Stable surfaces stay additive; new runtime surfaces must self-report as experimental or deferred.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Stable JSON fields are additive-only.</li>
