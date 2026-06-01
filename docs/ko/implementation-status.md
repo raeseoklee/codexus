@@ -183,7 +183,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 172 tests 통과
+- `npm test`: 176 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -226,13 +226,22 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Repository graph foundation 테스트는 `cx repo graph build/check`, repo-graph schema
   validation, scope 밖 변경을 무시하는 scoped freshness, scope 안 변경 stale detection,
   dangling edge failure, volatile gate output을 제외하는 stable graph id를 커버합니다.
+- Multi-engine relay recorder 테스트는 artifact import-only 동작, relay
+  session/stage-gate/convergence schema validation, 같은 artifact convergence 요구,
+  `delta-check` convergence 거부, valid convergence가 verification 실패 시 완료를 만들 수
+  없다는 invariant를 커버합니다.
 - Autopilot contract는 0.2/0.3 experimental surface로만 문서화되어 있습니다.
   아직 구현되지 않았고 0.1.x stable contract에는 포함되지 않습니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
-  search/explain, context injection, multi-engine relay autopilot은 0.1.x stable contract
-  밖에서 deferred입니다.
+  search/explain, context injection은 0.1.x stable contract 밖에서 deferred입니다.
+- Multi-engine relay autopilot은 experimental recorder/checker 첫 slice를 갖습니다:
+  `cx autopilot relay record`는 다른 engine을 spawn하지 않고 외부 author/reviewer
+  artifact를 import하고, `cx autopilot relay stage-gate`는 `delta-check`/`full-gate`
+  evidence를 기록하며, `cx autopilot relay check-agreement`는 같은 artifact convergence를
+  검증하고 verification 실패 시 convergence가 완료를 만들 수 없음을 증명합니다. Active
+  relay execution과 external engine adapter는 0.1.x stable contract 밖에서 deferred입니다.
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
@@ -258,7 +267,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   않았습니다.
 - cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
-- Autopilot과 multi-engine relay autopilot은 0.2/0.3 트랙의 설계 문서만 있습니다.
-  `cx repo graph build/check`는 experimental graph foundation으로 존재하지만,
-  graph import/search/explain/context injection은 0.1.x stable surface 밖에서 deferred입니다.
+- Autopilot active execution은 0.2/0.3 트랙의 설계 문서만 있습니다.
+  `cx repo graph build/check`와 `cx autopilot relay record/stage-gate/check-agreement`는
+  experimental foundation으로 존재하지만, graph import/search/explain/context injection과
+  active multi-engine relay adapter는 0.1.x stable surface 밖에서 deferred입니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

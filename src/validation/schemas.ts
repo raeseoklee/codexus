@@ -56,7 +56,10 @@ export type SchemaValidationType =
   | "session-state"
   | "supply-chain-policy"
   | "architecture-policy"
-  | "repo-graph";
+  | "repo-graph"
+  | "relay-session"
+  | "stage-gate-evidence"
+  | "convergence-agreement";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -82,6 +85,9 @@ export const schemaArtifactNames = [
   "supply-chain-policy.schema.json",
   "architecture-policy.schema.json",
   "repo-graph.schema.json",
+  "relay-session.schema.json",
+  "stage-gate-evidence.schema.json",
+  "convergence-agreement.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -94,11 +100,17 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "supply-chain-policy": "supply-chain-policy.schema.json",
   "architecture-policy": "architecture-policy.schema.json",
   "repo-graph": "repo-graph.schema.json",
+  "relay-session": "relay-session.schema.json",
+  "stage-gate-evidence": "stage-gate-evidence.schema.json",
+  "convergence-agreement": "convergence-agreement.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
 const terminalOutcomes = ["complete", "failed", "blocked", "cancelled"] as const;
 const verificationStatuses = ["pending", "passed", "failed", "skipped", "timed_out", "error"] as const;
+const relayStages = ["issue", "design", "plan", "implementation"] as const;
+const relayScopes = ["delta-check", "full-gate"] as const;
+const relayVerificationStatuses = ["passed", "failed", "skipped", "unknown"] as const;
 
 function schemaRoot(): string {
   return join(repoRoot(), "schemas");
@@ -562,6 +574,89 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       requireNumber(value.gate, "exitCode", errors, "gate.exitCode");
       requireString(value.gate, "reason", errors, "gate.reason");
     }
+  }
+
+  if (type === "relay-session") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "type", ["codexus.autopilot.relay.session"], errors);
+    requireString(value, "relayId", errors);
+    if (!(value.contractSubjectHash === null || typeof value.contractSubjectHash === "string")) errors.push("contractSubjectHash:invalid");
+    requireOneOf(value, "stage", relayStages, errors);
+    requireNumber(value, "round", errors);
+    requireOneOf(value, "status", ["recorded"], errors);
+    requireBoolean(value, "recordOnly", errors);
+    requireString(value, "createdAt", errors);
+    requireString(value, "updatedAt", errors);
+    requireRecord(value.authorEngine, errors, "authorEngine");
+    requireRecord(value.reviewEngine, errors, "reviewEngine");
+    if (requireRecord(value.stageArtifact, errors, "stageArtifact")) {
+      requireString(value.stageArtifact, "path", errors, "stageArtifact.path");
+      requireString(value.stageArtifact, "storedPath", errors, "stageArtifact.storedPath");
+      requireString(value.stageArtifact, "hash", errors, "stageArtifact.hash");
+    }
+    requireArray(value, "submissions", errors);
+    requireArray(value, "reviews", errors);
+    requireArray(value, "stageGateEvidence", errors);
+    if (!(value.convergenceAgreement === null || isRecord(value.convergenceAgreement))) errors.push("convergenceAgreement:invalid");
+    if (value.stop !== null) errors.push("stop:not_null");
+    requireArray(value, "evidenceGaps", errors);
+    requireArray(value, "derivableFacts", errors);
+    requireArray(value, "heuristicClaims", errors);
+    requireArray(value, "blockingUnknowns", errors);
+    requireArray(value, "informationalUnknowns", errors);
+    if (requireRecord(value.gate, errors, "gate")) {
+      requireBoolean(value.gate, "enabled", errors, "gate.enabled");
+      requireOneOf(value.gate, "status", ["not_requested", "passed", "failed", "blocked"], errors, "gate.status");
+      requireNumber(value.gate, "exitCode", errors, "gate.exitCode");
+      requireString(value.gate, "reason", errors, "gate.reason");
+    }
+  }
+
+  if (type === "stage-gate-evidence") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "type", ["codexus.autopilot.stage-gate-evidence"], errors);
+    requireString(value, "evidenceId", errors);
+    requireOneOf(value, "stage", relayStages, errors);
+    requireOneOf(value, "scope", relayScopes, errors);
+    requireString(value, "role", errors);
+    requireString(value, "recordedAt", errors);
+    requireString(value, "stageArtifactHash", errors);
+    requireArray(value, "freshReadArtifacts", errors);
+    requireArray(value, "verificationMatrix", errors);
+    requireArray(value, "findings", errors);
+    requireNumber(value, "residualFindingCount", errors);
+    const verificationResults = requireArray(value, "verificationResults", errors);
+    for (const item of verificationResults) {
+      if (!isRecord(item)) {
+        errors.push("verificationResults:non_object_item");
+        continue;
+      }
+      requireOneOf(item, "status", relayVerificationStatuses, errors, "verificationResults.status");
+      if (!(item.command === null || typeof item.command === "string")) errors.push("verificationResults.command:invalid");
+      if (!(item.evidencePath === null || typeof item.evidencePath === "string")) errors.push("verificationResults.evidencePath:invalid");
+    }
+    requireArray(value, "heuristicClaims", errors);
+    requireArray(value, "derivableFacts", errors);
+  }
+
+  if (type === "convergence-agreement") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "type", ["codexus.autopilot.convergence-agreement"], errors);
+    requireOneOf(value, "stage", relayStages, errors);
+    requireNumber(value, "round", errors);
+    const declarations = requireArray(value, "declarations", errors);
+    for (const item of declarations) {
+      if (!isRecord(item)) {
+        errors.push("declarations:non_object_item");
+        continue;
+      }
+      requireString(item, "role", errors, "declarations.role");
+      requireString(item, "engine", errors, "declarations.engine");
+      requireString(item, "artifactHash", errors, "declarations.artifactHash");
+      requireString(item, "declaredAt", errors, "declarations.declaredAt");
+    }
+    requireNumber(value, "unresolvedHighFindings", errors);
+    requireBoolean(value, "decisionNeeded", errors);
   }
 
   return { schemaVersion: 1, type, valid: errors.length === 0, errors };

@@ -253,10 +253,12 @@ evidence only when the supporting runtime exists:
     structural graph gates. Keep external import, search/explain, and context
     injection deferred until freshness, sanitization, and gate behavior are
     stable.
-13. Multi-engine relay autopilot remains a 0.2/0.3 design track. First slices
-    should import external review artifacts, validate convergence agreements over
-    the same artifact hash, and prove convergence cannot complete a run when
-    verification fails.
+13. Multi-engine relay autopilot now has an experimental recorder/checker first
+    slice: external author/reviewer artifact import, stage-gate evidence,
+    same-artifact convergence validation, and the proof that convergence cannot
+    complete a run when verification fails. Keep active relay execution and
+    external engine adapters deferred until descriptor-backed adapters and
+    normal evidence gates are proven.
 14. Harness-engineering alignment adds small 0.2 tracks before broader
     autonomy: `cx architecture check` now covers the first derivable import
     invariant, `cx repo map/check` now covers mechanical repository-knowledge
@@ -292,6 +294,12 @@ Harness-engineering alignment adds these evidence-first tracks:
   evidence while preserving the facts-vs-heuristics boundary. The subagent
   behavior checklist counterpart is implemented; remaining work is optional
   future artifacts such as lint/typecheck/coverage reports.
+- Multi-engine relay follow-up: [doc 15](design/15-multi-engine-relay-autopilot.md)
+  now has a recorder/checker first slice with `cx autopilot relay
+  record/stage-gate/check-agreement`. Next work is adapter evidence only:
+  supported external engine descriptors, read-only handoff contracts, and
+  eventual active relay execution without letting convergence replace
+  verification.
 - Observability adapters: add dev-server/browser/log evidence descriptors only
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.
@@ -316,7 +324,6 @@ Harness-engineering alignment adds these evidence-first tracks:
    default stable path.
 9. Autopilot contract layer: start as a 0.2/0.3 experimental track with schema
    artifacts and report-only scope gates before any `cx autopilot run`.
-10. Multi-engine relay autopilot: start with report-only author/reviewer
-    artifact recording, stage-gate evidence, and convergence validation. Keep
-    review engines artifact-import-only until a supported adapter exists, and do
-    not let convergence replace verification.
+10. Multi-engine relay autopilot: the report-only artifact recorder/checker is
+    implemented. Keep review engines artifact-import-only until a supported
+    adapter exists, and do not let convergence replace verification.

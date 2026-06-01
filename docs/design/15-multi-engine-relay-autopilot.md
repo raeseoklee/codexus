@@ -2,7 +2,8 @@
 
 [Korean](../ko/design/15-multi-engine-relay-autopilot.md)
 
-Status: proposed 0.2/0.3 design track.
+Status: experimental recorder/checker first slice implemented; active relay
+execution and external engine adapters remain deferred 0.2/0.3 design work.
 
 This document extends the [autopilot contract](12-autopilot-contract.md) with a
 multi-engine review loop. It is informed by the ai-devkit `agent-relay` /
@@ -70,7 +71,21 @@ kernel.
 
 ## Command Surface
 
-Proposed future surface:
+Implemented first-slice surface:
+
+```bash
+cx autopilot relay record --stage plan --artifact docs/plan.md --author-file author.json --review-file review.json --json
+cx autopilot relay stage-gate --stage plan --scope full-gate --artifact docs/plan.md --verification-status passed --json
+cx autopilot relay check-agreement --agreement agreement.json --stage-gate <stage-gate.json> --verification-status failed --gate --json
+cx autopilot relay status <relay-id> --json
+```
+
+This surface is `stability: "experimental"` and recorder/checker only. It
+imports externally produced author/reviewer artifacts, records stage-gate
+evidence, validates convergence agreements, and proves that convergence cannot
+complete work when verification fails. It does not spawn a second engine.
+
+Proposed future active relay surface:
 
 ```bash
 cx autopilot relay plan --from docs/PRD.md --review-engine claude-code --json
@@ -157,6 +172,7 @@ Convergence agreement artifact:
 ```json
 {
   "schemaVersion": 1,
+  "stability": "experimental",
   "type": "codexus.autopilot.convergence-agreement",
   "stage": "plan",
   "round": 4,
@@ -277,15 +293,18 @@ resume.
 
 ## First Slice
 
-1. Add relay artifact schemas and validation only.
-2. Add report-only recording of a single author/reviewer round.
-3. Treat the first review engine path as external artifact import only.
-4. Add stage-gate evidence shape with `delta-check` vs `full-gate`.
-5. Add convergence agreement validation requiring both role declarations over the
-   same stage artifact hash.
-6. Prove that a valid convergence agreement cannot complete a run when
+1. Done: relay session, stage-gate evidence, and convergence-agreement schema
+   artifacts plus focused validation.
+2. Done: report-only recording of a single author/reviewer round through
+   `cx autopilot relay record`.
+3. Done: the first review engine path is external artifact import only
+   (`driverId: "external-relay"`, `spawn: false`).
+4. Done: stage-gate evidence distinguishes `delta-check` from `full-gate`.
+5. Done: convergence validation requires both role declarations over the same
+   stage artifact hash.
+6. Done: tests prove a valid convergence agreement cannot complete a run when
    verification fails.
-7. Only then consider an external relay adapter.
+7. Deferred: only then consider an external relay adapter.
 
 Dogfood target: use Codexus docs work where Codex authors a proposal and an
 external reviewer produces a review artifact, but keep completion tied to

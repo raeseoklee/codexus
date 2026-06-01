@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/relay-session.schema.json",
+  "title": "Codexus Relay Session",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.autopilot.relay.session" },
+    "relayId": { "type": "string", "minLength": 1 },
+    "contractSubjectHash": { "type": ["string", "null"] },
+    "stage": { "enum": ["issue", "design", "plan", "implementation"] },
+    "round": { "type": "number", "minimum": 0 },
+    "status": { "const": "recorded" },
+    "recordOnly": { "type": "boolean" },
+    "createdAt": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string", "minLength": 1 },
+    "authorEngine": { "type": "object" },
+    "reviewEngine": { "type": "object" },
+    "stageArtifact": {
+      "type": "object",
+      "required": ["path", "storedPath", "hash"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "storedPath": { "type": "string", "minLength": 1 },
+        "hash": { "type": "string", "minLength": 1 }
+      }
+    },
+    "submissions": { "type": "array" },
+    "reviews": { "type": "array" },
+    "stageGateEvidence": { "type": "array" },
+    "convergenceAgreement": { "type": ["object", "null"] },
+    "stop": { "type": "null" },
+    "evidenceGaps": { "type": "array" },
+    "derivableFacts": { "type": "array" },
+    "heuristicClaims": { "type": "array" },
+    "blockingUnknowns": { "type": "array" },
+    "informationalUnknowns": { "type": "array" },
+    "gate": {
+      "type": "object",
+      "required": ["enabled", "status", "exitCode", "reason"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "status": { "enum": ["not_requested", "passed", "failed", "blocked"] },
+        "exitCode": { "type": "number", "minimum": 0 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "relayId", "contractSubjectHash", "stage", "round", "status", "recordOnly", "createdAt", "updatedAt", "authorEngine", "reviewEngine", "stageArtifact", "submissions", "reviews", "stageGateEvidence", "convergenceAgreement", "stop", "evidenceGaps", "derivableFacts", "heuristicClaims", "blockingUnknowns", "informationalUnknowns", "gate"]
+}

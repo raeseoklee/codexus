@@ -241,9 +241,11 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    validation, scoped freshness, structural graph gate를 포함한 experimental 첫 slice가
    있습니다. External import, search/explain, context injection은 freshness, sanitization,
    gate behavior가 안정될 때까지 deferred로 유지합니다.
-13. Multi-engine relay autopilot은 0.2/0.3 design track으로 유지합니다. 첫 slice는 external
-   review artifact import, 같은 artifact hash에 대한 convergence agreement validation,
-   verification 실패 시 convergence가 run을 complete하지 못함을 증명하는 데서 시작합니다.
+13. Multi-engine relay autopilot은 experimental recorder/checker 첫 slice를 갖습니다:
+   external author/reviewer artifact import, stage-gate evidence, 같은 artifact convergence
+   validation, verification 실패 시 convergence가 run을 complete하지 못한다는 증명입니다.
+   Active relay execution과 external engine adapter는 descriptor-backed adapter와 일반
+   evidence gate가 증명될 때까지 deferred로 유지합니다.
 14. Harness-engineering alignment는 더 넓은 autonomy 전에 작은 0.2 track을 추가합니다:
     첫 derivable import invariant는 이제 `cx architecture check`가 다루고, 기계적인
     repository-knowledge validation은 `cx repo map/check`가 다룹니다. `cx slop check`는
@@ -274,6 +276,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   assumption, verification-artifact, diff-surface evidence를 기록합니다. Fact-vs-heuristic
   경계는 유지했고, subagent behavior checklist counterpart는 구현됐습니다. 남은 작업은
   선택적 lint/typecheck/coverage artifact입니다.
+- Multi-engine relay follow-up: [15번 문서](design/15-multi-engine-relay-autopilot.md)는
+  이제 `cx autopilot relay record/stage-gate/check-agreement` recorder/checker 첫 slice를
+  갖습니다. 다음 작업은 adapter evidence입니다: 지원되는 external engine descriptor,
+  read-only handoff contract, 그리고 convergence가 verification을 대체하지 않는 active
+  relay execution입니다.
 - Observability adapter: architecture와 repo-knowledge gate가 안정된 뒤
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.
@@ -297,7 +304,6 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 8. Routine live model replay: opt-in, budget-gated로 유지하고 기본 stable path 밖에 둡니다.
 9. Autopilot contract layer: `cx autopilot run` 전에 schema artifact와 report-only scope
    gate부터 시작하는 0.2/0.3 experimental track으로 진행합니다.
-10. Multi-engine relay autopilot: report-only author/reviewer artifact recording,
-    stage-gate evidence, convergence validation부터 시작합니다. 지원되는 adapter가 생기기 전
-    review engine은 artifact import-only로 두고, convergence가 verification을 대체하지 않게
-    합니다.
+10. Multi-engine relay autopilot: report-only artifact recorder/checker는 구현됐습니다.
+    지원되는 adapter가 생기기 전 review engine은 artifact import-only로 두고, convergence가
+    verification을 대체하지 않게 합니다.

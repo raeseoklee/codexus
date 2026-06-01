@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/convergence-agreement.schema.json",
+  "title": "Codexus Convergence Agreement",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.autopilot.convergence-agreement" },
+    "stage": { "enum": ["issue", "design", "plan", "implementation"] },
+    "round": { "type": "number", "minimum": 0 },
+    "declarations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role", "engine", "artifactHash", "declaredAt"],
+        "properties": {
+          "role": { "type": "string", "minLength": 1 },
+          "engine": { "type": "string", "minLength": 1 },
+          "artifactHash": { "type": "string", "minLength": 1 },
+          "declaredAt": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "unresolvedHighFindings": { "type": "number", "minimum": 0 },
+    "decisionNeeded": { "type": "boolean" }
+  },
+  "required": ["schemaVersion", "stability", "type", "stage", "round", "declarations", "unresolvedHighFindings", "decisionNeeded"]
+}

@@ -26,6 +26,7 @@ import { supplyChainCommand } from "./commands/supply-chain.ts";
 import { versionCommand } from "./commands/version.ts";
 import { architectureCommand } from "./commands/architecture.ts";
 import { repoCommand } from "./commands/repo.ts";
+import { autopilotCommand } from "./commands/autopilot.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -57,6 +58,10 @@ Usage:
   cx repo map|check [--gate] [--json]
   cx repo graph build --graph-provider codexus-lite [--scope <glob>] [--json]
   cx repo graph check --graph <graph-id-or-path> [--gate] [--json]
+  cx autopilot relay record --stage issue|design|plan|implementation --artifact <path> --author-file <path> --review-file <path> [--json]
+  cx autopilot relay stage-gate --stage issue|design|plan|implementation --scope delta-check|full-gate --artifact <path> [--verification-status passed|failed|skipped|unknown] [--json]
+  cx autopilot relay check-agreement --agreement <path> --stage-gate <path> [--verification-status passed|failed|skipped|unknown] [--gate] [--json]
+  cx autopilot relay status <relay-id> [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>
   cx cancel <run-id> [--reason <reason>] [--json]
   cx plan <task> [--json]
@@ -67,7 +72,7 @@ Usage:
   cx locks list|inspect|clear [name] [--stale-only] [--json]
   cx schema check [--json]
   cx schema engine [--json]
-  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph> --file <path> [--json]
+  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph|relay-session|stage-gate-evidence|convergence-agreement> --file <path> [--json]
   cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|experiment [--dry-run|--live] [--json]
   cx app-server experiment --dry-run --record [--probe-process] [--supervise-fake] [--timeout-ms <n>] [--json]
@@ -143,6 +148,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "repo") {
     await repoCommand(args);
+    return;
+  }
+  if (args.command === "autopilot") {
+    await autopilotCommand(args);
     return;
   }
   if (args.command === "run") {

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/stage-gate-evidence.schema.json",
+  "title": "Codexus Stage Gate Evidence",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.autopilot.stage-gate-evidence" },
+    "evidenceId": { "type": "string", "minLength": 1 },
+    "stage": { "enum": ["issue", "design", "plan", "implementation"] },
+    "scope": { "enum": ["delta-check", "full-gate"] },
+    "role": { "type": "string", "minLength": 1 },
+    "recordedAt": { "type": "string", "minLength": 1 },
+    "stageArtifactHash": { "type": "string", "minLength": 1 },
+    "freshReadArtifacts": { "type": "array" },
+    "verificationMatrix": { "type": "array" },
+    "findings": { "type": "array" },
+    "residualFindingCount": { "type": "number", "minimum": 0 },
+    "verificationResults": { "type": "array" },
+    "heuristicClaims": { "type": "array" },
+    "derivableFacts": { "type": "array" }
+  },
+  "required": ["schemaVersion", "stability", "type", "evidenceId", "stage", "scope", "role", "recordedAt", "stageArtifactHash", "freshReadArtifacts", "verificationMatrix", "findings", "residualFindingCount", "verificationResults", "heuristicClaims", "derivableFacts"]
+}
