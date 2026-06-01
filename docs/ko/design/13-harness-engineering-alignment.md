@@ -249,7 +249,7 @@ worktree isolation, evidence gate, 앞단 1회 human approval이 필요합니다
 유지합니다. Behavior contract는 Codexus가 subagent를 launch했다고 가장하지 않으면서도
 recorded claim format을 개선할 수 있습니다.
 
-`session subagent complete` artifact의 future optional field:
+`session subagent complete`와 file 기반 subagent result artifact에 구현된 optional field:
 
 ```json
 {
@@ -263,7 +263,8 @@ recorded claim format을 개선할 수 있습니다.
 ```
 
 Codexus가 local artifact에서 fact를 도출할 수 없는 한, 이 값은 curator/subagent assertion입니다.
-Review에는 영향을 줄 수 있지만 verification freshness를 갱신하면 안 됩니다.
+Review에는 영향을 줄 수 있지만 verification freshness를 갱신하거나 completion authority를
+부여하지 않습니다.
 
 ## 포지셔닝
 
@@ -301,7 +302,8 @@ Codexus is a harness engineering layer for OpenAI Codex CLI.
 4. **Behavior evidence 확장**: `cx slop check`의 첫 surgicality, simplicity,
    assumption, verification-artifact, diff-surface lane을 구현했고 heuristic은 advisory로
    유지합니다.
-5. **Subagent checklist**: recorded claim artifact에 optional behavior checklist field 추가.
+5. **Subagent checklist**: recorded/complete claim artifact에 optional behavior checklist
+   field를 구현했습니다. 이 값은 review input이며 completion authority가 아닙니다.
 6. **Observability adapter**: 위 gate들이 안정된 뒤 dev-server/browser/log evidence descriptor
    추가.
 

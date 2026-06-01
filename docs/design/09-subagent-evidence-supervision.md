@@ -157,7 +157,15 @@ human or native Codex tool runs a subagent outside Codexus.
 
 Implemented: `cx session subagent complete --task-id <id> --claim <text>
 --json` records the final claims produced by a native subagent that ran in the
-current Codex session or another supported host surface.
+current Codex session or another supported host surface. It also accepts
+optional behavior checklist flags:
+
+```bash
+--assumptions-surfaced pass|fail|unknown
+--simplest-sufficient-change pass|fail|unknown
+--surgical-scope pass|fail|unknown
+--verification-evidence-present pass|fail|unknown
+```
 
 This command deliberately does not launch the subagent. It closes the handoff
 loop created by `launch`: the launcher contract records the bounded task and
@@ -173,6 +181,10 @@ The result uses `source.mode: "complete"` and replaces the
 `launch_unavailable` session link with an attached claim link. It still does not
 promote `evidenceFresh`; claims remain unverified until a separate verification,
 replay, or explicit review artifact supports them.
+
+Checklist values are subagent assertions recorded for later review. They do not
+gate completion, refresh verification evidence, or prove that Codexus launched
+the subagent.
 
 ## Automation Policy
 
@@ -232,7 +244,7 @@ First slice:
 cx session subagent record --file <result.json> --json
 cx session subagent attach --role explore --claim-file <claims.json> --json
 cx session subagent launch --role explore --task "review the staged diff" --json
-cx session subagent complete --task-id <id> --claim "bounded claim" --json
+cx session subagent complete --task-id <id> --claim "bounded claim" --assumptions-surfaced pass --json
 cx session subagent status <task-id> --json
 ```
 

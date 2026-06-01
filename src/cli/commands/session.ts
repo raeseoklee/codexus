@@ -409,7 +409,20 @@ async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Pr
     return;
   }
   if (action === "complete") {
-    assertAllowedFlags(args, ["json", "cwd", "role", "task-id", "claim", "limitation", "evidence-link", "confidence"]);
+    assertAllowedFlags(args, [
+      "json",
+      "cwd",
+      "role",
+      "task-id",
+      "claim",
+      "limitation",
+      "evidence-link",
+      "confidence",
+      "assumptions-surfaced",
+      "simplest-sufficient-change",
+      "surgical-scope",
+      "verification-evidence-present",
+    ]);
     assertMaxPositionals(args, 2);
     const result = await completeSubagentArtifact(cwd, {
       role: flagString(args.flags, "role"),
@@ -418,6 +431,10 @@ async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Pr
       limitations: flagArray(args.flags, "limitation"),
       evidenceLinks: flagArray(args.flags, "evidence-link"),
       confidence: flagString(args.flags, "confidence"),
+      assumptionsSurfaced: flagString(args.flags, "assumptions-surfaced"),
+      simplestSufficientChange: flagString(args.flags, "simplest-sufficient-change"),
+      surgicalScope: flagString(args.flags, "surgical-scope"),
+      verificationEvidencePresent: flagString(args.flags, "verification-evidence-present"),
     });
     if (json) {
       console.log(JSON.stringify(result, null, 2));

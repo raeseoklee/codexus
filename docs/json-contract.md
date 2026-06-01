@@ -81,3 +81,7 @@ in `0.1.x`.
   notice.
 - Experimental/deferred surfaces must self-report their stability instead of
   looking supported.
+- Experimental surfaces may be added in `0.1.x` without freezing their JSON
+  contract. `0.2.0` is the promotion point for turning experimental evidence
+  surfaces into stable contract surfaces, or for making any breaking change to
+  already-frozen stable fields.

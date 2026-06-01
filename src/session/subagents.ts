@@ -12,6 +12,7 @@ import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 
 export type SubagentRecordMode = "record" | "attach" | "complete";
 export type SubagentClaimConfidence = "low" | "medium" | "high" | "unknown";
+export type SubagentChecklistStatus = "pass" | "fail" | "unknown";
 export type SubagentLaunchMode = "read_only";
 
 export interface SubagentClaim {
@@ -19,6 +20,13 @@ export interface SubagentClaim {
   text: string;
   confidence: SubagentClaimConfidence;
   evidenceLinks: string[];
+}
+
+export interface SubagentBehaviorChecklist {
+  assumptionsSurfaced: SubagentChecklistStatus;
+  simplestSufficientChange: SubagentChecklistStatus;
+  surgicalScope: SubagentChecklistStatus;
+  verificationEvidencePresent: SubagentChecklistStatus;
 }
 
 export interface SubagentResultArtifact {
@@ -35,6 +43,7 @@ export interface SubagentResultArtifact {
   claims: SubagentClaim[];
   limitations: string[];
   evidenceLinks: string[];
+  behaviorChecklist: SubagentBehaviorChecklist | null;
   rawShape: {
     type: string;
     keys: string[];
@@ -79,6 +88,7 @@ export interface SubagentLaunchContractArtifact {
       }>;
       limitations: string[];
       evidenceLinks: string[];
+      behaviorChecklist: SubagentBehaviorChecklist;
     };
   };
 }
@@ -133,10 +143,87 @@ function confidence(value: unknown): SubagentClaimConfidence {
   return value === "low" || value === "medium" || value === "high" ? value : "unknown";
 }
 
+function checklistStatus(value: unknown): SubagentChecklistStatus {
+  return value === "pass" || value === "fail" ? value : "unknown";
+}
+
+function unknownBehaviorChecklist(): SubagentBehaviorChecklist {
+  return {
+    assumptionsSurfaced: "unknown",
+    simplestSufficientChange: "unknown",
+    surgicalScope: "unknown",
+    verificationEvidencePresent: "unknown",
+  };
+}
+
 function assertConfidence(value: string | undefined): SubagentClaimConfidence {
   if (value === undefined) return "unknown";
   if (value === "low" || value === "medium" || value === "high" || value === "unknown") return value;
   throw new Error(`invalid_subagent_confidence:${value}`);
+}
+
+function assertChecklistStatus(value: string | undefined, field: string): SubagentChecklistStatus | undefined {
+  if (value === undefined) return undefined;
+  if (value === "pass" || value === "fail" || value === "unknown") return value;
+  throw new Error(`invalid_subagent_checklist_status:${field}=${value}`);
+}
+
+function normalizeBehaviorChecklist(parsed: unknown): SubagentBehaviorChecklist | null {
+  if (!isRecord(parsed) || !isRecord(parsed.behaviorChecklist)) return null;
+  const checklist = parsed.behaviorChecklist;
+  return {
+    assumptionsSurfaced: checklistStatus(checklist.assumptionsSurfaced),
+    simplestSufficientChange: checklistStatus(checklist.simplestSufficientChange),
+    surgicalScope: checklistStatus(checklist.surgicalScope),
+    verificationEvidencePresent: checklistStatus(checklist.verificationEvidencePresent),
+  };
+}
+
+function normalizeLaunchContract(parsed: unknown): SubagentLaunchContractArtifact {
+  const launch = parsed as SubagentLaunchContractArtifact;
+  return {
+    ...launch,
+    handoff: {
+      ...launch.handoff,
+      claimFileShape: {
+        ...launch.handoff.claimFileShape,
+        behaviorChecklist: normalizeBehaviorChecklist(launch.handoff.claimFileShape) ?? unknownBehaviorChecklist(),
+      },
+    },
+  };
+}
+
+function behaviorChecklistFromOptions(options: {
+  assumptionsSurfaced?: string;
+  simplestSufficientChange?: string;
+  surgicalScope?: string;
+  verificationEvidencePresent?: string;
+}): SubagentBehaviorChecklist | null {
+  const assumptionsSurfaced = assertChecklistStatus(options.assumptionsSurfaced, "assumptions-surfaced");
+  const simplestSufficientChange = assertChecklistStatus(
+    options.simplestSufficientChange,
+    "simplest-sufficient-change",
+  );
+  const surgicalScope = assertChecklistStatus(options.surgicalScope, "surgical-scope");
+  const verificationEvidencePresent = assertChecklistStatus(
+    options.verificationEvidencePresent,
+    "verification-evidence-present",
+  );
+  if (
+    assumptionsSurfaced === undefined
+    && simplestSufficientChange === undefined
+    && surgicalScope === undefined
+    && verificationEvidencePresent === undefined
+  ) {
+    return null;
+  }
+  return {
+    ...unknownBehaviorChecklist(),
+    assumptionsSurfaced: assumptionsSurfaced ?? "unknown",
+    simplestSufficientChange: simplestSufficientChange ?? "unknown",
+    surgicalScope: surgicalScope ?? "unknown",
+    verificationEvidencePresent: verificationEvidencePresent ?? "unknown",
+  };
 }
 
 function normalizeClaim(value: unknown): SubagentClaim | null {
@@ -226,6 +313,7 @@ export async function recordSubagentArtifact(cwd: string, options: {
   const claims = normalizeClaims(parsed);
   const limitations = normalizeLimitations(parsed);
   const evidenceLinks = normalizeEvidenceLinks(parsed, claims);
+  const behaviorChecklist = normalizeBehaviorChecklist(parsed);
   const recordedAt = new Date().toISOString();
   const artifact: SubagentResultArtifact = {
     schemaVersion: 1,
@@ -241,6 +329,7 @@ export async function recordSubagentArtifact(cwd: string, options: {
     claims,
     limitations,
     evidenceLinks,
+    behaviorChecklist,
     rawShape: {
       type: Array.isArray(parsed) ? "array" : typeof parsed,
       keys: isRecord(parsed) ? Object.keys(parsed).sort().slice(0, 50) : [],
@@ -287,7 +376,7 @@ async function readLaunchContractIfPresent(cwd: string, taskId: string): Promise
   if (!isRecord(parsed) || parsed.type !== "codexus.session.subagent_launch_contract" || parsed.schemaVersion !== 1) {
     throw new Error(`subagent_artifact_invalid:${taskId}`);
   }
-  return parsed as unknown as SubagentLaunchContractArtifact;
+  return normalizeLaunchContract(parsed);
 }
 
 export async function completeSubagentArtifact(cwd: string, options: {
@@ -297,6 +386,10 @@ export async function completeSubagentArtifact(cwd: string, options: {
   limitations?: string[];
   evidenceLinks?: string[];
   confidence?: string;
+  assumptionsSurfaced?: string;
+  simplestSufficientChange?: string;
+  surgicalScope?: string;
+  verificationEvidencePresent?: string;
 }): Promise<SubagentCompleteResult> {
   const claimTexts = options.claims.map((item) => item.trim()).filter(Boolean);
   if (claimTexts.length === 0) throw new Error("missing_subagent_claim");
@@ -304,6 +397,7 @@ export async function completeSubagentArtifact(cwd: string, options: {
   const launch = await readLaunchContractIfPresent(cwd, taskId);
   const role = options.role?.trim() || launch?.role || "subagent";
   const claimConfidence = assertConfidence(options.confidence);
+  const behaviorChecklist = behaviorChecklistFromOptions(options);
   const evidenceLinks = [...new Set((options.evidenceLinks ?? []).map((item) => item.trim()).filter(Boolean))].sort();
   const limitations = (options.limitations ?? []).map((item) => item.trim()).filter(Boolean);
   const claims = claimTexts.map((text): SubagentClaim => ({
@@ -327,9 +421,19 @@ export async function completeSubagentArtifact(cwd: string, options: {
     claims,
     limitations,
     evidenceLinks,
+    behaviorChecklist,
     rawShape: {
       type: "cli-completion",
-      keys: ["claim", "limitation", "evidence-link", "confidence"].sort(),
+      keys: [
+        "assumptions-surfaced",
+        "claim",
+        "confidence",
+        "evidence-link",
+        "limitation",
+        "simplest-sufficient-change",
+        "surgical-scope",
+        "verification-evidence-present",
+      ].sort(),
     },
   };
   const paths = sessionPaths(cwd);
@@ -417,6 +521,7 @@ export async function createSubagentLaunchContract(cwd: string, options: {
         ],
         limitations: ["native subagent launch was performed outside Codexus or was unavailable"],
         evidenceLinks: [],
+        behaviorChecklist: unknownBehaviorChecklist(),
       },
     },
   };
@@ -462,7 +567,10 @@ export async function readSubagentArtifact(cwd: string, taskId: string): Promise
   if (!isRecord(parsed) || parsed.type !== "codexus.session.subagent_result" || parsed.schemaVersion !== 1) {
     throw new Error(`subagent_artifact_invalid:${safeTaskId}`);
   }
-  return parsed as unknown as SubagentResultArtifact;
+  return {
+    ...(parsed as unknown as SubagentResultArtifact),
+    behaviorChecklist: normalizeBehaviorChecklist(parsed),
+  };
 }
 
 export async function readSubagentStatusArtifact(cwd: string, taskId: string): Promise<SubagentStatusArtifact> {
@@ -478,7 +586,7 @@ export async function readSubagentStatusArtifact(cwd: string, taskId: string): P
   if (!isRecord(parsed) || parsed.type !== "codexus.session.subagent_launch_contract" || parsed.schemaVersion !== 1) {
     throw new Error(`subagent_artifact_invalid:${safeTaskId}`);
   }
-  return { kind: "launch", launch: parsed as unknown as SubagentLaunchContractArtifact };
+  return { kind: "launch", launch: normalizeLaunchContract(parsed) };
 }
 
 export function summarizeSubagentClaims(state: CodexusSessionState | null): {

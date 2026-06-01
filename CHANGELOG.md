@@ -27,6 +27,10 @@ occur before 1.0, but they should be called out clearly.
 - Expanded `cx slop check` behavior evidence with non-gating surgicality,
   verification-artifact, test-diff, and diff-surface facts plus advisory
   simplicity and unresolved-assumption heuristics that never affect `--gate`.
+- Added optional subagent behavior checklist fields to `session subagent
+  record/attach/complete` artifacts. The checklist supports `pass|fail|unknown`
+  review assertions without refreshing verification evidence or claiming
+  Codexus launched the subagent.
 
 ### Fixed
 

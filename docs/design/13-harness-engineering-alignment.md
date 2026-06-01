@@ -269,7 +269,8 @@ Subagent support should continue to be recorder/handoff/contract-only until a
 supported Codex bridge exists. The behavior contract can improve the recorded
 claim format without pretending Codexus launched the subagent.
 
-Optional future fields for `session subagent complete` artifacts:
+Implemented optional fields for `session subagent complete` and file-based
+subagent result artifacts:
 
 ```json
 {
@@ -282,9 +283,9 @@ Optional future fields for `session subagent complete` artifacts:
 }
 ```
 
-These values should be curator/subagent assertions unless Codexus can derive the
-fact from local artifacts. They may influence review, but they must not refresh
-verification freshness.
+These values are curator/subagent assertions unless Codexus can derive the fact
+from local artifacts. They may influence review, but they do not refresh
+verification freshness or grant completion authority.
 
 ## Positioning
 
@@ -323,8 +324,9 @@ Avoid ungrounded claims:
 4. **Behavior evidence expansion**: implemented first-slice `cx slop check`
    surgicality, simplicity, assumption, verification-artifact, and diff-surface
    lanes while keeping heuristics advisory.
-5. **Subagent checklist**: add optional behavior checklist fields to recorded
-   claim artifacts.
+5. **Subagent checklist**: implemented optional behavior checklist fields for
+   recorded and completed claim artifacts; they remain review inputs, not
+   completion authority.
 6. **Observability adapters**: add dev-server/browser/log evidence descriptors
    only after the above gates are stable.
 

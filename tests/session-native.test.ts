@@ -898,6 +898,12 @@ test("session subagent record stores unverified claims without changing evidence
         },
       ],
       limitations: ["read-only review"],
+      behaviorChecklist: {
+        assumptionsSurfaced: "pass",
+        simplestSufficientChange: "unknown",
+        surgicalScope: "pass",
+        verificationEvidencePresent: "fail",
+      },
     }, null, 2)}\n`);
 
     const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
@@ -908,6 +914,12 @@ test("session subagent record stores unverified claims without changing evidence
     const output = JSON.parse(record.stdout);
     assert.equal(output.artifact.taskId, "review-1");
     assert.equal(output.artifact.claims.length, 1);
+    assert.deepEqual(output.artifact.behaviorChecklist, {
+      assumptionsSurfaced: "pass",
+      simplestSufficientChange: "unknown",
+      surgicalScope: "pass",
+      verificationEvidencePresent: "fail",
+    });
     assert.equal(output.link.claimCount, 1);
     assert.ok(existsSync(output.artifactPath));
 
@@ -975,6 +987,12 @@ test("session subagent launch records unavailable launcher contract without prom
     assert.equal(output.launch.policy.completionAuthority, "verification");
     assert.match(output.launch.handoff.recordCommand, /session subagent attach/);
     assert.match(output.launch.handoff.completeCommand, /session subagent complete/);
+    assert.deepEqual(output.launch.handoff.claimFileShape.behaviorChecklist, {
+      assumptionsSurfaced: "unknown",
+      simplestSufficientChange: "unknown",
+      surgicalScope: "unknown",
+      verificationEvidencePresent: "unknown",
+    });
     assert.equal(output.link.status, "launch_unavailable");
     assert.equal(output.link.claimCount, 0);
     assert.ok(existsSync(output.artifactPath));
@@ -1028,6 +1046,14 @@ test("session subagent complete records hosted subagent claims without promoting
       "manual-review:subagent",
       "--confidence",
       "medium",
+      "--assumptions-surfaced",
+      "pass",
+      "--simplest-sufficient-change",
+      "unknown",
+      "--surgical-scope",
+      "pass",
+      "--verification-evidence-present",
+      "fail",
       "--json",
     ], { CODEX_HOME: codexHome });
     assert.equal(complete.status, 0, complete.stderr);
@@ -1039,6 +1065,12 @@ test("session subagent complete records hosted subagent claims without promoting
     assert.equal(output.artifact.claims.length, 2);
     assert.equal(output.artifact.claims[0].confidence, "medium");
     assert.deepEqual(output.artifact.evidenceLinks, ["manual-review:subagent"]);
+    assert.deepEqual(output.artifact.behaviorChecklist, {
+      assumptionsSurfaced: "pass",
+      simplestSufficientChange: "unknown",
+      surgicalScope: "pass",
+      verificationEvidencePresent: "fail",
+    });
     assert.equal(output.link.status, "attached");
     assert.equal(output.link.claimCount, 2);
     assert.equal(output.launch.taskId, launchOutput.launch.taskId);
@@ -1055,6 +1087,19 @@ test("session subagent complete records hosted subagent claims without promoting
     ], { CODEX_HOME: codexHome });
     assert.equal(invalid.status, 1);
     assert.equal(JSON.parse(invalid.stdout).code, "invalid_subagent_confidence");
+
+    const invalidChecklist = runCli(cwd, [
+      "session",
+      "subagent",
+      "complete",
+      "--claim",
+      "invalid checklist status should not be recorded",
+      "--assumptions-surfaced",
+      "yes",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(invalidChecklist.status, 1);
+    assert.equal(JSON.parse(invalidChecklist.stdout).code, "invalid_subagent_checklist_status");
 
     const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
     assert.equal(status.status, 0, status.stderr);

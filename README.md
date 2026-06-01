@@ -195,7 +195,7 @@ cx session verify --auto --json
 cx session verify --verify "npm test" --json
 cx session slop --json
 cx session subagent launch --role reviewer --task "review the staged diff" --json
-cx session subagent complete --task-id <id> --claim "review found no API drift" --json
+cx session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
 cx session subagent record --file <result.json> --json
 cx session workers status --json
 cx schema engine --json

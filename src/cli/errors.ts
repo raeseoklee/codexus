@@ -115,6 +115,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing subagent claim.";
     case "invalid_subagent_confidence":
       return `Invalid subagent claim confidence${target ? `: ${target}` : ""}.`;
+    case "invalid_subagent_checklist_status":
+      return `Invalid subagent behavior checklist status${target ? `: ${target}` : ""}.`;
     case "subagent_not_found":
       return `Subagent artifact not found${target ? `: ${target}` : ""}.`;
     case "subagent_artifact_invalid":
@@ -258,6 +260,8 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass at least one `--claim <text>` with `cx session subagent complete`.";
     case "invalid_subagent_confidence":
       return "Use `--confidence low|medium|high|unknown`.";
+    case "invalid_subagent_checklist_status":
+      return "Use `pass|fail|unknown` for subagent behavior checklist flags.";
     case "invalid_skill_export_target":
       return "Use `--target codex`.";
     case "skill_not_active":

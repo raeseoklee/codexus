@@ -77,3 +77,6 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
 - Patch release(`0.1.x`): stable surface에는 additive JSON field만 허용.
 - Minor release(`0.2.0`): changelog notice와 함께 frozen field 제거/재정의 가능.
 - Experimental/deferred surface는 supported처럼 보이지 않도록 stability를 자기보고해야 함.
+- Experimental surface는 JSON contract를 freeze하지 않고 `0.1.x`에서 추가할 수 있습니다.
+  `0.2.0`은 experimental evidence surface를 stable contract surface로 승격하거나 이미
+  frozen된 stable field에 breaking change가 필요할 때의 promotion point입니다.

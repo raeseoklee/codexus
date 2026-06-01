@@ -101,8 +101,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   verification freshness와 분리합니다. `cx session subagent launch`는
   `launcher.supported: false`인 deferred launcher contract를 기록합니다.
   `cx session subagent complete`는 현재 Codex session에서 사용한 native subagent의 최종
-  claim을 기록하되 Codexus가 spawn했다고 주장하지 않습니다. Codexus는 여전히 CLI에서
-  native subagent를 spawn하지 않습니다.
+  claim과 optional `pass|fail|unknown` behavior checklist assertion을 기록하되 Codexus가
+  spawn했다고 주장하지 않습니다. Codexus는 여전히 CLI에서 native subagent를 spawn하지
+  않습니다.
 - `cx session workers status --json`은 worker pane을 시작하지 않고 tmux-backed worker
   launch gate를 보고합니다.
 - `cx setup codex-session --enable-notify-hook`은 현재 project가 Codex config에서

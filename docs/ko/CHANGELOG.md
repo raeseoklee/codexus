@@ -26,6 +26,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   verification-artifact, test-diff, diff-surface fact와 advisory simplicity/
   unresolved-assumption heuristic을 추가하되, 이 heuristic은 `--gate`에 영향을 주지
   않습니다.
+- `session subagent record/attach/complete` artifact에 optional subagent behavior
+  checklist field를 추가했습니다. Checklist는 `pass|fail|unknown` review assertion을
+  지원하지만 verification evidence를 fresh로 만들거나 Codexus가 subagent를 launch했다고
+  주장하지 않습니다.
 
 ### Fixed
 
