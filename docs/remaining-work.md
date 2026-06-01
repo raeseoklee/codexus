@@ -162,9 +162,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     guarded alpha publish, trusted-publishing release workflow, Node 22 package
     smoke compatibility, and stable-readiness smoke coverage implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current npm baseline is `0.1.0-alpha.7`; prereleases publish through
-      `publish:next` as a fallback/dev path. `0.1.0` stable is gated on a
-      successful trusted-publishing rehearsal, release evidence, and `v0.1.0`.
+    - Current npm baseline is `0.1.0`; prereleases publish through
+      `publish:next` as a fallback/dev path, while stable releases publish from
+      trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin
       paths, runtime assets, strict doctor, supply-chain gate, mock
       pass/fail/repair/resume/cancel/events, and postinstall skill adapter
