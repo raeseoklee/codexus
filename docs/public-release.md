@@ -70,7 +70,7 @@ stable cut:
 - Configure npm trusted publishing for repository `raeseoklee/codexus` and
   workflow filename `release.yml`.
 - Prove the workflow with a prerelease rehearsal, for example
-  `0.1.0-alpha.5` using `workflow_dispatch` with `mode=next`.
+  `0.1.0-alpha.7` using `workflow_dispatch` with `mode=next`.
 - Confirm `npm run package:smoke` passes. This runs `npm pack`, installs the
   tarball into a temporary global prefix, checks the public bins, validates
   runtime schema assets, executes mock run/resume/cancel/status/event flows,

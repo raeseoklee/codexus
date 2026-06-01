@@ -67,7 +67,7 @@ Stable cut 전에 다음을 확인합니다:
 
 - npm trusted publishing이 repository `raeseoklee/codexus`, workflow filename
   `release.yml`을 가리키도록 설정.
-- `workflow_dispatch mode=next`로 `0.1.0-alpha.5` 같은 prerelease rehearsal을 1회
+- `workflow_dispatch mode=next`로 `0.1.0-alpha.7` 같은 prerelease rehearsal을 1회
   수행해 workflow publish를 증명.
 - `npm run package:smoke` 통과. 이 command는 `npm pack`, 임시 global prefix install,
   public bin 확인, runtime schema asset 검증, mock run/resume/cancel/status/event
