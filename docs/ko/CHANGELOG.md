@@ -9,7 +9,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
-아직 변경 사항이 없습니다.
+### Fixed
+
+- `install.sh`가 custom bin directory로 설치할 때 실제 `CODEXUS_BIN_DIR` 경로를
+  보고하도록 수정했습니다.
 
 ## 0.1.0 - 2026-06-01
 

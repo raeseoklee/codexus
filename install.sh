@@ -59,7 +59,11 @@ if [ "$install_skill" != "0" ]; then
 fi
 
 log "Installed Codexus $package_version to $package_root"
-log "Linked cx and codexus into $prefix_bin"
+if [ "$bin_dir" = "$prefix_bin" ]; then
+  log "Linked cx and codexus into $bin_dir"
+else
+  log "Linked cx and codexus into $bin_dir (targeting $prefix_bin)"
+fi
 
 case ":$PATH:" in
   *":$bin_dir:"*) ;;

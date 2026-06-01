@@ -9,7 +9,10 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
-No changes yet.
+### Fixed
+
+- `install.sh` now reports the actual `CODEXUS_BIN_DIR` when users install into
+  a custom bin directory.
 
 ## 0.1.0 - 2026-06-01
 

@@ -7,6 +7,10 @@ import { join, resolve } from "node:path";
 
 const root = resolve(".");
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 async function tempDir(): Promise<string> {
   return await mkdtemp(join(tmpdir(), "codexus-install-"));
 }
@@ -52,7 +56,9 @@ test("install.sh delegates to npm install and links canonical bins", async () =>
       },
     });
     assert.equal(install.status, 0, install.stderr ?? install.error?.message);
-    assert.match(install.stdout, new RegExp(`Installed Codexus ${pkg.version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+    assert.match(install.stdout, new RegExp(`Installed Codexus ${escapeRegExp(pkg.version)}`));
+    assert.match(install.stdout, new RegExp(`Linked cx and codexus into ${escapeRegExp(binDir)}`));
+    assert.match(install.stdout, new RegExp(`Try: ${escapeRegExp(join(binDir, "cx"))} schema check --json`));
 
     for (const name of ["cx", "codexus"]) {
       const stat = await lstat(join(binDir, name));
