@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer, type Socket } from "node:net";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -232,6 +232,30 @@ test("app-server discovery surfaces explicit socket candidates without connectin
   assert.equal(report.record.enabled, true);
 });
 
+test("app-server discovery reports validate as schema artifacts", async () => {
+  const cwd = await tempDir();
+  try {
+    const candidate = classifyAppServerProcessLine("  100 1 codex app-server --listen unix:///tmp/codex.sock");
+    assert.ok(candidate);
+    const reportPath = join(cwd, "discovery.json");
+    const report = buildAppServerDiscoveryReport({
+      cwd,
+      command: "codex",
+      controlSocketPath: "/home/user/.codex/app-server-control/app-server-control.sock",
+      controlSocketExists: false,
+      daemonVersionProbe: probe("failed"),
+      processCandidates: [candidate],
+      recordPath: reportPath,
+    });
+    await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-server-discovery", "--file", reportPath, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("live-read-only without env gate yields structured unsupported error", async () => {
   const cwd = await tempDir();
   try {
@@ -299,8 +323,12 @@ test("live-read-only records desktop turn-boundary evidence without transcript v
     assert.deepEqual(fake.receivedMethods, ["initialize", "thread/list", "remoteControl/status/read"]);
     assert.doesNotMatch(JSON.stringify(manifest), /should-not-be-stored/);
     assert.ok(existsSync(join(manifest.experimentDir, "manifest.json")));
-    const persisted = JSON.parse(await readFile(join(manifest.experimentDir, "manifest.json"), "utf8"));
+    const manifestPath = join(manifest.experimentDir, "manifest.json");
+    const persisted = JSON.parse(await readFile(manifestPath, "utf8"));
     assert.equal(persisted.eventObservation.runtimeSurface, "desktop-app-server");
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-server-stage-b", "--file", manifestPath, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
   } finally {
     await fake.close();
     await rm(cwd, { recursive: true, force: true });

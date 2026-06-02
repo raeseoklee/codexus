@@ -113,14 +113,15 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx init` creates project-local config/state directories without mutating
   unrelated tool state.
 - Run observability commands list runs, tail events, and preview reports.
-- App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, and explicit opt-in Stage B read-only socket observation are present, while live app-server execution remains gated off.
+- App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, and explicit opt-in Stage B read-only socket observation are present, while live app-server execution remains gated off. Discovery, Stage A, and Stage B app-server evidence manifests are registered as experimental schema-validatable artifacts.
 - Cron/gateway now expose an experimental explicit-approval live dispatch slice
   on top of the existing dry-run contract: `cx cron run-now` / `cx gateway
   check` can acquire an automation lock, record policy and approval artifacts,
   dispatch a normal supervised run, and return the linked run ledger.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
-  descriptors, and app instance artifacts, with focused enforcement plus
+  descriptors, app instance artifacts, and app-server discovery/experiment
+  evidence manifests, with focused enforcement plus
   zero-dependency schema-artifact subset validation on single-record and
   run-ledger checks.
 - Codex JSONL usage is captured when present and terminal state records usage or
@@ -460,7 +461,7 @@ review. Current high-level gaps:
 
 - Driver-failure repair is implemented only for repairable task failures and only with an explicit budget.
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
-- Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, deterministic fake lifecycle supervision, Stage A isolated real evidence, and Stage B read-only evidence are implemented behind explicit gates.
+- Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, and schema-validatable Stage B read-only evidence are implemented behind explicit gates.
 - First Stage B maintainer Desktop smoke was negative: no usable app-server
   WebSocket socket was found, and a discovered IPC socket closed before
   handshake. Desktop attachment remains unavailable/unobserved until a supported

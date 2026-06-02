@@ -68,7 +68,10 @@ export type SchemaValidationType =
   | "decision"
   | "app-instance-descriptor"
   | "app-instance"
-  | "app-instance-observation";
+  | "app-instance-observation"
+  | "app-server-discovery"
+  | "app-server-stage-a"
+  | "app-server-stage-b";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -104,6 +107,9 @@ export const schemaArtifactNames = [
   "app-instance-descriptor.schema.json",
   "app-instance.schema.json",
   "app-instance-observation.schema.json",
+  "app-server-discovery.schema.json",
+  "app-server-stage-a.schema.json",
+  "app-server-stage-b.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -125,6 +131,9 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "app-instance-descriptor": "app-instance-descriptor.schema.json",
   "app-instance": "app-instance.schema.json",
   "app-instance-observation": "app-instance-observation.schema.json",
+  "app-server-discovery": "app-server-discovery.schema.json",
+  "app-server-stage-a": "app-server-stage-a.schema.json",
+  "app-server-stage-b": "app-server-stage-b.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -741,6 +750,82 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
   if (type === "app-instance-observation") {
     const validation = validateAppInstanceObservation(value);
     errors.push(...validation.errors);
+  }
+
+  if (type === "app-server-discovery") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "command", ["app-server discover"], errors);
+    requireString(value, "cwd", errors);
+    requireString(value, "generatedAt", errors);
+    if (requireRecord(value.consent, errors, "consent")) {
+      if (value.consent.readOnly !== true) errors.push("consent.readOnly:not_true");
+      if (value.consent.remoteControlAutoEnabled !== false) errors.push("consent.remoteControlAutoEnabled:not_false");
+      if (value.consent.connectsToLiveSocket !== false) errors.push("consent.connectsToLiveSocket:not_false");
+      if (value.consent.startsDaemon !== false) errors.push("consent.startsDaemon:not_false");
+    }
+    requireRecord(value.controlSocket, errors, "controlSocket");
+    requireRecord(value.daemonVersionProbe, errors, "daemonVersionProbe");
+    requireRecord(value.processes, errors, "processes");
+    if (requireRecord(value.stageBReadiness, errors, "stageBReadiness")) {
+      requireOneOf(value.stageBReadiness, "status", ["candidate_socket_found", "stdio_only", "no_app_server", "unknown"], errors, "stageBReadiness.status");
+      requireOneOf(value.stageBReadiness, "promotionRecommendation", ["run_live_read_only_with_explicit_socket", "design_stdio_observer", "block_stage_b"], errors, "stageBReadiness.promotionRecommendation");
+    }
+    requireRecord(value.record, errors, "record");
+  }
+
+  if (type === "app-server-stage-a") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "mode", ["isolated-real"], errors);
+    requireString(value, "experimentId", errors);
+    requireString(value, "cwd", errors);
+    requireString(value, "experimentDir", errors);
+    requireNumber(value, "timeoutMs", errors);
+    requireRecord(value.isolation, errors, "isolation");
+    requireRecord(value.schemaDrift, errors, "schemaDrift");
+    requireRecord(value.appServerLifecycle, errors, "appServerLifecycle");
+    if (requireRecord(value.observerAttach, errors, "observerAttach")) {
+      requireOneOf(value.observerAttach, "observerAttach", ["observed", "unobserved", "unsupported", "unknown"], errors, "observerAttach.observerAttach");
+    }
+    requireRecord(value.cleanup, errors, "cleanup");
+    if (requireArray(value, "relevantEventMethods", errors).some((item) => typeof item !== "string")) errors.push("relevantEventMethods:non_string_item");
+    requireOneOf(value, "conservativeCapability", ["unobserved", "observed"], errors);
+  }
+
+  if (type === "app-server-stage-b") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "mode", ["live-read-only"], errors);
+    requireString(value, "experimentId", errors);
+    requireString(value, "cwd", errors);
+    requireString(value, "experimentDir", errors);
+    requireNumber(value, "timeoutMs", errors);
+    requireNumber(value, "observeMs", errors);
+    if (requireRecord(value.consent, errors, "consent")) {
+      requireOneOf(value.consent, "commandFlag", ["live-read-only"], errors, "consent.commandFlag");
+      requireOneOf(value.consent, "envGate", ["CODEXUS_ENABLE_DESKTOP_APP_SERVER_ATTACH"], errors, "consent.envGate");
+      requireBoolean(value.consent, "envGateEnabled", errors, "consent.envGateEnabled");
+      requireBoolean(value.consent, "userProvidedSocket", errors, "consent.userProvidedSocket");
+      if (value.consent.remoteControlAutoEnabled !== false) errors.push("consent.remoteControlAutoEnabled:not_false");
+      if (value.consent.readOnly !== true) errors.push("consent.readOnly:not_true");
+    }
+    requireRecord(value.socket, errors, "socket");
+    if (requireRecord(value.connection, errors, "connection")) {
+      requireOneOf(value.connection, "status", ["observed", "unobserved", "unavailable"], errors, "connection.status");
+      requireOneOf(value.connection, "handshake", ["observed", "unobserved", "unavailable"], errors, "connection.handshake");
+    }
+    requireArray(value, "readOnlyRequests", errors);
+    if (requireRecord(value.eventObservation, errors, "eventObservation")) {
+      requireOneOf(value.eventObservation, "status", ["observed", "unobserved", "unavailable"], errors, "eventObservation.status");
+      requireOneOf(value.eventObservation, "runtimeSurface", ["unknown", "desktop-app-server"], errors, "eventObservation.runtimeSurface");
+      requireBoolean(value.eventObservation, "turnBoundaryObserved", errors, "eventObservation.turnBoundaryObserved");
+      if (requireArray(value.eventObservation, "notificationMethods", errors, "eventObservation.notificationMethods").some((item) => typeof item !== "string")) {
+        errors.push("eventObservation.notificationMethods:non_string_item");
+      }
+      if (requireArray(value.eventObservation, "relevantEventMethods", errors, "eventObservation.relevantEventMethods").some((item) => typeof item !== "string")) {
+        errors.push("eventObservation.relevantEventMethods:non_string_item");
+      }
+      requireArray(value.eventObservation, "messages", errors, "eventObservation.messages");
+    }
+    requireOneOf(value, "promotionRecommendation", ["allow_session_mapping_design", "block_stage_b", "inconclusive"], errors);
   }
 
   return { schemaVersion: 1, type, valid: errors.length === 0, errors };

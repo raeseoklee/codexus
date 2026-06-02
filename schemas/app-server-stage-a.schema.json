@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/app-server-stage-a.schema.json",
+  "title": "Codexus App Server Stage A Manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "experimentId": { "type": "string", "minLength": 1 },
+    "mode": { "const": "isolated-real" },
+    "cwd": { "type": "string", "minLength": 1 },
+    "experimentDir": { "type": "string", "minLength": 1 },
+    "timeoutMs": { "type": "number", "exclusiveMinimum": 0 },
+    "isolation": {
+      "type": "object",
+      "properties": {
+        "codexHome": { "type": "string", "minLength": 1 },
+        "workspace": { "type": "string", "minLength": 1 },
+        "socketPath": { "type": "string", "minLength": 1 }
+      },
+      "required": ["codexHome", "workspace", "socketPath"]
+    },
+    "schemaDrift": {
+      "type": "object",
+      "properties": {
+        "generated": { "type": "string", "minLength": 1 },
+        "matchesFixture": { "enum": [true, false, "unknown"] },
+        "generatedMethods": { "type": "array", "items": { "type": "string" } },
+        "fixtureMethods": { "type": "array", "items": { "type": "string" } },
+        "missingFixtureMethods": { "type": "array", "items": { "type": "string" } },
+        "extraGeneratedMethods": { "type": "array", "items": { "type": "string" } },
+        "sourceFile": { "type": ["string", "null"] },
+        "schemaFileCount": { "type": "number", "minimum": 0 },
+        "boundedSummary": { "type": "string" }
+      },
+      "required": ["generated", "matchesFixture", "generatedMethods", "fixtureMethods", "missingFixtureMethods", "extraGeneratedMethods", "sourceFile", "schemaFileCount", "boundedSummary"]
+    },
+    "appServerLifecycle": {
+      "type": "object",
+      "properties": {
+        "attempted": { "type": "boolean" },
+        "transport": { "const": "direct-listen" },
+        "socketReady": { "type": "boolean" },
+        "supervised": { "type": ["object", "null"] },
+        "environmentUnsupported": { "type": ["string", "null"] },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["attempted", "transport", "socketReady", "supervised", "environmentUnsupported", "reason"]
+    },
+    "observerAttach": {
+      "type": "object",
+      "properties": {
+        "observerAttach": { "enum": ["observed", "unobserved", "unsupported", "unknown"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "overlapObserved": { "type": "boolean" },
+        "firstClient": { "type": ["object", "null"] },
+        "secondClient": { "type": ["object", "null"] }
+      },
+      "required": ["observerAttach", "reason", "overlapObserved", "firstClient", "secondClient"]
+    },
+    "cleanup": {
+      "type": "object",
+      "properties": {
+        "appServerStopRequested": { "type": "boolean" },
+        "appServerStopCompleted": { "type": "boolean" },
+        "appServerStopSignal": { "type": ["string", "null"] },
+        "daemonStopRequested": { "type": "boolean" },
+        "daemonStopCompleted": { "type": "boolean" },
+        "daemonStopSignal": { "type": ["string", "null"] },
+        "daemonStopStatus": { "enum": ["not_attempted", "passed", "failed", "timed_out", "error"] },
+        "daemonStopExitCode": { "type": ["number", "null"] },
+        "daemonStopError": { "type": ["string", "null"] },
+        "noLingeringChild": { "type": "boolean" },
+        "tempDirsRemoved": { "type": "boolean" }
+      },
+      "required": ["appServerStopRequested", "appServerStopCompleted", "appServerStopSignal", "daemonStopRequested", "daemonStopCompleted", "daemonStopSignal", "daemonStopStatus", "daemonStopExitCode", "daemonStopError", "noLingeringChild", "tempDirsRemoved"]
+    },
+    "relevantEventMethods": { "type": "array", "items": { "type": "string" } },
+    "conservativeCapability": { "enum": ["unobserved", "observed"] }
+  },
+  "required": ["schemaVersion", "stability", "experimentId", "mode", "cwd", "experimentDir", "timeoutMs", "isolation", "schemaDrift", "appServerLifecycle", "observerAttach", "cleanup", "relevantEventMethods", "conservativeCapability"]
+}

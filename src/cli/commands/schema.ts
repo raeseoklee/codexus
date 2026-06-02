@@ -33,6 +33,9 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "app-instance-descriptor",
   "app-instance",
   "app-instance-observation",
+  "app-server-discovery",
+  "app-server-stage-a",
+  "app-server-stage-b",
 ]);
 
 function parseSchemaType(value: string | undefined): SchemaValidationType {

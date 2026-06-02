@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/app-server-stage-b.schema.json",
+  "title": "Codexus App Server Stage B Manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "experimentId": { "type": "string", "minLength": 1 },
+    "mode": { "const": "live-read-only" },
+    "cwd": { "type": "string", "minLength": 1 },
+    "experimentDir": { "type": "string", "minLength": 1 },
+    "timeoutMs": { "type": "number", "exclusiveMinimum": 0 },
+    "observeMs": { "type": "number", "exclusiveMinimum": 0 },
+    "consent": {
+      "type": "object",
+      "properties": {
+        "commandFlag": { "const": "live-read-only" },
+        "envGate": { "const": "CODEXUS_ENABLE_DESKTOP_APP_SERVER_ATTACH" },
+        "envGateEnabled": { "type": "boolean" },
+        "userProvidedSocket": { "type": "boolean" },
+        "remoteControlAutoEnabled": { "const": false },
+        "readOnly": { "const": true }
+      },
+      "required": ["commandFlag", "envGate", "envGateEnabled", "userProvidedSocket", "remoteControlAutoEnabled", "readOnly"]
+    },
+    "socket": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "absolute": { "type": "boolean" },
+        "existsBeforeConnect": { "type": "boolean" },
+        "source": { "const": "flag" }
+      },
+      "required": ["path", "absolute", "existsBeforeConnect", "source"]
+    },
+    "connection": {
+      "type": "object",
+      "properties": {
+        "status": { "enum": ["observed", "unobserved", "unavailable"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "handshake": { "enum": ["observed", "unobserved", "unavailable"] },
+        "error": { "type": ["string", "null"] },
+        "durationMs": { "type": "number", "minimum": 0 },
+        "bytesRead": { "type": "number", "minimum": 0 },
+        "bytesWritten": { "type": "number", "minimum": 0 }
+      },
+      "required": ["status", "reason", "handshake", "error", "durationMs", "bytesRead", "bytesWritten"]
+    },
+    "readOnlyRequests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": { "enum": ["initialize", "thread/list", "remoteControl/status/read"] },
+          "sent": { "type": "boolean" }
+        },
+        "required": ["method", "sent"]
+      }
+    },
+    "eventObservation": {
+      "type": "object",
+      "properties": {
+        "status": { "enum": ["observed", "unobserved", "unavailable"] },
+        "runtimeSurface": { "enum": ["unknown", "desktop-app-server"] },
+        "turnBoundaryObserved": { "type": "boolean" },
+        "notificationMethods": { "type": "array", "items": { "type": "string" } },
+        "relevantEventMethods": { "type": "array", "items": { "type": "string" } },
+        "messages": { "type": "array", "items": { "type": "object" } },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["status", "runtimeSurface", "turnBoundaryObserved", "notificationMethods", "relevantEventMethods", "messages", "reason"]
+    },
+    "promotionRecommendation": { "enum": ["allow_session_mapping_design", "block_stage_b", "inconclusive"] }
+  },
+  "required": ["schemaVersion", "stability", "experimentId", "mode", "cwd", "experimentDir", "timeoutMs", "observeMs", "consent", "socket", "connection", "readOnlyRequests", "eventObservation", "promotionRecommendation"]
+}

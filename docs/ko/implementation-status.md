@@ -46,7 +46,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - deterministic replay 뒤 explicit budget/policy/live-environment gated model replay
 - unrelated tool state를 건드리지 않는 `cx init`
 - runs/events/report observability command
-- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled
+- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled. Discovery, Stage A, Stage B app-server evidence manifest는 experimental schema-validatable artifact로 등록되어 있습니다.
 - cron/gateway의 experimental explicit-approval live dispatch와
   policy/approval contract field를 포함한 dry-run automation plan 및
   optional audit record
@@ -331,7 +331,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   - `typosquat_name_similarity_deferred`
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
-- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
+- init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, schema-validatable Stage A isolated real evidence, schema-validatable Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
 
 ## 남은 gap
 
@@ -340,7 +340,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 - driver-failure repair는 repairable task failure에 한해 explicit budget이 있을 때만 실행됩니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
-- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision, Stage A isolated real evidence, Stage B read-only evidence를 explicit gate 뒤에 구현했습니다.
+- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, schema-validatable Stage B read-only evidence를 explicit gate 뒤에 구현했습니다.
 - 첫 Stage B maintainer Desktop smoke는 negative였습니다. 사용할 수 있는 app-server
   WebSocket socket을 찾지 못했고, 발견된 IPC socket은 handshake 전에 닫혔습니다.
   지원되는 socket 또는 별도 stdio-observer 설계가 증명될 때까지 Desktop attachment는

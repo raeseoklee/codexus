@@ -284,6 +284,11 @@ test("isolated-real happy path with fake codex records truthful manifest", async
     assert.ok(existsSync(manifestPath), "manifest should be persisted");
     const persisted = JSON.parse(await readFile(manifestPath, "utf8"));
     assert.equal(persisted.mode, "isolated-real");
+    const schema = spawnSync(process.execPath, [cli, "schema", "validate", "--type", "app-server-stage-a", "--file", manifestPath, "--json"], {
+      encoding: "utf8",
+    });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
     assert.equal(existsSync(manifest.isolation.codexHome), false);
     assert.equal(existsSync(manifest.isolation.workspace), false);
   } finally {

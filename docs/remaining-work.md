@@ -66,7 +66,8 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
 - Desktop app-server attachment evidence advanced through Stage A isolated
   real evidence and a Stage B read-only command surface that requires explicit
   opt-in and a user-provided socket. It records method shapes, not transcript
-  values, and still does not enable product behavior.
+  values, registers discovery/Stage A/Stage B evidence manifests as
+  schema-validatable artifacts, and still does not enable product behavior.
 - Session-native evidence surfaces advanced further: `cx session verify --auto`
   now detects verification candidates without execution, the quality evidence
   guard is available as `cx slop check` / `cx session slop`, and subagent claim
@@ -234,10 +235,11 @@ evidence only when the supporting runtime exists:
 3. Complete the Desktop app-server attachment evidence loop before enabling any
    app-server product behavior: Stage A isolated temporary-state evidence is
    implemented, Stage B has a gated read-only socket command surface, and
-   `cx app-server discover --json/--record` now records real Desktop discovery
-   evidence. Current maintainer evidence is `stdio_only` with no managed control
-   socket, so the next slice is either an explicit user-provided socket attempt
-   or a separate stdio-observer design. Keep app-server driver enablement
+   discovery/Stage A/Stage B manifests are schema-validatable. `cx app-server
+   discover --json/--record` now records real Desktop discovery evidence.
+   Current maintainer evidence is `stdio_only` with no managed control socket,
+   so the next slice is either an explicit user-provided socket attempt or a
+   separate stdio-observer design. Keep app-server driver enablement
    separate and still gated.
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`, and the first synchronous dispatcher

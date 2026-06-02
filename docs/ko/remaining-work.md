@@ -63,7 +63,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
 - Desktop app-server attachment evidence는 Stage A isolated real evidence와
   explicit opt-in 및 사용자 제공 socket이 필요한 Stage B read-only command
   surface까지 진행했습니다. 이 경로는 transcript 값이 아니라 method shape만
-  기록하며 아직 product behavior를 활성화하지 않습니다.
+  기록하고, discovery/Stage A/Stage B evidence manifest를 schema-validatable artifact로
+  등록했으며, 아직 product behavior를 활성화하지 않습니다.
 - Session-native evidence surface도 추가로 진행했습니다. `cx session verify --auto`는
   실행 없이 verification 후보를 감지하고, quality evidence guard는 `cx slop check` /
   `cx session slop`으로 사용할 수 있으며, subagent claim bundle은 completion evidence로
@@ -222,6 +223,7 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 3. app-server product behavior를 활성화하기 전에 Desktop app-server attachment
    evidence loop를 마무리합니다. Stage A isolated temporary-state evidence는 구현됐고,
    Stage B는 gated read-only socket command surface를 갖고 있으며,
+   discovery/Stage A/Stage B manifest는 schema-validatable합니다.
    `cx app-server discover --json/--record`가 실제 Desktop discovery evidence를
    기록합니다. 현재 maintainer evidence는 managed control socket이 없는 `stdio_only`이므로
    다음 slice는 explicit user-provided socket 시도 또는 별도 stdio-observer 설계입니다.

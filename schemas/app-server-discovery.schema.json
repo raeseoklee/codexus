@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/app-server-discovery.schema.json",
+  "title": "Codexus App Server Discovery Report",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "command": { "const": "app-server discover" },
+    "cwd": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "consent": {
+      "type": "object",
+      "properties": {
+        "readOnly": { "const": true },
+        "remoteControlAutoEnabled": { "const": false },
+        "connectsToLiveSocket": { "const": false },
+        "startsDaemon": { "const": false }
+      },
+      "required": ["readOnly", "remoteControlAutoEnabled", "connectsToLiveSocket", "startsDaemon"]
+    },
+    "controlSocket": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "exists": { "type": "boolean" },
+        "source": { "const": "codex-default" }
+      },
+      "required": ["path", "exists", "source"]
+    },
+    "daemonVersionProbe": {
+      "type": "object",
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "args": { "type": "array", "items": { "type": "string" } },
+        "status": { "enum": ["passed", "failed", "error", "timed_out"] },
+        "exitCode": { "type": ["number", "null"] },
+        "signal": { "type": ["string", "null"] },
+        "stdoutPreview": { "type": "string" },
+        "stderrPreview": { "type": "string" },
+        "error": { "type": ["string", "null"] },
+        "timeoutMs": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": ["command", "args", "status", "exitCode", "signal", "stdoutPreview", "stderrPreview", "error", "timeoutMs"]
+    },
+    "processes": {
+      "type": "object",
+      "properties": {
+        "candidates": { "type": "array", "items": { "type": "object" } },
+        "total": { "type": "number", "minimum": 0 },
+        "stdioCount": { "type": "number", "minimum": 0 },
+        "attachableCount": { "type": "number", "minimum": 0 }
+      },
+      "required": ["candidates", "total", "stdioCount", "attachableCount"]
+    },
+    "stageBReadiness": {
+      "type": "object",
+      "properties": {
+        "status": { "enum": ["candidate_socket_found", "stdio_only", "no_app_server", "unknown"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "candidateSocket": { "type": ["string", "null"] },
+        "promotionRecommendation": { "enum": ["run_live_read_only_with_explicit_socket", "design_stdio_observer", "block_stage_b"] }
+      },
+      "required": ["status", "reason", "candidateSocket", "promotionRecommendation"]
+    },
+    "record": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "path": { "type": ["string", "null"] }
+      },
+      "required": ["enabled", "path"]
+    }
+  },
+  "required": ["schemaVersion", "stability", "command", "cwd", "generatedAt", "consent", "controlSocket", "daemonVersionProbe", "processes", "stageBReadiness", "record"]
+}
