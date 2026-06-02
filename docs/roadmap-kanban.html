@@ -135,6 +135,7 @@
     .evidence { color: var(--green); background: #e9f7ef; border-color: #bfebd0; }
     .gated { color: var(--amber); background: #fff3d9; border-color: #f0d18d; }
     .blocked { color: var(--red); background: #ffe8e5; border-color: #f5b8b1; }
+    .gateable { color: var(--amber); background: #fff3d9; border-color: #f0d18d; }
     .later { color: var(--violet); background: #f0ebff; border-color: #d8ccff; }
 
     .card p { margin: 0 0 8px; }
@@ -170,15 +171,16 @@
   <header>
     <h1>Codexus Roadmap Kanban</h1>
     <p>
-      A four-column view of the remaining Codexus work after the 0.1.1
-      harness-engineering first pass.
+      A four-column view of indexed planned-but-unimplemented Codexus work at
+      the 0.1.2 release-candidate boundary.
       Cards are intentionally framed as evidence-first tasks: local facts may gate,
       judgment-heavy claims stay advisory, and experimental surfaces remain blocked
       until their runtime contract exists.
     </p>
     <div class="meta">
       <span class="pill">Updated: 2026-06-02</span>
-      <span class="pill">Baseline: npm 0.1.1 stable</span>
+      <span class="pill">Baseline: npm 0.1.2 release candidate</span>
+      <span class="pill">Source: indexed docs 01-18 + remaining work</span>
       <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
       <span class="pill"><a href="remaining-work.md">Remaining work</a></span>
       <span class="pill"><a href="design/13-harness-engineering-alignment.md">Harness alignment</a></span>
@@ -291,6 +293,24 @@
             <li>Runtime surface becomes <code>desktop-app-server</code> only from observed evidence.</li>
             <li>CLI notify absence is never used as Desktop proof.</li>
           </ul>
+        </article>
+
+        <article class="card">
+          <h3>Worktree App Instance Launcher</h3>
+          <div class="tags">
+            <span class="tag evidence">worktree evidence</span>
+            <span class="tag gated">experimental</span>
+          </div>
+          <p>Codexus does not yet boot one application instance per git worktree. Add a descriptor-backed launcher before browser, log, or app-health evidence can be tied to per-change instances.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li><code>cx app instance start/status/stop/logs --json</code> records an owned instance artifact.</li>
+            <li>Each artifact includes worktree path, branch/head, command profile, pid/owner heartbeat, port or URL, health check, log paths, and status.</li>
+            <li>Port allocation is per worktree; stop cleans only the owned process and never unrelated local servers.</li>
+            <li>Browser/dev-server evidence references an instance id and never claims control or health without live evidence.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
         </article>
 
         <article class="card">

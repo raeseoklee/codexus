@@ -260,6 +260,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - The autopilot contract is documented as a proposed 0.2/0.3 experimental
   surface. It is not implemented and is excluded from the 0.1.x stable
   contract.
+- A generic worktree app instance launcher is not implemented. Codexus does not
+  yet start, track, health-check, or stop one application process per git
+  worktree/change. That surface remains an experimental observability/autopilot
+  prerequisite, not a 0.1.x stable capability.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External

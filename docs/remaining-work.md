@@ -312,6 +312,12 @@ Harness-engineering alignment adds these evidence-first tracks:
 - Observability adapters: add dev-server/browser/log evidence descriptors only
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.
+- Worktree app instance launcher: add a descriptor-backed process launcher before
+  Codexus claims it can run one app instance per change/worktree. The launcher
+  should record worktree, branch/head, command profile, pid/owner heartbeat,
+  port/URL, health check, logs, and status under Codexus-owned artifacts. It
+  must remain experimental, stop only owned processes, and provide the instance
+  evidence that browser/dev-server adapters cite.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
@@ -360,3 +366,6 @@ Harness-engineering alignment adds these evidence-first tracks:
     policy fields exist.
 12. Compiled repository wiki: implement deterministic `cx wiki map/build/check`
     before any advisory synthesis or context injection.
+13. Worktree app instance launcher: add `cx app instance start/status/stop/logs`
+    as an experimental, descriptor-backed evidence surface before claiming
+    per-worktree app control or app-health evidence.

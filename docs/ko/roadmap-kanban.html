@@ -135,6 +135,7 @@
     .evidence { color: var(--green); background: #e9f7ef; border-color: #bfebd0; }
     .gated { color: var(--amber); background: #fff3d9; border-color: #f0d18d; }
     .blocked { color: var(--red); background: #ffe8e5; border-color: #f5b8b1; }
+    .gateable { color: var(--amber); background: #fff3d9; border-color: #f0d18d; }
     .later { color: var(--violet); background: #f0ebff; border-color: #d8ccff; }
 
     .card p { margin: 0 0 8px; }
@@ -170,13 +171,15 @@
   <header>
     <h1>Codexus 로드맵 칸반</h1>
     <p>
-      0.1.1 harness-engineering first pass 이후 남은 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
+      0.1.2 release-candidate 기준, indexed 문서에 계획되어 있지만 아직 구현되지 않은
+      Codexus 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
       evidence-first 원칙에 맞춰 작성했습니다. 로컬 fact는 gate할 수 있고, 판단이 필요한
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
       <span class="pill">갱신일: 2026-06-02</span>
-      <span class="pill">기준: npm 0.1.1 stable</span>
+      <span class="pill">기준: npm 0.1.2 release candidate</span>
+      <span class="pill">출처: indexed docs 01-18 + remaining work</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
       <span class="pill"><a href="remaining-work.md">남은 작업</a></span>
       <span class="pill"><a href="design/13-harness-engineering-alignment.md">하네스 정렬 문서</a></span>
@@ -289,6 +292,24 @@
             <li><code>desktop-app-server</code> runtime surface는 관측 증거에서만 나옵니다.</li>
             <li>CLI notify 부재를 Desktop 증거로 쓰지 않습니다.</li>
           </ul>
+        </article>
+
+        <article class="card">
+          <h3>Worktree App Instance Launcher</h3>
+          <div class="tags">
+            <span class="tag evidence">worktree evidence</span>
+            <span class="tag gated">experimental</span>
+          </div>
+          <p>Codexus는 아직 git worktree별로 application instance 하나를 부팅하지 않습니다. Browser, log, app-health evidence를 변경별 instance에 묶기 전에 descriptor-backed launcher가 필요합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li><code>cx app instance start/status/stop/logs --json</code>가 owned instance artifact를 기록합니다.</li>
+            <li>각 artifact는 worktree path, branch/head, command profile, pid/owner heartbeat, port 또는 URL, health check, log path, status를 포함합니다.</li>
+            <li>Port allocation은 worktree별이며, stop은 owned process만 정리하고 unrelated local server를 건드리지 않습니다.</li>
+            <li>Browser/dev-server evidence는 instance id를 참조하고 live evidence 없이 control/health를 주장하지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
         </article>
 
         <article class="card">

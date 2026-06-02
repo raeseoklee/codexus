@@ -258,6 +258,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   없다는 invariant를 커버합니다.
 - Autopilot contract는 0.2/0.3 experimental surface로만 문서화되어 있습니다.
   아직 구현되지 않았고 0.1.x stable contract에는 포함되지 않습니다.
+- Generic worktree app instance launcher는 구현되지 않았습니다. Codexus는 아직 git
+  worktree/change별 application process를 start, track, health-check, stop하지 않습니다.
+  이 surface는 0.1.x stable capability가 아니라 experimental observability/autopilot
+  prerequisite입니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
