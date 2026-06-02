@@ -7,7 +7,12 @@ Codexus의 notable change를 이 파일에 기록합니다.
 이 프로젝트는 practical pre-1.0 changelog format을 따릅니다. 1.0 전에는 breaking
 change가 있을 수 있지만, 명확히 표시해야 합니다.
 
-## Unreleased
+## 0.1.3 - 2026-06-02
+
+이 release는 experimental action surface를 추가합니다. 이 surface들은 계속 gate 뒤에
+있으며 frozen stable 0.1.x JSON contract에는 포함되지 않습니다. 이 action surface는
+owner-identity verification 또는 explicit approval 뒤에서만 효과를 갖고, Codexus는
+이를 자동 cleanup하거나 completion/health authority로 주장하지 않습니다.
 
 ### Added
 

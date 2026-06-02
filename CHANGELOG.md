@@ -7,7 +7,12 @@ All notable changes to Codexus will be documented in this file.
 This project follows a practical pre-1.0 changelog format. Breaking changes can
 occur before 1.0, but they should be called out clearly.
 
-## Unreleased
+## 0.1.3 - 2026-06-02
+
+This release adds experimental action surfaces. They remain gated and are not
+part of the frozen stable 0.1.x JSON contract. These action surfaces take effect
+only behind owner-identity verification or explicit approval, and Codexus never
+auto-cleans or claims completion/health authority over them.
 
 ### Added
 
