@@ -203,4 +203,3 @@ The live `start` and `stop` slices must enforce these local facts:
    evidence and `stop` is unavailable before ownership exists.
 
 Only after those pass should Codexus implement live `start` and `stop`.
-

@@ -196,4 +196,3 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
    `stop`이 unavailable임을 증명하는 테스트를 추가합니다.
 
 이후에만 live `start`와 `stop`을 구현해야 합니다.
-
