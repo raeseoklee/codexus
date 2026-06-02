@@ -225,9 +225,11 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    Stage B는 gated read-only socket command surface를 갖고 있으며,
    discovery/Stage A/Stage B manifest는 schema-validatable합니다.
    `cx app-server discover --json/--record`가 실제 Desktop discovery evidence를
-   기록합니다. 현재 maintainer evidence는 managed control socket이 없는 `stdio_only`이므로
-   다음 slice는 explicit user-provided socket 시도 또는 별도 stdio-observer 설계입니다.
-   app-server driver 활성화는 별도 gate로 계속 분리합니다.
+   기록합니다. 현재 maintainer evidence는 managed control socket이 없는
+   `stdio_only`입니다. Stdio-observer design contract는 문서화됐습니다. 기존 Desktop
+   stdio pipe는 attach target이 아니며, 다음 slice는 explicit user-provided socket이
+   없다면 fake 또는 Codexus-owned stdio proof harness입니다. app-server driver 활성화는
+   별도 gate로 계속 분리합니다.
 4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
    공유하며, 첫 synchronous dispatcher slice가 구현됐습니다. 다음은 richer
    scheduler semantics, retry/recovery policy, foreground dispatch를 넘는
@@ -335,7 +337,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   authority는 추가하지 않습니다.
 
 1. Desktop app-server attachment: 현재 discovery evidence는 `stdio_only`입니다.
-   Session-event mapping을 시도하기 전에 non-disruptive stdio observer를 설계하거나
+   Non-disruptive stdio observer contract는 문서화됐습니다. 기존 Desktop stdio pipe에
+   attach하지 않고, process liveness를 Desktop support로 추론하지 않습니다. 다음에는
+   session-event mapping 전에 fake 또는 Codexus-owned stdio proof harness를 구현하거나
    explicit user-provided app-server socket을 확보합니다. 아직 live app-server product
    behavior는 켜지지 않습니다.
 2. Cron/gateway dispatcher: 첫 explicit-approval live slice와

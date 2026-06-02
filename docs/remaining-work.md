@@ -237,10 +237,11 @@ evidence only when the supporting runtime exists:
    implemented, Stage B has a gated read-only socket command surface, and
    discovery/Stage A/Stage B manifests are schema-validatable. `cx app-server
    discover --json/--record` now records real Desktop discovery evidence.
-   Current maintainer evidence is `stdio_only` with no managed control socket,
-   so the next slice is either an explicit user-provided socket attempt or a
-   separate stdio-observer design. Keep app-server driver enablement
-   separate and still gated.
+   Current maintainer evidence is `stdio_only` with no managed control socket.
+   The stdio-observer design contract is documented: existing Desktop stdio
+   pipes are not attach targets, and the next slice is a fake or Codexus-owned
+   stdio proof harness unless the user provides an explicit app-server socket.
+   Keep app-server driver enablement separate and still gated.
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`, and the first synchronous dispatcher
    slice is implemented. Next add richer scheduler semantics, retry/recovery
@@ -351,9 +352,11 @@ Harness-engineering alignment adds these evidence-first tracks:
   Do not auto-inject stale or advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
-   Design a non-disruptive stdio observer or obtain an explicit user-provided
-   app-server socket before attempting session-event mapping. Do not enable live
-   app-server product behavior yet.
+   The non-disruptive stdio observer contract is documented: do not attach to
+   existing Desktop stdio pipes, and do not infer Desktop support from process
+   liveness. Next implement a fake or Codexus-owned stdio proof harness, or
+   obtain an explicit user-provided app-server socket, before attempting
+   session-event mapping. Do not enable live app-server product behavior yet.
 2. Cron/gateway dispatcher: the first explicit-approval live slice and
    schema-validatable blocked-dispatch boundary audit records are now
    implemented. Next add scheduler semantics, recovery/retry policy, and

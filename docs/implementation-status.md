@@ -2,7 +2,7 @@
 
 [Korean](ko/implementation-status.md)
 
-Date: 2026-06-02
+Date: 2026-06-03
 
 Product name: Codexus
 
@@ -303,8 +303,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `cx app-server discover --json/--record` reports default control-socket
   availability, running app-server transport modes, and Stage B readiness
   without connecting to live sockets or enabling remote control. Current
-  maintainer evidence is `stdio_only`, so positive Desktop attachment remains
-  blocked pending an explicit socket or stdio-observer design.
+  maintainer evidence is `stdio_only`. The stdio-observer design contract is
+  documented: existing Desktop stdio pipes are not attach targets, so positive
+  Desktop attachment remains blocked pending an explicit socket, a fake or
+  Codexus-owned stdio proof harness, or a future supported observer bridge.
 - Multi-engine relay autopilot has an experimental recorder/checker first slice:
   `cx autopilot relay record` imports external author/reviewer artifacts without
   spawning another engine, `cx autopilot relay stage-gate` records
@@ -473,7 +475,9 @@ review. Current high-level gaps:
 - First Stage B maintainer Desktop smoke was negative: no usable app-server
   WebSocket socket was found, and a discovered IPC socket closed before
   handshake. Desktop attachment remains unavailable/unobserved until a supported
-  socket or a separate stdio-observer design is proven.
+  socket, fake or Codexus-owned stdio proof harness, or future supported
+  observer bridge is proven. The documented stdio-observer contract forbids
+  attaching to existing Desktop stdio pipes.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
 - Session state is currently a cwd-scoped singleton because Codex does not expose
   a stable per-conversation id to Codexus.

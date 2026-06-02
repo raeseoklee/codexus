@@ -5,10 +5,10 @@
 날짜: 2026-05-30
 
 상태: Stage A는 구현됐고, Stage B read-only command는 explicit opt-in 뒤에
-구현됐습니다. 첫 maintainer Desktop smoke는 negative result였습니다. 현재 활성
-Codex Desktop app-server surface는 stdio 기반이었고, managed daemon control socket은
-없었으며, 발견된 IPC socket은 WebSocket handshake 전에 닫혔습니다. Desktop
-attachment는 아직 enabled runtime path가 아닙니다.
+구현됐으며, stdio-observer design contract가 문서화됐습니다. 첫 maintainer Desktop
+smoke는 negative result였습니다. 현재 활성 Codex Desktop app-server surface는 stdio
+기반이었고, managed daemon control socket은 없었으며, 발견된 IPC socket은 WebSocket
+handshake 전에 닫혔습니다. Desktop attachment는 아직 enabled runtime path가 아닙니다.
 
 ## 결정
 
@@ -154,6 +154,47 @@ Stage B에서 구현으로 넘어가는 gate:
   opt-in된 managed daemon socket, 또는 별도 stdio-observer 설계가 필요합니다. 그 경우에도
   remote control을 조용히 켜면 안 됩니다.
 
+## Stdio Observer Design Contract
+
+현재 maintainer Desktop evidence는 재사용 가능한 observer socket이 아니라 stdio 기반
+app-server surface를 보여줍니다. Stdio transport는 safety model을 바꿉니다. 이미 실행
+중인 Desktop process의 stdio pipe에 붙는 것은 read-only subscription이 아닙니다. Codexus가
+model-turn request를 보내지 않더라도 process communication channel을 빼앗거나, 막거나,
+손상시킬 수 있습니다.
+
+따라서 stdio observer는 다음 조건 중 하나에서만 허용됩니다:
+
+1. Codexus가 owner token, bounded lifetime, cleanup evidence를 갖고 관측 대상
+   app-server process를 직접 시작한 경우.
+2. 실제 Desktop process를 건드리지 않고 parser와 mapping behavior를 증명하기 위해 fake
+   또는 fixture app-server process를 쓰는 경우.
+3. 미래의 Codex-supported observer bridge가 non-disruptive read-only event stream을
+   명시적으로 노출하는 경우.
+
+이미 실행 중인 Desktop stdio pipe는 attach target이 아닙니다. Discovery는 이를 fact로
+보고할 수 있지만, non-disruptive observer path가 증명되기 전까지
+`stageBReadiness.status: "stdio_only"`와
+`promotionRecommendation: "design_stdio_observer"`를 유지해야 합니다.
+
+Stdio observer 비목표:
+
+- 기존 Desktop process의 stdio file descriptor에 연결하거나, 감싸거나, 대체하지 않습니다.
+- 관측 traffic을 만들기 위해 Desktop model turn을 시작하지 않습니다.
+- Transcript 값을 저장하지 않습니다.
+- Stdio app-server process liveness를 Desktop attachment support로 해석하지 않습니다.
+- 관측된 turn-boundary event 없이 stdio discovery를
+  `runtimeSurface: "desktop-app-server"`로 변환하지 않습니다.
+
+다음 구현 slice는 product attachment가 아니라 proof harness여야 합니다:
+
+- Bounded JSON-RPC notification method shape와 선택적인 turn-boundary-like event를 내보내는
+  fake stdio app-server fixture를 추가합니다.
+- Owner/process identity, byte/time limit, redaction status, observed method name,
+  transcript exclusion proof를 포함한 experimental stdio-observer manifest를 기록합니다.
+- 그 manifest를 local schema-artifact subset engine으로 검증합니다.
+- 실제 non-disruptive observer 또는 explicit socket path가 transcript data 없이 turn-boundary
+  event를 만들기 전까지 promotion은 blocked로 유지합니다.
+
 ## 비목표
 
 - `codex-app-server`를 run driver로 활성화.
@@ -187,12 +228,18 @@ cx app-server experiment --live-read-only --record --sock <path> --json
 존재 여부, Stage B readiness를 기록하지만 live socket에 연결하거나 daemon을 시작하거나
 remote control을 켜지 않습니다.
 
+미래의 stdio-observer command는 아직 구현되지 않았습니다. 추가된다면 fake 또는
+Codexus-owned process부터 시작하고 `stability: "experimental"`을 보고해야 하며, 기존
+Desktop stdio pipe에 attach하면 안 됩니다.
+
 ## 검증
 
 - Gate enforcement와 unsupported structured error unit test.
 - Stage A field, cleanup status, redaction, bounded output에 대한 manifest test.
 - Stdio-only와 explicit-socket classification에 대한 discovery test.
 - 로컬 app-server surface가 허용하면 격리 observer/concurrent-client probe evidence.
+- Fake 또는 Codexus-owned process를 쓰는 stdio-observer proof-harness test. Transcript
+  exclusion과 기존 stdio attach 금지 assertion을 포함합니다.
 - Live Desktop daemon 없이 event mapping을 증명하는 fake/proxy fixture.
 - 사용자가 명시적으로 opt-in했을 때만 Stage B manual smoke.
 - 관련 slice publish 전 `npm run ci`와 `npm run package:smoke`.

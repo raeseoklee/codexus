@@ -4,12 +4,12 @@
 
 Date: 2026-05-30
 
-Status: Stage A is implemented, and the Stage B read-only command is
-implemented behind explicit opt-in. A first maintainer Desktop smoke produced a
-negative result: the active Codex Desktop app-server surface was stdio-based, the
-managed daemon control socket was absent, and a discovered IPC socket closed
-before WebSocket handshake. Desktop attachment is still not an enabled runtime
-path.
+Status: Stage A is implemented, the Stage B read-only command is implemented
+behind explicit opt-in, and the stdio-observer design contract is documented. A
+first maintainer Desktop smoke produced a negative result: the active Codex
+Desktop app-server surface was stdio-based, the managed daemon control socket
+was absent, and a discovered IPC socket closed before WebSocket handshake.
+Desktop attachment is still not an enabled runtime path.
 
 ## Decision
 
@@ -160,6 +160,51 @@ Current evidence:
   or Unix socket, an already opt-in managed daemon socket, or a separate
   stdio-observer design. It must still avoid enabling remote control silently.
 
+## Stdio Observer Design Contract
+
+The current maintainer Desktop evidence shows a stdio-based app-server surface,
+not a reusable observer socket. Stdio transport changes the safety model:
+attaching to an already-running Desktop process's stdio pipes is not a
+read-only subscription. It can steal, block, or corrupt the process communication
+channel even if Codexus never sends a model-turn request.
+
+Therefore a stdio observer is allowed only under one of these conditions:
+
+1. Codexus owns the observed app-server process from launch, with an owner token,
+   bounded lifetime, and cleanup evidence.
+2. A fake or fixture app-server process is used to prove parser and mapping
+   behavior without touching a real Desktop process.
+3. A future Codex-supported observer bridge explicitly exposes a non-disruptive
+   read-only event stream.
+
+Existing Desktop stdio pipes are not an attach target. Discovery may report them
+as facts, but it must keep `stageBReadiness.status: "stdio_only"` and
+`promotionRecommendation: "design_stdio_observer"` until a non-disruptive
+observer path is proven.
+
+Stdio observer non-goals:
+
+- Do not connect to, wrap, or replace an existing Desktop process's stdio file
+  descriptors.
+- Do not spawn a Desktop model turn to create observation traffic.
+- Do not store transcript values.
+- Do not use liveness of a stdio app-server process as Desktop attachment
+  support.
+- Do not translate stdio discovery into `runtimeSurface: "desktop-app-server"`
+  without an observed turn-boundary event.
+
+The next implementation slice should be a proof harness, not product
+attachment:
+
+- Add a fake stdio app-server fixture that emits bounded JSON-RPC notification
+  method shapes and optional turn-boundary-like events.
+- Record an experimental stdio-observer manifest with owner/process identity,
+  byte/time limits, redaction status, observed method names, and transcript
+  exclusion proof.
+- Validate that manifest through the local schema-artifact subset engine.
+- Keep promotion blocked unless a real non-disruptive observer or explicit
+  socket path produces a turn-boundary event without transcript data.
+
 ## Non-Goals
 
 - Enabling `codex-app-server` as a run driver.
@@ -193,6 +238,10 @@ shapes rather than transcript values. Errors must be structured and truthful.
 control-socket availability, and Stage B readiness, but does not connect to a
 live socket, start a daemon, or enable remote control.
 
+A future stdio-observer command is not yet implemented. When added, it must
+start with fake or Codexus-owned processes and report `stability:
+"experimental"`; it must not attach to existing Desktop stdio pipes.
+
 ## Verification
 
 - Unit tests for gate enforcement and unsupported structured errors.
@@ -201,6 +250,8 @@ live socket, start a daemon, or enable remote control.
 - Discovery tests for stdio-only and explicit-socket classifications.
 - Isolated observer/concurrent-client probe evidence when the local app-server
   surface makes it possible.
+- Stdio-observer proof-harness tests using a fake or Codexus-owned process,
+  including transcript-exclusion and no-existing-stdio-attach assertions.
 - A fake/proxy fixture that proves event mapping without a live Desktop daemon.
 - A manual Stage B smoke only when the user explicitly opts in.
 - `npm run ci` and `npm run package:smoke` before publishing any related slice.

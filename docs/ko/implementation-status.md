@@ -2,7 +2,7 @@
 
 [English](../implementation-status.md)
 
-날짜: 2026-06-02
+날짜: 2026-06-03
 
 제품명: Codexus
 
@@ -216,8 +216,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   구현됐습니다. `cx app-server discover --json/--record`는 live socket에 연결하거나
   remote control을 켜지 않고 default control socket 존재 여부, 실행 중인 app-server
   transport mode, Stage B readiness를 보고합니다. 현재 maintainer evidence는
-  `stdio_only`이므로 positive Desktop attachment는 explicit socket 또는 stdio-observer
-  설계 전까지 계속 blocked입니다.
+  `stdio_only`입니다. Stdio-observer design contract는 문서화됐습니다. 기존 Desktop
+  stdio pipe는 attach target이 아니므로 positive Desktop attachment는 explicit socket,
+  fake 또는 Codexus-owned stdio proof harness, future supported observer bridge가
+  증명될 때까지 계속 blocked입니다.
 
 ## 검증
 
@@ -347,8 +349,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, schema-validatable Stage B read-only evidence를 explicit gate 뒤에 구현했습니다.
 - 첫 Stage B maintainer Desktop smoke는 negative였습니다. 사용할 수 있는 app-server
   WebSocket socket을 찾지 못했고, 발견된 IPC socket은 handshake 전에 닫혔습니다.
-  지원되는 socket 또는 별도 stdio-observer 설계가 증명될 때까지 Desktop attachment는
-  unavailable/unobserved로 유지합니다.
+  지원되는 socket, fake 또는 Codexus-owned stdio proof harness, future supported
+  observer bridge가 증명될 때까지 Desktop attachment는 unavailable/unobserved로
+  유지합니다. 문서화된 stdio-observer contract는 기존 Desktop stdio pipe에 attach하는
+  것을 금지합니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.
 - Codex가 stable per-conversation id를 Codexus에 노출하지 않기 때문에 session state는
   현재 cwd-scoped singleton입니다.

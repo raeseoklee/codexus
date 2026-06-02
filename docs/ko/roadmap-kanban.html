@@ -177,7 +177,7 @@
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
-      <span class="pill">갱신일: 2026-06-02</span>
+      <span class="pill">갱신일: 2026-06-03</span>
       <span class="pill">기준: npm 0.1.3 published</span>
       <span class="pill">출처: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
@@ -259,6 +259,23 @@
           <span class="label">근거</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md#acceptance-criteria-to-verification-matrix">multi-engine relay autopilot</a></p>
         </article>
+
+        <article class="card">
+          <h3>App-Server Stdio Observer 설계</h3>
+          <div class="tags">
+            <span class="tag done">설계 완료</span>
+            <span class="tag evidence">destructive attach 금지</span>
+          </div>
+          <p>Stdio-only Desktop discovery 결과에 명시적인 observer contract가 생겼습니다. 기존 Desktop stdio pipe는 fact이지 attach target이 아닙니다.</p>
+          <span class="label">증거</span>
+          <ul>
+            <li>기존 Desktop stdio file descriptor에 연결하거나, 감싸거나, 대체하면 안 됩니다.</li>
+            <li>Stdio observation은 fake, Codexus-owned, 또는 future supported observer-bridge process에서만 시작합니다.</li>
+            <li>Process liveness는 Desktop attachment support나 <code>desktop-app-server</code> runtime surface를 증명하지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md#stdio-observer-design-contract">app-server evidence plan</a></p>
+        </article>
       </section>
 
       <section class="column" aria-labelledby="next-evidence">
@@ -266,18 +283,18 @@
         <p class="summary">더 큰 runtime을 켜기 전에 먼저 증거를 만들어야 하는 작업입니다.</p>
 
         <article class="card">
-          <h3>App-Server Stdio Observer 설계</h3>
+          <h3>App-Server Stdio Proof Harness</h3>
           <div class="tags">
-            <span class="tag evidence">discovery 이후</span>
+            <span class="tag evidence">설계 이후</span>
             <span class="tag gated">remote control 금지</span>
           </div>
-          <p>Discovery 결과 maintainer Desktop surface는 managed control socket이 없는 stdio-only입니다. Session-event mapping 전에 non-disruptive observer를 설계합니다.</p>
+          <p>Discovery 결과 maintainer Desktop surface는 managed control socket이 없는 stdio-only이고, non-disruptive observer contract는 문서화됐습니다. Desktop session-event mapping 전에 fake 또는 Codexus-owned stdio로 parser와 mapping을 증명합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li><code>cx app-server discover --record --json</code>가 read-only를 유지하고 stdio-only evidence를 기록합니다.</li>
             <li>Discovery, Stage A, Stage B manifest는 schema-validatable experimental artifact로 유지됩니다.</li>
-            <li>Observer 설계는 기존 stdio pipe에 destructive하게 붙지 않습니다.</li>
-            <li>Positive mapping은 transcript value 없이 관측된 turn-boundary evidence가 있을 때만 가능합니다.</li>
+            <li>Fake 또는 Codexus-owned stdio observer manifest가 byte/time limit, transcript exclusion, owner identity, observed method shape를 증명합니다.</li>
+            <li>Proof harness는 기존 Desktop stdio pipe를 거부하고, 실제 non-disruptive turn-boundary evidence가 생길 때까지 positive mapping을 blocked로 유지합니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
