@@ -210,10 +210,14 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
    completion authority가 되지 않으면서 하나의 `instanceId`를 인용할 수 있도록
    `cx app instance evidence record/list`와 `app-instance-observation` schema artifact를
    추가합니다.
+9. 완료: 명시적 stale/orphan lifecycle policy projection을 추가합니다. Status 출력은
+   heartbeat age, stale threshold, cleanup policy, stop policy, non-authority 보장을
+   보고합니다. Stale 또는 dead artifact는 `orphaned`/`unknown`으로 남으며 health,
+   control, cleanup authority, completion을 의미하지 않습니다.
 
 ## 다음 Slice
 
 1. 실제 Browser/DevTools/dev-server adapter를 observation artifact contract에
    연결하되 browser 자동 open이나 health/control 주장을 하지 않게 유지합니다.
-2. 오래된 artifact를 더 명시적으로 드러내는 stale/orphan policy를 강화하되,
-   control이나 health를 과장하지 않게 유지합니다.
+2. Future autopilot surface가 launcher를 worktree-aware 방식으로 재사용하되 completion
+   authority는 verification과 policy gate에만 유지합니다.

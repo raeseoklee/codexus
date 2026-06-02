@@ -217,7 +217,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 218 tests 통과
+- `npm test`: 219 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -365,8 +365,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   갖습니다. start/stop, process ownership token, heartbeat, liveness, port
   allocation, active health probe는 Codexus-owned instance에 대해 구현됐습니다.
   Instance-linked observation evidence descriptor는
-  `cx app instance evidence record/list`로 구현됐고, 실제 Browser/DevTools adapter
-  capture와 더 강한 stale/orphan policy가 후속 작업입니다.
+  `cx app instance evidence record/list`로 구현됐고, 명시적 stale/orphan lifecycle
+  policy projection도 구현됐습니다. 실제 Browser/DevTools adapter capture와
+  worktree-aware launcher reuse가 후속 작업입니다.
 - Operational control invariant는 deterministic docs-code check와 실험적
   control-plane 첫 slice까지 구현됐습니다. Decision artifact, 반복
   verification loop summary, HUD/status projection, autonomy preset metadata,

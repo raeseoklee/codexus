@@ -217,10 +217,14 @@ The live `start` and `stop` slices must enforce these local facts:
    `app-instance-observation` schema artifacts so browser/dev-server/log/
    screenshot/metric observations can cite one `instanceId` without becoming
    control, health, or completion authority.
+9. Done: add explicit stale/orphan lifecycle policy projection. Status output
+   reports heartbeat age, stale thresholds, cleanup policy, stop policy, and
+   non-authority guarantees. Stale or dead artifacts remain `orphaned`/
+   `unknown` and never imply health, control, cleanup authority, or completion.
 
 ## Next Slice
 
 1. Wire real Browser/DevTools/dev-server adapters to the observation artifact
    contract without auto-opening browsers or claiming health/control.
-2. Strengthen stale/orphan policy so long-dead artifacts are surfaced more
-   explicitly without overclaiming control or health.
+2. Add worktree-aware launcher reuse for future autopilot surfaces while keeping
+   completion authority on verification and policy gates.

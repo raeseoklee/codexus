@@ -303,8 +303,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   experimental live ownership 첫 slice를 갖습니다. Descriptor/profile listing,
   `start --dry-run`, live owned-process start/stop, heartbeat, port allocation,
   active health check, bounded log projection, instance-linked observation
-  evidence record가 구현됐습니다. 다음 작업은 실제 adapter capture와 더 강한
-  stale/orphan policy입니다.
+  evidence record, 명시적 stale/orphan lifecycle policy projection이 구현됐습니다.
+  다음 작업은 실제 adapter capture와 future autopilot surface를 위한 worktree-aware
+  launcher reuse입니다.
 - Operational control invariant: [17번 문서](design/17-operational-control-invariants.md)는
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 기존 evidence 위의 control layer로 정의합니다. 첫 deterministic
@@ -361,5 +362,5 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     richer page coverage이며, injection path는 그 이후에만 검토합니다.
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
     구현된 live ownership과 observation-evidence slice 위에 다음 단계를 쌓습니다.
-    이후 작업은 실제 Browser/DevTools/dev-server adapter capture, 더 강한 stale/orphan
-    policy, future autopilot surface를 위한 worktree-aware launcher reuse입니다.
+    이후 작업은 실제 Browser/DevTools/dev-server adapter capture와 future autopilot
+    surface를 위한 worktree-aware launcher reuse입니다.

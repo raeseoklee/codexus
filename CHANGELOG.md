@@ -23,6 +23,10 @@ occur before 1.0, but they should be called out clearly.
   `cx app instance evidence record/list` and the `app-instance-observation`
   schema artifact let browser/dev-server/log/screenshot/metric observations cite
   one `instanceId` without becoming control, health, or completion authority.
+- Added explicit stale/orphan lifecycle policy projection for experimental app
+  instances. Status output now reports heartbeat age, stale thresholds, cleanup
+  policy, stop policy, and non-authority guarantees so long-dead artifacts do not
+  silently look healthy or controllable.
 - Added the experimental autopilot contract foundation slice:
   `cx autopilot plan --from ...`, `cx autopilot contract validate`,
   `cx autopilot contract approve`, `cx autopilot contract scope-check`, and the

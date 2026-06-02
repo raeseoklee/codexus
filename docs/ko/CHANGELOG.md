@@ -24,6 +24,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   artifact가 browser/dev-server/log/screenshot/metric observation을 하나의
   `instanceId`에 연결해 기록하되 control, health, completion authority가 되지는
   않게 합니다.
+- Experimental app instance에 대한 명시적 stale/orphan lifecycle policy projection을
+  추가했습니다. Status 출력은 heartbeat age, stale threshold, cleanup policy, stop
+  policy, non-authority 보장을 보고해 오래된 artifact가 조용히 healthy 또는 controllable로
+  보이지 않게 합니다.
 - Experimental autopilot contract foundation slice를 추가했습니다:
   `cx autopilot plan --from ...`, `cx autopilot contract validate`,
   `cx autopilot contract approve`, `cx autopilot contract scope-check`,

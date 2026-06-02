@@ -325,8 +325,9 @@ Harness-engineering alignment adds these evidence-first tracks:
   now has an experimental live ownership first slice: descriptor/profile
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
   port allocation, active health checks, bounded log projections, and
-  instance-linked observation evidence records. Next work is actual adapter
-  capture plus richer stale/orphan policy.
+  instance-linked observation evidence records plus explicit stale/orphan
+  lifecycle policy projection. Next work is actual adapter capture and
+  worktree-aware launcher reuse for future autopilot surfaces.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
@@ -387,5 +388,5 @@ Harness-engineering alignment adds these evidence-first tracks:
 13. Worktree app instance launcher: build on the implemented live ownership
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). Next add actual
-    Browser/DevTools/dev-server adapter capture, stronger stale/orphan policy,
-    and worktree-aware launcher reuse for future autopilot surfaces.
+    Browser/DevTools/dev-server adapter capture and worktree-aware launcher
+    reuse for future autopilot surfaces.

@@ -11,6 +11,17 @@ import { findCodexusPackageRoot } from "../util/package-root.ts";
 
 export type AppInstanceHealthStatus = "passed" | "failed" | "unknown" | "unavailable";
 export type AppInstanceStatus = "running" | "stopped" | "orphaned" | "unknown";
+export type AppInstanceLifecycleState =
+  | "managed_running"
+  | "managed_stopped"
+  | "orphaned_live_process"
+  | "orphaned_dead_artifact"
+  | "unmanaged_or_unverifiable";
+export type AppInstanceStopPolicy =
+  | "requires_owner_identity_check"
+  | "unavailable"
+  | "not_needed";
+export type AppInstanceCleanupPolicy = "none" | "manual_review";
 
 export interface AppInstancePortDescriptor {
   mode: "allocate" | "fixed";
@@ -805,59 +816,145 @@ function resolveArtifactPath(artifact: AppInstanceArtifact, artifactPath: string
 }
 
 function heartbeatFresh(heartbeat: AppInstanceHeartbeat): boolean {
+  const ageMs = heartbeatAgeMs(heartbeat);
+  return ageMs !== null && ageMs <= HEARTBEAT_STALE_MS;
+}
+
+function heartbeatAgeMs(heartbeat: AppInstanceHeartbeat | null): number | null {
+  if (!heartbeat) return null;
   const timestamp = new Date(heartbeat.updatedAt).getTime();
-  return Number.isFinite(timestamp) && Date.now() - timestamp <= HEARTBEAT_STALE_MS;
+  if (!Number.isFinite(timestamp)) return null;
+  return Math.max(0, Date.now() - timestamp);
+}
+
+function heartbeatStaleReason(artifact: AppInstanceArtifact, heartbeat: AppInstanceHeartbeat | null) {
+  if (!heartbeat) return "heartbeat_missing" as const;
+  if (heartbeat.ownerTokenHash !== artifact.owner.ownerTokenHash) return "heartbeat_owner_token_mismatch" as const;
+  if (!heartbeatFresh(heartbeat)) return "heartbeat_stale" as const;
+  return null;
+}
+
+function lifecyclePolicy(input: {
+  status: AppInstanceStatus;
+  reason: string;
+  heartbeat: AppInstanceHeartbeat | null;
+  ownedByCodexus: boolean;
+  live: boolean;
+}) {
+  const heartbeatAge = heartbeatAgeMs(input.heartbeat);
+  const stale = input.heartbeat === null
+    || !heartbeatFresh(input.heartbeat)
+    || input.reason === "heartbeat_owner_token_mismatch";
+  const state: AppInstanceLifecycleState =
+    !input.ownedByCodexus
+      ? "unmanaged_or_unverifiable"
+      : input.status === "running"
+        ? "managed_running"
+        : input.status === "stopped"
+          ? "managed_stopped"
+          : input.status === "orphaned" && input.live
+            ? "orphaned_live_process"
+            : input.status === "orphaned"
+              ? "orphaned_dead_artifact"
+              : "unmanaged_or_unverifiable";
+  const stopPolicy: AppInstanceStopPolicy =
+    input.status === "running"
+      ? "requires_owner_identity_check"
+      : input.status === "stopped"
+        ? "not_needed"
+        : "unavailable";
+  const cleanupPolicy: AppInstanceCleanupPolicy = state === "orphaned_live_process" || state === "orphaned_dead_artifact"
+    ? "manual_review"
+    : "none";
+  return {
+    state,
+    stale,
+    staleReason: stale ? input.reason : null,
+    heartbeatAgeMs: heartbeatAge,
+    heartbeatStaleAfterMs: HEARTBEAT_STALE_MS,
+    stopPolicy,
+    cleanupPolicy,
+    cleanupAuthority: false as const,
+    healthAuthority: false as const,
+    completionAuthority: false as const,
+  };
 }
 
 function projectProcess(artifact: AppInstanceArtifact, heartbeat: AppInstanceHeartbeat | null) {
   if (!artifact.owner.ownedByCodexus || artifact.owner.pid === null) {
+    const status = "unknown" as const;
+    const reason = "not_codexus_owned_or_missing_pid" as const;
     return {
-      status: "unknown" as const,
-      reason: "not_codexus_owned_or_missing_pid" as const,
+      status,
+      reason,
       pid: artifact.owner.pid,
       processGroupId: artifact.owner.processGroupId,
       heartbeatFresh: false,
+      heartbeatAgeMs: heartbeatAgeMs(heartbeat),
+      heartbeatStaleAfterMs: HEARTBEAT_STALE_MS,
       ownedByCodexus: artifact.owner.ownedByCodexus,
+      lifecycle: lifecyclePolicy({ status, reason, heartbeat, ownedByCodexus: artifact.owner.ownedByCodexus, live: false }),
     };
   }
   const live = pidLive(artifact.owner.pid);
-  if (live && heartbeat && heartbeatFresh(heartbeat) && heartbeat.ownerTokenHash === artifact.owner.ownerTokenHash) {
+  const staleReason = heartbeatStaleReason(artifact, heartbeat);
+  if (live && heartbeat && staleReason === null) {
+    const status = "running" as const;
+    const reason = "pid_live_and_heartbeat_fresh" as const;
     return {
-      status: "running" as const,
-      reason: "pid_live_and_heartbeat_fresh" as const,
+      status,
+      reason,
       pid: artifact.owner.pid,
       processGroupId: artifact.owner.processGroupId,
       heartbeatFresh: true,
+      heartbeatAgeMs: heartbeatAgeMs(heartbeat),
+      heartbeatStaleAfterMs: HEARTBEAT_STALE_MS,
       ownedByCodexus: artifact.owner.ownedByCodexus,
+      lifecycle: lifecyclePolicy({ status, reason, heartbeat, ownedByCodexus: artifact.owner.ownedByCodexus, live }),
     };
   }
   if (!live && artifact.status === "stopped") {
+    const status = "stopped" as const;
+    const reason = "artifact_marked_stopped_and_pid_dead" as const;
     return {
-      status: "stopped" as const,
-      reason: "artifact_marked_stopped_and_pid_dead" as const,
+      status,
+      reason,
       pid: artifact.owner.pid,
       processGroupId: artifact.owner.processGroupId,
       heartbeatFresh: heartbeat ? heartbeatFresh(heartbeat) : false,
+      heartbeatAgeMs: heartbeatAgeMs(heartbeat),
+      heartbeatStaleAfterMs: HEARTBEAT_STALE_MS,
       ownedByCodexus: artifact.owner.ownedByCodexus,
+      lifecycle: lifecyclePolicy({ status, reason, heartbeat, ownedByCodexus: artifact.owner.ownedByCodexus, live }),
     };
   }
   if (live) {
+    const status = "orphaned" as const;
+    const reason = staleReason ?? "heartbeat_unavailable" as const;
     return {
-      status: "orphaned" as const,
-      reason: heartbeat ? "heartbeat_stale_or_mismatched" as const : "heartbeat_missing" as const,
+      status,
+      reason,
       pid: artifact.owner.pid,
       processGroupId: artifact.owner.processGroupId,
       heartbeatFresh: heartbeat ? heartbeatFresh(heartbeat) : false,
+      heartbeatAgeMs: heartbeatAgeMs(heartbeat),
+      heartbeatStaleAfterMs: HEARTBEAT_STALE_MS,
       ownedByCodexus: artifact.owner.ownedByCodexus,
+      lifecycle: lifecyclePolicy({ status, reason, heartbeat, ownedByCodexus: artifact.owner.ownedByCodexus, live }),
     };
   }
+  const status = artifact.status === "running" ? "orphaned" as const : artifact.status;
+  const reason = "pid_dead" as const;
   return {
-    status: artifact.status === "running" ? "orphaned" as const : artifact.status,
-    reason: "pid_dead" as const,
+    status,
+    reason,
     pid: artifact.owner.pid,
     processGroupId: artifact.owner.processGroupId,
     heartbeatFresh: heartbeat ? heartbeatFresh(heartbeat) : false,
+    heartbeatAgeMs: heartbeatAgeMs(heartbeat),
+    heartbeatStaleAfterMs: HEARTBEAT_STALE_MS,
     ownedByCodexus: artifact.owner.ownedByCodexus,
+    lifecycle: lifecyclePolicy({ status, reason, heartbeat, ownedByCodexus: artifact.owner.ownedByCodexus, live }),
   };
 }
 
@@ -954,6 +1051,8 @@ async function projectInstance(validation: AppInstanceArtifactValidation) {
         status: heartbeat.status,
         updatedAt: heartbeat.updatedAt,
         fresh: heartbeatFresh(heartbeat),
+        ageMs: heartbeatAgeMs(heartbeat),
+        staleAfterMs: HEARTBEAT_STALE_MS,
         runnerPid: heartbeat.runnerPid,
         appPid: heartbeat.appPid,
       }
@@ -962,6 +1061,8 @@ async function projectInstance(validation: AppInstanceArtifactValidation) {
         status: "missing" as const,
         updatedAt: null,
         fresh: false,
+        ageMs: null,
+        staleAfterMs: HEARTBEAT_STALE_MS,
         runnerPid: null,
         appPid: null,
       },
@@ -1375,7 +1476,7 @@ export async function recordAppInstanceObservation(cwd: string, options: {
     ? "unavailable"
     : requestedStatus;
   const reason = status === "unavailable" && requestedStatus === "observed" && instance.process.status !== "running"
-    ? "instance_not_running"
+    ? `instance_not_running:${instance.process.reason}`
     : null;
   const observationId = `observation_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
   const path = observationPath(instance.worktree.path, instance.instanceId, observationId);

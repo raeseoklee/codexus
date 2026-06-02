@@ -332,7 +332,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 218.
+- Current test count: 219.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -388,7 +388,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   build mode.
 - App instance launcher tests cover descriptor schema validation, `profile
   list`, `start --dry-run`, live start, duplicate-start rejection, active
-  health promotion for a live owned process, bounded log tails, and owned stop.
+  health promotion for a live owned process, bounded log tails, owned stop,
+  unverifiable owner stop refusal, stale/orphan lifecycle policy projection, and
+  instance-linked observation evidence that never promotes control, health, or
+  completion authority.
 - Installed package smoke also covers deterministic wiki build, wiki-manifest
   schema validation, `wiki check --gate`, and bounded wiki context generation.
 - Installed package smoke also covers `cx policy catalog check --json`,
@@ -482,8 +485,9 @@ review. Current high-level gaps:
   start/stop, process ownership tokens, heartbeat, port allocation, liveness,
   and active health probes are implemented for Codexus-owned instances.
   Instance-linked observation evidence descriptors are implemented through
-  `cx app instance evidence record/list`; actual Browser/DevTools adapter
-  capture and richer stale/orphan policies remain follow-up work.
+  `cx app instance evidence record/list`; explicit stale/orphan lifecycle policy
+  projection is implemented. Actual Browser/DevTools adapter capture and
+  worktree-aware launcher reuse remain follow-up work.
 - Operational control invariants have deterministic docs-code checks plus an
   experimental control-plane first slice: decision artifacts, repeated
   verification loop summaries, HUD/status projections, autonomy preset

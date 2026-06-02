@@ -303,10 +303,10 @@
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
           </div>
-          <p>The live ownership and observation descriptor baseline is implemented. The next step is to connect real Browser/DevTools/dev-server adapters to those instance-linked artifacts.</p>
+          <p>The live ownership, observation descriptor, and stale/orphan lifecycle policy baseline is implemented. The next step is to connect real Browser/DevTools/dev-server adapters to those instance-linked artifacts.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale artifacts never imply health or control.</li>
+            <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale/orphan artifacts report lifecycle policy without implying health, cleanup, completion, or control.</li>
             <li>Observation evidence references an <code>instanceId</code> and never claims control, health, or completion authority.</li>
             <li>Adapter outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
             <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>

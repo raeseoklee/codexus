@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -119,6 +119,25 @@ async function writeInstance(cwd: string, instanceId: string, healthEvidencePath
   return path;
 }
 
+async function writeHeartbeat(cwd: string, instanceId: string, heartbeat: Record<string, unknown>): Promise<string> {
+  const path = join(cwd, ".codexus", "app-instances", instanceId, "heartbeat.json");
+  await writeFile(path, `${JSON.stringify({
+    schemaVersion: 1,
+    type: "codexus.app.instance.heartbeat",
+    instanceId,
+    ownerTokenHash: "sha256:test",
+    runnerPid: 123,
+    runnerStartMarker: null,
+    appPid: null,
+    updatedAt: new Date().toISOString(),
+    status: "running",
+    exitCode: null,
+    signal: null,
+    ...heartbeat,
+  }, null, 2)}\n`);
+  return path;
+}
+
 async function waitFor(condition: () => Promise<boolean>, timeoutMs = 5_000, intervalMs = 100): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -223,7 +242,57 @@ test("app instance status does not promote passed health when the process is not
     assert.equal(output.instances[0].health.status, "unknown");
     assert.equal(output.instances[0].health.reason, "process_not_running");
     assert.equal(output.instances[0].process.status, "orphaned");
+    assert.equal(output.instances[0].process.reason, "pid_dead");
+    assert.equal(output.instances[0].process.lifecycle.state, "orphaned_dead_artifact");
+    assert.equal(output.instances[0].process.lifecycle.cleanupPolicy, "manual_review");
+    assert.equal(output.instances[0].process.lifecycle.cleanupAuthority, false);
+    assert.equal(output.instances[0].process.lifecycle.stopPolicy, "unavailable");
+    assert.equal(output.instances[0].process.lifecycle.healthAuthority, false);
+    assert.equal(output.instances[0].process.lifecycle.completionAuthority, false);
   } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance status surfaces stale live heartbeats as orphaned without cleanup authority", async () => {
+  const cwd = await tempDir();
+  const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { stdio: "ignore" });
+  try {
+    assert.ok(child.pid);
+    const artifactPath = await writeInstance(cwd, "app_test");
+    const artifact = JSON.parse(await readFile(artifactPath, "utf8"));
+    artifact.owner.pid = child.pid;
+    artifact.owner.processGroupId = null;
+    artifact.owner.runnerStartMarker = null;
+    await writeFile(artifactPath, `${JSON.stringify(artifact, null, 2)}\n`);
+    await writeHeartbeat(cwd, "app_test", {
+      runnerPid: child.pid,
+      appPid: child.pid,
+      updatedAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+
+    const result = runCli(cwd, ["app", "instance", "status", "--instance-id", "app_test", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = parseJson(result);
+    const instance = output.instances[0];
+    assert.equal(instance.process.status, "orphaned");
+    assert.equal(instance.process.reason, "heartbeat_stale");
+    assert.equal(instance.process.heartbeatFresh, false);
+    assert.ok(instance.process.heartbeatAgeMs >= 8_000);
+    assert.equal(instance.process.heartbeatStaleAfterMs, 8_000);
+    assert.equal(instance.process.lifecycle.state, "orphaned_live_process");
+    assert.equal(instance.process.lifecycle.stale, true);
+    assert.equal(instance.process.lifecycle.staleReason, "heartbeat_stale");
+    assert.equal(instance.process.lifecycle.cleanupPolicy, "manual_review");
+    assert.equal(instance.process.lifecycle.cleanupAuthority, false);
+    assert.equal(instance.process.lifecycle.stopPolicy, "unavailable");
+    assert.equal(instance.process.lifecycle.healthAuthority, false);
+    assert.equal(instance.health.status, "unknown");
+    assert.equal(instance.heartbeat.fresh, false);
+    assert.ok(instance.heartbeat.ageMs >= 8_000);
+  } finally {
+    child.kill("SIGKILL");
     await cleanupInstances(cwd);
     await rm(cwd, { recursive: true, force: true });
   }
@@ -260,7 +329,7 @@ test("app instance evidence records observation without promoting control or hea
     assert.equal(output.observation.instance.instanceId, "app_test");
     assert.equal(output.observation.observation.kind, "browser");
     assert.equal(output.observation.observation.status, "unavailable");
-    assert.equal(output.observation.observation.reason, "instance_not_running");
+    assert.equal(output.observation.observation.reason, "instance_not_running:pid_dead");
     assert.equal(output.observation.authority.controlsInstance, false);
     assert.equal(output.observation.authority.healthAuthority, false);
     assert.equal(output.observation.authority.completionAuthority, false);
