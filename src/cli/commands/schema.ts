@@ -39,6 +39,7 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "app-server-discovery",
   "app-server-stage-a",
   "app-server-stage-b",
+  "app-server-stdio-proof",
 ]);
 
 function parseSchemaType(value: string | undefined): SchemaValidationType {

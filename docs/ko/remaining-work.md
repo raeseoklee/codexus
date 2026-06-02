@@ -223,13 +223,15 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 3. app-server product behavior를 활성화하기 전에 Desktop app-server attachment
    evidence loop를 마무리합니다. Stage A isolated temporary-state evidence는 구현됐고,
    Stage B는 gated read-only socket command surface를 갖고 있으며,
-   discovery/Stage A/Stage B manifest는 schema-validatable합니다.
+   discovery/Stage A/Stage B/stdio-proof manifest는 schema-validatable합니다.
    `cx app-server discover --json/--record`가 실제 Desktop discovery evidence를
    기록합니다. 현재 maintainer evidence는 managed control socket이 없는
-   `stdio_only`입니다. Stdio-observer design contract는 문서화됐습니다. 기존 Desktop
-   stdio pipe는 attach target이 아니며, 다음 slice는 explicit user-provided socket이
-   없다면 fake 또는 Codexus-owned stdio proof harness입니다. app-server driver 활성화는
-   별도 gate로 계속 분리합니다.
+   `stdio_only`입니다. Stdio-observer design contract는 문서화됐고 fake
+   Codexus-owned `cx app-server experiment --stdio-proof --record --json` proof
+   harness는 구현됐습니다. 다음 slice는 non-disruptive observer bridge 또는 explicit
+   user-provided socket이 transcript 값 없이 turn-boundary evidence를 만들 때만 실제
+   session-event mapping으로 진행합니다. app-server driver 활성화는 별도 gate로 계속
+   분리합니다.
 4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
    공유하며, 첫 synchronous dispatcher slice가 구현됐습니다. 다음은 richer
    scheduler semantics, retry/recovery policy, foreground dispatch를 넘는
@@ -338,10 +340,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 
 1. Desktop app-server attachment: 현재 discovery evidence는 `stdio_only`입니다.
    Non-disruptive stdio observer contract는 문서화됐습니다. 기존 Desktop stdio pipe에
-   attach하지 않고, process liveness를 Desktop support로 추론하지 않습니다. 다음에는
-   session-event mapping 전에 fake 또는 Codexus-owned stdio proof harness를 구현하거나
-   explicit user-provided app-server socket을 확보합니다. 아직 live app-server product
-   behavior는 켜지지 않습니다.
+   attach하지 않고, process liveness를 Desktop support로 추론하지 않습니다. Fake/Codexus-owned
+   stdio proof harness는 구현됐으며, 다음에는 session-event mapping 전에 non-disruptive
+   observer bridge 또는 explicit user-provided app-server socket을 확보합니다. 아직 live
+   app-server product behavior는 켜지지 않습니다.
 2. Cron/gateway dispatcher: 첫 explicit-approval live slice와
    schema-validatable blocked-dispatch boundary audit record는 구현됐습니다.
    다음은 scheduler semantics, recovery/retry policy, 더 강한 long-lived

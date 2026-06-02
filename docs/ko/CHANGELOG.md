@@ -7,6 +7,18 @@ Codexus의 notable change를 이 파일에 기록합니다.
 이 프로젝트는 practical pre-1.0 changelog format을 따릅니다. 1.0 전에는 breaking
 change가 있을 수 있지만, 명확히 표시해야 합니다.
 
+## Unreleased
+
+### Added
+
+- Experimental app-server stdio proof harness를 추가했습니다:
+  `cx app-server experiment --stdio-proof --record --json`은 fake/Codexus-owned
+  stdio process만 시작하고, schema-validatable `app-server-stdio-proof` artifact를
+  기록하며, transcript exclusion과 bounded method-shape observation을 증명합니다. 기존
+  Desktop stdio pipe는 계속 non-target입니다. Live Desktop attachment는 non-disruptive
+  observer bridge 또는 explicit user-provided socket이 증명될 때까지 unavailable로
+  유지됩니다.
+
 ## 0.1.3 - 2026-06-02
 
 이 release는 experimental action surface를 추가합니다. 이 surface들은 계속 gate 뒤에

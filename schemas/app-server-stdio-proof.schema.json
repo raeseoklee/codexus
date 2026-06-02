@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/app-server-stdio-proof.schema.json",
+  "title": "Codexus App Server Stdio Proof Manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "experimentId": { "type": "string", "minLength": 1 },
+    "mode": { "const": "stdio-proof" },
+    "cwd": { "type": "string", "minLength": 1 },
+    "experimentDir": { "type": "string", "minLength": 1 },
+    "timeoutMs": { "type": "number", "exclusiveMinimum": 0 },
+    "source": {
+      "type": "object",
+      "properties": {
+        "kind": { "enum": ["fake-process", "codexus-owned-process"] },
+        "ownedByCodexus": { "const": true },
+        "existingDesktopStdioAttachAttempted": { "const": false },
+        "desktopProcessPid": { "type": "null" },
+        "command": { "type": "string", "minLength": 1 },
+        "argsPreview": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["kind", "ownedByCodexus", "existingDesktopStdioAttachAttempted", "desktopProcessPid", "command", "argsPreview"]
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "readOnly": { "const": true },
+        "startsDesktopTurn": { "const": false },
+        "transcriptValuesStored": { "const": false },
+        "remoteControlAutoEnabled": { "const": false },
+        "completionAuthority": { "const": false },
+        "runtimeSurfaceAuthority": { "const": "turn-boundary-event-only" }
+      },
+      "required": ["readOnly", "startsDesktopTurn", "transcriptValuesStored", "remoteControlAutoEnabled", "completionAuthority", "runtimeSurfaceAuthority"]
+    },
+    "process": {
+      "type": "object",
+      "properties": {
+        "pid": { "type": ["number", "null"] },
+        "startedAt": { "type": "string", "minLength": 1 },
+        "completedAt": { "type": "string", "minLength": 1 },
+        "exitCode": { "type": ["number", "null"] },
+        "signal": { "type": ["string", "null"] },
+        "status": { "enum": ["passed", "failed", "timed_out", "error"] },
+        "error": { "type": ["string", "null"] }
+      },
+      "required": ["pid", "startedAt", "completedAt", "exitCode", "signal", "status", "error"]
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "maxReadBytes": { "type": "number", "minimum": 0 },
+        "maxMessages": { "type": "number", "minimum": 0 },
+        "bytesRead": { "type": "number", "minimum": 0 },
+        "truncated": { "type": "boolean" },
+        "timeoutMs": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": ["maxReadBytes", "maxMessages", "bytesRead", "truncated", "timeoutMs"]
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "status": { "enum": ["observed", "unobserved", "unavailable"] },
+        "runtimeSurface": { "enum": ["unknown", "desktop-app-server"] },
+        "turnBoundaryObserved": { "type": "boolean" },
+        "notificationMethods": { "type": "array", "items": { "type": "string" } },
+        "relevantEventMethods": { "type": "array", "items": { "type": "string" } },
+        "messages": { "type": "array", "items": { "type": "object" } },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["status", "runtimeSurface", "turnBoundaryObserved", "notificationMethods", "relevantEventMethods", "messages", "reason"]
+    },
+    "promotionRecommendation": { "enum": ["allow_session_mapping_design", "block_stage_b", "inconclusive"] }
+  },
+  "required": ["schemaVersion", "stability", "experimentId", "mode", "cwd", "experimentDir", "timeoutMs", "source", "safety", "process", "limits", "observation", "promotionRecommendation"]
+}

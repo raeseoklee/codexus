@@ -46,7 +46,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - deterministic replay 뒤 explicit budget/policy/live-environment gated model replay
 - unrelated tool state를 건드리지 않는 `cx init`
 - runs/events/report observability command
-- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled. Discovery, Stage A, Stage B app-server evidence manifest는 experimental schema-validatable artifact로 등록되어 있습니다.
+- app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, fake/Codexus-owned stdio proof evidence, live execution disabled. Discovery, Stage A, Stage B, stdio-proof app-server evidence manifest는 experimental schema-validatable artifact로 등록되어 있습니다.
 - cron/gateway의 experimental explicit-approval live dispatch, policy/approval
   contract field를 포함한 dry-run automation plan, 그리고 blocked live path용
   schema-validatable boundary audit record
@@ -217,9 +217,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   remote control을 켜지 않고 default control socket 존재 여부, 실행 중인 app-server
   transport mode, Stage B readiness를 보고합니다. 현재 maintainer evidence는
   `stdio_only`입니다. Stdio-observer design contract는 문서화됐습니다. 기존 Desktop
-  stdio pipe는 attach target이 아니므로 positive Desktop attachment는 explicit socket,
-  fake 또는 Codexus-owned stdio proof harness, future supported observer bridge가
-  증명될 때까지 계속 blocked입니다.
+  stdio pipe는 attach target이 아니며 fake/Codexus-owned stdio proof harness는
+  구현됐습니다. Positive Desktop attachment는 explicit socket 또는 future supported
+  observer bridge가 증명될 때까지 계속 blocked입니다.
 
 ## 검증
 
@@ -349,8 +349,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, schema-validatable Stage B read-only evidence를 explicit gate 뒤에 구현했습니다.
 - 첫 Stage B maintainer Desktop smoke는 negative였습니다. 사용할 수 있는 app-server
   WebSocket socket을 찾지 못했고, 발견된 IPC socket은 handshake 전에 닫혔습니다.
-  지원되는 socket, fake 또는 Codexus-owned stdio proof harness, future supported
-  observer bridge가 증명될 때까지 Desktop attachment는 unavailable/unobserved로
+  Fake/Codexus-owned stdio proof harness는 구현됐지만, 지원되는 socket 또는 future
+  supported observer bridge가 증명될 때까지 Desktop attachment는 unavailable/unobserved로
   유지합니다. 문서화된 stdio-observer contract는 기존 Desktop stdio pipe에 attach하는
   것을 금지합니다.
 - Codex-native adapter retrieval과 approved context artifact 기록은 있지만 active skill을 현재 Codex prompt에 자동 주입하지는 않습니다.

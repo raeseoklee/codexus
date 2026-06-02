@@ -235,13 +235,15 @@ evidence only when the supporting runtime exists:
 3. Complete the Desktop app-server attachment evidence loop before enabling any
    app-server product behavior: Stage A isolated temporary-state evidence is
    implemented, Stage B has a gated read-only socket command surface, and
-   discovery/Stage A/Stage B manifests are schema-validatable. `cx app-server
-   discover --json/--record` now records real Desktop discovery evidence.
-   Current maintainer evidence is `stdio_only` with no managed control socket.
-   The stdio-observer design contract is documented: existing Desktop stdio
-   pipes are not attach targets, and the next slice is a fake or Codexus-owned
-   stdio proof harness unless the user provides an explicit app-server socket.
-   Keep app-server driver enablement separate and still gated.
+   discovery/Stage A/Stage B/stdio-proof manifests are schema-validatable.
+   `cx app-server discover --json/--record` now records real Desktop discovery
+   evidence. Current maintainer evidence is `stdio_only` with no managed control
+   socket. The stdio-observer design contract is documented and the fake
+   Codexus-owned `cx app-server experiment --stdio-proof --record --json`
+   proof harness is implemented. The next slice is real session-event mapping
+   only from a non-disruptive observer bridge or an explicit user-provided
+   socket that produces turn-boundary evidence without transcript values. Keep
+   app-server driver enablement separate and still gated.
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`, and the first synchronous dispatcher
    slice is implemented. Next add richer scheduler semantics, retry/recovery
@@ -354,9 +356,10 @@ Harness-engineering alignment adds these evidence-first tracks:
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
    The non-disruptive stdio observer contract is documented: do not attach to
    existing Desktop stdio pipes, and do not infer Desktop support from process
-   liveness. Next implement a fake or Codexus-owned stdio proof harness, or
-   obtain an explicit user-provided app-server socket, before attempting
-   session-event mapping. Do not enable live app-server product behavior yet.
+   liveness. The fake/Codexus-owned stdio proof harness is implemented; next
+   obtain a non-disruptive observer bridge or an explicit user-provided
+   app-server socket before attempting session-event mapping. Do not enable live
+   app-server product behavior yet.
 2. Cron/gateway dispatcher: the first explicit-approval live slice and
    schema-validatable blocked-dispatch boundary audit records are now
    implemented. Next add scheduler semantics, recovery/retry policy, and

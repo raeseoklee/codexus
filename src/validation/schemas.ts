@@ -74,7 +74,8 @@ export type SchemaValidationType =
   | "subagent-launch-contract"
   | "app-server-discovery"
   | "app-server-stage-a"
-  | "app-server-stage-b";
+  | "app-server-stage-b"
+  | "app-server-stdio-proof";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -116,6 +117,7 @@ export const schemaArtifactNames = [
   "app-server-discovery.schema.json",
   "app-server-stage-a.schema.json",
   "app-server-stage-b.schema.json",
+  "app-server-stdio-proof.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -143,6 +145,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "app-server-discovery": "app-server-discovery.schema.json",
   "app-server-stage-a": "app-server-stage-a.schema.json",
   "app-server-stage-b": "app-server-stage-b.schema.json",
+  "app-server-stdio-proof": "app-server-stdio-proof.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -926,6 +929,63 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
         errors.push("eventObservation.relevantEventMethods:non_string_item");
       }
       requireArray(value.eventObservation, "messages", errors, "eventObservation.messages");
+    }
+    requireOneOf(value, "promotionRecommendation", ["allow_session_mapping_design", "block_stage_b", "inconclusive"], errors);
+  }
+
+  if (type === "app-server-stdio-proof") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "mode", ["stdio-proof"], errors);
+    requireString(value, "experimentId", errors);
+    requireString(value, "cwd", errors);
+    requireString(value, "experimentDir", errors);
+    requireNumber(value, "timeoutMs", errors);
+    if (requireRecord(value.source, errors, "source")) {
+      requireOneOf(value.source, "kind", ["fake-process", "codexus-owned-process"], errors, "source.kind");
+      if (value.source.ownedByCodexus !== true) errors.push("source.ownedByCodexus:not_true");
+      if (value.source.existingDesktopStdioAttachAttempted !== false) errors.push("source.existingDesktopStdioAttachAttempted:not_false");
+      if (value.source.desktopProcessPid !== null) errors.push("source.desktopProcessPid:not_null");
+      requireString(value.source, "command", errors, "source.command");
+      if (requireArray(value.source, "argsPreview", errors, "source.argsPreview").some((item) => typeof item !== "string")) {
+        errors.push("source.argsPreview:non_string_item");
+      }
+    }
+    if (requireRecord(value.safety, errors, "safety")) {
+      if (value.safety.readOnly !== true) errors.push("safety.readOnly:not_true");
+      if (value.safety.startsDesktopTurn !== false) errors.push("safety.startsDesktopTurn:not_false");
+      if (value.safety.transcriptValuesStored !== false) errors.push("safety.transcriptValuesStored:not_false");
+      if (value.safety.remoteControlAutoEnabled !== false) errors.push("safety.remoteControlAutoEnabled:not_false");
+      if (value.safety.completionAuthority !== false) errors.push("safety.completionAuthority:not_false");
+      requireOneOf(value.safety, "runtimeSurfaceAuthority", ["turn-boundary-event-only"], errors, "safety.runtimeSurfaceAuthority");
+    }
+    if (requireRecord(value.process, errors, "process")) {
+      if (!(value.process.pid === null || typeof value.process.pid === "number")) errors.push("process.pid:invalid");
+      requireString(value.process, "startedAt", errors, "process.startedAt");
+      requireString(value.process, "completedAt", errors, "process.completedAt");
+      if (!(value.process.exitCode === null || typeof value.process.exitCode === "number")) errors.push("process.exitCode:invalid");
+      if (!(value.process.signal === null || typeof value.process.signal === "string")) errors.push("process.signal:invalid");
+      requireOneOf(value.process, "status", ["passed", "failed", "timed_out", "error"], errors, "process.status");
+      if (!(value.process.error === null || typeof value.process.error === "string")) errors.push("process.error:invalid");
+    }
+    if (requireRecord(value.limits, errors, "limits")) {
+      requireNumber(value.limits, "maxReadBytes", errors, "limits.maxReadBytes");
+      requireNumber(value.limits, "maxMessages", errors, "limits.maxMessages");
+      requireNumber(value.limits, "bytesRead", errors, "limits.bytesRead");
+      requireBoolean(value.limits, "truncated", errors, "limits.truncated");
+      requireNumber(value.limits, "timeoutMs", errors, "limits.timeoutMs");
+    }
+    if (requireRecord(value.observation, errors, "observation")) {
+      requireOneOf(value.observation, "status", ["observed", "unobserved", "unavailable"], errors, "observation.status");
+      requireOneOf(value.observation, "runtimeSurface", ["unknown", "desktop-app-server"], errors, "observation.runtimeSurface");
+      requireBoolean(value.observation, "turnBoundaryObserved", errors, "observation.turnBoundaryObserved");
+      if (requireArray(value.observation, "notificationMethods", errors, "observation.notificationMethods").some((item) => typeof item !== "string")) {
+        errors.push("observation.notificationMethods:non_string_item");
+      }
+      if (requireArray(value.observation, "relevantEventMethods", errors, "observation.relevantEventMethods").some((item) => typeof item !== "string")) {
+        errors.push("observation.relevantEventMethods:non_string_item");
+      }
+      requireArray(value.observation, "messages", errors, "observation.messages");
+      requireString(value.observation, "reason", errors, "observation.reason");
     }
     requireOneOf(value, "promotionRecommendation", ["allow_session_mapping_design", "block_stage_b", "inconclusive"], errors);
   }

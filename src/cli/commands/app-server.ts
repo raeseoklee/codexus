@@ -6,6 +6,7 @@ import { runAppServerDiscovery } from "../../experiments/app-server-discovery.ts
 import { superviseProcess } from "../../experiments/process-supervisor.ts";
 import { runIsolatedRealStageA } from "../../experiments/app-server-stage-a.ts";
 import { runLiveReadOnlyStageB } from "../../experiments/app-server-stage-b.ts";
+import { runStdioProof } from "../../experiments/app-server-stdio-proof.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
@@ -136,6 +137,26 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (topic === "experiment") {
+    if (flagBool(args.flags, "stdio-proof")) {
+      const timeoutMs = Number(flagString(args.flags, "timeout-ms") ?? "30000");
+      if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) throw new Error("invalid_timeout_ms");
+      const experimentId = `app_server_stdio_proof_${Date.now()}`;
+      const experimentDir = resolve(harnessRoot(cwd), "experiments", "app-server", experimentId);
+      const { manifest } = await runStdioProof({
+        cwd,
+        experimentDir,
+        experimentId,
+        timeoutMs,
+        record: flagBool(args.flags, "record"),
+        sendTurnBoundary: !flagBool(args.flags, "no-turn-boundary"),
+      });
+      if (json) {
+        console.log(JSON.stringify(manifest, null, 2));
+        return;
+      }
+      console.log(`app-server experiment stdio-proof: observation=${manifest.observation.status} runtime=${manifest.observation.runtimeSurface}`);
+      return;
+    }
     if (flagBool(args.flags, "live-read-only")) {
       if (!desktopAttachEnabled()) throw new Error("unsupported_feature:codex-app-server-live-read-only");
       const socketPath = flagString(args.flags, "sock");

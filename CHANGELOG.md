@@ -7,6 +7,18 @@ All notable changes to Codexus will be documented in this file.
 This project follows a practical pre-1.0 changelog format. Breaking changes can
 occur before 1.0, but they should be called out clearly.
 
+## Unreleased
+
+### Added
+
+- Added the experimental app-server stdio proof harness:
+  `cx app-server experiment --stdio-proof --record --json` starts only a
+  fake/Codexus-owned stdio process, records a schema-validatable
+  `app-server-stdio-proof` artifact, proves transcript exclusion and bounded
+  method-shape observation, and keeps existing Desktop stdio pipes as
+  non-targets. Live Desktop attachment remains unavailable until a
+  non-disruptive observer bridge or explicit user-provided socket is proven.
+
 ## 0.1.3 - 2026-06-02
 
 This release adds experimental action surfaces. They remain gated and are not

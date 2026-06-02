@@ -187,11 +187,13 @@ Stdio observer 비목표:
 
 다음 구현 slice는 product attachment가 아니라 proof harness여야 합니다:
 
-- Bounded JSON-RPC notification method shape와 선택적인 turn-boundary-like event를 내보내는
-  fake stdio app-server fixture를 추가합니다.
-- Owner/process identity, byte/time limit, redaction status, observed method name,
-  transcript exclusion proof를 포함한 experimental stdio-observer manifest를 기록합니다.
-- 그 manifest를 local schema-artifact subset engine으로 검증합니다.
+- 구현된 stdio slice는 product attachment가 아니라 proof harness입니다.
+- `cx app-server experiment --stdio-proof --record --json`은 bounded JSON-RPC
+  notification method shape와 선택적인 turn-boundary-like event를 내보내는 fake
+  Codexus-owned stdio process만 시작합니다.
+- Owner/process identity, byte/time limit, observed method name, transcript exclusion
+  proof를 포함한 experimental `app-server-stdio-proof` manifest를 기록합니다.
+- 그 manifest는 local schema-artifact subset engine으로 검증됩니다.
 - 실제 non-disruptive observer 또는 explicit socket path가 transcript data 없이 turn-boundary
   event를 만들기 전까지 promotion은 blocked로 유지합니다.
 
@@ -216,6 +218,7 @@ cx app-server experiment --dry-run --record --probe-process --supervise-fake --j
 cx app-server discover --record --json
 cx app-server experiment --isolated-real --record --json
 cx app-server experiment --live-read-only --record --sock <path> --json
+cx app-server experiment --stdio-proof --record --json
 ```
 
 `--isolated-real`은 `CODEXUS_ENABLE_APP_SERVER_ISOLATED=1` 뒤에서 구현됐습니다.
@@ -228,9 +231,10 @@ cx app-server experiment --live-read-only --record --sock <path> --json
 존재 여부, Stage B readiness를 기록하지만 live socket에 연결하거나 daemon을 시작하거나
 remote control을 켜지 않습니다.
 
-미래의 stdio-observer command는 아직 구현되지 않았습니다. 추가된다면 fake 또는
-Codexus-owned process부터 시작하고 `stability: "experimental"`을 보고해야 하며, 기존
-Desktop stdio pipe에 attach하면 안 됩니다.
+`--stdio-proof`는 experimental fake/Codexus-owned process proof harness로 구현됐습니다.
+`stability: "experimental"`을 보고하고 schema-validatable `app-server-stdio-proof`
+artifact를 기록하지만, live Desktop attachment support로 해석하면 안 됩니다. 기존
+Desktop stdio pipe는 계속 non-target입니다.
 
 ## 검증
 

@@ -276,29 +276,29 @@
           <span class="label">근거</span>
           <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md#stdio-observer-design-contract">app-server evidence plan</a></p>
         </article>
+
+        <article class="card">
+          <h3>App-Server Stdio Proof Harness</h3>
+          <div class="tags">
+            <span class="tag done">완료</span>
+            <span class="tag evidence">fake owned process</span>
+            <span class="tag gated">Desktop attach 금지</span>
+          </div>
+          <p>첫 stdio proof harness는 live Desktop attachment가 아니라 experimental fake/Codexus-owned process로 구현됐습니다.</p>
+          <span class="label">증거</span>
+          <ul>
+            <li><code>cx app-server experiment --stdio-proof --record --json</code>가 schema-validatable <code>app-server-stdio-proof</code> artifact를 기록합니다.</li>
+            <li>Manifest는 owner identity, byte/time bound, transcript exclusion, observed method shape, 기존 Desktop stdio attach 금지를 증명합니다.</li>
+            <li>Positive Desktop runtime mapping은 실제 non-disruptive turn-boundary evidence가 있을 때까지 계속 blocked입니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
+        </article>
       </section>
 
       <section class="column" aria-labelledby="next-evidence">
         <h2 id="next-evidence">2. 다음 Evidence Slice</h2>
         <p class="summary">더 큰 runtime을 켜기 전에 먼저 증거를 만들어야 하는 작업입니다.</p>
-
-        <article class="card">
-          <h3>App-Server Stdio Proof Harness</h3>
-          <div class="tags">
-            <span class="tag evidence">설계 이후</span>
-            <span class="tag gated">remote control 금지</span>
-          </div>
-          <p>Discovery 결과 maintainer Desktop surface는 managed control socket이 없는 stdio-only이고, non-disruptive observer contract는 문서화됐습니다. Desktop session-event mapping 전에 fake 또는 Codexus-owned stdio로 parser와 mapping을 증명합니다.</p>
-          <span class="label">완료 조건</span>
-          <ul>
-            <li><code>cx app-server discover --record --json</code>가 read-only를 유지하고 stdio-only evidence를 기록합니다.</li>
-            <li>Discovery, Stage A, Stage B manifest는 schema-validatable experimental artifact로 유지됩니다.</li>
-            <li>Fake 또는 Codexus-owned stdio observer manifest가 byte/time limit, transcript exclusion, owner identity, observed method shape를 증명합니다.</li>
-            <li>Proof harness는 기존 Desktop stdio pipe를 거부하고, 실제 non-disruptive turn-boundary evidence가 생길 때까지 positive mapping을 blocked로 유지합니다.</li>
-          </ul>
-          <span class="label">근거</span>
-          <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
-        </article>
 
         <article class="card">
           <h3>App-Server Session Event Mapping</h3>

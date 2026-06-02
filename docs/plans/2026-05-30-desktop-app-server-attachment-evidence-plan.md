@@ -193,15 +193,15 @@ Stdio observer non-goals:
 - Do not translate stdio discovery into `runtimeSurface: "desktop-app-server"`
   without an observed turn-boundary event.
 
-The next implementation slice should be a proof harness, not product
-attachment:
+The implemented stdio slice is a proof harness, not product attachment:
 
-- Add a fake stdio app-server fixture that emits bounded JSON-RPC notification
-  method shapes and optional turn-boundary-like events.
-- Record an experimental stdio-observer manifest with owner/process identity,
-  byte/time limits, redaction status, observed method names, and transcript
-  exclusion proof.
-- Validate that manifest through the local schema-artifact subset engine.
+- `cx app-server experiment --stdio-proof --record --json` starts only a fake
+  Codexus-owned stdio process that emits bounded JSON-RPC notification method
+  shapes and optional turn-boundary-like events.
+- It records an experimental `app-server-stdio-proof` manifest with
+  owner/process identity, byte/time limits, observed method names, and
+  transcript-exclusion proof.
+- The manifest is validated through the local schema-artifact subset engine.
 - Keep promotion blocked unless a real non-disruptive observer or explicit
   socket path produces a turn-boundary event without transcript data.
 
@@ -226,6 +226,7 @@ cx app-server experiment --dry-run --record --probe-process --supervise-fake --j
 cx app-server discover --record --json
 cx app-server experiment --isolated-real --record --json
 cx app-server experiment --live-read-only --record --sock <path> --json
+cx app-server experiment --stdio-proof --record --json
 ```
 
 `--isolated-real` is implemented behind `CODEXUS_ENABLE_APP_SERVER_ISOLATED=1`.
@@ -238,9 +239,11 @@ shapes rather than transcript values. Errors must be structured and truthful.
 control-socket availability, and Stage B readiness, but does not connect to a
 live socket, start a daemon, or enable remote control.
 
-A future stdio-observer command is not yet implemented. When added, it must
-start with fake or Codexus-owned processes and report `stability:
-"experimental"`; it must not attach to existing Desktop stdio pipes.
+`--stdio-proof` is implemented as an experimental fake/Codexus-owned process
+proof harness. It reports `stability: "experimental"`, records
+`app-server-stdio-proof` schema-validatable artifacts, and must not be treated
+as live Desktop attachment support. Existing Desktop stdio pipes remain
+non-targets.
 
 ## Verification
 

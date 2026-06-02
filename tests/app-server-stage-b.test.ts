@@ -404,3 +404,66 @@ test("live-read-only bounds notification flood without transcript values", async
     await rm(socketDir, { recursive: true, force: true });
   }
 });
+
+test("stdio-proof records owned fake process evidence without attaching existing Desktop stdio", async () => {
+  const cwd = await tempDir();
+  try {
+    const result = runCli(cwd, [
+      "app-server",
+      "experiment",
+      "--stdio-proof",
+      "--record",
+      "--timeout-ms",
+      "2000",
+      "--json",
+    ]);
+    assert.equal(result.status, 0, result.stderr);
+    const manifest = JSON.parse(result.stdout);
+    assert.equal(manifest.mode, "stdio-proof");
+    assert.equal(manifest.source.kind, "fake-process");
+    assert.equal(manifest.source.ownedByCodexus, true);
+    assert.equal(manifest.source.existingDesktopStdioAttachAttempted, false);
+    assert.equal(manifest.source.desktopProcessPid, null);
+    assert.equal(manifest.safety.startsDesktopTurn, false);
+    assert.equal(manifest.safety.transcriptValuesStored, false);
+    assert.equal(manifest.safety.completionAuthority, false);
+    assert.equal(manifest.observation.status, "observed");
+    assert.equal(manifest.observation.runtimeSurface, "desktop-app-server");
+    assert.equal(manifest.observation.turnBoundaryObserved, true);
+    assert.ok(manifest.observation.notificationMethods.includes("turn/completed"));
+    assert.equal(manifest.promotionRecommendation, "allow_session_mapping_design");
+    assert.doesNotMatch(JSON.stringify(manifest), /should-not-be-stored/);
+    const manifestPath = join(manifest.experimentDir, "stdio-proof.json");
+    assert.ok(existsSync(manifestPath));
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-server-stdio-proof", "--file", manifestPath, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("stdio-proof keeps runtime unknown without turn-boundary notification", async () => {
+  const cwd = await tempDir();
+  try {
+    const result = runCli(cwd, [
+      "app-server",
+      "experiment",
+      "--stdio-proof",
+      "--no-turn-boundary",
+      "--timeout-ms",
+      "2000",
+      "--json",
+    ]);
+    assert.equal(result.status, 0, result.stderr);
+    const manifest = JSON.parse(result.stdout);
+    assert.equal(manifest.mode, "stdio-proof");
+    assert.equal(manifest.source.existingDesktopStdioAttachAttempted, false);
+    assert.equal(manifest.observation.status, "unobserved");
+    assert.equal(manifest.observation.runtimeSurface, "unknown");
+    assert.equal(manifest.observation.turnBoundaryObserved, false);
+    assert.equal(manifest.promotionRecommendation, "inconclusive");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});

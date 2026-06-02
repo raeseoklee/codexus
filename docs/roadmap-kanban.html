@@ -277,29 +277,29 @@
           <span class="label">Sources</span>
           <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md#stdio-observer-design-contract">app-server evidence plan</a></p>
         </article>
+
+        <article class="card">
+          <h3>App-Server Stdio Proof Harness</h3>
+          <div class="tags">
+            <span class="tag done">done</span>
+            <span class="tag evidence">fake owned process</span>
+            <span class="tag gated">no Desktop attach</span>
+          </div>
+          <p>The first stdio proof harness is implemented as an experimental fake/Codexus-owned process, not as live Desktop attachment.</p>
+          <span class="label">Evidence</span>
+          <ul>
+            <li><code>cx app-server experiment --stdio-proof --record --json</code> records a schema-validatable <code>app-server-stdio-proof</code> artifact.</li>
+            <li>The manifest proves owner identity, byte/time bounds, transcript exclusion, observed method shapes, and no existing Desktop stdio attach.</li>
+            <li>Positive Desktop runtime mapping remains blocked until real non-disruptive turn-boundary evidence exists.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
+        </article>
       </section>
 
       <section class="column" aria-labelledby="next-evidence">
         <h2 id="next-evidence">2. Next Evidence Slices</h2>
         <p class="summary">Evidence-producing work that should happen before any broader runtime is turned on.</p>
-
-        <article class="card">
-          <h3>App-Server Stdio Proof Harness</h3>
-          <div class="tags">
-            <span class="tag evidence">after design</span>
-            <span class="tag gated">no remote control</span>
-          </div>
-          <p>Discovery now shows the maintainer Desktop surface is stdio-only with no managed control socket, and the non-disruptive observer contract is documented. Prove parsing and mapping against fake or Codexus-owned stdio before any Desktop session-event mapping.</p>
-          <span class="label">Acceptance</span>
-          <ul>
-            <li><code>cx app-server discover --record --json</code> remains read-only and records stdio-only evidence.</li>
-            <li>Discovery, Stage A, and Stage B manifests remain schema-validatable experimental artifacts.</li>
-            <li>A fake or Codexus-owned stdio observer manifest proves byte/time limits, transcript exclusion, owner identity, and observed method shapes.</li>
-            <li>The proof harness refuses existing Desktop stdio pipes and keeps positive mapping blocked until real non-disruptive turn-boundary evidence exists.</li>
-          </ul>
-          <span class="label">Sources</span>
-          <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
-        </article>
 
         <article class="card">
           <h3>App-Server Session Event Mapping</h3>

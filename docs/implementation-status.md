@@ -113,7 +113,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx init` creates project-local config/state directories without mutating
   unrelated tool state.
 - Run observability commands list runs, tail events, and preview reports.
-- App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, and explicit opt-in Stage B read-only socket observation are present, while live app-server execution remains gated off. Discovery, Stage A, and Stage B app-server evidence manifests are registered as experimental schema-validatable artifacts.
+- App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, and fake/Codexus-owned stdio proof evidence are present, while live app-server execution remains gated off. Discovery, Stage A, Stage B, and stdio-proof app-server evidence manifests are registered as experimental schema-validatable artifacts.
 - Cron/gateway now expose an experimental explicit-approval live dispatch slice
   on top of the existing dry-run contract: `cx cron run-now` / `cx gateway
   check` can acquire an automation lock, record policy and approval artifacts,
@@ -474,10 +474,10 @@ review. Current high-level gaps:
 - Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, and schema-validatable Stage B read-only evidence are implemented behind explicit gates.
 - First Stage B maintainer Desktop smoke was negative: no usable app-server
   WebSocket socket was found, and a discovered IPC socket closed before
-  handshake. Desktop attachment remains unavailable/unobserved until a supported
-  socket, fake or Codexus-owned stdio proof harness, or future supported
-  observer bridge is proven. The documented stdio-observer contract forbids
-  attaching to existing Desktop stdio pipes.
+  handshake. The fake/Codexus-owned stdio proof harness is implemented, but
+  Desktop attachment remains unavailable/unobserved until a supported socket or
+  future supported observer bridge is proven. The documented stdio-observer
+  contract forbids attaching to existing Desktop stdio pipes.
 - Codex-native adapter retrieval exists, but it does not automatically inject active skills into the current Codex prompt.
 - Session state is currently a cwd-scoped singleton because Codex does not expose
   a stable per-conversation id to Codexus.
