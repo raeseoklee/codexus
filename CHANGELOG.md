@@ -30,6 +30,10 @@ occur before 1.0, but they should be called out clearly.
 - Extended experimental `cx repo check --gate --json` with a deferred
   self-report invariant: source `*_deferred` claims must be mirrored in both
   implementation-status documents, and the JSON output aggregates those claims.
+- Added experimental session control-plane evidence: `cx session decision
+  record/list/status` writes schema-valid advisory `codexus.decision`
+  artifacts, and `cx session loop --json` plus HUD/status projections summarize
+  repeated verification failures without gaining completion authority.
 - Documented the autopilot/relay branch-protection boundary: protected-branch,
   required-review, or required-check rejection must stop for human decision
   rather than bypass repository rules.

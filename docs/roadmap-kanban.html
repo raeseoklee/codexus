@@ -207,18 +207,18 @@
         </article>
 
         <article class="card">
-          <h3>Decision Artifact Schema</h3>
+          <h3>Control-Plane Follow-Up</h3>
           <div class="tags">
             <span class="tag ready">doc 17</span>
-            <span class="tag evidence">derivable</span>
+            <span class="tag evidence">advisory-first</span>
           </div>
-          <p>Add a local decision record artifact so long runs can preserve constraints, rejected alternatives, reversibility notes, and evidence links.</p>
+          <p>Decision artifacts, loop summaries, and HUD projections are implemented. Add the next control-plane metadata without creating a new completion authority.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li><code>codexus.decision</code> schema validates local decision artifacts.</li>
-            <li>Evidence links stay inside allowed Codexus artifact or repository paths.</li>
-            <li>Decision rationale remains advisory; only schema/path facts may gate.</li>
-            <li>Session commands can record and list decisions without changing completion authority.</li>
+            <li>Autonomy preset names are contract metadata, not trust scores.</li>
+            <li>Policy catalog output separates enforced, observed, advisory, and unavailable entries.</li>
+            <li>Richer risk facts remain derivable; heuristic risk stays advisory.</li>
+            <li>Task artifacts are read-only projections until verification evidence exists.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
@@ -329,16 +329,17 @@
         </article>
 
         <article class="card">
-          <h3>Decision Records and Loop Breakers</h3>
+          <h3>Policy Catalog And Risk Facts</h3>
           <div class="tags">
             <span class="tag evidence">doc 17</span>
-            <span class="tag gated">ledger-derived</span>
+            <span class="tag gated">control metadata</span>
           </div>
-          <p>After decision artifacts, add repeated-failure loop checks without changing completion authority.</p>
+          <p>Decision records and loop summaries are live. The next step is cataloging control policies and deriving richer risk facts without letting warnings become gates.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Loop checks are reconstructed from ledgers, not process memory.</li>
-            <li>Loop stops are boundary stops, not proof of incorrectness.</li>
+            <li>Policy entries report enforced, observed, advisory, or unavailable status.</li>
+            <li>Risk facts are reconstructed from diff/config/schema/package evidence.</li>
+            <li>Warnings cannot fail a change unless a declared policy promotes them.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>

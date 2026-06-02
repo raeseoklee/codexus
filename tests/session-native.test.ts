@@ -1150,6 +1150,122 @@ test("session hud reports compact evidence without statusline support", async ()
   }
 });
 
+test("session decision records advisory artifacts and projects them into status and hud", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    const record = runCli(cwd, [
+      "session",
+      "decision",
+      "record",
+      "Use explicit boundary stops",
+      "--kind",
+      "boundary",
+      "--rationale",
+      "Branch protection requires human decision",
+      "--constraint",
+      "No autonomous branch-protection bypass",
+      "--rejected",
+      "Force push through protection",
+      "--evidence-link",
+      "docs/design/12-autopilot-contract.md",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(record.status, 0, record.stderr);
+    const recorded = JSON.parse(record.stdout);
+    assert.equal(recorded.stability, "experimental");
+    assert.equal(recorded.decision.kind, "boundary");
+    assert.equal(recorded.decision.authority, "advisory");
+    assert.equal(recorded.decision.completionAuthority, false);
+    assert.ok(existsSync(recorded.artifactPath));
+    assert.ok(existsSync(recorded.statePath));
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "decision", "--file", recorded.artifactPath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const list = runCli(cwd, ["session", "decision", "list", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(list.status, 0, list.stderr);
+    const listed = JSON.parse(list.stdout);
+    assert.equal(listed.stability, "experimental");
+    assert.equal(listed.summary.count, 1);
+    assert.equal(listed.summary.lastDecision.decisionId, recorded.decision.decisionId);
+
+    const status = runCli(cwd, ["session", "decision", "status", recorded.decision.decisionId, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.artifact.decisionId, recorded.decision.decisionId);
+    assert.equal(statusOutput.artifact.completionAuthority, false);
+
+    const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(hud.status, 0, hud.stderr);
+    const hudOutput = JSON.parse(hud.stdout);
+    assert.equal(hudOutput.counts.decisions, 1);
+    assert.equal(hudOutput.lastDecision.decisionId, recorded.decision.decisionId);
+    assert.equal(hudOutput.loop.status, "none");
+    assert.equal(typeof hudOutput.riskSummary.fileCount, "number");
+
+    const invalid = runCli(cwd, [
+      "session",
+      "decision",
+      "record",
+      "--summary",
+      "Bad evidence link",
+      "--evidence-link",
+      "https://example.com/evidence",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(invalid.status, 1);
+    const invalidOutput = JSON.parse(invalid.stdout);
+    assert.equal(invalidOutput.code, "invalid_decision_evidence_link");
+
+    const parentPath = runCli(cwd, [
+      "session",
+      "decision",
+      "record",
+      "--summary",
+      "Bad parent path",
+      "--evidence-link",
+      "docs/..",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(parentPath.status, 1);
+    assert.equal(JSON.parse(parentPath.stdout).code, "invalid_decision_evidence_link");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("session loop reports repeated verification failures as an advisory boundary", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    for (let index = 0; index < 3; index += 1) {
+      const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"process.exit(1)\"", "--json"], { CODEX_HOME: codexHome });
+      assert.equal(verify.status, 1);
+    }
+
+    const loop = runCli(cwd, ["session", "loop", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(loop.status, 0, loop.stderr);
+    const loopOutput = JSON.parse(loop.stdout);
+    assert.equal(loopOutput.stability, "experimental");
+    assert.equal(loopOutput.loop.status, "boundary");
+    assert.equal(loopOutput.loop.repeatedFailureCount, 3);
+    assert.equal(loopOutput.loop.completionAuthority, false);
+    assert.equal(loopOutput.loop.evidenceLinks.length, 3);
+
+    const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(hud.status, 0, hud.stderr);
+    const hudOutput = JSON.parse(hud.stdout);
+    assert.equal(hudOutput.loop.status, "boundary");
+    assert.equal(hudOutput.loop.completionAuthority, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("session workers gate launch while subagents reject direct spawn honestly", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();

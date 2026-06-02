@@ -18,6 +18,8 @@ import {
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 import { deriveEvidenceModel } from "../../session/evidence.ts";
 import { buildChangeEvidenceReport } from "../../session/change-evidence.ts";
+import { listDecisionArtifacts, readDecisionArtifact, recordDecisionArtifact, summarizeDecisions } from "../../session/decisions.ts";
+import { summarizeVerificationLoop } from "../../session/loop.ts";
 import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
 import { completeSubagentArtifact, createSubagentLaunchContract, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
@@ -36,7 +38,19 @@ async function sessionStatusProjection(cwd: string) {
   const evidence = state
     ? deriveEvidenceModel(state, computeWorkspaceFingerprint(cwd), detection.recommended)
     : null;
-  const changeEvidence = buildChangeEvidenceReport(cwd, state, {}).changeEvidence;
+  const changeEvidenceReport = buildChangeEvidenceReport(cwd, state, {});
+  const changeEvidence = changeEvidenceReport.changeEvidence;
+  const riskSummary = {
+    schemaVersion: 1 as const,
+    status: changeEvidence.status,
+    fileCount: changeEvidenceReport.diff.files.length,
+    diffBase: changeEvidenceReport.diff.diffBase,
+    includesStaged: changeEvidenceReport.diff.includesStaged,
+    includesUntracked: changeEvidenceReport.diff.includesUntracked,
+    areas: [...new Set(changeEvidenceReport.diff.files.map((file) => file.split("/")[0] || file))].sort(),
+  };
+  const decisions = await summarizeDecisions(cwd);
+  const loop = summarizeVerificationLoop(state);
   const subagents = summarizeSubagentClaims(state);
   return {
     schemaVersion: 1,
@@ -46,6 +60,9 @@ async function sessionStatusProjection(cwd: string) {
     paths,
     evidence,
     changeEvidence,
+    riskSummary,
+    decisions,
+    loop,
     subagents,
     verifyDetection: detection,
     overlays: {
@@ -82,6 +99,9 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
     console.log(`Dirty since last verify: ${result.evidence.dirtySinceLastVerify}`);
     console.log(`Recommended verify: ${result.evidence.recommendedVerify ?? "none"}`);
   }
+  console.log(`Decisions: ${result.decisions.count}`);
+  console.log(`Loop: ${result.loop.status} (${result.loop.repeatedFailureCount}/${result.loop.threshold})`);
+  console.log(`Risk: ${result.riskSummary.status} (${result.riskSummary.fileCount} files)`);
 }
 
 async function hudCommand(cwd: string, json: boolean): Promise<void> {
@@ -102,14 +122,19 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
       }
       : null,
     changeEvidence: status.changeEvidence,
+    riskSummary: status.riskSummary,
+    decisions: status.decisions,
+    loop: status.loop,
     notifyDispatch: status.notifyDispatch,
     capabilities: status.state?.capabilities ?? null,
     counts: {
       checkpoints: status.state?.checkpoints.length ?? 0,
       verifications: status.state?.verifications.length ?? 0,
       subagentClaims: status.subagents.count,
+      decisions: status.decisions.count,
       hookEvents: status.state?.hookEvents.length ?? 0,
     },
+    lastDecision: status.decisions.lastDecision,
     lastCheckpoint,
     lastVerification,
   };
@@ -120,6 +145,9 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`Codexus HUD: ${result.status}`);
   console.log(`Verification: ${result.evidence?.verification ?? "unknown"}`);
   console.log(`Change evidence: ${result.changeEvidence.status}`);
+  console.log(`Risk: ${result.riskSummary.status}`);
+  console.log(`Loop: ${result.loop.status}`);
+  console.log(`Decisions: ${result.counts.decisions}`);
   console.log(`Notify: ${result.notifyDispatch.status}`);
 }
 
@@ -356,6 +384,90 @@ async function notifyCommand(args: ParsedArgs, cwd: string, json: boolean): Prom
   console.log(`Session notification recorded: ${record.id}`);
 }
 
+async function decisionCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
+  const action = args.positionals[1] ?? "list";
+  if (action === "record") {
+    assertAllowedFlags(args, ["json", "cwd", "kind", "summary", "rationale", "constraint", "rejected", "evidence-link"]);
+    const positionalSummary = args.positionals.slice(2).join(" ").trim();
+    const result = await recordDecisionArtifact(cwd, {
+      kind: flagString(args.flags, "kind"),
+      summary: flagString(args.flags, "summary") ?? positionalSummary,
+      rationale: flagString(args.flags, "rationale") ?? null,
+      constraints: flagArray(args.flags, "constraint"),
+      rejectedAlternatives: flagArray(args.flags, "rejected"),
+      evidenceLinks: flagArray(args.flags, "evidence-link"),
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Decision recorded: ${result.decision.decisionId}`);
+    console.log(result.artifactPath);
+    return;
+  }
+  if (action === "list") {
+    assertAllowedFlags(args, ["json", "cwd"]);
+    assertMaxPositionals(args, 2);
+    const decisions = await listDecisionArtifacts(cwd);
+    const result = {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      cwd,
+      decisions,
+      summary: await summarizeDecisions(cwd),
+    };
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Decisions: ${result.summary.count}`);
+    for (const entry of result.summary.recent) {
+      console.log(`${entry.decisionId} ${entry.kind}: ${entry.summary}`);
+    }
+    return;
+  }
+  if (action === "status") {
+    assertAllowedFlags(args, ["json", "cwd"]);
+    const decisionId = args.positionals[2];
+    if (!decisionId) throw new Error("missing_decision_id");
+    assertMaxPositionals(args, 3);
+    const result = {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      kind: "decision" as const,
+      ...(await readDecisionArtifact(cwd, decisionId)),
+    };
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Decision ${result.artifact.decisionId}: ${result.artifact.summary}`);
+    console.log(result.artifactPath);
+    return;
+  }
+  throw new Error(`unsupported_session_decision_command:${action}`);
+}
+
+async function loopCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
+  assertAllowedFlags(args, ["json", "cwd"]);
+  assertMaxPositionals(args, 1);
+  const stateRead = await readSessionStateWithMigration(cwd);
+  const state = stateRead.state ? await refreshSessionState(cwd, stateRead.state) : null;
+  const result = {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    cwd,
+    loop: summarizeVerificationLoop(state),
+    migration: stateRead.migration,
+  };
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  console.log(`Session loop: ${result.loop.status}`);
+  console.log(result.loop.reason);
+}
+
 async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
   const action = args.positionals[1] ?? "status";
   if (action === "record") {
@@ -544,6 +656,14 @@ export async function sessionCommand(args: ParsedArgs): Promise<void> {
   }
   if (subcommand === "notify") {
     await notifyCommand(args, cwd, json);
+    return;
+  }
+  if (subcommand === "decision") {
+    await decisionCommand(args, cwd, json);
+    return;
+  }
+  if (subcommand === "loop") {
+    await loopCommand(args, cwd, json);
     return;
   }
   if (subcommand === "subagent") {

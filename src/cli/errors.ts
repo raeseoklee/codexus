@@ -61,6 +61,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported session command${target ? `: ${target}` : ""}.`;
     case "unsupported_session_subagent_command":
       return `Unsupported session subagent command${target ? `: ${target}` : ""}.`;
+    case "unsupported_session_decision_command":
+      return `Unsupported session decision command${target ? `: ${target}` : ""}.`;
     case "unsupported_session_workers_command":
       return `Unsupported session workers command${target ? `: ${target}` : ""}.`;
     case "unsupported_slop_command":
@@ -77,6 +79,20 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing session checkpoint label.";
     case "missing_session_verification_command":
       return "Missing session verification command.";
+    case "missing_decision_summary":
+      return "Missing decision summary.";
+    case "missing_decision_id":
+      return "Missing decision id.";
+    case "invalid_decision_kind":
+      return `Invalid decision kind${target ? `: ${target}` : ""}.`;
+    case "invalid_decision_id":
+      return `Invalid decision id${target ? `: ${target}` : ""}.`;
+    case "invalid_decision_evidence_link":
+      return `Invalid decision evidence link${target ? `: ${target}` : ""}.`;
+    case "decision_not_found":
+      return `Decision artifact not found${target ? `: ${target}` : ""}.`;
+    case "decision_artifact_invalid":
+      return `Decision artifact is invalid${target ? `: ${target}` : ""}.`;
     case "ambiguous_session_verification_command":
       return "Multiple verification candidates were detected; choose one with --verify \"<cmd>\".";
     case "session_state_corrupt":
@@ -190,15 +206,17 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_setup_command":
       return "Run `cx setup codex-session --scope project --json`.";
     case "unsupported_session_command":
-      return "Run `cx session status --json`, `cx session hud --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, `cx session slop --json`, or `cx session notify --event <name> --json`.";
+      return "Run `cx session status --json`, `cx session hud --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, `cx session decision list --json`, `cx session loop --json`, `cx session slop --json`, or `cx session notify --event <name> --json`.";
     case "unsupported_session_subagent_command":
       return "Codexus does not directly spawn native subagents from the CLI; run `cx session subagent launch --role <role> --task <task> --json` to record a capability-gated launcher contract, `cx session subagent complete --task-id <id> --claim <text> --json` to record the result of a native subagent used in the current Codex session, `cx session subagent record --file <result.json> --json`, `cx session subagent attach --role <role> --claim-file <claims.json> --json`, or `cx session subagent status <task-id> --json`.";
+    case "unsupported_session_decision_command":
+      return "Run `cx session decision record --summary <text> --json`, `cx session decision list --json`, or `cx session decision status <decision-id> --json`.";
     case "unsupported_session_workers_command":
       return "Run `cx session workers status --json`.";
     case "unsupported_slop_command":
@@ -211,6 +229,14 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass a short label after `cx session checkpoint`.";
     case "missing_session_verification_command":
       return "Pass at least one `--verify <cmd>` argument.";
+    case "missing_decision_summary":
+      return "Pass `--summary <text>` or a positional summary after `cx session decision record`.";
+    case "missing_decision_id":
+      return "Pass a decision id from `.codexus/session/decisions/<decision-id>`.";
+    case "invalid_decision_kind":
+      return "Use `--kind decision|boundary|rejected_alternative|approval|note`.";
+    case "invalid_decision_evidence_link":
+      return "Decision evidence links must be relative workspace paths, not URLs, absolute paths, or parent-directory paths.";
     case "session_state_corrupt":
       return "Inspect `.codexus/session/state.json` before continuing.";
     case "missing_schema_file":

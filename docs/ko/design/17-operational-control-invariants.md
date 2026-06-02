@@ -168,34 +168,33 @@ contract의 일부로 선언되고 known inventory에 scoped될 때만 유용합
 ```json
 {
   "schemaVersion": 1,
+  "stability": "experimental",
   "type": "codexus.decision",
   "decisionId": "decision_...",
-  "runId": "run_...",
+  "kind": "boundary",
   "createdAt": "2026-06-02T00:00:00.000Z",
-  "topic": "Autopilot scope strategy",
-  "chosen": "post-step scope gate with worktree isolation",
+  "cwd": "/path/to/workspace",
+  "summary": "Use post-step scope gates with worktree isolation",
+  "rationale": "Codexus cannot pre-block writes made by the engine.",
   "constraints": [
     "Codexus cannot pre-block writes made by the engine"
   ],
-  "rejected": [
-    {
-      "option": "Treat scope extraction as a derivable fact",
-      "reason": "Acceptance criteria require judgment and approval"
-    }
+  "rejectedAlternatives": [
+    "Treat scope extraction as a derivable fact"
   ],
-  "reversibility": "clean",
   "evidenceLinks": [
     ".codexus/runs/run_.../verification/verification.json"
-  ]
+  ],
+  "authority": "advisory",
+  "completionAuthority": false
 }
 ```
 
 Gate 가능한 사실:
 
 - decision artifact schema가 유효함;
-- 연결된 run과 evidence artifact가 존재함;
-- path가 sanitize됐고 허용된 Codexus artifact bucket 안에 있음;
-- rejected alternative가 있으면 non-empty reason을 가짐.
+- 연결된 evidence path가 relative이고 sanitize됨;
+- rejected alternative가 있으면 non-empty string임.
 
 Advisory claim:
 
@@ -255,9 +254,10 @@ cx repo check --include docs-code --json
 cx autopilot presets list --json
 cx autopilot contract validate .codexus/autopilot.json --json
 cx policy catalog check --json
-cx session decisions list --json
-cx session decisions show <decision-id> --json
-cx session loops check --json
+cx session decision record --summary <text> --json
+cx session decision list --json
+cx session decision status <decision-id> --json
+cx session loop --json
 cx session hud --json
 ```
 
@@ -307,7 +307,11 @@ control model입니다.
    - out-of-scope path touch.
 3. Autopilot contract schema에 autonomy preset name을 contract metadata로 추가하되 completion
    gate는 바꾸지 않음.
-4. `codexus.decision` artifact schema와 ledger event 추가.
-5. 반복 verification failure를 위한 ledger-derived loop checker 추가.
-6. underlying artifact가 생긴 뒤 `cx session hud --json`에 task, decision, risk, loop summary
-   추가.
+4. 구현됨: `codexus.decision` artifact schema와
+   `cx session decision record/list/status` 명령 추가. 이 artifact는 advisory이며 항상
+   `completionAuthority: false`를 가집니다.
+5. 구현됨: 반복 verification failure를 위한 ledger-derived checker
+   `cx session loop --json` 추가. Loop result는 boundary signal이지 completion evidence가
+   아닙니다.
+6. 부분 구현됨: `cx session status --json`과 `cx session hud --json`에 decision, risk,
+   loop summary 추가. Task artifact는 별도 future slice로 남습니다.

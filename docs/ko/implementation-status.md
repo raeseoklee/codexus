@@ -47,9 +47,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - runs/events/report observability command
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled
 - cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
-- config/state/event/memory/skill/session-state/supply-chain-policy versioned
-  schema artifact, durable read-path focused enforcement, single-record/run-ledger
-  schema artifact subset validation
+- config/state/event/memory/skill/session-state/supply-chain-policy/decision
+  versioned schema artifact, durable read-path focused enforcement,
+  single-record/run-ledger schema artifact subset validation
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
   `dist/cli/main.js`를 만듭니다.
 - `npm run package:smoke`는 `npm pack`, 임시 global install,
@@ -95,6 +95,13 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   추천 command 실행에는 기존 policy preflight를 통과하는 명시적 `--execute`가 필요합니다.
 - `cx session hud --json`은 statusline integration이 unavailable인 동안 Codex
   chat/status workflow용 compact read-only session summary를 보고합니다.
+- `cx session decision record/list/status`는 `.codexus/session/decisions/` 아래에
+  schema-valid `codexus.decision` artifact를 기록하고 읽습니다. 이 artifact는
+  constraint, rejected alternative, rationale, relative evidence link를 advisory
+  control-plane evidence로 보존하지만 완료 권한은 갖지 않습니다.
+- `cx session loop --json`, `cx session status --json`, `cx session hud --json`은
+  session verification ledger에서 반복 실패 요약을 파생해 보고합니다. Loop boundary는
+  decision stop이지 task failure나 completion의 증명이 아닙니다.
 - Notify-hook `turn-ended` heartbeat는 read-only `heartbeatEvidence`와 compact
   `heartbeatChangeEvidence` snapshot을 기록할 수 있습니다. Verification을 실행하지 않고
   stale evidence를 fresh로 만들 수 없습니다.
@@ -307,7 +314,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   experimental foundation으로 존재하지만, graph import/search/explain/context injection,
   relay AC-to-verification matrix enforcement, active multi-engine relay adapter는 0.1.x
   stable surface 밖에서 deferred입니다.
-- Operational control invariant는 deterministic docs-code check로만 부분 구현됐습니다.
-  Autonomy preset, policy catalog, decision artifact, loop breaker, `cx wiki` 명령은
-  구현되지 않았습니다.
+- Operational control invariant는 deterministic docs-code check와 첫 advisory session
+  control-plane pass까지 구현됐습니다. Decision artifact, 반복 verification loop summary,
+  HUD/status projection은 구현됐습니다. Autonomy preset, policy catalog, task artifact,
+  더 풍부한 risk fact, `cx wiki` 명령은 아직 구현되지 않았습니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

@@ -54,8 +54,13 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
   `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
   `informationalUnknowns`, `supplyChain`, `gate`.
 - Session status output: `schemaVersion`, `stability`, `status`, `cwd`,
-  `paths`, `evidence`, `changeEvidence`, `subagents`, `verifyDetection`,
-  `overlays`, `notifyHook`, `notifyDispatch`, `migration`, `state`.
+  `paths`, `evidence`, `changeEvidence`, `riskSummary`, `decisions`, `loop`,
+  `subagents`, `verifyDetection`, `overlays`, `notifyHook`, `notifyDispatch`,
+  `migration`, `state`.
+- Session HUD output: `schemaVersion`, `stability`, `cwd`, `status`,
+  `evidence`, `changeEvidence`, `riskSummary`, `decisions`, `loop`,
+  `notifyDispatch`, `capabilities`, `counts`, `lastDecision`,
+  `lastCheckpoint`, `lastVerification`.
 - Quality evidence output(`slop check`, `session slop`): `schemaVersion`,
   `stability`, `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
   `derivableFacts`, `heuristicClaims`, `gate`.

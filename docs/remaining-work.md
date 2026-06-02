@@ -316,9 +316,12 @@ Harness-engineering alignment adds these evidence-first tracks:
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
   evidence. The first deterministic docs-code invariant pass is implemented in
-  `cx repo check`; next work is risk facts, decision schemas, and
-  ledger-derived loop checks. Do not add active autonomy or a new completion
-  authority.
+  `cx repo check`. The first session control-plane pass is also implemented:
+  `cx session decision record/list/status` writes advisory decision artifacts,
+  `cx session loop --json` summarizes repeated verification failures, and
+  session status/HUD include decision, risk, and loop summaries. Next work is
+  autonomy preset metadata, policy catalog reporting, richer risk facts, and
+  task artifacts. Do not add active autonomy or a new completion authority.
 - Compiled repository wiki: [doc 18](design/18-compiled-repository-wiki.md)
   defines a regenerable markdown projection over repository facts and Codexus
   artifacts. First work should add schemas, `cx wiki map`, deterministic
@@ -350,8 +353,10 @@ Harness-engineering alignment adds these evidence-first tracks:
     implemented. Add AC-to-verification matrix enforcement before active
     adapters, keep review engines artifact-import-only until a supported adapter
     exists, and do not let convergence replace verification.
-11. Operational control invariants: implement decision artifacts next, then
-    ledger-derived loop breakers. Autonomy presets remain contract metadata
-    until enforceable policy fields exist.
+11. Operational control invariants: decision artifacts and ledger-derived loop
+    summaries are implemented as advisory session evidence. Next implement
+    autonomy preset metadata, policy catalog reporting, richer risk facts, and
+    task artifacts. Autonomy presets remain contract metadata until enforceable
+    policy fields exist.
 12. Compiled repository wiki: implement deterministic `cx wiki map/build/check`
     before any advisory synthesis or context injection.

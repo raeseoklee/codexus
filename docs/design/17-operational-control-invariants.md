@@ -178,34 +178,33 @@ a path was chosen and which alternatives were rejected:
 ```json
 {
   "schemaVersion": 1,
+  "stability": "experimental",
   "type": "codexus.decision",
   "decisionId": "decision_...",
-  "runId": "run_...",
+  "kind": "boundary",
   "createdAt": "2026-06-02T00:00:00.000Z",
-  "topic": "Autopilot scope strategy",
-  "chosen": "post-step scope gate with worktree isolation",
+  "cwd": "/path/to/workspace",
+  "summary": "Use post-step scope gates with worktree isolation",
+  "rationale": "Codexus cannot pre-block writes made by the engine.",
   "constraints": [
     "Codexus cannot pre-block writes made by the engine"
   ],
-  "rejected": [
-    {
-      "option": "Treat scope extraction as a derivable fact",
-      "reason": "Acceptance criteria require judgment and approval"
-    }
+  "rejectedAlternatives": [
+    "Treat scope extraction as a derivable fact"
   ],
-  "reversibility": "clean",
   "evidenceLinks": [
     ".codexus/runs/run_.../verification/verification.json"
-  ]
+  ],
+  "authority": "advisory",
+  "completionAuthority": false
 }
 ```
 
 Gateable facts:
 
 - decision artifact schema is valid;
-- linked run and evidence artifacts exist;
-- paths are sanitized and inside allowed Codexus artifact buckets;
-- rejected alternatives have non-empty reasons when present.
+- linked evidence paths are relative and sanitized;
+- rejected alternatives are non-empty strings when present.
 
 Advisory claims:
 
@@ -267,9 +266,10 @@ cx repo check --include docs-code --json
 cx autopilot presets list --json
 cx autopilot contract validate .codexus/autopilot.json --json
 cx policy catalog check --json
-cx session decisions list --json
-cx session decisions show <decision-id> --json
-cx session loops check --json
+cx session decision record --summary <text> --json
+cx session decision list --json
+cx session decision status <decision-id> --json
+cx session loop --json
 cx session hud --json
 ```
 
@@ -323,7 +323,12 @@ that preserves the existing evidence-first identity.
    - out-of-scope path touch.
 3. Add autonomy preset names to the autopilot contract schema as contract
    metadata, without changing completion gates.
-4. Add a `codexus.decision` artifact schema and ledger event.
-5. Add a ledger-derived loop checker for repeated verification failures.
-6. Extend `cx session hud --json` with task, decision, risk, and loop summaries
-   once the underlying artifacts exist.
+4. Implemented: add a `codexus.decision` artifact schema and
+   `cx session decision record/list/status` commands. The artifact is advisory
+   and always carries `completionAuthority: false`.
+5. Implemented: add `cx session loop --json`, a ledger-derived repeated
+   verification failure checker. The loop result is a boundary signal, not
+   completion evidence.
+6. Partially implemented: extend `cx session status --json` and
+   `cx session hud --json` with decision, risk, and loop summaries. Task
+   artifacts remain a separate future slice.

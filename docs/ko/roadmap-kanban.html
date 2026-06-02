@@ -205,18 +205,18 @@
         </article>
 
         <article class="card">
-          <h3>Decision Artifact Schema</h3>
+          <h3>Control-Plane Follow-Up</h3>
           <div class="tags">
             <span class="tag ready">17번 문서</span>
-            <span class="tag evidence">derivable</span>
+            <span class="tag evidence">advisory-first</span>
           </div>
-          <p>장시간 run이 constraint, rejected alternative, reversibility note, evidence link를 보존할 수 있도록 local decision record artifact를 추가합니다.</p>
+          <p>Decision artifact, loop summary, HUD projection은 구현됐습니다. 다음은 새 완료 권한을 만들지 않고 control-plane metadata를 확장하는 작업입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li><code>codexus.decision</code> schema가 local decision artifact를 검증합니다.</li>
-            <li>Evidence link는 허용된 Codexus artifact 또는 repository path 안에 머뭅니다.</li>
-            <li>Decision rationale은 advisory이고, schema/path fact만 gate 가능합니다.</li>
-            <li>Session command가 완료 권한을 바꾸지 않고 decision을 record/list할 수 있습니다.</li>
+            <li>Autonomy preset name은 trust score가 아니라 contract metadata입니다.</li>
+            <li>Policy catalog output은 enforced, observed, advisory, unavailable을 분리합니다.</li>
+            <li>더 풍부한 risk fact는 derivable로 유지하고 heuristic risk는 advisory로 둡니다.</li>
+            <li>Task artifact는 verification evidence가 생기기 전까지 read-only projection입니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
@@ -327,16 +327,17 @@
         </article>
 
         <article class="card">
-          <h3>Decision Record와 Loop Breaker</h3>
+          <h3>Policy Catalog와 Risk Fact</h3>
           <div class="tags">
             <span class="tag evidence">17번 문서</span>
-            <span class="tag gated">ledger-derived</span>
+            <span class="tag gated">control metadata</span>
           </div>
-          <p>Decision artifact 이후 repeated-failure loop check를 추가하되 완료 권한은 바꾸지 않습니다.</p>
+          <p>Decision record와 loop summary는 live입니다. 다음은 warning을 gate처럼 보이게 하지 않으면서 control policy catalog와 더 풍부한 risk fact를 파생하는 일입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>Loop check는 process memory가 아니라 ledger에서 재구성됩니다.</li>
-            <li>Loop stop은 boundary stop이지 결과가 틀렸다는 증명이 아닙니다.</li>
+            <li>Policy entry는 enforced, observed, advisory, unavailable 상태를 보고합니다.</li>
+            <li>Risk fact는 diff/config/schema/package evidence에서 재구성합니다.</li>
+            <li>Declared policy가 승격하지 않는 한 warning은 change를 fail시킬 수 없습니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>

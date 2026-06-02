@@ -59,7 +59,8 @@ export type SchemaValidationType =
   | "repo-graph"
   | "relay-session"
   | "stage-gate-evidence"
-  | "convergence-agreement";
+  | "convergence-agreement"
+  | "decision";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -88,6 +89,7 @@ export const schemaArtifactNames = [
   "relay-session.schema.json",
   "stage-gate-evidence.schema.json",
   "convergence-agreement.schema.json",
+  "decision.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -103,6 +105,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "relay-session": "relay-session.schema.json",
   "stage-gate-evidence": "stage-gate-evidence.schema.json",
   "convergence-agreement": "convergence-agreement.schema.json",
+  decision: "decision.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -657,6 +660,22 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     }
     requireNumber(value, "unresolvedHighFindings", errors);
     requireBoolean(value, "decisionNeeded", errors);
+  }
+
+  if (type === "decision") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "type", ["codexus.decision"], errors);
+    requireString(value, "decisionId", errors);
+    requireOneOf(value, "kind", ["decision", "boundary", "rejected_alternative", "approval", "note"], errors);
+    requireString(value, "createdAt", errors);
+    requireString(value, "cwd", errors);
+    requireString(value, "summary", errors);
+    if (!(value.rationale === null || typeof value.rationale === "string")) errors.push("rationale:invalid");
+    if (requireArray(value, "constraints", errors).some((item) => typeof item !== "string")) errors.push("constraints:non_string_item");
+    if (requireArray(value, "rejectedAlternatives", errors).some((item) => typeof item !== "string")) errors.push("rejectedAlternatives:non_string_item");
+    if (requireArray(value, "evidenceLinks", errors).some((item) => typeof item !== "string")) errors.push("evidenceLinks:non_string_item");
+    requireOneOf(value, "authority", ["advisory"], errors);
+    if (value.completionAuthority !== false) errors.push("completionAuthority:not_false");
   }
 
   return { schemaVersion: 1, type, valid: errors.length === 0, errors };

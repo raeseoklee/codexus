@@ -29,6 +29,11 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Experimental `cx repo check --gate --json`에 deferred self-report invariant를
   확장했습니다. Source `*_deferred` claim은 양쪽 implementation-status 문서에 mirrored되어야
   하며, JSON output은 이 claim들을 집계합니다.
+- Experimental session control-plane evidence를 추가했습니다.
+  `cx session decision record/list/status`는 schema-valid advisory
+  `codexus.decision` artifact를 기록하고, `cx session loop --json`과 HUD/status
+  projection은 반복 verification failure를 요약합니다. 이 정보는 완료 권한을 갖지
+  않습니다.
 - Autopilot/relay branch-protection boundary를 문서화했습니다. Protected branch, required
   review, required check 거부는 repository rule 우회가 아니라 사람 결정을 위한 stop이어야
   합니다.

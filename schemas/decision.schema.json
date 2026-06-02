@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/decision.schema.json",
+  "title": "Codexus Decision Artifact",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.decision" },
+    "decisionId": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["decision", "boundary", "rejected_alternative", "approval", "note"] },
+    "createdAt": { "type": "string", "minLength": 1 },
+    "cwd": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "rationale": { "type": ["string", "null"] },
+    "constraints": { "type": "array", "items": { "type": "string" } },
+    "rejectedAlternatives": { "type": "array", "items": { "type": "string" } },
+    "evidenceLinks": { "type": "array", "items": { "type": "string" } },
+    "authority": { "const": "advisory" },
+    "completionAuthority": { "const": false }
+  },
+  "required": ["schemaVersion", "stability", "type", "decisionId", "kind", "createdAt", "cwd", "summary", "rationale", "constraints", "rejectedAlternatives", "evidenceLinks", "authority", "completionAuthority"]
+}

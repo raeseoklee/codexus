@@ -111,9 +111,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, and explicit opt-in Stage B read-only socket observation are present, while live app-server execution remains gated off.
 - Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records with policy/approval contract fields for future dispatch.
 - Versioned schema artifacts exist for config, state, events, memory entries,
-  skills, session state, and supply-chain policy, with focused enforcement plus
-  zero-dependency schema-artifact subset validation on single-record and
-  run-ledger checks.
+  skills, session state, supply-chain policy, and decision artifacts, with
+  focused enforcement plus zero-dependency schema-artifact subset validation on
+  single-record and run-ledger checks.
 - Codex JSONL usage is captured when present and terminal state records usage or
   `{ "available": false }`.
 - Unsupported Codex exec config options emit `config.option_ignored` ledger
@@ -168,6 +168,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   command through the existing policy preflight.
 - `cx session hud --json` reports a compact read-only session summary for Codex
   chat/status workflows while statusline integration remains unavailable.
+- `cx session decision record/list/status` records and reads schema-valid
+  `codexus.decision` artifacts under `.codexus/session/decisions/`. These
+  artifacts preserve constraints, rejected alternatives, rationale, and relative
+  evidence links as advisory control-plane evidence; they never become
+  completion authority.
+- `cx session loop --json`, `cx session status --json`, and `cx session hud
+  --json` report a ledger-derived repeated-verification-failure summary. Loop
+  boundaries are decision stops and do not prove task failure or completion.
 - Notify-hook `turn-ended` heartbeats can record read-only `heartbeatEvidence`
   and compact `heartbeatChangeEvidence` snapshots; they do not execute
   verification and cannot refresh stale evidence.
@@ -416,7 +424,9 @@ review. Current high-level gaps:
   import/search/explain/context injection, relay AC-to-verification matrix
   enforcement, and active multi-engine relay adapters remain deferred outside the
   0.1.x stable surface.
-- Operational control invariants are partially implemented only as deterministic
-  docs-code checks. Autonomy presets, policy catalogs, decision artifacts, loop
-  breakers, and `cx wiki` commands are not implemented yet.
+- Operational control invariants have deterministic docs-code checks plus the
+  first advisory session control-plane pass: decision artifacts, repeated
+  verification loop summaries, and HUD/status projections are implemented.
+  Autonomy presets, policy catalogs, task artifacts, richer risk facts, and
+  `cx wiki` commands are not implemented yet.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

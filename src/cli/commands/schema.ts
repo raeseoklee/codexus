@@ -27,6 +27,7 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "relay-session",
   "stage-gate-evidence",
   "convergence-agreement",
+  "decision",
 ]);
 
 function parseSchemaType(value: string | undefined): SchemaValidationType {

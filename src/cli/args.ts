@@ -8,7 +8,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const [command = "help", ...rest] = argv;
   const positionals: string[] = [];
   const flags: ParsedArgs["flags"] = {};
-  const repeatedStringFlags = new Set(["verify", "claim", "limitation", "evidence-link", "required-role"]);
+  const repeatedStringFlags = new Set(["verify", "claim", "limitation", "evidence-link", "required-role", "constraint", "rejected"]);
   const booleanFlags = new Set([
     "json",
     "help",
