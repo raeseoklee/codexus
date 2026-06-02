@@ -126,3 +126,52 @@ test("doctor reports missing, current, and stale Codexus skill installs", async 
     await rm(codexHome, { recursive: true, force: true });
   }
 });
+
+test("doctor reports deferred self-report aggregation", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, ".codexus"), { recursive: true });
+    await mkdir(join(cwd, "src"), { recursive: true });
+    await mkdir(join(cwd, "docs", "ko"), { recursive: true });
+    await writeFile(join(cwd, "package.json"), JSON.stringify({ name: "fixture", version: "1.0.0" }));
+    await writeFile(join(cwd, "src", "feature.ts"), "export const claim = 'example_capability_deferred';\n");
+    await writeFile(join(cwd, "docs", "implementation-status.md"), "Deferred: `example_capability_deferred`.\n");
+    await writeFile(join(cwd, "docs", "ko", "implementation-status.md"), "Deferred: `example_capability_deferred`.\n");
+    const fakeCodex = join(cwd, "fake-codex.mjs");
+    await writeFile(fakeCodex, `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === "--version") {
+  console.log("codex-cli test");
+} else if (args[0] === "login" && args[1] === "status") {
+  console.log("logged in");
+} else if (args[0] === "exec" && args[1] === "--help") {
+  console.log("Usage: codex exec --json --sandbox --model --output-last-message");
+} else if (args[0] === "app-server" && args[1] === "--help") {
+  console.log("Usage: codex app-server");
+} else if (args[0] === "features" && args[1] === "list") {
+  console.log("mock stable true");
+} else {
+  console.error("unexpected args", args.join(" "));
+  process.exit(2);
+}
+`);
+    await chmod(fakeCodex, 0o755);
+    await writeFile(join(cwd, ".codexus", "config.json"), JSON.stringify({
+      codex: { command: fakeCodex },
+    }));
+
+    const result = spawnSync(process.execPath, [cli, "doctor", "--cwd", cwd, "--json"], {
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    const check = output.checks.find((item: { id: string }) => item.id === "codexus.deferred_self_reports");
+    assert.equal(check.status, "pass");
+    assert.equal(check.details.status, "clear");
+    assert.deepEqual(check.details.sourceClaims, ["example_capability_deferred"]);
+    assert.deepEqual(check.details.documentedClaims, ["example_capability_deferred"]);
+    assert.equal(check.details.completionAuthority, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});

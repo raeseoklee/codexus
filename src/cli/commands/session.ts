@@ -23,6 +23,7 @@ import { summarizeVerificationLoop } from "../../session/loop.ts";
 import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
 import { completeSubagentArtifact, createSubagentLaunchContract, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
+import { summarizeDeferredSelfReports } from "../../control/deferred-self-reports.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 
 function statePath(cwd: string): string {
@@ -52,6 +53,11 @@ async function sessionStatusProjection(cwd: string) {
   const decisions = await summarizeDecisions(cwd);
   const loop = summarizeVerificationLoop(state);
   const subagents = summarizeSubagentClaims(state);
+  const controlPlane = {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    deferredSelfReports: summarizeDeferredSelfReports(cwd),
+  };
   return {
     schemaVersion: 1,
     stability: "stable" as const,
@@ -64,6 +70,7 @@ async function sessionStatusProjection(cwd: string) {
     decisions,
     loop,
     subagents,
+    controlPlane,
     verifyDetection: detection,
     overlays: {
       project: await overlayStatus(cwd, "project"),
@@ -125,6 +132,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
     riskSummary: status.riskSummary,
     decisions: status.decisions,
     loop: status.loop,
+    controlPlane: status.controlPlane,
     notifyDispatch: status.notifyDispatch,
     capabilities: status.state?.capabilities ?? null,
     counts: {
@@ -132,6 +140,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
       verifications: status.state?.verifications.length ?? 0,
       subagentClaims: status.subagents.count,
       decisions: status.decisions.count,
+      deferredSelfReports: status.controlPlane.deferredSelfReports.counts.source,
       hookEvents: status.state?.hookEvents.length ?? 0,
     },
     lastDecision: status.decisions.lastDecision,
@@ -148,6 +157,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`Risk: ${result.riskSummary.status}`);
   console.log(`Loop: ${result.loop.status}`);
   console.log(`Decisions: ${result.counts.decisions}`);
+  console.log(`Deferred self-reports: ${result.controlPlane.deferredSelfReports.status}`);
   console.log(`Notify: ${result.notifyDispatch.status}`);
 }
 

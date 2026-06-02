@@ -250,8 +250,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `cx schema validate --type session-state --file <path> --json` validates
   session state through the same local schema-artifact subset engine.
 - `doctor --json` reports Codexus session state, project/user overlay status,
-  notify-hook installation status, notify dispatch observation status, and
-  truthful unavailable status for statusline integration.
+  notify-hook installation status, notify dispatch observation status, deferred
+  self-report aggregation, and truthful unavailable status for statusline
+  integration.
 - GitHub Actions CI runs committed whitespace checks, static syntax validation, and unit tests on pushes to `main` and pull requests.
 - Local CI parity is available with `npm run ci`; remote Actions execution still depends on repository/account runner availability.
 - Public repository readiness files are present: MIT license, contributing guide, security policy, support guide, code of conduct, roadmap, changelog, issue templates, and PR template.
@@ -315,7 +316,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `cx repo check --gate --json` still checks required indexes, index links,
   English/Korean counterparts, declared `schemas/*.schema.json` references,
   and source `*_deferred` self-report claims mirrored in both
-  implementation-status docs.
+  implementation-status docs. `cx session status --json`,
+  `cx session hud --json`, and `doctor --json` now aggregate those deferred
+  self-reports into one control-plane summary with `completionAuthority: false`.
 - The compiled repository wiki now has an experimental deterministic first
   slice: `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check
   --gate`, and `cx wiki context --topic <name> --budget <n>`. It generates
@@ -332,7 +335,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 219.
+- Current test count: 221.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`

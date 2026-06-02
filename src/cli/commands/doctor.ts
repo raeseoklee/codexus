@@ -14,6 +14,7 @@ import { findCodexusPackageRoot } from "../../util/package-root.ts";
 import { overlayStatus, readSessionStateWithMigration, refreshSessionState, sessionPaths, type NotifyDispatchState, type SessionStateMigrationReport } from "../../session/state.ts";
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 import { buildSupplyChainEvidenceReport } from "../../supply-chain/check.ts";
+import { summarizeDeferredSelfReports } from "../../control/deferred-self-reports.ts";
 
 interface Check {
   id: string;
@@ -194,6 +195,14 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
       blockingUnknowns: supplyChain.blockingUnknowns.length,
       informationalUnknowns: supplyChain.informationalUnknowns.length,
     },
+  });
+
+  const deferredSelfReports = summarizeDeferredSelfReports(cwd);
+  checks.push({
+    id: "codexus.deferred_self_reports",
+    status: deferredSelfReports.status === "findings" ? "fail" : deferredSelfReports.status === "unknown" ? "warn" : "pass",
+    summary: `Deferred self-reports ${deferredSelfReports.status} (${deferredSelfReports.counts.documented}/${deferredSelfReports.counts.source} documented, ${deferredSelfReports.counts.undocumented} undocumented, ${deferredSelfReports.counts.unbacked} unbacked)`,
+    details: deferredSelfReports,
   });
 
   const session = sessionPaths(cwd);

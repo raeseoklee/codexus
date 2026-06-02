@@ -229,7 +229,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `supply-chain check --gate`, mock pass/fail/repair, status/events/resume,
   terminal cancel behavior
 - `doctor --json`: Codex auth/version/features, git, tmux, driver capability,
-  optional advanced interop readiness 확인
+  deferred self-report aggregation, optional advanced interop readiness 확인
 - `doctor --json --strict`: missing command 진단이 `ok:false`와 exit 1을 반환함을 확인
 - mock driver: success/failure/repair/blocked/cancelled outcome 검증
 - repair context artifact, verification not-reached reason, AbortSignal
@@ -314,6 +314,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `riskFacts`가 포함됩니다. 새 완료 권한은 없고 기존 evidence gate 위의
   advisory/control metadata로만 동작합니다. Deterministic docs-code
   invariant pass는 여전히 `cx repo check --gate --json`이 맡고 있습니다.
+  `cx session status --json`, `cx session hud --json`, `doctor --json`은 이제
+  deferred self-report를 하나의 control-plane summary로 모으며
+  `completionAuthority: false`를 유지합니다.
 - Compiled repository wiki는 이제 experimental deterministic 첫 slice를 가집니다:
   `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check --gate`,
   `cx wiki context --topic <name> --budget <n>`이 동작합니다. `.codexus/wiki/`

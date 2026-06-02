@@ -324,6 +324,14 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   synthesis, checked-in export, richer page set, explicit injection policy입니다.
   Stale/advisory page를 run에 자동 주입하지 않습니다.
 
+- Operational control invariant: decision artifact와 ledger-derived loop
+  summary는 advisory session evidence로 구현됐고, 첫 operational-control slice에는
+  autonomy preset metadata, policy catalog reporting, richer risk fact,
+  session status/HUD/doctor의 deferred self-report aggregation이 포함됩니다.
+  다음 작업은 task artifact, broader policy promotion, deferred self-report를
+  넘어서는 unified control aggregation입니다. Active autonomy나 새 completion
+  authority는 추가하지 않습니다.
+
 1. Desktop app-server attachment: 현재 discovery evidence는 `stdio_only`입니다.
    Session-event mapping을 시도하기 전에 non-disruptive stdio observer를 설계하거나
    explicit user-provided app-server socket을 확보합니다. 아직 live app-server product

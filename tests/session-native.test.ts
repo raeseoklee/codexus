@@ -1150,6 +1150,37 @@ test("session hud reports compact evidence without statusline support", async ()
   }
 });
 
+test("session status and hud aggregate documented deferred self-reports", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await mkdir(join(cwd, "src"), { recursive: true });
+    await mkdir(join(cwd, "docs", "ko"), { recursive: true });
+    await writeFile(join(cwd, "package.json"), JSON.stringify({ name: "fixture", version: "1.0.0" }));
+    await writeFile(join(cwd, "src", "feature.ts"), "export const claim = 'example_capability_deferred';\n");
+    await writeFile(join(cwd, "docs", "implementation-status.md"), "Deferred: `example_capability_deferred`.\n");
+    await writeFile(join(cwd, "docs", "ko", "implementation-status.md"), "Deferred: `example_capability_deferred`.\n");
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.controlPlane.deferredSelfReports.status, "clear");
+    assert.equal(statusOutput.controlPlane.deferredSelfReports.completionAuthority, false);
+    assert.deepEqual(statusOutput.controlPlane.deferredSelfReports.sourceClaims, ["example_capability_deferred"]);
+    assert.deepEqual(statusOutput.controlPlane.deferredSelfReports.documentedClaims, ["example_capability_deferred"]);
+    assert.deepEqual(statusOutput.controlPlane.deferredSelfReports.evidenceGaps, []);
+
+    const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(hud.status, 0, hud.stderr);
+    const hudOutput = JSON.parse(hud.stdout);
+    assert.equal(hudOutput.controlPlane.deferredSelfReports.status, "clear");
+    assert.equal(hudOutput.counts.deferredSelfReports, 1);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("session decision records advisory artifacts and projects them into status and hud", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();

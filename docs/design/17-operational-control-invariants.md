@@ -22,7 +22,8 @@ Still deferred:
 
 - task artifacts and task-panel projection promotion;
 - active policy enforcement beyond existing start/stop gates;
-- runtime aggregation of every deferred self-report into one control dashboard.
+- broader runtime control dashboards beyond the current deferred self-report
+  summary.
 
 ## Decision
 
@@ -348,6 +349,10 @@ that preserves the existing evidence-first identity.
 5. Implemented: add `cx session loop --json`, a ledger-derived repeated
    verification failure checker. The loop result is a boundary signal, not
    completion evidence.
-6. Partially implemented: extend `cx session status --json` and
+6. Implemented: extend `cx session status --json`, `cx session hud --json`,
+   and `doctor --json` with a deferred self-report control summary derived from
+   the same docs-code invariant model as `cx repo check`. The summary is
+   advisory/control metadata and carries `completionAuthority: false`.
+7. Partially implemented: extend `cx session status --json` and
    `cx session hud --json` with decision, risk, and loop summaries. Task
    artifacts remain a separate future slice.

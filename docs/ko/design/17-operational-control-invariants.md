@@ -18,7 +18,7 @@
 
 - task artifact와 task-panel projection 승격;
 - 기존 start/stop gate를 넘는 active policy enforcement;
-- 모든 deferred self-report를 하나로 모으는 통합 control dashboard.
+- 현재 deferred self-report summary를 넘어서는 더 넓은 runtime control dashboard.
 
 ## 결정
 
@@ -328,5 +328,9 @@ control model입니다.
 5. 구현됨: 반복 verification failure를 위한 ledger-derived checker
    `cx session loop --json` 추가. Loop result는 boundary signal이지 completion evidence가
    아닙니다.
-6. 부분 구현됨: `cx session status --json`과 `cx session hud --json`에 decision, risk,
+6. 구현됨: `cx session status --json`, `cx session hud --json`,
+   `doctor --json`에 `cx repo check`와 같은 docs-code invariant model에서 파생한
+   deferred self-report control summary를 추가. 이 summary는 advisory/control
+   metadata이며 `completionAuthority: false`를 가집니다.
+7. 부분 구현됨: `cx session status --json`과 `cx session hud --json`에 decision, risk,
    loop summary 추가. Task artifact는 별도 future slice로 남습니다.
