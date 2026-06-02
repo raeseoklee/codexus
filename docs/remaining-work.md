@@ -310,6 +310,17 @@ Harness-engineering alignment adds these evidence-first tracks:
 - Observability adapters: add dev-server/browser/log evidence descriptors only
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.
+- Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
+  defines autonomy presets, policy catalogs, docs-code invariants, decision
+  records, loop breakers, and HUD projection as a control layer over existing
+  evidence. First work should be deterministic: docs-code invariants, risk
+  facts, decision schemas, and ledger-derived loop checks. Do not add active
+  autonomy or a new completion authority.
+- Compiled repository wiki: [doc 18](design/18-compiled-repository-wiki.md)
+  defines a regenerable markdown projection over repository facts and Codexus
+  artifacts. First work should add schemas, `cx wiki map`, deterministic
+  build/check, and read-only context packs. Do not auto-inject stale or
+  advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
    Design a non-disruptive stdio observer or obtain an explicit user-provided
@@ -335,3 +346,8 @@ Harness-engineering alignment adds these evidence-first tracks:
 10. Multi-engine relay autopilot: the report-only artifact recorder/checker is
     implemented. Keep review engines artifact-import-only until a supported
     adapter exists, and do not let convergence replace verification.
+11. Operational control invariants: implement the docs-code invariant pass first,
+    then decision artifacts and loop breakers. Autonomy presets remain contract
+    metadata until enforceable policy fields exist.
+12. Compiled repository wiki: implement deterministic `cx wiki map/build/check`
+    before any advisory synthesis or context injection.

@@ -266,6 +266,16 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   validates same-artifact convergence while proving convergence cannot complete
   work when verification fails. Active relay execution and external engine
   adapters remain deferred outside the 0.1.x stable contract.
+- Operational control invariants are documented as a proposed 0.2/0.3 track:
+  autonomy presets, policy catalogs, docs-code invariants, decision records,
+  loop breakers, and HUD projection. No new completion authority exists yet;
+  the first implementation should add deterministic docs-code checks and
+  artifact schemas before any active autonomy surface.
+- The compiled repository wiki is documented as a proposed 0.2/0.3 track:
+  regenerable markdown pages over repository facts, Codexus ledgers, graph
+  artifacts, decisions, and verification evidence. No `cx wiki` commands exist
+  yet; the first implementation should be deterministic map/build/check/context
+  surfaces with scoped freshness and no automatic context injection.
 
 ## Verified
 
@@ -393,4 +403,7 @@ review. Current high-level gaps:
   check-agreement` exist as experimental foundations, but graph
   import/search/explain/context injection and active multi-engine relay adapters
   remain deferred outside the 0.1.x stable surface.
+- Operational control invariants and the compiled repository wiki remain
+  documentation tracks only. Autonomy presets, policy catalogs, decision
+  artifacts, loop breakers, and `cx wiki` commands are not implemented yet.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

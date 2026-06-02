@@ -9,15 +9,11 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
-### Fixed
+### Added
 
-- Stable tag publish가 matching GitHub Release를 생성/갱신하고 `install.sh`를
-  첨부하도록 수정했습니다. GitHub latest release route가 npm `latest`와 같은 version을
-  가리키게 됩니다.
-- GitHub Pages deploy를 repository-owned workflow로 전환했습니다. 이 workflow는
-  pinned Node 24-compatible action과 명시적인 Node 24 JavaScript action opt-in을
-  사용하며, Node.js 20 action deprecation warning을 냈던 legacy GitHub-managed Pages
-  deploy path를 대체합니다.
+- Operational control invariant와 compiled repository wiki 설계 문서를 추가했습니다.
+  둘 다 제안된 0.2/0.3 track이며, evidence가 완료를 gate하고 control/projection은
+  완료 권한이 아니라는 기존 규칙을 유지합니다.
 - Experimental `cx app-server discover --json/--record`를 추가했습니다. 이
   read-only Desktop app-server discovery report는 live socket에 연결하거나 remote
   control을 켜지 않고 default control socket 존재 여부, 실행 중인 app-server transport
@@ -27,6 +23,16 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   installer default, trusted-publishing wiring, GitHub Release `install.sh` attachment
   wiring, release-evidence doc을 로컬에서 증명합니다. npm/GitHub live reconciliation은
   `--live`로 명시적으로 실행합니다.
+
+### Fixed
+
+- Stable tag publish가 matching GitHub Release를 생성/갱신하고 `install.sh`를
+  첨부하도록 수정했습니다. GitHub latest release route가 npm `latest`와 같은 version을
+  가리키게 됩니다.
+- GitHub Pages deploy를 repository-owned workflow로 전환했습니다. 이 workflow는
+  pinned Node 24-compatible action과 명시적인 Node 24 JavaScript action opt-in을
+  사용하며, Node.js 20 action deprecation warning을 냈던 legacy GitHub-managed Pages
+  deploy path를 대체합니다.
 
 ## 0.1.1 - 2026-06-01
 

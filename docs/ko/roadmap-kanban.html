@@ -175,7 +175,7 @@
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
-      <span class="pill">갱신일: 2026-06-01</span>
+      <span class="pill">갱신일: 2026-06-02</span>
       <span class="pill">기준: npm 0.1.1 stable</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
       <span class="pill"><a href="remaining-work.md">남은 작업</a></span>
@@ -202,6 +202,24 @@
             <li>Experimental surface는 stable처럼 보이지 않습니다.</li>
             <li>Gate 가능한 claim은 derivable fact로 뒷받침됩니다.</li>
           </ul>
+        </article>
+
+        <article class="card">
+          <h3>Docs-Code Invariant Pass</h3>
+          <div class="tags">
+            <span class="tag ready">17번 문서</span>
+            <span class="tag evidence">derivable</span>
+          </div>
+          <p>Repo evidence에 기계적인 docs-code invariant를 추가해 첫 operational-control check를 구현합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>문서 index link가 resolve됩니다.</li>
+            <li>English/Korean design counterpart link가 resolve됩니다.</li>
+            <li>Schema reference는 기계적으로 선언된 경우에만 확인합니다.</li>
+            <li>Semantic "문서 품질" claim은 gate가 되지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
         </article>
       </section>
 
@@ -270,6 +288,41 @@
           </ul>
           <span class="label">근거</span>
           <p><a href="design/14-repository-knowledge-graph.md">repository knowledge graph</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Compiled Wiki Deterministic Slice</h3>
+          <div class="tags">
+            <span class="tag evidence">18번 문서</span>
+            <span class="tag gated">synthesis는 나중</span>
+          </div>
+          <p>Repository wiki를 LLM-written knowledge base가 아니라 measured fact 위의 재생성 가능한 projection으로 시작합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li><code>codexus.wiki.manifest</code>와 page schema가 존재합니다.</li>
+            <li><code>cx wiki map/build/check --json</code>는 deterministic/local입니다.</li>
+            <li>Generated page는 source ref와 scoped freshness를 인용합니다.</li>
+            <li>첫 slice에서는 automatic context injection이나 advisory synthesis를 하지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/18-compiled-repository-wiki.md">compiled repository wiki</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Decision Record와 Loop Breaker</h3>
+          <div class="tags">
+            <span class="tag evidence">17번 문서</span>
+            <span class="tag gated">ledger-derived</span>
+          </div>
+          <p>Docs-code invariant 이후 local decision artifact와 repeated-failure loop check를 추가하되 완료 권한은 바꾸지 않습니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li><code>codexus.decision</code> schema가 linked evidence path를 검증합니다.</li>
+            <li>Loop check는 process memory가 아니라 ledger에서 재구성됩니다.</li>
+            <li>Loop stop은 boundary stop이지 결과가 틀렸다는 증명이 아닙니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
         </article>
 
         <article class="card">
@@ -427,6 +480,19 @@
           </ul>
           <span class="label">근거</span>
           <p><a href="design/12-autopilot-contract.md">autopilot contract</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Operational Control Layer</h3>
+          <div class="tags">
+            <span class="tag later">0.2 / 0.3</span>
+            <span class="tag gated">control은 evidence가 아님</span>
+          </div>
+          <p>Deterministic check가 존재한 뒤 autonomy preset, policy catalog, risk fact, decision, loop breaker, HUD projection을 승격합니다.</p>
+          <span class="label">Gate</span>
+          <p>Control은 boundary에서 멈출 수 있지만, 완료는 여전히 verification과 structural evidence gate가 결정합니다.</p>
+          <span class="label">근거</span>
+          <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
         </article>
 
         <article class="card">

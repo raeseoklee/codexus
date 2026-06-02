@@ -257,6 +257,15 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   evidence를 기록하며, `cx autopilot relay check-agreement`는 같은 artifact convergence를
   검증하고 verification 실패 시 convergence가 완료를 만들 수 없음을 증명합니다. Active
   relay execution과 external engine adapter는 0.1.x stable contract 밖에서 deferred입니다.
+- Operational control invariant는 제안된 0.2/0.3 track으로 문서화되어 있습니다:
+  autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
+  HUD projection을 다룹니다. 새 완료 권한은 아직 없으며, 첫 구현은 active autonomy
+  surface 전에 deterministic docs-code check와 artifact schema를 추가하는 방향입니다.
+- Compiled repository wiki는 제안된 0.2/0.3 track으로 문서화되어 있습니다:
+  repository fact, Codexus ledger, graph artifact, decision, verification evidence 위에
+  재생성 가능한 markdown page를 만듭니다. 아직 `cx wiki` 명령은 없으며, 첫 구현은
+  scoped freshness를 갖춘 deterministic map/build/check/context surface여야 하고 자동
+  context injection은 하지 않아야 합니다.
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
@@ -286,4 +295,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `cx repo graph build/check`와 `cx autopilot relay record/stage-gate/check-agreement`는
   experimental foundation으로 존재하지만, graph import/search/explain/context injection과
   active multi-engine relay adapter는 0.1.x stable surface 밖에서 deferred입니다.
+- Operational control invariant와 compiled repository wiki는 아직 documentation track입니다.
+  Autonomy preset, policy catalog, decision artifact, loop breaker, `cx wiki` 명령은
+  구현되지 않았습니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

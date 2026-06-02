@@ -9,15 +9,12 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
-### Fixed
+### Added
 
-- Stable tag publishes now create or refresh the matching GitHub Release and
-  attach `install.sh`, keeping GitHub's latest release route aligned with npm
-  `latest`.
-- GitHub Pages deployment now has a repository-owned workflow with pinned
-  Node 24-compatible actions and an explicit Node 24 JavaScript action opt-in,
-  replacing the legacy GitHub-managed Pages deploy path that emitted Node.js 20
-  action deprecation warnings.
+- Added design notes for operational control invariants and a compiled
+  repository wiki. Both are proposed 0.2/0.3 tracks and preserve the existing
+  rule that evidence gates completion while control and projections stay
+  non-authoritative.
 - Added experimental `cx app-server discover --json/--record`, a read-only
   Desktop app-server discovery report that records default control-socket
   availability, running app-server transport modes, and Stage B readiness
@@ -27,6 +24,16 @@ occur before 1.0, but they should be called out clearly.
   defaults, trusted-publishing wiring, GitHub Release `install.sh` attachment
   wiring, and release-evidence docs before tag publish. Live npm/GitHub
   reconciliation remains explicit via `--live`.
+
+### Fixed
+
+- Stable tag publishes now create or refresh the matching GitHub Release and
+  attach `install.sh`, keeping GitHub's latest release route aligned with npm
+  `latest`.
+- GitHub Pages deployment now has a repository-owned workflow with pinned
+  Node 24-compatible actions and an explicit Node 24 JavaScript action opt-in,
+  replacing the legacy GitHub-managed Pages deploy path that emitted Node.js 20
+  action deprecation warnings.
 
 ## 0.1.1 - 2026-06-01
 

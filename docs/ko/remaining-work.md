@@ -290,6 +290,15 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 - Observability adapter: architecture와 repo-knowledge gate가 안정된 뒤
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.
+- Operational control invariant: [17번 문서](design/17-operational-control-invariants.md)는
+  autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
+  HUD projection을 기존 evidence 위의 control layer로 정의합니다. 첫 작업은
+  deterministic해야 합니다: docs-code invariant, risk fact, decision schema,
+  ledger-derived loop check입니다. Active autonomy나 새 완료 권한을 추가하지 않습니다.
+- Compiled repository wiki: [18번 문서](design/18-compiled-repository-wiki.md)는
+  repository fact와 Codexus artifact 위의 재생성 가능한 markdown projection을 정의합니다.
+  첫 작업은 schema, `cx wiki map`, deterministic build/check, read-only context pack입니다.
+  Stale/advisory page를 run에 자동 주입하지 않습니다.
 
 1. Desktop app-server attachment: 현재 discovery evidence는 `stdio_only`입니다.
    Session-event mapping을 시도하기 전에 non-disruptive stdio observer를 설계하거나
@@ -314,3 +323,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 10. Multi-engine relay autopilot: report-only artifact recorder/checker는 구현됐습니다.
     지원되는 adapter가 생기기 전 review engine은 artifact import-only로 두고, convergence가
     verification을 대체하지 않게 합니다.
+11. Operational control invariant: docs-code invariant pass를 먼저 구현하고, 그 다음
+    decision artifact와 loop breaker를 추가합니다. Enforceable policy field가 생기기 전까지
+    autonomy preset은 contract metadata로 둡니다.
+12. Compiled repository wiki: advisory synthesis나 context injection 전에 deterministic
+    `cx wiki map/build/check`부터 구현합니다.

@@ -177,7 +177,7 @@
       until their runtime contract exists.
     </p>
     <div class="meta">
-      <span class="pill">Updated: 2026-06-01</span>
+      <span class="pill">Updated: 2026-06-02</span>
       <span class="pill">Baseline: npm 0.1.1 stable</span>
       <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
       <span class="pill"><a href="remaining-work.md">Remaining work</a></span>
@@ -204,6 +204,24 @@
             <li>Experimental surfaces do not look stable.</li>
             <li>Gateable claims remain backed by derivable facts.</li>
           </ul>
+        </article>
+
+        <article class="card">
+          <h3>Docs-Code Invariant Pass</h3>
+          <div class="tags">
+            <span class="tag ready">doc 17</span>
+            <span class="tag evidence">derivable</span>
+          </div>
+          <p>Add the first operational-control check by extending repo evidence with mechanical docs-code invariants.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Documentation index links resolve.</li>
+            <li>English/Korean design counterpart links resolve.</li>
+            <li>Schema references are checked only when declared mechanically.</li>
+            <li>No semantic "doc quality" claim becomes a gate.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
         </article>
       </section>
 
@@ -272,6 +290,41 @@
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/14-repository-knowledge-graph.md">repository knowledge graph</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Compiled Wiki Deterministic Slice</h3>
+          <div class="tags">
+            <span class="tag evidence">doc 18</span>
+            <span class="tag gated">no synthesis first</span>
+          </div>
+          <p>Start the repository wiki as a regenerable projection over measured facts, not as an LLM-written knowledge base.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li><code>codexus.wiki.manifest</code> and page schemas exist.</li>
+            <li><code>cx wiki map/build/check --json</code> are deterministic and local.</li>
+            <li>Generated pages cite source refs and scoped freshness.</li>
+            <li>No automatic context injection or advisory synthesis in the first slice.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/18-compiled-repository-wiki.md">compiled repository wiki</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Decision Records and Loop Breakers</h3>
+          <div class="tags">
+            <span class="tag evidence">doc 17</span>
+            <span class="tag gated">ledger-derived</span>
+          </div>
+          <p>After docs-code invariants, add local decision artifacts and repeated-failure loop checks without changing completion authority.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li><code>codexus.decision</code> schema validates linked evidence paths.</li>
+            <li>Loop checks are reconstructed from ledgers, not process memory.</li>
+            <li>Loop stops are boundary stops, not proof of incorrectness.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
         </article>
 
         <article class="card">
@@ -429,6 +482,19 @@
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/12-autopilot-contract.md">autopilot contract</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Operational Control Layer</h3>
+          <div class="tags">
+            <span class="tag later">0.2 / 0.3</span>
+            <span class="tag gated">control not evidence</span>
+          </div>
+          <p>Promote autonomy presets, policy catalogs, risk facts, decisions, loop breakers, and HUD projection only after deterministic checks exist.</p>
+          <span class="label">Gate</span>
+          <p>Control can stop at boundaries, but completion still requires verification and structural evidence gates.</p>
+          <span class="label">Sources</span>
+          <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
         </article>
 
         <article class="card">

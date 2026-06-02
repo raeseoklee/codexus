@@ -48,6 +48,8 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Repository knowledge graph](design/14-repository-knowledge-graph.md): experimental codexus-lite graph build/check first slice, plus the deferred graph-provider boundary for Understand-Anything JSON import, scoped freshness, and structural graph gates.
 - [Multi-engine relay autopilot](design/15-multi-engine-relay-autopilot.md): experimental recorder/checker first slice for author/reviewer artifacts, stage-gate evidence, and convergence validation without making convergence completion authority.
 - [Codex task panel projection](design/16-codex-task-panel-projection.md): proposed durable Codexus task state that can be projected into the native Codex task panel without making host UI the source of truth.
+- [Operational control invariants](design/17-operational-control-invariants.md): proposed Codexus-native control layer for autonomy presets, policy catalogs, docs-code invariants, decision records, loop breakers, and HUD projection without adding a new completion authority.
+- [Compiled repository wiki](design/18-compiled-repository-wiki.md): proposed regenerable markdown projection over repository facts, ledgers, graph artifacts, decisions, and verification evidence, with scoped freshness and context packs.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Roadmap Kanban](roadmap-kanban.html): four-column HTML board of the remaining ready, evidence, gated, and later work.
