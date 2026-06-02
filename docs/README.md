@@ -31,6 +31,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [JSON contract](json-contract.md): frozen `0.1.x` JSON fields, stability markers, and breaking-change rules for automation consumers.
 - [0.1.0 release evidence](release-evidence/0.1.0.md): redacted manual sign-off template for the stable cut.
 - [0.1.1 release evidence](release-evidence/0.1.1.md): trusted-publishing evidence and installed-package smoke for the harness-engineering first pass.
+- [0.1.2 release evidence](release-evidence/0.1.2.md): release-candidate evidence for additive experimental evidence surfaces and release-integrity hardening.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.

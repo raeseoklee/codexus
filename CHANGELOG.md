@@ -9,6 +9,10 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+No changes yet.
+
+## 0.1.2 - 2026-06-02
+
 ### Added
 
 - Added design notes for operational control invariants and a compiled

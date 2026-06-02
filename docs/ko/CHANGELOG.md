@@ -9,6 +9,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+아직 변경 사항이 없습니다.
+
+## 0.1.2 - 2026-06-02
+
 ### Added
 
 - Operational control invariant와 compiled repository wiki 설계 문서를 추가했습니다.
