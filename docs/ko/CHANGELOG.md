@@ -26,6 +26,12 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Experimental `cx repo check --gate --json`에 docs-code invariant를 확장했습니다.
   문서가 선언한 `schemas/*.schema.json` reference가 local schema artifact로 resolve되는지
   검증합니다.
+- Experimental `cx repo check --gate --json`에 deferred self-report invariant를
+  확장했습니다. Source `*_deferred` claim은 양쪽 implementation-status 문서에 mirrored되어야
+  하며, JSON output은 이 claim들을 집계합니다.
+- Autopilot/relay branch-protection boundary를 문서화했습니다. Protected branch, required
+  review, required check 거부는 repository rule 우회가 아니라 사람 결정을 위한 stop이어야
+  합니다.
 
 ### Fixed
 

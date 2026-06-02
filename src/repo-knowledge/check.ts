@@ -4,22 +4,36 @@ import { dirname, extname, join, relative, resolve } from "node:path";
 export type RepoKnowledgeStatus = "pass" | "fail" | "unknown";
 
 export interface RepoKnowledgeEvidenceGap {
-  kind: "required_doc_missing" | "index_link_broken" | "counterpart_missing" | "schema_reference_missing";
+  kind:
+    | "required_doc_missing"
+    | "index_link_broken"
+    | "counterpart_missing"
+    | "schema_reference_missing"
+    | "deferred_self_report_undocumented"
+    | "deferred_self_report_unbacked";
   gate: true;
   evidence: string | null;
   policy: string;
   recommendation: string;
   files?: string[];
   links?: string[];
+  claims?: string[];
 }
 
 export interface RepoKnowledgeDerivableFact {
-  kind: "required_doc_present" | "index_link_resolved" | "counterpart_present" | "schema_reference_resolved" | "external_link_recorded";
+  kind:
+    | "required_doc_present"
+    | "index_link_resolved"
+    | "counterpart_present"
+    | "schema_reference_resolved"
+    | "external_link_recorded"
+    | "deferred_self_report_documented";
   gate: boolean;
   evidence: string;
   files?: string[];
   links?: string[];
   count?: number;
+  claims?: string[];
 }
 
 export interface RepoKnowledgeHeuristicClaim {
@@ -78,6 +92,7 @@ export interface RepoKnowledgeReport {
     englishKoreanCounterparts: boolean;
     checkedCounterpartRoots: string[];
     schemaReferencesResolve: boolean;
+    deferredSelfReportsDocumented: boolean;
   };
   indexes: Array<{
     path: string;
@@ -96,6 +111,13 @@ export interface RepoKnowledgeReport {
     status: RepoKnowledgeStatus;
     documentCount: number;
     indexLinkCount: number;
+    deferredSelfReportCount: number;
+  };
+  deferredSelfReports: {
+    sourceClaims: string[];
+    englishImplementationStatusClaims: string[];
+    koreanImplementationStatusClaims: string[];
+    documentedClaims: string[];
   };
   gate: RepoKnowledgeGate;
 }
@@ -112,6 +134,8 @@ interface SchemaReference {
 
 const requiredIndexes = ["docs/README.md", "docs/ko/README.md"] as const;
 const counterpartRoots = ["docs", "docs/design", "docs/plans", "docs/references", "docs/release-evidence"] as const;
+const deferredSelfReportPattern = /\b[a-z][a-z0-9_]*_deferred\b/g;
+const implementationStatusDocs = ["docs/implementation-status.md", "docs/ko/implementation-status.md"] as const;
 
 function findPackageRoot(cwd: string): string | null {
   let current = resolve(cwd);
@@ -288,6 +312,26 @@ function extractSchemaReferences(source: string, content: string): SchemaReferen
   return references;
 }
 
+function extractDeferredSelfReports(content: string): string[] {
+  return [...new Set(Array.from(content.matchAll(deferredSelfReportPattern), (match) => match[0]))].sort();
+}
+
+function collectSourceDeferredSelfReports(packageRoot: string): string[] {
+  const claims = new Set<string>();
+  for (const path of listFiles(packageRoot, "src")) {
+    if (![".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"].includes(extname(path).toLowerCase())) continue;
+    const content = readFileSync(join(packageRoot, path), "utf8");
+    for (const claim of extractDeferredSelfReports(content)) claims.add(claim);
+  }
+  return [...claims].sort();
+}
+
+function readDeferredSelfReports(packageRoot: string, path: string): string[] {
+  const absolutePath = join(packageRoot, path);
+  if (!existsSync(absolutePath)) return [];
+  return extractDeferredSelfReports(readFileSync(absolutePath, "utf8"));
+}
+
 function counterpartFor(path: string): string | null {
   const normalized = normalizePath(path);
   if (normalized.startsWith("docs/ko/")) return null;
@@ -364,6 +408,7 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
         englishKoreanCounterparts: true,
         checkedCounterpartRoots: [...counterpartRoots],
         schemaReferencesResolve: true,
+        deferredSelfReportsDocumented: true,
       },
       indexes: [],
       documents: [],
@@ -372,7 +417,13 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
       heuristicClaims,
       blockingUnknowns,
       informationalUnknowns,
-      repoKnowledge: { status, documentCount: 0, indexLinkCount: 0 },
+      repoKnowledge: { status, documentCount: 0, indexLinkCount: 0, deferredSelfReportCount: 0 },
+      deferredSelfReports: {
+        sourceClaims: [],
+        englishImplementationStatusClaims: [],
+        koreanImplementationStatusClaims: [],
+        documentedClaims: [],
+      },
       gate: repoKnowledgeGateFor(status, options.gate === true, true),
     };
   }
@@ -527,6 +578,51 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
     });
   }
 
+  const sourceDeferredClaims = collectSourceDeferredSelfReports(packageRoot);
+  const englishImplementationStatusClaims = readDeferredSelfReports(packageRoot, implementationStatusDocs[0]);
+  const koreanImplementationStatusClaims = readDeferredSelfReports(packageRoot, implementationStatusDocs[1]);
+  const englishSet = new Set(englishImplementationStatusClaims);
+  const koreanSet = new Set(koreanImplementationStatusClaims);
+  const sourceSet = new Set(sourceDeferredClaims);
+  const documentedClaims = sourceDeferredClaims.filter((claim) => englishSet.has(claim) && koreanSet.has(claim));
+  const undocumentedClaims = sourceDeferredClaims.filter((claim) => !englishSet.has(claim) || !koreanSet.has(claim));
+  const unbackedClaims = [...new Set([...englishImplementationStatusClaims, ...koreanImplementationStatusClaims])]
+    .filter((claim) => !sourceSet.has(claim))
+    .sort();
+
+  if (documentedClaims.length > 0) {
+    derivableFacts.push({
+      kind: "deferred_self_report_documented",
+      gate: true,
+      evidence: `${documentedClaims.length} source deferred self-report claims are documented in both implementation status files`,
+      files: [...implementationStatusDocs],
+      claims: documentedClaims,
+      count: documentedClaims.length,
+    });
+  }
+  if (undocumentedClaims.length > 0) {
+    evidenceGaps.push({
+      kind: "deferred_self_report_undocumented",
+      gate: true,
+      evidence: `${undocumentedClaims.length} source deferred self-report claims are missing from one or both implementation status files`,
+      policy: "built-in:deferred-self-reports-documented",
+      recommendation: "Document each source *_deferred self-report claim in both English and Korean implementation-status docs, or remove the stale source claim.",
+      files: [...implementationStatusDocs],
+      claims: undocumentedClaims,
+    });
+  }
+  if (unbackedClaims.length > 0) {
+    evidenceGaps.push({
+      kind: "deferred_self_report_unbacked",
+      gate: true,
+      evidence: `${unbackedClaims.length} implementation-status deferred self-report claims are not present in source`,
+      policy: "built-in:deferred-self-reports-documented",
+      recommendation: "Remove stale implementation-status *_deferred claims or add the corresponding source self-report.",
+      files: [...implementationStatusDocs],
+      claims: unbackedClaims,
+    });
+  }
+
   const status: RepoKnowledgeStatus = evidenceGaps.length > 0
     ? "fail"
     : blockingUnknowns.length > 0
@@ -546,6 +642,7 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
       englishKoreanCounterparts: true,
       checkedCounterpartRoots: [...counterpartRoots],
       schemaReferencesResolve: true,
+      deferredSelfReportsDocumented: true,
     },
     indexes,
     documents,
@@ -558,6 +655,13 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
       status,
       documentCount: documents.length,
       indexLinkCount: indexes.reduce((sum, index) => sum + index.links.length, 0),
+      deferredSelfReportCount: sourceDeferredClaims.length,
+    },
+    deferredSelfReports: {
+      sourceClaims: sourceDeferredClaims,
+      englishImplementationStatusClaims,
+      koreanImplementationStatusClaims,
+      documentedClaims,
     },
     gate: repoKnowledgeGateFor(status, options.gate === true, blockingUnknowns.length > 0),
   };

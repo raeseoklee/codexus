@@ -212,11 +212,15 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   blocked verification attempts instead of executing dangerous commands.
 - `cx schema engine --json` reports the active local schema subset engine and
   the unavailable full JSON Schema engine without adding a dependency.
+- `cx architecture check --json` reports schema-validated architecture policy
+  facts and forbidden-import evidence. Broad layering analysis remains heuristic
+  in the first slice and self-reports `broad_layering_rule_deferred`.
 - `cx supply-chain check --json` reports local derivable package evidence with
   `evidenceGaps`, `derivableFacts`, `heuristicClaims`, `blockingUnknowns`, and
   `informationalUnknowns`; `--gate` exits only from evidence gaps and blocking
   unknowns. The default path uses static package projection and does not execute
-  package lifecycle scripts.
+  package lifecycle scripts. Dependency name similarity / typosquat evaluation
+  remains advisory and self-reports `typosquat_name_similarity_deferred`.
 - `cx replay parity --json` reports canonical replay parity label coverage from
   committed fixtures and preserves the no-new-label-without-fixture contract.
 - Cron/gateway live paths share the `policy-reviewed-live-dispatch-v1` policy
@@ -274,8 +278,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   loop breakers, and HUD projection. No new completion authority exists yet;
   the first deterministic docs-code invariant pass is implemented in
   `cx repo check --gate --json`: required indexes, index links, English/Korean
-  counterparts, and declared `schemas/*.schema.json` references are checked
-  mechanically before any active autonomy surface exists.
+  counterparts, declared `schemas/*.schema.json` references, and source
+  `*_deferred` self-report claims mirrored in both implementation-status docs are
+  checked mechanically before any active autonomy surface exists. The repo check
+  output also aggregates deferred self-report claims so intentionally unbuilt
+  surfaces stay visible.
 - The compiled repository wiki is documented as a proposed 0.2/0.3 track:
   regenerable markdown pages over repository facts, Codexus ledgers, graph
   artifacts, decisions, and verification evidence. No `cx wiki` commands exist

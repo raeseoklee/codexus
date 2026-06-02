@@ -66,6 +66,10 @@ documented contract → policy gate → bounded execution → evidence gate → 
   driver/sandbox가 이런 policy field를 강제하거나 관측할 수 없으면 `autopilot run`은 시작에서
   block하거나 해당 계약 field를 unsupported로 거부해야 합니다. best-effort warning으로 조용히
   낮추면 안 됩니다.
+- **branch protection 우회 없음.** Protected branch 거부, required PR review, required
+  status check 미충족은 repository rule을 우회하라는 지시가 아니라 boundary stop /
+  `decision_needed`입니다. 우회가 필요하다면 autonomous execution 밖의 사람 maintainer
+  action이어야 합니다.
 - **stop은 실패가 아니다.** 계약 한도(max diff, scope edge, timeout) 도달은 "autopilot
   실패"가 아니라 "사람이 필요한 경계 도달"입니다.
 - **새 gate subsystem 없음.** 완료는 기존 gate들 + scope gate의 AND; 병렬 스캐너 없음.
@@ -253,6 +257,8 @@ cx autopilot run --policy .codexus/autopilot.json --json   # worktree + strict g
 - driver가 요청된 approval/sandbox 모드 또는 요청된 network/command/secret policy surface를
   보장 못 하면 `autopilot run`이 시작에서 block(조용한 `option_ignored` 없음, warning-only
   downgrade 없음).
+- Protected branch, required review, required check 거부는 boundary record와 함께 멈추며,
+  autonomous execution은 branch protection을 우회하지 않음.
 - 완료는 네 gate 전부 green 필요; heuristic/informational unknown은 완료 exit code를 절대
   안 움직임.
 - 한도-도달 정지는 실패가 아니라 경계(재개 가능)로 보고.

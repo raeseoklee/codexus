@@ -138,11 +138,15 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   실행하지 않고 blocked verification attempt로 기록합니다.
 - `cx schema engine --json`은 dependency를 추가하지 않고 active local schema subset
   engine과 unavailable full JSON Schema engine을 보고합니다.
+- `cx architecture check --json`은 schema-validated architecture policy fact와
+  forbidden-import evidence를 보고합니다. Broad layering analysis는 첫 slice에서
+  heuristic으로 남으며 `broad_layering_rule_deferred`로 자기보고합니다.
 - `cx supply-chain check --json`은 로컬 derivable package evidence를
   `evidenceGaps`, `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
   `informationalUnknowns`로 보고합니다. `--gate`는 evidence gap과 blocking
   unknown만 exit code에 반영하며, 기본 경로는 static package projection을 사용하고
-  package lifecycle script를 실행하지 않습니다.
+  package lifecycle script를 실행하지 않습니다. Dependency name similarity / typosquat
+  평가는 advisory로 남으며 `typosquat_name_similarity_deferred`로 자기보고합니다.
 - `cx replay parity --json`은 committed fixture 기반 canonical replay parity label
   coverage를 보고하고 no-new-label-without-fixture contract를 보존합니다.
 - Cron/gateway live path는 `policy-reviewed-live-dispatch-v1` policy contract를 공유하고
@@ -264,8 +268,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 다룹니다. 새 완료 권한은 아직 없으며, 첫 deterministic docs-code
   invariant pass는 `cx repo check --gate --json`에 구현됐습니다: required index,
-  index link, English/Korean counterpart, 선언된 `schemas/*.schema.json` reference를
-  기계적으로 확인합니다.
+  index link, English/Korean counterpart, 선언된 `schemas/*.schema.json` reference, source
+  `*_deferred` self-report claim이 양쪽 implementation-status 문서에 mirrored됐는지를
+  기계적으로 확인합니다. Repo check output은 deferred self-report claim도 집계해 의도적으로
+  미구현된 surface가 계속 보이도록 합니다.
 - Compiled repository wiki는 제안된 0.2/0.3 track으로 문서화되어 있습니다:
   repository fact, Codexus ledger, graph artifact, decision, verification evidence 위에
   재생성 가능한 markdown page를 만듭니다. 아직 `cx wiki` 명령은 없으며, 첫 구현은

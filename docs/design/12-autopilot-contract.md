@@ -73,6 +73,10 @@ Supporting boundaries:
   or observe one of these policy fields, `autopilot run` must block at start or
   reject that contract field. It must not silently downgrade the bound into a
   best-effort warning.
+- **No branch-protection bypass.** Protected branch rejection, required PR
+  review, or missing required status checks are boundary stops /
+  `decision_needed`, not instructions to bypass repository rules. Any bypass
+  must remain a human maintainer action outside autonomous execution.
 - **Stop is not failure.** Hitting a contract bound (max diff, scope edge,
   timeout) is "reached a boundary that needs a human," not "autopilot failed."
 - **No new gate subsystem.** Completion is the AND of existing gates plus the
@@ -283,6 +287,8 @@ Dogfood on a small Codexus task first.
 - `autopilot run` blocks at start when the driver cannot guarantee the requested
   approval/sandbox mode or any requested network/command/secret policy surface
   (no silent `option_ignored`, no warning-only downgrade).
+- Protected-branch, required-review, or required-check rejection stops with a
+  boundary record; autonomous execution never bypasses branch protection.
 - Completion requires all four gates green; heuristics/informational unknowns
   never move the completion exit code.
 - A bound-hit stop is reported as a boundary (resumable), not a failure.

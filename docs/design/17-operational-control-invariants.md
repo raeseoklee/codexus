@@ -311,7 +311,11 @@ that preserves the existing evidence-first identity.
    `cx repo check`:
    - documentation index links exist;
    - English/Korean design translation links resolve;
-   - schema references point to existing schema files where declared.
+   - schema references point to existing schema files where declared;
+   - source `*_deferred` self-report claims are mirrored in both
+     implementation-status documents;
+   - the JSON output aggregates deferred self-reports so intentionally unbuilt
+     surfaces do not stay hidden in individual command artifacts.
 2. Add `riskFacts` to change evidence:
    - changed file count;
    - diff size;

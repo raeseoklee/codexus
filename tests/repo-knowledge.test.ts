@@ -149,6 +149,48 @@ test("repo check --gate fails on missing declared schema references", async () =
   }
 });
 
+test("repo check --gate fails when source deferred self-reports are undocumented", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, "docs", "design"), { recursive: true });
+    await mkdir(join(cwd, "src"), { recursive: true });
+    await writeFixtureDocs(cwd);
+    await writeFile(join(cwd, "src", "feature.ts"), "export const deferredClaim = 'example_enforcement_deferred';\n");
+
+    const result = runCli(cwd, ["repo", "check", "--gate", "--json"]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    const gap = output.evidenceGaps.find((item: { kind: string }) => item.kind === "deferred_self_report_undocumented");
+    assert.ok(gap);
+    assert.ok(gap.claims.includes("example_enforcement_deferred"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("repo check --gate records documented deferred self-reports", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, "docs", "design"), { recursive: true });
+    await mkdir(join(cwd, "src"), { recursive: true });
+    await writeFixtureDocs(cwd);
+    await writeFile(join(cwd, "src", "feature.ts"), "export const deferredClaim = 'example_enforcement_deferred';\n");
+    await writeFile(join(cwd, "docs", "implementation-status.md"), "Deferred claim: `example_enforcement_deferred`.\n");
+    await writeFile(join(cwd, "docs", "ko", "implementation-status.md"), "Deferred claim: `example_enforcement_deferred`.\n");
+
+    const result = runCli(cwd, ["repo", "check", "--gate", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.repoKnowledge.deferredSelfReportCount, 1);
+    assert.deepEqual(output.deferredSelfReports.documentedClaims, ["example_enforcement_deferred"]);
+    assert.ok(output.derivableFacts.some((fact: { kind: string; claims?: string[] }) => (
+      fact.kind === "deferred_self_report_documented" && fact.claims?.includes("example_enforcement_deferred")
+    )));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("Codexus package dogfoods repo knowledge gate", () => {
   const result = runCli(resolve("."), ["repo", "check", "--gate", "--json"]);
   assert.equal(result.status, 0, result.stderr);
@@ -157,5 +199,7 @@ test("Codexus package dogfoods repo knowledge gate", () => {
   assert.equal(output.repoKnowledge.status, "pass");
   assert.equal(output.gate.status, "passed");
   assert.equal(output.scanAccuracy, "best_effort");
+  assert.ok(output.deferredSelfReports.sourceClaims.includes("verification_matrix_enforcement_deferred"));
+  assert.ok(output.deferredSelfReports.documentedClaims.includes("verification_matrix_enforcement_deferred"));
   assert.deepEqual(output.evidenceGaps, []);
 });

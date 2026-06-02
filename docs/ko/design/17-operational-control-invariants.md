@@ -295,7 +295,11 @@ control model입니다.
 1. 구현된 첫 pass: `cx repo check`에 작은 docs-code invariant pass 추가:
    - documentation index link가 존재함;
    - English/Korean design translation link가 resolve됨;
-   - 선언된 경우 schema reference가 실제 schema file을 가리킴.
+   - 선언된 경우 schema reference가 실제 schema file을 가리킴;
+   - source의 `*_deferred` self-report claim이 양쪽 implementation-status 문서에
+     mirrored됨;
+   - JSON output이 deferred self-report를 집계해 의도적으로 미구현된 surface가 개별 command
+     artifact 안에 숨어 있지 않게 함.
 2. Change evidence에 `riskFacts` 추가:
    - changed file count;
    - diff size;
