@@ -206,10 +206,14 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
    non-owned 또는 invalid artifact는 `unavailable`로 남깁니다.
 7. 완료: live start, duplicate-start rejection, live owned process의 health promotion,
    bounded log, owned stop을 증명하는 테스트를 추가합니다.
+8. 완료: browser/dev-server/log/screenshot/metric observation이 control, health,
+   completion authority가 되지 않으면서 하나의 `instanceId`를 인용할 수 있도록
+   `cx app instance evidence record/list`와 `app-instance-observation` schema artifact를
+   추가합니다.
 
 ## 다음 Slice
 
-1. Screenshot과 adapter 관측이 하나의 `instanceId`를 가리키도록
-   instance-linked browser/dev-server evidence descriptor를 추가합니다.
+1. 실제 Browser/DevTools/dev-server adapter를 observation artifact contract에
+   연결하되 browser 자동 open이나 health/control 주장을 하지 않게 유지합니다.
 2. 오래된 artifact를 더 명시적으로 드러내는 stale/orphan policy를 강화하되,
    control이나 health를 과장하지 않게 유지합니다.

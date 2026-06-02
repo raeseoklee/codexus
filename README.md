@@ -177,7 +177,7 @@ dispatch is now available as an experimental explicit-approval surface.
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence/gate surface |
 | `repo graph build/check` | Experimental graph evidence surface; build/check only, no import/search/injection |
-| `app instance profile list/status/logs/start/stop` | Experimental owned-process surface; live start/stop work only for Codexus-owned instances |
+| `app instance profile list/status/logs/start/stop/evidence record/evidence list` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
 | app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval, and other surfaces stay status/record/launch-contract/gated |
 | autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`); live `autopilot run` remains deferred to the 0.2/0.3 track |
 
@@ -221,6 +221,7 @@ cx release check --gate --json
 cx app instance profile list --json
 cx app instance start --profile web --worktree . --json
 cx app instance status --json
+cx app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
 cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json

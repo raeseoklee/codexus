@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/app-instance-observation.schema.json",
+  "title": "Codexus App Instance Observation Artifact",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.app.instance.observation" },
+    "observationId": { "type": "string", "minLength": 1 },
+    "recordedAt": { "type": "string", "minLength": 1 },
+    "instance": {
+      "type": "object",
+      "properties": {
+        "instanceId": { "type": "string", "minLength": 1 },
+        "artifactPath": { "type": "string", "minLength": 1 },
+        "worktreePath": { "type": "string", "minLength": 1 },
+        "processStatus": { "enum": ["running", "stopped", "orphaned", "unknown"] },
+        "healthStatus": { "enum": ["passed", "failed", "unknown", "unavailable"] },
+        "url": { "type": ["string", "null"] }
+      },
+      "required": ["instanceId", "artifactPath", "worktreePath", "processStatus", "healthStatus", "url"]
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "kind": { "enum": ["browser", "dev-server", "log", "screenshot", "metric"] },
+        "status": { "enum": ["observed", "unavailable", "failed"] },
+        "source": { "type": "string", "minLength": 1 },
+        "url": { "type": ["string", "null"] },
+        "evidencePath": { "type": ["string", "null"] },
+        "summary": { "type": ["string", "null"] },
+        "reason": { "type": ["string", "null"] }
+      },
+      "required": ["kind", "status", "source", "url", "evidencePath", "summary", "reason"]
+    },
+    "authority": {
+      "type": "object",
+      "properties": {
+        "controlsInstance": { "const": false },
+        "healthAuthority": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["controlsInstance", "healthAuthority", "completionAuthority"]
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "observationId", "recordedAt", "instance", "observation", "authority"]
+}

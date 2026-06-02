@@ -19,6 +19,10 @@ occur before 1.0, but they should be called out clearly.
   validation, owned-process heartbeat artifacts, active HTTP health checks, and
   bounded log capture. Stop remains unavailable for non-owned or invalid
   artifacts.
+- Added experimental instance-linked observation evidence:
+  `cx app instance evidence record/list` and the `app-instance-observation`
+  schema artifact let browser/dev-server/log/screenshot/metric observations cite
+  one `instanceId` without becoming control, health, or completion authority.
 - Added the experimental autopilot contract foundation slice:
   `cx autopilot plan --from ...`, `cx autopilot contract validate`,
   `cx autopilot contract approve`, `cx autopilot contract scope-check`, and the

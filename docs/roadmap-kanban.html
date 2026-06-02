@@ -303,11 +303,11 @@
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
           </div>
-          <p>The live ownership baseline is implemented. The next step is to make browser and dev-server observations cite a concrete app instance instead of relying on generic local-server evidence.</p>
+          <p>The live ownership and observation descriptor baseline is implemented. The next step is to connect real Browser/DevTools/dev-server adapters to those instance-linked artifacts.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale artifacts never imply health or control.</li>
-            <li>Browser/dev-server evidence references an <code>instanceId</code> and never claims control or health without live evidence.</li>
+            <li>Observation evidence references an <code>instanceId</code> and never claims control, health, or completion authority.</li>
             <li>Adapter outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
             <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>
           </ul>
@@ -421,7 +421,7 @@
           <div class="tags">
             <span class="tag evidence">adapter descriptors</span>
           </div>
-          <p>Add dev-server, browser, log, screenshot, trace, or metric evidence descriptors after architecture and repo gates are stable.</p>
+          <p>Wire real dev-server, browser, log, screenshot, trace, or metric adapters to existing app-instance observation descriptors.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Stack-specific behavior stays outside the workflow kernel.</li>

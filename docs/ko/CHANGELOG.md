@@ -19,6 +19,11 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   artifact schema validation, owned-process heartbeat artifact, active HTTP
   health check, bounded log capture를 포함합니다. Stop은 non-owned 또는 invalid
   artifact에는 계속 unavailable을 보고합니다.
+- Experimental instance-linked observation evidence를 추가했습니다:
+  `cx app instance evidence record/list`와 `app-instance-observation` schema
+  artifact가 browser/dev-server/log/screenshot/metric observation을 하나의
+  `instanceId`에 연결해 기록하되 control, health, completion authority가 되지는
+  않게 합니다.
 - Experimental autopilot contract foundation slice를 추가했습니다:
   `cx autopilot plan --from ...`, `cx autopilot contract validate`,
   `cx autopilot contract approve`, `cx autopilot contract scope-check`,

@@ -425,6 +425,37 @@ process.on("SIGINT", shutdown);
   assert(appLogs.stdout.lines.some((line) => line.includes("listening 127.0.0.1:")), "app instance live stdout did not contain the listening line");
   assert(appLogs.stderr.lines.some((line) => line.includes("stderr ready")), "app instance live stderr did not contain the readiness line");
 
+  const observationEvidence = join(project, "browser-evidence.txt");
+  await writeFile(observationEvidence, "browser reached app instance\n");
+  const appObservation = parseJsonRun(codexus, [
+    "app",
+    "instance",
+    "evidence",
+    "record",
+    "--cwd",
+    project,
+    "--instance-id",
+    liveInstanceId,
+    "--kind",
+    "browser",
+    "--source",
+    "package-smoke",
+    "--url",
+    appLive.launch.url,
+    "--evidence-path",
+    observationEvidence,
+    "--summary",
+    "browser evidence linked to the live app instance",
+    "--json",
+  ]);
+  assert(appObservation.observation?.instance?.instanceId === liveInstanceId, "app instance observation did not cite the live instance id");
+  assert(appObservation.observation?.observation?.status === "observed", "app instance observation did not remain observed while the instance was live");
+  assert(appObservation.observation?.authority?.completionAuthority === false, "app instance observation must not become completion authority");
+  const appObservationSchema = parseJsonRun(codexus, ["schema", "validate", "--cwd", project, "--type", "app-instance-observation", "--file", appObservation.path, "--json"]);
+  assert(appObservationSchema.ok === true, "app instance observation did not validate against schema");
+  const appObservationList = parseJsonRun(codexus, ["app", "instance", "evidence", "list", "--cwd", project, "--instance-id", liveInstanceId, "--json"]);
+  assert(appObservationList.observations?.length === 1, "app instance evidence list did not include the recorded observation");
+
   const appStop = parseJsonRun(codexus, ["app", "instance", "stop", "--cwd", project, "--instance-id", liveInstanceId, "--json"]);
   assert(appStop.status === "stopped", "app instance stop did not report stopped");
   assert(appStop.stopped === true, "app instance stop did not report stopped=true");

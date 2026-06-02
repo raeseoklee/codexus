@@ -295,14 +295,16 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   convergence의 structural gate로 구현됐습니다. 다음 작업은 adapter evidence입니다:
   지원되는 external engine descriptor, read-only handoff contract, 그리고 convergence가
   verification을 대체하지 않는 active relay execution입니다.
-- Observability adapter: architecture와 repo-knowledge gate가 안정된 뒤
-  dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
-  workflow kernel 밖에 둡니다.
+- Observability adapter: app-instance observation descriptor는
+  browser/dev-server/log/screenshot/metric evidence용으로 구현됐습니다. 다음 작업은
+  실제 Browser/DevTools/dev-server adapter를 이 descriptor에 연결하되 stack-specific
+  behavior는 workflow kernel 밖에 두는 것입니다.
 - Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)는
   experimental live ownership 첫 slice를 갖습니다. Descriptor/profile listing,
   `start --dry-run`, live owned-process start/stop, heartbeat, port allocation,
-  active health check, bounded log projection이 구현됐습니다. 다음 작업은
-  instance-linked browser/dev-server evidence와 더 강한 stale/orphan policy입니다.
+  active health check, bounded log projection, instance-linked observation
+  evidence record가 구현됐습니다. 다음 작업은 실제 adapter capture와 더 강한
+  stale/orphan policy입니다.
 - Operational control invariant: [17번 문서](design/17-operational-control-invariants.md)는
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 기존 evidence 위의 control layer로 정의합니다. 첫 deterministic
@@ -358,6 +360,6 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     slice는 구현되었습니다. 다음은 advisory synthesis, explicit checked-in export,
     richer page coverage이며, injection path는 그 이후에만 검토합니다.
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
-    구현된 live ownership slice 위에 다음 단계를 쌓습니다. 이후 작업은
-    instance-linked browser/dev-server evidence, 더 강한 stale/orphan policy,
-    future autopilot surface를 위한 worktree-aware launcher reuse입니다.
+    구현된 live ownership과 observation-evidence slice 위에 다음 단계를 쌓습니다.
+    이후 작업은 실제 Browser/DevTools/dev-server adapter capture, 더 강한 stale/orphan
+    policy, future autopilot surface를 위한 worktree-aware launcher reuse입니다.

@@ -229,6 +229,57 @@ test("app instance status does not promote passed health when the process is not
   }
 });
 
+test("app instance evidence records observation without promoting control or health", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeInstance(cwd, "app_test");
+    const evidencePath = join(cwd, "screenshot.txt");
+    await writeFile(evidencePath, "fake screenshot evidence\n");
+
+    const record = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "record",
+      "--instance-id",
+      "app_test",
+      "--kind",
+      "browser",
+      "--source",
+      "manual-smoke",
+      "--url",
+      "http://127.0.0.1:5173/",
+      "--evidence-path",
+      evidencePath,
+      "--summary",
+      "browser reached target",
+      "--json",
+    ]);
+    assert.equal(record.status, 0, record.stderr);
+    const output = parseJson(record);
+    assert.equal(output.observation.instance.instanceId, "app_test");
+    assert.equal(output.observation.observation.kind, "browser");
+    assert.equal(output.observation.observation.status, "unavailable");
+    assert.equal(output.observation.observation.reason, "instance_not_running");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-instance-observation", "--file", output.path, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(parseJson(schema).ok, true);
+
+    const list = runCli(cwd, ["app", "instance", "evidence", "list", "--instance-id", "app_test", "--json"]);
+    assert.equal(list.status, 0, list.stderr);
+    const listed = parseJson(list);
+    assert.equal(listed.observations.length, 1);
+    assert.equal(listed.authority.completionAuthority, false);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("app instance live start, status, logs, and stop manage one owned process per worktree", async () => {
   const cwd = await tempDir();
   try {

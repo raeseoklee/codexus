@@ -177,6 +177,14 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Invalid app instance worktree${target ? `: ${target}` : ""}.`;
     case "invalid_app_instance_log_tail":
       return "Invalid app instance log tail.";
+    case "invalid_app_instance_observation_kind":
+      return `Invalid app instance observation kind${target ? `: ${target}` : ""}.`;
+    case "invalid_app_instance_observation_status":
+      return `Invalid app instance observation status${target ? `: ${target}` : ""}.`;
+    case "missing_app_instance_observation_source":
+      return "Missing app instance observation source.";
+    case "app_instance_observation_evidence_missing":
+      return `App instance observation evidence file not found${target ? `: ${target}` : ""}.`;
     case "app_instance_descriptor_invalid":
       return `App instance descriptor is invalid${target ? `: ${target}` : ""}.`;
     case "app_instance_profile_not_found":
@@ -409,6 +417,14 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass a directory path for `--worktree`.";
     case "invalid_app_instance_log_tail":
       return "Use `--tail <n>` with a value from 1 to 500.";
+    case "invalid_app_instance_observation_kind":
+      return "Use `--kind browser|dev-server|log|screenshot|metric`.";
+    case "invalid_app_instance_observation_status":
+      return "Use `--status observed|unavailable|failed`.";
+    case "missing_app_instance_observation_source":
+      return "Pass `--source <adapter-or-tool>` when recording app instance evidence.";
+    case "app_instance_observation_evidence_missing":
+      return "Pass an existing file with `--evidence-path`, or omit the flag for URL/summary-only evidence.";
     case "app_instance_fixed_port_required":
       return "Set `port.preferred` in the descriptor or pass `--port <n>` for a fixed-port profile.";
     case "app_instance_port_unavailable":

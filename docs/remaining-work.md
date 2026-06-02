@@ -317,15 +317,16 @@ Harness-engineering alignment adds these evidence-first tracks:
   work is adapter evidence: supported external engine descriptors, read-only
   handoff contracts, and eventual active relay execution without letting
   convergence replace verification.
-- Observability adapters: add dev-server/browser/log evidence descriptors only
-  after the architecture and repo-knowledge gates are stable; keep stack-specific
-  behavior outside the workflow kernel.
+- Observability adapters: app-instance observation descriptors now exist for
+  browser/dev-server/log/screenshot/metric evidence. Next work is wiring real
+  Browser/DevTools/dev-server adapters to those descriptors while keeping
+  stack-specific behavior outside the workflow kernel.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
   now has an experimental live ownership first slice: descriptor/profile
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
-  port allocation, active health checks, and bounded log projections. Next
-  work is instance-linked browser/dev-server evidence plus richer stale/orphan
-  policy.
+  port allocation, active health checks, bounded log projections, and
+  instance-linked observation evidence records. Next work is actual adapter
+  capture plus richer stale/orphan policy.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
@@ -384,6 +385,7 @@ Harness-engineering alignment adds these evidence-first tracks:
     synthesis, explicit checked-in export, and richer page coverage before any
     injection path is considered.
 13. Worktree app instance launcher: build on the implemented live ownership
-    slice from [doc 19](design/19-worktree-app-instance-launcher.md). Next add
-    instance-linked browser/dev-server evidence, stronger stale/orphan policy,
+    and observation-evidence slices from
+    [doc 19](design/19-worktree-app-instance-launcher.md). Next add actual
+    Browser/DevTools/dev-server adapter capture, stronger stale/orphan policy,
     and worktree-aware launcher reuse for future autopilot surfaces.

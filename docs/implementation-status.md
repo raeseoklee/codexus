@@ -279,8 +279,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   reads descriptor-backed profiles, starts one Codexus-owned process per
   worktree, writes owned instance artifacts plus heartbeat, probes active HTTP
   health, tails bounded logs, and stops only owned processes. The surface
-  remains outside the 0.1.x stable contract, and instance-linked browser or
-  dev-server evidence remains follow-up work.
+  remains outside the 0.1.x stable contract. `cx app instance evidence
+  record/list` records browser/dev-server/log/screenshot/metric observations
+  against one `instanceId` without claiming control, health authority, or
+  completion authority; actual Browser/DevTools adapter integration remains
+  follow-up work.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External
@@ -329,7 +332,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 217.
+- Current test count: 218.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -478,8 +481,9 @@ review. Current high-level gaps:
 - Worktree app instance launcher now has an experimental live ownership slice:
   start/stop, process ownership tokens, heartbeat, port allocation, liveness,
   and active health probes are implemented for Codexus-owned instances.
-  Instance-linked browser/dev-server evidence and richer stale/orphan policies
-  remain follow-up work.
+  Instance-linked observation evidence descriptors are implemented through
+  `cx app instance evidence record/list`; actual Browser/DevTools adapter
+  capture and richer stale/orphan policies remain follow-up work.
 - Operational control invariants have deterministic docs-code checks plus an
   experimental control-plane first slice: decision artifacts, repeated
   verification loop summaries, HUD/status projections, autonomy preset

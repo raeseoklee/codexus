@@ -2,7 +2,9 @@ import { resolve } from "node:path";
 import {
   appInstanceLogs,
   appInstanceStatus,
+  listAppInstanceObservations,
   listAppInstanceProfiles,
+  recordAppInstanceObservation,
   startAppInstance,
   stopAppInstance,
 } from "../../app-instance/launcher.ts";
@@ -54,6 +56,39 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
     }
     console.log(`app instance logs: ${result.instanceId}`);
     return;
+  }
+
+  if (action === "evidence") {
+    const subaction = args.positionals[2];
+    if (subaction === "record") {
+      const result = await recordAppInstanceObservation(cwd, {
+        instanceId: flagString(args.flags, "instance-id"),
+        kind: flagString(args.flags, "kind"),
+        source: flagString(args.flags, "source"),
+        status: flagString(args.flags, "status"),
+        url: flagString(args.flags, "url"),
+        evidencePath: flagString(args.flags, "evidence-path"),
+        summary: flagString(args.flags, "summary"),
+      });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`app instance evidence recorded: ${result.observation.observationId}`);
+      return;
+    }
+    if (subaction === "list") {
+      const result = await listAppInstanceObservations(cwd, {
+        instanceId: flagString(args.flags, "instance-id"),
+      });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`app instance evidence: ${result.observations.length}`);
+      return;
+    }
+    throw new Error(`unsupported_app_instance_command:evidence-${subaction ?? "missing"}`);
   }
 
   if (action === "start") {

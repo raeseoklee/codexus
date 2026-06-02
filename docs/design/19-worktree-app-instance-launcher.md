@@ -213,10 +213,14 @@ The live `start` and `stop` slices must enforce these local facts:
    leaves non-owned or invalid artifacts unavailable.
 7. Done: add tests proving live start, duplicate-start rejection, health
    promotion for a live owned process, bounded logs, and owned stop.
+8. Done: add `cx app instance evidence record/list` and
+   `app-instance-observation` schema artifacts so browser/dev-server/log/
+   screenshot/metric observations can cite one `instanceId` without becoming
+   control, health, or completion authority.
 
 ## Next Slice
 
-1. Add instance-linked browser/dev-server evidence descriptors so screenshots
-   and adapter observations can cite one `instanceId`.
+1. Wire real Browser/DevTools/dev-server adapters to the observation artifact
+   contract without auto-opening browsers or claiming health/control.
 2. Strengthen stale/orphan policy so long-dead artifacts are surfaced more
    explicitly without overclaiming control or health.

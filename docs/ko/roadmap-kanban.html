@@ -302,11 +302,11 @@
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
           </div>
-          <p>Live ownership baseline은 구현됐습니다. 다음 단계는 browser와 dev-server 관측이 generic local server가 아니라 구체적인 app instance를 가리키게 만드는 것입니다.</p>
+          <p>Live ownership과 observation descriptor baseline은 구현됐습니다. 다음 단계는 실제 Browser/DevTools/dev-server adapter를 instance-linked artifact에 연결하는 것입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>구현된 baseline은 정직해야 합니다. Codexus-owned instance만 중지할 수 있고, stale artifact만으로 health나 control을 주장하지 않습니다.</li>
-            <li>Browser/dev-server evidence는 <code>instanceId</code>를 참조하고 live evidence 없이 control/health를 주장하지 않습니다.</li>
+            <li>Observation evidence는 <code>instanceId</code>를 참조하고 control, health, completion authority를 주장하지 않습니다.</li>
             <li>Adapter 출력은 “이 server를 관측했다”와 “이 owned worktree instance를 관측했다”를 구분할 수 있어야 합니다.</li>
             <li>Future autopilot surface는 generic localhost port가 아니라 per-worktree instance artifact를 재사용해야 합니다.</li>
           </ul>
@@ -420,7 +420,7 @@
           <div class="tags">
             <span class="tag evidence">adapter descriptor</span>
           </div>
-          <p>Architecture/repo gate가 안정된 뒤 dev-server, browser, log, screenshot, trace, metric evidence descriptor를 추가합니다.</p>
+          <p>실제 dev-server, browser, log, screenshot, trace, metric adapter를 기존 app-instance observation descriptor에 연결합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>Stack-specific behavior는 workflow kernel 밖에 둡니다.</li>

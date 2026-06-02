@@ -3,7 +3,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:net";
 import { existsSync } from "node:fs";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { isAbsolute, join, relative, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { withFileLock } from "../util/lock.ts";
@@ -100,6 +100,46 @@ export interface AppInstanceArtifactValidation {
   valid: boolean;
   errors: string[];
   artifact: AppInstanceArtifact | null;
+}
+
+export type AppInstanceObservationKind = "browser" | "dev-server" | "log" | "screenshot" | "metric";
+export type AppInstanceObservationStatus = "observed" | "unavailable" | "failed";
+
+export interface AppInstanceObservationArtifact {
+  schemaVersion: 1;
+  stability: "experimental";
+  type: "codexus.app.instance.observation";
+  observationId: string;
+  recordedAt: string;
+  instance: {
+    instanceId: string;
+    artifactPath: string;
+    worktreePath: string;
+    processStatus: AppInstanceStatus;
+    healthStatus: AppInstanceHealthStatus;
+    url: string | null;
+  };
+  observation: {
+    kind: AppInstanceObservationKind;
+    status: AppInstanceObservationStatus;
+    source: string;
+    url: string | null;
+    evidencePath: string | null;
+    summary: string | null;
+    reason: string | null;
+  };
+  authority: {
+    controlsInstance: false;
+    healthAuthority: false;
+    completionAuthority: false;
+  };
+}
+
+export interface AppInstanceObservationValidation {
+  path: string;
+  valid: boolean;
+  errors: string[];
+  artifact: AppInstanceObservationArtifact | null;
 }
 
 interface AppInstanceHeartbeat {
@@ -424,6 +464,7 @@ function instancePaths(worktree: string, instanceId: string) {
   const dir = instanceDirPath(worktree, instanceId);
   return {
     dir,
+    observations: join(dir, "observations"),
     artifact: join(dir, "instance.json"),
     heartbeat: join(dir, "heartbeat.json"),
     launch: join(dir, "launch.json"),
@@ -432,6 +473,10 @@ function instancePaths(worktree: string, instanceId: string) {
     stderr: join(dir, "stderr.log"),
     health: join(dir, "health.json"),
   };
+}
+
+function observationPath(worktree: string, instanceId: string, observationId: string): string {
+  return join(instancePaths(worktree, instanceId).observations, `${observationId}.json`);
 }
 
 function runnerScriptPath(): string {
@@ -603,6 +648,82 @@ export function validateAppInstanceArtifact(value: unknown, path = "artifact"): 
       health,
       logs,
       status: value.status as AppInstanceStatus,
+    }
+    : null;
+  return { path, valid: errors.length === 0, errors, artifact };
+}
+
+function isObservationKind(value: unknown): value is AppInstanceObservationKind {
+  return value === "browser" || value === "dev-server" || value === "log" || value === "screenshot" || value === "metric";
+}
+
+function isObservationStatus(value: unknown): value is AppInstanceObservationStatus {
+  return value === "observed" || value === "unavailable" || value === "failed";
+}
+
+export function validateAppInstanceObservation(value: unknown, path = "observation"): AppInstanceObservationValidation {
+  const errors: string[] = [];
+  if (!isRecord(value)) {
+    return { path, valid: false, errors: [`${path}:not_object`], artifact: null };
+  }
+  if (value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  if (value.stability !== "experimental") errors.push("stability:not_experimental");
+  if (value.type !== "codexus.app.instance.observation") errors.push("type:not_codexus_app_instance_observation");
+  const observationId = requireString(value, "observationId", errors);
+  const recordedAt = requireString(value, "recordedAt", errors);
+  if (!isRecord(value.instance)) errors.push("instance:expected_object");
+  if (!isRecord(value.observation)) errors.push("observation:expected_object");
+  if (!isRecord(value.authority)) errors.push("authority:expected_object");
+
+  const rawProcessStatus = isRecord(value.instance) ? value.instance.processStatus : null;
+  if (!isInstanceStatus(rawProcessStatus)) errors.push("instance.processStatus:invalid_enum");
+  const rawHealthStatus = isRecord(value.instance) ? value.instance.healthStatus : null;
+  if (!isHealthStatus(rawHealthStatus)) errors.push("instance.healthStatus:invalid_enum");
+  const rawKind = isRecord(value.observation) ? value.observation.kind : null;
+  if (!isObservationKind(rawKind)) errors.push("observation.kind:invalid_enum");
+  const rawStatus = isRecord(value.observation) ? value.observation.status : null;
+  if (!isObservationStatus(rawStatus)) errors.push("observation.status:invalid_enum");
+  if (isRecord(value.authority)) {
+    if (value.authority.controlsInstance !== false) errors.push("authority.controlsInstance:not_false");
+    if (value.authority.healthAuthority !== false) errors.push("authority.healthAuthority:not_false");
+    if (value.authority.completionAuthority !== false) errors.push("authority.completionAuthority:not_false");
+  }
+
+  const instance = isRecord(value.instance)
+    ? {
+      instanceId: requireString(value.instance, "instanceId", errors, "instance.instanceId") ?? "",
+      artifactPath: requireString(value.instance, "artifactPath", errors, "instance.artifactPath") ?? "",
+      worktreePath: requireString(value.instance, "worktreePath", errors, "instance.worktreePath") ?? "",
+      processStatus: isInstanceStatus(rawProcessStatus) ? rawProcessStatus : "unknown" as const,
+      healthStatus: isHealthStatus(rawHealthStatus) ? rawHealthStatus : "unknown" as const,
+      url: optionalString(value.instance, "url", errors, "instance.url"),
+    }
+    : null;
+  const observation = isRecord(value.observation)
+    ? {
+      kind: isObservationKind(rawKind) ? rawKind : "browser" as const,
+      status: isObservationStatus(rawStatus) ? rawStatus : "unavailable" as const,
+      source: requireString(value.observation, "source", errors, "observation.source") ?? "",
+      url: optionalString(value.observation, "url", errors, "observation.url"),
+      evidencePath: optionalString(value.observation, "evidencePath", errors, "observation.evidencePath"),
+      summary: optionalString(value.observation, "summary", errors, "observation.summary"),
+      reason: optionalString(value.observation, "reason", errors, "observation.reason"),
+    }
+    : null;
+  const artifact = errors.length === 0 && observationId && recordedAt && instance && observation
+    ? {
+      schemaVersion: 1 as const,
+      stability: "experimental" as const,
+      type: "codexus.app.instance.observation" as const,
+      observationId,
+      recordedAt,
+      instance,
+      observation,
+      authority: {
+        controlsInstance: false as const,
+        healthAuthority: false as const,
+        completionAuthority: false as const,
+      },
     }
     : null;
   return { path, valid: errors.length === 0, errors, artifact };
@@ -1212,6 +1333,133 @@ export async function appInstanceLogs(cwd: string, options: { instanceId?: strin
     tail,
     stdout: await readTail(stdoutPath, tail),
     stderr: await readTail(stderrPath, tail),
+  };
+}
+
+function parseObservationKindFlag(value: string | undefined): AppInstanceObservationKind {
+  if (isObservationKind(value)) return value;
+  throw new Error(`invalid_app_instance_observation_kind:${value ?? "missing"}`);
+}
+
+function parseObservationStatusFlag(value: string | undefined): AppInstanceObservationStatus {
+  if (value === undefined) return "observed";
+  if (isObservationStatus(value)) return value;
+  throw new Error(`invalid_app_instance_observation_status:${value}`);
+}
+
+async function findProjectedInstance(cwd: string, instanceId: string) {
+  const status = await appInstanceStatus(cwd, { instanceId });
+  const instance = status.instances[0];
+  if (!instance) throw new Error(`app_instance_not_found:${instanceId}`);
+  return instance;
+}
+
+export async function recordAppInstanceObservation(cwd: string, options: {
+  instanceId?: string;
+  kind?: string;
+  source?: string;
+  status?: string;
+  url?: string;
+  evidencePath?: string;
+  summary?: string;
+}) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  const kind = parseObservationKindFlag(options.kind);
+  const requestedStatus = parseObservationStatusFlag(options.status);
+  const source = options.source?.trim();
+  if (!source) throw new Error("missing_app_instance_observation_source");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const evidencePath = options.evidencePath ? resolve(cwd, options.evidencePath) : null;
+  if (evidencePath && !existsSync(evidencePath)) throw new Error(`app_instance_observation_evidence_missing:${evidencePath}`);
+  const status: AppInstanceObservationStatus = requestedStatus === "observed" && instance.process.status !== "running"
+    ? "unavailable"
+    : requestedStatus;
+  const reason = status === "unavailable" && requestedStatus === "observed" && instance.process.status !== "running"
+    ? "instance_not_running"
+    : null;
+  const observationId = `observation_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
+  const path = observationPath(instance.worktree.path, instance.instanceId, observationId);
+  const artifact: AppInstanceObservationArtifact = {
+    schemaVersion: 1,
+    stability: "experimental",
+    type: "codexus.app.instance.observation",
+    observationId,
+    recordedAt: nowIso(),
+    instance: {
+      instanceId: instance.instanceId,
+      artifactPath: instance.artifactPath,
+      worktreePath: instance.worktree.path,
+      processStatus: instance.process.status,
+      healthStatus: instance.health.status,
+      url: instance.network.url,
+    },
+    observation: {
+      kind,
+      status,
+      source,
+      url: options.url ?? null,
+      evidencePath,
+      summary: options.summary ?? null,
+      reason,
+    },
+    authority: {
+      controlsInstance: false,
+      healthAuthority: false,
+      completionAuthority: false,
+    },
+  };
+  await ensureDir(dirname(path));
+  await writeJsonAtomic(path, artifact);
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence record" as const,
+    cwd,
+    path,
+    observation: artifact,
+  };
+}
+
+async function listObservationPaths(worktree: string, instanceId: string): Promise<string[]> {
+  const dir = instancePaths(worktree, instanceId).observations;
+  if (!existsSync(dir)) return [];
+  const entries = await readdir(dir);
+  return entries.filter((entry) => entry.endsWith(".json")).sort().map((entry) => join(dir, entry));
+}
+
+export async function readAppInstanceObservation(path: string): Promise<AppInstanceObservationValidation> {
+  if (!existsSync(path)) return { path, valid: false, errors: ["observation_missing"], artifact: null };
+  try {
+    return validateAppInstanceObservation(JSON.parse(await readFile(path, "utf8")) as unknown, path);
+  } catch (error) {
+    return { path, valid: false, errors: [`json_unreadable:${error instanceof Error ? error.message : String(error)}`], artifact: null };
+  }
+}
+
+export async function listAppInstanceObservations(cwd: string, options: { instanceId?: string }) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const validations = await Promise.all((await listObservationPaths(instance.worktree.path, instance.instanceId)).map(readAppInstanceObservation));
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence list" as const,
+    cwd,
+    instanceId: options.instanceId,
+    observations: validations
+      .filter((validation): validation is AppInstanceObservationValidation & { artifact: AppInstanceObservationArtifact } => validation.artifact !== null)
+      .map((validation) => ({ path: validation.path, ...validation.artifact })),
+    artifacts: validations.map((validation) => ({
+      path: validation.path,
+      valid: validation.valid,
+      errors: validation.errors,
+      observationId: validation.artifact?.observationId ?? null,
+    })),
+    authority: {
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
   };
 }
 

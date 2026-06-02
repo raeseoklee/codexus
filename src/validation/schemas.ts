@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { validateArchitecturePolicy } from "../architecture/policy.ts";
-import { validateAppInstanceArtifact, validateAppInstanceDescriptor } from "../app-instance/launcher.ts";
+import { validateAppInstanceArtifact, validateAppInstanceDescriptor, validateAppInstanceObservation } from "../app-instance/launcher.ts";
 import { validateAutopilotContract } from "../autopilot/contract.ts";
 import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
 import { validateWikiManifest } from "../wiki/wiki.ts";
@@ -67,7 +67,8 @@ export type SchemaValidationType =
   | "convergence-agreement"
   | "decision"
   | "app-instance-descriptor"
-  | "app-instance";
+  | "app-instance"
+  | "app-instance-observation";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -102,6 +103,7 @@ export const schemaArtifactNames = [
   "decision.schema.json",
   "app-instance-descriptor.schema.json",
   "app-instance.schema.json",
+  "app-instance-observation.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -122,6 +124,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   decision: "decision.schema.json",
   "app-instance-descriptor": "app-instance-descriptor.schema.json",
   "app-instance": "app-instance.schema.json",
+  "app-instance-observation": "app-instance-observation.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -732,6 +735,11 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
 
   if (type === "app-instance") {
     const validation = validateAppInstanceArtifact(value);
+    errors.push(...validation.errors);
+  }
+
+  if (type === "app-instance-observation") {
+    const validation = validateAppInstanceObservation(value);
     errors.push(...validation.errors);
   }
 

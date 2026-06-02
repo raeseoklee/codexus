@@ -217,7 +217,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 217 tests 통과
+- `npm test`: 218 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -289,8 +289,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   descriptor-backed profile을 읽고, worktree별 Codexus-owned process를 하나씩 띄우고,
   owned instance artifact와 heartbeat를 쓰며, active HTTP health를 probe하고,
   bounded log를 tail하며, owned process만 중지합니다. 이 surface는 여전히 0.1.x
-  stable contract 밖에 있고, instance-linked browser/dev-server evidence는 후속
-  작업입니다.
+  stable contract 밖에 있습니다. `cx app instance evidence record/list`는
+  browser/dev-server/log/screenshot/metric observation을 하나의 `instanceId`에
+  연결해 기록하되 control, health authority, completion authority를 주장하지
+  않습니다. 실제 Browser/DevTools adapter 연동은 후속 작업입니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
@@ -361,9 +363,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   deferred입니다.
 - Worktree app instance launcher는 이제 experimental live ownership slice를
   갖습니다. start/stop, process ownership token, heartbeat, liveness, port
-  allocation, active health probe는 Codexus-owned instance에 대해 구현됐고,
-  instance-linked browser/dev-server evidence와 더 강한 stale/orphan policy가
-  후속 작업입니다.
+  allocation, active health probe는 Codexus-owned instance에 대해 구현됐습니다.
+  Instance-linked observation evidence descriptor는
+  `cx app instance evidence record/list`로 구현됐고, 실제 Browser/DevTools adapter
+  capture와 더 강한 stale/orphan policy가 후속 작업입니다.
 - Operational control invariant는 deterministic docs-code check와 실험적
   control-plane 첫 slice까지 구현됐습니다. Decision artifact, 반복
   verification loop summary, HUD/status projection, autonomy preset metadata,

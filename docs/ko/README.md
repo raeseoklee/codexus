@@ -163,7 +163,7 @@ surface로 제공됩니다.
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | 안정적인 session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | 안정적인 local evidence/gate surface |
 | `repo graph build/check` | Experimental graph evidence surface; build/check만 지원, import/search/injection 없음 |
-| `app instance profile list/status/logs/start/stop` | Experimental owned-process surface; live start/stop은 Codexus-owned instance에서만 동작 |
+| `app instance profile list/status/logs/start/stop/evidence record/evidence list` | Experimental owned-process와 observation-evidence surface; live start/stop은 Codexus-owned instance에서만 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용 |
 | app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; app-server는 read-only, cron/gateway는 explicit approval live dispatch 지원, 나머지는 status/record/launch-contract/gated surface |
 | autopilot contract layer | Experimental foundation slice 구현 (`plan`, `contract validate/approve/scope-check`); live `autopilot run`은 계속 0.2/0.3 트랙에서 deferred |
 
@@ -205,6 +205,7 @@ cx release check --gate --json
 cx app instance profile list --json
 cx app instance start --profile web --worktree . --json
 cx app instance status --json
+cx app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
 cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
@@ -241,7 +242,7 @@ Public bin은 `cx`와 `codexus`입니다.
 - [Codex task panel projection](design/16-codex-task-panel-projection.md): durable Codexus task state를 native Codex task panel로 projection하되, host UI를 source of truth로 만들지 않는 0.2 제안 설계입니다.
 - [Operational control invariants](design/17-operational-control-invariants.md): autonomy preset, policy catalog reporting, docs-code invariant, decision record, loop breaker, HUD projection의 실험적 첫 slice를 정리하되 새 완료 권한은 만들지 않습니다.
 - [Compiled repository wiki](design/18-compiled-repository-wiki.md): repository fact, ledger, graph artifact, decision, verification evidence 위의 재생성 가능한 markdown page를 위한 experimental deterministic 첫 slice입니다. `cx wiki map/build/check/context`가 local하게 동작하며 advisory synthesis와 checked-in export는 계속 deferred입니다.
-- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): worktree별 app evidence를 위한 experimental live ownership app instance surface입니다. Live start/stop은 Codexus-owned instance에 대해 동작하며 stable 0.1.x contract 밖에 남습니다.
+- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): worktree별 app evidence를 위한 experimental live ownership과 observation-evidence app instance surface입니다. Live start/stop은 Codexus-owned instance에 대해 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용합니다.
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)
