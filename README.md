@@ -40,6 +40,10 @@ npm install -g codexus
 codexus run --verify "npm test" "fix the failing parser tests"
 ```
 
+Codexus is a command-line tool, so install it globally. The npmjs sidebar may
+show `npm i codexus`; that is npm's local dependency form and will not put the
+`codexus` / `cx` commands on your normal `PATH`.
+
 Codexus runs Codex, then runs `npm test`. If the test fails, Codexus gives Codex
 the real failing output and retries within the configured repair budget. The run
 is `complete` only when the verification command passes.
@@ -93,6 +97,10 @@ npm install -g codexus
 codexus --version
 codexus doctor --json
 ```
+
+Use the global form above for normal CLI use. A local `npm i codexus` installs
+Codexus into the current project's `node_modules` and is not the recommended
+user install path.
 
 Run a supervised task with verification:
 

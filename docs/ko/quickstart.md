@@ -14,6 +14,11 @@ npm install -g codexus
 codexus doctor --json
 ```
 
+일반적인 CLI 사용에는 global install 형식을 사용하세요. npmjs package page의
+자동 install box는 `npm i codexus`를 보여줄 수 있지만, 이 명령은 Codexus를 현재
+project의 local dependency로 설치하며 `codexus` / `cx` 명령을 일반 `PATH`에
+올리지 않습니다.
+
 Global npm 설치는 기본적으로 CLI와 Codex-native skill adapter를 함께 설치합니다.
 Adapter는 `${CODEX_HOME:-~/.codex}/skills/codexus`에 기록됩니다. CLI만 설치하려면
 다음처럼 실행합니다:

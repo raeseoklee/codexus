@@ -14,6 +14,11 @@ npm install -g codexus
 codexus doctor --json
 ```
 
+Use the global install form for normal CLI use. The npmjs package page may show
+`npm i codexus` in its generated install box; that installs Codexus as a local
+project dependency and does not put the `codexus` / `cx` commands on your normal
+`PATH`.
+
 Global npm installation installs both the CLI and the Codex-native skill
 adapter into `${CODEX_HOME:-~/.codex}/skills/codexus` by default. Set
 `CODEXUS_INSTALL_CODEX_SKILL=0` for a CLI-only install:

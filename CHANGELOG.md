@@ -30,6 +30,9 @@ occur before 1.0, but they should be called out clearly.
 
 ### Fixed
 
+- Clarified that Codexus should be installed globally with
+  `npm install -g codexus`; npmjs may still show its generated local
+  `npm i codexus` snippet, which is not the recommended CLI install path.
 - Stable tag publishes now create or refresh the matching GitHub Release and
   attach `install.sh`, keeping GitHub's latest release route aligned with npm
   `latest`.

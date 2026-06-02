@@ -29,6 +29,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ### Fixed
 
+- Codexus는 `npm install -g codexus`로 global install해야 한다는 점을
+  명확히 했습니다. npmjs는 여전히 자동 생성된 local `npm i codexus` snippet을
+  보여줄 수 있지만, 이것은 권장 CLI 설치 경로가 아닙니다.
 - Stable tag publish가 matching GitHub Release를 생성/갱신하고 `install.sh`를
   첨부하도록 수정했습니다. GitHub latest release route가 npm `latest`와 같은 version을
   가리키게 됩니다.

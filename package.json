@@ -1,7 +1,7 @@
 {
   "name": "codexus",
   "version": "0.1.1",
-  "description": "A local execution harness for OpenAI Codex with durable ledgers, verification gates, memory, and replay-gated skills.",
+  "description": "A globally installed CLI harness for OpenAI Codex with durable ledgers, verification gates, memory, and replay-gated skills.",
   "license": "MIT",
   "type": "module",
   "repository": {
