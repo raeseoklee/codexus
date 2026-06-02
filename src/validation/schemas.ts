@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { validateArchitecturePolicy } from "../architecture/policy.ts";
+import { validateAppInstanceArtifact, validateAppInstanceDescriptor } from "../app-instance/launcher.ts";
 import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
 import { findCodexusPackageRoot } from "../util/package-root.ts";
 import { inspectJsonSchemaSubset, jsonSchemaSubsetEngine, validateJsonSchemaSubset } from "./json-schema-subset.ts";
@@ -60,7 +61,9 @@ export type SchemaValidationType =
   | "relay-session"
   | "stage-gate-evidence"
   | "convergence-agreement"
-  | "decision";
+  | "decision"
+  | "app-instance-descriptor"
+  | "app-instance";
 
 export interface SchemaValidationResult {
   schemaVersion: 1;
@@ -90,6 +93,8 @@ export const schemaArtifactNames = [
   "stage-gate-evidence.schema.json",
   "convergence-agreement.schema.json",
   "decision.schema.json",
+  "app-instance-descriptor.schema.json",
+  "app-instance.schema.json",
 ] as const;
 
 const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactNames[number]> = {
@@ -106,6 +111,8 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "stage-gate-evidence": "stage-gate-evidence.schema.json",
   "convergence-agreement": "convergence-agreement.schema.json",
   decision: "decision.schema.json",
+  "app-instance-descriptor": "app-instance-descriptor.schema.json",
+  "app-instance": "app-instance.schema.json",
 };
 
 const harnessPhases = ["intake", "research", "plan", "execute", "verify", "repair", "evolve", "complete", "failed", "blocked", "cancelled"] as const;
@@ -698,6 +705,16 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     if (requireArray(value, "evidenceLinks", errors).some((item) => typeof item !== "string")) errors.push("evidenceLinks:non_string_item");
     requireOneOf(value, "authority", ["advisory"], errors);
     if (value.completionAuthority !== false) errors.push("completionAuthority:not_false");
+  }
+
+  if (type === "app-instance-descriptor") {
+    const validation = validateAppInstanceDescriptor(value);
+    errors.push(...validation.errors);
+  }
+
+  if (type === "app-instance") {
+    const validation = validateAppInstanceArtifact(value);
+    errors.push(...validation.errors);
   }
 
   return { schemaVersion: 1, type, valid: errors.length === 0, errors };

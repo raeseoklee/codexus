@@ -55,6 +55,10 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported schema validation type${target ? `: ${target}` : ""}.`;
     case "unsupported_app_server_command":
       return `Unsupported app-server command${target ? `: ${target}` : ""}.`;
+    case "unsupported_app_command":
+      return `Unsupported app command${target ? `: ${target}` : ""}.`;
+    case "unsupported_app_instance_command":
+      return `Unsupported app instance command${target ? `: ${target}` : ""}.`;
     case "unsupported_setup_command":
       return `Unsupported setup command${target ? `: ${target}` : ""}.`;
     case "unsupported_session_command":
@@ -121,6 +125,30 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing run prompt.";
     case "missing_app_server_socket":
       return "Missing app-server socket path.";
+    case "missing_app_instance_descriptor":
+      return "Missing app instance descriptor.";
+    case "missing_app_instance_profile":
+      return "Missing app instance profile.";
+    case "missing_app_instance_worktree":
+      return "Missing app instance worktree.";
+    case "missing_app_instance_id":
+      return "Missing app instance id.";
+    case "invalid_app_instance_port":
+      return "Invalid app instance port.";
+    case "invalid_app_instance_worktree":
+      return `Invalid app instance worktree${target ? `: ${target}` : ""}.`;
+    case "invalid_app_instance_log_tail":
+      return "Invalid app instance log tail.";
+    case "app_instance_descriptor_invalid":
+      return `App instance descriptor is invalid${target ? `: ${target}` : ""}.`;
+    case "app_instance_profile_not_found":
+      return `App instance profile not found${target ? `: ${target}` : ""}.`;
+    case "app_instance_profile_cwd_outside_worktree":
+      return "App instance profile cwd resolves outside the selected worktree.";
+    case "app_instance_not_found":
+      return `App instance not found${target ? `: ${target}` : ""}.`;
+    case "app_instance_artifact_invalid":
+      return `App instance artifact is invalid${target ? `: ${target}` : ""}.`;
     case "missing_subagent_file":
       return "Missing subagent evidence file.";
     case "missing_subagent_id":
@@ -206,9 +234,13 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
+    case "unsupported_app_command":
+      return "Run `cx app instance status --json`.";
+    case "unsupported_app_instance_command":
+      return "Run `cx app instance profile list --json`, `cx app instance status --json`, `cx app instance logs --instance-id <id> --json`, or `cx app instance start --profile <name> --worktree <path> --dry-run --json`.";
     case "unsupported_setup_command":
       return "Run `cx setup codex-session --scope project --json`.";
     case "unsupported_session_command":
@@ -275,6 +307,18 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Use a positive integer for `--observe-ms` that is less than or equal to `--timeout-ms`.";
     case "missing_app_server_socket":
       return "Pass `--sock <path>` with `cx app-server experiment --live-read-only`.";
+    case "missing_app_instance_descriptor":
+      return "Pass `--descriptor <path>` or add `codexus.app-instances.json` / package.json#codexus.appInstances.";
+    case "missing_app_instance_profile":
+      return "Pass `--profile <name>` from `cx app instance profile list --json`.";
+    case "missing_app_instance_worktree":
+      return "Pass `--worktree <path>` so the dry-run can bind evidence to one worktree.";
+    case "missing_app_instance_id":
+      return "Pass `--instance-id <id>` from `cx app instance status --json`.";
+    case "invalid_app_instance_port":
+      return "Use a TCP port from 1 to 65535.";
+    case "invalid_app_instance_log_tail":
+      return "Use `--tail <n>` with a value from 1 to 500.";
     case "missing_subagent_file":
       return "Pass `--file <result.json>` or `--claim-file <claims.json>` with `cx session subagent`.";
     case "missing_subagent_id":

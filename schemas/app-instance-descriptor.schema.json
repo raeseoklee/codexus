@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/app-instance-descriptor.schema.json",
+  "title": "Codexus App Instance Descriptor",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "cwd": { "type": "string", "minLength": 1 },
+          "command": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "port": {
+            "type": "object",
+            "properties": {
+              "mode": { "enum": ["allocate", "fixed"] },
+              "preferred": { "type": ["integer", "null"], "minimum": 1 }
+            },
+            "required": ["mode", "preferred"]
+          },
+          "health": {
+            "type": ["object", "null"],
+            "properties": {
+              "type": { "const": "http" },
+              "url": { "type": "string", "minLength": 1 },
+              "timeoutMs": { "type": "integer", "exclusiveMinimum": 0 }
+            },
+            "required": ["type", "url", "timeoutMs"]
+          },
+          "log": {
+            "type": "object",
+            "properties": {
+              "stdout": { "type": "boolean" },
+              "stderr": { "type": "boolean" }
+            },
+            "required": ["stdout", "stderr"]
+          }
+        },
+        "required": ["name", "cwd", "command", "port", "health", "log"]
+      }
+    }
+  },
+  "required": ["schemaVersion", "stability", "profiles"]
+}

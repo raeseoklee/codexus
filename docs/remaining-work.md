@@ -314,12 +314,11 @@ Harness-engineering alignment adds these evidence-first tracks:
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
-  defines a descriptor-backed process launcher before Codexus claims it can run
-  one app instance per change/worktree. The launcher
-  should record worktree, branch/head, command profile, pid/owner heartbeat,
-  port/URL, health check, logs, and status under Codexus-owned artifacts. It
-  must remain experimental, stop only owned processes, and provide the instance
-  evidence that browser/dev-server adapters cite.
+  now has an experimental observe/dry-run first slice: descriptor/profile
+  listing, read-only instance status/log projections, app instance schema
+  validation, and `start --dry-run` planning. Next work is live ownership
+  evidence: owned process artifacts, owner tokens, heartbeat, port allocation,
+  active health checks, and stop-only-owned-process cleanup.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
@@ -370,8 +369,6 @@ Harness-engineering alignment adds these evidence-first tracks:
 12. Compiled repository wiki: implement deterministic `cx wiki map/build/check`
     before any advisory synthesis or context injection.
 13. Worktree app instance launcher: follow [doc 19](design/19-worktree-app-instance-launcher.md)
-    and add `cx app instance start/status/stop/logs` as an experimental,
-    descriptor-backed evidence surface before claiming per-worktree app control
-    or app-health evidence. Start with observe-only status/log artifacts and
-    `start --dry-run`; gate live start/stop behind owned-process, owner-token,
-    heartbeat, port-allocation, and health evidence.
+    beyond the implemented observe/dry-run slice. Add live start/stop only after
+    owned-process artifacts, owner-token checks, heartbeat, port allocation,
+    liveness, and active health evidence are enforceable.

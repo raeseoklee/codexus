@@ -28,6 +28,7 @@ import { architectureCommand } from "./commands/architecture.ts";
 import { repoCommand } from "./commands/repo.ts";
 import { autopilotCommand } from "./commands/autopilot.ts";
 import { releaseCommand } from "./commands/release.ts";
+import { appCommand } from "./commands/app.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -78,13 +79,18 @@ Usage:
   cx locks list|inspect|clear [name] [--stale-only] [--json]
   cx schema check [--json]
   cx schema engine [--json]
-  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision> --file <path> [--json]
+  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance> --file <path> [--json]
   cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|discover|experiment [--dry-run|--live] [--json]
   cx app-server discover [--record] [--timeout-ms <n>] [--json]
   cx app-server experiment --dry-run --record [--probe-process] [--supervise-fake] [--timeout-ms <n>] [--json]
   cx app-server experiment --isolated-real --record [--timeout-ms <n>] [--json]
   cx app-server experiment --live-read-only --sock <path> --record [--observe-ms <n>] [--timeout-ms <n>] [--json]
+  cx app instance profile list [--descriptor <path>] [--json]
+  cx app instance status [--instance-id <id>] [--worktree <path>] [--json]
+  cx app instance logs --instance-id <id> [--tail <n>] [--json]
+  cx app instance start --profile <name> --worktree <path> --dry-run [--descriptor <path>] [--port <n>] [--json]
+  cx app instance stop --instance-id <id> [--json]
   cx resume <run-id> [follow-up] [--json]
   cx verify <run-id> [--verify <cmd>] [--json]
   cx replay parity [--json]
@@ -199,6 +205,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "app-server") {
     await appServerCommand(args);
+    return;
+  }
+  if (args.command === "app") {
+    await appCommand(args);
     return;
   }
   if (args.command === "resume") {

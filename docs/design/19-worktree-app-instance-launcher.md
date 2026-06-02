@@ -3,7 +3,7 @@
 [Korean](../ko/design/19-worktree-app-instance-launcher.md)
 
 Date: 2026-06-02
-Status: proposed 0.2 / 0.3 design track; implementation deferred.
+Status: experimental first slice implemented; live start/stop deferred.
 
 ## Decision
 
@@ -77,12 +77,19 @@ cx app instance logs --instance-id <id> [--tail <n>] --json
 cx app instance stop --instance-id <id> --json
 ```
 
-The first slice should implement `profile list`, `status`, `logs`, and
-`start --dry-run` before live `start` or `stop`.
+The first slice implements `profile list`, `status`, `logs`, and
+`start --dry-run`. Live `start` remains unsupported, and `stop` reports
+`unavailable` until owned-process artifacts and owner-token enforcement exist.
 
 ## Descriptor Contract
 
-The launcher should read an explicit descriptor, for example:
+The first slice reads descriptors in this order:
+
+1. an explicit `--descriptor <path>`;
+2. `codexus.app-instances.json` in the selected command cwd;
+3. `package.json#codexus.appInstances`.
+
+The descriptor format is:
 
 ```json
 {
@@ -193,13 +200,13 @@ The live `start` and `stop` slices must enforce these local facts:
 
 ## First Slice
 
-1. Add descriptor and instance artifact schemas.
-2. Add `cx app instance profile list --json`.
-3. Add `cx app instance status --json` and `logs --json` as read-only
+1. Done: add descriptor and instance artifact schemas.
+2. Done: add `cx app instance profile list --json`.
+3. Done: add `cx app instance status --json` and `logs --json` as read-only
    projections over existing instance artifacts.
-4. Add `start --dry-run --json` that resolves worktree, branch/head, command
+4. Done: add `start --dry-run --json` that resolves worktree, branch/head, command
    profile, candidate port, log paths, and health descriptor without spawning.
-5. Add tests proving that `status` never reports `healthy` without live health
-   evidence and `stop` is unavailable before ownership exists.
+5. Done: add tests proving that `status` never reports `passed` health without
+   live health evidence and `stop` is unavailable before ownership exists.
 
 Only after those pass should Codexus implement live `start` and `stop`.

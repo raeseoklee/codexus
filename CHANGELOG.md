@@ -14,6 +14,10 @@ occur before 1.0, but they should be called out clearly.
 - Added the worktree app instance launcher design note. The proposed surface is
   descriptor-backed, observe-before-act, and requires owned-process lifecycle
   evidence before Codexus can claim per-worktree app control.
+- Added the experimental first launcher slice: `cx app instance profile list`,
+  `status`, `logs`, and `start --dry-run`, plus descriptor and instance artifact
+  schema validation. Live start remains unsupported and stop reports
+  unavailable until owned-process evidence exists.
 
 ### Fixed
 

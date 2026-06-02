@@ -3,7 +3,7 @@
 [English](../../design/19-worktree-app-instance-launcher.md)
 
 날짜: 2026-06-02
-상태: 제안된 0.2 / 0.3 design track, 구현은 deferred.
+상태: experimental 첫 slice 구현됨, live start/stop은 deferred.
 
 ## 결정
 
@@ -73,12 +73,19 @@ cx app instance logs --instance-id <id> [--tail <n>] --json
 cx app instance stop --instance-id <id> --json
 ```
 
-첫 slice는 live `start`나 `stop` 전에 `profile list`, `status`, `logs`,
-`start --dry-run`부터 구현해야 합니다.
+첫 slice는 `profile list`, `status`, `logs`, `start --dry-run`를 구현합니다. Live
+`start`는 계속 unsupported이며, `stop`은 owned-process artifact와 owner-token enforcement가
+생기기 전까지 `unavailable`을 보고합니다.
 
 ## Descriptor Contract
 
-Launcher는 다음과 같은 explicit descriptor를 읽어야 합니다:
+첫 slice는 descriptor를 다음 순서로 읽습니다:
+
+1. 명시적인 `--descriptor <path>`;
+2. 선택한 command cwd의 `codexus.app-instances.json`;
+3. `package.json#codexus.appInstances`.
+
+Descriptor 형식은 다음과 같습니다:
 
 ```json
 {
@@ -186,13 +193,13 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
 
 ## First Slice
 
-1. Descriptor와 instance artifact schema를 추가합니다.
-2. `cx app instance profile list --json`을 추가합니다.
-3. 기존 instance artifact 위의 read-only projection으로 `cx app instance status --json`와
+1. 완료: descriptor와 instance artifact schema를 추가합니다.
+2. 완료: `cx app instance profile list --json`을 추가합니다.
+3. 완료: 기존 instance artifact 위의 read-only projection으로 `cx app instance status --json`와
    `logs --json`를 추가합니다.
-4. Spawn 없이 worktree, branch/head, command profile, candidate port, log path, health
+4. 완료: spawn 없이 worktree, branch/head, command profile, candidate port, log path, health
    descriptor를 resolve하는 `start --dry-run --json`을 추가합니다.
-5. `status`가 live health evidence 없이 `healthy`를 보고하지 않고, ownership이 생기기 전
-   `stop`이 unavailable임을 증명하는 테스트를 추가합니다.
+5. 완료: `status`가 live health evidence 없이 `passed` health를 보고하지 않고, ownership이
+   생기기 전 `stop`이 unavailable임을 증명하는 테스트를 추가합니다.
 
 이후에만 live `start`와 `stop`을 구현해야 합니다.

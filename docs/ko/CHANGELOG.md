@@ -14,6 +14,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Worktree app instance launcher 설계 문서를 추가했습니다. 제안된 surface는
   descriptor-backed, observe-before-act 방식이며, Codexus가 per-worktree app control을
   주장하기 전에 owned-process lifecycle evidence를 요구합니다.
+- Experimental 첫 launcher slice를 추가했습니다: `cx app instance profile list`,
+  `status`, `logs`, `start --dry-run`, descriptor 및 instance artifact schema validation.
+  Live start는 계속 unsupported이고, stop은 owned-process evidence가 생기기 전까지
+  unavailable을 보고합니다.
 
 ### Fixed
 

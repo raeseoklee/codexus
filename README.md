@@ -157,11 +157,11 @@ npm run package:smoke
 - Session-native quality evidence guard and subagent claim recorder/completion handoff
 - Schema artifact validation, stale-lock recovery, and local CI parity
 - Automatic migration from legacy `.codex-harness/` into `.codexus/`
-- Gated app-server, cron, gateway, and model-replay experiments that do not affect the stable `codex exec --json` path
+- Gated app-server, app-instance, cron, gateway, and model-replay experiments that do not affect the stable `codex exec --json` path
 
 ## Status
 
-Codexus 0.1.1 is usable as a local harness with a narrow stable path around
+Codexus 0.1.2 is usable as a local harness with a narrow stable path around
 `codex exec --json`; live app-server turns, routine live model replay,
 automatic prompt injection, and live cron/gateway dispatch remain intentionally
 gated.
@@ -174,6 +174,7 @@ gated.
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence/gate surface |
 | `repo graph build/check` | Experimental graph evidence surface; build/check only, no import/search/injection |
+| `app instance profile list/status/logs/start --dry-run` | Experimental observe/dry-run surface; no live start/stop yet |
 | app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; dry-run, status, record/attach/complete, launch-contract, or explicitly gated |
 | autopilot contract layer | Proposed design, deferred to the 0.2/0.3 track |
 
@@ -214,6 +215,9 @@ cx repo graph check --graph <graph-id-or-path> --gate --json
 cx slop check --scope "src/**" --gate --json
 cx supply-chain check --gate --json
 cx release check --gate --json
+cx app instance profile list --json
+cx app instance start --profile web --worktree . --dry-run --json
+cx app instance status --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json

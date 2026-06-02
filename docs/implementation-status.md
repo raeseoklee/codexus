@@ -2,7 +2,7 @@
 
 [Korean](ko/implementation-status.md)
 
-Date: 2026-06-01
+Date: 2026-06-02
 
 Product name: Codexus
 
@@ -10,7 +10,7 @@ Target CLI: `cx`
 
 Public bins: `cx`, `codexus`
 
-Current stable baseline: `0.1.1`
+Current stable baseline: `0.1.2`
 
 The npm package exposes `cx` and `codexus` as canonical bins. The historical
 `chx` alias is not published.
@@ -44,6 +44,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `app-server status`
   - `app-server roundtrip`
   - `app-server experiment`
+  - `app instance profile list`
+  - `app instance status`
+  - `app instance logs`
+  - `app instance start --dry-run`
+  - `app instance stop` (structured unavailable status; live stop deferred)
   - `memory add`
   - `memory search`
   - `memory list`
@@ -111,9 +116,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, and explicit opt-in Stage B read-only socket observation are present, while live app-server execution remains gated off.
 - Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records with policy/approval contract fields for future dispatch.
 - Versioned schema artifacts exist for config, state, events, memory entries,
-  skills, session state, supply-chain policy, and decision artifacts, with
-  focused enforcement plus zero-dependency schema-artifact subset validation on
-  single-record and run-ledger checks.
+  skills, session state, supply-chain policy, decision artifacts, app instance
+  descriptors, and app instance artifacts, with focused enforcement plus
+  zero-dependency schema-artifact subset validation on single-record and
+  run-ledger checks.
 - Codex JSONL usage is captured when present and terminal state records usage or
   `{ "available": false }`.
 - Unsupported Codex exec config options emit `config.option_ignored` ledger
@@ -260,10 +266,13 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - The autopilot contract is documented as a proposed 0.2/0.3 experimental
   surface. It is not implemented and is excluded from the 0.1.x stable
   contract.
-- A generic worktree app instance launcher is not implemented. Codexus does not
-  yet start, track, health-check, or stop one application process per git
-  worktree/change. That surface remains an experimental observability/autopilot
-  prerequisite, not a 0.1.x stable capability.
+- A generic worktree app instance launcher has an experimental observe/dry-run
+  first slice: `cx app instance profile list/status/logs/start --dry-run` reads
+  descriptor-backed profiles, projects existing instance artifacts, tails
+  bounded logs, and plans a per-worktree launch without spawning. Live start,
+  live stop, owner-token enforcement, process liveness
+  (`live_process_liveness_probe_deferred`), port allocation, and active health
+  checks remain deferred outside the 0.1.x stable contract.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External
@@ -304,7 +313,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 196.
+- Current test count: 202.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -347,7 +356,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Multi-engine relay recorder tests cover artifact import-only behavior, relay
   session/stage-gate/convergence schema validation, same-artifact convergence
   requirements, `delta-check` rejection for convergence, and the invariant that
-  valid convergence cannot complete work when verification fails.
+  valid convergence cannot complete work when verification fails. The
+  implementation-stage AC-to-verification matrix gate is covered for missing
+  matrix, unmapped criteria, missing evidence, approved deferrals, missing
+  evidence paths, and passing evidence.
+- App instance launcher first-slice tests cover descriptor schema validation,
+  `profile list`, `start --dry-run` without spawning, live start rejection,
+  health status demotion when evidence is missing, health promotion only with
+  local evidence, bounded log tails, and structured unavailable stop.
 - Real Codex exec smoke through ChatGPT-authenticated local Codex:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-CODEX-OK" --json`
   - observed final artifact: `CHX-CODEX-OK`
@@ -425,9 +441,12 @@ review. Current high-level gaps:
 - Autopilot active execution remains design-only for the 0.2/0.3 track.
   `cx repo graph build/check` and `cx autopilot relay record/stage-gate/
   check-agreement` exist as experimental foundations, but graph
-  import/search/explain/context injection, relay AC-to-verification matrix
-  enforcement, and active multi-engine relay adapters remain deferred outside the
-  0.1.x stable surface.
+  import/search/explain/context injection and active multi-engine relay adapters
+  remain deferred outside the 0.1.x stable surface.
+- Worktree app instance launcher has an experimental observe/dry-run slice, but
+  live start/stop, process ownership tokens, heartbeat enforcement, liveness
+  checks (`live_process_liveness_probe_deferred`), port allocation, and active
+  health probes remain deferred.
 - Operational control invariants have deterministic docs-code checks plus the
   first advisory session control-plane pass: decision artifacts, repeated
   verification loop summaries, and HUD/status projections are implemented.

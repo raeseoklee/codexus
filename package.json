@@ -102,6 +102,8 @@
         "schemas/stage-gate-evidence.schema.json",
         "schemas/convergence-agreement.schema.json",
         "schemas/decision.schema.json",
+        "schemas/app-instance-descriptor.schema.json",
+        "schemas/app-instance.schema.json",
         "fixtures/app-server/schema.fixture.json",
         "codex/skills/codexus/SKILL.md",
         "scripts/postinstall.mjs",

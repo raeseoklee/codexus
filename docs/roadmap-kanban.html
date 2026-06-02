@@ -298,16 +298,16 @@
         </article>
 
         <article class="card">
-          <h3>Worktree App Instance Launcher</h3>
+          <h3>Worktree App Instance Live Ownership</h3>
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
           </div>
-          <p>Codexus does not yet boot one application instance per git worktree. Add a descriptor-backed launcher before browser, log, or app-health evidence can be tied to per-change instances.</p>
+          <p>The descriptor-backed observe/dry-run slice is implemented. The remaining step is live ownership evidence before Codexus may boot, monitor, or stop one application instance per git worktree.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li><code>cx app instance start/status/stop/logs --json</code> records an owned instance artifact.</li>
-            <li>Each artifact includes worktree path, branch/head, command profile, pid/owner heartbeat, port or URL, health check, log paths, and status.</li>
+            <li>Implemented baseline stays honest: <code>profile list</code>, <code>status</code>, <code>logs</code>, and <code>start --dry-run</code> never claim live control.</li>
+            <li>Live <code>start/status/stop/logs --json</code> records an owned instance artifact with worktree path, branch/head, command profile, pid/owner heartbeat, port or URL, health check, log paths, and status.</li>
             <li>Port allocation is per worktree; stop cleans only the owned process and never unrelated local servers.</li>
             <li>Browser/dev-server evidence references an instance id and never claims control or health without live evidence.</li>
           </ul>

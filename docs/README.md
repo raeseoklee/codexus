@@ -51,7 +51,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Codex task panel projection](design/16-codex-task-panel-projection.md): proposed durable Codexus task state that can be projected into the native Codex task panel without making host UI the source of truth.
 - [Operational control invariants](design/17-operational-control-invariants.md): proposed Codexus-native control layer for autonomy presets, policy catalogs, docs-code invariants, decision records, loop breakers, and HUD projection without adding a new completion authority.
 - [Compiled repository wiki](design/18-compiled-repository-wiki.md): proposed regenerable markdown projection over repository facts, ledgers, graph artifacts, decisions, and verification evidence, with scoped freshness and context packs.
-- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): proposed descriptor-backed app process lifecycle surface for per-worktree app evidence, with observe-before-act and owned-process safety invariants.
+- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): experimental observe/dry-run app instance surface for per-worktree app evidence; live start/stop remains deferred behind owned-process safety invariants.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Roadmap Kanban](roadmap-kanban.html): four-column HTML board of the remaining ready, evidence, gated, and later work.

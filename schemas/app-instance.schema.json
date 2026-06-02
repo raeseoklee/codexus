@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/app-instance.schema.json",
+  "title": "Codexus App Instance Artifact",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.app.instance" },
+    "instanceId": { "type": "string", "minLength": 1 },
+    "worktree": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "branch": { "type": ["string", "null"] },
+        "head": { "type": ["string", "null"] }
+      },
+      "required": ["path", "branch", "head"]
+    },
+    "profile": { "type": "string", "minLength": 1 },
+    "owner": {
+      "type": "object",
+      "properties": {
+        "ownedByCodexus": { "type": "boolean" },
+        "ownerTokenHash": { "type": ["string", "null"] },
+        "pid": { "type": ["integer", "null"] },
+        "processGroupId": { "type": ["integer", "null"] },
+        "heartbeatPath": { "type": ["string", "null"] }
+      },
+      "required": ["ownedByCodexus", "ownerTokenHash", "pid", "processGroupId", "heartbeatPath"]
+    },
+    "network": {
+      "type": "object",
+      "properties": {
+        "host": { "const": "127.0.0.1" },
+        "port": { "type": ["integer", "null"], "minimum": 1 },
+        "url": { "type": ["string", "null"] }
+      },
+      "required": ["host", "port", "url"]
+    },
+    "health": {
+      "type": "object",
+      "properties": {
+        "status": { "enum": ["passed", "failed", "unknown", "unavailable"] },
+        "lastCheckedAt": { "type": ["string", "null"] },
+        "evidencePath": { "type": ["string", "null"] }
+      },
+      "required": ["status", "lastCheckedAt", "evidencePath"]
+    },
+    "logs": {
+      "type": "object",
+      "properties": {
+        "stdoutPath": { "type": ["string", "null"] },
+        "stderrPath": { "type": ["string", "null"] }
+      },
+      "required": ["stdoutPath", "stderrPath"]
+    },
+    "status": { "enum": ["running", "stopped", "orphaned", "unknown"] }
+  },
+  "required": ["schemaVersion", "stability", "type", "instanceId", "worktree", "profile", "owner", "network", "health", "logs", "status"]
+}

@@ -144,11 +144,11 @@ npm run package:smoke
 - Session-native quality evidence guard와 subagent claim recorder/completion handoff
 - Schema artifact validation, stale-lock recovery, local CI parity
 - Legacy `.codex-harness/`에서 `.codexus/`로 자동 migration
-- Stable `codex exec --json` path에 영향을 주지 않는 gated app-server, cron, gateway, model-replay experiment
+- Stable `codex exec --json` path에 영향을 주지 않는 gated app-server, app-instance, cron, gateway, model-replay experiment
 
 ## 상태
 
-Codexus 0.1.1은 좁은 stable path를 가진 local harness로 사용할 수 있습니다.
+Codexus 0.1.2는 좁은 stable path를 가진 local harness로 사용할 수 있습니다.
 안정 경로는 `codex exec --json`을 감싸는 CLI입니다. Live app-server turn,
 routine live model replay, automatic prompt injection, live cron/gateway dispatch는
 의도적으로 gate 뒤에 있습니다.
@@ -160,6 +160,7 @@ routine live model replay, automatic prompt injection, live cron/gateway dispatc
 | `codex exec --json` supervised run, verification/repair, run ledger, resume/cancel/status/events | 안정 경로 |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | 안정적인 session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | 안정적인 local evidence/gate surface |
+| `app instance profile list/status/logs/start --dry-run` | Experimental observe/dry-run surface; live start/stop 없음 |
 | app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; dry-run, status, record/attach/complete, launch-contract 또는 명시적 gate 뒤 |
 | autopilot contract layer | 제안된 설계, 0.2/0.3 트랙으로 deferred |
 
@@ -198,6 +199,9 @@ cx replay parity --json
 cx slop check --scope "src/**" --gate --json
 cx supply-chain check --gate --json
 cx release check --gate --json
+cx app instance profile list --json
+cx app instance start --profile web --worktree . --dry-run --json
+cx app instance status --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json
@@ -233,7 +237,7 @@ Public bin은 `cx`와 `codexus`입니다.
 - [Codex task panel projection](design/16-codex-task-panel-projection.md): durable Codexus task state를 native Codex task panel로 projection하되, host UI를 source of truth로 만들지 않는 0.2 제안 설계입니다.
 - [Operational control invariants](design/17-operational-control-invariants.md): autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker, HUD projection을 Codexus-native control layer로 정리하되 새 완료 권한은 만들지 않는 제안 설계입니다.
 - [Compiled repository wiki](design/18-compiled-repository-wiki.md): repository fact, ledger, graph artifact, decision, verification evidence 위에 scoped freshness와 context pack을 갖춘 재생성 가능한 markdown projection을 만드는 제안 설계입니다.
-- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): worktree별 app evidence를 위해 descriptor-backed app process lifecycle surface를 제안하되, observe-before-act와 owned-process safety invariant를 먼저 두는 설계입니다.
+- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): worktree별 app evidence를 위한 experimental observe/dry-run app instance surface입니다. Live start/stop은 owned-process safety invariant 뒤로 deferred입니다.
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)

@@ -133,6 +133,28 @@ if (args[0] === "--version") {
 `);
   await chmod(fakeCodex, 0o755);
   await writeFile(join(project, ".codexus", "config.json"), `${JSON.stringify({ codex: { command: fakeCodex } }, null, 2)}\n`);
+  const appInstanceDescriptor = join(project, "codexus.app-instances.json");
+  await writeFile(
+    appInstanceDescriptor,
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        stability: "experimental",
+        profiles: [
+          {
+            name: "web",
+            command: ["npm", "run", "dev"],
+            cwd: ".",
+            port: { mode: "allocate", preferred: 4173 },
+            health: { type: "http", url: "http://127.0.0.1:{port}/", timeoutMs: 1000 },
+            log: { stdout: true, stderr: true },
+          },
+        ],
+      },
+      null,
+      2,
+    )}\n`,
+  );
 
   run("npm", ["pack", "--pack-destination", packDir]);
   const packed = (await readdir(packDir)).filter((name) => name.endsWith(".tgz"));
@@ -191,6 +213,37 @@ if (args[0] === "--version") {
   assert(repo.stability === "experimental", "repo check did not report experimental JSON stability");
   assert(repo.scanAccuracy === "best_effort", "repo check did not report best-effort scan accuracy");
   assert(repo.gate?.status === "passed", "installed repo knowledge gate did not pass");
+
+  const appProfiles = parseJsonRun(codexus, ["app", "instance", "profile", "list", "--cwd", project, "--descriptor", appInstanceDescriptor, "--json"]);
+  assert(appProfiles.stability === "experimental", "app instance profile list did not report experimental stability");
+  assert(appProfiles.descriptor?.valid === true, "app instance descriptor did not validate from installed package");
+  assert(appProfiles.profiles?.[0]?.name === "web", "app instance profile list did not load the web profile");
+  assert(appProfiles.capabilities?.dryRunStart === true, "app instance profile list did not report dry-run capability");
+  assert(appProfiles.capabilities?.liveStart === false, "app instance profile list falsely reported live start capability");
+  const appPlan = parseJsonRun(codexus, [
+    "app",
+    "instance",
+    "start",
+    "--cwd",
+    project,
+    "--descriptor",
+    appInstanceDescriptor,
+    "--profile",
+    "web",
+    "--worktree",
+    project,
+    "--dry-run",
+    "--json",
+  ]);
+  assert(appPlan.stability === "experimental", "app instance dry-run plan did not report experimental stability");
+  assert(appPlan.mode === "dry-run", "app instance start did not stay in dry-run mode");
+  assert(appPlan.spawned === false, "app instance dry-run falsely reported spawned=true");
+  assert(appPlan.status === "planned", "app instance dry-run did not report planned status");
+  assert(appPlan.capabilities?.liveStart === false, "app instance dry-run falsely reported live start capability");
+  const appStatus = parseJsonRun(codexus, ["app", "instance", "status", "--cwd", project, "--json"]);
+  assert(appStatus.stability === "experimental", "app instance status did not report experimental stability");
+  assert(appStatus.status === "empty", "app instance status should not report dry-run plans as live instances");
+  assert(appStatus.instances?.length === 0, "app instance status should not include dry-run plans as instances");
 
   const subagentLaunch = parseJsonRun(codexus, [
     "session",

@@ -2,7 +2,7 @@
 
 [English](../implementation-status.md)
 
-날짜: 2026-06-01
+날짜: 2026-06-02
 
 제품명: Codexus
 
@@ -10,7 +10,7 @@
 
 Public bins: `cx`, `codexus`
 
-현재 stable baseline: `0.1.1`
+현재 stable baseline: `0.1.2`
 
 Npm package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. 기존 `chx`
 alias는 공개 npm bin으로 배포하지 않습니다.
@@ -21,6 +21,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Source development entrypoint: `node src/cli/main.ts`
 - `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`, `replay parity`
 - `locks list/inspect/clear`, `schema check/engine/validate/validate-run`, `app-server status/roundtrip/experiment`
+- `app instance profile list/status/logs/start --dry-run`, `app instance stop` structured unavailable status
 - `slop check`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
@@ -47,7 +48,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - runs/events/report observability command
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled
 - cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
-- config/state/event/memory/skill/session-state/supply-chain-policy/decision
+- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
@@ -209,7 +210,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 176 tests 통과
+- `npm test`: 202 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -255,13 +256,22 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Multi-engine relay recorder 테스트는 artifact import-only 동작, relay
   session/stage-gate/convergence schema validation, 같은 artifact convergence 요구,
   `delta-check` convergence 거부, valid convergence가 verification 실패 시 완료를 만들 수
-  없다는 invariant를 커버합니다.
+  없다는 invariant를 커버합니다. Implementation-stage AC-to-verification matrix gate는
+  missing matrix, unmapped criteria, missing evidence, approved deferral, missing
+  evidence path, passing evidence를 커버합니다.
+- App instance launcher 첫 slice 테스트는 descriptor schema validation, `profile list`,
+  spawn 없는 `start --dry-run`, live start rejection, evidence가 없을 때 health status
+  demotion, local evidence가 있을 때만 health promotion, bounded log tail, structured
+  unavailable stop을 커버합니다.
 - Autopilot contract는 0.2/0.3 experimental surface로만 문서화되어 있습니다.
   아직 구현되지 않았고 0.1.x stable contract에는 포함되지 않습니다.
-- Generic worktree app instance launcher는 구현되지 않았습니다. Codexus는 아직 git
-  worktree/change별 application process를 start, track, health-check, stop하지 않습니다.
-  이 surface는 0.1.x stable capability가 아니라 experimental observability/autopilot
-  prerequisite입니다.
+- Generic worktree app instance launcher는 experimental observe/dry-run 첫 slice를
+  갖습니다. `cx app instance profile list/status/logs/start --dry-run`는
+  descriptor-backed profile을 읽고, 기존 instance artifact를 projection하고, bounded log를
+  tail하며, process를 spawn하지 않는 per-worktree launch plan을 만듭니다. Live start,
+  live stop, owner-token enforcement, process liveness
+  (`live_process_liveness_probe_deferred`), port allocation, active health check는
+  0.1.x stable contract 밖에서 deferred입니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
@@ -317,8 +327,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Autopilot active execution은 0.2/0.3 트랙의 설계 문서만 있습니다.
   `cx repo graph build/check`와 `cx autopilot relay record/stage-gate/check-agreement`는
   experimental foundation으로 존재하지만, graph import/search/explain/context injection,
-  relay AC-to-verification matrix enforcement, active multi-engine relay adapter는 0.1.x
-  stable surface 밖에서 deferred입니다.
+  active multi-engine relay adapter는 0.1.x stable surface 밖에서 deferred입니다.
+- Worktree app instance launcher는 experimental observe/dry-run slice를 갖지만, live
+  start/stop, process ownership token, heartbeat enforcement, liveness check, port
+  allocation, active health probe는 deferred입니다
+  (`live_process_liveness_probe_deferred`).
 - Operational control invariant는 deterministic docs-code check와 첫 advisory session
   control-plane pass까지 구현됐습니다. Decision artifact, 반복 verification loop summary,
   HUD/status projection은 구현됐습니다. Autonomy preset, policy catalog, task artifact,

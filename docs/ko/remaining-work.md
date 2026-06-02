@@ -293,12 +293,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.
 - Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)는
-  Codexus가 변경/worktree별 앱 instance를 실행할 수 있다고 주장하기 전에 필요한
-  descriptor-backed process launcher를 정의합니다. Launcher는
-  Codexus-owned artifact에 worktree, branch/head, command profile, pid/owner
-  heartbeat, port/URL, health check, log, status를 기록해야 합니다. Experimental로
-  유지하고 owned process만 stop해야 하며, browser/dev-server adapter가 참조할
-  instance evidence를 제공합니다.
+  experimental observe/dry-run 첫 slice를 갖습니다. Descriptor/profile listing,
+  read-only instance status/log projection, app instance schema validation,
+  `start --dry-run` planning이 구현됐습니다. 다음 작업은 live ownership evidence입니다:
+  owned process artifact, owner token, heartbeat, port allocation, active health check,
+  owned process만 stop하는 cleanup입니다.
 - Operational control invariant: [17번 문서](design/17-operational-control-invariants.md)는
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 기존 evidence 위의 control layer로 정의합니다. 첫 deterministic
@@ -345,8 +344,6 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 12. Compiled repository wiki: advisory synthesis나 context injection 전에 deterministic
     `cx wiki map/build/check`부터 구현합니다.
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)를
-    따라 per-worktree app control이나 app-health evidence를 주장하기 전에
-    `cx app instance start/status/stop/logs`를 experimental, descriptor-backed evidence
-    surface로 추가합니다. 먼저 observe-only status/log artifact와 `start --dry-run`으로
-    시작하고, live start/stop은 owned-process, owner-token, heartbeat, port-allocation,
-    health evidence 뒤에 gate합니다.
+    따라 구현된 observe/dry-run slice 이후의 live start/stop을 준비합니다. Live control은
+    owned-process artifact, owner-token check, heartbeat, port allocation, liveness,
+    active health evidence가 enforce 가능해진 뒤에만 추가합니다.
