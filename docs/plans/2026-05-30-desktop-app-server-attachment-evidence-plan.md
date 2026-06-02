@@ -147,9 +147,18 @@ Current evidence:
 - Result: `connection.status: "unavailable"`,
   `eventObservation.runtimeSurface: "unknown"`, and
   `promotionRecommendation: "block_stage_b"`.
+- `cx app-server discover --record --json` now captures the current Desktop
+  runtime shape without connecting to a live socket or enabling remote control.
+  In the current maintainer Desktop environment it observed running Codex
+  app-server processes, but all exposed `stdio` or default-stdio transports; the
+  default managed control socket
+  `~/.codex/app-server-control/app-server-control.sock` did not exist.
+- Discovery result: `stageBReadiness.status: "stdio_only"`,
+  `candidateSocket: null`, and
+  `promotionRecommendation: "design_stdio_observer"`.
 - The next positive Stage B attempt needs a user-provided app-server WebSocket
-  socket, an already opt-in managed daemon socket, or a separate stdio-observer
-  design. It must still avoid enabling remote control silently.
+  or Unix socket, an already opt-in managed daemon socket, or a separate
+  stdio-observer design. It must still avoid enabling remote control silently.
 
 ## Non-Goals
 
@@ -169,6 +178,7 @@ surface instead of adding stable user-facing promises:
 ```bash
 cx app-server experiment --dry-run --record --probe-process --json
 cx app-server experiment --dry-run --record --probe-process --supervise-fake --json
+cx app-server discover --record --json
 cx app-server experiment --isolated-real --record --json
 cx app-server experiment --live-read-only --record --sock <path> --json
 ```
@@ -179,12 +189,16 @@ cx app-server experiment --live-read-only --record --sock <path> --json
 That path sends only read-only app-server requests (`initialize`,
 `thread/list`, `remoteControl/status/read`) and records notification method
 shapes rather than transcript values. Errors must be structured and truthful.
+`discover` is read-only discovery: it records process transport modes, default
+control-socket availability, and Stage B readiness, but does not connect to a
+live socket, start a daemon, or enable remote control.
 
 ## Verification
 
 - Unit tests for gate enforcement and unsupported structured errors.
 - Manifest tests for Stage A fields, cleanup status, redaction, and bounded
   output.
+- Discovery tests for stdio-only and explicit-socket classifications.
 - Isolated observer/concurrent-client probe evidence when the local app-server
   surface makes it possible.
 - A fake/proxy fixture that proves event mapping without a live Desktop daemon.

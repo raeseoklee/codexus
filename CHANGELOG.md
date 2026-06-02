@@ -18,6 +18,10 @@ occur before 1.0, but they should be called out clearly.
   Node 24-compatible actions and an explicit Node 24 JavaScript action opt-in,
   replacing the legacy GitHub-managed Pages deploy path that emitted Node.js 20
   action deprecation warnings.
+- Added experimental `cx app-server discover --json/--record`, a read-only
+  Desktop app-server discovery report that records default control-socket
+  availability, running app-server transport modes, and Stage B readiness
+  without connecting to a live socket or enabling remote control.
 - Added experimental `cx release check --json/--gate` and wired it into
   `npm run release:check`, so stable release candidates locally prove installer
   defaults, trusted-publishing wiring, GitHub Release `install.sh` attachment

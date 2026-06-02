@@ -217,10 +217,11 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    fixture coverage와 CLI replay evidence 없이 추가하지 않습니다. `cx replay parity --json`이
    canonical label coverage를 보고합니다.
 3. app-server product behavior를 활성화하기 전에 Desktop app-server attachment
-   evidence loop를 마무리합니다. Stage A isolated temporary-state evidence는
-   구현됐고, Stage B는 gated read-only command surface와 negative maintainer smoke
-   evidence를 갖췄습니다. 남은 evidence는 지원되는 실제 Desktop daemon에서 user-visible
-   turn boundary를 관측하는 것과, 그 뒤의 별도 session-event mapping 설계입니다.
+   evidence loop를 마무리합니다. Stage A isolated temporary-state evidence는 구현됐고,
+   Stage B는 gated read-only socket command surface를 갖고 있으며,
+   `cx app-server discover --json/--record`가 실제 Desktop discovery evidence를
+   기록합니다. 현재 maintainer evidence는 managed control socket이 없는 `stdio_only`이므로
+   다음 slice는 explicit user-provided socket 시도 또는 별도 stdio-observer 설계입니다.
    app-server driver 활성화는 별도 gate로 계속 분리합니다.
 4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
    공유합니다. Permission, approval, lock, dispatch, completion event가 실제로 준비되기
@@ -290,9 +291,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.
 
-1. Desktop app-server attachment: 지원되는 실제 Desktop daemon 관측 경로를 증명한 뒤
-   session-event mapping을 설계합니다. 아직 live app-server product behavior는 켜지지
-   않습니다.
+1. Desktop app-server attachment: 현재 discovery evidence는 `stdio_only`입니다.
+   Session-event mapping을 시도하기 전에 non-disruptive stdio observer를 설계하거나
+   explicit user-provided app-server socket을 확보합니다. 아직 live app-server product
+   behavior는 켜지지 않습니다.
 2. Cron/gateway dispatcher: permission, approval, lock, dispatch, completion event가
    실제로 준비된 뒤에만 구현합니다.
 3. Full JSON Schema engine: dependency policy가 허용될 때만 local subset engine을

@@ -228,11 +228,12 @@ evidence only when the supporting runtime exists:
    reports canonical label coverage and must stay green before new labels land.
 3. Complete the Desktop app-server attachment evidence loop before enabling any
    app-server product behavior: Stage A isolated temporary-state evidence is
-   implemented, and Stage B has a gated read-only command surface plus negative
-   maintainer smoke evidence. The remaining evidence is a supported real Desktop
-   daemon observation with a user-visible turn boundary, followed by a separate
-   session-event mapping design. Keep app-server driver enablement separate and
-   still gated.
+   implemented, Stage B has a gated read-only socket command surface, and
+   `cx app-server discover --json/--record` now records real Desktop discovery
+   evidence. Current maintainer evidence is `stdio_only` with no managed control
+   socket, so the next slice is either an explicit user-provided socket attempt
+   or a separate stdio-observer design. Keep app-server driver enablement
+   separate and still gated.
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`; implement the dispatcher only after
    permission, approval, lock, dispatch, and completion events are live.
@@ -310,8 +311,9 @@ Harness-engineering alignment adds these evidence-first tracks:
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.
 
-1. Desktop app-server attachment: prove a supported real Desktop daemon
-   observation path, then design the session-event mapping. Do not enable live
+1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
+   Design a non-disruptive stdio observer or obtain an explicit user-provided
+   app-server socket before attempting session-event mapping. Do not enable live
    app-server product behavior yet.
 2. Cron/gateway dispatcher: implement only after permission, approval, lock,
    dispatch, and completion events are live.

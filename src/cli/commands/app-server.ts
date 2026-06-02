@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { loadConfig } from "../../config/loader.ts";
 import { CodexAppServerDriver } from "../../drivers/codex-app-server.ts";
+import { runAppServerDiscovery } from "../../experiments/app-server-discovery.ts";
 import { superviseProcess } from "../../experiments/process-supervisor.ts";
 import { runIsolatedRealStageA } from "../../experiments/app-server-stage-a.ts";
 import { runLiveReadOnlyStageB } from "../../experiments/app-server-stage-b.ts";
@@ -110,6 +111,27 @@ export async function appServerCommand(args: ParsedArgs): Promise<void> {
     }
     console.log(`app-server ${result.mode} roundtrip: ${result.status}`);
     process.exitCode = result.status === "passed" ? 0 : 1;
+    return;
+  }
+
+  if (topic === "discover") {
+    const timeoutMs = Number(flagString(args.flags, "timeout-ms") ?? "2000");
+    if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) throw new Error("invalid_timeout_ms");
+    const experimentId = `app_server_discovery_${Date.now()}`;
+    const experimentDir = resolve(harnessRoot(cwd), "experiments", "app-server", experimentId);
+    const { report } = await runAppServerDiscovery({
+      cwd,
+      command: config.codex.command,
+      experimentDir,
+      timeoutMs,
+      record: flagBool(args.flags, "record"),
+    });
+    if (json) {
+      console.log(JSON.stringify(report, null, 2));
+      return;
+    }
+    console.log(`app-server discovery: ${report.stageBReadiness.status}`);
+    console.log(report.stageBReadiness.reason);
     return;
   }
 

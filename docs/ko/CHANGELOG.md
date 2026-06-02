@@ -18,6 +18,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   pinned Node 24-compatible action과 명시적인 Node 24 JavaScript action opt-in을
   사용하며, Node.js 20 action deprecation warning을 냈던 legacy GitHub-managed Pages
   deploy path를 대체합니다.
+- Experimental `cx app-server discover --json/--record`를 추가했습니다. 이
+  read-only Desktop app-server discovery report는 live socket에 연결하거나 remote
+  control을 켜지 않고 default control socket 존재 여부, 실행 중인 app-server transport
+  mode, Stage B readiness를 기록합니다.
 - Experimental `cx release check --json/--gate`를 추가하고
   `npm run release:check`에 연결했습니다. Stable release candidate는 tag publish 전에
   installer default, trusted-publishing wiring, GitHub Release `install.sh` attachment

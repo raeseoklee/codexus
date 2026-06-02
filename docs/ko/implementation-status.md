@@ -189,6 +189,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.
 - Session-native supervision 설계는 Codex-native in-Codex usage를 제품 방향으로
   정리했고, `codex exec resume`은 별도 external multi-turn feature로 deferred했습니다.
+- Desktop app-server discovery는 experimental read-only evidence command로
+  구현됐습니다. `cx app-server discover --json/--record`는 live socket에 연결하거나
+  remote control을 켜지 않고 default control socket 존재 여부, 실행 중인 app-server
+  transport mode, Stage B readiness를 보고합니다. 현재 maintainer evidence는
+  `stdio_only`이므로 positive Desktop attachment는 explicit socket 또는 stdio-observer
+  설계 전까지 계속 blocked입니다.
 
 ## 검증
 

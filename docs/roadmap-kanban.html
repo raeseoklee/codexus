@@ -212,17 +212,17 @@
         <p class="summary">Evidence-producing work that should happen before any broader runtime is turned on.</p>
 
         <article class="card">
-          <h3>Desktop App-Server Real Observation</h3>
+          <h3>App-Server Stdio Observer Design</h3>
           <div class="tags">
-            <span class="tag evidence">Stage B evidence</span>
-            <span class="tag gated">read-only</span>
+            <span class="tag evidence">after discovery</span>
+            <span class="tag gated">no remote control</span>
           </div>
-          <p>Prove a supported real Desktop daemon observation path with explicit socket input and a visible turn boundary.</p>
+          <p>Discovery now shows the maintainer Desktop surface is stdio-only with no managed control socket. Design a non-disruptive observer before any session-event mapping.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>No transcript values captured.</li>
-            <li>Connection is proven non-disruptive before live use.</li>
-            <li>Negative results remain supported outcomes.</li>
+            <li><code>cx app-server discover --record --json</code> remains read-only and records stdio-only evidence.</li>
+            <li>The observer design does not attach to existing stdio pipes destructively.</li>
+            <li>Positive mapping still requires observed turn-boundary evidence without transcript values.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>

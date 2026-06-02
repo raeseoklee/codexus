@@ -7,6 +7,11 @@ import { createServer, type Socket } from "node:net";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
+import {
+  buildAppServerDiscoveryReport,
+  classifyAppServerProcessLine,
+  type AppServerDiscoveryReport,
+} from "../src/experiments/app-server-discovery.ts";
 
 const cli = resolve("src/cli/main.ts");
 
@@ -167,6 +172,65 @@ async function startFakeAppServer(socketPath: string, options: { sendTurnBoundar
     },
   };
 }
+
+function probe(status: AppServerDiscoveryReport["daemonVersionProbe"]["status"]): AppServerDiscoveryReport["daemonVersionProbe"] {
+  return {
+    command: "codex",
+    args: ["app-server", "daemon", "version"],
+    status,
+    exitCode: status === "passed" ? 0 : 1,
+    signal: null,
+    stdoutPreview: status === "passed" ? "{\"version\":\"1\"}" : "",
+    stderrPreview: status === "passed" ? "" : "failed",
+    error: null,
+    timeoutMs: 1000,
+  };
+}
+
+test("app-server discovery classifies stdio-only Desktop surfaces without promoting Stage B", () => {
+  const desktop = classifyAppServerProcessLine("  74924     1 /Applications/Codex.app/Contents/Resources/codex app-server --analytics-default-enabled");
+  const session = classifyAppServerProcessLine("  58539 58536 /Applications/Codex.app/Contents/Resources/codex app-server --listen stdio://");
+  const vscode = classifyAppServerProcessLine("  50301 50223 /Users/me/.vscode/extensions/openai.chatgpt/bin/codex app-server --analytics-default-enabled");
+  assert.ok(desktop);
+  assert.ok(session);
+  assert.ok(vscode);
+  assert.equal(desktop.source, "desktop-app");
+  assert.equal(vscode.source, "vscode-extension");
+  const report = buildAppServerDiscoveryReport({
+    cwd: "/repo",
+    command: "codex",
+    controlSocketPath: "/home/user/.codex/app-server-control/app-server-control.sock",
+    controlSocketExists: false,
+    daemonVersionProbe: probe("failed"),
+    processCandidates: [desktop, session, vscode],
+  });
+  assert.equal(report.consent.remoteControlAutoEnabled, false);
+  assert.equal(report.consent.connectsToLiveSocket, false);
+  assert.equal(report.processes.total, 3);
+  assert.equal(report.processes.stdioCount, 3);
+  assert.equal(report.stageBReadiness.status, "stdio_only");
+  assert.equal(report.stageBReadiness.candidateSocket, null);
+  assert.equal(report.stageBReadiness.promotionRecommendation, "design_stdio_observer");
+});
+
+test("app-server discovery surfaces explicit socket candidates without connecting", () => {
+  const candidate = classifyAppServerProcessLine("  100 1 codex app-server --listen unix:///tmp/codex.sock");
+  assert.ok(candidate);
+  const report = buildAppServerDiscoveryReport({
+    cwd: "/repo",
+    command: "codex",
+    controlSocketPath: "/home/user/.codex/app-server-control/app-server-control.sock",
+    controlSocketExists: false,
+    daemonVersionProbe: probe("failed"),
+    processCandidates: [candidate],
+    recordPath: "/repo/.codexus/experiments/app-server/discovery.json",
+  });
+  assert.equal(report.processes.attachableCount, 1);
+  assert.equal(report.stageBReadiness.status, "candidate_socket_found");
+  assert.equal(report.stageBReadiness.candidateSocket, "/tmp/codex.sock");
+  assert.equal(report.stageBReadiness.promotionRecommendation, "run_live_read_only_with_explicit_socket");
+  assert.equal(report.record.enabled, true);
+});
 
 test("live-read-only without env gate yields structured unsupported error", async () => {
   const cwd = await tempDir();

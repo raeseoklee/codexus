@@ -142,8 +142,16 @@ Stage B에서 구현으로 넘어가는 gate:
 - 결과: `connection.status: "unavailable"`,
   `eventObservation.runtimeSurface: "unknown"`,
   `promotionRecommendation: "block_stage_b"`.
-- 다음 positive Stage B 시도에는 사용자 제공 app-server WebSocket socket, 이미 opt-in된
-  managed daemon socket, 또는 별도 stdio-observer 설계가 필요합니다. 그 경우에도
+- 이제 `cx app-server discover --record --json`는 live socket에 연결하거나 remote
+  control을 켜지 않고 현재 Desktop runtime shape를 기록합니다. 현재 maintainer Desktop
+  환경에서는 실행 중인 Codex app-server process를 관측했지만 모두 `stdio` 또는
+  default-stdio transport였고, default managed control socket
+  `~/.codex/app-server-control/app-server-control.sock`은 존재하지 않았습니다.
+- Discovery 결과: `stageBReadiness.status: "stdio_only"`,
+  `candidateSocket: null`,
+  `promotionRecommendation: "design_stdio_observer"`.
+- 다음 positive Stage B 시도에는 사용자 제공 app-server WebSocket/Unix socket, 이미
+  opt-in된 managed daemon socket, 또는 별도 stdio-observer 설계가 필요합니다. 그 경우에도
   remote control을 조용히 켜면 안 됩니다.
 
 ## 비목표
@@ -164,6 +172,7 @@ Stage B에서 구현으로 넘어가는 gate:
 ```bash
 cx app-server experiment --dry-run --record --probe-process --json
 cx app-server experiment --dry-run --record --probe-process --supervise-fake --json
+cx app-server discover --record --json
 cx app-server experiment --isolated-real --record --json
 cx app-server experiment --live-read-only --record --sock <path> --json
 ```
@@ -174,11 +183,15 @@ cx app-server experiment --live-read-only --record --sock <path> --json
 (`initialize`, `thread/list`, `remoteControl/status/read`)만 보내고 transcript 값이
 아닌 notification method shape만 기록합니다. 오류는 structured하고 truthful해야
 합니다.
+`discover`는 read-only discovery입니다. Process transport mode, default control socket
+존재 여부, Stage B readiness를 기록하지만 live socket에 연결하거나 daemon을 시작하거나
+remote control을 켜지 않습니다.
 
 ## 검증
 
 - Gate enforcement와 unsupported structured error unit test.
 - Stage A field, cleanup status, redaction, bounded output에 대한 manifest test.
+- Stdio-only와 explicit-socket classification에 대한 discovery test.
 - 로컬 app-server surface가 허용하면 격리 observer/concurrent-client probe evidence.
 - Live Desktop daemon 없이 event mapping을 증명하는 fake/proxy fixture.
 - 사용자가 명시적으로 opt-in했을 때만 Stage B manual smoke.

@@ -253,6 +253,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   scoped freshness, deterministic graph identity, and structural gates. External
   graph import, search/explain, and context injection remain deferred outside
   the 0.1.x stable contract.
+- Desktop app-server discovery has an experimental read-only evidence command:
+  `cx app-server discover --json/--record` reports default control-socket
+  availability, running app-server transport modes, and Stage B readiness
+  without connecting to live sockets or enabling remote control. Current
+  maintainer evidence is `stdio_only`, so positive Desktop attachment remains
+  blocked pending an explicit socket or stdio-observer design.
 - Multi-engine relay autopilot has an experimental recorder/checker first slice:
   `cx autopilot relay record` imports external author/reviewer artifacts without
   spawning another engine, `cx autopilot relay stage-gate` records
