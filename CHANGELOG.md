@@ -14,6 +14,10 @@ occur before 1.0, but they should be called out clearly.
 - Stable tag publishes now create or refresh the matching GitHub Release and
   attach `install.sh`, keeping GitHub's latest release route aligned with npm
   `latest`.
+- GitHub Pages deployment now has a repository-owned workflow with pinned
+  Node 24-compatible actions and an explicit Node 24 JavaScript action opt-in,
+  replacing the legacy GitHub-managed Pages deploy path that emitted Node.js 20
+  action deprecation warnings.
 - Added experimental `cx release check --json/--gate` and wired it into
   `npm run release:check`, so stable release candidates locally prove installer
   defaults, trusted-publishing wiring, GitHub Release `install.sh` attachment

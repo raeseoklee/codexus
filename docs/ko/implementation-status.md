@@ -182,6 +182,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Root `install.sh`는 GitHub Pages `curl | sh` 설치에서 npm(`codexus` 기본값)에
   위임하고, canonical bin link와 `CODEXUS_INSTALL_CODEX_SKILL=0`이 아닐 때 Codex
   skill adapter 설치를 수행합니다.
+- GitHub Pages deploy는 `.github/workflows/pages.yml`의 repository-owned workflow가
+  담당합니다. 이 workflow는 pinned Node 24-compatible action과 명시적인 Node 24
+  JavaScript action opt-in을 사용하며 legacy GitHub-managed Pages deploy path를
+  대체합니다.
 - User-facing Codex-session usage 문서는 `$codexus` skill 호출법, 우선 사용할 명령, 일반 Codex interaction을 유지해야 하는 경우를 설명합니다.
 - Session-native supervision 설계는 Codex-native in-Codex usage를 제품 방향으로
   정리했고, `codex exec resume`은 별도 external multi-turn feature로 deferred했습니다.

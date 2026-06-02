@@ -14,6 +14,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Stable tag publish가 matching GitHub Release를 생성/갱신하고 `install.sh`를
   첨부하도록 수정했습니다. GitHub latest release route가 npm `latest`와 같은 version을
   가리키게 됩니다.
+- GitHub Pages deploy를 repository-owned workflow로 전환했습니다. 이 workflow는
+  pinned Node 24-compatible action과 명시적인 Node 24 JavaScript action opt-in을
+  사용하며, Node.js 20 action deprecation warning을 냈던 legacy GitHub-managed Pages
+  deploy path를 대체합니다.
 - Experimental `cx release check --json/--gate`를 추가하고
   `npm run release:check`에 연결했습니다. Stable release candidate는 tag publish 전에
   installer default, trusted-publishing wiring, GitHub Release `install.sh` attachment

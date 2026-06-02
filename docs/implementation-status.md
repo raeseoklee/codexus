@@ -237,6 +237,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   delegating to npm (`codexus` by default), linking canonical bins, and
   installing the Codex skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is
   set.
+- GitHub Pages deployment is repository-owned through
+  `.github/workflows/pages.yml`, using pinned Node 24-compatible actions and an
+  explicit Node 24 JavaScript action opt-in instead of the legacy
+  GitHub-managed Pages deploy path.
 - User-facing Codex-session usage docs now explain how to invoke the `$codexus` skill, what commands to prefer, and when to stay with normal Codex interaction.
 - The session-native supervision design now makes Codex-native in-Codex usage the
   product direction, with `codex exec resume` deferred as a separate external

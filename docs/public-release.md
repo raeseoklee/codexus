@@ -111,8 +111,9 @@ Codexus ships `install.sh` from the repository root. The script delegates to
 the npm package channel (`codexus` by default), then installs the
 Codex-native skill adapter unless `CODEXUS_INSTALL_CODEX_SKILL=0` is set.
 Direct global npm installs perform the same adapter install through package
-postinstall. Enable GitHub Pages from the `main` branch and `/` root so this
-URL works:
+postinstall. Enable GitHub Pages in workflow mode so
+`.github/workflows/pages.yml` owns the deploy path with pinned actions and the
+Node 24 JavaScript action opt-in:
 
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
@@ -132,16 +133,17 @@ On a personal Free plan, Pages may be unavailable while the repository remains
 private. If GitHub returns `Your current plan does not support GitHub Pages for
 this repository`, make the repository public first, then enable Pages.
 
-API form:
+Create Pages in workflow mode:
 
 ```bash
-gh api --method POST repos/raeseoklee/codexus/pages -f 'source[branch]=main' -f 'source[path]=/'
+gh api --method POST repos/raeseoklee/codexus/pages -f build_type=workflow
 ```
 
-If Pages already exists, update it:
+If Pages already exists, switch it from the legacy branch deployer to workflow
+mode:
 
 ```bash
-gh api --method PUT repos/raeseoklee/codexus/pages -f 'source[branch]=main' -f 'source[path]=/'
+gh api --method PUT repos/raeseoklee/codexus/pages -f build_type=workflow
 ```
 
 The root URL `https://raeseoklee.github.io/install.sh` requires a separate User
