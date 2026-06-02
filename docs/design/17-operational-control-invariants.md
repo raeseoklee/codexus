@@ -307,7 +307,8 @@ that preserves the existing evidence-first identity.
 
 ## First Slice
 
-1. Add a small docs-code invariant pass to `cx repo check`:
+1. Implemented first pass: add a small docs-code invariant pass to
+   `cx repo check`:
    - documentation index links exist;
    - English/Korean design translation links resolve;
    - schema references point to existing schema files where declared.

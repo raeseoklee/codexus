@@ -23,6 +23,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   installer default, trusted-publishing wiring, GitHub Release `install.sh` attachment
   wiring, release-evidence doc을 로컬에서 증명합니다. npm/GitHub live reconciliation은
   `--live`로 명시적으로 실행합니다.
+- Experimental `cx repo check --gate --json`에 docs-code invariant를 확장했습니다.
+  문서가 선언한 `schemas/*.schema.json` reference가 local schema artifact로 resolve되는지
+  검증합니다.
 
 ### Fixed
 

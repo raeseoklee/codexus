@@ -4,7 +4,7 @@ import { dirname, extname, join, relative, resolve } from "node:path";
 export type RepoKnowledgeStatus = "pass" | "fail" | "unknown";
 
 export interface RepoKnowledgeEvidenceGap {
-  kind: "required_doc_missing" | "index_link_broken" | "counterpart_missing";
+  kind: "required_doc_missing" | "index_link_broken" | "counterpart_missing" | "schema_reference_missing";
   gate: true;
   evidence: string | null;
   policy: string;
@@ -14,7 +14,7 @@ export interface RepoKnowledgeEvidenceGap {
 }
 
 export interface RepoKnowledgeDerivableFact {
-  kind: "required_doc_present" | "index_link_resolved" | "counterpart_present" | "external_link_recorded";
+  kind: "required_doc_present" | "index_link_resolved" | "counterpart_present" | "schema_reference_resolved" | "external_link_recorded";
   gate: boolean;
   evidence: string;
   files?: string[];
@@ -77,6 +77,7 @@ export interface RepoKnowledgeReport {
     requiredIndexes: string[];
     englishKoreanCounterparts: boolean;
     checkedCounterpartRoots: string[];
+    schemaReferencesResolve: boolean;
   };
   indexes: Array<{
     path: string;
@@ -101,6 +102,12 @@ export interface RepoKnowledgeReport {
 
 export interface RepoKnowledgeOptions {
   gate?: boolean;
+}
+
+interface SchemaReference {
+  source: string;
+  line: number;
+  target: string;
 }
 
 const requiredIndexes = ["docs/README.md", "docs/ko/README.md"] as const;
@@ -267,6 +274,20 @@ function extractLinks(source: string, content: string, packageRoot: string): Rep
   return links;
 }
 
+function extractSchemaReferences(source: string, content: string): SchemaReference[] {
+  const references: SchemaReference[] = [];
+  const seen = new Set<string>();
+  for (const match of content.matchAll(/(^|[^A-Za-z0-9_./-])((?:\.\/)?schemas\/[A-Za-z0-9._/-]+\.schema\.json)/g)) {
+    const target = normalizePath(match[2]);
+    const line = lineForIndex(content, (match.index ?? 0) + match[1].length);
+    const key = `${line}:${target}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    references.push({ source, line, target });
+  }
+  return references;
+}
+
 function counterpartFor(path: string): string | null {
   const normalized = normalizePath(path);
   if (normalized.startsWith("docs/ko/")) return null;
@@ -342,6 +363,7 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
         requiredIndexes: [...requiredIndexes],
         englishKoreanCounterparts: true,
         checkedCounterpartRoots: [...counterpartRoots],
+        schemaReferencesResolve: true,
       },
       indexes: [],
       documents: [],
@@ -448,6 +470,7 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
     .sort();
   const documents: RepoDocument[] = [];
   const missingCounterparts: string[] = [];
+  const missingSchemaReferences: SchemaReference[] = [];
   for (const path of docs) {
     const counterpartPath = counterpartFor(path);
     const counterpartExists = counterpartPath ? existsSync(join(packageRoot, counterpartPath)) : null;
@@ -467,6 +490,20 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
       counterpartExists,
       linkCount: indexes.find((index) => index.path === path)?.links.length ?? 0,
     });
+    const content = readFileSync(join(packageRoot, path), "utf8");
+    for (const reference of extractSchemaReferences(path, content)) {
+      if (existsSync(join(packageRoot, reference.target))) {
+        derivableFacts.push({
+          kind: "schema_reference_resolved",
+          gate: true,
+          evidence: `${reference.source}:${reference.line} -> ${reference.target}`,
+          files: [reference.source, reference.target],
+          links: [reference.target],
+        });
+      } else {
+        missingSchemaReferences.push(reference);
+      }
+    }
   }
   if (missingCounterparts.length > 0) {
     evidenceGaps.push({
@@ -476,6 +513,17 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
       policy: "built-in:english-korean-counterparts",
       recommendation: "Add the missing Korean counterpart documents or narrow the counterpart policy.",
       files: missingCounterparts.sort(),
+    });
+  }
+  if (missingSchemaReferences.length > 0) {
+    evidenceGaps.push({
+      kind: "schema_reference_missing",
+      gate: true,
+      evidence: `${missingSchemaReferences.length} declared schema references did not resolve`,
+      policy: "built-in:docs-schema-references-resolve",
+      recommendation: "Restore the referenced schema artifacts or update the documentation references.",
+      files: [...new Set(missingSchemaReferences.map((reference) => reference.target))].sort(),
+      links: missingSchemaReferences.map((reference) => `${reference.source}:${reference.line}:${reference.target}`).sort(),
     });
   }
 
@@ -497,6 +545,7 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
       requiredIndexes: [...requiredIndexes],
       englishKoreanCounterparts: true,
       checkedCounterpartRoots: [...counterpartRoots],
+      schemaReferencesResolve: true,
     },
     indexes,
     documents,

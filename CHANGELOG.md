@@ -24,6 +24,9 @@ occur before 1.0, but they should be called out clearly.
   defaults, trusted-publishing wiring, GitHub Release `install.sh` attachment
   wiring, and release-evidence docs before tag publish. Live npm/GitHub
   reconciliation remains explicit via `--live`.
+- Extended experimental `cx repo check --gate --json` with a docs-code invariant
+  that validates declared `schemas/*.schema.json` documentation references
+  against local schema artifacts.
 
 ### Fixed
 

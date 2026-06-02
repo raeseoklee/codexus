@@ -292,7 +292,7 @@ control model입니다.
 
 ## 첫 슬라이스
 
-1. `cx repo check`에 작은 docs-code invariant pass 추가:
+1. 구현된 첫 pass: `cx repo check`에 작은 docs-code invariant pass 추가:
    - documentation index link가 존재함;
    - English/Korean design translation link가 resolve됨;
    - 선언된 경우 schema reference가 실제 schema file을 가리킴.

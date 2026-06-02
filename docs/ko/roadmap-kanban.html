@@ -205,18 +205,18 @@
         </article>
 
         <article class="card">
-          <h3>Docs-Code Invariant Pass</h3>
+          <h3>Decision Artifact Schema</h3>
           <div class="tags">
             <span class="tag ready">17번 문서</span>
             <span class="tag evidence">derivable</span>
           </div>
-          <p>Repo evidence에 기계적인 docs-code invariant를 추가해 첫 operational-control check를 구현합니다.</p>
+          <p>장시간 run이 constraint, rejected alternative, reversibility note, evidence link를 보존할 수 있도록 local decision record artifact를 추가합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>문서 index link가 resolve됩니다.</li>
-            <li>English/Korean design counterpart link가 resolve됩니다.</li>
-            <li>Schema reference는 기계적으로 선언된 경우에만 확인합니다.</li>
-            <li>Semantic "문서 품질" claim은 gate가 되지 않습니다.</li>
+            <li><code>codexus.decision</code> schema가 local decision artifact를 검증합니다.</li>
+            <li>Evidence link는 허용된 Codexus artifact 또는 repository path 안에 머뭅니다.</li>
+            <li>Decision rationale은 advisory이고, schema/path fact만 gate 가능합니다.</li>
+            <li>Session command가 완료 권한을 바꾸지 않고 decision을 record/list할 수 있습니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
@@ -314,10 +314,9 @@
             <span class="tag evidence">17번 문서</span>
             <span class="tag gated">ledger-derived</span>
           </div>
-          <p>Docs-code invariant 이후 local decision artifact와 repeated-failure loop check를 추가하되 완료 권한은 바꾸지 않습니다.</p>
+          <p>Decision artifact 이후 repeated-failure loop check를 추가하되 완료 권한은 바꾸지 않습니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li><code>codexus.decision</code> schema가 linked evidence path를 검증합니다.</li>
             <li>Loop check는 process memory가 아니라 ledger에서 재구성됩니다.</li>
             <li>Loop stop은 boundary stop이지 결과가 틀렸다는 증명이 아닙니다.</li>
           </ul>

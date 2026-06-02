@@ -101,6 +101,54 @@ test("repo check --gate fails on missing Korean counterparts", async () => {
   }
 });
 
+test("repo check --gate validates declared schema references mechanically", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, "docs", "design"), { recursive: true });
+    await mkdir(join(cwd, "schemas"), { recursive: true });
+    await writeFixtureDocs(cwd);
+    await writeFile(join(cwd, "schemas", "config.schema.json"), "{}\n");
+    await writeFile(join(cwd, "docs", "design", "01-architecture.md"), [
+      "# Architecture",
+      "",
+      "The config schema is `schemas/config.schema.json`.",
+      "",
+    ].join("\n"));
+
+    const result = runCli(cwd, ["repo", "check", "--gate", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.ok(output.derivableFacts.some((fact: { kind: string; evidence: string }) => (
+      fact.kind === "schema_reference_resolved" && fact.evidence.includes("schemas/config.schema.json")
+    )));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("repo check --gate fails on missing declared schema references", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, "docs", "design"), { recursive: true });
+    await writeFixtureDocs(cwd);
+    await writeFile(join(cwd, "docs", "design", "01-architecture.md"), [
+      "# Architecture",
+      "",
+      "The missing schema is `schemas/missing.schema.json`.",
+      "",
+    ].join("\n"));
+
+    const result = runCli(cwd, ["repo", "check", "--gate", "--json"]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    const gap = output.evidenceGaps.find((item: { kind: string }) => item.kind === "schema_reference_missing");
+    assert.ok(gap.files.includes("schemas/missing.schema.json"));
+    assert.ok(gap.links.some((link: string) => link.includes("docs/design/01-architecture.md")));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("Codexus package dogfoods repo knowledge gate", () => {
   const result = runCli(resolve("."), ["repo", "check", "--gate", "--json"]);
   assert.equal(result.status, 0, result.stderr);

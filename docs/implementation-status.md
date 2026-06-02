@@ -269,8 +269,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Operational control invariants are documented as a proposed 0.2/0.3 track:
   autonomy presets, policy catalogs, docs-code invariants, decision records,
   loop breakers, and HUD projection. No new completion authority exists yet;
-  the first implementation should add deterministic docs-code checks and
-  artifact schemas before any active autonomy surface.
+  the first deterministic docs-code invariant pass is implemented in
+  `cx repo check --gate --json`: required indexes, index links, English/Korean
+  counterparts, and declared `schemas/*.schema.json` references are checked
+  mechanically before any active autonomy surface exists.
 - The compiled repository wiki is documented as a proposed 0.2/0.3 track:
   regenerable markdown pages over repository facts, Codexus ledgers, graph
   artifacts, decisions, and verification evidence. No `cx wiki` commands exist
@@ -403,7 +405,7 @@ review. Current high-level gaps:
   check-agreement` exist as experimental foundations, but graph
   import/search/explain/context injection and active multi-engine relay adapters
   remain deferred outside the 0.1.x stable surface.
-- Operational control invariants and the compiled repository wiki remain
-  documentation tracks only. Autonomy presets, policy catalogs, decision
-  artifacts, loop breakers, and `cx wiki` commands are not implemented yet.
+- Operational control invariants are partially implemented only as deterministic
+  docs-code checks. Autonomy presets, policy catalogs, decision artifacts, loop
+  breakers, and `cx wiki` commands are not implemented yet.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.
