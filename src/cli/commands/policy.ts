@@ -28,4 +28,3 @@ export async function policyCommand(args: ParsedArgs): Promise<void> {
   console.log(`Advisory: ${result.policyCatalog.counts.advisory}`);
   console.log(`Unavailable: ${result.policyCatalog.counts.unavailable}`);
 }
-

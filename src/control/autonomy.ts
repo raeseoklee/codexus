@@ -49,4 +49,3 @@ export function isAutonomyPresetName(value: unknown): value is AutonomyPresetNam
 export function listAutonomyPresets(): AutonomyPresetDescriptor[] {
   return [...AUTONOMY_PRESETS];
 }
-
