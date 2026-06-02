@@ -221,6 +221,24 @@
           <span class="label">근거</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
         </article>
+
+        <article class="card">
+          <h3>Relay AC Matrix Enforcement</h3>
+          <div class="tags">
+            <span class="tag ready">15번 문서</span>
+            <span class="tag gateable">adapter 이전</span>
+          </div>
+          <p>Active multi-engine adapter를 승격하기 전에 deferred 상태인 acceptance-criteria-to-verification matrix를 structural relay gate로 만듭니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li><code>cx autopilot relay stage-gate</code>가 matrix row를 import 또는 record할 수 있습니다.</li>
+            <li>승인된 모든 acceptance criterion은 최소 하나의 row 또는 승인된 deferred reason에 매핑됩니다.</li>
+            <li>필수 matrix row에 evidence path가 없으면 implementation convergence가 실패합니다.</li>
+            <li>Gate가 생긴 뒤에만 현재 <code>verification_matrix_enforcement_deferred</code> advisory claim을 제거합니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/15-multi-engine-relay-autopilot.md#acceptance-criteria-to-verification-matrix">multi-engine relay autopilot</a></p>
+        </article>
       </section>
 
       <section class="column" aria-labelledby="next-evidence">
@@ -507,7 +525,7 @@
             <li>완료: recorder/checker surface는 두 번째 engine을 spawn하지 않습니다.</li>
             <li>완료: Convergence declaration은 같은 stage artifact hash를 참조해야 합니다.</li>
             <li>완료: Verification 또는 evidence gate가 실패하면 valid convergence도 run을 complete할 수 없습니다.</li>
-            <li>다음: descriptor-backed external engine adapter evidence.</li>
+            <li>다음: descriptor-backed external engine adapter evidence 전에 AC matrix enforcement.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md">multi-engine relay autopilot</a></p>

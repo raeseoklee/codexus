@@ -29,6 +29,13 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ### Fixed
 
+- Stage-gate relay artifact가 빈 `verificationMatrix`를 모호하게 남기지 않고,
+  acceptance-criteria matrix enforcement가 deferred임을 advisory claim으로
+  자기보고하도록 했습니다.
+- Release integrity check가 `actions/*` ref뿐 아니라 third-party GitHub Action의
+  mutable ref도 감지하도록 수정했습니다.
+- Architecture check와 repo-graph check가 하나의 static import scanner를 공유해
+  evidence surface 간 regex drift를 줄였습니다.
 - Codexus는 `npm install -g codexus`로 global install해야 한다는 점을
   명확히 했습니다. npmjs는 여전히 자동 생성된 local `npm i codexus` snippet을
   보여줄 수 있지만, 이것은 권장 CLI 설치 경로가 아닙니다.

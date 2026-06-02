@@ -74,6 +74,7 @@ export interface RelayDerivableFact {
 export interface RelayHeuristicClaim {
   kind:
     | "artifact_content_not_semantically_evaluated"
+    | "verification_matrix_enforcement_deferred"
     | "engine_agreement_is_advisory";
   confidence: "low" | "medium" | "high";
   evidence: string;
@@ -323,6 +324,15 @@ function artifactContentNotEvaluated(evidence: string): RelayHeuristicClaim {
   };
 }
 
+function verificationMatrixDeferred(): RelayHeuristicClaim {
+  return {
+    kind: "verification_matrix_enforcement_deferred",
+    confidence: "high",
+    evidence: "Stage-gate evidence currently records verification status only; acceptance-criteria-to-verification matrix enforcement is deferred.",
+    recommendation: "Do not treat an empty verificationMatrix as acceptance coverage. Keep final completion attached to existing verification and evidence gates.",
+  };
+}
+
 function importOnlyReviewEngine(engine: string): RelayEngineDescriptor {
   return {
     engine,
@@ -472,6 +482,7 @@ export async function recordStageGateEvidence(cwd: string, options: {
     ],
     heuristicClaims: [
       artifactContentNotEvaluated("stage-gate evidence shape does not prove semantic correctness by itself"),
+      verificationMatrixDeferred(),
     ],
     derivableFacts: [
       { kind: "stage_artifact_hashed", gate: true, evidence: stageArtifactHash },

@@ -193,7 +193,7 @@ function appendFact(
 function actionRefs(workflowText: string): { pinned: string[]; unpinned: string[] } {
   const pinned: string[] = [];
   const unpinned: string[] = [];
-  const matcher = /^\s*-?\s*uses:\s*(actions\/[^@\s]+)@([^\s#]+)/gm;
+  const matcher = /^\s*-?\s*uses:\s*([^@\s]+)@([^\s#]+)/gm;
   let match: RegExpExecArray | null;
   while ((match = matcher.exec(workflowText))) {
     const full = `${match[1]}@${match[2]}`;
@@ -454,7 +454,7 @@ export function buildReleaseIntegrityReport(
           kind: "release_workflow_unpinned_action",
           evidence: unpinnedActions.length > 0 ? unpinnedActions.join(", ") : "no pinned actions found",
           policy: "publish workflows with OIDC must pin GitHub Actions by commit SHA",
-          recommendation: "Pin actions/checkout and actions/setup-node to commit SHAs.",
+          recommendation: "Pin every action used by the publish workflow to a commit SHA.",
           files: [".github/workflows/release.yml"],
           actions: unpinnedActions,
         });

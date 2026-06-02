@@ -117,6 +117,31 @@ test("release integrity gates missing release evidence docs", async () => {
   }
 });
 
+test("release integrity gates mutable third-party action refs", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeFixture(cwd);
+    const workflowPath = join(cwd, ".github", "workflows", "release.yml");
+    const workflow = readFileSync(workflowPath, "utf8").replace(
+      "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",
+      [
+        "      - uses: pnpm/action-setup@v4",
+        "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",
+      ].join("\n")
+    );
+    writeFileSync(workflowPath, workflow);
+
+    const report = buildReleaseIntegrityReport(cwd, { gate: true });
+    assert.equal(report.releaseIntegrity.status, "fail");
+    assert.equal(report.gate.status, "failed");
+    const gap = report.evidenceGaps.find((item) => item.kind === "release_workflow_unpinned_action");
+    assert.ok(gap);
+    assert.ok(gap.actions?.includes("pnpm/action-setup@v4"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("release integrity live sign-off compares gh latest without relying on isLatest", async () => {
   const cwd = await tempDir();
   try {

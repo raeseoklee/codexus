@@ -282,13 +282,15 @@ Harness-engineering alignment adds these evidence-first tracks:
 
 - Architecture check follow-up: first-slice `cx architecture check --json` now
   exists with schema-validated `codexus.architecture.policy`, `scanAccuracy:
-  "best_effort"`, and a dogfood `forbidden-import` rule. Future rule kinds such
-  as required files or simple layer edges must keep the same derivable-fact gate
+  "best_effort"`, a dogfood `forbidden-import` rule, and a shared static import
+  scanner also used by the repo-graph provider. Future rule kinds such as
+  required files or simple layer edges must keep the same derivable-fact gate
   model.
 - Repository knowledge follow-up: first-slice `cx repo map/check` now validates
   required indexes, index links, and English/Korean counterparts mechanically.
-  Future expansion can add referenced schema/artifact link checks. Keep semantic
-  staleness advisory.
+  Referenced `schemas/*.schema.json` docs links are now checked mechanically;
+  future expansion can add other artifact link checks. Keep semantic staleness
+  advisory.
 - Repository knowledge graph follow-up: [doc 14](design/14-repository-knowledge-graph.md)
   now has an experimental first slice with `cx repo graph build/check`,
   canonical graph identity hashing, graph schema validation, scoped freshness,
@@ -303,10 +305,10 @@ Harness-engineering alignment adds these evidence-first tracks:
   future artifacts such as lint/typecheck/coverage reports.
 - Multi-engine relay follow-up: [doc 15](design/15-multi-engine-relay-autopilot.md)
   now has a recorder/checker first slice with `cx autopilot relay
-  record/stage-gate/check-agreement`. Next work is adapter evidence only:
-  supported external engine descriptors, read-only handoff contracts, and
-  eventual active relay execution without letting convergence replace
-  verification.
+  record/stage-gate/check-agreement`. Next work is AC-to-verification matrix
+  import/enforcement, then adapter evidence: supported external engine
+  descriptors, read-only handoff contracts, and eventual active relay execution
+  without letting convergence replace verification.
 - Observability adapters: add dev-server/browser/log evidence descriptors only
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.
@@ -345,8 +347,9 @@ Harness-engineering alignment adds these evidence-first tracks:
 9. Autopilot contract layer: start as a 0.2/0.3 experimental track with schema
    artifacts and report-only scope gates before any `cx autopilot run`.
 10. Multi-engine relay autopilot: the report-only artifact recorder/checker is
-    implemented. Keep review engines artifact-import-only until a supported
-    adapter exists, and do not let convergence replace verification.
+    implemented. Add AC-to-verification matrix enforcement before active
+    adapters, keep review engines artifact-import-only until a supported adapter
+    exists, and do not let convergence replace verification.
 11. Operational control invariants: implement decision artifacts next, then
     ledger-derived loop breakers. Autonomy presets remain contract metadata
     until enforceable policy fields exist.

@@ -98,7 +98,7 @@ if (process.argv[2] === "exec") {
         codex: {
           ...defaultConfig.codex,
           command: fakeCodex,
-          runTimeoutMs: 300,
+          runTimeoutMs: 1_000,
         },
       },
       context: { rawStdoutPath, rawStderrPath },

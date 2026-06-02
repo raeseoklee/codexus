@@ -266,12 +266,13 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 
 - Architecture check follow-up: first-slice `cx architecture check --json`은 이제
   schema-validated `codexus.architecture.policy`, `scanAccuracy: "best_effort"`,
-  dogfood `forbidden-import` rule을 갖습니다. 향후 required file이나 단순 layer edge
-  같은 rule kind도 같은 derivable-fact gate model을 유지해야 합니다.
+  dogfood `forbidden-import` rule, repo-graph provider와 공유하는 static import scanner를
+  갖습니다. 향후 required file이나 단순 layer edge 같은 rule kind도 같은 derivable-fact
+  gate model을 유지해야 합니다.
 - Repository knowledge follow-up: first-slice `cx repo map/check`는 required index,
-  index link, English/Korean counterpart를 기계적으로 검증합니다. 향후 referenced
-  schema/artifact link check를 추가할 수 있습니다. Semantic staleness는 advisory로
-  유지합니다.
+  index link, English/Korean counterpart를 기계적으로 검증합니다. 문서가 참조하는
+  `schemas/*.schema.json` link는 이제 기계적으로 검사하며, 향후 다른 artifact link check를
+  추가할 수 있습니다. Semantic staleness는 advisory로 유지합니다.
 - Repository knowledge graph follow-up: [14번 문서](design/14-repository-knowledge-graph.md)는
   이제 `cx repo graph build/check`, canonical graph identity hashing, graph schema
   validation, scoped freshness, persisted Codexus graph artifact, structural graph gate를
@@ -284,9 +285,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   선택적 lint/typecheck/coverage artifact입니다.
 - Multi-engine relay follow-up: [15번 문서](design/15-multi-engine-relay-autopilot.md)는
   이제 `cx autopilot relay record/stage-gate/check-agreement` recorder/checker 첫 slice를
-  갖습니다. 다음 작업은 adapter evidence입니다: 지원되는 external engine descriptor,
-  read-only handoff contract, 그리고 convergence가 verification을 대체하지 않는 active
-  relay execution입니다.
+  갖습니다. 다음 작업은 AC-to-verification matrix import/enforcement이고, 그 다음이
+  adapter evidence입니다: 지원되는 external engine descriptor, read-only handoff contract,
+  그리고 convergence가 verification을 대체하지 않는 active relay execution입니다.
 - Observability adapter: architecture와 repo-knowledge gate가 안정된 뒤
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.
@@ -322,7 +323,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 9. Autopilot contract layer: `cx autopilot run` 전에 schema artifact와 report-only scope
    gate부터 시작하는 0.2/0.3 experimental track으로 진행합니다.
 10. Multi-engine relay autopilot: report-only artifact recorder/checker는 구현됐습니다.
-    지원되는 adapter가 생기기 전 review engine은 artifact import-only로 두고, convergence가
+    Active adapter 전에 AC-to-verification matrix enforcement를 추가합니다. 지원되는
+    adapter가 생기기 전 review engine은 artifact import-only로 두고, convergence가
     verification을 대체하지 않게 합니다.
 11. Operational control invariant: 다음은 decision artifact 구현이고, 그 다음
     ledger-derived loop breaker를 추가합니다. Enforceable policy field가 생기기 전까지

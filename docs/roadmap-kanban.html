@@ -223,6 +223,24 @@
           <span class="label">Sources</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
         </article>
+
+        <article class="card">
+          <h3>Relay AC Matrix Enforcement</h3>
+          <div class="tags">
+            <span class="tag ready">doc 15</span>
+            <span class="tag gateable">before adapters</span>
+          </div>
+          <p>Turn the deferred acceptance-criteria-to-verification matrix into a structural relay gate before any active multi-engine adapter is promoted.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li><code>cx autopilot relay stage-gate</code> can import or record matrix rows.</li>
+            <li>Every approved acceptance criterion maps to at least one row or an approved deferred reason.</li>
+            <li>Implementation convergence fails when required matrix rows lack evidence paths.</li>
+            <li>The current <code>verification_matrix_enforcement_deferred</code> advisory claim is removed only when the gate exists.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/15-multi-engine-relay-autopilot.md#acceptance-criteria-to-verification-matrix">multi-engine relay autopilot</a></p>
+        </article>
       </section>
 
       <section class="column" aria-labelledby="next-evidence">
@@ -509,7 +527,7 @@
             <li>Done: recorder/checker surface does not spawn a second engine.</li>
             <li>Done: convergence declarations must reference the same stage artifact hash.</li>
             <li>Done: valid convergence cannot complete a run when verification or evidence gates fail.</li>
-            <li>Next: descriptor-backed external engine adapter evidence.</li>
+            <li>Next: AC matrix enforcement before descriptor-backed external engine adapter evidence.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md">multi-engine relay autopilot</a></p>

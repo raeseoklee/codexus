@@ -264,8 +264,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   spawning another engine, `cx autopilot relay stage-gate` records
   `delta-check`/`full-gate` evidence, and `cx autopilot relay check-agreement`
   validates same-artifact convergence while proving convergence cannot complete
-  work when verification fails. Active relay execution and external engine
-  adapters remain deferred outside the 0.1.x stable contract.
+  work when verification fails. Acceptance-criteria-to-verification matrix
+  enforcement is explicitly deferred and reported as
+  `verification_matrix_enforcement_deferred` in stage-gate artifacts. Active
+  relay execution and external engine adapters remain deferred outside the 0.1.x
+  stable contract.
 - Operational control invariants are documented as a proposed 0.2/0.3 track:
   autonomy presets, policy catalogs, docs-code invariants, decision records,
   loop breakers, and HUD projection. No new completion authority exists yet;
@@ -403,8 +406,9 @@ review. Current high-level gaps:
 - Autopilot active execution remains design-only for the 0.2/0.3 track.
   `cx repo graph build/check` and `cx autopilot relay record/stage-gate/
   check-agreement` exist as experimental foundations, but graph
-  import/search/explain/context injection and active multi-engine relay adapters
-  remain deferred outside the 0.1.x stable surface.
+  import/search/explain/context injection, relay AC-to-verification matrix
+  enforcement, and active multi-engine relay adapters remain deferred outside the
+  0.1.x stable surface.
 - Operational control invariants are partially implemented only as deterministic
   docs-code checks. Autonomy presets, policy catalogs, decision artifacts, loop
   breakers, and `cx wiki` commands are not implemented yet.

@@ -30,6 +30,12 @@ occur before 1.0, but they should be called out clearly.
 
 ### Fixed
 
+- Stage-gate relay artifacts now self-report deferred acceptance-criteria matrix
+  enforcement instead of leaving an empty `verificationMatrix` ambiguous.
+- Release integrity checks now detect mutable third-party GitHub Action refs,
+  not only `actions/*` refs.
+- Architecture and repo-graph checks now share one static import scanner to
+  reduce regex drift between evidence surfaces.
 - Clarified that Codexus should be installed globally with
   `npm install -g codexus`; npmjs may still show its generated local
   `npm i codexus` snippet, which is not the recommended CLI install path.

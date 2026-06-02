@@ -111,6 +111,7 @@ test("valid convergence remains unable to complete when verification fails", asy
     ]);
     assert.equal(stageGate.status, 0, stageGate.stderr);
     const stageGateOutput = JSON.parse(stageGate.stdout);
+    assert.ok(stageGateOutput.heuristicClaims.some((claim: { kind: string }) => claim.kind === "verification_matrix_enforcement_deferred"));
     const agreementPath = await writeAgreement(cwd, stageGateOutput.stageArtifactHash);
 
     const schema = runCli(cwd, ["schema", "validate", "--type", "stage-gate-evidence", "--file", stageGateOutput.artifactPath, "--json"]);

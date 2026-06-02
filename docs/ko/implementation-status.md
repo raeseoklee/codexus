@@ -255,8 +255,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `cx autopilot relay record`는 다른 engine을 spawn하지 않고 외부 author/reviewer
   artifact를 import하고, `cx autopilot relay stage-gate`는 `delta-check`/`full-gate`
   evidence를 기록하며, `cx autopilot relay check-agreement`는 같은 artifact convergence를
-  검증하고 verification 실패 시 convergence가 완료를 만들 수 없음을 증명합니다. Active
-  relay execution과 external engine adapter는 0.1.x stable contract 밖에서 deferred입니다.
+  검증하고 verification 실패 시 convergence가 완료를 만들 수 없음을 증명합니다.
+  Acceptance-criteria-to-verification matrix enforcement는 명시적으로 deferred이며
+  stage-gate artifact의 `verification_matrix_enforcement_deferred` advisory claim으로
+  보고됩니다. Active relay execution과 external engine adapter는 0.1.x stable contract
+  밖에서 deferred입니다.
 - Operational control invariant는 제안된 0.2/0.3 track으로 문서화되어 있습니다:
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 다룹니다. 새 완료 권한은 아직 없으며, 첫 deterministic docs-code
@@ -295,8 +298,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - Autopilot active execution은 0.2/0.3 트랙의 설계 문서만 있습니다.
   `cx repo graph build/check`와 `cx autopilot relay record/stage-gate/check-agreement`는
-  experimental foundation으로 존재하지만, graph import/search/explain/context injection과
-  active multi-engine relay adapter는 0.1.x stable surface 밖에서 deferred입니다.
+  experimental foundation으로 존재하지만, graph import/search/explain/context injection,
+  relay AC-to-verification matrix enforcement, active multi-engine relay adapter는 0.1.x
+  stable surface 밖에서 deferred입니다.
 - Operational control invariant는 deterministic docs-code check로만 부분 구현됐습니다.
   Autonomy preset, policy catalog, decision artifact, loop breaker, `cx wiki` 명령은
   구현되지 않았습니다.

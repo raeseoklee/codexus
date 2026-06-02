@@ -256,6 +256,12 @@ Relay는 implementation 전에 verification matrix를 요구해 `acceptanceCrite
   deferred reason을 가져야 함;
 - patch log는 supporting evidence이지 acceptance의 source of truth가 아님.
 
+현재 구현 상태: 첫 recorder/checker slice는 아직 이 matrix를 enforce하지 않습니다.
+`cx autopilot relay stage-gate`는 `verificationMatrix: []`를 기록하고 advisory claim
+`verification_matrix_enforcement_deferred`를 출력합니다. 따라서 빈 matrix를 acceptance
+coverage로 해석하면 안 됩니다. 이후 slice에서 matrix import, validation, convergence
+check가 추가되기 전까지 완료 권한은 기존 verification/evidence gate에 남아 있습니다.
+
 ## Stop Conditions
 
 Relay는 아래 상황에서 failure가 아니라 `decision_needed`로 멈춥니다:

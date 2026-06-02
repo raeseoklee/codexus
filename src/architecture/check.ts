@@ -1,6 +1,7 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { dirname, extname, join, resolve } from "node:path";
-import { matchesPattern, normalizeGlobPath } from "../util/glob.ts";
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { matchesPattern } from "../util/glob.ts";
+import { scanStaticImports, type StaticImportEdge } from "../util/static-import-scan.ts";
 import { readArchitecturePolicy, type ArchitecturePolicyResolution } from "./policy.ts";
 
 export type ArchitectureEvidenceStatus = "pass" | "fail" | "unknown";
@@ -56,12 +57,7 @@ export interface ArchitectureGate {
   reason: string;
 }
 
-export interface ImportEdge {
-  file: string;
-  line: number;
-  specifier: string;
-  kind: "import" | "export" | "dynamic_literal";
-}
+export type ImportEdge = StaticImportEdge;
 
 export interface ArchitectureEvidenceReport {
   schemaVersion: 1;
@@ -93,8 +89,6 @@ export interface ArchitectureCheckOptions {
   policyPath?: string;
 }
 
-const sourceExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
-
 function findPackageRoot(cwd: string): string | null {
   let current = resolve(cwd);
   while (true) {
@@ -103,76 +97,6 @@ function findPackageRoot(cwd: string): string | null {
     if (next === current) return null;
     current = next;
   }
-}
-
-function listFiles(root: string, relative = ""): string[] {
-  const path = join(root, relative);
-  if (!existsSync(path)) return [];
-  const stat = statSync(path);
-  if (stat.isFile()) return [normalizeGlobPath(relative)];
-  if (!stat.isDirectory()) return [];
-  const files: string[] = [];
-  for (const entry of readdirSync(path, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === ".git" || entry.name === ".codexus" || entry.name === ".codex-harness") continue;
-    const child = relative ? `${relative}/${entry.name}` : entry.name;
-    if (entry.isDirectory()) files.push(...listFiles(root, child));
-    else if (entry.isFile()) files.push(normalizeGlobPath(child));
-  }
-  return files;
-}
-
-function lineForIndex(content: string, index: number): number {
-  let line = 1;
-  for (let cursor = 0; cursor < index; cursor += 1) {
-    if (content.charCodeAt(cursor) === 10) line += 1;
-  }
-  return line;
-}
-
-function extractImportEdges(file: string, content: string): { edges: ImportEdge[]; unknowns: ArchitectureUnknown[] } {
-  const edges: ImportEdge[] = [];
-  const unknowns: ArchitectureUnknown[] = [];
-  const staticImport = /(?:^|\n)\s*import\s+(?:type\s+)?(?:[^'"]*?\s+from\s+)?["']([^"']+)["']/gms;
-  const staticExport = /(?:^|\n)\s*export\s+(?:type\s+)?[^'"]*?\s+from\s+["']([^"']+)["']/gms;
-  const dynamicLiteral = /\bimport\s*\(\s*["']([^"']+)["']\s*\)/gm;
-  const dynamicComputed = /\bimport\s*\(\s*(?!\s*["'])/gm;
-
-  for (const match of content.matchAll(staticImport)) {
-    edges.push({ file, line: lineForIndex(content, match.index ?? 0), specifier: match[1], kind: "import" });
-  }
-  for (const match of content.matchAll(staticExport)) {
-    edges.push({ file, line: lineForIndex(content, match.index ?? 0), specifier: match[1], kind: "export" });
-  }
-  for (const match of content.matchAll(dynamicLiteral)) {
-    edges.push({ file, line: lineForIndex(content, match.index ?? 0), specifier: match[1], kind: "dynamic_literal" });
-  }
-  for (const match of content.matchAll(dynamicComputed)) {
-    unknowns.push({
-      kind: "computed_dynamic_import",
-      gate: false,
-      evidence: `${file}:${lineForIndex(content, match.index ?? 0)}`,
-      recommendation: "Review computed dynamic import manually; static best-effort scan cannot derive its module specifier.",
-      files: [file],
-    });
-  }
-
-  return { edges, unknowns };
-}
-
-function scanImports(packageRoot: string, scopePatterns: string[] | null): { filesScanned: number; edges: ImportEdge[]; informationalUnknowns: ArchitectureUnknown[] } {
-  const files = listFiles(packageRoot)
-    .filter((file) => sourceExtensions.has(extname(file).toLowerCase()))
-    .filter((file) => scopePatterns === null || scopePatterns.some((pattern) => matchesPattern(file, pattern)))
-    .sort();
-  const edges: ImportEdge[] = [];
-  const informationalUnknowns: ArchitectureUnknown[] = [];
-  for (const file of files) {
-    const content = readFileSync(join(packageRoot, file), "utf8");
-    const scan = extractImportEdges(file, content);
-    edges.push(...scan.edges);
-    informationalUnknowns.push(...scan.unknowns);
-  }
-  return { filesScanned: files.length, edges, informationalUnknowns };
 }
 
 function architectureGateFor(status: ArchitectureEvidenceStatus, enabled: boolean, hasBlockingUnknowns: boolean): ArchitectureGate {
@@ -253,8 +177,14 @@ export function buildArchitectureEvidenceReport(cwd: string, options: Architectu
   const scanScopes = effectivePolicy && effectivePolicy.rules.length > 0
     ? [...new Set(effectivePolicy.rules.flatMap((rule) => rule.from))].sort()
     : null;
-  const scan = scanImports(packageRoot, scanScopes);
-  const informationalUnknowns = [...scan.informationalUnknowns];
+  const scan = scanStaticImports(packageRoot, scanScopes);
+  const informationalUnknowns: ArchitectureUnknown[] = scan.computedDynamicImports.map((item) => ({
+    kind: "computed_dynamic_import",
+    gate: false,
+    evidence: `${item.file}:${item.line}`,
+    recommendation: "Review computed dynamic import manually; static best-effort scan cannot derive its module specifier.",
+    files: [item.file],
+  }));
 
   if (policy.validation.errors.some((error) => error.startsWith("package_json_unreadable:"))) {
     blockingUnknowns.push({

@@ -265,6 +265,13 @@ Rules:
   evidence paths or an approved deferred reason;
 - a patch log is supporting evidence, not the source of truth for acceptance.
 
+Current implementation status: the first recorder/checker slice does not enforce
+this matrix yet. `cx autopilot relay stage-gate` records `verificationMatrix: []`
+and emits the advisory claim `verification_matrix_enforcement_deferred`.
+Therefore an empty matrix must not be interpreted as acceptance coverage. The
+existing completion authority remains the normal verification and evidence gates
+until a later slice adds matrix import, validation, and convergence checks.
+
 ## Stop Conditions
 
 Relay stops with `decision_needed`, not failure, when:

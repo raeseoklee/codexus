@@ -1,10 +1,11 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { dirname, extname, join, relative, resolve } from "node:path";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { dirname, join, relative, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { matchesPattern, normalizeGlobPath } from "../util/glob.ts";
 import { sha256Bytes, sha256CanonicalJson, sha256Text } from "../util/hash.ts";
+import { extractStaticImportEdges, isStaticSourceFile, listRepositoryFiles } from "../util/static-import-scan.ts";
 
 export type RepoGraphStatus = "pass" | "fail" | "unknown";
 
@@ -176,7 +177,6 @@ export interface RepoGraphCheckOptions {
   gate?: boolean;
 }
 
-const sourceExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
 const DEFAULT_SCOPE = ["src/**"];
 const MAX_SCOPED_UNTRACKED_FILES = 200;
 const MAX_SCOPED_UNTRACKED_BYTES = 5 * 1024 * 1024;
@@ -235,22 +235,6 @@ function isSafeRelativePath(path: string): boolean {
 function isPathInside(root: string, path: string): boolean {
   const relativePath = relative(root, path).replace(/\\/g, "/");
   return relativePath === "" || (!relativePath.startsWith("../") && relativePath !== ".." && !relativePath.startsWith("/"));
-}
-
-function listFiles(root: string, relativePath = ""): string[] {
-  const path = join(root, relativePath);
-  if (!existsSync(path)) return [];
-  const stat = statSync(path);
-  if (stat.isFile()) return [normalizePath(relativePath)];
-  if (!stat.isDirectory()) return [];
-  const files: string[] = [];
-  for (const entry of readdirSync(path, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === ".git" || entry.name === ".codexus" || entry.name === ".codex-harness") continue;
-    const child = relativePath ? `${relativePath}/${entry.name}` : entry.name;
-    if (entry.isDirectory()) files.push(...listFiles(root, child));
-    else if (entry.isFile()) files.push(normalizePath(child));
-  }
-  return files;
 }
 
 function pathInScope(path: string, patterns: string[]): boolean {
@@ -410,14 +394,6 @@ function codexusLiteProvider(): RepoGraphProviderDescriptor {
   };
 }
 
-function lineForIndex(content: string, index: number): number {
-  let line = 1;
-  for (let cursor = 0; cursor < index; cursor += 1) {
-    if (content.charCodeAt(cursor) === 10) line += 1;
-  }
-  return line;
-}
-
 function fileNodeId(path: string): string {
   return `file:${path}`;
 }
@@ -426,23 +402,8 @@ function moduleNodeId(specifier: string): string {
   return `module:${specifier}`;
 }
 
-function extractImportSpecifiers(path: string, content: string): Array<{ line: number; specifier: string }> {
-  const specifiers: Array<{ line: number; specifier: string }> = [];
-  const patterns = [
-    /(?:^|\n)\s*import\s+(?:type\s+)?(?:[^'"]*?\s+from\s+)?["']([^"']+)["']/gms,
-    /(?:^|\n)\s*export\s+(?:type\s+)?[^'"]*?\s+from\s+["']([^"']+)["']/gms,
-    /\bimport\s*\(\s*["']([^"']+)["']\s*\)/gm,
-  ];
-  for (const pattern of patterns) {
-    for (const match of content.matchAll(pattern)) {
-      specifiers.push({ line: lineForIndex(content, match.index ?? 0), specifier: match[1] });
-    }
-  }
-  return specifiers;
-}
-
 function buildLiteNodesAndEdges(packageRoot: string, patterns: string[]): { nodes: RepoGraphNode[]; edges: RepoGraphEdge[]; files: string[] } {
-  const files = listFiles(packageRoot)
+  const files = listRepositoryFiles(packageRoot)
     .filter((path) => pathInScope(path, patterns))
     .sort();
   const nodesById = new Map<string, RepoGraphNode>();
@@ -450,9 +411,9 @@ function buildLiteNodesAndEdges(packageRoot: string, patterns: string[]): { node
   for (const file of files) {
     const sourceId = fileNodeId(file);
     nodesById.set(sourceId, { id: sourceId, kind: "file", path: file });
-    if (!sourceExtensions.has(extname(file).toLowerCase())) continue;
+    if (!isStaticSourceFile(file)) continue;
     const content = readFileSync(join(packageRoot, file), "utf8");
-    for (const item of extractImportSpecifiers(file, content)) {
+    for (const item of extractStaticImportEdges(file, content).edges) {
       const targetId = moduleNodeId(item.specifier);
       nodesById.set(targetId, { id: targetId, kind: "module", label: item.specifier });
       edges.push({
