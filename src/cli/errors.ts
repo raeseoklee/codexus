@@ -73,6 +73,20 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported slop command${target ? `: ${target}` : ""}.`;
     case "unsupported_supply_chain_command":
       return `Unsupported supply-chain command${target ? `: ${target}` : ""}.`;
+    case "unsupported_policy_command":
+      return `Unsupported policy command${target ? `: ${target}` : ""}.`;
+    case "unsupported_wiki_command":
+      return `Unsupported wiki command${target ? `: ${target}` : ""}.`;
+    case "unsupported_wiki_build_mode":
+      return `Unsupported wiki build mode${target ? `: ${target}` : ""}.`;
+    case "unsupported_autopilot_command":
+      return `Unsupported autopilot command${target ? `: ${target}` : ""}.`;
+    case "unsupported_autopilot_contract_command":
+      return `Unsupported autopilot contract command${target ? `: ${target}` : ""}.`;
+    case "autopilot_run_deferred":
+      return "Autopilot run is still deferred behind capability and policy start gates.";
+    case "invalid_autopilot_preset":
+      return `Invalid autopilot preset${target ? `: ${target}` : ""}.`;
     case "invalid_session_setup_scope":
       return `Invalid Codex-session setup scope${target ? `: ${target}` : ""}.`;
     case "conflicting_notify_hook_flags":
@@ -115,6 +129,30 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Invalid observe milliseconds.";
     case "missing_memory_kind":
       return "Missing memory kind.";
+    case "missing_autopilot_from":
+      return "Missing autopilot source document.";
+    case "missing_autopilot_contract_file":
+      return "Missing autopilot contract file.";
+    case "missing_autopilot_approved_by":
+      return "Missing autopilot approver identity.";
+    case "missing_automation_task":
+      return "Missing automation task prompt.";
+    case "missing_wiki_topic":
+      return "Missing wiki context topic.";
+    case "invalid_wiki_budget":
+      return "Invalid wiki context budget.";
+    case "wiki_manifest_missing":
+      return "Wiki manifest is missing.";
+    case "wiki_manifest_invalid":
+      return "Wiki manifest is invalid.";
+    case "autopilot_source_doc_missing":
+      return `Autopilot source document not found${target ? `: ${target}` : ""}.`;
+    case "autopilot_source_doc_outside_workspace":
+      return `Autopilot source document is outside the workspace${target ? `: ${target}` : ""}.`;
+    case "autopilot_contract_invalid":
+      return `Autopilot contract is invalid${target ? `: ${target}` : ""}.`;
+    case "autopilot_contract_not_draft":
+      return `Autopilot contract is not a draft${target ? `: ${target}` : ""}.`;
     case "missing_memory_text":
       return "Missing memory text.";
     case "missing_memory_id":
@@ -149,6 +187,18 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `App instance not found${target ? `: ${target}` : ""}.`;
     case "app_instance_artifact_invalid":
       return `App instance artifact is invalid${target ? `: ${target}` : ""}.`;
+    case "app_instance_fixed_port_required":
+      return "App instance profile requires a fixed port, but no port was resolved.";
+    case "app_instance_port_unavailable":
+      return `App instance port is unavailable${target ? `: ${target}` : ""}.`;
+    case "app_instance_runner_missing":
+      return "App instance runner script is missing from this installation.";
+    case "app_instance_profile_already_running":
+      return `An app instance for this profile is already running${target ? `: ${target}` : ""}.`;
+    case "app_instance_start_timeout":
+      return "App instance start timed out before the runner reported readiness.";
+    case "app_instance_start_failed":
+      return `App instance start failed${target ? `: ${target}` : ""}.`;
     case "missing_subagent_file":
       return "Missing subagent evidence file.";
     case "missing_subagent_id":
@@ -234,7 +284,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_app_command":
@@ -255,6 +305,18 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Run `cx slop check --json` or `cx slop check --gate --json`.";
     case "unsupported_supply_chain_command":
       return "Run `cx supply-chain check --json` or `cx supply-chain check --gate --json`.";
+    case "unsupported_policy_command":
+      return "Run `cx policy catalog check --json`.";
+    case "unsupported_wiki_command":
+      return "Run `cx wiki map --json`, `cx wiki build --mode deterministic --json`, `cx wiki check --gate --json`, or `cx wiki context --topic <name> --json`.";
+    case "unsupported_wiki_build_mode":
+      return "Use `--mode deterministic`; advisory wiki synthesis remains deferred.";
+    case "unsupported_autopilot_command":
+      return "Run `cx autopilot presets list --json`, `cx autopilot plan --from <path> --preset <name> --json`, `cx autopilot contract validate <path> --json`, `cx autopilot contract approve <path> --approved-by <name> --json`, `cx autopilot contract scope-check <path> --json`, or `cx autopilot relay ...`.";
+    case "unsupported_autopilot_contract_command":
+      return "Run `cx autopilot contract validate <path> --json`, `cx autopilot contract approve <path> --approved-by <name> --json`, or `cx autopilot contract scope-check <path> --json`.";
+    case "autopilot_run_deferred":
+      return "Use `cx autopilot plan` and `cx autopilot contract scope-check` first; live `autopilot run` stays blocked until capability and scope gates are promoted.";
     case "invalid_session_setup_scope":
       return "Use `--scope project` or `--scope user`.";
     case "missing_session_checkpoint_label":
@@ -287,6 +349,32 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass a bounded query after `cx memory search`.";
     case "missing_memory_kind":
       return "Pass `--kind repo_fact|user_preference|workflow_lesson|verification_pattern|failure_pattern|tooling_note`.";
+    case "missing_autopilot_from":
+      return "Pass at least one `--from <path>` source document.";
+    case "missing_autopilot_contract_file":
+      return "Pass an autopilot contract path, for example `cx autopilot contract validate .codexus/autopilot/drafts/<id>.json --json`.";
+    case "missing_autopilot_approved_by":
+      return "Pass `--approved-by <name>` when approving a draft contract.";
+    case "missing_automation_task":
+      return "Pass `--task <text>` when running live `cx cron run-now` or `cx gateway check`.";
+    case "invalid_autopilot_preset":
+      return "Use `--preset manual|guided|contracted|gated-auto|extended-auto`.";
+    case "missing_wiki_topic":
+      return "Pass `--topic <name>` with `cx wiki context`.";
+    case "invalid_wiki_budget":
+      return "Use a positive integer for `--budget`.";
+    case "wiki_manifest_missing":
+      return "Run `cx wiki build --mode deterministic --json` before requesting wiki context or checks.";
+    case "wiki_manifest_invalid":
+      return "Rebuild the wiki so the manifest matches the current schema and page set.";
+    case "autopilot_source_doc_missing":
+      return "Pass an existing workspace document path with `--from`.";
+    case "autopilot_source_doc_outside_workspace":
+      return "Keep autopilot source documents inside the current workspace so scope and provenance stay reproducible.";
+    case "autopilot_contract_invalid":
+      return "Run `cx autopilot contract validate <path> --json` to inspect contract errors before approval or scope checks.";
+    case "autopilot_contract_not_draft":
+      return "Approve only draft contracts, or regenerate a fresh draft with `cx autopilot plan`.";
     case "missing_memory_text":
       return "Pass memory text after the memory command.";
     case "missing_memory_id":
@@ -317,8 +405,22 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass `--instance-id <id>` from `cx app instance status --json`.";
     case "invalid_app_instance_port":
       return "Use a TCP port from 1 to 65535.";
+    case "invalid_app_instance_worktree":
+      return "Pass a directory path for `--worktree`.";
     case "invalid_app_instance_log_tail":
       return "Use `--tail <n>` with a value from 1 to 500.";
+    case "app_instance_fixed_port_required":
+      return "Set `port.preferred` in the descriptor or pass `--port <n>` for a fixed-port profile.";
+    case "app_instance_port_unavailable":
+      return "Choose another port or stop the conflicting process before retrying.";
+    case "app_instance_runner_missing":
+      return "Reinstall Codexus so the packaged app instance runner script is available.";
+    case "app_instance_profile_already_running":
+      return "Use `cx app instance status --json` to inspect the existing owned instance before starting another one.";
+    case "app_instance_start_timeout":
+      return "Inspect `cx app instance logs --instance-id <id> --json` or rerun with a simpler descriptor command.";
+    case "app_instance_start_failed":
+      return "Inspect the reported runner error and the instance logs before retrying.";
     case "missing_subagent_file":
       return "Pass `--file <result.json>` or `--claim-file <claims.json>` with `cx session subagent`.";
     case "missing_subagent_id":

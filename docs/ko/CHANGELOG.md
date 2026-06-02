@@ -14,10 +14,32 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Worktree app instance launcher 설계 문서를 추가했습니다. 제안된 surface는
   descriptor-backed, observe-before-act 방식이며, Codexus가 per-worktree app control을
   주장하기 전에 owned-process lifecycle evidence를 요구합니다.
-- Experimental 첫 launcher slice를 추가했습니다: `cx app instance profile list`,
-  `status`, `logs`, `start --dry-run`, descriptor 및 instance artifact schema validation.
-  Live start는 계속 unsupported이고, stop은 owned-process evidence가 생기기 전까지
-  unavailable을 보고합니다.
+- Experimental live ownership launcher slice를 추가했습니다:
+  `cx app instance profile list/status/logs/start/stop`, descriptor 및 instance
+  artifact schema validation, owned-process heartbeat artifact, active HTTP
+  health check, bounded log capture를 포함합니다. Stop은 non-owned 또는 invalid
+  artifact에는 계속 unavailable을 보고합니다.
+- Experimental autopilot contract foundation slice를 추가했습니다:
+  `cx autopilot plan --from ...`, `cx autopilot contract validate`,
+  `cx autopilot contract approve`, `cx autopilot contract scope-check`,
+  `autopilot-contract` schema artifact를 포함합니다. Live `cx autopilot run`은
+  의도적으로 계속 deferred입니다.
+- Experimental compiled wiki 첫 slice를 추가했습니다:
+  `cx wiki map`, deterministic `cx wiki build`, `cx wiki check --gate`,
+  `cx wiki context --topic ...`, 그리고 `wiki-manifest` / `wiki-page` schema
+  artifact를 포함합니다. Automatic context injection, checked-in export,
+  advisory synthesis는 계속 deferred입니다.
+- Experimental operational control 첫 slice를 추가했습니다:
+  `cx autopilot presets list --json`, autopilot contract의
+  `autonomyPreset` metadata, `cx policy catalog check --json`, 그리고 blast
+  radius / dependency / schema / migration / scope finding에 대한 더 풍부한
+  `riskFacts`가 포함됩니다. 이 정보들은 advisory/control metadata이며 새
+  완료 권한을 만들지 않습니다.
+- Experimental explicit-approval automation live-dispatch slice를 추가했습니다:
+  `cx cron run-now` / `cx gateway check`는 이제 automation lock을 획득하고,
+  policy/approval artifact를 기록하고, 기존 run ledger를 통해 일반 supervised run을
+  dispatch한 뒤 연결된 run outcome을 반환할 수 있습니다. 더 풍부한 unattended
+  scheduler/retry ownership은 계속 deferred입니다.
 
 ### Fixed
 

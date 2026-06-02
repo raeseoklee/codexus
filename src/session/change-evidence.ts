@@ -50,6 +50,23 @@ export interface HeuristicClaim {
   files?: string[];
 }
 
+export interface RiskFact {
+  kind:
+    | "changed_file_count"
+    | "diff_line_volume"
+    | "dependency_or_lockfile_touched"
+    | "schema_file_touched"
+    | "migration_file_touched"
+    | "out_of_scope_paths";
+  severity: "low" | "medium" | "high";
+  evidence: string;
+  files?: string[];
+  fileCount?: number;
+  addedLines?: number;
+  deletedLines?: number;
+  dependencies?: string[];
+}
+
 export interface ChangeEvidenceSummary {
   status: ChangeEvidenceStatus;
   verification: EvidenceModel["verification"] | "unknown";
@@ -84,6 +101,7 @@ export interface ChangeEvidenceReport {
   evidenceGaps: EvidenceGap[];
   derivableFacts: DerivableFact[];
   heuristicClaims: HeuristicClaim[];
+  riskFacts: RiskFact[];
   changeEvidence: ChangeEvidenceSummary;
   gate: ChangeEvidenceGate;
 }
@@ -291,6 +309,10 @@ function diffAreas(files: string[]): string[] {
   }))].sort();
 }
 
+function touchedFiles(diff: ChangeEvidenceReport["diff"], patterns: string[]): string[] {
+  return diff.files.filter((file) => patterns.some((pattern) => matchesPattern(file, pattern)));
+}
+
 function evidenceGapsFor(evidence: EvidenceModel | null): EvidenceGap[] {
   if (!evidence) return [];
   if (evidence.verification === "passed") return [];
@@ -390,6 +412,7 @@ export function buildChangeEvidenceReport(
   const sourceFiles = diff.files.filter(isSourceFile);
   const testFiles = diff.files.filter(isTestFile);
   const derivableFacts: DerivableFact[] = [];
+  const riskFacts: RiskFact[] = [];
   const patch = patchText(resolvedCwd, options.since ?? null);
   const stats = patchStats(patch);
   const areas = diffAreas(diff.files);
@@ -403,6 +426,24 @@ export function buildChangeEvidenceReport(
       addedLines: stats.addedLines,
       deletedLines: stats.deletedLines,
       fileCount: diff.files.length,
+    });
+    riskFacts.push({
+      kind: "changed_file_count",
+      severity: diff.files.length >= 25 ? "high" : diff.files.length >= 10 ? "medium" : "low",
+      evidence: `${diff.files.length} changed files`,
+      files: diff.files.slice(0, 50),
+      fileCount: diff.files.length,
+    });
+  }
+  if (stats.addedLines > 0 || stats.deletedLines > 0) {
+    const total = stats.addedLines + stats.deletedLines;
+    riskFacts.push({
+      kind: "diff_line_volume",
+      severity: total >= 500 ? "high" : total >= 150 ? "medium" : "low",
+      evidence: `${total} diff lines changed`,
+      addedLines: stats.addedLines,
+      deletedLines: stats.deletedLines,
+      files: diff.files.slice(0, 50),
     });
   }
   if (options.scope && diff.files.length > 0 && scopeEvidenceGaps(diff, options.scope).length === 0) {
@@ -438,12 +479,42 @@ export function buildChangeEvidenceReport(
     });
   }
   const deps = newDependencies(resolvedCwd, options.since ?? null);
+  const dependencyFiles = touchedFiles(diff, ["package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb"]);
   if (deps.length > 0) {
     derivableFacts.push({
       kind: "new_dependency_added",
       gate: false,
       evidence: "package.json dependency diff",
       dependencies: deps,
+    });
+  }
+  if (dependencyFiles.length > 0 || deps.length > 0) {
+    riskFacts.push({
+      kind: "dependency_or_lockfile_touched",
+      severity: "high",
+      evidence: deps.length > 0
+        ? `new dependencies added: ${deps.join(", ")}`
+        : "dependency manifest or lockfile changed",
+      files: dependencyFiles.slice(0, 50),
+      dependencies: deps,
+    });
+  }
+  const schemaFiles = touchedFiles(diff, ["schemas/**", "**/*.schema.json"]);
+  if (schemaFiles.length > 0) {
+    riskFacts.push({
+      kind: "schema_file_touched",
+      severity: "medium",
+      evidence: `${schemaFiles.length} schema files changed`,
+      files: schemaFiles.slice(0, 50),
+    });
+  }
+  const migrationFiles = diff.files.filter((file) => /(^|\/)(migrations?|db\/migrate|sql\/migrations?)\//.test(file) || /migration/i.test(file));
+  if (migrationFiles.length > 0) {
+    riskFacts.push({
+      kind: "migration_file_touched",
+      severity: "high",
+      evidence: `${migrationFiles.length} migration-like files changed`,
+      files: migrationFiles.slice(0, 50),
     });
   }
   for (const review of options.reviews ?? []) {
@@ -528,6 +599,16 @@ export function buildChangeEvidenceReport(
     : !state
       ? "unknown"
       : "pass";
+  const outOfScope = evidenceGaps.find((gap) => gap.kind === "out_of_declared_scope");
+  if (outOfScope?.files && outOfScope.files.length > 0) {
+    riskFacts.push({
+      kind: "out_of_scope_paths",
+      severity: "high",
+      evidence: `${outOfScope.files.length} files changed outside the declared scope`,
+      files: outOfScope.files,
+      fileCount: outOfScope.files.length,
+    });
+  }
   const gate = gateFor(status, options.gate === true);
   return {
     schemaVersion: 1,
@@ -538,6 +619,7 @@ export function buildChangeEvidenceReport(
     evidenceGaps,
     derivableFacts,
     heuristicClaims,
+    riskFacts,
     changeEvidence: {
       status,
       verification: evidence?.verification ?? "unknown",

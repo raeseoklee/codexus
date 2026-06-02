@@ -49,8 +49,9 @@ the real failing output and retries within the configured repair budget. The run
 is `complete` only when the verification command passes.
 
 > The 0.1.x stable line is intentionally narrow: live app-server turns, routine
-> live model replay, automatic prompt injection, and live cron/gateway dispatch
-> remain gated off. See [Status](#status).
+> live model replay, and automatic prompt injection remain gated off. Live
+> cron/gateway dispatch now exists as an explicit-approval experimental surface.
+> See [Status](#status).
 
 ## Use It In Codex CLI Chat
 
@@ -157,14 +158,16 @@ npm run package:smoke
 - Session-native quality evidence guard and subagent claim recorder/completion handoff
 - Schema artifact validation, stale-lock recovery, and local CI parity
 - Automatic migration from legacy `.codex-harness/` into `.codexus/`
-- Gated app-server, app-instance, cron, gateway, and model-replay experiments that do not affect the stable `codex exec --json` path
+- Gated app-server and model-replay experiments plus experimental app-instance
+  and explicit-approval cron/gateway dispatch surfaces that do not affect the
+  stable `codex exec --json` path
 
 ## Status
 
 Codexus 0.1.2 is usable as a local harness with a narrow stable path around
-`codex exec --json`; live app-server turns, routine live model replay,
-automatic prompt injection, and live cron/gateway dispatch remain intentionally
-gated.
+`codex exec --json`; live app-server turns, routine live model replay, and
+automatic prompt injection remain intentionally gated. Live cron/gateway
+dispatch is now available as an experimental explicit-approval surface.
 
 ## Support Matrix
 
@@ -174,9 +177,9 @@ gated.
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence/gate surface |
 | `repo graph build/check` | Experimental graph evidence surface; build/check only, no import/search/injection |
-| `app instance profile list/status/logs/start --dry-run` | Experimental observe/dry-run surface; no live start/stop yet |
-| app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; dry-run, status, record/attach/complete, launch-contract, or explicitly gated |
-| autopilot contract layer | Proposed design, deferred to the 0.2/0.3 track |
+| `app instance profile list/status/logs/start/stop` | Experimental owned-process surface; live start/stop work only for Codexus-owned instances |
+| app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval, and other surfaces stay status/record/launch-contract/gated |
+| autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`); live `autopilot run` remains deferred to the 0.2/0.3 track |
 
 See [Implementation status](docs/implementation-status.md) and
 [Remaining work](docs/remaining-work.md) for exact coverage and gaps.
@@ -216,8 +219,9 @@ cx slop check --scope "src/**" --gate --json
 cx supply-chain check --gate --json
 cx release check --gate --json
 cx app instance profile list --json
-cx app instance start --profile web --worktree . --dry-run --json
+cx app instance start --profile web --worktree . --json
 cx app instance status --json
+cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json

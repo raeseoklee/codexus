@@ -3,7 +3,26 @@
 [Korean](../ko/design/17-operational-control-invariants.md)
 
 Date: 2026-06-02
-Status: proposed 0.2 / 0.3 design track.
+Status: experimental first slice implemented; broader task-artifact and promotion work remains on the 0.2 / 0.3 track.
+
+## Implementation Status
+
+Implemented now:
+
+- `cx autopilot presets list --json` exposes the named autonomy presets and the
+  default preset.
+- Autopilot draft contracts carry `autonomyPreset` as schema-validated contract
+  metadata.
+- `cx policy catalog check --json` reports observed/advisory/unavailable control
+  findings without turning warnings into completion gates.
+- Change evidence now derives `riskFacts` for blast radius, dependency,
+  schema, migration, and out-of-scope paths.
+
+Still deferred:
+
+- task artifacts and task-panel projection promotion;
+- active policy enforcement beyond existing start/stop gates;
+- runtime aggregation of every deferred self-report into one control dashboard.
 
 ## Decision
 

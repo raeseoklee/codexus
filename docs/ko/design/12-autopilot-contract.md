@@ -3,7 +3,7 @@
 [English](../../design/12-autopilot-contract.md)
 
 작성일: 2026-05-31
-상태: 제안된 설계 (0.1.0에서 deferred; 0.2 / 0.3 트랙)
+상태: experimental foundation slice 구현; draft contract는 autonomy preset metadata를 가지며 live `cx autopilot run`은 계속 0.2 / 0.3 트랙에서 deferred
 
 ## 결정
 
@@ -87,6 +87,7 @@ gate를 약화시키지 말고 loud하게 실패). 후보 필드:
   "schemaVersion": 1,
   "type": "codexus.autopilot.contract",
   "status": "approved",
+  "autonomyPreset": "contracted",
   "approval": {
     "approvedAt": "2026-05-31T00:00:00.000Z",
     "approvedBy": "maintainer-or-local-operator",
@@ -127,7 +128,8 @@ gate를 약화시키지 말고 loud하게 실패). 후보 필드:
 
 1. **`cx autopilot plan --from docs/...`** 가 문서를 읽어 *제안된* 계약을 냄
    (`acceptanceCriteria` / `forbiddenChanges` / `verificationRequired`를 heuristic하게
-   도출). 검토가 필요한 draft로 명시적으로 라벨됨.
+   도출). 검토가 필요한 draft로 명시적으로 라벨되며, 선택된 autonomy preset도
+   contract metadata로 함께 기록합니다.
 2. **사람 승인(1회).** 메인테이너가 계약을 검토·승인. 이때 source document hash와 canonical
    contract-body hash를 담은 approval artifact를 씁니다. 이 1회 승인이 per-step 승인을 대체.
 3. **`cx autopilot run --policy <contract>`** 가 worktree 안에서, 승인된 계약 아래, strict
@@ -213,12 +215,16 @@ panel에서 체크된 item은 verification, scope, slop, supply-chain, graph evi
 ## 표면 (Surface)
 
 ```bash
-cx autopilot plan --from docs/PRD.md --json     # 제안 계약(draft, 승인 필요)
-cx autopilot run --policy .codexus/autopilot.json --json   # worktree + strict gates
+cx autopilot plan --from docs/PRD.md --json
+cx autopilot contract validate .codexus/autopilot/drafts/<id>.json --json
+cx autopilot contract approve .codexus/autopilot/drafts/<id>.json --approved-by maintainer --json
+cx autopilot contract scope-check .codexus/autopilot/drafts/<id>.json --json
+cx autopilot run --policy .codexus/autopilot.json --json   # deferred
 ```
 
-둘 다 `--json` first이며 ledger/event/gate 형태 재사용. `autopilot run` 출력은 surface가
-안정될 때까지 `experimental` stability 마커(readiness plan 참조).
+구현된 명령은 모두 `--json` first이며 ledger/event/gate 형태를 재사용합니다.
+`cx autopilot run`은 scope gate, worktree ownership, capability 시작 게이트의 live
+실행 경로가 현재 foundation slice를 넘어서 승격될 때까지 계속 deferred입니다.
 
 ## 비목표
 
@@ -229,9 +235,26 @@ cx autopilot run --policy .codexus/autopilot.json --json   # worktree + strict g
 - 지원되는 관측/강제 surface 없이 network, command, secret/env policy enforcement를 주장 안 함.
 - 계약 한도 정지를 실패로 취급 안 함.
 - Codex 특수성을 계약/scope/gate 레이어에 넣지 않음.
-- 0.1.0 stable에 포함 안 됨; 0.2 / 0.3 트랙에서 experimental로 ship.
+- 0.1.x stable contract에 포함 안 됨; 구현된 첫 slice는 `stability: experimental`
+  을 자기보고하며, live `cx autopilot run`은 계속 0.2 / 0.3 트랙에서 deferred.
 
 ## 첫 슬라이스
+
+현재 구현 상태:
+
+- 완료: `cx schema validate --type autopilot-contract`를 통한 schema artifact +
+  validation.
+- 완료: `cx autopilot plan --from ...`이 `sourceDocs`, 추출된 acceptance criteria,
+  추론된 scope, verification candidate를 담은 draft contract를 기록.
+- 완료: `cx autopilot contract approve`가 canonical subject hash 기반 approval
+  artifact를 기록하고 승인된 contract를 생성.
+- 완료: `cx autopilot contract scope-check`가 change-evidence fact를 재사용해 승인된
+  contract 기준 forbidden/out-of-scope change를 gate 가능.
+- Deferred: acceptance-criteria extraction은 heuristic이며
+  `acceptance_criteria_extraction_deferred`를 자기보고합니다. 비어 있거나 일부만 추출된
+  결과를 authoritative acceptance coverage로 해석하면 안 됩니다.
+- Deferred: worktree-isolated live execution이 생기기 전까지 `cx autopilot run`은
+  의도적으로 unavailable이며 `autopilot_run_deferred`를 자기보고합니다.
 
 1. autopilot 계약 **schema artifact + validation**(빈 scope 거부, 미지 키 거부,
    `forbiddenChanges` 우선순위).

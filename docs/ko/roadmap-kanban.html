@@ -297,18 +297,18 @@
         </article>
 
         <article class="card">
-          <h3>Worktree App Instance Live Ownership</h3>
+          <h3>Instance-Linked App Evidence</h3>
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
           </div>
-          <p>Descriptor-backed observe/dry-run slice는 구현됐습니다. 남은 단계는 Codexus가 git worktree별 application instance를 부팅, 관측, 중지하기 전에 필요한 live ownership evidence입니다.</p>
+          <p>Live ownership baseline은 구현됐습니다. 다음 단계는 browser와 dev-server 관측이 generic local server가 아니라 구체적인 app instance를 가리키게 만드는 것입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>구현된 baseline은 정직해야 합니다. <code>profile list</code>, <code>status</code>, <code>logs</code>, <code>start --dry-run</code>은 live control을 주장하지 않습니다.</li>
-            <li>Live <code>start/status/stop/logs --json</code>가 worktree path, branch/head, command profile, pid/owner heartbeat, port 또는 URL, health check, log path, status를 포함한 owned instance artifact를 기록합니다.</li>
-            <li>Port allocation은 worktree별이며, stop은 owned process만 정리하고 unrelated local server를 건드리지 않습니다.</li>
-            <li>Browser/dev-server evidence는 instance id를 참조하고 live evidence 없이 control/health를 주장하지 않습니다.</li>
+            <li>구현된 baseline은 정직해야 합니다. Codexus-owned instance만 중지할 수 있고, stale artifact만으로 health나 control을 주장하지 않습니다.</li>
+            <li>Browser/dev-server evidence는 <code>instanceId</code>를 참조하고 live evidence 없이 control/health를 주장하지 않습니다.</li>
+            <li>Adapter 출력은 “이 server를 관측했다”와 “이 owned worktree instance를 관측했다”를 구분할 수 있어야 합니다.</li>
+            <li>Future autopilot surface는 generic localhost port가 아니라 per-worktree instance artifact를 재사용해야 합니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/19-worktree-app-instance-launcher.md">worktree app instance launcher</a> · <a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
@@ -332,35 +332,35 @@
         </article>
 
         <article class="card">
-          <h3>Compiled Wiki Deterministic Slice</h3>
+          <h3>Compiled Wiki Advisory Slice</h3>
           <div class="tags">
             <span class="tag evidence">18번 문서</span>
-            <span class="tag gated">synthesis는 나중</span>
+            <span class="tag gated">experimental 다음</span>
           </div>
-          <p>Repository wiki를 LLM-written knowledge base가 아니라 measured fact 위의 재생성 가능한 projection으로 시작합니다.</p>
+          <p>Deterministic compiled wiki slice는 구현되었습니다. 다음 단계는 generated page를 authority로 만들지 않는 advisory/export 작업입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li><code>codexus.wiki.manifest</code>와 page schema가 존재합니다.</li>
-            <li><code>cx wiki map/build/check --json</code>는 deterministic/local입니다.</li>
-            <li>Generated page는 source ref와 scoped freshness를 인용합니다.</li>
-            <li>첫 slice에서는 automatic context injection이나 advisory synthesis를 하지 않습니다.</li>
+            <li><code>cx wiki build --mode advisory</code>가 driver/model/source bundle evidence를 기록하고 advisory 상태를 유지합니다.</li>
+            <li><code>cx wiki export</code>는 explicit하게 동작하고 checked-in page를 authoritative하게 만들지 않습니다.</li>
+            <li>Deterministic freshness와 stale-page gate 동작이 유지됩니다.</li>
+            <li>Wiki page에서 automatic context injection을 하지 않습니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/18-compiled-repository-wiki.md">compiled repository wiki</a></p>
         </article>
 
         <article class="card">
-          <h3>Policy Catalog와 Risk Fact</h3>
+          <h3>Operational Control Task Artifacts</h3>
           <div class="tags">
             <span class="tag evidence">17번 문서</span>
             <span class="tag gated">control metadata</span>
           </div>
-          <p>Decision record와 loop summary는 live입니다. 다음은 warning을 gate처럼 보이게 하지 않으면서 control policy catalog와 더 풍부한 risk fact를 파생하는 일입니다.</p>
+          <p>Autonomy preset, policy catalog, richer risk fact는 live입니다. 다음은 advisory state를 completion authority로 승격하지 않으면서 durable task artifact와 unified control aggregation을 추가하는 일입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>Policy entry는 enforced, observed, advisory, unavailable 상태를 보고합니다.</li>
-            <li>Risk fact는 diff/config/schema/package evidence에서 재구성합니다.</li>
-            <li>Declared policy가 승격하지 않는 한 warning은 change를 fail시킬 수 없습니다.</li>
+            <li>Task artifact는 자체 schema를 가지며 completion authority가 되지 않습니다.</li>
+            <li>Control summary는 unavailable capability를 숨기지 않고 advisory/deferred status를 집계합니다.</li>
+            <li>Warning은 이미 선언된 policy surface가 승격시키지 않는 한 advisory로 남습니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
@@ -384,16 +384,17 @@
         </article>
 
         <article class="card">
-          <h3>Cron / Gateway Dispatcher Contract</h3>
+          <h3>Automation Scheduler And Recovery</h3>
           <div class="tags">
             <span class="tag gated">policy-reviewed-live-dispatch-v1</span>
+            <span class="tag evidence">experimental next</span>
           </div>
-          <p>Permission, approval, lock, dispatch, completion event가 살아난 뒤에만 dispatcher를 구현합니다.</p>
+          <p>첫 explicit-approval dispatcher는 live입니다. 다음은 unattended ownership을 과장하지 않으면서 durable scheduler/retry semantics를 추가하는 일입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>Dry-run/live path가 같은 policy contract를 씁니다.</li>
-            <li>Dispatch가 typed ledger event를 씁니다.</li>
-            <li>명시적 policy/approval record 없이는 unattended execution을 하지 않습니다.</li>
+            <li>Dry-run/live path가 계속 같은 policy contract를 공유합니다.</li>
+            <li>Retry, recovery, queue ownership이 durable evidence로 기록됩니다.</li>
+            <li>Explicit ownership/recovery proof 없이는 unattended scheduler를 주장하지 않습니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="remaining-work.md">remaining work item 4</a></p>
@@ -447,14 +448,14 @@
         </article>
 
         <article class="card">
-          <h3>Real Cron / Gateway Dispatch</h3>
+          <h3>Automation Scheduler / Recovery Ownership</h3>
           <div class="tags">
-            <span class="tag blocked">blocked</span>
+            <span class="tag advisory">experimental live slice</span>
             <span class="tag gated">automation</span>
           </div>
-          <p>현재 surface는 status와 dry-run audit record까지만 지원합니다.</p>
+          <p>Explicit-approval live dispatcher는 이미 있습니다. 남은 작업은 autonomy를 과장하지 않으면서 unattended scheduler, retry, ownership evidence를 추가하는 것입니다.</p>
           <span class="label">Gate</span>
-          <p>Permission, approval, lock, dispatch, completion, recovery event가 필요합니다.</p>
+          <p>Permission, approval, lock, dispatch, completion, recovery, owner-liveness evidence가 durable해야 합니다.</p>
         </article>
 
         <article class="card">
@@ -509,15 +510,16 @@
           <h3>Autopilot Contract Layer</h3>
           <div class="tags">
             <span class="tag later">0.2 / 0.3</span>
-            <span class="tag gated">experimental</span>
+            <span class="tag gateable">foundation 완료</span>
+            <span class="tag gated">live run deferred</span>
           </div>
-          <p><code>cx autopilot run</code>을 노출하기 전 schema artifact와 report-only scope gate부터 시작합니다.</p>
+          <p>Experimental foundation은 이미 있습니다. draft planning, contract validate/approve, scope-check까지 구현됐고, live <code>cx autopilot run</code>에는 worktree-owned execution과 capability 시작 게이트가 아직 필요합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>Human-approved scope.</li>
-            <li>Worktree isolation.</li>
-            <li>Detect-then-stop enforcement.</li>
-            <li>Evidence-gated acceptance.</li>
+            <li>완료: 사람 승인 contract draft 및 approval record 흐름.</li>
+            <li>완료: change-evidence fact 위의 scope-check foundation.</li>
+            <li>다음: worktree-owned live execution.</li>
+            <li>다음: live run용 capability/policy 시작 게이트.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/12-autopilot-contract.md">autopilot contract</a></p>

@@ -3,7 +3,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { validateArchitecturePolicy } from "../architecture/policy.ts";
 import { validateAppInstanceArtifact, validateAppInstanceDescriptor } from "../app-instance/launcher.ts";
+import { validateAutopilotContract } from "../autopilot/contract.ts";
 import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
+import { validateWikiManifest } from "../wiki/wiki.ts";
 import { findCodexusPackageRoot } from "../util/package-root.ts";
 import { inspectJsonSchemaSubset, jsonSchemaSubsetEngine, validateJsonSchemaSubset } from "./json-schema-subset.ts";
 
@@ -57,6 +59,8 @@ export type SchemaValidationType =
   | "session-state"
   | "supply-chain-policy"
   | "architecture-policy"
+  | "autopilot-contract"
+  | "wiki-manifest"
   | "repo-graph"
   | "relay-session"
   | "stage-gate-evidence"
@@ -88,6 +92,9 @@ export const schemaArtifactNames = [
   "session-state.schema.json",
   "supply-chain-policy.schema.json",
   "architecture-policy.schema.json",
+  "autopilot-contract.schema.json",
+  "wiki-manifest.schema.json",
+  "wiki-page.schema.json",
   "repo-graph.schema.json",
   "relay-session.schema.json",
   "stage-gate-evidence.schema.json",
@@ -106,6 +113,8 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "session-state": "session-state.schema.json",
   "supply-chain-policy": "supply-chain-policy.schema.json",
   "architecture-policy": "architecture-policy.schema.json",
+  "autopilot-contract": "autopilot-contract.schema.json",
+  "wiki-manifest": "wiki-manifest.schema.json",
   "repo-graph": "repo-graph.schema.json",
   "relay-session": "relay-session.schema.json",
   "stage-gate-evidence": "stage-gate-evidence.schema.json",
@@ -518,6 +527,15 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
 
   if (type === "architecture-policy") {
     const validation = validateArchitecturePolicy(value);
+    errors.push(...validation.errors);
+  }
+
+  if (type === "autopilot-contract") {
+    const validation = validateAutopilotContract(value);
+    errors.push(...validation.errors);
+  }
+  if (type === "wiki-manifest") {
+    const validation = validateWikiManifest(value);
     errors.push(...validation.errors);
   }
 

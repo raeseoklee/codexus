@@ -101,6 +101,19 @@ function parseJsonRun(command, args, options = {}) {
   return JSON.parse(run(command, args, options).stdout);
 }
 
+async function wait(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitFor(check, timeoutMs = 5000, intervalMs = 100) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await check()) return;
+    await wait(intervalMs);
+  }
+  throw new Error("wait_for_timeout");
+}
+
 const workspace = await mkdtemp(join(tmpdir(), "codexus-package-smoke-"));
 const packDir = join(workspace, "pack");
 const prefix = join(workspace, "prefix");
@@ -112,6 +125,24 @@ try {
   await mkdir(project, { recursive: true });
   await mkdir(codexHome, { recursive: true });
   await mkdir(join(project, ".codexus"), { recursive: true });
+  await mkdir(join(project, "docs"), { recursive: true });
+  await writeFile(join(project, "README.md"), "# Package Smoke Fixture\n");
+  await writeFile(join(project, "docs", "README.md"), "# Docs Index\n");
+  await writeFile(
+    join(project, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "package-smoke-project",
+        version: "1.0.0",
+        scripts: {
+          test: "node --test",
+          lint: "node -e \"console.log('lint ok')\"",
+        },
+      },
+      null,
+      2,
+    )}\n`,
+  );
 
   const fakeCodex = join(workspace, "fake-codex.mjs");
   await writeFile(fakeCodex, `#!/usr/bin/env node
@@ -132,7 +163,43 @@ if (args[0] === "--version") {
 }
 `);
   await chmod(fakeCodex, 0o755);
-  await writeFile(join(project, ".codexus", "config.json"), `${JSON.stringify({ codex: { command: fakeCodex } }, null, 2)}\n`);
+  await writeFile(join(project, ".codexus", "config.json"), `${JSON.stringify({
+    codex: { command: fakeCodex },
+    automation: {
+      cronEnabled: true,
+      gatewayEnabled: true,
+    },
+  }, null, 2)}\n`);
+  const serverScript = join(project, "server.mjs");
+  await writeFile(serverScript, `#!/usr/bin/env node
+import http from "node:http";
+
+const host = process.env.HOST || "127.0.0.1";
+const port = Number(process.env.PORT || 0);
+const server = http.createServer((req, res) => {
+  if (req.url === "/health") {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+  res.writeHead(200, { "content-type": "text/plain" });
+  res.end("ok");
+});
+
+server.listen(port, host, () => {
+  const address = server.address();
+  const actualPort = address && typeof address !== "string" ? address.port : port;
+  console.log(\`listening \${host}:\${actualPort}\`);
+  console.error("stderr ready");
+});
+
+function shutdown() {
+  server.close(() => process.exit(0));
+}
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+`);
   const appInstanceDescriptor = join(project, "codexus.app-instances.json");
   await writeFile(
     appInstanceDescriptor,
@@ -143,10 +210,10 @@ if (args[0] === "--version") {
         profiles: [
           {
             name: "web",
-            command: ["npm", "run", "dev"],
+            command: [process.execPath, serverScript],
             cwd: ".",
             port: { mode: "allocate", preferred: 4173 },
-            health: { type: "http", url: "http://127.0.0.1:{port}/", timeoutMs: 1000 },
+            health: { type: "http", url: "http://127.0.0.1:{port}/health", timeoutMs: 1000 },
             log: { stdout: true, stderr: true },
           },
         ],
@@ -203,6 +270,12 @@ if (args[0] === "--version") {
   const supplyChain = parseJsonRun(codexus, ["supply-chain", "check", "--gate", "--json"]);
   assert(supplyChain.stability === "stable", "supply-chain check did not report stable JSON stability");
   assert(supplyChain.gate?.status === "passed", "installed supply-chain gate did not pass");
+  const policyCatalog = parseJsonRun(codexus, ["policy", "catalog", "check", "--scope", "src/**", "--json"], {
+    cwd: project,
+  });
+  assert(policyCatalog.stability === "experimental", "policy catalog did not report experimental stability");
+  assert(policyCatalog.command === "policy catalog check", "policy catalog command name was not stable");
+  assert(policyCatalog.rules?.some((rule) => rule.ruleId === "driver.command.preflight" && rule.status === "unavailable"), "policy catalog did not report honest driver preflight unavailability");
 
   const architecture = parseJsonRun(codexus, ["architecture", "check", "--gate", "--json"]);
   assert(architecture.stability === "experimental", "architecture check did not report experimental JSON stability");
@@ -214,12 +287,91 @@ if (args[0] === "--version") {
   assert(repo.scanAccuracy === "best_effort", "repo check did not report best-effort scan accuracy");
   assert(repo.gate?.status === "passed", "installed repo knowledge gate did not pass");
 
+  const wikiBuild = parseJsonRun(codexus, ["wiki", "build", "--cwd", project, "--mode", "deterministic", "--json"]);
+  assert(wikiBuild.stability === "experimental", "wiki build did not report experimental stability");
+  assert(wikiBuild.mode === "deterministic", "wiki build did not stay in deterministic mode");
+  assert(wikiBuild.manifest?.pages?.length >= 3, "wiki build did not generate the expected starter pages");
+  const wikiManifestValidation = parseJsonRun(codexus, [
+    "schema",
+    "validate",
+    "--type",
+    "wiki-manifest",
+    "--file",
+    join(project, ".codexus", "wiki", "manifest.json"),
+    "--json",
+  ]);
+  assert(wikiManifestValidation.ok === true, "wiki manifest validation did not pass from the installed package");
+  const wikiCheck = parseJsonRun(codexus, ["wiki", "check", "--cwd", project, "--gate", "--json"]);
+  assert(wikiCheck.stability === "experimental", "wiki check did not report experimental stability");
+  assert(wikiCheck.gate?.status === "passed", "wiki check gate did not pass from the installed package");
+  const wikiContext = parseJsonRun(codexus, [
+    "wiki",
+    "context",
+    "--cwd",
+    project,
+    "--topic",
+    "verification",
+    "--budget",
+    "1200",
+    "--json",
+  ]);
+  assert(wikiContext.stability === "experimental", "wiki context did not report experimental stability");
+  assert(wikiContext.selectedPages?.some((page) => page.pageId === "wiki.verification"), "wiki context did not include the verification page");
+  assert(wikiContext.eligibleForAutomaticInjection === false, "wiki context should not be eligible for automatic injection");
+  const autopilotPresets = parseJsonRun(codexus, ["autopilot", "presets", "list", "--json"]);
+  assert(autopilotPresets.stability === "experimental", "autopilot presets did not report experimental stability");
+  assert(autopilotPresets.defaultPreset === "contracted", "autopilot presets did not report the default preset");
+  const autopilotPlan = parseJsonRun(codexus, [
+    "autopilot",
+    "plan",
+    "--cwd",
+    project,
+    "--from",
+    join(project, "README.md"),
+    "--preset",
+    "guided",
+    "--json",
+  ]);
+  assert(autopilotPlan.stability === "experimental", "autopilot plan did not report experimental stability");
+  assert(autopilotPlan.contract?.autonomyPreset === "guided", "autopilot plan did not persist the requested preset");
+  const cronDispatch = parseJsonRun(codexus, [
+    "cron",
+    "run-now",
+    "--cwd",
+    project,
+    "--driver",
+    "mock",
+    "--task",
+    "package smoke dispatch",
+    "--approved-by",
+    "package-smoke",
+    "--json",
+  ]);
+  assert(cronDispatch.stability === "experimental", "cron live dispatch did not report experimental stability");
+  assert(cronDispatch.status === "completed", "cron live dispatch did not complete through the mock driver");
+  assert(cronDispatch.run?.outcome === "complete", "cron live dispatch did not produce a completed supervised run");
+  const gatewayDispatch = parseJsonRun(codexus, [
+    "gateway",
+    "check",
+    "--cwd",
+    project,
+    "--driver",
+    "mock",
+    "--task",
+    "package smoke gateway check",
+    "--approved-by",
+    "package-smoke",
+    "--json",
+  ]);
+  assert(gatewayDispatch.stability === "experimental", "gateway live dispatch did not report experimental stability");
+  assert(gatewayDispatch.status === "completed", "gateway live dispatch did not complete through the mock driver");
+
   const appProfiles = parseJsonRun(codexus, ["app", "instance", "profile", "list", "--cwd", project, "--descriptor", appInstanceDescriptor, "--json"]);
   assert(appProfiles.stability === "experimental", "app instance profile list did not report experimental stability");
   assert(appProfiles.descriptor?.valid === true, "app instance descriptor did not validate from installed package");
   assert(appProfiles.profiles?.[0]?.name === "web", "app instance profile list did not load the web profile");
   assert(appProfiles.capabilities?.dryRunStart === true, "app instance profile list did not report dry-run capability");
-  assert(appProfiles.capabilities?.liveStart === false, "app instance profile list falsely reported live start capability");
+  assert(appProfiles.capabilities?.liveStart === true, "app instance profile list did not report live start capability");
   const appPlan = parseJsonRun(codexus, [
     "app",
     "instance",
@@ -239,11 +391,48 @@ if (args[0] === "--version") {
   assert(appPlan.mode === "dry-run", "app instance start did not stay in dry-run mode");
   assert(appPlan.spawned === false, "app instance dry-run falsely reported spawned=true");
   assert(appPlan.status === "planned", "app instance dry-run did not report planned status");
-  assert(appPlan.capabilities?.liveStart === false, "app instance dry-run falsely reported live start capability");
+  assert(appPlan.capabilities?.liveStart === true, "app instance dry-run did not report live start capability");
   const appStatus = parseJsonRun(codexus, ["app", "instance", "status", "--cwd", project, "--json"]);
   assert(appStatus.stability === "experimental", "app instance status did not report experimental stability");
   assert(appStatus.status === "empty", "app instance status should not report dry-run plans as live instances");
   assert(appStatus.instances?.length === 0, "app instance status should not include dry-run plans as instances");
+
+  const appLive = parseJsonRun(codexus, [
+    "app",
+    "instance",
+    "start",
+    "--cwd",
+    project,
+    "--descriptor",
+    appInstanceDescriptor,
+    "--profile",
+    "web",
+    "--worktree",
+    project,
+    "--json",
+  ]);
+  assert(appLive.mode === "live", "app instance live start did not report live mode");
+  assert(appLive.spawned === true, "app instance live start did not report spawned=true");
+  assert(appLive.owned === true, "app instance live start did not report owned=true");
+  const liveInstanceId = appLive.launch.instanceId;
+
+  await waitFor(async () => {
+    const status = parseJsonRun(codexus, ["app", "instance", "status", "--cwd", project, "--instance-id", liveInstanceId, "--json"]);
+    return status.instances?.[0]?.process?.status === "running" && status.instances?.[0]?.health?.status === "passed";
+  });
+
+  const appLogs = parseJsonRun(codexus, ["app", "instance", "logs", "--cwd", project, "--instance-id", liveInstanceId, "--tail", "20", "--json"]);
+  assert(appLogs.stdout.lines.some((line) => line.includes("listening 127.0.0.1:")), "app instance live stdout did not contain the listening line");
+  assert(appLogs.stderr.lines.some((line) => line.includes("stderr ready")), "app instance live stderr did not contain the readiness line");
+
+  const appStop = parseJsonRun(codexus, ["app", "instance", "stop", "--cwd", project, "--instance-id", liveInstanceId, "--json"]);
+  assert(appStop.status === "stopped", "app instance stop did not report stopped");
+  assert(appStop.stopped === true, "app instance stop did not report stopped=true");
+
+  await waitFor(async () => {
+    const status = parseJsonRun(codexus, ["app", "instance", "status", "--cwd", project, "--instance-id", liveInstanceId, "--json"]);
+    return status.instances?.[0]?.process?.status === "stopped";
+  });
 
   const subagentLaunch = parseJsonRun(codexus, [
     "session",

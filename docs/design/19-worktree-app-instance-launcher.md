@@ -3,7 +3,7 @@
 [Korean](../ko/design/19-worktree-app-instance-launcher.md)
 
 Date: 2026-06-02
-Status: experimental first slice implemented; live start/stop deferred.
+Status: experimental live ownership first slice implemented.
 
 ## Decision
 
@@ -77,9 +77,10 @@ cx app instance logs --instance-id <id> [--tail <n>] --json
 cx app instance stop --instance-id <id> --json
 ```
 
-The first slice implements `profile list`, `status`, `logs`, and
-`start --dry-run`. Live `start` remains unsupported, and `stop` reports
-`unavailable` until owned-process artifacts and owner-token enforcement exist.
+The current slice implements `profile list`, `status`, `logs`, `start
+--dry-run`, live `start`, and owned `stop`. Stop remains unavailable for
+non-owned or invalid artifacts, and the whole surface remains experimental
+outside the 0.1.x stable contract.
 
 ## Descriptor Contract
 
@@ -198,7 +199,7 @@ The live `start` and `stop` slices must enforce these local facts:
 - **Control plane**: policy catalogs should report lifecycle policies as
   `enforced`, `observed`, `advisory`, or `unavailable`.
 
-## First Slice
+## Implemented Slice
 
 1. Done: add descriptor and instance artifact schemas.
 2. Done: add `cx app instance profile list --json`.
@@ -206,7 +207,16 @@ The live `start` and `stop` slices must enforce these local facts:
    projections over existing instance artifacts.
 4. Done: add `start --dry-run --json` that resolves worktree, branch/head, command
    profile, candidate port, log paths, and health descriptor without spawning.
-5. Done: add tests proving that `status` never reports `passed` health without
-   live health evidence and `stop` is unavailable before ownership exists.
+5. Done: implement live owned-process `start` with port allocation, heartbeat,
+   artifact recording, active HTTP health checks, and bounded log capture.
+6. Done: implement owned `stop` that targets only Codexus-owned instances and
+   leaves non-owned or invalid artifacts unavailable.
+7. Done: add tests proving live start, duplicate-start rejection, health
+   promotion for a live owned process, bounded logs, and owned stop.
 
-Only after those pass should Codexus implement live `start` and `stop`.
+## Next Slice
+
+1. Add instance-linked browser/dev-server evidence descriptors so screenshots
+   and adapter observations can cite one `instanceId`.
+2. Strengthen stale/orphan policy so long-dead artifacts are surfaced more
+   explicitly without overclaiming control or health.

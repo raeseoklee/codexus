@@ -234,12 +234,14 @@ formatting합니다. 자동 prompt injection이나 별도 chat loop는 만들지
   Codex config를 변경하거나, turn을 조종하거나, transcript를 저장하면 안 됩니다.
   또한 observer/concurrent-client behavior가 non-disruptive로 확인되지 않은 실제
   control socket에는 연결하면 안 됩니다.
+- 첫 slice의 live path는 sync/local입니다:
+  - feature gate가 config에서 enabled여야 하고,
+  - operator가 `--approved-by <name>`을 명시해야 하며,
+  - Codexus가 automation lock을 획득하고,
+  - 기존 run ledger를 통해 일반 supervised run을 dispatch하며,
+  - automation artifact가 policy / approval / lock / dispatch / completion
+    event를 기록합니다.
 - `cx cron run-now --dry-run --json`과 `cx gateway check --dry-run --json`은
-  lock name과 ledger event intent를 포함한 automation plan만 반환합니다.
-  Real dispatch는 approval/policy event가 완성된 뒤에만 추가합니다.
-- `--record`는 policy-check, lock-planning, dispatch-skipped event가 들어 있는
-  dry-run audit record를 씁니다. 이 record가 향후 live dispatch와의
-  compatibility boundary입니다.
-- Plan에는 policy와 approval contract field도 포함됩니다. Feature gate가 켜져
-  있어도 dispatcher capability가 구현/검토되기 전까지 live dispatch는 blocked
-  상태로 남습니다.
+  계속 lock name과 ledger event intent를 포함한 automation plan만 반환합니다.
+- `--record`는 dry-run/live 모두에서 policy/approval/lock/dispatch/completion
+  evidence를 남기는 audit artifact를 씁니다.

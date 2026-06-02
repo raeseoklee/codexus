@@ -14,10 +14,32 @@ occur before 1.0, but they should be called out clearly.
 - Added the worktree app instance launcher design note. The proposed surface is
   descriptor-backed, observe-before-act, and requires owned-process lifecycle
   evidence before Codexus can claim per-worktree app control.
-- Added the experimental first launcher slice: `cx app instance profile list`,
-  `status`, `logs`, and `start --dry-run`, plus descriptor and instance artifact
-  schema validation. Live start remains unsupported and stop reports
-  unavailable until owned-process evidence exists.
+- Added the experimental live ownership launcher slice: `cx app instance
+  profile list/status/logs/start/stop`, descriptor and instance artifact schema
+  validation, owned-process heartbeat artifacts, active HTTP health checks, and
+  bounded log capture. Stop remains unavailable for non-owned or invalid
+  artifacts.
+- Added the experimental autopilot contract foundation slice:
+  `cx autopilot plan --from ...`, `cx autopilot contract validate`,
+  `cx autopilot contract approve`, `cx autopilot contract scope-check`, and the
+  `autopilot-contract` schema artifact. Live `cx autopilot run` remains
+  intentionally deferred.
+- Added the experimental compiled wiki first slice:
+  `cx wiki map`, deterministic `cx wiki build`, `cx wiki check --gate`, and
+  `cx wiki context --topic ...`, plus `wiki-manifest` / `wiki-page` schema
+  artifacts. Automatic context injection, checked-in export, and advisory
+  synthesis remain deferred.
+- Added the experimental operational control first slice:
+  `cx autopilot presets list --json`, autopilot contract `autonomyPreset`
+  metadata, `cx policy catalog check --json`, and richer change-evidence
+  `riskFacts` for blast radius, dependency, schema, migration, and scope
+  findings. These remain advisory/control metadata and do not add a new
+  completion authority.
+- Added the experimental explicit-approval automation live-dispatch slice:
+  `cx cron run-now` / `cx gateway check` can now acquire automation locks,
+  record policy and approval artifacts, dispatch a normal supervised run
+  through the existing run ledger, and return the linked run outcome. Richer
+  unattended scheduler/retry ownership remains deferred.
 
 ### Fixed
 

@@ -213,7 +213,7 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 15);
+    assert.equal(schemaOutput.schemas.length, 18);
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
@@ -228,6 +228,9 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
       "session-state.schema.json",
       "supply-chain-policy.schema.json",
       "architecture-policy.schema.json",
+      "autopilot-contract.schema.json",
+      "wiki-manifest.schema.json",
+      "wiki-page.schema.json",
       "repo-graph.schema.json",
       "relay-session.schema.json",
       "stage-gate-evidence.schema.json",
@@ -403,11 +406,11 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
 
     const cron = runCli(cwd, ["cron", "status", "--json"]);
     const cronStatus = JSON.parse(cron.stdout);
-    assert.equal(cronStatus.stability, "deferred");
+    assert.equal(cronStatus.stability, "experimental");
     assert.equal(cronStatus.enabled, false);
     const gateway = runCli(cwd, ["gateway", "status", "--json"]);
     const gatewayStatus = JSON.parse(gateway.stdout);
-    assert.equal(gatewayStatus.stability, "deferred");
+    assert.equal(gatewayStatus.stability, "experimental");
     assert.equal(gatewayStatus.enabled, false);
 
     const appStatus = runCli(cwd, ["app-server", "status", "--json"]);
@@ -469,7 +472,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const cronDryRun = runCli(cwd, ["cron", "run-now", "--dry-run", "--record", "--cwd", featureCwd, "--task", "memory review", "--json"]);
     assert.equal(cronDryRun.status, 0, cronDryRun.stderr);
     const cronDryRunOutput = JSON.parse(cronDryRun.stdout);
-    assert.equal(cronDryRunOutput.stability, "deferred");
+    assert.equal(cronDryRunOutput.stability, "experimental");
     assert.equal(cronDryRunOutput.status, "planned");
     assert.equal(cronDryRunOutput.policy.decision, "dry_run_allowed");
     assert.equal(cronDryRunOutput.policy.dispatchAllowed, false);
@@ -493,14 +496,14 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
     assert.equal(cronLive.status, 1);
     const cronLiveOutput = JSON.parse(cronLive.stdout);
-    assert.equal(cronLiveOutput.stability, "deferred");
+    assert.equal(cronLiveOutput.stability, "experimental");
     assert.equal(cronLiveOutput.status, "blocked");
     assert.equal(cronLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(cronLiveOutput.policy.dispatchAllowed, false);
     const gatewayLive = runCli(cwd, ["gateway", "check", "--json"]);
     assert.equal(gatewayLive.status, 1);
     const gatewayLiveOutput = JSON.parse(gatewayLive.stdout);
-    assert.equal(gatewayLiveOutput.stability, "deferred");
+    assert.equal(gatewayLiveOutput.stability, "experimental");
     assert.equal(gatewayLiveOutput.status, "blocked");
     assert.equal(gatewayLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(gatewayLiveOutput.policy.dispatchAllowed, false);
@@ -511,11 +514,12 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
   }
 });
 
-test("enabled automation gates still block live dispatch until dispatcher exists", async () => {
+test("enabled automation live dispatch still requires explicit approval", async () => {
   const cwd = await tempDir();
   try {
     await mkdir(join(cwd, ".codexus"), { recursive: true });
     await writeFile(join(cwd, ".codexus", "config.json"), `${JSON.stringify({
+      driver: "mock",
       automation: {
         cronEnabled: true,
         gatewayEnabled: true,
@@ -524,24 +528,80 @@ test("enabled automation gates still block live dispatch until dispatcher exists
     const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
     assert.equal(cronLive.status, 1);
     const cronOutput = JSON.parse(cronLive.stdout);
-    assert.equal(cronOutput.stability, "deferred");
+    assert.equal(cronOutput.stability, "experimental");
     assert.equal(cronOutput.status, "blocked");
     assert.equal(cronOutput.enabled, true);
-    assert.equal(cronOutput.policy.decision, "live_requires_unimplemented_dispatcher");
+    assert.equal(cronOutput.policy.decision, "live_blocked_by_missing_approval");
     assert.equal(cronOutput.policy.dispatchAllowed, false);
     assert.equal(cronOutput.policy.contractVersion, "policy-reviewed-live-dispatch-v1");
-    assert.equal(cronOutput.policy.liveDispatcherImplemented, false);
+    assert.equal(cronOutput.policy.liveDispatcherImplemented, true);
     assert.equal(cronOutput.approval.status, "required_but_not_requested");
-    assert.ok(cronOutput.ledgerEvents.includes("automation.dispatch_skipped"));
+    assert.ok(existsSync(cronOutput.record.path));
+    assert.ok(cronOutput.record.path.includes("/dispatches/"));
 
     const gatewayLive = runCli(cwd, ["gateway", "check", "--json"]);
     assert.equal(gatewayLive.status, 1);
     const gatewayOutput = JSON.parse(gatewayLive.stdout);
-    assert.equal(gatewayOutput.stability, "deferred");
+    assert.equal(gatewayOutput.stability, "experimental");
     assert.equal(gatewayOutput.status, "blocked");
     assert.equal(gatewayOutput.enabled, true);
-    assert.equal(gatewayOutput.policy.decision, "live_requires_unimplemented_dispatcher");
+    assert.equal(gatewayOutput.policy.decision, "live_blocked_by_missing_approval");
     assert.equal(gatewayOutput.policy.dispatchAllowed, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("enabled automation live dispatch runs through the normal Codexus run ledger", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, ".codexus"), { recursive: true });
+    await writeFile(join(cwd, ".codexus", "config.json"), `${JSON.stringify({
+      driver: "mock",
+      automation: {
+        cronEnabled: true,
+        gatewayEnabled: true,
+      },
+    }, null, 2)}\n`);
+
+    const cronLive = runCli(cwd, [
+      "cron",
+      "run-now",
+      "--task",
+      "review memory health",
+      "--approved-by",
+      "maintainer",
+      "--json",
+    ]);
+    assert.equal(cronLive.status, 0, cronLive.stderr);
+    const cronOutput = JSON.parse(cronLive.stdout);
+    assert.equal(cronOutput.stability, "experimental");
+    assert.equal(cronOutput.status, "completed");
+    assert.equal(cronOutput.policy.decision, "live_dispatch_allowed");
+    assert.equal(cronOutput.policy.dispatchAllowed, true);
+    assert.equal(cronOutput.approval.status, "approved");
+    assert.equal(cronOutput.run.outcome, "complete");
+    assert.ok(existsSync(cronOutput.run.statePath));
+    assert.ok(existsSync(cronOutput.record.path));
+    const cronRecord = JSON.parse(await readFile(cronOutput.record.path, "utf8"));
+    assert.equal(cronRecord.ledgerEvents.some((event: { type: string }) => event.type === "automation.lock_acquired"), true);
+    assert.equal(cronRecord.ledgerEvents.some((event: { type: string }) => event.type === "automation.dispatched"), true);
+    assert.equal(cronRecord.ledgerEvents.some((event: { type: string; payload?: { outcome?: string } }) => event.type === "automation.completed" && event.payload?.outcome === "complete"), true);
+
+    const gatewayLive = runCli(cwd, [
+      "gateway",
+      "check",
+      "--task",
+      "inspect repo events",
+      "--approved-by",
+      "maintainer",
+      "--json",
+    ]);
+    assert.equal(gatewayLive.status, 0, gatewayLive.stderr);
+    const gatewayOutput = JSON.parse(gatewayLive.stdout);
+    assert.equal(gatewayOutput.status, "completed");
+    assert.equal(gatewayOutput.run.outcome, "complete");
+    assert.ok(existsSync(gatewayOutput.record.path));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

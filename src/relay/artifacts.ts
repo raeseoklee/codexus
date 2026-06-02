@@ -730,7 +730,11 @@ function enforceVerificationMatrix(cwd: string, stageGate: StageGateEvidenceArti
       ));
     }
   }
-  if (acceptanceCriteria.length > 0 && allCriteriaCovered) {
+  const criteriaSatisfied = acceptanceCriteria.every((criterion) => {
+    const rows = rowsByCriterion.get(criterion.id) ?? [];
+    return rows.some((row) => (row.deferredReason !== null && row.deferredApproved === true) || row.status === "passed");
+  });
+  if (acceptanceCriteria.length > 0 && allCriteriaCovered && criteriaSatisfied) {
     derivableFacts.push({ kind: "verification_matrix_acceptance_covered", gate: true, evidence: `${acceptanceCriteria.length} criteria covered` });
   }
 

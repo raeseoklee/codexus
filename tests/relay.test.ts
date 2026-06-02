@@ -253,6 +253,7 @@ test("implementation matrix rows must cite passing evidence or approved deferral
     assert.equal(check.status, 1);
     const output = JSON.parse(check.stdout);
     assert.equal(output.relay.convergence, "invalid");
+    assert.equal(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "verification_matrix_acceptance_covered"), false);
     assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "verification_matrix_row_missing_evidence"));
   } finally {
     await rm(cwd, { recursive: true, force: true });

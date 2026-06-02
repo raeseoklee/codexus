@@ -29,6 +29,8 @@ import { repoCommand } from "./commands/repo.ts";
 import { autopilotCommand } from "./commands/autopilot.ts";
 import { releaseCommand } from "./commands/release.ts";
 import { appCommand } from "./commands/app.ts";
+import { wikiCommand } from "./commands/wiki.ts";
+import { policyCommand } from "./commands/policy.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -60,11 +62,22 @@ Usage:
   cx session workers status [--json]
   cx slop check [--since <ref>] [--scope <glob>] [--review <path>] [--gate] [--json]
   cx supply-chain check [--gate] [--json]
+  cx policy catalog check [--since <ref>] [--scope <glob>] [--json]
   cx release check [--version <version>] [--live] [--gate] [--json]
   cx architecture check [--policy <path>] [--gate] [--json]
   cx repo map|check [--gate] [--json]
   cx repo graph build --graph-provider codexus-lite [--scope <glob>] [--json]
   cx repo graph check --graph <graph-id-or-path> [--gate] [--json]
+  cx wiki map [--json]
+  cx wiki build [--mode deterministic|advisory] [--json]
+  cx wiki check [--gate] [--json]
+  cx wiki context --topic <name> [--budget <n>] [--json]
+  cx autopilot presets [list] [--json]
+  cx autopilot plan --from <path> [--from <path>] [--preset <name>] [--json]
+  cx autopilot contract validate <path> [--json]
+  cx autopilot contract approve <path> --approved-by <name> [--output <path>] [--json]
+  cx autopilot contract scope-check <path> [--since <ref>] [--gate] [--json]
+  cx autopilot run --policy <path> [--json]
   cx autopilot relay record --stage issue|design|plan|implementation --artifact <path> --author-file <path> --review-file <path> [--json]
   cx autopilot relay stage-gate --stage issue|design|plan|implementation --scope delta-check|full-gate --artifact <path> [--acceptance-criteria <path>] [--acceptance-criterion <id>] [--verification-matrix <path>] [--verification-status passed|failed|skipped|unknown] [--json]
   cx autopilot relay check-agreement --agreement <path> --stage-gate <path> [--verification-status passed|failed|skipped|unknown] [--gate] [--json]
@@ -79,7 +92,7 @@ Usage:
   cx locks list|inspect|clear [name] [--stale-only] [--json]
   cx schema check [--json]
   cx schema engine [--json]
-  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance> --file <path> [--json]
+  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance> --file <path> [--json]
   cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|discover|experiment [--dry-run|--live] [--json]
   cx app-server discover [--record] [--timeout-ms <n>] [--json]
@@ -89,7 +102,7 @@ Usage:
   cx app instance profile list [--descriptor <path>] [--json]
   cx app instance status [--instance-id <id>] [--worktree <path>] [--json]
   cx app instance logs --instance-id <id> [--tail <n>] [--json]
-  cx app instance start --profile <name> --worktree <path> --dry-run [--descriptor <path>] [--port <n>] [--json]
+  cx app instance start --profile <name> --worktree <path> [--dry-run] [--descriptor <path>] [--port <n>] [--json]
   cx app instance stop --instance-id <id> [--json]
   cx resume <run-id> [follow-up] [--json]
   cx verify <run-id> [--verify <cmd>] [--json]
@@ -109,8 +122,8 @@ Usage:
   cx skill improve <skill-id> [--reason <reason>] [--json]
   cx skill deprecate <skill-id> [reason] [--json]
   cx skill list [--json]
-  cx cron status|run-now [--dry-run] [--record] [--json]
-  cx gateway status|check [--dry-run] [--record] [--json]
+  cx cron status|run-now [--dry-run] [--record] [--task <task>] [--approved-by <name>] [--driver mock|codex-exec] [--json]
+  cx gateway status|check [--dry-run] [--record] [--task <task>] [--approved-by <name>] [--driver mock|codex-exec] [--json]
 
 Public bins:
   codexus and cx are the supported command names.
@@ -155,6 +168,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
     await supplyChainCommand(args);
     return;
   }
+  if (args.command === "policy") {
+    await policyCommand(args);
+    return;
+  }
   if (args.command === "release") {
     await releaseCommand(args);
     return;
@@ -165,6 +182,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "repo") {
     await repoCommand(args);
+    return;
+  }
+  if (args.command === "wiki") {
+    await wikiCommand(args);
     return;
   }
   if (args.command === "autopilot") {

@@ -23,6 +23,8 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "session-state",
   "supply-chain-policy",
   "architecture-policy",
+  "autopilot-contract",
+  "wiki-manifest",
   "repo-graph",
   "relay-session",
   "stage-gate-evidence",

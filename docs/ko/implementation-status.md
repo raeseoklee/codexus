@@ -21,7 +21,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Source development entrypoint: `node src/cli/main.ts`
 - `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`, `replay parity`
 - `locks list/inspect/clear`, `schema check/engine/validate/validate-run`, `app-server status/roundtrip/experiment`
-- `app instance profile list/status/logs/start --dry-run`, `app instance stop` structured unavailable status
+- `app instance profile list/status/logs/start/stop`
 - `slop check`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
@@ -47,7 +47,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - unrelated tool state를 건드리지 않는 `cx init`
 - runs/events/report observability command
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled
-- cron/gateway disabled feature gate와 policy/approval contract field를 포함한 dry-run automation plan 및 optional audit record
+- cron/gateway의 experimental explicit-approval live dispatch와
+  policy/approval contract field를 포함한 dry-run automation plan 및
+  optional audit record
 - config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
@@ -58,6 +60,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   skill adapter 설치, fake Codex fixture를 통한 `doctor --json --strict`,
   `supply-chain check --gate`, installed-package mock pass/fail/repair/status/
   events/resume/cancel 흐름을 검증합니다.
+- Installed package automation smoke는 enabled feature gate, explicit approval,
+  mock driver 조합으로 `cx cron run-now`와 `cx gateway check`를 실행해 packed
+  global install에서도 experimental automation dispatcher가 lock을 획득하고
+  연결된 run result를 반환함을 검증합니다.
 - `prepublishOnly`는 local CI, package smoke, report-only supply-chain dogfood,
   `cx release check --gate --json`을 묶은 `npm run release:check`를 실행합니다.
   Package smoke에는 설치된 package에 대한 gate-mode supply-chain check가 포함됩니다.
@@ -157,8 +163,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   평가는 advisory로 남으며 `typosquat_name_similarity_deferred`로 자기보고합니다.
 - `cx replay parity --json`은 committed fixture 기반 canonical replay parity label
   coverage를 보고하고 no-new-label-without-fixture contract를 보존합니다.
-- Cron/gateway live path는 `policy-reviewed-live-dispatch-v1` policy contract를 공유하고
-  dispatcher가 생길 때까지 blocked로 남습니다.
+- Cron/gateway live path는 `policy-reviewed-live-dispatch-v1` policy contract를
+  공유하며, feature gate가 켜지고 explicit approval이 있으면 일반 Codexus run
+  ledger를 통해 dispatch됩니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
 - `schemas/session-state.schema.json`은 v5 session-state shape용 first-class schema
@@ -210,7 +217,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 ## 검증
 
-- `npm test`: 202 tests 통과
+- `npm test`: 217 tests 통과
 - `npm run typecheck` 통과
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -259,19 +266,31 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   없다는 invariant를 커버합니다. Implementation-stage AC-to-verification matrix gate는
   missing matrix, unmapped criteria, missing evidence, approved deferral, missing
   evidence path, passing evidence를 커버합니다.
-- App instance launcher 첫 slice 테스트는 descriptor schema validation, `profile list`,
-  spawn 없는 `start --dry-run`, live start rejection, evidence가 없을 때 health status
-  demotion, local evidence가 있을 때만 health promotion, bounded log tail, structured
-  unavailable stop을 커버합니다.
-- Autopilot contract는 0.2/0.3 experimental surface로만 문서화되어 있습니다.
-  아직 구현되지 않았고 0.1.x stable contract에는 포함되지 않습니다.
-- Generic worktree app instance launcher는 experimental observe/dry-run 첫 slice를
-  갖습니다. `cx app instance profile list/status/logs/start --dry-run`는
-  descriptor-backed profile을 읽고, 기존 instance artifact를 projection하고, bounded log를
-  tail하며, process를 spawn하지 않는 per-worktree launch plan을 만듭니다. Live start,
-  live stop, owner-token enforcement, process liveness
-  (`live_process_liveness_probe_deferred`), port allocation, active health check는
-  0.1.x stable contract 밖에서 deferred입니다.
+- Compiled wiki 테스트는 deterministic `map/build/check/context`, scoped source
+  변경 후 stale-page gate failure, advisory build mode의 honest rejection을
+  커버합니다.
+- App instance launcher 테스트는 descriptor schema validation, `profile list`,
+  `start --dry-run`, live start, duplicate-start rejection, live owned process의
+  active health promotion, bounded log tail, owned stop을 커버합니다.
+- Installed package smoke는 deterministic wiki build, wiki-manifest schema
+  validation, `wiki check --gate`, bounded wiki context generation,
+  `cx policy catalog check --json`, `cx autopilot presets list --json`,
+  explicit-preset autopilot draft planning도 포함합니다.
+- Autopilot contract는 이제 experimental foundation slice를 갖습니다:
+  `cx autopilot plan --from ...`,
+  `cx autopilot contract validate <file>`,
+  `cx autopilot contract approve <file> --approved-by <name>`,
+  `cx autopilot contract scope-check <file> [--gate]`가 구현됐습니다. 계약 body는
+  schema 검증되고, approval record는 canonical subject hash를 포함하며, scope
+  check는 승인된 계약을 기준으로 change-evidence fact를 재사용합니다. Live
+  `cx autopilot run`은 여전히 0.1.x stable contract 밖에서 deferred입니다.
+- Generic worktree app instance launcher는 experimental live ownership 첫 slice를
+  갖습니다. `cx app instance profile list/status/logs/start/stop`는
+  descriptor-backed profile을 읽고, worktree별 Codexus-owned process를 하나씩 띄우고,
+  owned instance artifact와 heartbeat를 쓰며, active HTTP health를 probe하고,
+  bounded log를 tail하며, owned process만 중지합니다. 이 surface는 여전히 0.1.x
+  stable contract 밖에 있고, instance-linked browser/dev-server evidence는 후속
+  작업입니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
@@ -286,19 +305,25 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   deferral이 있는 full-gate acceptance-criteria-to-verification matrix를 요구합니다.
   Active relay execution과 external engine adapter는 0.1.x stable contract 밖에서
   deferred입니다.
-- Operational control invariant는 제안된 0.2/0.3 track으로 문서화되어 있습니다:
-  autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
-  HUD projection을 다룹니다. 새 완료 권한은 아직 없으며, 첫 deterministic docs-code
-  invariant pass는 `cx repo check --gate --json`에 구현됐습니다: required index,
-  index link, English/Korean counterpart, 선언된 `schemas/*.schema.json` reference, source
-  `*_deferred` self-report claim이 양쪽 implementation-status 문서에 mirrored됐는지를
-  기계적으로 확인합니다. Repo check output은 남아 있는 deferred self-report claim도
-  집계해 의도적으로 미구현된 surface가 계속 보이도록 합니다.
-- Compiled repository wiki는 제안된 0.2/0.3 track으로 문서화되어 있습니다:
-  repository fact, Codexus ledger, graph artifact, decision, verification evidence 위에
-  재생성 가능한 markdown page를 만듭니다. 아직 `cx wiki` 명령은 없으며, 첫 구현은
-  scoped freshness를 갖춘 deterministic map/build/check/context surface여야 하고 자동
-  context injection은 하지 않아야 합니다.
+- Operational control invariant는 이제 실험적 첫 slice를 가집니다:
+  `cx autopilot presets list --json`, autopilot contract의 schema-validated
+  `autonomyPreset` metadata, `cx policy catalog check --json`, 그리고 blast
+  radius / dependency / schema / migration / scope finding에 대한 더 풍부한
+  `riskFacts`가 포함됩니다. 새 완료 권한은 없고 기존 evidence gate 위의
+  advisory/control metadata로만 동작합니다. Deterministic docs-code
+  invariant pass는 여전히 `cx repo check --gate --json`이 맡고 있습니다.
+- Compiled repository wiki는 이제 experimental deterministic 첫 slice를 가집니다:
+  `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check --gate`,
+  `cx wiki context --topic <name> --budget <n>`이 동작합니다. `.codexus/wiki/`
+  아래에 source ref, local link, manifest/page schema, scoped freshness를 가진
+  재생성 가능한 markdown page를 만들며, advisory synthesis, checked-in export,
+  automatic context injection은 계속 deferred입니다.
+- `cx repo check --gate --json`가 현재 문서 일치를 강제하는 deferred self-report는
+  다음 네 가지입니다:
+  - `acceptance_criteria_extraction_deferred`
+  - `autopilot_run_deferred`
+  - `broad_layering_rule_deferred`
+  - `typosquat_name_similarity_deferred`
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, Stage A isolated real evidence, Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트
@@ -322,18 +347,31 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   구현됐습니다. `cx session hud --json`은 statusline fallback으로 사용할 수 있습니다.
   Statusline integration과 tmux-backed worker launch는 설계됐지만 아직 구현되지
   않았습니다.
-- cron/gateway live automation은 feature gate 뒤에서 disabled이며 dry-run plan/audit record와 policy/approval contract field만 구현했습니다.
+- cron/gateway는 이제 experimental explicit-approval live dispatcher를 가집니다.
+  다음 작업은 richer scheduler semantics, recovery/retry policy, asynchronous
+  ownership 증거입니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
-- Autopilot active execution은 0.2/0.3 트랙의 설계 문서만 있습니다.
-  `cx repo graph build/check`와 `cx autopilot relay record/stage-gate/check-agreement`는
-  experimental foundation으로 존재하지만, graph import/search/explain/context injection,
-  active multi-engine relay adapter는 0.1.x stable surface 밖에서 deferred입니다.
-- Worktree app instance launcher는 experimental observe/dry-run slice를 갖지만, live
-  start/stop, process ownership token, heartbeat enforcement, liveness check, port
-  allocation, active health probe는 deferred입니다
-  (`live_process_liveness_probe_deferred`).
-- Operational control invariant는 deterministic docs-code check와 첫 advisory session
-  control-plane pass까지 구현됐습니다. Decision artifact, 반복 verification loop summary,
-  HUD/status projection은 구현됐습니다. Autonomy preset, policy catalog, task artifact,
-  더 풍부한 risk fact, `cx wiki` 명령은 아직 구현되지 않았습니다.
+- Autopilot active execution은 계속 0.2/0.3 트랙에서 deferred입니다. Experimental
+  foundation은 이제 `cx autopilot plan`과 contract
+  validate/approve/scope-check까지 포함하지만, `cx autopilot run`과 worktree에
+  붙는 장시간 실행은 의도적으로 아직 구현하지 않았습니다. `cx repo graph
+  build/check`와 `cx autopilot relay record/stage-gate/check-agreement`는
+  experimental foundation으로 존재하지만, graph import/search/explain/context
+  injection과 active multi-engine relay adapter는 0.1.x stable surface 밖에서
+  deferred입니다.
+- Worktree app instance launcher는 이제 experimental live ownership slice를
+  갖습니다. start/stop, process ownership token, heartbeat, liveness, port
+  allocation, active health probe는 Codexus-owned instance에 대해 구현됐고,
+  instance-linked browser/dev-server evidence와 더 강한 stale/orphan policy가
+  후속 작업입니다.
+- Operational control invariant는 deterministic docs-code check와 실험적
+  control-plane 첫 slice까지 구현됐습니다. Decision artifact, 반복
+  verification loop summary, HUD/status projection, autonomy preset metadata,
+  policy catalog reporting, richer risk fact가 포함됩니다. Task artifact,
+  broader policy promotion, unified control aggregation은 아직 구현되지
+  않았습니다.
+- Compiled repository wiki는 이제 experimental deterministic 첫 slice를
+  가집니다. Source-linked page generation, structural freshness gate, bounded
+  context-pack generation이 존재하며 advisory synthesis, checked-in export,
+  automatic injection path는 future work입니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

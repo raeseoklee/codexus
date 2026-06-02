@@ -264,14 +264,24 @@ not start the real app-server.
 
 ### `cx cron run-now` and `cx gateway check`
 
-Purpose: return dry-run automation plans with lock and ledger-event intent.
-Live dispatch remains disabled until policy and approval events are complete.
+Purpose: expose an explicit-approval automation dispatcher without inventing a
+new completion authority.
 
-`--record` writes a dry-run audit record with policy-check, lock-planning, and
-dispatch-skipped events. These records are the compatibility boundary for later
-live cron/gateway dispatch. The plan also carries policy and approval contract
-fields; even when a feature gate is enabled, live dispatch stays blocked until a
-dispatcher capability is implemented and reviewed.
+The first live slice is synchronous and local:
+
+- feature gate must be enabled in config;
+- the operator must pass `--approved-by <name>`;
+- Codexus acquires the automation lock;
+- Codexus dispatches a normal supervised run through the existing run ledger;
+- the automation artifact records policy, approval, lock, dispatch, and
+  completion events.
+
+`--record` writes an audit artifact for both dry-run and live execution. Dry
+runs capture policy/approval intent without dispatch, while live dispatch writes
+policy, approval, lock, dispatch, and completion evidence under
+`.codexus/automation/<feature>/dispatches/` and returns the linked supervised
+run result. No unattended scheduler, queue, or retry service is implied by this
+first slice.
 
 ### `cx skill ...`
 

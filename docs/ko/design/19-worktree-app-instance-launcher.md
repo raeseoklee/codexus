@@ -3,7 +3,7 @@
 [English](../../design/19-worktree-app-instance-launcher.md)
 
 날짜: 2026-06-02
-상태: experimental 첫 slice 구현됨, live start/stop은 deferred.
+상태: experimental live ownership 첫 slice 구현됨.
 
 ## 결정
 
@@ -73,9 +73,10 @@ cx app instance logs --instance-id <id> [--tail <n>] --json
 cx app instance stop --instance-id <id> --json
 ```
 
-첫 slice는 `profile list`, `status`, `logs`, `start --dry-run`를 구현합니다. Live
-`start`는 계속 unsupported이며, `stop`은 owned-process artifact와 owner-token enforcement가
-생기기 전까지 `unavailable`을 보고합니다.
+현재 slice는 `profile list`, `status`, `logs`, `start --dry-run`, live `start`,
+owned `stop`을 구현합니다. `stop`은 non-owned 또는 invalid artifact에는 계속
+`unavailable`을 보고하며, 전체 surface는 0.1.x stable contract 밖의
+experimental 상태로 남습니다.
 
 ## Descriptor Contract
 
@@ -191,7 +192,7 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
 - **Control plane**: policy catalog는 lifecycle policy를 `enforced`, `observed`,
   `advisory`, `unavailable`로 보고해야 합니다.
 
-## First Slice
+## 구현된 Slice
 
 1. 완료: descriptor와 instance artifact schema를 추가합니다.
 2. 완료: `cx app instance profile list --json`을 추가합니다.
@@ -199,7 +200,16 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
    `logs --json`를 추가합니다.
 4. 완료: spawn 없이 worktree, branch/head, command profile, candidate port, log path, health
    descriptor를 resolve하는 `start --dry-run --json`을 추가합니다.
-5. 완료: `status`가 live health evidence 없이 `passed` health를 보고하지 않고, ownership이
-   생기기 전 `stop`이 unavailable임을 증명하는 테스트를 추가합니다.
+5. 완료: port allocation, heartbeat, artifact recording, active HTTP health check,
+   bounded log capture를 포함한 live owned-process `start`를 구현합니다.
+6. 완료: Codexus-owned instance만 대상으로 하는 owned `stop`을 구현하고,
+   non-owned 또는 invalid artifact는 `unavailable`로 남깁니다.
+7. 완료: live start, duplicate-start rejection, live owned process의 health promotion,
+   bounded log, owned stop을 증명하는 테스트를 추가합니다.
 
-이후에만 live `start`와 `stop`을 구현해야 합니다.
+## 다음 Slice
+
+1. Screenshot과 adapter 관측이 하나의 `instanceId`를 가리키도록
+   instance-linked browser/dev-server evidence descriptor를 추가합니다.
+2. 오래된 artifact를 더 명시적으로 드러내는 stale/orphan policy를 강화하되,
+   control이나 health를 과장하지 않게 유지합니다.

@@ -2,9 +2,9 @@ import { resolve } from "node:path";
 import {
   appInstanceLogs,
   appInstanceStatus,
-  appInstanceStopUnavailable,
   listAppInstanceProfiles,
-  planAppInstanceStart,
+  startAppInstance,
+  stopAppInstance,
 } from "../../app-instance/launcher.ts";
 import { flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -57,7 +57,7 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (action === "start") {
-    const result = await planAppInstanceStart(cwd, {
+    const result = await startAppInstance(cwd, {
       descriptorPath,
       profile: flagString(args.flags, "profile"),
       worktree: flagString(args.flags, "worktree"),
@@ -73,16 +73,16 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (action === "stop") {
-    const result = await appInstanceStopUnavailable(cwd, {
+    const result = await stopAppInstance(cwd, {
       instanceId: flagString(args.flags, "instance-id"),
     });
     if (json) {
       console.log(JSON.stringify(result, null, 2));
-      process.exitCode = 1;
+      process.exitCode = result.status === "unavailable" ? 1 : 0;
       return;
     }
     console.log(`app instance stop: ${result.status}`);
-    process.exitCode = 1;
+    process.exitCode = result.status === "unavailable" ? 1 : 0;
     return;
   }
 

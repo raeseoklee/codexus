@@ -37,14 +37,14 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   third-party bundle export, bounded adapter retrieval, deterministic replay와
   model replay gate, memory lifecycle command, app-server
   fixture/status gate, `cx init`, packaging/typecheck smoke, run observability,
-  cron/gateway disabled gate.
+  experimental cron/gateway dispatcher.
 - 승격된 hardening surface: stale-lock metadata inspection/recovery, versioned
   schema artifact, budget/policy-gated model replay runner, Codex-native
   bounded context formatter와 자동 주입 없는 approved context artifact,
   live gate가 있는 app-server dry-run roundtrip contract와 recorded sandbox
   experiment manifest, 명시적 budget이 필요한 repairable driver-failure retry,
-  cron/gateway dry-run automation plan/audit record와 policy/approval contract
-  field, run-ledger validation, installed Codexus skill diagnostic,
+  cron/gateway live dispatch와 dry-run automation plan/audit record 및
+  policy/approval contract field, run-ledger validation, installed Codexus skill diagnostic,
   app-server process-probe evidence, replay pass/failure/extended fixture.
 - Accepted harness review 기반 remediation hardening 구현됨: bounded repair
   context artifact, 확장된 repair-context redaction, terminal verification
@@ -72,16 +72,19 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   schema engine status는 local subset engine과 unavailable full engine을 보고하고,
   replay parity는 audit 가능하며, adapter injection은 자동 주입 없이 visible approval
   artifact를 쓰고, HUD는 read-only JSON summary로 제공됩니다. tmux/native-subagent launch
-  surface는 truthful gate이고, automation live contract는 dispatcher가 생길 때까지 계속
-  blocked입니다.
+  surface는 truthful gate이고, automation live contract는 이제 explicit approval로
+  synchronous dispatch가 가능하며 richer scheduler/recovery semantics는 후속입니다.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
-  engine enforcement/migration, real cron/gateway automation dispatch,
+  engine enforcement/migration, richer cron/gateway scheduler semantics,
   statusline/HUD integration, tmux-backed worker, cancellation wait/remote-host UX 보강.
   Repository knowledge graph는 이제 codexus-lite graph artifact, scoped freshness,
   structural gate를 위한 experimental 첫 slice(`cx repo graph build/check`)가 있습니다.
   Autopilot, graph import/search/explain/context injection, multi-engine relay autopilot은
-  계속 0.2/0.3 track으로 deferred입니다.
+  계속 0.2/0.3 track으로 deferred입니다. 다만 Autopilot은 이제 experimental
+  foundation slice(`cx autopilot plan`, contract validate/approve/scope-check)를
+  갖고 있으며, live `cx autopilot run`과 worktree에 붙는 실행만 의도적으로 남겨둔
+  상태입니다.
 
 ### P0: Contract and Safety Hardening
 
@@ -182,7 +185,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - 제안 command: `cx runs list`, `cx events tail <run-id>`, `cx report <run-id>`.
     - 출력은 bounded, JSON-first로 유지합니다.
 
-15. cron/gateway automation은 P0 safety 이후에 추가. 상태: disabled feature gate와 dry-run automation plan/audit record 및 policy/approval contract field 구현, real automation deferred.
+15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch와 dry-run audit record가 구현됐고, richer scheduler/recovery 동작이 남아 있습니다.
     - Hermes-style cron/gateway는 lock, schema migration, permission event,
       explicit user policy 뒤에 둬야 합니다.
 
@@ -224,8 +227,9 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    다음 slice는 explicit user-provided socket 시도 또는 별도 stdio-observer 설계입니다.
    app-server driver 활성화는 별도 gate로 계속 분리합니다.
 4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
-   공유합니다. Permission, approval, lock, dispatch, completion event가 실제로 준비되기
-   전에는 dispatcher를 구현하지 않습니다.
+   공유하며, 첫 synchronous dispatcher slice가 구현됐습니다. 다음은 richer
+   scheduler semantics, retry/recovery policy, foreground dispatch를 넘는
+   durable ownership입니다.
 5. Adapter injection은 명시적 approval이 필요하고 visible approval
    artifact를 기록합니다. 여전히 prompt context를 자동 주입하지 않습니다.
 6. `cx session hud --json`이 지원되는 fallback입니다. Statusline integration은 Codex가
@@ -240,9 +244,11 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 10. Subagent support는 recorder/handoff/contract-only로 유지합니다. 지원되는 Codex
    bridge가 생기기 전까지 active native spawn launcher를 노출하지 않습니다. Subagent
    claim은 verification freshness와 계속 분리해야 합니다.
-11. Autopilot은 0.2/0.3 design track으로 유지합니다. `cx autopilot run`을 노출하기 전
-   schema artifact와 report-only scope gate부터 시작해야 하며, human-approved,
-   worktree-isolated, `stability: experimental`이어야 합니다.
+11. Autopilot은 이제 experimental foundation slice를 가집니다. 다음 작업은 live
+   `cx autopilot run`입니다. 사람 승인 contract 흐름을 유지하고,
+   worktree-isolated, `stability: experimental` 상태를 지키면서, 시작 시
+   capability/policy proof를 요구하고 지원되지 않는 policy field는 조용히
+   downgrade하지 말고 block해야 합니다.
 12. Repository knowledge graph는 canonical graph identity hashing, graph schema
    validation, scoped freshness, structural graph gate를 포함한 experimental 첫 slice가
    있습니다. External import, search/explain, context injection은 freshness, sanitization,
@@ -293,31 +299,35 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.
 - Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)는
-  experimental observe/dry-run 첫 slice를 갖습니다. Descriptor/profile listing,
-  read-only instance status/log projection, app instance schema validation,
-  `start --dry-run` planning이 구현됐습니다. 다음 작업은 live ownership evidence입니다:
-  owned process artifact, owner token, heartbeat, port allocation, active health check,
-  owned process만 stop하는 cleanup입니다.
+  experimental live ownership 첫 slice를 갖습니다. Descriptor/profile listing,
+  `start --dry-run`, live owned-process start/stop, heartbeat, port allocation,
+  active health check, bounded log projection이 구현됐습니다. 다음 작업은
+  instance-linked browser/dev-server evidence와 더 강한 stale/orphan policy입니다.
 - Operational control invariant: [17번 문서](design/17-operational-control-invariants.md)는
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 기존 evidence 위의 control layer로 정의합니다. 첫 deterministic
   docs-code invariant pass는 `cx repo check`에 구현됐습니다. 첫 session control-plane
   pass도 구현됐습니다. `cx session decision record/list/status`는 advisory decision
   artifact를 쓰고, `cx session loop --json`은 반복 verification failure를 요약하며,
-  session status/HUD는 decision, risk, loop summary를 포함합니다. 다음 작업은 autonomy
-  preset metadata, policy catalog reporting, 더 풍부한 risk fact, task artifact입니다.
-  Active autonomy나 새 완료 권한을 추가하지 않습니다.
+  session status/HUD는 decision, risk, loop summary를 포함합니다. 첫
+  operational-control slice도 구현되어 autonomy preset metadata, policy catalog
+  reporting, 더 풍부한 risk fact가 포함됩니다. 다음 작업은 task artifact,
+  broader policy promotion, unified control aggregation입니다. Active autonomy나
+  새 완료 권한을 추가하지 않습니다.
 - Compiled repository wiki: [18번 문서](design/18-compiled-repository-wiki.md)는
-  repository fact와 Codexus artifact 위의 재생성 가능한 markdown projection을 정의합니다.
-  첫 작업은 schema, `cx wiki map`, deterministic build/check, read-only context pack입니다.
+  repository fact와 Codexus artifact 위의 재생성 가능한 markdown projection을 정의하며,
+  이제 experimental deterministic 첫 slice를 가집니다. Schema, `cx wiki
+  map/build/check`, read-only context pack이 존재하고, 다음 작업은 advisory
+  synthesis, checked-in export, richer page set, explicit injection policy입니다.
   Stale/advisory page를 run에 자동 주입하지 않습니다.
 
 1. Desktop app-server attachment: 현재 discovery evidence는 `stdio_only`입니다.
    Session-event mapping을 시도하기 전에 non-disruptive stdio observer를 설계하거나
    explicit user-provided app-server socket을 확보합니다. 아직 live app-server product
    behavior는 켜지지 않습니다.
-2. Cron/gateway dispatcher: permission, approval, lock, dispatch, completion event가
-   실제로 준비된 뒤에만 구현합니다.
+2. Cron/gateway dispatcher: 첫 explicit-approval live slice는 구현됐습니다.
+   다음은 scheduler semantics, recovery/retry policy, 더 강한 long-lived
+   ownership evidence입니다.
 3. Full JSON Schema engine: dependency policy가 허용될 때만 local subset engine을
    교체합니다. 현재 schema artifact는 regression fixture로 유지합니다.
 4. Statusline integration: Codex가 안정적인 supported configuration surface를 제공할 때까지
@@ -330,20 +340,24 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 7. Automatic adapter injection: 명시적이고 되돌릴 수 있는 injection path를 설계하기 전까지
    visible approval artifact만 기록하고 auto-injection은 하지 않습니다.
 8. Routine live model replay: opt-in, budget-gated로 유지하고 기본 stable path 밖에 둡니다.
-9. Autopilot contract layer: `cx autopilot run` 전에 schema artifact와 report-only scope
-   gate부터 시작하는 0.2/0.3 experimental track으로 진행합니다.
+9. Autopilot contract layer: schema artifact, draft planning, contract approval,
+   scope-check foundation이 experimental slice로 존재합니다. Live `cx autopilot run`
+   전에는 worktree-owned execution, capability 시작 게이트, explicit
+   policy-surface blocking을 추가해야 합니다.
 10. Multi-engine relay autopilot: report-only artifact recorder/checker는 구현됐습니다.
     Implementation-stage AC-to-verification matrix enforcement도 structural gate로
     구현됐습니다. 지원되는 adapter가 생기기 전 review engine은 artifact import-only로
     두고, descriptor-backed adapter evidence 없이 active execution으로 넘어가지 않으며,
     convergence가 verification을 대체하지 않게 합니다.
 11. Operational control invariant: decision artifact와 ledger-derived loop summary는
-    advisory session evidence로 구현됐습니다. 다음은 autonomy preset metadata, policy
-    catalog reporting, 더 풍부한 risk fact, task artifact입니다. Enforceable policy
-    field가 생기기 전까지 autonomy preset은 contract metadata로 둡니다.
-12. Compiled repository wiki: advisory synthesis나 context injection 전에 deterministic
-    `cx wiki map/build/check`부터 구현합니다.
-13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)를
-    따라 구현된 observe/dry-run slice 이후의 live start/stop을 준비합니다. Live control은
-    owned-process artifact, owner-token check, heartbeat, port allocation, liveness,
-    active health evidence가 enforce 가능해진 뒤에만 추가합니다.
+    advisory session evidence로 구현됐고, 첫 operational-control slice로 autonomy
+    preset metadata, policy catalog reporting, 더 풍부한 risk fact도 구현됐습니다.
+    다음은 task artifact, broader policy promotion, unified control aggregation입니다.
+    Enforceable policy field가 생기기 전까지 autonomy preset은 contract metadata로 둡니다.
+12. Compiled repository wiki: deterministic `cx wiki map/build/check/context`
+    slice는 구현되었습니다. 다음은 advisory synthesis, explicit checked-in export,
+    richer page coverage이며, injection path는 그 이후에만 검토합니다.
+13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
+    구현된 live ownership slice 위에 다음 단계를 쌓습니다. 이후 작업은
+    instance-linked browser/dev-server evidence, 더 강한 stale/orphan policy,
+    future autopilot surface를 위한 worktree-aware launcher reuse입니다.

@@ -3,7 +3,22 @@
 [English](../../design/17-operational-control-invariants.md)
 
 작성일: 2026-06-02
-상태: 제안된 0.2 / 0.3 설계 트랙
+상태: experimental first slice implemented; broader task artifact / promotion work remains on the 0.2 / 0.3 track.
+
+## 구현 상태
+
+현재 구현됨:
+
+- `cx autopilot presets list --json`이 이름 있는 autonomy preset과 default preset을 노출합니다.
+- Autopilot draft contract는 `autonomyPreset`을 schema-validated contract metadata로 가집니다.
+- `cx policy catalog check --json`이 observed/advisory/unavailable control finding을 보고합니다.
+- Change evidence가 blast radius, dependency, schema, migration, scope path에 대한 `riskFacts`를 파생합니다.
+
+계속 deferred:
+
+- task artifact와 task-panel projection 승격;
+- 기존 start/stop gate를 넘는 active policy enforcement;
+- 모든 deferred self-report를 하나로 모으는 통합 control dashboard.
 
 ## 결정
 

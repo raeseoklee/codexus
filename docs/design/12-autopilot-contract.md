@@ -3,7 +3,7 @@
 [Korean](../ko/design/12-autopilot-contract.md)
 
 Date: 2026-05-31
-Status: proposed design (deferred from 0.1.0; 0.2 / 0.3 track)
+Status: experimental foundation slice implemented; draft contracts now carry autonomy preset metadata, while live `cx autopilot run` remains deferred on the 0.2 / 0.3 track
 
 ## Decision
 
@@ -97,6 +97,7 @@ weaken a gate). Candidate fields:
   "schemaVersion": 1,
   "type": "codexus.autopilot.contract",
   "status": "approved",
+  "autonomyPreset": "contracted",
   "approval": {
     "approvedAt": "2026-05-31T00:00:00.000Z",
     "approvedBy": "maintainer-or-local-operator",
@@ -141,7 +142,8 @@ Validation rules that matter:
 1. **`cx autopilot plan --from docs/...`** reads the documents and emits a
    *proposed* contract (`acceptanceCriteria` / `forbiddenChanges` /
    `verificationRequired` derived heuristically). It is explicitly labeled as a
-   draft needing review.
+   draft needing review and records the selected autonomy preset as contract
+   metadata.
 2. **Human approval (once).** The maintainer reviews and approves the contract.
    This writes an approval artifact with source document hashes and the canonical
    contract-body hash. This is the single approval that replaces per-step
@@ -239,13 +241,17 @@ evidence.
 ## Surface
 
 ```bash
-cx autopilot plan --from docs/PRD.md --json     # proposed contract (draft, needs approval)
-cx autopilot run --policy .codexus/autopilot.json --json   # worktree + strict gates
+cx autopilot plan --from docs/PRD.md --json
+cx autopilot contract validate .codexus/autopilot/drafts/<id>.json --json
+cx autopilot contract approve .codexus/autopilot/drafts/<id>.json --approved-by maintainer --json
+cx autopilot contract scope-check .codexus/autopilot/drafts/<id>.json --json
+cx autopilot run --policy .codexus/autopilot.json --json   # deferred
 ```
 
-Both are `--json`-first and reuse the ledger/event/gate shapes. `autopilot run`
-output is `experimental`-stable-marked (see the readiness plan) until the surface
-settles.
+The implemented commands are `--json`-first and reuse the ledger/event/gate
+shapes. `cx autopilot run` remains deferred until the scope gate, worktree
+ownership, and capability start-gate execution path are promoted beyond the
+current foundation slice.
 
 ## Non-Goals
 
@@ -258,9 +264,26 @@ settles.
   supported observation/enforcement surface.
 - Does not treat a contract-bound stop as a failure.
 - Does not bake Codex specifics into the contract/scope/gate layer.
-- Not part of 0.1.0 stable; ships experimental on the 0.2 / 0.3 track.
+- Not part of the 0.1.x stable contract; the implemented first slice self-reports
+  `stability: experimental`, and live `cx autopilot run` remains deferred on the
+  0.2 / 0.3 track.
 
 ## First Slice
+
+Current implementation status:
+
+- Done: schema artifact + validation through `cx schema validate --type autopilot-contract`.
+- Done: `cx autopilot plan --from ...` writes a draft contract with `sourceDocs`,
+  extracted acceptance criteria, inferred scope, and verification candidates.
+- Done: `cx autopilot contract approve` records a canonical subject-hash-backed
+  approval artifact and emits an approved contract.
+- Done: `cx autopilot contract scope-check` reuses change-evidence facts and can
+  gate forbidden or out-of-scope changes against an approved contract.
+- Deferred: acceptance-criteria extraction is heuristic and self-reports
+  `acceptance_criteria_extraction_deferred`; empty or partial extraction must not
+  be treated as authoritative acceptance coverage.
+- Deferred: `cx autopilot run` is intentionally unavailable and self-reports
+  `autopilot_run_deferred` until worktree-isolated live execution exists.
 
 1. autopilot contract **schema artifact + validation** (empty-scope rejected,
    unknown keys rejected, `forbiddenChanges` precedence).

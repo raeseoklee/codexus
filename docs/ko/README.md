@@ -41,8 +41,9 @@ Codexus는 Codex를 실행한 뒤 `npm test`를 실행합니다. 테스트가 �
 때만 `complete`가 됩니다.
 
 > 0.1.x 안정 라인은 의도적으로 좁습니다. Live app-server turn, routine live model
-> replay, automatic prompt injection, live cron/gateway dispatch는 계속 gate 뒤에
-> 있습니다. 자세한 상태는 [구현 상태](implementation-status.md)를 확인하세요.
+> replay, automatic prompt injection은 계속 gate 뒤에 있습니다. Live
+> cron/gateway dispatch는 이제 explicit approval이 필요한 experimental
+> surface입니다. 자세한 상태는 [구현 상태](implementation-status.md)를 확인하세요.
 
 ## Codex CLI 채팅 안에서 사용하기
 
@@ -150,8 +151,9 @@ npm run package:smoke
 
 Codexus 0.1.2는 좁은 stable path를 가진 local harness로 사용할 수 있습니다.
 안정 경로는 `codex exec --json`을 감싸는 CLI입니다. Live app-server turn,
-routine live model replay, automatic prompt injection, live cron/gateway dispatch는
-의도적으로 gate 뒤에 있습니다.
+routine live model replay, automatic prompt injection은 의도적으로 gate 뒤에
+있습니다. Live cron/gateway dispatch는 experimental explicit-approval
+surface로 제공됩니다.
 
 ## 지원 상태 매트릭스
 
@@ -160,9 +162,10 @@ routine live model replay, automatic prompt injection, live cron/gateway dispatc
 | `codex exec --json` supervised run, verification/repair, run ledger, resume/cancel/status/events | 안정 경로 |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | 안정적인 session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | 안정적인 local evidence/gate surface |
-| `app instance profile list/status/logs/start --dry-run` | Experimental observe/dry-run surface; live start/stop 없음 |
-| app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; dry-run, status, record/attach/complete, launch-contract 또는 명시적 gate 뒤 |
-| autopilot contract layer | 제안된 설계, 0.2/0.3 트랙으로 deferred |
+| `repo graph build/check` | Experimental graph evidence surface; build/check만 지원, import/search/injection 없음 |
+| `app instance profile list/status/logs/start/stop` | Experimental owned-process surface; live start/stop은 Codexus-owned instance에서만 동작 |
+| app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; app-server는 read-only, cron/gateway는 explicit approval live dispatch 지원, 나머지는 status/record/launch-contract/gated surface |
+| autopilot contract layer | Experimental foundation slice 구현 (`plan`, `contract validate/approve/scope-check`); live `autopilot run`은 계속 0.2/0.3 트랙에서 deferred |
 
 정확한 coverage와 gap은 [구현 상태](implementation-status.md)와
 [남은 작업](remaining-work.md)을 확인하세요.
@@ -200,8 +203,9 @@ cx slop check --scope "src/**" --gate --json
 cx supply-chain check --gate --json
 cx release check --gate --json
 cx app instance profile list --json
-cx app instance start --profile web --worktree . --dry-run --json
+cx app instance start --profile web --worktree . --json
 cx app instance status --json
+cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
 cx status <run-id> --json
@@ -230,14 +234,14 @@ Public bin은 `cx`와 `codexus`입니다.
 - [Subagent evidence supervision](design/09-subagent-evidence-supervision.md)
 - [품질 증거 가드 (slop guard)](design/10-quality-evidence-guard.md)
 - [공급망 증거](design/11-supply-chain-evidence.md)
-- [Autopilot 계약](design/12-autopilot-contract.md): 장시간 supervised run을 위한 0.2/0.3 제안 설계. 사람이 승인한 scope, worktree 격리, detect-then-stop, evidence-gated acceptance를 다룹니다.
+- [Autopilot 계약](design/12-autopilot-contract.md): 장시간 supervised run을 위한 experimental foundation slice입니다. `cx autopilot plan`, contract validate/approve/scope-check, 사람이 승인한 scope, worktree 격리, detect-then-stop, evidence-gated acceptance를 다루며, live `autopilot run`은 계속 deferred입니다.
 - [하네스 엔지니어링 정렬](design/13-harness-engineering-alignment.md): OpenAI harness engineering 글과 Karpathy-style behavior contract를 종합한 정렬 문서. repository map, architecture gate, behavior evidence, non-goal을 정의합니다.
 - [Repository knowledge graph](design/14-repository-knowledge-graph.md): experimental codexus-lite graph build/check 첫 slice와, deferred Understand-Anything JSON import용 graph-provider boundary, scoped freshness, structural graph gate를 정의합니다.
 - [Multi-engine relay autopilot](design/15-multi-engine-relay-autopilot.md): author/reviewer artifact, stage-gate evidence, convergence validation을 위한 experimental recorder/checker 첫 slice입니다. Convergence는 완료 권한이 아닙니다.
 - [Codex task panel projection](design/16-codex-task-panel-projection.md): durable Codexus task state를 native Codex task panel로 projection하되, host UI를 source of truth로 만들지 않는 0.2 제안 설계입니다.
-- [Operational control invariants](design/17-operational-control-invariants.md): autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker, HUD projection을 Codexus-native control layer로 정리하되 새 완료 권한은 만들지 않는 제안 설계입니다.
-- [Compiled repository wiki](design/18-compiled-repository-wiki.md): repository fact, ledger, graph artifact, decision, verification evidence 위에 scoped freshness와 context pack을 갖춘 재생성 가능한 markdown projection을 만드는 제안 설계입니다.
-- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): worktree별 app evidence를 위한 experimental observe/dry-run app instance surface입니다. Live start/stop은 owned-process safety invariant 뒤로 deferred입니다.
+- [Operational control invariants](design/17-operational-control-invariants.md): autonomy preset, policy catalog reporting, docs-code invariant, decision record, loop breaker, HUD projection의 실험적 첫 slice를 정리하되 새 완료 권한은 만들지 않습니다.
+- [Compiled repository wiki](design/18-compiled-repository-wiki.md): repository fact, ledger, graph artifact, decision, verification evidence 위의 재생성 가능한 markdown page를 위한 experimental deterministic 첫 slice입니다. `cx wiki map/build/check/context`가 local하게 동작하며 advisory synthesis와 checked-in export는 계속 deferred입니다.
+- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): worktree별 app evidence를 위한 experimental live ownership app instance surface입니다. Live start/stop은 Codexus-owned instance에 대해 동작하며 stable 0.1.x contract 밖에 남습니다.
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)
@@ -254,5 +258,5 @@ Public bin은 `cx`와 `codexus`입니다.
 
 Codexus는 private ChatGPT/Codex backend API를 의도적으로 사용하지 않습니다. 안정적인
 driver boundary는 로컬에 인증된 Codex CLI입니다. Experimental surface는 feature gate
-뒤에 있으며, live dispatch path를 활성화하기 전에 dry-run, policy, approval, evidence
-record를 먼저 보고합니다.
+뒤에 있으며, live dispatch path는 explicit approval, policy, lock, evidence
+record를 남긴 뒤에만 실행됩니다.

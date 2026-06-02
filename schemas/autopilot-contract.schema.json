@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.dev/schemas/autopilot-contract.schema.json",
+  "title": "Codexus autopilot contract",
+  "type": "object",
+  "required": ["schemaVersion", "stability", "type", "status", "autonomyPreset", "sourceDocs", "autopilot"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.autopilot.contract" },
+    "status": { "enum": ["draft", "approved"] },
+    "autonomyPreset": {
+      "enum": ["manual", "guided", "contracted", "gated-auto", "extended-auto"]
+    },
+    "sourceDocs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^sha256:" }
+        }
+      }
+    },
+    "autopilot": {
+      "type": "object",
+      "required": [
+        "scope",
+        "acceptanceCriteria",
+        "verificationRequired",
+        "commandAllowlist",
+        "networkPolicy",
+        "maxRuntimeMs",
+        "maxRepairIterations",
+        "maxChangedFiles",
+        "maxDiffLines",
+        "approval",
+        "stopOnPolicyViolation"
+      ],
+      "properties": {
+        "scope": {
+          "type": "object",
+          "required": ["allow", "forbiddenChanges"],
+          "properties": {
+            "allow": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "forbiddenChanges": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "verificationRequired": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "commandAllowlist": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "networkPolicy": {
+          "type": "object",
+          "required": ["mode", "requiresDriverEnforcement"],
+          "properties": {
+            "mode": { "enum": ["none", "driver-default"] },
+            "requiresDriverEnforcement": { "type": "boolean" }
+          }
+        },
+        "maxRuntimeMs": { "type": "number", "exclusiveMinimum": 0 },
+        "maxRepairIterations": { "type": "number", "minimum": 1 },
+        "maxChangedFiles": { "type": "number", "minimum": 1 },
+        "maxDiffLines": { "type": "number", "minimum": 1 },
+        "approval": { "const": "enforced-never-with-isolation" },
+        "stopOnPolicyViolation": { "type": "boolean" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "required": ["approvedAt", "approvedBy", "subjectHash", "approvalRecordPath"],
+      "properties": {
+        "approvedAt": { "type": "string", "minLength": 1 },
+        "approvedBy": { "type": "string", "minLength": 1 },
+        "subjectHash": { "type": "string", "pattern": "^sha256:" },
+        "approvalRecordPath": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

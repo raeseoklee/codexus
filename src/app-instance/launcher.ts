@@ -1,8 +1,13 @@
-import { spawnSync } from "node:child_process";
+import { createHash, randomBytes } from "node:crypto";
+import { spawn, spawnSync } from "node:child_process";
+import { createServer } from "node:net";
 import { existsSync } from "node:fs";
-import { open, readFile, readdir, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
+import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
+import { withFileLock } from "../util/lock.ts";
+import { findCodexusPackageRoot } from "../util/package-root.ts";
 
 export type AppInstanceHealthStatus = "passed" | "failed" | "unknown" | "unavailable";
 export type AppInstanceStatus = "running" | "stopped" | "orphaned" | "unknown";
@@ -68,6 +73,7 @@ export interface AppInstanceArtifact {
     ownerTokenHash: string | null;
     pid: number | null;
     processGroupId: number | null;
+    runnerStartMarker?: string | null;
     heartbeatPath: string | null;
   };
   network: {
@@ -79,6 +85,8 @@ export interface AppInstanceArtifact {
     status: AppInstanceHealthStatus;
     lastCheckedAt: string | null;
     evidencePath: string | null;
+    url?: string | null;
+    timeoutMs?: number | null;
   };
   logs: {
     stdoutPath: string | null;
@@ -94,9 +102,71 @@ export interface AppInstanceArtifactValidation {
   artifact: AppInstanceArtifact | null;
 }
 
+interface AppInstanceHeartbeat {
+  schemaVersion: 1;
+  type: "codexus.app.instance.heartbeat";
+  instanceId: string;
+  ownerTokenHash: string;
+  runnerPid: number;
+  runnerStartMarker?: string | null;
+  appPid: number | null;
+  updatedAt: string;
+  status: "running" | "stopped" | "failed";
+  exitCode: number | null;
+  signal: NodeJS.Signals | null;
+}
+
+interface AppInstanceLaunchResult {
+  schemaVersion: 1;
+  type: "codexus.app.instance.launch-result";
+  recordedAt: string;
+  status: "ready" | "failed";
+  instanceId: string;
+  appPid?: number;
+  processGroupId?: number;
+  error?: string;
+}
+
+interface AppInstanceLaunchConfig {
+  schemaVersion: 1;
+  command: string[];
+  cwd: string;
+  env: Record<string, string> | null;
+  instanceId: string;
+  worktreePath: string;
+  worktreeBranch: string | null;
+  worktreeHead: string | null;
+  profile: string;
+  artifactPath: string;
+  heartbeatPath: string;
+  resultPath: string;
+  ownerTokenHash: string;
+  network: {
+    host: "127.0.0.1";
+    port: number | null;
+    url: string | null;
+  };
+  health: {
+    url: string | null;
+    timeoutMs: number | null;
+    evidencePath: string | null;
+  };
+  logs: {
+    stdoutPath: string | null;
+    stderrPath: string | null;
+  };
+  heartbeatIntervalMs: number;
+}
+
 const MAX_LOG_TAIL_BYTES = 64 * 1024;
 const DEFAULT_LOG_TAIL_LINES = 80;
 const MAX_LOG_TAIL_LINES = 500;
+const LAUNCH_WAIT_TIMEOUT_MS = 2_500;
+const HEARTBEAT_STALE_MS = 8_000;
+const HEARTBEAT_INTERVAL_MS = 1_000;
+const STOP_GRACE_MS = 2_000;
+const HEALTH_DEFAULT_TIMEOUT_MS = 2_000;
+const HOST = "127.0.0.1" as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -310,103 +380,139 @@ function parsePortOverride(port: string | undefined): number | null {
   return parsed;
 }
 
-function renderHealthUrl(profile: AppInstanceProfile, port: number | null): string | null {
-  if (!profile.health) return null;
-  if (port === null) return profile.health.url;
-  return profile.health.url.replaceAll("{port}", String(port));
+function nowIso(): string {
+  return new Date().toISOString();
 }
 
-export async function listAppInstanceProfiles(cwd: string, options: { descriptorPath?: string }) {
-  const descriptor = await readAppInstanceDescriptor(cwd, options.descriptorPath);
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function pidLive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error
+      ? (error as { code?: unknown }).code
+      : null;
+    return code === "EPERM";
+  }
+}
+
+function readProcessStartMarker(pid: number): string | null {
+  if (!Number.isInteger(pid) || pid <= 0) return null;
+  const result = spawnSync("ps", ["-o", "lstart=", "-p", String(pid)], { encoding: "utf8" });
+  if (result.status !== 0) return null;
+  const marker = result.stdout.trim();
+  return marker.length > 0 ? marker : null;
+}
+
+function hashOwnerToken(token: string): string {
+  return `sha256:${createHash("sha256").update(token).digest("hex")}`;
+}
+
+function appInstanceRoot(cwd: string): string {
+  return join(harnessRoot(cwd), "app-instances");
+}
+
+function instanceDirPath(worktree: string, instanceId: string): string {
+  return join(appInstanceRoot(worktree), instanceId);
+}
+
+function instancePaths(worktree: string, instanceId: string) {
+  const dir = instanceDirPath(worktree, instanceId);
   return {
-    schemaVersion: 1,
-    stability: "experimental" as const,
-    command: "app instance profile list" as const,
-    cwd,
-    descriptor: {
-      declared: descriptor.declared,
-      source: descriptor.source,
-      path: descriptor.path,
-      valid: descriptor.validation.valid,
-      errors: descriptor.validation.errors,
-    },
-    profiles: descriptor.validation.descriptor?.profiles ?? [],
-    capabilities: {
-      liveStart: false,
-      liveStop: false,
-      dryRunStart: descriptor.declared && descriptor.validation.valid,
-    },
+    dir,
+    artifact: join(dir, "instance.json"),
+    heartbeat: join(dir, "heartbeat.json"),
+    launch: join(dir, "launch.json"),
+    result: join(dir, "result.json"),
+    stdout: join(dir, "stdout.log"),
+    stderr: join(dir, "stderr.log"),
+    health: join(dir, "health.json"),
   };
 }
 
-export async function planAppInstanceStart(cwd: string, options: {
-  descriptorPath?: string;
-  profile?: string;
-  worktree?: string;
-  port?: string;
-  dryRun: boolean;
-}) {
-  if (!options.dryRun) throw new Error("unsupported_feature:app-instance-live-start");
-  if (!options.profile) throw new Error("missing_app_instance_profile");
-  if (!options.worktree) throw new Error("missing_app_instance_worktree");
-  const descriptor = await readAppInstanceDescriptor(cwd, options.descriptorPath);
-  if (!descriptor.declared) throw new Error("missing_app_instance_descriptor");
-  if (!descriptor.validation.valid || !descriptor.validation.descriptor) throw new Error(`app_instance_descriptor_invalid:${descriptor.validation.errors.join(",")}`);
-  const profile = descriptor.validation.descriptor.profiles.find((candidate) => candidate.name === options.profile);
-  if (!profile) throw new Error(`app_instance_profile_not_found:${options.profile}`);
-  const worktree = resolve(cwd, options.worktree);
-  if (!existsSync(worktree) || !(await stat(worktree)).isDirectory()) throw new Error(`invalid_app_instance_worktree:${worktree}`);
-  const profileCwd = resolve(worktree, profile.cwd);
-  if (!pathInside(worktree, profileCwd)) throw new Error("app_instance_profile_cwd_outside_worktree");
-  const portOverride = parsePortOverride(options.port);
-  const candidatePort = portOverride ?? profile.port.preferred;
-  const instanceId = `app_dry_run_${Date.now().toString(36)}`;
-  const instanceDir = join(harnessRoot(worktree), "app-instances", instanceId);
-  const stdoutPath = profile.log.stdout ? join(instanceDir, "stdout.log") : null;
-  const stderrPath = profile.log.stderr ? join(instanceDir, "stderr.log") : null;
-  const heartbeatPath = join(instanceDir, "heartbeat.json");
+function runnerScriptPath(): string {
+  return join(findCodexusPackageRoot(), "scripts", "codexus-app-instance-runner.mjs");
+}
+
+function substitutePlaceholders(value: string, port: number | null): string {
+  return value
+    .replaceAll("{host}", HOST)
+    .replaceAll("{port}", port === null ? "" : String(port));
+}
+
+function buildLaunchCommand(profile: AppInstanceProfile, port: number | null): string[] {
+  return profile.command.map((part) => substitutePlaceholders(part, port));
+}
+
+function renderHealthUrl(profile: AppInstanceProfile, port: number | null): string | null {
+  if (!profile.health) return null;
+  return substitutePlaceholders(profile.health.url, port);
+}
+
+async function probePort(port: number): Promise<boolean> {
+  return await new Promise((resolve) => {
+    const server = createServer();
+    server.unref();
+    server.once("error", () => {
+      resolve(false);
+    });
+    server.listen(port, HOST, () => {
+      server.close(() => resolve(true));
+    });
+  });
+}
+
+async function allocateEphemeralPort(): Promise<number> {
+  return await new Promise((resolve, reject) => {
+    const server = createServer();
+    server.unref();
+    server.once("error", reject);
+    server.listen(0, HOST, () => {
+      const address = server.address();
+      if (!address || typeof address === "string") {
+        server.close(() => reject(new Error("ephemeral_port_unavailable")));
+        return;
+      }
+      const { port } = address;
+      server.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(port);
+      });
+    });
+  });
+}
+
+async function selectPort(profile: AppInstanceProfile, override: number | null): Promise<{
+  port: number | null;
+  status: "preferred" | "reallocated" | "fixed" | "fixed_override" | "unassigned";
+}> {
+  const requested = override ?? profile.port.preferred;
+  if (profile.port.mode === "fixed") {
+    if (requested === null) throw new Error("app_instance_fixed_port_required");
+    const available = await probePort(requested);
+    if (!available) throw new Error(`app_instance_port_unavailable:${requested}`);
+    return { port: requested, status: override === null ? "fixed" : "fixed_override" };
+  }
+  if (requested !== null && await probePort(requested)) {
+    return { port: requested, status: "preferred" };
+  }
+  const fallback = requested === null ? await allocateEphemeralPort() : await allocateEphemeralPort();
+  return { port: fallback, status: requested === null ? "unassigned" : "reallocated" };
+}
+
+function buildInstanceEnvironment(port: number | null): Record<string, string> {
   return {
-    schemaVersion: 1,
-    stability: "experimental" as const,
-    command: "app instance start" as const,
-    mode: "dry-run" as const,
-    spawned: false,
-    status: "planned" as const,
-    cwd,
-    descriptor: {
-      source: descriptor.source,
-      path: descriptor.path,
-      valid: descriptor.validation.valid,
-    },
-    profile,
-    worktree: inspectWorktree(worktree),
-    launchPlan: {
-      command: profile.command,
-      cwd: profileCwd,
-      host: "127.0.0.1" as const,
-      port: candidatePort,
-      healthUrl: renderHealthUrl(profile, candidatePort),
-      portCheck: {
-        status: "not_checked" as const,
-        reason: "dry_run_does_not_bind_or_probe_ports" as const,
-      },
-      environment: {
-        copied: false,
-        reason: "first_slice_does_not_copy_environment_variables" as const,
-      },
-    },
-    wouldWrite: {
-      instanceId,
-      instancePath: join(instanceDir, "instance.json"),
-      heartbeatPath,
-      stdoutPath,
-      stderrPath,
-    },
-    capabilities: {
-      liveStart: false,
-      liveStop: false,
-      dryRunStart: true,
-    },
+    HOST,
+    PORT: port === null ? "" : String(port),
+    CODEXUS_HOST: HOST,
+    CODEXUS_PORT: port === null ? "" : String(port),
   };
 }
 
@@ -447,28 +553,37 @@ export function validateAppInstanceArtifact(value: unknown, path = "artifact"): 
       ownerTokenHash: optionalString(value.owner, "ownerTokenHash", errors, "owner.ownerTokenHash"),
       pid: value.owner.pid === null ? null : requireInteger(value.owner, "pid", errors, "owner.pid"),
       processGroupId: value.owner.processGroupId === null ? null : requireInteger(value.owner, "processGroupId", errors, "owner.processGroupId"),
+      runnerStartMarker: optionalString(value.owner, "runnerStartMarker", errors, "owner.runnerStartMarker"),
       heartbeatPath: optionalString(value.owner, "heartbeatPath", errors, "owner.heartbeatPath"),
     }
-    : { ownedByCodexus: false, ownerTokenHash: null, pid: null, processGroupId: null, heartbeatPath: null };
+    : { ownedByCodexus: false, ownerTokenHash: null, pid: null, processGroupId: null, runnerStartMarker: null, heartbeatPath: null };
   const networkPort = isRecord(value.network) && value.network.port === null ? null : isRecord(value.network) ? requireInteger(value.network, "port", errors, "network.port") : null;
   if (networkPort !== null && (networkPort < 1 || networkPort > 65535)) errors.push("network.port:expected_port_range");
   const network = isRecord(value.network)
     ? {
-      host: value.network.host === "127.0.0.1" ? "127.0.0.1" as const : "127.0.0.1" as const,
+      host: value.network.host === HOST ? HOST : HOST,
       port: networkPort,
       url: optionalString(value.network, "url", errors, "network.url"),
     }
-    : { host: "127.0.0.1" as const, port: null, url: null };
-  if (isRecord(value.network) && value.network.host !== "127.0.0.1") errors.push("network.host:not_loopback");
+    : { host: HOST, port: null, url: null };
+  if (isRecord(value.network) && value.network.host !== HOST) errors.push("network.host:not_loopback");
   const rawHealthStatus = isRecord(value.health) ? value.health.status : null;
   if (!isHealthStatus(rawHealthStatus)) errors.push("health.status:invalid_enum");
+  const healthTimeoutMs = isRecord(value.health) && value.health.timeoutMs === null
+    ? null
+    : isRecord(value.health) && value.health.timeoutMs !== undefined
+      ? requireInteger(value.health, "timeoutMs", errors, "health.timeoutMs")
+      : null;
+  if (healthTimeoutMs !== null && healthTimeoutMs <= 0) errors.push("health.timeoutMs:expected_positive_integer");
   const health = isRecord(value.health)
     ? {
       status: isHealthStatus(rawHealthStatus) ? rawHealthStatus : "unknown" as const,
       lastCheckedAt: optionalString(value.health, "lastCheckedAt", errors, "health.lastCheckedAt"),
       evidencePath: optionalString(value.health, "evidencePath", errors, "health.evidencePath"),
+      url: optionalString(value.health, "url", errors, "health.url"),
+      timeoutMs: healthTimeoutMs,
     }
-    : { status: "unknown" as const, lastCheckedAt: null, evidencePath: null };
+    : { status: "unknown" as const, lastCheckedAt: null, evidencePath: null, url: null, timeoutMs: null };
   const logs = isRecord(value.logs)
     ? {
       stdoutPath: optionalString(value.logs, "stdoutPath", errors, "logs.stdoutPath"),
@@ -493,8 +608,48 @@ export function validateAppInstanceArtifact(value: unknown, path = "artifact"): 
   return { path, valid: errors.length === 0, errors, artifact };
 }
 
-function instanceRoot(cwd: string): string {
-  return join(harnessRoot(cwd), "app-instances");
+function isHeartbeat(value: unknown): value is AppInstanceHeartbeat {
+  return isRecord(value)
+    && value.schemaVersion === 1
+    && value.type === "codexus.app.instance.heartbeat"
+    && typeof value.instanceId === "string"
+    && typeof value.ownerTokenHash === "string"
+    && Number.isInteger(value.runnerPid)
+    && (value.runnerStartMarker === undefined || value.runnerStartMarker === null || typeof value.runnerStartMarker === "string")
+    && (value.appPid === null || Number.isInteger(value.appPid))
+    && typeof value.updatedAt === "string"
+    && (value.status === "running" || value.status === "stopped" || value.status === "failed")
+    && (value.exitCode === null || Number.isInteger(value.exitCode))
+    && (value.signal === null || typeof value.signal === "string");
+}
+
+function isLaunchResult(value: unknown): value is AppInstanceLaunchResult {
+  return isRecord(value)
+    && value.schemaVersion === 1
+    && value.type === "codexus.app.instance.launch-result"
+    && typeof value.recordedAt === "string"
+    && (value.status === "ready" || value.status === "failed")
+    && typeof value.instanceId === "string";
+}
+
+async function readHeartbeat(path: string | null): Promise<AppInstanceHeartbeat | null> {
+  if (!path || !existsSync(path)) return null;
+  try {
+    const value = JSON.parse(await readFile(path, "utf8")) as unknown;
+    return isHeartbeat(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+async function readLaunchResult(path: string): Promise<AppInstanceLaunchResult | null> {
+  if (!existsSync(path)) return null;
+  try {
+    const value = JSON.parse(await readFile(path, "utf8")) as unknown;
+    return isLaunchResult(value) ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 async function readInstanceArtifact(path: string): Promise<AppInstanceArtifactValidation> {
@@ -506,7 +661,7 @@ async function readInstanceArtifact(path: string): Promise<AppInstanceArtifactVa
 }
 
 async function listInstanceArtifactPaths(cwd: string): Promise<string[]> {
-  const root = instanceRoot(cwd);
+  const root = appInstanceRoot(cwd);
   if (!existsSync(root)) return [];
   const paths: string[] = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
@@ -528,54 +683,472 @@ function resolveArtifactPath(artifact: AppInstanceArtifact, artifactPath: string
   return resolve(artifactPath, "..", path);
 }
 
-function projectHealth(artifact: AppInstanceArtifact, artifactPath: string) {
+function heartbeatFresh(heartbeat: AppInstanceHeartbeat): boolean {
+  const timestamp = new Date(heartbeat.updatedAt).getTime();
+  return Number.isFinite(timestamp) && Date.now() - timestamp <= HEARTBEAT_STALE_MS;
+}
+
+function projectProcess(artifact: AppInstanceArtifact, heartbeat: AppInstanceHeartbeat | null) {
+  if (!artifact.owner.ownedByCodexus || artifact.owner.pid === null) {
+    return {
+      status: "unknown" as const,
+      reason: "not_codexus_owned_or_missing_pid" as const,
+      pid: artifact.owner.pid,
+      processGroupId: artifact.owner.processGroupId,
+      heartbeatFresh: false,
+      ownedByCodexus: artifact.owner.ownedByCodexus,
+    };
+  }
+  const live = pidLive(artifact.owner.pid);
+  if (live && heartbeat && heartbeatFresh(heartbeat) && heartbeat.ownerTokenHash === artifact.owner.ownerTokenHash) {
+    return {
+      status: "running" as const,
+      reason: "pid_live_and_heartbeat_fresh" as const,
+      pid: artifact.owner.pid,
+      processGroupId: artifact.owner.processGroupId,
+      heartbeatFresh: true,
+      ownedByCodexus: artifact.owner.ownedByCodexus,
+    };
+  }
+  if (!live && artifact.status === "stopped") {
+    return {
+      status: "stopped" as const,
+      reason: "artifact_marked_stopped_and_pid_dead" as const,
+      pid: artifact.owner.pid,
+      processGroupId: artifact.owner.processGroupId,
+      heartbeatFresh: heartbeat ? heartbeatFresh(heartbeat) : false,
+      ownedByCodexus: artifact.owner.ownedByCodexus,
+    };
+  }
+  if (live) {
+    return {
+      status: "orphaned" as const,
+      reason: heartbeat ? "heartbeat_stale_or_mismatched" as const : "heartbeat_missing" as const,
+      pid: artifact.owner.pid,
+      processGroupId: artifact.owner.processGroupId,
+      heartbeatFresh: heartbeat ? heartbeatFresh(heartbeat) : false,
+      ownedByCodexus: artifact.owner.ownedByCodexus,
+    };
+  }
+  return {
+    status: artifact.status === "running" ? "orphaned" as const : artifact.status,
+    reason: "pid_dead" as const,
+    pid: artifact.owner.pid,
+    processGroupId: artifact.owner.processGroupId,
+    heartbeatFresh: heartbeat ? heartbeatFresh(heartbeat) : false,
+    ownedByCodexus: artifact.owner.ownedByCodexus,
+  };
+}
+
+async function probeHealth(artifact: AppInstanceArtifact, artifactPath: string, processStatus: ReturnType<typeof projectProcess>) {
   const evidencePath = resolveArtifactPath(artifact, artifactPath, artifact.health.evidencePath);
-  const evidenceExists = evidencePath !== null && existsSync(evidencePath);
-  if (artifact.health.status === "passed" && !evidenceExists) {
+  if (processStatus.status !== "running") {
     return {
       status: "unknown" as const,
       rawStatus: artifact.health.status,
       evidencePath,
-      evidenceExists,
-      reason: "passed_health_requires_existing_evidence_artifact" as const,
+      evidenceExists: evidencePath !== null && existsSync(evidencePath),
+      reason: "process_not_running" as const,
+      lastCheckedAt: artifact.health.lastCheckedAt,
     };
   }
+  if (!artifact.health.url) {
+    return {
+      status: "unavailable" as const,
+      rawStatus: artifact.health.status,
+      evidencePath,
+      evidenceExists: evidencePath !== null && existsSync(evidencePath),
+      reason: "health_descriptor_unavailable" as const,
+      lastCheckedAt: artifact.health.lastCheckedAt,
+    };
+  }
+  const timeoutMs = artifact.health.timeoutMs ?? HEALTH_DEFAULT_TIMEOUT_MS;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let nextStatus: AppInstanceHealthStatus = "failed";
+  let summary = "request_failed";
+  let statusCode: number | null = null;
+  try {
+    const response = await fetch(artifact.health.url, { signal: controller.signal });
+    statusCode = response.status;
+    nextStatus = response.ok ? "passed" : "failed";
+    summary = response.ok ? "http_ok" : "http_non_ok";
+  } catch (error) {
+    nextStatus = "failed";
+    summary = error instanceof Error ? error.message : String(error);
+  } finally {
+    clearTimeout(timer);
+  }
+  const checkedAt = nowIso();
+  if (evidencePath) {
+    await writeJsonAtomic(evidencePath, {
+      schemaVersion: 1,
+      type: "codexus.app.instance.health-evidence",
+      instanceId: artifact.instanceId,
+      checkedAt,
+      url: artifact.health.url,
+      timeoutMs,
+      status: nextStatus,
+      statusCode,
+      summary,
+    });
+  }
+  const nextArtifact: AppInstanceArtifact = {
+    ...artifact,
+    health: {
+      ...artifact.health,
+      status: nextStatus,
+      lastCheckedAt: checkedAt,
+      evidencePath,
+    },
+  };
+  await writeJsonAtomic(artifactPath, nextArtifact);
   return {
-    status: artifact.health.status,
-    rawStatus: artifact.health.status,
+    status: nextStatus,
+    rawStatus: nextStatus,
     evidencePath,
-    evidenceExists,
-    reason: null,
+    evidenceExists: evidencePath !== null && existsSync(evidencePath),
+    reason: nextStatus === "passed" ? null : summary,
+    lastCheckedAt: checkedAt,
   };
 }
 
-function projectInstance(validation: AppInstanceArtifactValidation) {
+async function projectInstance(validation: AppInstanceArtifactValidation) {
   if (!validation.artifact) return null;
   const artifact = validation.artifact;
+  const heartbeatPath = resolveArtifactPath(artifact, validation.path, artifact.owner.heartbeatPath);
+  const heartbeat = await readHeartbeat(heartbeatPath);
+  const process = projectProcess(artifact, heartbeat);
+  const health = await probeHealth(artifact, validation.path, process);
   return {
     instanceId: artifact.instanceId,
     artifactPath: validation.path,
     worktree: artifact.worktree,
     profile: artifact.profile,
-    status: artifact.status,
-    process: {
-      status: "unknown" as const,
-      reason: "live_process_liveness_probe_deferred" as const,
-      pid: artifact.owner.pid,
-      ownedByCodexus: artifact.owner.ownedByCodexus,
-    },
+    status: process.status,
+    process,
+    heartbeat: heartbeat
+      ? {
+        path: heartbeatPath,
+        status: heartbeat.status,
+        updatedAt: heartbeat.updatedAt,
+        fresh: heartbeatFresh(heartbeat),
+        runnerPid: heartbeat.runnerPid,
+        appPid: heartbeat.appPid,
+      }
+      : {
+        path: heartbeatPath,
+        status: "missing" as const,
+        updatedAt: null,
+        fresh: false,
+        runnerPid: null,
+        appPid: null,
+      },
     network: artifact.network,
-    health: projectHealth(artifact, validation.path),
+    health,
     logs: artifact.logs,
+    owner: artifact.owner,
   };
+}
+
+async function existingRunningInstance(worktree: string, profile: string) {
+  const validations = await Promise.all((await listInstanceArtifactPaths(worktree)).map(readInstanceArtifact));
+  for (const validation of validations) {
+    if (!validation.artifact || validation.artifact.profile !== profile) continue;
+    const heartbeatPath = resolveArtifactPath(validation.artifact, validation.path, validation.artifact.owner.heartbeatPath);
+    const heartbeat = await readHeartbeat(heartbeatPath);
+    const process = projectProcess(validation.artifact, heartbeat);
+    if (process.status === "running") return projectInstance(validation);
+  }
+  return null;
+}
+
+async function waitForLaunchResult(resultPath: string): Promise<AppInstanceLaunchResult | null> {
+  const deadline = Date.now() + LAUNCH_WAIT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const result = await readLaunchResult(resultPath);
+    if (result) return result;
+    await wait(50);
+  }
+  return null;
+}
+
+function buildLaunchConfig(
+  worktree: string,
+  profile: AppInstanceProfile,
+  instanceId: string,
+  ownerTokenHash: string,
+  selectedPort: number | null,
+  selectedWorktree: ReturnType<typeof inspectWorktree>,
+): AppInstanceLaunchConfig {
+  const paths = instancePaths(worktree, instanceId);
+  return {
+    schemaVersion: 1,
+    command: buildLaunchCommand(profile, selectedPort),
+    cwd: resolve(worktree, profile.cwd),
+    env: buildInstanceEnvironment(selectedPort),
+    instanceId,
+    worktreePath: worktree,
+    worktreeBranch: selectedWorktree.branch,
+    worktreeHead: selectedWorktree.head,
+    profile: profile.name,
+    artifactPath: paths.artifact,
+    heartbeatPath: paths.heartbeat,
+    resultPath: paths.result,
+    ownerTokenHash,
+    network: {
+      host: HOST,
+      port: selectedPort,
+      url: selectedPort === null ? null : `http://${HOST}:${selectedPort}/`,
+    },
+    health: {
+      url: renderHealthUrl(profile, selectedPort),
+      timeoutMs: profile.health?.timeoutMs ?? null,
+      evidencePath: paths.health,
+    },
+    logs: {
+      stdoutPath: profile.log.stdout ? paths.stdout : null,
+      stderrPath: profile.log.stderr ? paths.stderr : null,
+    },
+    heartbeatIntervalMs: HEARTBEAT_INTERVAL_MS,
+  };
+}
+
+async function spawnRunner(config: AppInstanceLaunchConfig): Promise<void> {
+  const script = runnerScriptPath();
+  if (!existsSync(script)) throw new Error("app_instance_runner_missing");
+  await ensureDir(dirnameSafe(config.artifactPath));
+  await writeJsonAtomic(instancePaths(config.worktreePath, config.instanceId).launch, config);
+  const child = spawn(process.execPath, [script, instancePaths(config.worktreePath, config.instanceId).launch], {
+    cwd: config.cwd,
+    stdio: "ignore",
+    detached: true,
+  });
+  child.unref();
+}
+
+function dirnameSafe(path: string): string {
+  return resolve(path, "..");
+}
+
+async function readStartedInstance(path: string) {
+  const validation = await readInstanceArtifact(path);
+  return await projectInstance(validation);
+}
+
+function terminatePid(pid: number, signal: NodeJS.Signals): boolean {
+  try {
+    process.kill(pid, signal);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function terminateOwnedProcess(owner: AppInstanceArtifact["owner"]) {
+  const processGroupId = owner.processGroupId;
+  const pid = owner.pid;
+  if (processGroupId !== null && process.platform !== "win32") {
+    terminatePid(-processGroupId, "SIGTERM");
+  } else if (pid !== null) {
+    terminatePid(pid, "SIGTERM");
+  }
+  const deadline = Date.now() + STOP_GRACE_MS;
+  while (pid !== null && pidLive(pid) && Date.now() < deadline) {
+    await wait(100);
+  }
+  const forced = pid !== null && pidLive(pid);
+  if (forced) {
+    if (processGroupId !== null && process.platform !== "win32") {
+      terminatePid(-processGroupId, "SIGKILL");
+    } else if (pid !== null) {
+      terminatePid(pid, "SIGKILL");
+    }
+  }
+  return { forced };
+}
+
+function ownerIdentityVerifiable(owner: AppInstanceArtifact["owner"], heartbeat: AppInstanceHeartbeat | null) {
+  if (!owner.ownedByCodexus || !owner.ownerTokenHash || !owner.heartbeatPath) {
+    return { ok: false as const, reason: "owner_not_codexus_managed" as const };
+  }
+  if (!heartbeat) {
+    return { ok: false as const, reason: "heartbeat_missing" as const };
+  }
+  if (!heartbeatFresh(heartbeat)) {
+    return { ok: false as const, reason: "heartbeat_stale" as const };
+  }
+  if (heartbeat.ownerTokenHash !== owner.ownerTokenHash) {
+    return { ok: false as const, reason: "heartbeat_owner_token_mismatch" as const };
+  }
+  if (owner.processGroupId === null || heartbeat.runnerPid !== owner.processGroupId) {
+    return { ok: false as const, reason: "runner_pid_mismatch" as const };
+  }
+  if (!owner.runnerStartMarker || !heartbeat.runnerStartMarker) {
+    return { ok: false as const, reason: "runner_start_marker_missing" as const };
+  }
+  if (heartbeat.runnerStartMarker !== owner.runnerStartMarker) {
+    return { ok: false as const, reason: "runner_start_marker_mismatch" as const };
+  }
+  const liveRunnerMarker = readProcessStartMarker(owner.processGroupId);
+  if (!liveRunnerMarker || liveRunnerMarker !== owner.runnerStartMarker) {
+    return { ok: false as const, reason: "runner_identity_unverifiable" as const };
+  }
+  return { ok: true as const, reason: "owner_identity_verified" as const };
+}
+
+export async function listAppInstanceProfiles(cwd: string, options: { descriptorPath?: string }) {
+  const descriptor = await readAppInstanceDescriptor(cwd, options.descriptorPath);
+  const runnerAvailable = existsSync(runnerScriptPath());
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance profile list" as const,
+    cwd,
+    descriptor: {
+      declared: descriptor.declared,
+      source: descriptor.source,
+      path: descriptor.path,
+      valid: descriptor.validation.valid,
+      errors: descriptor.validation.errors,
+    },
+    profiles: descriptor.validation.descriptor?.profiles ?? [],
+    capabilities: {
+      liveStart: descriptor.declared && descriptor.validation.valid && runnerAvailable,
+      liveStop: runnerAvailable,
+      dryRunStart: descriptor.declared && descriptor.validation.valid,
+    },
+  };
+}
+
+export async function startAppInstance(cwd: string, options: {
+  descriptorPath?: string;
+  profile?: string;
+  worktree?: string;
+  port?: string;
+  dryRun: boolean;
+}) {
+  if (!options.profile) throw new Error("missing_app_instance_profile");
+  if (!options.worktree) throw new Error("missing_app_instance_worktree");
+  const descriptor = await readAppInstanceDescriptor(cwd, options.descriptorPath);
+  if (!descriptor.declared) throw new Error("missing_app_instance_descriptor");
+  if (!descriptor.validation.valid || !descriptor.validation.descriptor) throw new Error(`app_instance_descriptor_invalid:${descriptor.validation.errors.join(",")}`);
+  const profile = descriptor.validation.descriptor.profiles.find((candidate) => candidate.name === options.profile);
+  if (!profile) throw new Error(`app_instance_profile_not_found:${options.profile}`);
+  const worktree = resolve(cwd, options.worktree);
+  if (!existsSync(worktree) || !(await stat(worktree)).isDirectory()) throw new Error(`invalid_app_instance_worktree:${worktree}`);
+  const profileCwd = resolve(worktree, profile.cwd);
+  if (!pathInside(worktree, profileCwd)) throw new Error("app_instance_profile_cwd_outside_worktree");
+  const portOverride = parsePortOverride(options.port);
+  const selectedWorktree = inspectWorktree(worktree);
+  const selectedPort = await selectPort(profile, portOverride);
+  const launchCommand = buildLaunchCommand(profile, selectedPort.port);
+  const launchConfig = buildLaunchConfig(worktree, profile, `app_${Date.now().toString(36)}${randomBytes(3).toString("hex")}`, hashOwnerToken(randomBytes(32).toString("hex")), selectedPort.port, selectedWorktree);
+
+  if (options.dryRun) {
+    return {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      command: "app instance start" as const,
+      mode: "dry-run" as const,
+      spawned: false,
+      owned: false,
+      status: "planned" as const,
+      cwd,
+      descriptor: {
+        source: descriptor.source,
+        path: descriptor.path,
+        valid: descriptor.validation.valid,
+      },
+      profile,
+      worktree: selectedWorktree,
+      launchPlan: {
+        command: launchCommand,
+        cwd: profileCwd,
+        host: HOST,
+        port: selectedPort.port,
+        portCheck: {
+          status: selectedPort.status,
+          reason: selectedPort.status === "preferred" || selectedPort.status === "fixed" || selectedPort.status === "fixed_override"
+            ? "requested_port_available"
+            : "preferred_port_reallocated",
+        },
+        healthUrl: launchConfig.health.url,
+        environment: {
+          copied: true,
+          keys: Object.keys(launchConfig.env ?? {}).sort(),
+        },
+      },
+      wouldWrite: {
+        instanceId: launchConfig.instanceId,
+        instancePath: launchConfig.artifactPath,
+        heartbeatPath: launchConfig.heartbeatPath,
+        stdoutPath: launchConfig.logs.stdoutPath,
+        stderrPath: launchConfig.logs.stderrPath,
+      },
+      capabilities: {
+        liveStart: true,
+        liveStop: true,
+        dryRunStart: true,
+      },
+    };
+  }
+
+  return await withFileLock(worktree, "app-instance", async () => {
+    const running = await existingRunningInstance(worktree, profile.name);
+    if (running) throw new Error(`app_instance_profile_already_running:${profile.name}:${running.instanceId}`);
+    await spawnRunner(launchConfig);
+    const launchResult = await waitForLaunchResult(launchConfig.resultPath);
+    if (!launchResult) throw new Error("app_instance_start_timeout");
+    if (launchResult.status === "failed") throw new Error(`app_instance_start_failed:${launchResult.error ?? "runner_failed"}`);
+    const started = await readStartedInstance(launchConfig.artifactPath);
+    if (!started) throw new Error("app_instance_start_failed:artifact_missing_after_ready");
+    return {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      command: "app instance start" as const,
+      mode: "live" as const,
+      spawned: true,
+      owned: true,
+      status: "started" as const,
+      cwd,
+      descriptor: {
+        source: descriptor.source,
+        path: descriptor.path,
+        valid: descriptor.validation.valid,
+      },
+      profile,
+      worktree: selectedWorktree,
+      launch: {
+        instanceId: launchConfig.instanceId,
+        artifactPath: launchConfig.artifactPath,
+        heartbeatPath: launchConfig.heartbeatPath,
+        processGroupId: launchResult.processGroupId ?? null,
+        appPid: launchResult.appPid ?? null,
+        command: launchCommand,
+        cwd: profileCwd,
+        host: HOST,
+        port: selectedPort.port,
+        url: launchConfig.network.url,
+        healthUrl: launchConfig.health.url,
+      },
+      instance: started,
+      capabilities: {
+        liveStart: true,
+        liveStop: true,
+        dryRunStart: true,
+      },
+    };
+  }, {
+    operation: "app-instance-start",
+  });
 }
 
 export async function appInstanceStatus(cwd: string, options: { instanceId?: string; worktree?: string }) {
   const scanCwd = resolve(options.worktree ?? cwd);
   const validations = await Promise.all((await listInstanceArtifactPaths(scanCwd)).map(readInstanceArtifact));
-  const projected = validations
-    .map(projectInstance)
-    .filter((item): item is NonNullable<ReturnType<typeof projectInstance>> => item !== null)
+  const projected = (await Promise.all(validations.map(projectInstance)))
+    .filter((item): item is NonNullable<Awaited<ReturnType<typeof projectInstance>>> => item !== null)
     .filter((item) => !options.instanceId || item.instanceId === options.instanceId)
     .filter((item) => !options.worktree || resolve(item.worktree.path) === scanCwd);
   return {
@@ -593,9 +1166,9 @@ export async function appInstanceStatus(cwd: string, options: { instanceId?: str
       instanceId: validation.artifact?.instanceId ?? null,
     })),
     capabilities: {
-      liveProcessProbe: false,
-      liveStart: false,
-      liveStop: false,
+      liveProcessProbe: true,
+      liveStart: true,
+      liveStop: true,
     },
   };
 }
@@ -606,12 +1179,9 @@ async function readTail(path: string | null, lines: number) {
   const info = await stat(path);
   const length = Math.min(info.size, MAX_LOG_TAIL_BYTES);
   const buffer = Buffer.alloc(length);
-  const handle = await open(path, "r");
-  try {
-    await handle.read(buffer, 0, length, info.size - length);
-  } finally {
-    await handle.close();
-  }
+  const handle = await readFile(path);
+  const slice = handle.subarray(Math.max(0, handle.length - length));
+  slice.copy(buffer, 0, 0, slice.length);
   const text = buffer.toString("utf8");
   const renderedLines = text.split(/\r?\n/).filter((line) => line.length > 0);
   return {
@@ -645,19 +1215,102 @@ export async function appInstanceLogs(cwd: string, options: { instanceId?: strin
   };
 }
 
-export async function appInstanceStopUnavailable(cwd: string, options: { instanceId?: string }) {
+export async function stopAppInstance(cwd: string, options: { instanceId?: string }) {
   if (!options.instanceId) throw new Error("missing_app_instance_id");
-  return {
-    schemaVersion: 1,
-    stability: "experimental" as const,
-    command: "app instance stop" as const,
-    cwd,
-    instanceId: options.instanceId,
-    status: "unavailable" as const,
-    stopped: false,
-    reason: "live_stop_deferred_until_owned_process_artifact_and_owner_token_are_enforced" as const,
-    capabilities: {
-      liveStop: false,
-    },
-  };
+  const status = await appInstanceStatus(cwd, { instanceId: options.instanceId });
+  const instance = status.instances[0];
+  if (!instance) throw new Error(`app_instance_not_found:${options.instanceId}`);
+  const validation = await readInstanceArtifact(instance.artifactPath);
+  if (!validation.artifact) throw new Error(`app_instance_artifact_invalid:${options.instanceId}`);
+  const artifact = validation.artifact;
+  if (!artifact.owner.ownedByCodexus || !artifact.owner.ownerTokenHash || !artifact.owner.heartbeatPath) {
+    return {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      command: "app instance stop" as const,
+      cwd,
+      instanceId: options.instanceId,
+      status: "unavailable" as const,
+      stopped: false,
+      reason: "stop_requires_codexus_owned_instance" as const,
+      capabilities: {
+        liveStop: false,
+      },
+    };
+  }
+  if (instance.process.status === "stopped") {
+    return {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      command: "app instance stop" as const,
+      cwd,
+      instanceId: options.instanceId,
+      status: "already_stopped" as const,
+      stopped: false,
+      capabilities: {
+        liveStop: true,
+      },
+    };
+  }
+  const heartbeatPath = resolveArtifactPath(artifact, validation.path, artifact.owner.heartbeatPath);
+  const heartbeat = await readHeartbeat(heartbeatPath);
+  if (!heartbeat || heartbeat.ownerTokenHash !== artifact.owner.ownerTokenHash) {
+    return {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      command: "app instance stop" as const,
+      cwd,
+      instanceId: options.instanceId,
+      status: "unavailable" as const,
+      stopped: false,
+      reason: "owner_heartbeat_missing_or_mismatched" as const,
+      capabilities: {
+        liveStop: false,
+      },
+    };
+  }
+  const identity = ownerIdentityVerifiable(artifact.owner, heartbeat);
+  if (!identity.ok) {
+    return {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      command: "app instance stop" as const,
+      cwd,
+      instanceId: options.instanceId,
+      status: "unavailable" as const,
+      stopped: false,
+      reason: "owner_identity_unverifiable" as const,
+      identityCheck: identity.reason,
+      capabilities: {
+        liveStop: false,
+      },
+    };
+  }
+  return await withFileLock(artifact.worktree.path, "app-instance", async () => {
+    const termination = await terminateOwnedProcess(artifact.owner);
+    const nextArtifact: AppInstanceArtifact = {
+      ...artifact,
+      status: "stopped",
+      health: {
+        ...artifact.health,
+        status: artifact.health.url ? "unknown" : "unavailable",
+      },
+    };
+    await writeJsonAtomic(validation.path, nextArtifact);
+    return {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      command: "app instance stop" as const,
+      cwd,
+      instanceId: options.instanceId,
+      status: "stopped" as const,
+      stopped: true,
+      forced: termination.forced,
+      capabilities: {
+        liveStop: true,
+      },
+    };
+  }, {
+    operation: "app-instance-stop",
+  });
 }

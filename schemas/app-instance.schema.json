@@ -25,6 +25,7 @@
         "ownerTokenHash": { "type": ["string", "null"] },
         "pid": { "type": ["integer", "null"] },
         "processGroupId": { "type": ["integer", "null"] },
+        "runnerStartMarker": { "type": ["string", "null"] },
         "heartbeatPath": { "type": ["string", "null"] }
       },
       "required": ["ownedByCodexus", "ownerTokenHash", "pid", "processGroupId", "heartbeatPath"]
@@ -43,7 +44,9 @@
       "properties": {
         "status": { "enum": ["passed", "failed", "unknown", "unavailable"] },
         "lastCheckedAt": { "type": ["string", "null"] },
-        "evidencePath": { "type": ["string", "null"] }
+        "evidencePath": { "type": ["string", "null"] },
+        "url": { "type": ["string", "null"] },
+        "timeoutMs": { "type": ["integer", "null"], "exclusiveMinimum": 0 }
       },
       "required": ["status", "lastCheckedAt", "evidencePath"]
     },

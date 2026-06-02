@@ -3,13 +3,21 @@
 [Korean](../ko/design/18-compiled-repository-wiki.md)
 
 Date: 2026-06-02
-Status: proposed 0.2 / 0.3 design track.
+Status: experimental first slice implemented; advisory/export track remains deferred.
 
 ## Decision
 
 Codexus should add a **compiled repository wiki** track: a regenerable,
 evidence-linked markdown projection over repository facts, run ledgers,
 verification artifacts, decision records, and repository graph outputs.
+
+Implementation status as of 2026-06-02:
+
+- implemented: `cx wiki map --json`, deterministic `cx wiki build --mode deterministic --json`,
+  `cx wiki check --gate --json`, and `cx wiki context --topic <name> --budget <n> --json`;
+- implemented schemas: `codexus.wiki.manifest` and `codexus.wiki.page`;
+- still deferred: advisory synthesis, checked-in export, and any automatic
+  context injection into runs.
 
 This adapts the LLM-maintained wiki pattern to Codexus without turning Codexus
 into a general knowledge-base product. The wiki is not the source of truth. It is

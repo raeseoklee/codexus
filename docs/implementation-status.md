@@ -47,8 +47,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `app instance profile list`
   - `app instance status`
   - `app instance logs`
-  - `app instance start --dry-run`
-  - `app instance stop` (structured unavailable status; live stop deferred)
+  - `app instance start`
+  - `app instance stop`
   - `memory add`
   - `memory search`
   - `memory list`
@@ -114,7 +114,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   unrelated tool state.
 - Run observability commands list runs, tail events, and preview reports.
 - App-server schema fixture/status, dry-run roundtrip contract, sandboxed experiment manifest recording, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, and explicit opt-in Stage B read-only socket observation are present, while live app-server execution remains gated off.
-- Cron/gateway feature gates expose disabled status by default and dry-run automation plans plus optional audit records with policy/approval contract fields for future dispatch.
+- Cron/gateway now expose an experimental explicit-approval live dispatch slice
+  on top of the existing dry-run contract: `cx cron run-now` / `cx gateway
+  check` can acquire an automation lock, record policy and approval artifacts,
+  dispatch a normal supervised run, and return the linked run ledger.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
   descriptors, and app instance artifacts, with focused enforcement plus
@@ -238,7 +241,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `cx replay parity --json` reports canonical replay parity label coverage from
   committed fixtures and preserves the no-new-label-without-fixture contract.
 - Cron/gateway live paths share the `policy-reviewed-live-dispatch-v1` policy
-  contract and remain blocked until a dispatcher exists.
+  contract and now dispatch through the normal supervised run ledger when the
+  feature gate is enabled and explicit approval is supplied.
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
 - `schemas/session-state.schema.json` is a first-class schema artifact for the
@@ -263,16 +267,20 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - The session-native supervision design now makes Codex-native in-Codex usage the
   product direction, with `codex exec resume` deferred as a separate external
   multi-turn feature.
-- The autopilot contract is documented as a proposed 0.2/0.3 experimental
-  surface. It is not implemented and is excluded from the 0.1.x stable
-  contract.
-- A generic worktree app instance launcher has an experimental observe/dry-run
-  first slice: `cx app instance profile list/status/logs/start --dry-run` reads
-  descriptor-backed profiles, projects existing instance artifacts, tails
-  bounded logs, and plans a per-worktree launch without spawning. Live start,
-  live stop, owner-token enforcement, process liveness
-  (`live_process_liveness_probe_deferred`), port allocation, and active health
-  checks remain deferred outside the 0.1.x stable contract.
+- The autopilot contract now has an experimental foundation slice:
+  `cx autopilot plan --from ...`, `cx autopilot contract validate <file>`,
+  `cx autopilot contract approve <file> --approved-by <name>`, and
+  `cx autopilot contract scope-check <file> [--gate]` exist. The contract body
+  is schema-validated, approval records include a canonical subject hash, and
+  scope checking reuses change-evidence facts against the approved contract.
+  Live `cx autopilot run` remains deferred outside the 0.1.x stable contract.
+- A generic worktree app instance launcher now has an experimental live
+  ownership first slice: `cx app instance profile list/status/logs/start/stop`
+  reads descriptor-backed profiles, starts one Codexus-owned process per
+  worktree, writes owned instance artifacts plus heartbeat, probes active HTTP
+  health, tails bounded logs, and stops only owned processes. The surface
+  remains outside the 0.1.x stable contract, and instance-linked browser or
+  dev-server evidence remains follow-up work.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External
@@ -294,26 +302,34 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   acceptance-criteria-to-verification matrix with passing evidence or explicit
   approved deferrals. Active relay execution and external engine adapters remain
   deferred outside the 0.1.x stable contract.
-- Operational control invariants are documented as a proposed 0.2/0.3 track:
-  autonomy presets, policy catalogs, docs-code invariants, decision records,
-  loop breakers, and HUD projection. No new completion authority exists yet;
-  the first deterministic docs-code invariant pass is implemented in
-  `cx repo check --gate --json`: required indexes, index links, English/Korean
-  counterparts, declared `schemas/*.schema.json` references, and source
-  `*_deferred` self-report claims mirrored in both implementation-status docs are
-  checked mechanically before any active autonomy surface exists. The repo check
-  output also aggregates the remaining deferred self-report claims so
-  intentionally unbuilt surfaces stay visible.
-- The compiled repository wiki is documented as a proposed 0.2/0.3 track:
-  regenerable markdown pages over repository facts, Codexus ledgers, graph
-  artifacts, decisions, and verification evidence. No `cx wiki` commands exist
-  yet; the first implementation should be deterministic map/build/check/context
-  surfaces with scoped freshness and no automatic context injection.
+- Operational control invariants now have an experimental first slice:
+  `cx autopilot presets list --json`, schema-validated `autonomyPreset`
+  metadata in autopilot draft contracts, `cx policy catalog check --json`, and
+  richer `riskFacts` derived from change evidence for blast radius,
+  dependency, schema, migration, and scope findings. No new completion
+  authority exists; these remain advisory/control metadata over the existing
+  evidence gates. The deterministic docs-code invariant pass in
+  `cx repo check --gate --json` still checks required indexes, index links,
+  English/Korean counterparts, declared `schemas/*.schema.json` references,
+  and source `*_deferred` self-report claims mirrored in both
+  implementation-status docs.
+- The compiled repository wiki now has an experimental deterministic first
+  slice: `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check
+  --gate`, and `cx wiki context --topic <name> --budget <n>`. It generates
+  regenerable markdown pages under `.codexus/wiki/` with source refs, local
+  links, manifest/page schemas, and scoped freshness. Advisory synthesis,
+  checked-in export, and any automatic context injection remain deferred.
+- Deferred self-reports currently documented and enforced by `cx repo check
+  --gate --json` are:
+  - `acceptance_criteria_extraction_deferred`
+  - `autopilot_run_deferred`
+  - `broad_layering_rule_deferred`
+  - `typosquat_name_similarity_deferred`
 
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 202.
+- Current test count: 217.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`
@@ -325,6 +341,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   postinstall Codex skill adapter install, `doctor --json --strict` with a fake
   Codex fixture, `supply-chain check --gate`, mock pass/fail/repair,
   status/events/resume, and terminal cancel behavior.
+- Installed package automation smoke: `cx cron run-now` and `cx gateway check`
+  with enabled feature gates, explicit approval, and the mock driver prove that
+  the experimental automation dispatcher acquires a lock and returns a linked
+  run result from a packed global install.
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor strict smoke: missing command diagnostics return `ok: false` and exit 1 with `--strict`.
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.
@@ -360,10 +380,17 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   implementation-stage AC-to-verification matrix gate is covered for missing
   matrix, unmapped criteria, missing evidence, approved deferrals, missing
   evidence paths, and passing evidence.
-- App instance launcher first-slice tests cover descriptor schema validation,
-  `profile list`, `start --dry-run` without spawning, live start rejection,
-  health status demotion when evidence is missing, health promotion only with
-  local evidence, bounded log tails, and structured unavailable stop.
+- Compiled wiki tests cover deterministic `map/build/check/context`, stale-page
+  gate failure after scoped source changes, and honest rejection of advisory
+  build mode.
+- App instance launcher tests cover descriptor schema validation, `profile
+  list`, `start --dry-run`, live start, duplicate-start rejection, active
+  health promotion for a live owned process, bounded log tails, and owned stop.
+- Installed package smoke also covers deterministic wiki build, wiki-manifest
+  schema validation, `wiki check --gate`, and bounded wiki context generation.
+- Installed package smoke also covers `cx policy catalog check --json`,
+  `cx autopilot presets list --json`, and autopilot draft planning with an
+  explicit preset.
 - Real Codex exec smoke through ChatGPT-authenticated local Codex:
   - command: `node src/cli/main.ts run --driver codex-exec "Reply exactly CHX-CODEX-OK" --json`
   - observed final artifact: `CHX-CODEX-OK`
@@ -436,20 +463,31 @@ review. Current high-level gaps:
   trust checks. `cx session hud --json` is available as the statusline fallback;
   statusline integration and tmux-backed worker launch are designed but not
   implemented.
-- Cron/gateway live automation remains disabled behind feature gates; dry-run plans, optional audit records, and policy/approval contract fields are implemented.
+- Cron/gateway now have an experimental explicit-approval live dispatcher.
+  Future work is richer scheduler semantics, recovery/retry policy, and
+  asynchronous ownership beyond the first synchronous dispatch slice.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
-- Autopilot active execution remains design-only for the 0.2/0.3 track.
-  `cx repo graph build/check` and `cx autopilot relay record/stage-gate/
-  check-agreement` exist as experimental foundations, but graph
-  import/search/explain/context injection and active multi-engine relay adapters
-  remain deferred outside the 0.1.x stable surface.
-- Worktree app instance launcher has an experimental observe/dry-run slice, but
-  live start/stop, process ownership tokens, heartbeat enforcement, liveness
-  checks (`live_process_liveness_probe_deferred`), port allocation, and active
-  health probes remain deferred.
-- Operational control invariants have deterministic docs-code checks plus the
-  first advisory session control-plane pass: decision artifacts, repeated
-  verification loop summaries, and HUD/status projections are implemented.
-  Autonomy presets, policy catalogs, task artifacts, richer risk facts, and
-  `cx wiki` commands are not implemented yet.
+- Autopilot active execution remains deferred for the 0.2/0.3 track. The
+  experimental foundation now covers `cx autopilot plan` plus contract
+  validate/approve/scope-check, but `cx autopilot run` and worktree-attached
+  long-running execution are still intentionally unbuilt. `cx repo graph
+  build/check` and `cx autopilot relay record/stage-gate/check-agreement`
+  exist as experimental foundations, but graph import/search/explain/context
+  injection and active multi-engine relay adapters remain deferred outside the
+  0.1.x stable surface.
+- Worktree app instance launcher now has an experimental live ownership slice:
+  start/stop, process ownership tokens, heartbeat, port allocation, liveness,
+  and active health probes are implemented for Codexus-owned instances.
+  Instance-linked browser/dev-server evidence and richer stale/orphan policies
+  remain follow-up work.
+- Operational control invariants have deterministic docs-code checks plus an
+  experimental control-plane first slice: decision artifacts, repeated
+  verification loop summaries, HUD/status projections, autonomy preset
+  metadata, policy-catalog reporting, and richer change-evidence risk facts are
+  implemented. Task artifacts, broader policy promotion, and unified control
+  aggregation remain future work.
+- Compiled repository wiki now has an experimental deterministic first slice:
+  source-linked page generation, structural freshness gates, and bounded
+  context-pack generation exist. Advisory synthesis, checked-in export, and any
+  automatic injection path remain future work.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

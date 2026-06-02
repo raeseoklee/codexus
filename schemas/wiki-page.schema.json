@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/wiki-page.schema.json",
+  "title": "Codexus Wiki Page Metadata",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.wiki.page" },
+    "pageId": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "sourceRefs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "localLinks": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "sourceFingerprint": { "type": "string", "minLength": 1 },
+    "freshness": { "enum": ["fresh", "stale", "partial", "unknown"] },
+    "claimClasses": {
+      "type": "object",
+      "properties": {
+        "derivableFacts": { "type": "number", "minimum": 0 },
+        "advisoryClaims": { "type": "number", "minimum": 0 }
+      },
+      "required": ["derivableFacts", "advisoryClaims"]
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "pageId", "title", "generatedAt", "sourceRefs", "localLinks", "sourceFingerprint", "freshness", "claimClasses"]
+}

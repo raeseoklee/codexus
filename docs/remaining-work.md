@@ -37,13 +37,14 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   export plus optional third-party bundle export, bounded adapter retrieval,
   deterministic replay and model replay gate, memory lifecycle
   commands, app-server fixture/status gate, `cx init`, packaging/typecheck
-  smoke, run observability commands, and cron/gateway disabled gates.
+  smoke, run observability commands, and the experimental cron/gateway
+  dispatcher.
 - Promoted hardening surfaces: stale-lock metadata inspection/recovery,
   versioned schema artifacts, budget/policy-gated model replay runner,
   Codex-native bounded context formatter plus non-injected approved context
   artifacts, app-server dry-run roundtrip contract and recorded sandbox
   experiment manifests with a live gate, explicit-budget repairable
-  driver-failure retry, cron/gateway dry-run automation plans and audit
+  driver-failure retry, cron/gateway live dispatch plus dry-run audit
   records with policy/approval contract fields, run-ledger validation, installed
   Codexus skill diagnostics, app-server process-probe evidence, and replay
   pass/failure/extended fixtures.
@@ -76,16 +77,20 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   engine, replay parity can be audited, adapter injection writes visible
   approval artifacts without auto-injection, HUD is available as a read-only
   JSON summary, tmux/native-subagent launch surfaces are truthful gates, and
-  automation live contracts remain blocked until a dispatcher exists.
+  automation live contracts now dispatch synchronously with explicit approval,
+  while richer scheduler/recovery semantics remain follow-up work.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
-  full external JSON Schema engine enforcement/migrations, real cron/gateway
-  automation dispatch, statusline/HUD integration, tmux-backed workers, and
+  full external JSON Schema engine enforcement/migrations, richer cron/gateway
+  scheduler semantics, statusline/HUD integration, tmux-backed workers, and
   richer wait/remote-host UX around cancellation. The repository knowledge graph
   now has an experimental first slice (`cx repo graph build/check`) for
   codexus-lite graph artifacts, scoped freshness, and structural gates. Autopilot,
   graph import/search/explain/context injection, and multi-engine relay autopilot
-  remain deferred to the 0.2/0.3 track.
+  remain deferred to the 0.2/0.3 track. Autopilot now has an experimental
+  foundation slice (`cx autopilot plan`, contract validate/approve/scope-check),
+  but live `cx autopilot run` and worktree-attached execution are still
+  intentionally unbuilt.
 
 ### P0: Contract and Safety Hardening
 
@@ -191,7 +196,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
       `cx report <run-id>`.
     - Keep outputs bounded and JSON-first.
 
-15. Add cron/gateway automation only after P0 safety work. Status: disabled feature gates plus dry-run automation plans, audit records, and policy/approval contract fields implemented; real automation deferred.
+15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch plus dry-run audit records are implemented; richer scheduler/recovery behavior remains future work.
     - Hermes-style cron and gateway behavior should depend on locks, schema
       migration, permission events, and explicit user policy.
 
@@ -235,8 +240,9 @@ evidence only when the supporting runtime exists:
    or a separate stdio-observer design. Keep app-server driver enablement
    separate and still gated.
 4. Cron/gateway dry-run and live paths now share
-   `policy-reviewed-live-dispatch-v1`; implement the dispatcher only after
-   permission, approval, lock, dispatch, and completion events are live.
+   `policy-reviewed-live-dispatch-v1`, and the first synchronous dispatcher
+   slice is implemented. Next add richer scheduler semantics, retry/recovery
+   policy, and durable ownership beyond one foreground dispatch.
 5. Retrieved context surfaces only as approved, user-visible artifacts, with no
    auto-injection of prompt context.
 6. `cx session hud --json` is the supported fallback; statusline integration
@@ -252,9 +258,10 @@ evidence only when the supporting runtime exists:
 10. Subagent support remains recorder/handoff/contract-only. Do not expose an
    active native spawn launcher until a supported Codex bridge exists; subagent
    claims must stay separate from verification freshness.
-11. Autopilot remains a 0.2/0.3 design track. Start with schema artifacts and a
-    report-only scope gate before exposing `cx autopilot run`; it must remain
-    human-approved, worktree-isolated, and `stability: experimental`.
+11. Autopilot now has an experimental foundation slice. The next work is live
+    `cx autopilot run`: keep it human-approved, worktree-isolated, and
+    `stability: experimental`, while adding capability/policy start-gates and
+    refusing unsupported policy fields instead of silently downgrading them.
 12. Repository knowledge graph now has an experimental first slice: canonical
     graph identity hashing, graph schema validation, scoped freshness, and
     structural graph gates. Keep external import, search/explain, and context
@@ -314,11 +321,11 @@ Harness-engineering alignment adds these evidence-first tracks:
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
-  now has an experimental observe/dry-run first slice: descriptor/profile
-  listing, read-only instance status/log projections, app instance schema
-  validation, and `start --dry-run` planning. Next work is live ownership
-  evidence: owned process artifacts, owner tokens, heartbeat, port allocation,
-  active health checks, and stop-only-owned-process cleanup.
+  now has an experimental live ownership first slice: descriptor/profile
+  listing, `start --dry-run`, live owned-process start/stop, heartbeat,
+  port allocation, active health checks, and bounded log projections. Next
+  work is instance-linked browser/dev-server evidence plus richer stale/orphan
+  policy.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
@@ -326,21 +333,24 @@ Harness-engineering alignment adds these evidence-first tracks:
   `cx repo check`. The first session control-plane pass is also implemented:
   `cx session decision record/list/status` writes advisory decision artifacts,
   `cx session loop --json` summarizes repeated verification failures, and
-  session status/HUD include decision, risk, and loop summaries. Next work is
-  autonomy preset metadata, policy catalog reporting, richer risk facts, and
-  task artifacts. Do not add active autonomy or a new completion authority.
+  session status/HUD include decision, risk, and loop summaries. The first
+  operational-control slice also now exists: autopilot preset metadata, policy
+  catalog reporting, and richer risk facts are implemented. Next work is task
+  artifacts, broader policy promotion, and unified control aggregation. Do not
+  add active autonomy or a new completion authority.
 - Compiled repository wiki: [doc 18](design/18-compiled-repository-wiki.md)
-  defines a regenerable markdown projection over repository facts and Codexus
-  artifacts. First work should add schemas, `cx wiki map`, deterministic
-  build/check, and read-only context packs. Do not auto-inject stale or
-  advisory pages into a run.
+  now has an experimental deterministic first slice: schemas, `cx wiki
+  map/build/check`, and read-only context packs exist. Next work is advisory
+  synthesis, checked-in export, richer page sets, and explicit injection policy.
+  Do not auto-inject stale or advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
    Design a non-disruptive stdio observer or obtain an explicit user-provided
    app-server socket before attempting session-event mapping. Do not enable live
    app-server product behavior yet.
-2. Cron/gateway dispatcher: implement only after permission, approval, lock,
-   dispatch, and completion events are live.
+2. Cron/gateway dispatcher: the first explicit-approval live slice is now
+   implemented. Next add scheduler semantics, recovery/retry policy, and
+   stronger long-lived ownership evidence.
 3. Full JSON Schema engine: replace the local subset engine only if dependency
    policy allows it; keep current schema artifacts as regression fixtures.
 4. Statusline integration: wait for a stable Codex-supported configuration
@@ -354,21 +364,26 @@ Harness-engineering alignment adds these evidence-first tracks:
    auto-injection until an explicit, reversible injection path is designed.
 8. Routine live model replay: keep it opt-in, budget-gated, and outside the
    default stable path.
-9. Autopilot contract layer: start as a 0.2/0.3 experimental track with schema
-   artifacts and report-only scope gates before any `cx autopilot run`.
+9. Autopilot contract layer: schema artifacts, draft planning, contract approval,
+   and scope-check foundations now exist as an experimental slice. Before any
+   live `cx autopilot run`, add worktree-owned execution, capability start
+   gates, and explicit policy-surface blocking.
 10. Multi-engine relay autopilot: the report-only artifact recorder/checker is
     implemented, and implementation-stage AC-to-verification matrix enforcement
     is now a structural gate. Keep review engines artifact-import-only until a
     supported adapter exists, add descriptor-backed adapter evidence before
     active execution, and do not let convergence replace verification.
 11. Operational control invariants: decision artifacts and ledger-derived loop
-    summaries are implemented as advisory session evidence. Next implement
-    autonomy preset metadata, policy catalog reporting, richer risk facts, and
-    task artifacts. Autonomy presets remain contract metadata until enforceable
-    policy fields exist.
-12. Compiled repository wiki: implement deterministic `cx wiki map/build/check`
-    before any advisory synthesis or context injection.
-13. Worktree app instance launcher: follow [doc 19](design/19-worktree-app-instance-launcher.md)
-    beyond the implemented observe/dry-run slice. Add live start/stop only after
-    owned-process artifacts, owner-token checks, heartbeat, port allocation,
-    liveness, and active health evidence are enforceable.
+    summaries are implemented as advisory session evidence, and the first
+    operational-control slice now includes autonomy preset metadata, policy
+    catalog reporting, and richer risk facts. Next implement task artifacts,
+    broader policy promotion, and unified control aggregation. Autonomy presets
+    remain contract metadata until enforceable policy fields exist.
+12. Compiled repository wiki: the deterministic `cx wiki
+    map/build/check/context` slice now exists. Next implement advisory
+    synthesis, explicit checked-in export, and richer page coverage before any
+    injection path is considered.
+13. Worktree app instance launcher: build on the implemented live ownership
+    slice from [doc 19](design/19-worktree-app-instance-launcher.md). Next add
+    instance-linked browser/dev-server evidence, stronger stale/orphan policy,
+    and worktree-aware launcher reuse for future autopilot surfaces.

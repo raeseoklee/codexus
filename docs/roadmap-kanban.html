@@ -298,18 +298,18 @@
         </article>
 
         <article class="card">
-          <h3>Worktree App Instance Live Ownership</h3>
+          <h3>Instance-Linked App Evidence</h3>
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
           </div>
-          <p>The descriptor-backed observe/dry-run slice is implemented. The remaining step is live ownership evidence before Codexus may boot, monitor, or stop one application instance per git worktree.</p>
+          <p>The live ownership baseline is implemented. The next step is to make browser and dev-server observations cite a concrete app instance instead of relying on generic local-server evidence.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Implemented baseline stays honest: <code>profile list</code>, <code>status</code>, <code>logs</code>, and <code>start --dry-run</code> never claim live control.</li>
-            <li>Live <code>start/status/stop/logs --json</code> records an owned instance artifact with worktree path, branch/head, command profile, pid/owner heartbeat, port or URL, health check, log paths, and status.</li>
-            <li>Port allocation is per worktree; stop cleans only the owned process and never unrelated local servers.</li>
-            <li>Browser/dev-server evidence references an instance id and never claims control or health without live evidence.</li>
+            <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale artifacts never imply health or control.</li>
+            <li>Browser/dev-server evidence references an <code>instanceId</code> and never claims control or health without live evidence.</li>
+            <li>Adapter outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
+            <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/19-worktree-app-instance-launcher.md">worktree app instance launcher</a> · <a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
@@ -333,35 +333,35 @@
         </article>
 
         <article class="card">
-          <h3>Compiled Wiki Deterministic Slice</h3>
+          <h3>Compiled Wiki Advisory Slice</h3>
           <div class="tags">
             <span class="tag evidence">doc 18</span>
-            <span class="tag gated">no synthesis first</span>
+            <span class="tag gated">experimental next</span>
           </div>
-          <p>Start the repository wiki as a regenerable projection over measured facts, not as an LLM-written knowledge base.</p>
+          <p>The deterministic compiled wiki slice is in place. The next step is advisory/export work without turning generated pages into authority.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li><code>codexus.wiki.manifest</code> and page schemas exist.</li>
-            <li><code>cx wiki map/build/check --json</code> are deterministic and local.</li>
-            <li>Generated pages cite source refs and scoped freshness.</li>
-            <li>No automatic context injection or advisory synthesis in the first slice.</li>
+            <li><code>cx wiki build --mode advisory</code> records driver/model/source bundle evidence and stays advisory.</li>
+            <li><code>cx wiki export</code> is explicit and does not make checked-in pages authoritative.</li>
+            <li>Deterministic freshness and stale-page gate behavior remain intact.</li>
+            <li>No automatic context injection from wiki pages.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/18-compiled-repository-wiki.md">compiled repository wiki</a></p>
         </article>
 
         <article class="card">
-          <h3>Policy Catalog And Risk Facts</h3>
+          <h3>Operational Control Task Artifacts</h3>
           <div class="tags">
             <span class="tag evidence">doc 17</span>
             <span class="tag gated">control metadata</span>
           </div>
-          <p>Decision records and loop summaries are live. The next step is cataloging control policies and deriving richer risk facts without letting warnings become gates.</p>
+          <p>Autonomy presets, policy catalogs, and richer risk facts are live. The next step is durable task artifacts and unified control aggregation without promoting advisory state into completion authority.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Policy entries report enforced, observed, advisory, or unavailable status.</li>
-            <li>Risk facts are reconstructed from diff/config/schema/package evidence.</li>
-            <li>Warnings cannot fail a change unless a declared policy promotes them.</li>
+            <li>Task artifacts have their own schema and never become completion authority.</li>
+            <li>Control summaries aggregate advisory/deferred status without hiding unavailable capabilities.</li>
+            <li>Warnings stay advisory unless an already-declared policy surface promotes them.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/17-operational-control-invariants.md">operational control invariants</a></p>
@@ -385,16 +385,17 @@
         </article>
 
         <article class="card">
-          <h3>Cron / Gateway Dispatcher Contract</h3>
+          <h3>Automation Scheduler And Recovery</h3>
           <div class="tags">
             <span class="tag gated">policy-reviewed-live-dispatch-v1</span>
+            <span class="tag evidence">experimental next</span>
           </div>
-          <p>Implement the dispatcher only after permission, approval, lock, dispatch, and completion events are live.</p>
+          <p>The first explicit-approval dispatcher is live. The next step is durable scheduler/retry semantics without overstating unattended ownership.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Dry-run and live paths share the same policy contract.</li>
-            <li>Dispatch writes typed ledger events.</li>
-            <li>No unattended execution without explicit policy and approval records.</li>
+            <li>Dry-run and live paths continue to share the same policy contract.</li>
+            <li>Retries, recovery, and queue ownership are recorded as durable evidence.</li>
+            <li>No unattended scheduler claims without explicit ownership and recovery proofs.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="remaining-work.md">remaining work item 4</a></p>
@@ -448,14 +449,14 @@
         </article>
 
         <article class="card">
-          <h3>Real Cron / Gateway Dispatch</h3>
+          <h3>Automation Scheduler / Recovery Ownership</h3>
           <div class="tags">
-            <span class="tag blocked">blocked</span>
+            <span class="tag advisory">experimental live slice</span>
             <span class="tag gated">automation</span>
           </div>
-          <p>Current surfaces may report status and dry-run audit records only.</p>
+          <p>An explicit-approval live dispatcher now exists. The remaining work is unattended scheduler, retry, and ownership evidence without overstating autonomy.</p>
           <span class="label">Gate</span>
-          <p>Permission, approval, lock, dispatch, completion, and recovery events must be live.</p>
+          <p>Permission, approval, lock, dispatch, completion, recovery, and owner-liveness evidence must stay durable.</p>
         </article>
 
         <article class="card">
@@ -510,15 +511,16 @@
           <h3>Autopilot Contract Layer</h3>
           <div class="tags">
             <span class="tag later">0.2 / 0.3</span>
-            <span class="tag gated">experimental</span>
+            <span class="tag gateable">foundation done</span>
+            <span class="tag gated">live run deferred</span>
           </div>
-          <p>Start with schema artifacts and report-only scope gates before exposing <code>cx autopilot run</code>.</p>
+          <p>The experimental foundation exists: draft planning, contract validate/approve, and scope-check are in place. Live <code>cx autopilot run</code> still needs worktree-owned execution and capability start gates.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Human-approved scope.</li>
-            <li>Worktree isolation.</li>
-            <li>Detect-then-stop enforcement.</li>
-            <li>Evidence-gated acceptance.</li>
+            <li>Done: human-approved contract draft and approval record flow.</li>
+            <li>Done: scope-check foundation over change-evidence facts.</li>
+            <li>Next: worktree-owned live execution.</li>
+            <li>Next: capability/policy start gate for live runs.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/12-autopilot-contract.md">autopilot contract</a></p>

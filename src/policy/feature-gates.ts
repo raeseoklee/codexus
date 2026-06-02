@@ -8,7 +8,7 @@ export function featureEnabled(config: HarnessConfig, feature: GuardedFeature): 
 
 export function featureStatus(config: HarnessConfig, feature: GuardedFeature): {
   schemaVersion: 1;
-  stability: "deferred";
+  stability: "experimental";
   feature: GuardedFeature;
   enabled: boolean;
   status: "enabled" | "disabled";
@@ -17,13 +17,13 @@ export function featureStatus(config: HarnessConfig, feature: GuardedFeature): {
   const enabled = featureEnabled(config, feature);
   return {
     schemaVersion: 1,
-    stability: "deferred",
+    stability: "experimental",
     feature,
     enabled,
     status: enabled ? "enabled" : "disabled",
     reason: enabled
-      ? "feature gate enabled in config; command implementation may still require explicit support"
-      : "feature is disabled until ledger events, locks, schema migration, and explicit user policy are complete",
+      ? "feature gate enabled in config; explicit approval and dispatcher policy still apply"
+      : "feature is disabled until enabled in config for experimental automation dispatch",
   };
 }
 

@@ -3,13 +3,23 @@
 [English](../../design/18-compiled-repository-wiki.md)
 
 작성일: 2026-06-02
-상태: 제안된 0.2 / 0.3 설계 트랙
+상태: experimental 첫 slice 구현 완료, advisory/export track은 계속 deferred
 
 ## 결정
 
 Codexus는 **compiled repository wiki** 트랙을 추가할 수 있습니다. 이는 repository fact,
 run ledger, verification artifact, decision record, repository graph output 위에 재생성 가능한
 evidence-linked markdown projection을 만드는 방향입니다.
+
+2026-06-02 기준 구현 상태:
+
+- 구현됨: `cx wiki map --json`, deterministic
+  `cx wiki build --mode deterministic --json`,
+  `cx wiki check --gate --json`,
+  `cx wiki context --topic <name> --budget <n> --json`
+- 구현된 schema: `codexus.wiki.manifest`, `codexus.wiki.page`
+- 계속 deferred: advisory synthesis, checked-in export, run으로의 automatic
+  context injection
 
 이 설계는 LLM-maintained wiki 패턴을 Codexus에 맞게 적용하되, Codexus를 일반 지식관리 제품으로
 바꾸지 않습니다. Wiki는 source of truth가 아닙니다. 매 session마다 context를 처음부터 다시
