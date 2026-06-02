@@ -199,7 +199,7 @@ test("Codexus package dogfoods repo knowledge gate", () => {
   assert.equal(output.repoKnowledge.status, "pass");
   assert.equal(output.gate.status, "passed");
   assert.equal(output.scanAccuracy, "best_effort");
-  assert.ok(output.deferredSelfReports.sourceClaims.includes("verification_matrix_enforcement_deferred"));
-  assert.ok(output.deferredSelfReports.documentedClaims.includes("verification_matrix_enforcement_deferred"));
+  assert.equal(output.deferredSelfReports.sourceClaims.includes("verification_matrix_enforcement_deferred"), false);
+  assert.equal(output.deferredSelfReports.documentedClaims.includes("verification_matrix_enforcement_deferred"), false);
   assert.deepEqual(output.evidenceGaps, []);
 });

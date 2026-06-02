@@ -56,6 +56,9 @@ export async function autopilotCommand(args: ParsedArgs): Promise<void> {
       "role",
       "artifact",
       "artifact-hash",
+      "acceptance-criteria",
+      "acceptance-criterion",
+      "verification-matrix",
       "residual-high-findings",
       "verification-status",
     ]);
@@ -65,6 +68,9 @@ export async function autopilotCommand(args: ParsedArgs): Promise<void> {
       role: flagString(args.flags, "role"),
       artifact: flagString(args.flags, "artifact"),
       artifactHash: flagString(args.flags, "artifact-hash"),
+      acceptanceCriteriaFile: flagString(args.flags, "acceptance-criteria"),
+      acceptanceCriteria: flagArray(args.flags, "acceptance-criterion"),
+      verificationMatrixFile: flagString(args.flags, "verification-matrix"),
       residualHighFindings: flagString(args.flags, "residual-high-findings"),
       verificationStatus: flagString(args.flags, "verification-status"),
     });

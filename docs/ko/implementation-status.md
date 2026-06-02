@@ -269,20 +269,21 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Multi-engine relay autopilot은 experimental recorder/checker 첫 slice를 갖습니다:
   `cx autopilot relay record`는 다른 engine을 spawn하지 않고 외부 author/reviewer
   artifact를 import하고, `cx autopilot relay stage-gate`는 `delta-check`/`full-gate`
-  evidence를 기록하며, `cx autopilot relay check-agreement`는 같은 artifact convergence를
-  검증하고 verification 실패 시 convergence가 완료를 만들 수 없음을 증명합니다.
-  Acceptance-criteria-to-verification matrix enforcement는 명시적으로 deferred이며
-  stage-gate artifact의 `verification_matrix_enforcement_deferred` advisory claim으로
-  보고됩니다. Active relay execution과 external engine adapter는 0.1.x stable contract
-  밖에서 deferred입니다.
+  evidence와 optional acceptance criteria / verification matrix row를 기록합니다.
+  `cx autopilot relay check-agreement`는 같은 artifact convergence를 검증하고
+  verification 실패 시 convergence가 완료를 만들 수 없음을 증명합니다.
+  Implementation-stage convergence는 이제 passing evidence 또는 명시적으로 승인된
+  deferral이 있는 full-gate acceptance-criteria-to-verification matrix를 요구합니다.
+  Active relay execution과 external engine adapter는 0.1.x stable contract 밖에서
+  deferred입니다.
 - Operational control invariant는 제안된 0.2/0.3 track으로 문서화되어 있습니다:
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 다룹니다. 새 완료 권한은 아직 없으며, 첫 deterministic docs-code
   invariant pass는 `cx repo check --gate --json`에 구현됐습니다: required index,
   index link, English/Korean counterpart, 선언된 `schemas/*.schema.json` reference, source
   `*_deferred` self-report claim이 양쪽 implementation-status 문서에 mirrored됐는지를
-  기계적으로 확인합니다. Repo check output은 deferred self-report claim도 집계해 의도적으로
-  미구현된 surface가 계속 보이도록 합니다.
+  기계적으로 확인합니다. Repo check output은 남아 있는 deferred self-report claim도
+  집계해 의도적으로 미구현된 surface가 계속 보이도록 합니다.
 - Compiled repository wiki는 제안된 0.2/0.3 track으로 문서화되어 있습니다:
   repository fact, Codexus ledger, graph artifact, decision, verification evidence 위에
   재생성 가능한 markdown page를 만듭니다. 아직 `cx wiki` 명령은 없으며, 첫 구현은

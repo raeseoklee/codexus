@@ -233,6 +233,7 @@ Public bin은 `cx`와 `codexus`입니다.
 - [Codex task panel projection](design/16-codex-task-panel-projection.md): durable Codexus task state를 native Codex task panel로 projection하되, host UI를 source of truth로 만들지 않는 0.2 제안 설계입니다.
 - [Operational control invariants](design/17-operational-control-invariants.md): autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker, HUD projection을 Codexus-native control layer로 정리하되 새 완료 권한은 만들지 않는 제안 설계입니다.
 - [Compiled repository wiki](design/18-compiled-repository-wiki.md): repository fact, ledger, graph artifact, decision, verification evidence 위에 scoped freshness와 context pack을 갖춘 재생성 가능한 markdown projection을 만드는 제안 설계입니다.
+- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): worktree별 app evidence를 위해 descriptor-backed app process lifecycle surface를 제안하되, observe-before-act와 owned-process safety invariant를 먼저 두는 설계입니다.
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)

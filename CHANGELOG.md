@@ -9,7 +9,19 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added the worktree app instance launcher design note. The proposed surface is
+  descriptor-backed, observe-before-act, and requires owned-process lifecycle
+  evidence before Codexus can claim per-worktree app control.
+
+### Fixed
+
+- Relay stage-gate evidence now imports acceptance criteria and verification
+  matrix rows, and implementation-stage convergence fails when the matrix is
+  missing, unmapped, lacks passing local evidence, or cites a missing evidence
+  artifact. The previous `verification_matrix_enforcement_deferred` self-report
+  has been removed because the first structural gate now exists.
 
 ## 0.1.2 - 2026-06-02
 

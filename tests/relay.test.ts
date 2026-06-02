@@ -32,12 +32,13 @@ async function writeFixtureFiles(cwd: string): Promise<{ stage: string; author: 
 }
 
 async function writeAgreement(cwd: string, hash: string, extra: Record<string, unknown> = {}): Promise<string> {
+  const stage = typeof extra.stage === "string" ? extra.stage : "plan";
   const path = join(cwd, "agreement.json");
   await writeFile(path, `${JSON.stringify({
     schemaVersion: 1,
     stability: "experimental",
     type: "codexus.autopilot.convergence-agreement",
-    stage: "plan",
+    stage,
     round: 1,
     declarations: [
       { role: "author-engine", engine: "codex", artifactHash: hash, declaredAt: "2026-06-01T00:00:00.000Z" },
@@ -47,6 +48,12 @@ async function writeAgreement(cwd: string, hash: string, extra: Record<string, u
     decisionNeeded: false,
     ...extra,
   }, null, 2)}\n`);
+  return path;
+}
+
+async function writeMatrix(cwd: string, rows: unknown[]): Promise<string> {
+  const path = join(cwd, "matrix.json");
+  await writeFile(path, `${JSON.stringify(rows, null, 2)}\n`);
   return path;
 }
 
@@ -111,7 +118,8 @@ test("valid convergence remains unable to complete when verification fails", asy
     ]);
     assert.equal(stageGate.status, 0, stageGate.stderr);
     const stageGateOutput = JSON.parse(stageGate.stdout);
-    assert.ok(stageGateOutput.heuristicClaims.some((claim: { kind: string }) => claim.kind === "verification_matrix_enforcement_deferred"));
+    assert.equal(stageGateOutput.verificationMatrix.length, 0);
+    assert.equal(stageGateOutput.heuristicClaims.some((claim: { kind: string }) => claim.kind === "verification_matrix_enforcement_deferred"), false);
     const agreementPath = await writeAgreement(cwd, stageGateOutput.stageArtifactHash);
 
     const schema = runCli(cwd, ["schema", "validate", "--type", "stage-gate-evidence", "--file", stageGateOutput.artifactPath, "--json"]);
@@ -142,6 +150,239 @@ test("valid convergence remains unable to complete when verification fails", asy
     assert.equal(output.relay.convergenceIsCompletionAuthority, false);
     assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "verification_failed_blocks_completion"));
     assert.equal(output.gate.status, "failed");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("implementation convergence requires verification matrix evidence", async () => {
+  const cwd = await tempDir();
+  try {
+    const files = await writeFixtureFiles(cwd);
+    const stageGate = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "stage-gate",
+      "--stage",
+      "implementation",
+      "--scope",
+      "full-gate",
+      "--artifact",
+      files.stage,
+      "--verification-status",
+      "passed",
+      "--json",
+    ]);
+    assert.equal(stageGate.status, 0, stageGate.stderr);
+    const stageGateOutput = JSON.parse(stageGate.stdout);
+    const agreementPath = await writeAgreement(cwd, stageGateOutput.stageArtifactHash, { stage: "implementation" });
+
+    const check = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "check-agreement",
+      "--agreement",
+      agreementPath,
+      "--stage-gate",
+      stageGateOutput.artifactPath,
+      "--verification-status",
+      "passed",
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(check.status, 1);
+    const output = JSON.parse(check.stdout);
+    assert.equal(output.relay.convergence, "invalid");
+    assert.equal(output.relay.canComplete, false);
+    assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "verification_matrix_missing"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("implementation matrix rows must cite passing evidence or approved deferral", async () => {
+  const cwd = await tempDir();
+  try {
+    const files = await writeFixtureFiles(cwd);
+    const matrix = await writeMatrix(cwd, [
+      {
+        acceptanceCriterion: "AC-1",
+        planStep: "Step 1",
+        verification: "npm test -- parser.test.ts",
+        status: "planned",
+        evidencePath: null,
+        deferredReason: null,
+        deferredApproved: false,
+      },
+    ]);
+    const stageGate = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "stage-gate",
+      "--stage",
+      "implementation",
+      "--scope",
+      "full-gate",
+      "--artifact",
+      files.stage,
+      "--acceptance-criterion",
+      "AC-1: parser tests pass",
+      "--verification-matrix",
+      matrix,
+      "--verification-status",
+      "passed",
+      "--json",
+    ]);
+    assert.equal(stageGate.status, 0, stageGate.stderr);
+    const stageGateOutput = JSON.parse(stageGate.stdout);
+    const agreementPath = await writeAgreement(cwd, stageGateOutput.stageArtifactHash, { stage: "implementation" });
+
+    const check = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "check-agreement",
+      "--agreement",
+      agreementPath,
+      "--stage-gate",
+      stageGateOutput.artifactPath,
+      "--verification-status",
+      "passed",
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(check.status, 1);
+    const output = JSON.parse(check.stdout);
+    assert.equal(output.relay.convergence, "invalid");
+    assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "verification_matrix_row_missing_evidence"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("implementation matrix evidence allows convergence when verification passes", async () => {
+  const cwd = await tempDir();
+  try {
+    const files = await writeFixtureFiles(cwd);
+    const evidencePath = join(cwd, "parser-test.log");
+    await writeFile(evidencePath, "ok parser tests\n");
+    const matrix = await writeMatrix(cwd, [
+      {
+        acceptanceCriterion: "AC-1",
+        planStep: "Step 1",
+        verification: "npm test -- parser.test.ts",
+        status: "passed",
+        evidencePath,
+        deferredReason: null,
+        deferredApproved: false,
+      },
+    ]);
+    const stageGate = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "stage-gate",
+      "--stage",
+      "implementation",
+      "--scope",
+      "full-gate",
+      "--artifact",
+      files.stage,
+      "--acceptance-criterion",
+      "AC-1: parser tests pass",
+      "--verification-matrix",
+      matrix,
+      "--verification-status",
+      "passed",
+      "--json",
+    ]);
+    assert.equal(stageGate.status, 0, stageGate.stderr);
+    const stageGateOutput = JSON.parse(stageGate.stdout);
+    assert.equal(stageGateOutput.acceptanceCriteria.length, 1);
+    assert.equal(stageGateOutput.verificationMatrix.length, 1);
+    const schema = runCli(cwd, ["schema", "validate", "--type", "stage-gate-evidence", "--file", stageGateOutput.artifactPath, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+    const agreementPath = await writeAgreement(cwd, stageGateOutput.stageArtifactHash, { stage: "implementation" });
+
+    const check = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "check-agreement",
+      "--agreement",
+      agreementPath,
+      "--stage-gate",
+      stageGateOutput.artifactPath,
+      "--verification-status",
+      "passed",
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(check.status, 0, check.stderr);
+    const output = JSON.parse(check.stdout);
+    assert.equal(output.relay.convergence, "valid");
+    assert.equal(output.relay.canComplete, true);
+    assert.ok(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "verification_matrix_present"));
+    assert.ok(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "verification_matrix_acceptance_covered"));
+    assert.ok(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "verification_matrix_rows_evidenced"));
+    assert.deepEqual(output.evidenceGaps, []);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("implementation matrix evidence path must exist", async () => {
+  const cwd = await tempDir();
+  try {
+    const files = await writeFixtureFiles(cwd);
+    const matrix = await writeMatrix(cwd, [
+      {
+        acceptanceCriterion: "AC-1",
+        planStep: "Step 1",
+        verification: "npm test -- parser.test.ts",
+        status: "passed",
+        evidencePath: "missing-parser-test.log",
+        deferredReason: null,
+        deferredApproved: false,
+      },
+    ]);
+    const stageGate = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "stage-gate",
+      "--stage",
+      "implementation",
+      "--scope",
+      "full-gate",
+      "--artifact",
+      files.stage,
+      "--acceptance-criterion",
+      "AC-1: parser tests pass",
+      "--verification-matrix",
+      matrix,
+      "--verification-status",
+      "passed",
+      "--json",
+    ]);
+    assert.equal(stageGate.status, 0, stageGate.stderr);
+    const stageGateOutput = JSON.parse(stageGate.stdout);
+    const agreementPath = await writeAgreement(cwd, stageGateOutput.stageArtifactHash, { stage: "implementation" });
+
+    const check = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "check-agreement",
+      "--agreement",
+      agreementPath,
+      "--stage-gate",
+      stageGateOutput.artifactPath,
+      "--verification-status",
+      "passed",
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(check.status, 1);
+    const output = JSON.parse(check.stdout);
+    assert.equal(output.relay.convergence, "invalid");
+    assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "verification_matrix_evidence_missing"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

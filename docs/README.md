@@ -31,7 +31,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [JSON contract](json-contract.md): frozen `0.1.x` JSON fields, stability markers, and breaking-change rules for automation consumers.
 - [0.1.0 release evidence](release-evidence/0.1.0.md): redacted manual sign-off template for the stable cut.
 - [0.1.1 release evidence](release-evidence/0.1.1.md): trusted-publishing evidence and installed-package smoke for the harness-engineering first pass.
-- [0.1.2 release evidence](release-evidence/0.1.2.md): release-candidate evidence for additive experimental evidence surfaces and release-integrity hardening.
+- [0.1.2 release evidence](release-evidence/0.1.2.md): trusted-publishing and post-publish evidence for additive experimental evidence surfaces and release-integrity hardening.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.
@@ -51,6 +51,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Codex task panel projection](design/16-codex-task-panel-projection.md): proposed durable Codexus task state that can be projected into the native Codex task panel without making host UI the source of truth.
 - [Operational control invariants](design/17-operational-control-invariants.md): proposed Codexus-native control layer for autonomy presets, policy catalogs, docs-code invariants, decision records, loop breakers, and HUD projection without adding a new completion authority.
 - [Compiled repository wiki](design/18-compiled-repository-wiki.md): proposed regenerable markdown projection over repository facts, ledgers, graph artifacts, decisions, and verification evidence, with scoped freshness and context packs.
+- [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): proposed descriptor-backed app process lifecycle surface for per-worktree app evidence, with observe-before-act and owned-process safety invariants.
 - [Implementation status](implementation-status.md): current MVP spine, verification evidence, and known gaps.
 - [Remaining work](remaining-work.md): prioritized backlog, additional design considerations, and suggested next slice.
 - [Roadmap Kanban](roadmap-kanban.html): four-column HTML board of the remaining ready, evidence, gated, and later work.

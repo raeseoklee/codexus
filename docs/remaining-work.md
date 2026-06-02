@@ -305,15 +305,17 @@ Harness-engineering alignment adds these evidence-first tracks:
   future artifacts such as lint/typecheck/coverage reports.
 - Multi-engine relay follow-up: [doc 15](design/15-multi-engine-relay-autopilot.md)
   now has a recorder/checker first slice with `cx autopilot relay
-  record/stage-gate/check-agreement`. Next work is AC-to-verification matrix
-  import/enforcement, then adapter evidence: supported external engine
-  descriptors, read-only handoff contracts, and eventual active relay execution
-  without letting convergence replace verification.
+  record/stage-gate/check-agreement`. AC-to-verification matrix
+  import/enforcement is implemented for implementation-stage convergence. Next
+  work is adapter evidence: supported external engine descriptors, read-only
+  handoff contracts, and eventual active relay execution without letting
+  convergence replace verification.
 - Observability adapters: add dev-server/browser/log evidence descriptors only
   after the architecture and repo-knowledge gates are stable; keep stack-specific
   behavior outside the workflow kernel.
-- Worktree app instance launcher: add a descriptor-backed process launcher before
-  Codexus claims it can run one app instance per change/worktree. The launcher
+- Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
+  defines a descriptor-backed process launcher before Codexus claims it can run
+  one app instance per change/worktree. The launcher
   should record worktree, branch/head, command profile, pid/owner heartbeat,
   port/URL, health check, logs, and status under Codexus-owned artifacts. It
   must remain experimental, stop only owned processes, and provide the instance
@@ -356,9 +358,10 @@ Harness-engineering alignment adds these evidence-first tracks:
 9. Autopilot contract layer: start as a 0.2/0.3 experimental track with schema
    artifacts and report-only scope gates before any `cx autopilot run`.
 10. Multi-engine relay autopilot: the report-only artifact recorder/checker is
-    implemented. Add AC-to-verification matrix enforcement before active
-    adapters, keep review engines artifact-import-only until a supported adapter
-    exists, and do not let convergence replace verification.
+    implemented, and implementation-stage AC-to-verification matrix enforcement
+    is now a structural gate. Keep review engines artifact-import-only until a
+    supported adapter exists, add descriptor-backed adapter evidence before
+    active execution, and do not let convergence replace verification.
 11. Operational control invariants: decision artifacts and ledger-derived loop
     summaries are implemented as advisory session evidence. Next implement
     autonomy preset metadata, policy catalog reporting, richer risk facts, and
@@ -366,6 +369,9 @@ Harness-engineering alignment adds these evidence-first tracks:
     policy fields exist.
 12. Compiled repository wiki: implement deterministic `cx wiki map/build/check`
     before any advisory synthesis or context injection.
-13. Worktree app instance launcher: add `cx app instance start/status/stop/logs`
-    as an experimental, descriptor-backed evidence surface before claiming
-    per-worktree app control or app-health evidence.
+13. Worktree app instance launcher: follow [doc 19](design/19-worktree-app-instance-launcher.md)
+    and add `cx app instance start/status/stop/logs` as an experimental,
+    descriptor-backed evidence surface before claiming per-worktree app control
+    or app-health evidence. Start with observe-only status/log artifacts and
+    `start --dry-run`; gate live start/stop behind owned-process, owner-token,
+    heartbeat, port-allocation, and health evidence.

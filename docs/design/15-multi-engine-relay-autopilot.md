@@ -262,15 +262,19 @@ Rules:
 - every approved acceptance criterion must map to at least one verification row;
 - implementation cannot converge on `delta-check` only;
 - implementation convergence requires the latest verification matrix rows to have
-  evidence paths or an approved deferred reason;
+  passing local evidence paths or an approved deferred reason;
+- a matrix evidence path must resolve to a local evidence artifact;
 - a patch log is supporting evidence, not the source of truth for acceptance.
 
-Current implementation status: the first recorder/checker slice does not enforce
-this matrix yet. `cx autopilot relay stage-gate` records `verificationMatrix: []`
-and emits the advisory claim `verification_matrix_enforcement_deferred`.
-Therefore an empty matrix must not be interpreted as acceptance coverage. The
-existing completion authority remains the normal verification and evidence gates
-until a later slice adds matrix import, validation, and convergence checks.
+Current implementation status: the first structural matrix gate is implemented
+for implementation-stage convergence. `cx autopilot relay stage-gate` can import
+matrix rows with `--verification-matrix <path>` and approved acceptance criteria
+with `--acceptance-criteria <path>` or repeated `--acceptance-criterion <id>`.
+`cx autopilot relay check-agreement --gate` fails implementation convergence
+when the matrix is missing, when an approved criterion has no row, when a
+non-deferred row lacks passing evidence, or when its evidence path does not
+resolve to a local artifact. Approved deferrals must be explicit in the matrix
+row; model agreement alone never fills the matrix.
 
 ## Stop Conditions
 
@@ -311,7 +315,9 @@ resume.
    stage artifact hash.
 6. Done: tests prove a valid convergence agreement cannot complete a run when
    verification fails.
-7. Deferred: only then consider an external relay adapter.
+7. Done: implementation-stage convergence enforces the acceptance-criteria to
+   verification matrix before completion.
+8. Deferred: only then consider an external relay adapter.
 
 Dogfood target: use Codexus docs work where Codex authors a proposal and an
 external reviewer produces a review artifact, but keep completion tied to

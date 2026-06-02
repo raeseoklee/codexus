@@ -14,12 +14,38 @@
     "recordedAt": { "type": "string", "minLength": 1 },
     "stageArtifactHash": { "type": "string", "minLength": 1 },
     "freshReadArtifacts": { "type": "array" },
-    "verificationMatrix": { "type": "array" },
+    "acceptanceCriteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "text": { "type": ["string", "null"] }
+        },
+        "required": ["id", "text"]
+      }
+    },
+    "verificationMatrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "acceptanceCriterion": { "type": "string", "minLength": 1 },
+          "planStep": { "type": ["string", "null"] },
+          "verification": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["passed", "failed", "skipped", "unknown", "planned", "deferred"] },
+          "evidencePath": { "type": ["string", "null"] },
+          "deferredReason": { "type": ["string", "null"] },
+          "deferredApproved": { "type": "boolean" }
+        },
+        "required": ["acceptanceCriterion", "planStep", "verification", "status", "evidencePath", "deferredReason", "deferredApproved"]
+      }
+    },
     "findings": { "type": "array" },
     "residualFindingCount": { "type": "number", "minimum": 0 },
     "verificationResults": { "type": "array" },
     "heuristicClaims": { "type": "array" },
     "derivableFacts": { "type": "array" }
   },
-  "required": ["schemaVersion", "stability", "type", "evidenceId", "stage", "scope", "role", "recordedAt", "stageArtifactHash", "freshReadArtifacts", "verificationMatrix", "findings", "residualFindingCount", "verificationResults", "heuristicClaims", "derivableFacts"]
+  "required": ["schemaVersion", "stability", "type", "evidenceId", "stage", "scope", "role", "recordedAt", "stageArtifactHash", "freshReadArtifacts", "acceptanceCriteria", "verificationMatrix", "findings", "residualFindingCount", "verificationResults", "heuristicClaims", "derivableFacts"]
 }

@@ -65,7 +65,7 @@ Usage:
   cx repo graph build --graph-provider codexus-lite [--scope <glob>] [--json]
   cx repo graph check --graph <graph-id-or-path> [--gate] [--json]
   cx autopilot relay record --stage issue|design|plan|implementation --artifact <path> --author-file <path> --review-file <path> [--json]
-  cx autopilot relay stage-gate --stage issue|design|plan|implementation --scope delta-check|full-gate --artifact <path> [--verification-status passed|failed|skipped|unknown] [--json]
+  cx autopilot relay stage-gate --stage issue|design|plan|implementation --scope delta-check|full-gate --artifact <path> [--acceptance-criteria <path>] [--acceptance-criterion <id>] [--verification-matrix <path>] [--verification-status passed|failed|skipped|unknown] [--json]
   cx autopilot relay check-agreement --agreement <path> --stage-gate <path> [--verification-status passed|failed|skipped|unknown] [--gate] [--json]
   cx autopilot relay status <relay-id> [--json]
   cx run [--driver mock|codex-exec] [--verify <cmd>] [--max-driver-repairs <n>] [--run-timeout-ms <n|none>] <prompt>

@@ -285,14 +285,16 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   선택적 lint/typecheck/coverage artifact입니다.
 - Multi-engine relay follow-up: [15번 문서](design/15-multi-engine-relay-autopilot.md)는
   이제 `cx autopilot relay record/stage-gate/check-agreement` recorder/checker 첫 slice를
-  갖습니다. 다음 작업은 AC-to-verification matrix import/enforcement이고, 그 다음이
-  adapter evidence입니다: 지원되는 external engine descriptor, read-only handoff contract,
-  그리고 convergence가 verification을 대체하지 않는 active relay execution입니다.
+  갖습니다. AC-to-verification matrix import/enforcement는 implementation-stage
+  convergence의 structural gate로 구현됐습니다. 다음 작업은 adapter evidence입니다:
+  지원되는 external engine descriptor, read-only handoff contract, 그리고 convergence가
+  verification을 대체하지 않는 active relay execution입니다.
 - Observability adapter: architecture와 repo-knowledge gate가 안정된 뒤
   dev-server/browser/log evidence descriptor를 추가합니다. Stack-specific behavior는
   workflow kernel 밖에 둡니다.
-- Worktree app instance launcher: Codexus가 변경/worktree별 앱 instance를 실행할 수
-  있다고 주장하기 전에 descriptor-backed process launcher를 추가합니다. Launcher는
+- Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)는
+  Codexus가 변경/worktree별 앱 instance를 실행할 수 있다고 주장하기 전에 필요한
+  descriptor-backed process launcher를 정의합니다. Launcher는
   Codexus-owned artifact에 worktree, branch/head, command profile, pid/owner
   heartbeat, port/URL, health check, log, status를 기록해야 합니다. Experimental로
   유지하고 owned process만 stop해야 하며, browser/dev-server adapter가 참조할
@@ -332,15 +334,19 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 9. Autopilot contract layer: `cx autopilot run` 전에 schema artifact와 report-only scope
    gate부터 시작하는 0.2/0.3 experimental track으로 진행합니다.
 10. Multi-engine relay autopilot: report-only artifact recorder/checker는 구현됐습니다.
-    Active adapter 전에 AC-to-verification matrix enforcement를 추가합니다. 지원되는
-    adapter가 생기기 전 review engine은 artifact import-only로 두고, convergence가
-    verification을 대체하지 않게 합니다.
+    Implementation-stage AC-to-verification matrix enforcement도 structural gate로
+    구현됐습니다. 지원되는 adapter가 생기기 전 review engine은 artifact import-only로
+    두고, descriptor-backed adapter evidence 없이 active execution으로 넘어가지 않으며,
+    convergence가 verification을 대체하지 않게 합니다.
 11. Operational control invariant: decision artifact와 ledger-derived loop summary는
     advisory session evidence로 구현됐습니다. 다음은 autonomy preset metadata, policy
     catalog reporting, 더 풍부한 risk fact, task artifact입니다. Enforceable policy
     field가 생기기 전까지 autonomy preset은 contract metadata로 둡니다.
 12. Compiled repository wiki: advisory synthesis나 context injection 전에 deterministic
     `cx wiki map/build/check`부터 구현합니다.
-13. Worktree app instance launcher: per-worktree app control이나 app-health evidence를
-    주장하기 전에 `cx app instance start/status/stop/logs`를 experimental,
-    descriptor-backed evidence surface로 추가합니다.
+13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)를
+    따라 per-worktree app control이나 app-health evidence를 주장하기 전에
+    `cx app instance start/status/stop/logs`를 experimental, descriptor-backed evidence
+    surface로 추가합니다. 먼저 observe-only status/log artifact와 `start --dry-run`으로
+    시작하고, live start/stop은 owned-process, owner-token, heartbeat, port-allocation,
+    health evidence 뒤에 gate합니다.

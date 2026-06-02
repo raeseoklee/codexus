@@ -9,7 +9,19 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
-아직 변경 사항이 없습니다.
+### Added
+
+- Worktree app instance launcher 설계 문서를 추가했습니다. 제안된 surface는
+  descriptor-backed, observe-before-act 방식이며, Codexus가 per-worktree app control을
+  주장하기 전에 owned-process lifecycle evidence를 요구합니다.
+
+### Fixed
+
+- Relay stage-gate evidence가 acceptance criteria와 verification matrix row를 import하고,
+  implementation-stage convergence는 matrix가 없거나, criterion이 unmapped이거나, passing
+  local evidence가 없거나, 존재하지 않는 evidence artifact를 인용하면 실패합니다. 첫
+  structural gate가 생겼으므로 기존 `verification_matrix_enforcement_deferred`
+  self-report는 제거했습니다.
 
 ## 0.1.2 - 2026-06-02
 

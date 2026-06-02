@@ -137,6 +137,7 @@
     .blocked { color: var(--red); background: #ffe8e5; border-color: #f5b8b1; }
     .gateable { color: var(--amber); background: #fff3d9; border-color: #f0d18d; }
     .later { color: var(--violet); background: #f0ebff; border-color: #d8ccff; }
+    .done { color: var(--green); background: #e9f7ef; border-color: #bfebd0; }
 
     .card p { margin: 0 0 8px; }
     .card ul { margin: 0 0 8px 18px; padding: 0; }
@@ -171,15 +172,14 @@
   <header>
     <h1>Codexus 로드맵 칸반</h1>
     <p>
-      0.1.2 release-candidate 기준, indexed 문서에 계획되어 있지만 아직 구현되지 않은
-      Codexus 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
+      0.1.2 release 이후 indexed Codexus roadmap 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
       evidence-first 원칙에 맞춰 작성했습니다. 로컬 fact는 gate할 수 있고, 판단이 필요한
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
       <span class="pill">갱신일: 2026-06-02</span>
-      <span class="pill">기준: npm 0.1.2 release candidate</span>
-      <span class="pill">출처: indexed docs 01-18 + remaining work</span>
+      <span class="pill">기준: npm 0.1.2 published</span>
+      <span class="pill">출처: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
       <span class="pill"><a href="remaining-work.md">남은 작업</a></span>
       <span class="pill"><a href="design/13-harness-engineering-alignment.md">하네스 정렬 문서</a></span>
@@ -189,8 +189,8 @@
   <main>
     <section class="board" aria-label="Codexus roadmap kanban">
       <section class="column" aria-labelledby="ready-now">
-        <h2 id="ready-now">1. 바로 가능</h2>
-        <p class="summary">Deferred runtime을 켜지 않고도 구현할 수 있는 작고 도출 가능한 유지보수/gate입니다.</p>
+        <h2 id="ready-now">1. 완료 / 바로 가능</h2>
+        <p class="summary">최근 완료된 evidence 작업과 deferred runtime을 켜지 않고 구현할 수 있는 작은 derivable gate입니다.</p>
 
         <article class="card">
           <h3>0.1.x Patch Queue</h3>
@@ -205,6 +205,23 @@
             <li>Experimental surface는 stable처럼 보이지 않습니다.</li>
             <li>Gate 가능한 claim은 derivable fact로 뒷받침됩니다.</li>
           </ul>
+        </article>
+
+        <article class="card">
+          <h3>Release Integrity Live Sign-Off</h3>
+          <div class="tags">
+            <span class="tag done">0.1.2 완료</span>
+            <span class="tag evidence">post-publish</span>
+          </div>
+          <p>0.1.2 stable tag에서 npm latest, GitHub latest, GitHub Release installer asset이 같은 version을 가리킴을 증명했습니다.</p>
+          <span class="label">증거</span>
+          <ul>
+            <li><code>cx release check --version 0.1.2 --live --gate --json</code> 통과.</li>
+            <li>GitHub Release의 <code>install.sh</code> hash가 checked-in installer와 일치.</li>
+            <li>Post-publish release evidence가 영문/한국어 release-evidence 문서에 기록됨.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="release-evidence/0.1.2.md">0.1.2 release evidence</a></p>
         </article>
 
         <article class="card">
@@ -228,16 +245,16 @@
         <article class="card">
           <h3>Relay AC Matrix Enforcement</h3>
           <div class="tags">
-            <span class="tag ready">15번 문서</span>
+            <span class="tag done">완료</span>
             <span class="tag gateable">adapter 이전</span>
           </div>
-          <p>Active multi-engine adapter를 승격하기 전에 deferred 상태인 acceptance-criteria-to-verification matrix를 structural relay gate로 만듭니다.</p>
-          <span class="label">완료 조건</span>
+          <p>Acceptance-criteria-to-verification matrix는 이제 active multi-engine adapter 승격 전 implementation-stage structural relay gate입니다.</p>
+          <span class="label">증거</span>
           <ul>
-            <li><code>cx autopilot relay stage-gate</code>가 matrix row를 import 또는 record할 수 있습니다.</li>
-            <li>승인된 모든 acceptance criterion은 최소 하나의 row 또는 승인된 deferred reason에 매핑됩니다.</li>
-            <li>필수 matrix row에 evidence path가 없으면 implementation convergence가 실패합니다.</li>
-            <li>Gate가 생긴 뒤에만 현재 <code>verification_matrix_enforcement_deferred</code> advisory claim을 제거합니다.</li>
+            <li><code>cx autopilot relay stage-gate</code>가 matrix row와 승인된 acceptance criteria를 import합니다.</li>
+            <li>승인된 모든 acceptance criterion은 최소 하나의 row 또는 승인된 deferred reason에 매핑되어야 합니다.</li>
+            <li>필수 matrix row에 passing evidence가 없으면 implementation convergence가 실패합니다.</li>
+            <li>Structural gate가 생겼으므로 기존 deferred advisory claim은 제거됐습니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md#acceptance-criteria-to-verification-matrix">multi-engine relay autopilot</a></p>
@@ -263,21 +280,6 @@
           </ul>
           <span class="label">근거</span>
           <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
-        </article>
-
-        <article class="card">
-          <h3>Release Integrity Live Sign-Off</h3>
-          <div class="tags">
-            <span class="tag evidence">post-publish</span>
-            <span class="tag gated">explicit live</span>
-          </div>
-          <p>Stable tag publish 이후 live release-integrity check를 실행해 npm latest, GitHub latest, GitHub Release installer asset이 모두 같은 version을 가리키는지 증명합니다.</p>
-          <span class="label">완료 조건</span>
-          <ul>
-            <li><code>cx release check --version &lt;version&gt; --live --gate --json</code> 통과.</li>
-            <li>GitHub Release의 <code>install.sh</code> hash가 checked-in installer와 일치.</li>
-            <li>Live network failure는 이 명시적 sign-off에서만 blocking이며, local release candidate gate에는 영향을 주지 않습니다.</li>
-          </ul>
         </article>
 
         <article class="card">
@@ -309,7 +311,7 @@
             <li>Browser/dev-server evidence는 instance id를 참조하고 live evidence 없이 control/health를 주장하지 않습니다.</li>
           </ul>
           <span class="label">근거</span>
-          <p><a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
+          <p><a href="design/19-worktree-app-instance-launcher.md">worktree app instance launcher</a> · <a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
         </article>
 
         <article class="card">
@@ -547,7 +549,8 @@
             <li>완료: recorder/checker surface는 두 번째 engine을 spawn하지 않습니다.</li>
             <li>완료: Convergence declaration은 같은 stage artifact hash를 참조해야 합니다.</li>
             <li>완료: Verification 또는 evidence gate가 실패하면 valid convergence도 run을 complete할 수 없습니다.</li>
-            <li>다음: descriptor-backed external engine adapter evidence 전에 AC matrix enforcement.</li>
+            <li>완료: implementation-stage AC matrix enforcement는 passing evidence 없이 convergence를 막습니다.</li>
+            <li>다음: descriptor-backed external engine adapter evidence.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md">multi-engine relay autopilot</a></p>

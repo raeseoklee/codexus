@@ -137,6 +137,7 @@
     .blocked { color: var(--red); background: #ffe8e5; border-color: #f5b8b1; }
     .gateable { color: var(--amber); background: #fff3d9; border-color: #f0d18d; }
     .later { color: var(--violet); background: #f0ebff; border-color: #d8ccff; }
+    .done { color: var(--green); background: #e9f7ef; border-color: #bfebd0; }
 
     .card p { margin: 0 0 8px; }
     .card ul { margin: 0 0 8px 18px; padding: 0; }
@@ -171,16 +172,15 @@
   <header>
     <h1>Codexus Roadmap Kanban</h1>
     <p>
-      A four-column view of indexed planned-but-unimplemented Codexus work at
-      the 0.1.2 release-candidate boundary.
+      A four-column view of indexed Codexus roadmap work after the 0.1.2 release.
       Cards are intentionally framed as evidence-first tasks: local facts may gate,
       judgment-heavy claims stay advisory, and experimental surfaces remain blocked
       until their runtime contract exists.
     </p>
     <div class="meta">
       <span class="pill">Updated: 2026-06-02</span>
-      <span class="pill">Baseline: npm 0.1.2 release candidate</span>
-      <span class="pill">Source: indexed docs 01-18 + remaining work</span>
+      <span class="pill">Baseline: npm 0.1.2 published</span>
+      <span class="pill">Source: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
       <span class="pill"><a href="remaining-work.md">Remaining work</a></span>
       <span class="pill"><a href="design/13-harness-engineering-alignment.md">Harness alignment</a></span>
@@ -190,8 +190,8 @@
   <main>
     <section class="board" aria-label="Codexus roadmap kanban">
       <section class="column" aria-labelledby="ready-now">
-        <h2 id="ready-now">1. Ready Now</h2>
-        <p class="summary">Small, derivable maintenance and evidence gates that can be implemented without enabling deferred runtime behavior.</p>
+        <h2 id="ready-now">1. Done / Ready Now</h2>
+        <p class="summary">Recently completed evidence work plus small derivable maintenance gates that do not enable deferred runtime behavior.</p>
 
         <article class="card">
           <h3>0.1.x Patch Queue</h3>
@@ -206,6 +206,23 @@
             <li>Experimental surfaces do not look stable.</li>
             <li>Gateable claims remain backed by derivable facts.</li>
           </ul>
+        </article>
+
+        <article class="card">
+          <h3>Release Integrity Live Sign-Off</h3>
+          <div class="tags">
+            <span class="tag done">done in 0.1.2</span>
+            <span class="tag evidence">post-publish</span>
+          </div>
+          <p>The 0.1.2 stable tag proved npm latest, GitHub latest, and the GitHub Release installer asset point at the same version.</p>
+          <span class="label">Evidence</span>
+          <ul>
+            <li><code>cx release check --version 0.1.2 --live --gate --json</code> passed.</li>
+            <li>The GitHub Release <code>install.sh</code> hash matches the checked-in installer.</li>
+            <li>Post-publish release evidence is recorded in the English and Korean release-evidence docs.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="release-evidence/0.1.2.md">0.1.2 release evidence</a></p>
         </article>
 
         <article class="card">
@@ -229,16 +246,16 @@
         <article class="card">
           <h3>Relay AC Matrix Enforcement</h3>
           <div class="tags">
-            <span class="tag ready">doc 15</span>
+            <span class="tag done">done</span>
             <span class="tag gateable">before adapters</span>
           </div>
-          <p>Turn the deferred acceptance-criteria-to-verification matrix into a structural relay gate before any active multi-engine adapter is promoted.</p>
-          <span class="label">Acceptance</span>
+          <p>The acceptance-criteria-to-verification matrix is now a structural implementation-stage relay gate before any active multi-engine adapter is promoted.</p>
+          <span class="label">Evidence</span>
           <ul>
-            <li><code>cx autopilot relay stage-gate</code> can import or record matrix rows.</li>
-            <li>Every approved acceptance criterion maps to at least one row or an approved deferred reason.</li>
-            <li>Implementation convergence fails when required matrix rows lack evidence paths.</li>
-            <li>The current <code>verification_matrix_enforcement_deferred</code> advisory claim is removed only when the gate exists.</li>
+            <li><code>cx autopilot relay stage-gate</code> imports matrix rows and approved acceptance criteria.</li>
+            <li>Every approved acceptance criterion must map to at least one row or an approved deferred reason.</li>
+            <li>Implementation convergence fails when required matrix rows lack passing evidence.</li>
+            <li>The former deferred advisory claim is removed because the structural gate exists.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md#acceptance-criteria-to-verification-matrix">multi-engine relay autopilot</a></p>
@@ -264,21 +281,6 @@
           </ul>
           <span class="label">Sources</span>
           <p><a href="plans/2026-05-30-desktop-app-server-attachment-evidence-plan.md">app-server evidence plan</a></p>
-        </article>
-
-        <article class="card">
-          <h3>Release Integrity Live Sign-Off</h3>
-          <div class="tags">
-            <span class="tag evidence">post-publish</span>
-            <span class="tag gated">explicit live</span>
-          </div>
-          <p>After a stable tag publishes, run the live release-integrity check to prove npm latest, GitHub latest, and the GitHub Release installer asset all point at the same version.</p>
-          <span class="label">Acceptance</span>
-          <ul>
-            <li><code>cx release check --version &lt;version&gt; --live --gate --json</code> passes.</li>
-            <li>The GitHub Release <code>install.sh</code> hash matches the checked-in installer.</li>
-            <li>Live network failures are blocking only for this explicit sign-off, not for local release candidates.</li>
-          </ul>
         </article>
 
         <article class="card">
@@ -310,7 +312,7 @@
             <li>Browser/dev-server evidence references an instance id and never claims control or health without live evidence.</li>
           </ul>
           <span class="label">Sources</span>
-          <p><a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
+          <p><a href="design/19-worktree-app-instance-launcher.md">worktree app instance launcher</a> · <a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
         </article>
 
         <article class="card">
@@ -548,7 +550,8 @@
             <li>Done: recorder/checker surface does not spawn a second engine.</li>
             <li>Done: convergence declarations must reference the same stage artifact hash.</li>
             <li>Done: valid convergence cannot complete a run when verification or evidence gates fail.</li>
-            <li>Next: AC matrix enforcement before descriptor-backed external engine adapter evidence.</li>
+            <li>Done: implementation-stage AC matrix enforcement blocks convergence without passing evidence.</li>
+            <li>Next: descriptor-backed external engine adapter evidence.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md">multi-engine relay autopilot</a></p>

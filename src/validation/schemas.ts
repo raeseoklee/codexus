@@ -625,7 +625,29 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     requireString(value, "recordedAt", errors);
     requireString(value, "stageArtifactHash", errors);
     requireArray(value, "freshReadArtifacts", errors);
-    requireArray(value, "verificationMatrix", errors);
+    const acceptanceCriteria = requireArray(value, "acceptanceCriteria", errors);
+    for (const item of acceptanceCriteria) {
+      if (!isRecord(item)) {
+        errors.push("acceptanceCriteria:non_object_item");
+        continue;
+      }
+      requireString(item, "id", errors, "acceptanceCriteria.id");
+      if (!(item.text === null || typeof item.text === "string")) errors.push("acceptanceCriteria.text:invalid");
+    }
+    const verificationMatrix = requireArray(value, "verificationMatrix", errors);
+    for (const item of verificationMatrix) {
+      if (!isRecord(item)) {
+        errors.push("verificationMatrix:non_object_item");
+        continue;
+      }
+      requireString(item, "acceptanceCriterion", errors, "verificationMatrix.acceptanceCriterion");
+      if (!(item.planStep === null || typeof item.planStep === "string")) errors.push("verificationMatrix.planStep:invalid");
+      requireString(item, "verification", errors, "verificationMatrix.verification");
+      requireOneOf(item, "status", [...relayVerificationStatuses, "planned", "deferred"], errors, "verificationMatrix.status");
+      if (!(item.evidencePath === null || typeof item.evidencePath === "string")) errors.push("verificationMatrix.evidencePath:invalid");
+      if (!(item.deferredReason === null || typeof item.deferredReason === "string")) errors.push("verificationMatrix.deferredReason:invalid");
+      requireBoolean(item, "deferredApproved", errors, "verificationMatrix.deferredApproved");
+    }
     requireArray(value, "findings", errors);
     requireNumber(value, "residualFindingCount", errors);
     const verificationResults = requireArray(value, "verificationResults", errors);

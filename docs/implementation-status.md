@@ -278,13 +278,13 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Multi-engine relay autopilot has an experimental recorder/checker first slice:
   `cx autopilot relay record` imports external author/reviewer artifacts without
   spawning another engine, `cx autopilot relay stage-gate` records
-  `delta-check`/`full-gate` evidence, and `cx autopilot relay check-agreement`
-  validates same-artifact convergence while proving convergence cannot complete
-  work when verification fails. Acceptance-criteria-to-verification matrix
-  enforcement is explicitly deferred and reported as
-  `verification_matrix_enforcement_deferred` in stage-gate artifacts. Active
-  relay execution and external engine adapters remain deferred outside the 0.1.x
-  stable contract.
+  `delta-check`/`full-gate` evidence plus optional acceptance criteria and
+  verification matrix rows, and `cx autopilot relay check-agreement` validates
+  same-artifact convergence while proving convergence cannot complete work when
+  verification fails. Implementation-stage convergence now requires a full-gate
+  acceptance-criteria-to-verification matrix with passing evidence or explicit
+  approved deferrals. Active relay execution and external engine adapters remain
+  deferred outside the 0.1.x stable contract.
 - Operational control invariants are documented as a proposed 0.2/0.3 track:
   autonomy presets, policy catalogs, docs-code invariants, decision records,
   loop breakers, and HUD projection. No new completion authority exists yet;
@@ -293,8 +293,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   counterparts, declared `schemas/*.schema.json` references, and source
   `*_deferred` self-report claims mirrored in both implementation-status docs are
   checked mechanically before any active autonomy surface exists. The repo check
-  output also aggregates deferred self-report claims so intentionally unbuilt
-  surfaces stay visible.
+  output also aggregates the remaining deferred self-report claims so
+  intentionally unbuilt surfaces stay visible.
 - The compiled repository wiki is documented as a proposed 0.2/0.3 track:
   regenerable markdown pages over repository facts, Codexus ledgers, graph
   artifacts, decisions, and verification evidence. No `cx wiki` commands exist
@@ -304,7 +304,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 ## Verified
 
 - Unit tests: `npm test`
-- Current test count: 176.
+- Current test count: 196.
 - Static check: `npm run typecheck`
 - CI workflow: `.github/workflows/ci.yml`
 - Local CI parity: `npm run ci`

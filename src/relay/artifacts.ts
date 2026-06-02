@@ -10,6 +10,7 @@ export type RelayStage = "issue" | "design" | "plan" | "implementation";
 export type RelayReviewScope = "delta-check" | "full-gate";
 export type RelayRole = "author-engine" | "review-engine" | string;
 export type RelayVerificationStatus = "passed" | "failed" | "skipped" | "unknown";
+export type RelayVerificationMatrixStatus = RelayVerificationStatus | "planned" | "deferred";
 export type RelayStatus = "pass" | "fail" | "unknown";
 
 export interface RelayEngineDescriptor {
@@ -48,6 +49,12 @@ export interface RelayEvidenceGap {
     | "stage_gate_stage_mismatch"
     | "stage_gate_artifact_hash_mismatch"
     | "stage_gate_residual_findings"
+    | "verification_matrix_missing"
+    | "verification_matrix_acceptance_unmapped"
+    | "verification_matrix_row_missing_evidence"
+    | "verification_matrix_evidence_missing"
+    | "verification_matrix_row_not_passed"
+    | "verification_matrix_deferred_not_approved"
     | "verification_failed_blocks_completion";
   gate: true;
   evidence: string | null;
@@ -66,6 +73,9 @@ export interface RelayDerivableFact {
     | "required_role_declarations_present"
     | "required_declarations_same_artifact_hash"
     | "stage_gate_full_gate_present"
+    | "verification_matrix_present"
+    | "verification_matrix_acceptance_covered"
+    | "verification_matrix_rows_evidenced"
     | "verification_passed";
   gate: boolean;
   evidence: string;
@@ -74,7 +84,6 @@ export interface RelayDerivableFact {
 export interface RelayHeuristicClaim {
   kind:
     | "artifact_content_not_semantically_evaluated"
-    | "verification_matrix_enforcement_deferred"
     | "engine_agreement_is_advisory";
   confidence: "low" | "medium" | "high";
   evidence: string;
@@ -145,7 +154,8 @@ export interface StageGateEvidenceArtifact {
     storedPath: string | null;
     hash: string;
   }>;
-  verificationMatrix: unknown[];
+  acceptanceCriteria: StageGateAcceptanceCriterion[];
+  verificationMatrix: StageGateVerificationMatrixRow[];
   findings: unknown[];
   residualFindingCount: number;
   verificationResults: Array<{
@@ -155,6 +165,21 @@ export interface StageGateEvidenceArtifact {
   }>;
   heuristicClaims: RelayHeuristicClaim[];
   derivableFacts: RelayDerivableFact[];
+}
+
+export interface StageGateAcceptanceCriterion {
+  id: string;
+  text: string | null;
+}
+
+export interface StageGateVerificationMatrixRow {
+  acceptanceCriterion: string;
+  planStep: string | null;
+  verification: string;
+  status: RelayVerificationMatrixStatus;
+  evidencePath: string | null;
+  deferredReason: string | null;
+  deferredApproved: boolean;
 }
 
 export interface ConvergenceDeclaration {
@@ -215,6 +240,7 @@ export interface RelayAgreementCheckResult {
 const relayStages = new Set<RelayStage>(["issue", "design", "plan", "implementation"]);
 const relayReviewScopes = new Set<RelayReviewScope>(["delta-check", "full-gate"]);
 const verificationStatuses = new Set<RelayVerificationStatus>(["passed", "failed", "skipped", "unknown"]);
+const verificationMatrixStatuses = new Set<RelayVerificationMatrixStatus>(["passed", "failed", "skipped", "unknown", "planned", "deferred"]);
 const agreementStructuralGapKinds = new Set<RelayEvidenceGap["kind"]>([
   "missing_required_role_declaration",
   "artifact_hash_mismatch",
@@ -226,6 +252,12 @@ const agreementStructuralGapKinds = new Set<RelayEvidenceGap["kind"]>([
   "stage_gate_stage_mismatch",
   "stage_gate_artifact_hash_mismatch",
   "stage_gate_residual_findings",
+  "verification_matrix_missing",
+  "verification_matrix_acceptance_unmapped",
+  "verification_matrix_row_missing_evidence",
+  "verification_matrix_evidence_missing",
+  "verification_matrix_row_not_passed",
+  "verification_matrix_deferred_not_approved",
 ]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -269,6 +301,14 @@ function assertNonNegativeInteger(value: string | undefined, field: string): num
   return parsed;
 }
 
+async function readJsonValue(path: string): Promise<unknown> {
+  try {
+    return JSON.parse(await readFile(path, "utf8")) as unknown;
+  } catch (error) {
+    throw new Error(`json_parse_failed:${path}:${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 async function hashFile(path: string): Promise<string> {
   return sha256Bytes(await readFile(path));
 }
@@ -304,6 +344,102 @@ async function importArtifact(cwd: string, path: string, artifactDir: string, na
   };
 }
 
+function parseAcceptanceCriterion(value: string): StageGateAcceptanceCriterion {
+  const trimmed = value.trim();
+  if (!trimmed) throw new Error("invalid_relay_acceptance_criterion:empty");
+  const separator = trimmed.indexOf(":");
+  if (separator === -1) return { id: trimmed, text: null };
+  const id = trimmed.slice(0, separator).trim();
+  const text = trimmed.slice(separator + 1).trim();
+  if (!id) throw new Error("invalid_relay_acceptance_criterion:missing_id");
+  return { id, text: text || null };
+}
+
+function acceptanceCriterionFromRecord(value: Record<string, unknown>): StageGateAcceptanceCriterion {
+  const id = typeof value.id === "string"
+    ? value.id.trim()
+    : typeof value.acceptanceCriterion === "string"
+      ? value.acceptanceCriterion.trim()
+      : "";
+  if (!id) throw new Error("invalid_relay_acceptance_criterion:missing_id");
+  const text = typeof value.text === "string" && value.text.trim() ? value.text.trim() : null;
+  return { id, text };
+}
+
+async function loadAcceptanceCriteria(cwd: string, file: string | undefined, inline: string[] | undefined): Promise<StageGateAcceptanceCriterion[]> {
+  const criteria: StageGateAcceptanceCriterion[] = [];
+  if (file) {
+    const path = resolve(cwd, file);
+    if (!existsSync(path)) throw new Error(`missing_relay_acceptance_criteria:${path}`);
+    const parsed = await readJsonValue(path);
+    const rawCriteria = Array.isArray(parsed)
+      ? parsed
+      : isRecord(parsed) && Array.isArray(parsed.acceptanceCriteria)
+        ? parsed.acceptanceCriteria
+        : null;
+    if (!rawCriteria) throw new Error("invalid_relay_acceptance_criteria:expected_array");
+    for (const item of rawCriteria) {
+      if (typeof item === "string") criteria.push(parseAcceptanceCriterion(item));
+      else if (isRecord(item)) criteria.push(acceptanceCriterionFromRecord(item));
+      else throw new Error("invalid_relay_acceptance_criteria:item");
+    }
+  }
+  for (const item of inline ?? []) {
+    criteria.push(parseAcceptanceCriterion(item));
+  }
+  const byId = new Map<string, StageGateAcceptanceCriterion>();
+  for (const criterion of criteria) {
+    if (!byId.has(criterion.id)) byId.set(criterion.id, criterion);
+  }
+  return [...byId.values()];
+}
+
+function matrixRowFromRecord(value: Record<string, unknown>): StageGateVerificationMatrixRow {
+  const acceptanceCriterion = typeof value.acceptanceCriterion === "string" ? value.acceptanceCriterion.trim() : "";
+  if (!acceptanceCriterion) throw new Error("invalid_relay_verification_matrix_row:missing_acceptanceCriterion");
+  const verification = typeof value.verification === "string" && value.verification.trim()
+    ? value.verification.trim()
+    : typeof value.command === "string" && value.command.trim()
+      ? value.command.trim()
+      : "";
+  if (!verification) throw new Error("invalid_relay_verification_matrix_row:missing_verification");
+  const rawStatus = typeof value.status === "string" ? value.status : "unknown";
+  if (!verificationMatrixStatuses.has(rawStatus as RelayVerificationMatrixStatus)) {
+    throw new Error(`invalid_relay_verification_matrix_row_status:${rawStatus}`);
+  }
+  const deferredReason = typeof value.deferredReason === "string" && value.deferredReason.trim()
+    ? value.deferredReason.trim()
+    : null;
+  return {
+    acceptanceCriterion,
+    planStep: typeof value.planStep === "string" && value.planStep.trim() ? value.planStep.trim() : null,
+    verification,
+    status: rawStatus as RelayVerificationMatrixStatus,
+    evidencePath: typeof value.evidencePath === "string" && value.evidencePath.trim() ? value.evidencePath.trim() : null,
+    deferredReason,
+    deferredApproved: value.deferredApproved === true,
+  };
+}
+
+async function loadVerificationMatrix(cwd: string, file: string | undefined): Promise<StageGateVerificationMatrixRow[]> {
+  if (!file) return [];
+  const path = resolve(cwd, file);
+  if (!existsSync(path)) throw new Error(`missing_relay_verification_matrix:${path}`);
+  const parsed = await readJsonValue(path);
+  const rawRows = Array.isArray(parsed)
+    ? parsed
+    : isRecord(parsed) && Array.isArray(parsed.verificationMatrix)
+      ? parsed.verificationMatrix
+      : isRecord(parsed) && Array.isArray(parsed.rows)
+        ? parsed.rows
+        : null;
+  if (!rawRows) throw new Error("invalid_relay_verification_matrix:expected_array");
+  return rawRows.map((item) => {
+    if (!isRecord(item)) throw new Error("invalid_relay_verification_matrix_row:item");
+    return matrixRowFromRecord(item);
+  });
+}
+
 function notRequestedGate(): RelayGate {
   return { enabled: false, status: "not_requested", exitCode: 0, reason: "gate_not_requested" };
 }
@@ -321,15 +457,6 @@ function artifactContentNotEvaluated(evidence: string): RelayHeuristicClaim {
     confidence: "high",
     evidence,
     recommendation: "Use relay artifacts as review inputs; do not treat imported prose as verification.",
-  };
-}
-
-function verificationMatrixDeferred(): RelayHeuristicClaim {
-  return {
-    kind: "verification_matrix_enforcement_deferred",
-    confidence: "high",
-    evidence: "Stage-gate evidence currently records verification status only; acceptance-criteria-to-verification matrix enforcement is deferred.",
-    recommendation: "Do not treat an empty verificationMatrix as acceptance coverage. Keep final completion attached to existing verification and evidence gates.",
   };
 }
 
@@ -435,6 +562,9 @@ export async function recordStageGateEvidence(cwd: string, options: {
   role?: string;
   artifact?: string;
   artifactHash?: string;
+  acceptanceCriteriaFile?: string;
+  acceptanceCriteria?: string[];
+  verificationMatrixFile?: string;
   residualHighFindings?: string;
   verificationStatus?: string;
 }): Promise<StageGateRecordResult> {
@@ -443,6 +573,8 @@ export async function recordStageGateEvidence(cwd: string, options: {
   const role = options.role ?? "review-engine";
   const residualFindingCount = assertNonNegativeInteger(options.residualHighFindings, "residual-high-findings");
   const verificationStatus = assertVerificationStatus(options.verificationStatus);
+  const acceptanceCriteria = await loadAcceptanceCriteria(cwd, options.acceptanceCriteriaFile, options.acceptanceCriteria);
+  const verificationMatrix = await loadVerificationMatrix(cwd, options.verificationMatrixFile);
   if (!options.artifact && !options.artifactHash) throw new Error("missing_relay_stage_artifact_or_hash");
   const evidenceId = createEvidenceId();
   const artifactDir = join(harnessRoot(cwd), "relay", "stage-gates");
@@ -470,7 +602,8 @@ export async function recordStageGateEvidence(cwd: string, options: {
         hash: stageArtifactHash,
       },
     ],
-    verificationMatrix: [],
+    acceptanceCriteria,
+    verificationMatrix,
     findings: [],
     residualFindingCount,
     verificationResults: [
@@ -482,7 +615,6 @@ export async function recordStageGateEvidence(cwd: string, options: {
     ],
     heuristicClaims: [
       artifactContentNotEvaluated("stage-gate evidence shape does not prove semantic correctness by itself"),
-      verificationMatrixDeferred(),
     ],
     derivableFacts: [
       { kind: "stage_artifact_hashed", gate: true, evidence: stageArtifactHash },
@@ -491,6 +623,9 @@ export async function recordStageGateEvidence(cwd: string, options: {
         gate: scope === "full-gate",
         evidence: `${stage}:${scope}`,
       },
+      ...(verificationMatrix.length > 0
+        ? [{ kind: "verification_matrix_present" as const, gate: true, evidence: `${verificationMatrix.length} rows` }]
+        : []),
     ],
   };
   const artifactPath = join(artifactDir, `${evidenceId}.json`);
@@ -550,12 +685,103 @@ function asStageGate(value: unknown): StageGateEvidenceArtifact | null {
   if (!relayStages.has(value.stage as RelayStage)) return null;
   if (!relayReviewScopes.has(value.scope as RelayReviewScope)) return null;
   if (typeof value.role !== "string" || typeof value.stageArtifactHash !== "string") return null;
+  if (!Array.isArray(value.verificationMatrix)) return null;
   if (!Number.isInteger(value.residualFindingCount) || (value.residualFindingCount as number) < 0) return null;
   return value as unknown as StageGateEvidenceArtifact;
 }
 
 function gap(kind: RelayEvidenceGap["kind"], evidence: string | null, policy: string, recommendation: string): RelayEvidenceGap {
   return { kind, gate: true, evidence, policy, recommendation };
+}
+
+function enforceVerificationMatrix(cwd: string, stageGate: StageGateEvidenceArtifact, evidenceGaps: RelayEvidenceGap[], derivableFacts: RelayDerivableFact[]): void {
+  if (stageGate.stage !== "implementation") return;
+  const matrix = Array.isArray(stageGate.verificationMatrix) ? stageGate.verificationMatrix : [];
+  const acceptanceCriteria = Array.isArray(stageGate.acceptanceCriteria) ? stageGate.acceptanceCriteria : [];
+
+  if (matrix.length === 0) {
+    evidenceGaps.push(gap(
+      "verification_matrix_missing",
+      "verificationMatrix:[]",
+      "Implementation convergence requires an acceptance-criteria-to-verification matrix.",
+      "Record stage-gate evidence with --verification-matrix before accepting implementation convergence.",
+    ));
+    return;
+  }
+
+  derivableFacts.push({ kind: "verification_matrix_present", gate: true, evidence: `${matrix.length} rows` });
+
+  const rowsByCriterion = new Map<string, StageGateVerificationMatrixRow[]>();
+  for (const row of matrix) {
+    const rows = rowsByCriterion.get(row.acceptanceCriterion) ?? [];
+    rows.push(row);
+    rowsByCriterion.set(row.acceptanceCriterion, rows);
+  }
+
+  let allCriteriaCovered = true;
+  for (const criterion of acceptanceCriteria) {
+    if (!rowsByCriterion.has(criterion.id)) {
+      allCriteriaCovered = false;
+      evidenceGaps.push(gap(
+        "verification_matrix_acceptance_unmapped",
+        criterion.id,
+        "Every approved acceptance criterion must map to at least one verification matrix row.",
+        "Add a verification matrix row for the missing acceptance criterion or remove it from the approved criteria artifact.",
+      ));
+    }
+  }
+  if (acceptanceCriteria.length > 0 && allCriteriaCovered) {
+    derivableFacts.push({ kind: "verification_matrix_acceptance_covered", gate: true, evidence: `${acceptanceCriteria.length} criteria covered` });
+  }
+
+  let rowsEvidenced = true;
+  for (const row of matrix) {
+    const deferredOk = row.deferredReason !== null && row.deferredApproved === true;
+    if (row.deferredReason !== null && row.deferredApproved !== true) {
+      rowsEvidenced = false;
+      evidenceGaps.push(gap(
+        "verification_matrix_deferred_not_approved",
+        row.acceptanceCriterion,
+        "A deferred verification matrix row must carry an explicit approved deferred reason.",
+        "Set deferredApproved:true only after recording the decision that accepts this deferral.",
+      ));
+      continue;
+    }
+    if (deferredOk) continue;
+    if (!row.evidencePath) {
+      rowsEvidenced = false;
+      evidenceGaps.push(gap(
+        "verification_matrix_row_missing_evidence",
+        row.acceptanceCriterion,
+        "Implementation convergence requires every non-deferred verification matrix row to cite evidence.",
+        "Attach the command output artifact or record an approved deferred reason.",
+      ));
+      continue;
+    }
+    const evidencePath = resolve(cwd, row.evidencePath);
+    if (!existsSync(evidencePath)) {
+      rowsEvidenced = false;
+      evidenceGaps.push(gap(
+        "verification_matrix_evidence_missing",
+        row.evidencePath,
+        "Verification matrix evidence paths must resolve to local evidence artifacts.",
+        "Write or import the verification evidence artifact before accepting implementation convergence.",
+      ));
+      continue;
+    }
+    if (row.status !== "passed") {
+      rowsEvidenced = false;
+      evidenceGaps.push(gap(
+        "verification_matrix_row_not_passed",
+        `${row.acceptanceCriterion}:${row.status}`,
+        "Implementation convergence requires each non-deferred verification matrix row to pass.",
+        "Run the mapped verification until it passes or record an approved deferred reason.",
+      ));
+    }
+  }
+  if (rowsEvidenced) {
+    derivableFacts.push({ kind: "verification_matrix_rows_evidenced", gate: true, evidence: `${matrix.length} rows evidenced or approved-deferred` });
+  }
 }
 
 function unknown(kind: RelayUnknown["kind"], evidence: string | null, recommendation: string, gate = true): RelayUnknown {
@@ -707,6 +933,7 @@ export async function checkConvergenceAgreement(cwd: string, options: {
         "Resolve residual findings or stop with decision_needed.",
       ));
     }
+    enforceVerificationMatrix(cwd, stageGate, evidenceGaps, derivableFacts);
   }
 
   const verificationStatus = assertVerificationStatus(options.verificationStatus);
