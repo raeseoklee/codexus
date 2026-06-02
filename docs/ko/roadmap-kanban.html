@@ -172,13 +172,13 @@
   <header>
     <h1>Codexus 로드맵 칸반</h1>
     <p>
-      0.1.2 release 이후 indexed Codexus roadmap 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
+      0.1.3 release 이후 indexed Codexus roadmap 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
       evidence-first 원칙에 맞춰 작성했습니다. 로컬 fact는 gate할 수 있고, 판단이 필요한
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
       <span class="pill">갱신일: 2026-06-02</span>
-      <span class="pill">기준: npm 0.1.2 published</span>
+      <span class="pill">기준: npm 0.1.3 published</span>
       <span class="pill">출처: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
       <span class="pill"><a href="remaining-work.md">남은 작업</a></span>
@@ -210,18 +210,18 @@
         <article class="card">
           <h3>Release Integrity Live Sign-Off</h3>
           <div class="tags">
-            <span class="tag done">0.1.2 완료</span>
+            <span class="tag done">0.1.3 완료</span>
             <span class="tag evidence">post-publish</span>
           </div>
-          <p>0.1.2 stable tag에서 npm latest, GitHub latest, GitHub Release installer asset이 같은 version을 가리킴을 증명했습니다.</p>
+          <p>0.1.3 stable tag에서 npm latest, GitHub latest, GitHub Release installer asset이 같은 version을 가리킴을 증명했습니다.</p>
           <span class="label">증거</span>
           <ul>
-            <li><code>cx release check --version 0.1.2 --live --gate --json</code> 통과.</li>
+            <li><code>cx release check --version 0.1.3 --live --gate --json</code> 통과.</li>
             <li>GitHub Release의 <code>install.sh</code> hash가 checked-in installer와 일치.</li>
             <li>Post-publish release evidence가 영문/한국어 release-evidence 문서에 기록됨.</li>
           </ul>
           <span class="label">근거</span>
-          <p><a href="release-evidence/0.1.2.md">0.1.2 release evidence</a></p>
+          <p><a href="release-evidence/0.1.3.md">0.1.3 release evidence</a></p>
         </article>
 
         <article class="card">
