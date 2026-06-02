@@ -729,6 +729,7 @@ test("session verify stores a workspace fingerprint and last-verified evidence",
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
+
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -937,6 +938,10 @@ test("session subagent record stores unverified claims without changing evidence
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const artifactSchema = runCli(cwd, ["schema", "validate", "--type", "subagent-result", "--file", output.artifactPath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(artifactSchema.status, 0, artifactSchema.stderr);
+    assert.equal(JSON.parse(artifactSchema.stdout).ok, true);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -961,6 +966,9 @@ test("session subagent attach records role-scoped claim bundles", async () => {
     assert.equal(output.artifact.claims.length, 1);
     assert.equal(output.state.subagents[0].role, "debugger");
     assert.deepEqual(output.state.subagents[0].evidenceLinks, ["verification:latest"]);
+    const artifactSchema = runCli(cwd, ["schema", "validate", "--type", "subagent-result", "--file", output.artifactPath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(artifactSchema.status, 0, artifactSchema.stderr);
+    assert.equal(JSON.parse(artifactSchema.stdout).ok, true);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -1014,6 +1022,10 @@ test("session subagent launch records unavailable launcher contract without prom
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const launchSchema = runCli(cwd, ["schema", "validate", "--type", "subagent-launch-contract", "--file", output.artifactPath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(launchSchema.status, 0, launchSchema.stderr);
+    assert.equal(JSON.parse(launchSchema.stdout).ok, true);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -1118,6 +1130,10 @@ test("session subagent complete records hosted subagent claims without promoting
     const schema = runCli(cwd, ["schema", "validate", "--type", "session-state", "--file", output.statePath, "--json"], { CODEX_HOME: codexHome });
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const artifactSchema = runCli(cwd, ["schema", "validate", "--type", "subagent-result", "--file", output.artifactPath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(artifactSchema.status, 0, artifactSchema.stderr);
+    assert.equal(JSON.parse(artifactSchema.stdout).ok, true);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });

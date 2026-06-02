@@ -123,8 +123,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   boundaries.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
-  descriptors, app instance artifacts, automation dispatch records, and
-  app-server discovery/experiment evidence manifests, with focused enforcement plus
+  descriptors, app instance artifacts, automation dispatch records, subagent
+  result/launch artifacts, and app-server discovery/experiment evidence
+  manifests, with focused enforcement plus
   zero-dependency schema-artifact subset validation on single-record and
   run-ledger checks.
 - Codex JSONL usage is captured when present and terminal state records usage or
@@ -204,8 +205,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   launch` records a deferred launcher contract with `launcher.supported: false`;
   `cx session subagent complete` records final claims from a native subagent
   used in the current Codex session and optional `pass|fail|unknown` behavior
-  checklist assertions without claiming Codexus spawned it. Codexus still does
-  not spawn native subagents from the CLI.
+  checklist assertions without claiming Codexus spawned it. Result and launch
+  artifacts are schema-validatable via `subagent-result` and
+  `subagent-launch-contract`. Codexus still does not spawn native subagents
+  from the CLI.
 - `cx session workers status --json` reports the tmux-backed worker launch gate
   without starting worker panes.
 - `cx setup codex-session --enable-notify-hook` installs a Codex notify hook

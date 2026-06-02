@@ -257,9 +257,9 @@ evidence only when the supporting runtime exists:
    `--gate` automation mode. Further expansion must still come only from
    derivable artifacts such as coverage or lint/typecheck outputs; heuristics
    stay advisory.
-10. Subagent support remains recorder/handoff/contract-only. Do not expose an
-   active native spawn launcher until a supported Codex bridge exists; subagent
-   claims must stay separate from verification freshness.
+10. Subagent support remains schema-validatable recorder/handoff/contract-only.
+   Do not expose an active native spawn launcher until a supported Codex bridge
+   exists; subagent claims must stay separate from verification freshness.
 11. Autopilot now has an experimental foundation slice. The next work is live
     `cx autopilot run`: keep it human-approved, worktree-isolated, and
     `stability: experimental`, while adding capability/policy start-gates and

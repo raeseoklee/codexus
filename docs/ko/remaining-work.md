@@ -243,9 +243,9 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 9. Quality evidence guard는 explicit review artifact link와 `--gate` automation mode를
    받습니다. 추가 확장은 coverage, lint/typecheck output 같은 derivable artifact에서만
    해야 하며 heuristic finding은 계속 advisory입니다.
-10. Subagent support는 recorder/handoff/contract-only로 유지합니다. 지원되는 Codex
-   bridge가 생기기 전까지 active native spawn launcher를 노출하지 않습니다. Subagent
-   claim은 verification freshness와 계속 분리해야 합니다.
+10. Subagent support는 schema-validatable recorder/handoff/contract-only로
+   유지합니다. 지원되는 Codex bridge가 생기기 전까지 active native spawn launcher를
+   노출하지 않습니다. Subagent claim은 verification freshness와 계속 분리해야 합니다.
 11. Autopilot은 이제 experimental foundation slice를 가집니다. 다음 작업은 live
    `cx autopilot run`입니다. 사람 승인 contract 흐름을 유지하고,
    worktree-isolated, `stability: experimental` 상태를 지키면서, 시작 시

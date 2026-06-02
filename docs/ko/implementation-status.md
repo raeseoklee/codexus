@@ -50,7 +50,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - cron/gateway의 experimental explicit-approval live dispatch, policy/approval
   contract field를 포함한 dry-run automation plan, 그리고 blocked live path용
   schema-validatable boundary audit record
-- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/automation dispatch
+- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/automation dispatch/subagent result/subagent launch
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
@@ -123,8 +123,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `launcher.supported: false`인 deferred launcher contract를 기록합니다.
   `cx session subagent complete`는 현재 Codex session에서 사용한 native subagent의 최종
   claim과 optional `pass|fail|unknown` behavior checklist assertion을 기록하되 Codexus가
-  spawn했다고 주장하지 않습니다. Codexus는 여전히 CLI에서 native subagent를 spawn하지
-  않습니다.
+  spawn했다고 주장하지 않습니다. Result/launch artifact는 `subagent-result`와
+  `subagent-launch-contract`로 schema validation할 수 있습니다. Codexus는 여전히
+  CLI에서 native subagent를 spawn하지 않습니다.
 - `cx session workers status --json`은 worker pane을 시작하지 않고 tmux-backed worker
   launch gate를 보고합니다.
 - `cx setup codex-session --enable-notify-hook`은 현재 project가 Codex config에서

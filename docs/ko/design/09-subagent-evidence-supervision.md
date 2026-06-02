@@ -106,6 +106,8 @@ verification-only입니다.
 
 - subagent result envelope 정의,
 - `.codexus/session/subagents/` 아래 subagent artifact 기록,
+- `subagent-result`와 `subagent-launch-contract` schema artifact로 result/launch
+  artifact 검증,
 - session state에서 artifact id link,
 - `session status`가 unverified subagent claim을 verification evidence와 분리 보고,
 - `evidenceFresh`는 session verification만으로 결정.
@@ -265,7 +267,7 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
 
 ## 구현 슬라이스
 
-1. 구현됨: read-only subagent artifact schema와 session-state link 추가.
+1. 구현됨: read-only subagent result/launch artifact schema와 session-state link 추가.
 2. 구현됨: `.codexus/` artifact만 쓰는 `cx session subagent record/attach` command 추가.
 3. 구현됨: linked subagent id, claim count, limitation, evidence link, 명시적
    `unverifiedClaims` section을 포함한 status integration.

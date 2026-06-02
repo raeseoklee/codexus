@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/subagent-result.schema.json",
+  "title": "Codexus Session Subagent Result",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "type": { "const": "codexus.session.subagent_result" },
+    "taskId": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["recorded", "attached"] },
+    "recordedAt": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "properties": {
+        "mode": { "enum": ["record", "attach", "complete"] },
+        "inputFile": { "type": ["string", "null"] }
+      },
+      "required": ["mode", "inputFile"]
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 },
+          "confidence": { "enum": ["low", "medium", "high", "unknown"] },
+          "evidenceLinks": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["kind", "text", "confidence", "evidenceLinks"]
+      }
+    },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "evidenceLinks": { "type": "array", "items": { "type": "string" } },
+    "behaviorChecklist": {
+      "type": ["object", "null"],
+      "properties": {
+        "assumptionsSurfaced": { "enum": ["pass", "fail", "unknown"] },
+        "simplestSufficientChange": { "enum": ["pass", "fail", "unknown"] },
+        "surgicalScope": { "enum": ["pass", "fail", "unknown"] },
+        "verificationEvidencePresent": { "enum": ["pass", "fail", "unknown"] }
+      },
+      "required": ["assumptionsSurfaced", "simplestSufficientChange", "surgicalScope", "verificationEvidencePresent"]
+    },
+    "rawShape": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "keys": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["type", "keys"]
+    }
+  },
+  "required": ["schemaVersion", "type", "taskId", "role", "status", "recordedAt", "source", "claims", "limitations", "evidenceLinks", "behaviorChecklist", "rawShape"]
+}

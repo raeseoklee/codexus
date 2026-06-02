@@ -70,6 +70,8 @@ export type SchemaValidationType =
   | "app-instance"
   | "app-instance-observation"
   | "automation-dispatch"
+  | "subagent-result"
+  | "subagent-launch-contract"
   | "app-server-discovery"
   | "app-server-stage-a"
   | "app-server-stage-b";
@@ -109,6 +111,8 @@ export const schemaArtifactNames = [
   "app-instance.schema.json",
   "app-instance-observation.schema.json",
   "automation-dispatch.schema.json",
+  "subagent-result.schema.json",
+  "subagent-launch-contract.schema.json",
   "app-server-discovery.schema.json",
   "app-server-stage-a.schema.json",
   "app-server-stage-b.schema.json",
@@ -134,6 +138,8 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "app-instance": "app-instance.schema.json",
   "app-instance-observation": "app-instance-observation.schema.json",
   "automation-dispatch": "automation-dispatch.schema.json",
+  "subagent-result": "subagent-result.schema.json",
+  "subagent-launch-contract": "subagent-launch-contract.schema.json",
   "app-server-discovery": "app-server-discovery.schema.json",
   "app-server-stage-a": "app-server-stage-a.schema.json",
   "app-server-stage-b": "app-server-stage-b.schema.json",
@@ -778,6 +784,73 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
         requireBoolean(item.payload, "required_approval", errors, "ledgerEvents.boundary_stop.payload.required_approval");
         if (item.payload.completionAuthority !== false) errors.push("ledgerEvents.boundary_stop.payload.completionAuthority:not_false");
       }
+    }
+  }
+
+  if (type === "subagent-result") {
+    requireOneOf(value, "type", ["codexus.session.subagent_result"], errors);
+    requireString(value, "taskId", errors);
+    requireString(value, "role", errors);
+    requireOneOf(value, "status", ["recorded", "attached"], errors);
+    requireString(value, "recordedAt", errors);
+    if (requireRecord(value.source, errors, "source")) {
+      requireOneOf(value.source, "mode", ["record", "attach", "complete"], errors, "source.mode");
+      if (!(value.source.inputFile === null || typeof value.source.inputFile === "string")) errors.push("source.inputFile:invalid");
+    }
+    const claims = requireArray(value, "claims", errors);
+    for (const item of claims) {
+      if (!isRecord(item)) {
+        errors.push("claims:non_object_item");
+        continue;
+      }
+      requireString(item, "kind", errors, "claims.kind");
+      requireString(item, "text", errors, "claims.text");
+      requireOneOf(item, "confidence", ["low", "medium", "high", "unknown"], errors, "claims.confidence");
+      if (requireArray(item, "evidenceLinks", errors, "claims.evidenceLinks").some((link) => typeof link !== "string")) errors.push("claims.evidenceLinks:non_string_item");
+    }
+    if (requireArray(value, "limitations", errors).some((item) => typeof item !== "string")) errors.push("limitations:non_string_item");
+    if (requireArray(value, "evidenceLinks", errors).some((item) => typeof item !== "string")) errors.push("evidenceLinks:non_string_item");
+    if (value.behaviorChecklist !== null) {
+      if (requireRecord(value.behaviorChecklist, errors, "behaviorChecklist")) {
+        requireOneOf(value.behaviorChecklist, "assumptionsSurfaced", ["pass", "fail", "unknown"], errors, "behaviorChecklist.assumptionsSurfaced");
+        requireOneOf(value.behaviorChecklist, "simplestSufficientChange", ["pass", "fail", "unknown"], errors, "behaviorChecklist.simplestSufficientChange");
+        requireOneOf(value.behaviorChecklist, "surgicalScope", ["pass", "fail", "unknown"], errors, "behaviorChecklist.surgicalScope");
+        requireOneOf(value.behaviorChecklist, "verificationEvidencePresent", ["pass", "fail", "unknown"], errors, "behaviorChecklist.verificationEvidencePresent");
+      }
+    }
+    if (requireRecord(value.rawShape, errors, "rawShape")) {
+      requireString(value.rawShape, "type", errors, "rawShape.type");
+      if (requireArray(value.rawShape, "keys", errors, "rawShape.keys").some((item) => typeof item !== "string")) errors.push("rawShape.keys:non_string_item");
+    }
+  }
+
+  if (type === "subagent-launch-contract") {
+    requireOneOf(value, "type", ["codexus.session.subagent_launch_contract"], errors);
+    requireString(value, "taskId", errors);
+    requireString(value, "role", errors);
+    requireString(value, "task", errors);
+    requireOneOf(value, "mode", ["read_only"], errors);
+    requireString(value, "requestedAt", errors);
+    requireOneOf(value, "stability", ["deferred"], errors);
+    requireOneOf(value, "status", ["unavailable"], errors);
+    if (requireRecord(value.launcher, errors, "launcher")) {
+      requireOneOf(value.launcher, "driverId", ["native-subagent"], errors, "launcher.driverId");
+      if (value.launcher.supported !== false) errors.push("launcher.supported:not_false");
+      requireOneOf(value.launcher, "capability", ["unavailable"], errors, "launcher.capability");
+      requireString(value.launcher, "reason", errors, "launcher.reason");
+      requireString(value.launcher, "recoveryHint", errors, "launcher.recoveryHint");
+    }
+    if (requireRecord(value.policy, errors, "policy")) {
+      if (value.policy.maySpawn !== false) errors.push("policy.maySpawn:not_false");
+      if (value.policy.mayModifyWorkspace !== false) errors.push("policy.mayModifyWorkspace:not_false");
+      if (value.policy.mayApplyPatch !== false) errors.push("policy.mayApplyPatch:not_false");
+      if (value.policy.verificationRequired !== true) errors.push("policy.verificationRequired:not_true");
+      requireOneOf(value.policy, "completionAuthority", ["verification"], errors, "policy.completionAuthority");
+    }
+    if (requireRecord(value.handoff, errors, "handoff")) {
+      requireString(value.handoff, "recordCommand", errors, "handoff.recordCommand");
+      requireString(value.handoff, "completeCommand", errors, "handoff.completeCommand");
+      requireRecord(value.handoff.claimFileShape, errors, "handoff.claimFileShape");
     }
   }
 

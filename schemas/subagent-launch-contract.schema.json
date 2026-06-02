@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/subagent-launch-contract.schema.json",
+  "title": "Codexus Session Subagent Launch Contract",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "type": { "const": "codexus.session.subagent_launch_contract" },
+    "taskId": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 },
+    "task": { "type": "string", "minLength": 1 },
+    "mode": { "const": "read_only" },
+    "requestedAt": { "type": "string", "minLength": 1 },
+    "stability": { "const": "deferred" },
+    "status": { "const": "unavailable" },
+    "launcher": {
+      "type": "object",
+      "properties": {
+        "driverId": { "const": "native-subagent" },
+        "supported": { "const": false },
+        "capability": { "const": "unavailable" },
+        "reason": { "type": "string", "minLength": 1 },
+        "recoveryHint": { "type": "string", "minLength": 1 }
+      },
+      "required": ["driverId", "supported", "capability", "reason", "recoveryHint"]
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "maySpawn": { "const": false },
+        "mayModifyWorkspace": { "const": false },
+        "mayApplyPatch": { "const": false },
+        "verificationRequired": { "const": true },
+        "completionAuthority": { "const": "verification" }
+      },
+      "required": ["maySpawn", "mayModifyWorkspace", "mayApplyPatch", "verificationRequired", "completionAuthority"]
+    },
+    "handoff": {
+      "type": "object",
+      "properties": {
+        "recordCommand": { "type": "string", "minLength": 1 },
+        "completeCommand": { "type": "string", "minLength": 1 },
+        "claimFileShape": { "type": "object" }
+      },
+      "required": ["recordCommand", "completeCommand", "claimFileShape"]
+    }
+  },
+  "required": ["schemaVersion", "type", "taskId", "role", "task", "mode", "requestedAt", "stability", "status", "launcher", "policy", "handoff"]
+}

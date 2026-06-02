@@ -109,6 +109,8 @@ Implemented: the first implementation bundle is the recording half:
 
 - define the subagent result envelope,
 - write subagent artifacts under `.codexus/session/subagents/`,
+- validate result and launch artifacts with `subagent-result` and
+  `subagent-launch-contract` schema artifacts,
 - link artifact ids from session state,
 - make `session status` report unverified subagent claims separately from
   verification evidence,
@@ -277,7 +279,8 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
 
 ## Implementation Slices
 
-1. Implemented: add a read-only subagent artifact schema and session-state links.
+1. Implemented: add read-only subagent result/launch artifact schemas and
+   session-state links.
 2. Implemented: add `cx session subagent record/attach` commands that only write
    `.codexus/` artifacts.
 3. Implemented: add status integration with linked subagent ids, claim count,
