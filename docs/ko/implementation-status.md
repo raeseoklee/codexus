@@ -47,10 +47,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - unrelated tool state를 건드리지 않는 `cx init`
 - runs/events/report observability command
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, live execution disabled. Discovery, Stage A, Stage B app-server evidence manifest는 experimental schema-validatable artifact로 등록되어 있습니다.
-- cron/gateway의 experimental explicit-approval live dispatch와
-  policy/approval contract field를 포함한 dry-run automation plan 및
-  optional audit record
-- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance
+- cron/gateway의 experimental explicit-approval live dispatch, policy/approval
+  contract field를 포함한 dry-run automation plan, 그리고 blocked live path용
+  schema-validatable boundary audit record
+- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/automation dispatch
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
@@ -165,7 +165,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   coverage를 보고하고 no-new-label-without-fixture contract를 보존합니다.
 - Cron/gateway live path는 `policy-reviewed-live-dispatch-v1` policy contract를
   공유하며, feature gate가 켜지고 explicit approval이 있으면 일반 Codexus run
-  ledger를 통해 dispatch됩니다.
+  ledger를 통해 dispatch됩니다. Blocked live path는 feature gate, approval, lock
+  boundary를 `automation.boundary_stop` payload로 남기며
+  `cx schema validate --type automation-dispatch --file <path> --json`으로
+  검증할 수 있습니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
 - `schemas/session-state.schema.json`은 v5 session-state shape용 first-class schema
@@ -352,9 +355,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   구현됐습니다. `cx session hud --json`은 statusline fallback으로 사용할 수 있습니다.
   Statusline integration과 tmux-backed worker launch는 설계됐지만 아직 구현되지
   않았습니다.
-- cron/gateway는 이제 experimental explicit-approval live dispatcher를 가집니다.
-  다음 작업은 richer scheduler semantics, recovery/retry policy, asynchronous
-  ownership 증거입니다.
+- cron/gateway는 이제 experimental explicit-approval live dispatcher와
+  schema-validatable blocked-dispatch boundary record를 가집니다. 다음 작업은
+  richer scheduler semantics, recovery/retry policy, asynchronous ownership
+  증거입니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - Autopilot active execution은 계속 0.2/0.3 트랙에서 deferred입니다. Experimental
   foundation은 이제 `cx autopilot plan`과 contract

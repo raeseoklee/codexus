@@ -20,6 +20,18 @@ function runCli(cwd: string, args: string[], env: Record<string, string> = {}) {
   });
 }
 
+function assertAutomationBoundaryEvent(record: { ledgerEvents: Array<{ type: string; payload?: Record<string, unknown> }> }, feature: string, reason: string) {
+  const boundary = record.ledgerEvents.find((event) => event.type === "automation.boundary_stop");
+  assert.ok(boundary, "expected automation.boundary_stop event");
+  assert.equal(boundary.payload?.schemaVersion, 1);
+  assert.equal(boundary.payload?.contractVersion, "automation-boundary-v1");
+  assert.equal(boundary.payload?.feature, feature);
+  assert.equal(boundary.payload?.reason, reason);
+  assert.equal(boundary.payload?.control_boundary, true);
+  assert.equal(boundary.payload?.required_approval, true);
+  assert.equal(boundary.payload?.completionAuthority, false);
+}
+
 test("init command bootstraps project harness without disturbing unrelated files", async () => {
   const cwd = await tempDir();
   try {
@@ -213,7 +225,7 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 22);
+    assert.equal(schemaOutput.schemas.length, 23);
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
@@ -500,6 +512,11 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(cronLiveOutput.status, "blocked");
     assert.equal(cronLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(cronLiveOutput.policy.dispatchAllowed, false);
+    const cronLiveRecord = JSON.parse(await readFile(cronLiveOutput.record.path, "utf8"));
+    assertAutomationBoundaryEvent(cronLiveRecord, "cron", "feature_gate_disabled");
+    const cronLiveSchema = runCli(cwd, ["schema", "validate", "--type", "automation-dispatch", "--file", cronLiveOutput.record.path, "--json"]);
+    assert.equal(cronLiveSchema.status, 0, cronLiveSchema.stderr);
+    assert.equal(JSON.parse(cronLiveSchema.stdout).ok, true);
     const gatewayLive = runCli(cwd, ["gateway", "check", "--json"]);
     assert.equal(gatewayLive.status, 1);
     const gatewayLiveOutput = JSON.parse(gatewayLive.stdout);
@@ -507,6 +524,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(gatewayLiveOutput.status, "blocked");
     assert.equal(gatewayLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(gatewayLiveOutput.policy.dispatchAllowed, false);
+    const gatewayLiveRecord = JSON.parse(await readFile(gatewayLiveOutput.record.path, "utf8"));
+    assertAutomationBoundaryEvent(gatewayLiveRecord, "gateway", "feature_gate_disabled");
   } finally {
     if (missingCodexCwd) await rm(missingCodexCwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
@@ -538,6 +557,11 @@ test("enabled automation live dispatch still requires explicit approval", async 
     assert.equal(cronOutput.approval.status, "required_but_not_requested");
     assert.ok(existsSync(cronOutput.record.path));
     assert.ok(cronOutput.record.path.includes("/dispatches/"));
+    const cronRecord = JSON.parse(await readFile(cronOutput.record.path, "utf8"));
+    assertAutomationBoundaryEvent(cronRecord, "cron", "approval_missing");
+    const cronSchema = runCli(cwd, ["schema", "validate", "--type", "automation-dispatch", "--file", cronOutput.record.path, "--json"]);
+    assert.equal(cronSchema.status, 0, cronSchema.stderr);
+    assert.equal(JSON.parse(cronSchema.stdout).ok, true);
 
     const gatewayLive = runCli(cwd, ["gateway", "check", "--json"]);
     assert.equal(gatewayLive.status, 1);
@@ -547,6 +571,8 @@ test("enabled automation live dispatch still requires explicit approval", async 
     assert.equal(gatewayOutput.enabled, true);
     assert.equal(gatewayOutput.policy.decision, "live_blocked_by_missing_approval");
     assert.equal(gatewayOutput.policy.dispatchAllowed, false);
+    const gatewayRecord = JSON.parse(await readFile(gatewayOutput.record.path, "utf8"));
+    assertAutomationBoundaryEvent(gatewayRecord, "gateway", "approval_missing");
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

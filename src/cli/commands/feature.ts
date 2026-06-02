@@ -28,6 +28,22 @@ interface AutomationDispatchRecord {
 }
 
 const liveDispatchImplemented = true;
+const automationBoundaryContractVersion = "automation-boundary-v1";
+
+type AutomationBoundaryReason = "feature_gate_disabled" | "approval_missing" | "lock_unavailable";
+
+function automationBoundaryPayload(feature: GuardedFeature, reason: AutomationBoundaryReason, requiredApproval: boolean, extra: Record<string, unknown> = {}) {
+  return {
+    schemaVersion: 1,
+    contractVersion: automationBoundaryContractVersion,
+    feature,
+    reason,
+    control_boundary: true,
+    required_approval: requiredApproval,
+    completionAuthority: false,
+    ...extra,
+  };
+}
 
 function automationPolicyContract(feature: GuardedFeature, enabled: boolean, dryRun: boolean, approvalPresent: boolean) {
   const dispatchAllowed = enabled && !dryRun && liveDispatchImplemented && approvalPresent;
@@ -173,7 +189,8 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
           { type: "automation.policy_checked", dryRun: false, payload: { policy } },
           { type: "approval.requested", dryRun: false, payload: { required: true } },
           { type: "approval.resolved", dryRun: false, payload: { status: "not_requested", reason: "feature_disabled" } },
-          { type: "automation.completed", dryRun: false, payload: { status: "blocked", reason: "feature_gate_disabled" } },
+          { type: "automation.boundary_stop", dryRun: false, payload: automationBoundaryPayload(feature, "feature_gate_disabled", true) },
+          { type: "automation.completed", dryRun: false, payload: { status: "blocked", ...automationBoundaryPayload(feature, "feature_gate_disabled", true) } },
         ]);
         if (flagBool(args.flags, "json")) {
           console.log(JSON.stringify({ ...blocked, record: blockedRecord }, null, 2));
@@ -197,7 +214,8 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
           { type: "automation.policy_checked", dryRun: false, payload: { policy } },
           { type: "approval.requested", dryRun: false, payload: { required: true } },
           { type: "approval.resolved", dryRun: false, payload: { status: "required_but_not_requested" } },
-          { type: "automation.completed", dryRun: false, payload: { status: "blocked", reason: "approval_missing" } },
+          { type: "automation.boundary_stop", dryRun: false, payload: automationBoundaryPayload(feature, "approval_missing", true) },
+          { type: "automation.completed", dryRun: false, payload: { status: "blocked", ...automationBoundaryPayload(feature, "approval_missing", true) } },
         ]);
         if (flagBool(args.flags, "json")) {
           console.log(JSON.stringify({ ...blocked, record: blockedRecord }, null, 2));
@@ -265,7 +283,8 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
           { type: "approval.requested", dryRun: false, payload: { required: true } },
           { type: "approval.resolved", dryRun: false, payload: { status: "approved", approvedBy, approvedAt: approval.approvedAt } },
           { type: "automation.lock_unavailable", dryRun: false, payload: { lockName } },
-          { type: "automation.completed", dryRun: false, payload: { status: "blocked", reason: "lock_unavailable" } },
+          { type: "automation.boundary_stop", dryRun: false, payload: automationBoundaryPayload(feature, "lock_unavailable", true, { lockName }) },
+          { type: "automation.completed", dryRun: false, payload: { status: "blocked", ...automationBoundaryPayload(feature, "lock_unavailable", true, { lockName }) } },
         ]);
         if (flagBool(args.flags, "json")) {
           console.log(JSON.stringify({ ...blocked, record: blockedRecord }, null, 2));

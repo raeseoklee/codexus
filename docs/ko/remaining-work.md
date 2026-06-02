@@ -186,7 +186,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - 제안 command: `cx runs list`, `cx events tail <run-id>`, `cx report <run-id>`.
     - 출력은 bounded, JSON-first로 유지합니다.
 
-15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch와 dry-run audit record가 구현됐고, richer scheduler/recovery 동작이 남아 있습니다.
+15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch, dry-run audit record, schema-validatable blocked-dispatch boundary record가 구현됐고, richer scheduler/recovery 동작이 남아 있습니다.
     - Hermes-style cron/gateway는 lock, schema migration, permission event,
       explicit user policy 뒤에 둬야 합니다.
 
@@ -338,7 +338,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
    Session-event mapping을 시도하기 전에 non-disruptive stdio observer를 설계하거나
    explicit user-provided app-server socket을 확보합니다. 아직 live app-server product
    behavior는 켜지지 않습니다.
-2. Cron/gateway dispatcher: 첫 explicit-approval live slice는 구현됐습니다.
+2. Cron/gateway dispatcher: 첫 explicit-approval live slice와
+   schema-validatable blocked-dispatch boundary audit record는 구현됐습니다.
    다음은 scheduler semantics, recovery/retry policy, 더 강한 long-lived
    ownership evidence입니다.
 3. Full JSON Schema engine: dependency policy가 허용될 때만 local subset engine을

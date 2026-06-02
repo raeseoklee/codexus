@@ -197,7 +197,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
       `cx report <run-id>`.
     - Keep outputs bounded and JSON-first.
 
-15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch plus dry-run audit records are implemented; richer scheduler/recovery behavior remains future work.
+15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch, dry-run audit records, and schema-validatable blocked-dispatch boundary records are implemented; richer scheduler/recovery behavior remains future work.
     - Hermes-style cron and gateway behavior should depend on locks, schema
       migration, permission events, and explicit user policy.
 
@@ -354,7 +354,8 @@ Harness-engineering alignment adds these evidence-first tracks:
    Design a non-disruptive stdio observer or obtain an explicit user-provided
    app-server socket before attempting session-event mapping. Do not enable live
    app-server product behavior yet.
-2. Cron/gateway dispatcher: the first explicit-approval live slice is now
+2. Cron/gateway dispatcher: the first explicit-approval live slice and
+   schema-validatable blocked-dispatch boundary audit records are now
    implemented. Next add scheduler semantics, recovery/retry policy, and
    stronger long-lived ownership evidence.
 3. Full JSON Schema engine: replace the local subset engine only if dependency

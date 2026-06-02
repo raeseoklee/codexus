@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/automation-dispatch.schema.json",
+  "title": "Codexus Automation Dispatch Record",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "dispatchId": { "type": "string", "minLength": 1 },
+    "recordedAt": { "type": "string", "minLength": 1 },
+    "plan": { "type": "object" },
+    "ledgerEvents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "minLength": 1 },
+          "dryRun": { "const": false },
+          "payload": { "type": "object" }
+        },
+        "required": ["type", "dryRun"]
+      }
+    },
+    "path": { "type": "string", "minLength": 1 }
+  },
+  "required": ["schemaVersion", "dispatchId", "recordedAt", "plan", "ledgerEvents", "path"]
+}

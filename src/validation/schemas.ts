@@ -69,6 +69,7 @@ export type SchemaValidationType =
   | "app-instance-descriptor"
   | "app-instance"
   | "app-instance-observation"
+  | "automation-dispatch"
   | "app-server-discovery"
   | "app-server-stage-a"
   | "app-server-stage-b";
@@ -107,6 +108,7 @@ export const schemaArtifactNames = [
   "app-instance-descriptor.schema.json",
   "app-instance.schema.json",
   "app-instance-observation.schema.json",
+  "automation-dispatch.schema.json",
   "app-server-discovery.schema.json",
   "app-server-stage-a.schema.json",
   "app-server-stage-b.schema.json",
@@ -131,6 +133,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "app-instance-descriptor": "app-instance-descriptor.schema.json",
   "app-instance": "app-instance.schema.json",
   "app-instance-observation": "app-instance-observation.schema.json",
+  "automation-dispatch": "automation-dispatch.schema.json",
   "app-server-discovery": "app-server-discovery.schema.json",
   "app-server-stage-a": "app-server-stage-a.schema.json",
   "app-server-stage-b": "app-server-stage-b.schema.json",
@@ -750,6 +753,32 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
   if (type === "app-instance-observation") {
     const validation = validateAppInstanceObservation(value);
     errors.push(...validation.errors);
+  }
+
+  if (type === "automation-dispatch") {
+    requireString(value, "dispatchId", errors);
+    requireString(value, "recordedAt", errors);
+    requireRecord(value.plan, errors, "plan");
+    requireString(value, "path", errors);
+    const ledgerEvents = requireArray(value, "ledgerEvents", errors);
+    for (const item of ledgerEvents) {
+      if (!isRecord(item)) {
+        errors.push("ledgerEvents:non_object_item");
+        continue;
+      }
+      requireString(item, "type", errors, "ledgerEvents.type");
+      if (item.dryRun !== false) errors.push("ledgerEvents.dryRun:not_false");
+      if (item.type === "automation.boundary_stop") {
+        if (!requireRecord(item.payload, errors, "ledgerEvents.boundary_stop.payload")) continue;
+        if (item.payload.schemaVersion !== 1) errors.push("ledgerEvents.boundary_stop.payload.schemaVersion:not_1");
+        requireOneOf(item.payload, "contractVersion", ["automation-boundary-v1"], errors, "ledgerEvents.boundary_stop.payload.contractVersion");
+        requireOneOf(item.payload, "feature", ["cron", "gateway"], errors, "ledgerEvents.boundary_stop.payload.feature");
+        requireOneOf(item.payload, "reason", ["feature_gate_disabled", "approval_missing", "lock_unavailable"], errors, "ledgerEvents.boundary_stop.payload.reason");
+        if (item.payload.control_boundary !== true) errors.push("ledgerEvents.boundary_stop.payload.control_boundary:not_true");
+        requireBoolean(item.payload, "required_approval", errors, "ledgerEvents.boundary_stop.payload.required_approval");
+        if (item.payload.completionAuthority !== false) errors.push("ledgerEvents.boundary_stop.payload.completionAuthority:not_false");
+      }
+    }
   }
 
   if (type === "app-server-discovery") {

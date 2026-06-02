@@ -33,6 +33,7 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "app-instance-descriptor",
   "app-instance",
   "app-instance-observation",
+  "automation-dispatch",
   "app-server-discovery",
   "app-server-stage-a",
   "app-server-stage-b",

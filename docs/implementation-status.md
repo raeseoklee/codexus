@@ -117,11 +117,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Cron/gateway now expose an experimental explicit-approval live dispatch slice
   on top of the existing dry-run contract: `cx cron run-now` / `cx gateway
   check` can acquire an automation lock, record policy and approval artifacts,
-  dispatch a normal supervised run, and return the linked run ledger.
+  dispatch a normal supervised run, and return the linked run ledger. Blocked
+  live attempts now write schema-validatable automation dispatch records with
+  `automation.boundary_stop` payloads for feature-gate, approval, and lock
+  boundaries.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
-  descriptors, app instance artifacts, and app-server discovery/experiment
-  evidence manifests, with focused enforcement plus
+  descriptors, app instance artifacts, automation dispatch records, and
+  app-server discovery/experiment evidence manifests, with focused enforcement plus
   zero-dependency schema-artifact subset validation on single-record and
   run-ledger checks.
 - Codex JSONL usage is captured when present and terminal state records usage or
@@ -243,7 +246,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   committed fixtures and preserves the no-new-label-without-fixture contract.
 - Cron/gateway live paths share the `policy-reviewed-live-dispatch-v1` policy
   contract and now dispatch through the normal supervised run ledger when the
-  feature gate is enabled and explicit approval is supplied.
+  feature gate is enabled and explicit approval is supplied. Blocked live paths
+  share `automation-boundary-v1` audit payloads and
+  `cx schema validate --type automation-dispatch --file <path> --json`.
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
 - `schemas/session-state.schema.json` is a first-class schema artifact for the
@@ -473,9 +478,10 @@ review. Current high-level gaps:
   trust checks. `cx session hud --json` is available as the statusline fallback;
   statusline integration and tmux-backed worker launch are designed but not
   implemented.
-- Cron/gateway now have an experimental explicit-approval live dispatcher.
-  Future work is richer scheduler semantics, recovery/retry policy, and
-  asynchronous ownership beyond the first synchronous dispatch slice.
+- Cron/gateway now have an experimental explicit-approval live dispatcher and
+  schema-validatable blocked-dispatch boundary records. Future work is richer
+  scheduler semantics, recovery/retry policy, and asynchronous ownership beyond
+  the first synchronous dispatch slice.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
 - Autopilot active execution remains deferred for the 0.2/0.3 track. The
   experimental foundation now covers `cx autopilot plan` plus contract

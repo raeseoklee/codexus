@@ -92,7 +92,7 @@ Usage:
   cx locks list|inspect|clear [name] [--stale-only] [--json]
   cx schema check [--json]
   cx schema engine [--json]
-  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance|app-instance-observation|app-server-discovery|app-server-stage-a|app-server-stage-b> --file <path> [--json]
+  cx schema validate --type <config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|app-server-discovery|app-server-stage-a|app-server-stage-b> --file <path> [--json]
   cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|discover|experiment [--dry-run|--live] [--json]
   cx app-server discover [--record] [--timeout-ms <n>] [--json]
