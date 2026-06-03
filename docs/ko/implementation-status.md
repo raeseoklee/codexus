@@ -64,9 +64,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   mock driver 조합으로 `cx cron run-now`와 `cx gateway check`를 실행해 packed
   global install에서도 experimental automation dispatcher가 lock을 획득하고
   연결된 run result를 반환함을 검증합니다.
-- `prepublishOnly`는 local CI, package smoke, report-only supply-chain dogfood,
-  `cx release check --gate --json`을 묶은 `npm run release:check`를 실행합니다.
-  Package smoke에는 설치된 package에 대한 gate-mode supply-chain check가 포함됩니다.
+- `prepublishOnly`는 local CI, source-tree `lsp:check` dogfood, package smoke,
+  report-only supply-chain dogfood, `cx release check --gate --json`을 묶은
+  `npm run release:check`를 실행합니다. Package smoke에는 설치된 package에 대한
+  gate-mode supply-chain check와 LSP check가 포함됩니다.
 - `cx release check --json`은 source checkout의 experimental release-integrity
   evidence를 보고합니다. Stable installer default, expected-version guard,
   pinned trusted-publishing workflow, GitHub Release `install.sh` asset wiring,

@@ -17,6 +17,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   project diagnostics를 실행합니다. 첫 slice에서 LSP protocol server는 detect/report
   only입니다. Language server를 자동 시작하지 않고, 파일을 수정하지 않으며, completion
   authority를 주장하지 않습니다.
+- `npm run lsp:check`를 추가하고 `npm run release:check`에 연결했습니다. Package
+  smoke도 설치된 CLI가 language server를 시작하지 않고 `cx lsp check --gate`를 실행할
+  수 있음을 검증합니다.
 
 ## 0.1.6 - 2026-06-03
 

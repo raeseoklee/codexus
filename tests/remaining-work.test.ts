@@ -381,7 +381,9 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(pkg.files.includes("src"), false);
     assert.equal(pkg.files.includes("fixtures"), false);
     assert.equal(pkg.scripts.prepublishOnly, "npm run release:check");
+    assert.equal(pkg.scripts["lsp:check"], "node src/cli/main.ts lsp check --gate --json");
     assert.equal(pkg.scripts["supply-chain:report"], "node src/cli/main.ts supply-chain check --json");
+    assert.match(pkg.scripts["release:check"], /lsp:check/);
     assert.match(pkg.scripts["release:check"], /supply-chain:report/);
     assert.equal(pkg.scripts.postinstall, "node scripts/postinstall.mjs");
     assert.ok(pkg.files.includes("scripts/postinstall.mjs"));

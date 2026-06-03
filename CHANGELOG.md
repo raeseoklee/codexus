@@ -17,6 +17,9 @@ occur before 1.0, but they should be called out clearly.
   diagnostics such as `npm run typecheck`. This first slice is detect/report
   only for LSP protocol servers: it does not auto-start language servers, does
   not edit files, and does not claim completion authority.
+- Added `npm run lsp:check` and wired it into `npm run release:check`; package
+  smoke also verifies the installed CLI can run `cx lsp check --gate` without
+  starting a language server.
 
 ## 0.1.6 - 2026-06-03
 

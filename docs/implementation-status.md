@@ -143,9 +143,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   --gate`, and installed-package mock pass/fail/repair/status/events/resume/
   cancel flows.
 - `prepublishOnly` runs `npm run release:check`, which combines local CI,
-  package smoke verification, report-only supply-chain dogfood, and
-  `cx release check --gate --json`. Package smoke includes the gate-mode
-  supply-chain check for the installed package.
+  source-tree `lsp:check` dogfood, package smoke verification, report-only
+  supply-chain dogfood, and `cx release check --gate --json`. Package smoke
+  includes the gate-mode supply-chain and LSP checks for the installed package.
 - `cx release check --json` reports experimental release-integrity evidence for
   the source checkout: stable installer default, expected-version guard, pinned
   trusted-publishing workflow, GitHub Release `install.sh` asset wiring, and

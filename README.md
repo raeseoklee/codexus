@@ -143,6 +143,7 @@ Clone and verify the repository:
 git clone https://github.com/raeseoklee/codexus.git
 cd codexus
 npm run ci
+npm run lsp:check
 npm run package:smoke
 ```
 

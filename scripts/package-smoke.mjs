@@ -137,6 +137,7 @@ try {
         scripts: {
           test: "node --test",
           lint: "node -e \"console.log('lint ok')\"",
+          typecheck: "node -e \"console.log('typecheck ok')\"",
         },
       },
       null,
@@ -270,6 +271,11 @@ process.on("SIGINT", shutdown);
   const supplyChain = parseJsonRun(codexus, ["supply-chain", "check", "--gate", "--json"]);
   assert(supplyChain.stability === "stable", "supply-chain check did not report stable JSON stability");
   assert(supplyChain.gate?.status === "passed", "installed supply-chain gate did not pass");
+  const lsp = parseJsonRun(codexus, ["lsp", "check", "--cwd", project, "--gate", "--json"]);
+  assert(lsp.stability === "experimental", "installed lsp check did not report experimental stability");
+  assert(lsp.autoApply?.startsLanguageServer === false, "installed lsp check should not start a language server");
+  assert(lsp.result?.status === "passed", "installed lsp check did not run the fixture typecheck");
+  assert(lsp.gate?.status === "passed", "installed lsp gate did not pass");
   const policyCatalog = parseJsonRun(codexus, ["policy", "catalog", "check", "--scope", "src/**", "--json"], {
     cwd: project,
   });
