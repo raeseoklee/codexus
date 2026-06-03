@@ -9,7 +9,13 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added an experimental app-instance log snapshot evidence adapter:
+  `cx app instance evidence logs --instance-id <id> [--tail <n>]` records
+  bounded, redacted stdout/stderr tail evidence for a Codexus-owned worktree app
+  instance and links it to an `app-instance-observation` artifact. The snapshot
+  never claims control, health authority, or completion authority.
 
 ## 0.1.5 - 2026-06-03
 

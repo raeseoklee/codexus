@@ -293,8 +293,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   record/list` records browser/dev-server/log/screenshot/metric observations
   against one `instanceId`, and `cx app instance evidence probe` records
   loopback-only bounded/redacted HTTP dev-server evidence for a running owned
-  instance. None of these evidence surfaces claim control, health authority, or
-  completion authority; Browser/DevTools/screenshot adapter integration remains
+  instance. `cx app instance evidence logs` records bounded/redacted stdout and
+  stderr tail evidence for the same owned instance. None of these evidence
+  surfaces claim control, health authority, or completion authority;
+  Browser/DevTools/screenshot adapter integration remains
   follow-up work.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
@@ -505,10 +507,11 @@ review. Current high-level gaps:
   and active health probes are implemented for Codexus-owned instances.
   Instance-linked observation evidence descriptors are implemented through
   `cx app instance evidence record/list`, with a first real adapter in
-  `cx app instance evidence probe` for loopback HTTP dev-server evidence;
-  explicit stale/orphan lifecycle policy projection is implemented. Actual
-  Browser/DevTools/screenshot adapter capture and worktree-aware launcher reuse
-  remain follow-up work.
+  `cx app instance evidence probe` for loopback HTTP dev-server evidence and
+  `cx app instance evidence logs` for bounded/redacted stdout/stderr tail
+  evidence; explicit stale/orphan lifecycle policy projection is implemented.
+  Actual Browser/DevTools/screenshot adapter capture and worktree-aware
+  launcher reuse remain follow-up work.
 - Operational control invariants have deterministic docs-code checks plus an
   experimental control-plane first slice: decision artifacts, repeated
   verification loop summaries, HUD/status projections, autonomy preset

@@ -162,7 +162,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
     compatibility, stable-readiness smoke coverage, local release integrity gate 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 현재 npm baseline은 `0.1.3`입니다. Prerelease는 fallback/dev path인
+    - 현재 npm baseline은 `0.1.5`입니다. Prerelease는 fallback/dev path인
       `publish:next`를 통해 배포할 수 있고, stable release는 trusted GitHub Actions
       tag run에서 배포합니다.
     - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,
@@ -305,7 +305,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   browser/dev-server/log/screenshot/metric evidence용으로 구현됐고, 첫 real
   dev-server adapter는 `cx app instance evidence probe`로 존재합니다. 이 command는
   하나의 Codexus-owned `instanceId`에 연결된 loopback-only, bounded, redacted HTTP
-  probe입니다. 다음 작업은 Browser/DevTools/screenshot/log/metric adapter를 추가하되
+  probe입니다. 첫 log adapter도 `cx app instance evidence logs`로 존재하며, bounded,
+  redacted stdout/stderr tail evidence를 health/control/completion authority 없이
+  기록합니다. 다음 작업은 Browser/DevTools/screenshot/metric adapter를 추가하되
   stack-specific behavior를 workflow kernel 밖에 두는 것입니다.
 - Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)는
   experimental live ownership 첫 slice를 갖습니다. Descriptor/profile listing,
@@ -382,6 +384,6 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     richer page coverage이며, injection path는 그 이후에만 검토합니다.
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
     구현된 live ownership과 observation-evidence slice 위에 다음 단계를 쌓습니다.
-    첫 loopback HTTP dev-server probe는 구현됐습니다. 이후 작업은 더 풍부한
-    Browser/DevTools/screenshot/log/metric capture와 future autopilot surface를 위한
-    worktree-aware launcher reuse입니다.
+    첫 loopback HTTP dev-server probe와 bounded/redacted log snapshot adapter는
+    구현됐습니다. 이후 작업은 더 풍부한 Browser/DevTools/screenshot/metric capture와
+    future autopilot surface를 위한 worktree-aware launcher reuse입니다.

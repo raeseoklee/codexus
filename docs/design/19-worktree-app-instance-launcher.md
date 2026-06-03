@@ -226,10 +226,15 @@ The live `start` and `stop` slices must enforce these local facts:
     for a running Codexus-owned instance and links the evidence to an
     `app-instance-observation` artifact without becoming health, control, or
     completion authority.
+11. Done: add `cx app instance evidence logs` as the first log adapter capture
+    slice. It records bounded, redacted stdout/stderr tail evidence for a
+    Codexus-owned instance and links the snapshot to an
+    `app-instance-observation` artifact without becoming health, control, or
+    completion authority.
 
 ## Next Slice
 
-1. Wire real Browser/DevTools/screenshot/log/metric adapters to the observation
+1. Wire real Browser/DevTools/screenshot/metric adapters to the observation
    artifact contract without auto-opening browsers or claiming health/control.
 2. Add worktree-aware launcher reuse for future autopilot surfaces while keeping
    completion authority on verification and policy gates.

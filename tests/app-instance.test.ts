@@ -50,7 +50,9 @@ server.listen(port, host, () => {
   const address = server.address();
   const actualPort = address && typeof address !== "string" ? address.port : port;
   console.log(\`listening \${host}:\${actualPort}\`);
+  console.log("startup token=secret-value");
   console.error("stderr ready");
+  console.error("stderr password=hunter2");
 });
 
 function shutdown() {
@@ -430,6 +432,79 @@ test("app instance HTTP probe records bounded redacted evidence for a running ow
     const listed = parseJson(list);
     assert.equal(listed.observations.length, 1);
     assert.equal(listed.observations[0].observation.summary, "http_200");
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance log evidence records a redacted snapshot without authority", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+
+    const start = runCli(cwd, [
+      "app",
+      "instance",
+      "start",
+      "--descriptor",
+      descriptorPath,
+      "--profile",
+      "web",
+      "--worktree",
+      cwd,
+      "--json",
+    ]);
+    assert.equal(start.status, 0, start.stderr);
+    const started = parseJson(start);
+    const instanceId = started.launch.instanceId;
+
+    await waitFor(async () => {
+      const status = runCli(cwd, ["app", "instance", "status", "--instance-id", instanceId, "--json"]);
+      if (status.status !== 0) return false;
+      const output = parseJson(status);
+      return output.instances[0]?.process?.status === "running";
+    });
+
+    const logs = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "logs",
+      "--instance-id",
+      instanceId,
+      "--tail",
+      "20",
+      "--json",
+    ]);
+    assert.equal(logs.status, 0, logs.stderr);
+    const output = parseJson(logs);
+    assert.equal(output.command, "app instance evidence logs");
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.logSnapshot.status, "observed");
+    assert.equal(output.logSnapshot.controlsInstance, false);
+    assert.equal(output.logSnapshot.healthAuthority, false);
+    assert.equal(output.logSnapshot.completionAuthority, false);
+    assert.equal(output.observation.observation.kind, "log");
+    assert.equal(output.observation.observation.source, "log-snapshot");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const logEvidence = JSON.parse(await readFile(output.logSnapshot.evidencePath, "utf8"));
+    assert.equal(logEvidence.type, "codexus.app.instance.log-snapshot");
+    assert.equal(logEvidence.status, "observed");
+    assert.equal(logEvidence.authority.controlsInstance, false);
+    assert.equal(logEvidence.authority.healthAuthority, false);
+    assert.equal(logEvidence.authority.completionAuthority, false);
+    assert.ok(logEvidence.stdout.lines.some((line: string) => line.includes("[REDACTED:possible-secret]")));
+    assert.ok(logEvidence.stderr.lines.some((line: string) => line.includes("[REDACTED:possible-secret]")));
+    assert.doesNotMatch(JSON.stringify(logEvidence), /secret-value|hunter2/);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-instance-observation", "--file", output.path, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(parseJson(schema).ok, true);
   } finally {
     await cleanupInstances(cwd);
     await rm(cwd, { recursive: true, force: true });

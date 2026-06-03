@@ -298,9 +298,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   stable contract 밖에 있습니다. `cx app instance evidence record/list`는
   browser/dev-server/log/screenshot/metric observation을 하나의 `instanceId`에
   연결해 기록하고, `cx app instance evidence probe`는 running owned instance에 대한
-  loopback-only bounded/redacted HTTP dev-server evidence를 기록합니다. 이 evidence
-  surface들은 control, health authority, completion authority를 주장하지 않습니다.
-  실제 Browser/DevTools/screenshot adapter 연동은 후속 작업입니다.
+  loopback-only bounded/redacted HTTP dev-server evidence를 기록합니다.
+  `cx app instance evidence logs`는 같은 owned instance의 stdout/stderr tail
+  evidence를 bounded/redacted snapshot으로 기록합니다. 이 evidence surface들은 control,
+  health authority, completion authority를 주장하지 않습니다. 실제 Browser/DevTools/
+  screenshot adapter 연동은 후속 작업입니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,

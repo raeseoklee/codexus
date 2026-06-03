@@ -219,10 +219,14 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
     bounded, redacted HTTP dev-server evidence를 기록하고 그 evidence를
     `app-instance-observation` artifact에 연결하되 health, control, completion
     authority가 되지 않습니다.
+11. 완료: 첫 log adapter capture slice로 `cx app instance evidence logs`를
+    추가합니다. 이 command는 Codexus-owned instance의 stdout/stderr tail evidence를
+    bounded, redacted snapshot으로 기록하고 `app-instance-observation` artifact에
+    연결하되 health, control, completion authority가 되지 않습니다.
 
 ## 다음 Slice
 
-1. 실제 Browser/DevTools/screenshot/log/metric adapter를 observation artifact contract에
+1. 실제 Browser/DevTools/screenshot/metric adapter를 observation artifact contract에
    연결하되 browser 자동 open이나 health/control 주장을 하지 않게 유지합니다.
 2. Future autopilot surface가 launcher를 worktree-aware 방식으로 재사용하되 completion
    authority는 verification과 policy gate에만 유지합니다.

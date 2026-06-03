@@ -9,7 +9,13 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
-아직 변경 사항이 없습니다.
+### Added
+
+- Experimental app-instance log snapshot evidence adapter를 추가했습니다:
+  `cx app instance evidence logs --instance-id <id> [--tail <n>]`는
+  Codexus-owned worktree app instance의 stdout/stderr tail evidence를 bounded,
+  redacted artifact로 기록하고 `app-instance-observation` artifact에 연결합니다.
+  이 snapshot은 control, health authority, completion authority를 주장하지 않습니다.
 
 ## 0.1.5 - 2026-06-03
 

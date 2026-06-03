@@ -105,6 +105,7 @@ Usage:
   cx app instance logs --instance-id <id> [--tail <n>] [--json]
   cx app instance evidence record --instance-id <id> --kind browser|dev-server|log|screenshot|metric --source <name> [--status observed|unavailable|failed] [--url <url>] [--evidence-path <path>] [--summary <text>] [--json]
   cx app instance evidence probe --instance-id <id> [--url <loopback-url>] [--timeout-ms <n>] [--json]
+  cx app instance evidence logs --instance-id <id> [--tail <n>] [--json]
   cx app instance evidence list --instance-id <id> [--json]
   cx app instance start --profile <name> --worktree <path> [--dry-run] [--descriptor <path>] [--port <n>] [--json]
   cx app instance stop --instance-id <id> [--json]

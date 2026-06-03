@@ -172,7 +172,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     smoke compatibility, stable-readiness smoke coverage, and local release
     integrity gating implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current npm baseline is `0.1.3`; prereleases publish through
+    - Current npm baseline is `0.1.5`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
       trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin
@@ -325,9 +325,11 @@ Harness-engineering alignment adds these evidence-first tracks:
 - Observability adapters: app-instance observation descriptors now exist for
   browser/dev-server/log/screenshot/metric evidence, and the first real
   dev-server adapter exists as `cx app instance evidence probe`: a loopback-only,
-  bounded, redacted HTTP probe linked to one Codexus-owned `instanceId`. Next work
-  is Browser/DevTools/screenshot/log/metric adapters while keeping stack-specific
-  behavior outside the workflow kernel.
+  bounded, redacted HTTP probe linked to one Codexus-owned `instanceId`. The
+  first log adapter also exists as `cx app instance evidence logs`, which records
+  bounded, redacted stdout/stderr tail evidence without becoming health, control,
+  or completion authority. Next work is Browser/DevTools/screenshot/metric
+  adapters while keeping stack-specific behavior outside the workflow kernel.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
   now has an experimental live ownership first slice: descriptor/profile
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
@@ -403,6 +405,7 @@ Harness-engineering alignment adds these evidence-first tracks:
 13. Worktree app instance launcher: build on the implemented live ownership
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback
-    HTTP dev-server probe is implemented; next add richer Browser/DevTools/
-    screenshot/log/metric capture and worktree-aware launcher reuse for future
+    HTTP dev-server probe and bounded/redacted log snapshot adapter are
+    implemented; next add richer Browser/DevTools/screenshot/metric capture and
+    worktree-aware launcher reuse for future
     autopilot surfaces.

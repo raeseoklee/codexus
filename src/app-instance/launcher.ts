@@ -1441,6 +1441,13 @@ export async function appInstanceLogs(cwd: string, options: { instanceId?: strin
   };
 }
 
+function redactLogTail(tail: Awaited<ReturnType<typeof readTail>>) {
+  return {
+    ...tail,
+    lines: tail.lines.map((line) => redactSensitiveText(line)),
+  };
+}
+
 function parseObservationKindFlag(value: string | undefined): AppInstanceObservationKind {
   if (isObservationKind(value)) return value;
   throw new Error(`invalid_app_instance_observation_kind:${value ?? "missing"}`);
@@ -1740,6 +1747,78 @@ export async function probeAppInstanceHttpObservation(cwd: string, options: {
       evidencePath,
       status: artifact.observation.status,
       reason: artifact.observation.reason,
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
+    observation: artifact,
+  };
+}
+
+export async function recordAppInstanceLogObservation(cwd: string, options: {
+  instanceId?: string;
+  tail?: string;
+}) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const logs = await appInstanceLogs(cwd, {
+    instanceId: options.instanceId,
+    tail: options.tail,
+  });
+  const observationId = `log_snapshot_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
+  const evidencePath = join(instancePaths(instance.worktree.path, instance.instanceId).observations, `${observationId}.log.json`);
+  const stdout = redactLogTail(logs.stdout);
+  const stderr = redactLogTail(logs.stderr);
+  const hasLogEvidence = stdout.lines.length > 0 || stderr.lines.length > 0;
+  const requestedStatus: AppInstanceObservationStatus = hasLogEvidence && instance.process.status === "running" ? "observed" : "unavailable";
+  const reason = !hasLogEvidence
+    ? "log_tail_empty_or_unavailable"
+    : instance.process.status === "running"
+      ? null
+      : `instance_not_running:${instance.process.reason}`;
+  const logEvidence = {
+    schemaVersion: 1,
+    type: "codexus.app.instance.log-snapshot",
+    recordedAt: nowIso(),
+    instanceId: instance.instanceId,
+    tail: logs.tail,
+    status: requestedStatus,
+    reason,
+    stdout,
+    stderr,
+    authority: {
+      controlsInstance: false,
+      healthAuthority: false,
+      completionAuthority: false,
+    },
+  };
+
+  await ensureDir(dirname(evidencePath));
+  await writeJsonAtomic(evidencePath, logEvidence);
+  const { path, artifact } = await writeObservationArtifact(cwd, {
+    instance,
+    kind: "log",
+    source: "log-snapshot",
+    requestedStatus,
+    url: instance.network.url,
+    evidencePath,
+    summary: hasLogEvidence ? `log_tail:${logs.tail}` : "log_unavailable",
+    reason,
+  });
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence logs" as const,
+    cwd,
+    path,
+    logSnapshot: {
+      source: "log-snapshot" as const,
+      tail: logs.tail,
+      evidencePath,
+      status: artifact.observation.status,
+      reason: artifact.observation.reason,
+      stdoutLines: stdout.lines.length,
+      stderrLines: stderr.lines.length,
       controlsInstance: false as const,
       healthAuthority: false as const,
       completionAuthority: false as const,

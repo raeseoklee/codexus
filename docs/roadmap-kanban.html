@@ -172,14 +172,14 @@
   <header>
     <h1>Codexus Roadmap Kanban</h1>
     <p>
-      A four-column view of indexed Codexus roadmap work after the 0.1.3 release.
+      A four-column view of indexed Codexus roadmap work after the 0.1.5 release.
       Cards are intentionally framed as evidence-first tasks: local facts may gate,
       judgment-heavy claims stay advisory, and experimental surfaces remain blocked
       until their runtime contract exists.
     </p>
     <div class="meta">
       <span class="pill">Updated: 2026-06-03</span>
-      <span class="pill">Baseline: npm 0.1.3 published</span>
+      <span class="pill">Baseline: npm 0.1.5 published</span>
       <span class="pill">Source: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
       <span class="pill"><a href="remaining-work.md">Remaining work</a></span>
@@ -320,14 +320,15 @@
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
-            <span class="tag gateable">HTTP probe done</span>
+            <span class="tag gateable">HTTP/log done</span>
           </div>
-          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, and first loopback HTTP dev-server probe are implemented. The next step is richer Browser/DevTools/screenshot/log/metric adapters.</p>
+          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, and bounded log snapshot adapter are implemented. The next step is richer Browser/DevTools/screenshot/metric adapters.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale/orphan artifacts report lifecycle policy without implying health, cleanup, completion, or control.</li>
             <li>Done: loopback HTTP probe evidence references an <code>instanceId</code>, is bounded and redacted, and never claims control, health, or completion authority.</li>
-            <li>Next: Browser/DevTools/screenshot/log/metric outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
+            <li>Done: log snapshot evidence records bounded/redacted stdout/stderr tails for the same <code>instanceId</code> without becoming health, control, or completion authority.</li>
+            <li>Next: Browser/DevTools/screenshot/metric outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
             <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>
           </ul>
           <span class="label">Sources</span>
