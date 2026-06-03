@@ -9,6 +9,8 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.8 - 2026-06-04
+
 ### Added
 
 - Added experimental `cx contract check --target 0.2.0 --json`, a promotion

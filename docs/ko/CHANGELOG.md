@@ -9,6 +9,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.8 - 2026-06-04
+
 ### Added
 
 - Experimental `cx contract check --target 0.2.0 --json`을 추가했습니다. 이
