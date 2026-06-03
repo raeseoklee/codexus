@@ -177,7 +177,7 @@
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
-      <span class="pill">갱신일: 2026-06-03</span>
+      <span class="pill">갱신일: 2026-06-04</span>
       <span class="pill">기준: npm 0.1.6 published</span>
       <span class="pill">출처: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
@@ -468,6 +468,24 @@
           <span class="label">근거</span>
           <p><a href="design/13-harness-engineering-alignment.md#project-lsp-diagnostics">harness alignment LSP diagnostics</a></p>
         </article>
+
+        <article class="card">
+          <h3>Update Availability Notification</h3>
+          <div class="tags">
+            <span class="tag evidence">cached registry fact</span>
+            <span class="tag advisory">informational</span>
+          </div>
+          <p>새 Codexus package가 있을 때 알려주되, registry 접근이 불가능해도 일반 command가 느려지거나 실패하지 않게 합니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li><code>cx update check --json</code> 추가.</li>
+            <li><code>version</code>, <code>doctor</code>, <code>session status</code>에 TTL-cached <code>update</code> summary 추가.</li>
+            <li><code>CODEXUS_NO_UPDATE_CHECK=1</code>과 CI cache-only/off 동작 지원.</li>
+            <li>Update lookup 실패가 primary command 실패나 설치 변경으로 이어지지 않음.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/06-codex-native-adapter.md#update-notification">Codex-native adapter update notification</a></p>
+        </article>
       </section>
 
       <section class="column" aria-labelledby="gated">
@@ -537,6 +555,19 @@
           <p>Retrieved context는 reversible injection path가 설계되기 전까지 visible approval artifact로만 둡니다.</p>
           <span class="label">Gate</span>
           <p>User-visible approval, audit artifact, disable path, no silent prompt mutation.</p>
+        </article>
+
+        <article class="card">
+          <h3>Codex Plugin Packaging</h3>
+          <div class="tags">
+            <span class="tag gated">experimental packaging</span>
+            <span class="tag blocked">always-on 증거 아님</span>
+          </div>
+          <p>npm-installed skill을 stable adapter로 유지합니다. Plugin packaging은 doctor가 installed plugin state를 진단할 수 있을 때까지 discoverability/distribution layer로만 탐색합니다.</p>
+          <span class="label">Gate</span>
+          <p>Plugin 설치가 always-on supervision을 암시하면 안 됩니다. 관측된 heartbeat나 notify evidence가 여전히 권한입니다.</p>
+          <span class="label">근거</span>
+          <p><a href="design/06-codex-native-adapter.md">Codex-native adapter plugin packaging</a></p>
         </article>
       </section>
 

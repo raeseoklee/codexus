@@ -178,7 +178,7 @@
       until their runtime contract exists.
     </p>
     <div class="meta">
-      <span class="pill">Updated: 2026-06-03</span>
+      <span class="pill">Updated: 2026-06-04</span>
       <span class="pill">Baseline: npm 0.1.6 published</span>
       <span class="pill">Source: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
@@ -469,6 +469,24 @@
           <span class="label">Sources</span>
           <p><a href="design/13-harness-engineering-alignment.md#project-lsp-diagnostics">harness alignment LSP diagnostics</a></p>
         </article>
+
+        <article class="card">
+          <h3>Update Availability Notifications</h3>
+          <div class="tags">
+            <span class="tag evidence">cached registry fact</span>
+            <span class="tag advisory">informational</span>
+          </div>
+          <p>Tell users when a newer Codexus package exists while keeping normal commands fast, non-failing, and quiet when registry access is unavailable.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Add <code>cx update check --json</code>.</li>
+            <li>Add a TTL-cached <code>update</code> summary to <code>version</code>, <code>doctor</code>, and <code>session status</code>.</li>
+            <li>Support <code>CODEXUS_NO_UPDATE_CHECK=1</code> and CI cache-only/off behavior.</li>
+            <li>Never mutate installation or fail the primary command because update lookup failed.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/06-codex-native-adapter.md#update-notifications">Codex-native adapter update notifications</a></p>
+        </article>
       </section>
 
       <section class="column" aria-labelledby="gated">
@@ -538,6 +556,19 @@
           <p>Retrieved context stays as visible approval artifacts until a reversible injection path is designed.</p>
           <span class="label">Gate</span>
           <p>User-visible approval, audit artifact, disable path, and no silent prompt mutation.</p>
+        </article>
+
+        <article class="card">
+          <h3>Codex Plugin Packaging</h3>
+          <div class="tags">
+            <span class="tag gated">experimental packaging</span>
+            <span class="tag blocked">not always-on proof</span>
+          </div>
+          <p>Keep the npm-installed skill as the stable adapter. Explore plugin packaging only as a discoverability/distribution layer until doctor can diagnose installed plugin state.</p>
+          <span class="label">Gate</span>
+          <p>Plugin install must not imply always-on supervision; observed heartbeat or notify evidence remains the authority.</p>
+          <span class="label">Sources</span>
+          <p><a href="design/06-codex-native-adapter.md#skill-versus-plugin-packaging">skill versus plugin packaging</a></p>
         </article>
       </section>
 

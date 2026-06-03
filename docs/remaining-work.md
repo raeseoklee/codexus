@@ -420,3 +420,17 @@ Harness-engineering alignment adds these evidence-first tracks:
     TypeScript diagnostics via explicit local project commands. Keep automatic
     project LSP application detect-only until protocol-server lifecycle,
     workspace trust, output bounding, and gate behavior are explicit.
+15. Update availability notifications: add `cx update check --json` plus a
+    cached additive `update` summary on `version`, `doctor`, and
+    `session status`. Registry checks must be TTL-bounded, disabled by
+    `CODEXUS_NO_UPDATE_CHECK=1`, cache-only or off in CI, and informational
+    only. The `$codexus` skill may summarize available updates inside Codex
+    chat when Codexus is invoked, but update checks must never fail the primary
+    command or mutate the installation.
+16. Codex plugin packaging experiment: keep the npm-installed `$codexus` skill
+    as the stable adapter, and treat plugin packaging as an experimental
+    distribution/discoverability layer. A plugin can bundle the skill, assets,
+    scripts, and optional MCP/app descriptors, but it does not prove always-on
+    supervision. Do not claim always-on behavior unless a notify hook or other
+    observed heartbeat has dispatched, and do not move workflow-kernel logic
+    into plugin-local scripts.

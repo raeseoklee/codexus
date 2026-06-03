@@ -63,6 +63,60 @@ The installer writes source and installed tree hashes into `codexus-root.json`.
 A stale install is a warning, not an automatic mutation; reinstall explicitly
 with the command above.
 
+## Update Notifications
+
+Codexus should surface update availability automatically when it is already
+being used, but it must not turn normal commands into noisy network probes.
+
+Planned first slice:
+
+- add `cx update check --json` as an explicit command;
+- query the npm `latest` dist-tag only through a bounded TTL cache;
+- expose an additive `update` summary on high-signal commands such as
+  `version --json`, `doctor --json`, and `session status --json`;
+- let the `$codexus` skill summarize that update field inside the active Codex
+  chat when the user invokes Codexus from a session;
+- never fail the primary command because the update check could not reach the
+  registry.
+
+Required gates:
+
+- `CODEXUS_NO_UPDATE_CHECK=1` disables registry checks;
+- CI/non-interactive release verification should default to disabled or
+  cache-only update checks;
+- update notifications are informational only and do not affect completion,
+  verification, or release gates;
+- prerelease/`next` checks require explicit opt-in;
+- automatic installation is out of scope for this slice.
+
+## Skill Versus Plugin Packaging
+
+Codexus currently installs as a Codex skill adapter because the first product
+need is a thin, explicit command surface inside the active Codex conversation.
+That remains the primary path.
+
+A Codex plugin package can still be useful later, but it should not be treated
+as proof of always-on behavior by itself. Based on the local Codex plugin shape,
+a plugin can bundle skills, scripts, assets, MCP/app descriptors, and
+marketplace metadata. That packaging improves distribution and discoverability,
+but it does not replace the existing always-on evidence sources:
+
+- AGENTS overlay guidance;
+- trust-gated notify-hook heartbeat;
+- local `.codexus/session` state;
+- explicit `cx` commands and JSON evidence.
+
+Recommended direction:
+
+1. Keep the npm-installed `$codexus` skill as the stable adapter.
+2. Add a plugin-packaging experiment only after the update-notification slice
+   lands, so plugin users can also see stale package/adapter status.
+3. Treat plugin packaging as `stability: experimental` until installed-plugin
+   status can be diagnosed by `cx doctor --json`.
+4. Do not move workflow-kernel logic into plugin-local scripts.
+5. Do not claim plugin installation creates always-on supervision unless a
+   notify hook or other observed heartbeat has actually dispatched.
+
 ## Supported First Commands
 
 Inside Codex, prefer low-risk commands first:
