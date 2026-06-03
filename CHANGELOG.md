@@ -9,6 +9,8 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.7 - 2026-06-04
+
 ### Added
 
 - Added experimental project LSP diagnostics evidence:
@@ -20,6 +22,14 @@ occur before 1.0, but they should be called out clearly.
 - Added `npm run lsp:check` and wired it into `npm run release:check`; package
   smoke also verifies the installed CLI can run `cx lsp check --gate` without
   starting a language server.
+- Documented the next update-notification slice: `cx update check --json`,
+  TTL-cached additive update summaries on high-signal commands, opt-out/CI
+  behavior, and the rule that update lookup cannot fail the primary command or
+  mutate the installation.
+- Documented the Codex plugin-packaging boundary: the npm-installed `$codexus`
+  skill remains the stable Codex-native adapter, while plugin packaging is only
+  an experimental distribution/discoverability layer until doctor can diagnose
+  installed plugin state and observed heartbeat evidence.
 
 ## 0.1.6 - 2026-06-03
 

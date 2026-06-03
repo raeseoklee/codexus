@@ -9,6 +9,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.7 - 2026-06-04
+
 ### Added
 
 - Experimental project LSP diagnostics evidence를 추가했습니다:
@@ -20,6 +22,14 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - `npm run lsp:check`를 추가하고 `npm run release:check`에 연결했습니다. Package
   smoke도 설치된 CLI가 language server를 시작하지 않고 `cx lsp check --gate`를 실행할
   수 있음을 검증합니다.
+- 다음 update-notification slice를 문서화했습니다: `cx update check --json`,
+  high-signal command의 TTL-cached additive update summary, opt-out/CI 동작,
+  그리고 update lookup이 primary command를 실패시키거나 설치를 변경하면 안 된다는
+  규칙을 포함합니다.
+- Codex plugin-packaging boundary를 문서화했습니다. npm-installed `$codexus` skill은
+  stable Codex-native adapter로 유지하고, plugin packaging은 doctor가 installed
+  plugin state를 진단할 수 있고 관측 heartbeat evidence가 생기기 전까지 experimental
+  distribution/discoverability layer로만 둡니다.
 
 ## 0.1.6 - 2026-06-03
 
