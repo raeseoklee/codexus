@@ -4,6 +4,7 @@ import {
   appInstanceStatus,
   listAppInstanceObservations,
   listAppInstanceProfiles,
+  probeAppInstanceHttpObservation,
   recordAppInstanceObservation,
   startAppInstance,
   stopAppInstance,
@@ -86,6 +87,19 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
         return;
       }
       console.log(`app instance evidence: ${result.observations.length}`);
+      return;
+    }
+    if (subaction === "probe") {
+      const result = await probeAppInstanceHttpObservation(cwd, {
+        instanceId: flagString(args.flags, "instance-id"),
+        url: flagString(args.flags, "url"),
+        timeoutMs: flagString(args.flags, "timeout-ms"),
+      });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`app instance evidence probe: ${result.probe.status}`);
       return;
     }
     throw new Error(`unsupported_app_instance_command:evidence-${subaction ?? "missing"}`);

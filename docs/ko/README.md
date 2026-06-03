@@ -206,6 +206,7 @@ cx app instance profile list --json
 cx app instance start --profile web --worktree . --json
 cx app instance status --json
 cx app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
+cx app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
 cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json

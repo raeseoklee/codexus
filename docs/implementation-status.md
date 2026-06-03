@@ -291,8 +291,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   health, tails bounded logs, and stops only owned processes. The surface
   remains outside the 0.1.x stable contract. `cx app instance evidence
   record/list` records browser/dev-server/log/screenshot/metric observations
-  against one `instanceId` without claiming control, health authority, or
-  completion authority; actual Browser/DevTools adapter integration remains
+  against one `instanceId`, and `cx app instance evidence probe` records
+  loopback-only bounded/redacted HTTP dev-server evidence for a running owned
+  instance. None of these evidence surfaces claim control, health authority, or
+  completion authority; Browser/DevTools/screenshot adapter integration remains
   follow-up work.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
@@ -404,8 +406,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   list`, `start --dry-run`, live start, duplicate-start rejection, active
   health promotion for a live owned process, bounded log tails, owned stop,
   unverifiable owner stop refusal, stale/orphan lifecycle policy projection, and
-  instance-linked observation evidence that never promotes control, health, or
-  completion authority.
+  instance-linked observation evidence, including loopback HTTP probe evidence,
+  that never promotes control, health, or completion authority.
 - Installed package smoke also covers deterministic wiki build, wiki-manifest
   schema validation, `wiki check --gate`, and bounded wiki context generation.
 - Installed package smoke also covers `cx policy catalog check --json`,
@@ -502,9 +504,11 @@ review. Current high-level gaps:
   start/stop, process ownership tokens, heartbeat, port allocation, liveness,
   and active health probes are implemented for Codexus-owned instances.
   Instance-linked observation evidence descriptors are implemented through
-  `cx app instance evidence record/list`; explicit stale/orphan lifecycle policy
-  projection is implemented. Actual Browser/DevTools adapter capture and
-  worktree-aware launcher reuse remain follow-up work.
+  `cx app instance evidence record/list`, with a first real adapter in
+  `cx app instance evidence probe` for loopback HTTP dev-server evidence;
+  explicit stale/orphan lifecycle policy projection is implemented. Actual
+  Browser/DevTools/screenshot adapter capture and worktree-aware launcher reuse
+  remain follow-up work.
 - Operational control invariants have deterministic docs-code checks plus an
   experimental control-plane first slice: decision artifacts, repeated
   verification loop summaries, HUD/status projections, autonomy preset

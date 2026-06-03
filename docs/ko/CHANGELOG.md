@@ -9,7 +9,15 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
-아직 변경 사항이 없습니다.
+### Added
+
+- Experimental app-instance HTTP evidence probe를 추가했습니다:
+  `cx app instance evidence probe --instance-id <id> [--url <loopback-url>]`는
+  Codexus-owned worktree app instance의 dev-server response evidence를 bounded,
+  redacted artifact로 기록하고 `app-instance-observation` artifact에 연결합니다.
+  이 probe는 loopback URL만 허용하며 control, health authority, completion
+  authority를 주장하지 않습니다. Browser/DevTools/screenshot adapter는 계속 후속
+  작업입니다.
 
 ## 0.1.4 - 2026-06-03
 

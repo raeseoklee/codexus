@@ -221,10 +221,15 @@ The live `start` and `stop` slices must enforce these local facts:
    reports heartbeat age, stale thresholds, cleanup policy, stop policy, and
    non-authority guarantees. Stale or dead artifacts remain `orphaned`/
    `unknown` and never imply health, control, cleanup authority, or completion.
+10. Done: add `cx app instance evidence probe` as the first real adapter capture
+    slice. It records loopback-only, bounded, redacted HTTP dev-server evidence
+    for a running Codexus-owned instance and links the evidence to an
+    `app-instance-observation` artifact without becoming health, control, or
+    completion authority.
 
 ## Next Slice
 
-1. Wire real Browser/DevTools/dev-server adapters to the observation artifact
-   contract without auto-opening browsers or claiming health/control.
+1. Wire real Browser/DevTools/screenshot/log/metric adapters to the observation
+   artifact contract without auto-opening browsers or claiming health/control.
 2. Add worktree-aware launcher reuse for future autopilot surfaces while keeping
    completion authority on verification and policy gates.

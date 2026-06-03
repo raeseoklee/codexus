@@ -214,10 +214,15 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
    heartbeat age, stale threshold, cleanup policy, stop policy, non-authority 보장을
    보고합니다. Stale 또는 dead artifact는 `orphaned`/`unknown`으로 남으며 health,
    control, cleanup authority, completion을 의미하지 않습니다.
+10. 완료: 첫 real adapter capture slice로 `cx app instance evidence probe`를
+    추가합니다. 이 command는 running Codexus-owned instance에 대해 loopback-only,
+    bounded, redacted HTTP dev-server evidence를 기록하고 그 evidence를
+    `app-instance-observation` artifact에 연결하되 health, control, completion
+    authority가 되지 않습니다.
 
 ## 다음 Slice
 
-1. 실제 Browser/DevTools/dev-server adapter를 observation artifact contract에
+1. 실제 Browser/DevTools/screenshot/log/metric adapter를 observation artifact contract에
    연결하되 browser 자동 open이나 health/control 주장을 하지 않게 유지합니다.
 2. Future autopilot surface가 launcher를 worktree-aware 방식으로 재사용하되 completion
    authority는 verification과 policy gate에만 유지합니다.

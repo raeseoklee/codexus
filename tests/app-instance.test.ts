@@ -37,6 +37,11 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({ ok: true }));
     return;
   }
+  if (req.url === "/secret") {
+    res.writeHead(200, { "content-type": "text/plain" });
+    res.end("probe ok token=secret-value");
+    return;
+  }
   res.writeHead(200, { "content-type": "text/plain" });
   res.end("ok");
 });
@@ -343,6 +348,173 @@ test("app instance evidence records observation without promoting control or hea
     const listed = parseJson(list);
     assert.equal(listed.observations.length, 1);
     assert.equal(listed.authority.completionAuthority, false);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance HTTP probe records bounded redacted evidence for a running owned instance", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+
+    const start = runCli(cwd, [
+      "app",
+      "instance",
+      "start",
+      "--descriptor",
+      descriptorPath,
+      "--profile",
+      "web",
+      "--worktree",
+      cwd,
+      "--json",
+    ]);
+    assert.equal(start.status, 0, start.stderr);
+    const started = parseJson(start);
+    const instanceId = started.launch.instanceId;
+
+    await waitFor(async () => {
+      const status = runCli(cwd, ["app", "instance", "status", "--instance-id", instanceId, "--json"]);
+      if (status.status !== 0) return false;
+      const output = parseJson(status);
+      return output.instances[0]?.process?.status === "running" && output.instances[0]?.health?.status === "passed";
+    });
+
+    const probe = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "probe",
+      "--instance-id",
+      instanceId,
+      "--url",
+      `${started.launch.url}secret`,
+      "--timeout-ms",
+      "2000",
+      "--json",
+    ]);
+    assert.equal(probe.status, 0, probe.stderr);
+    const output = parseJson(probe);
+    assert.equal(output.command, "app instance evidence probe");
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.probe.status, "observed");
+    assert.equal(output.probe.controlsInstance, false);
+    assert.equal(output.probe.healthAuthority, false);
+    assert.equal(output.probe.completionAuthority, false);
+    assert.equal(output.observation.observation.kind, "dev-server");
+    assert.equal(output.observation.observation.status, "observed");
+    assert.equal(output.observation.observation.summary, "http_200");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const probeEvidence = JSON.parse(await readFile(output.probe.evidencePath, "utf8"));
+    assert.equal(probeEvidence.status, "observed");
+    assert.equal(probeEvidence.statusCode, 200);
+    assert.equal(probeEvidence.body.truncated, false);
+    assert.match(probeEvidence.body.preview, /\[REDACTED:possible-secret\]/);
+    assert.doesNotMatch(probeEvidence.body.preview, /secret-value/);
+    assert.equal(probeEvidence.authority.controlsInstance, false);
+    assert.equal(probeEvidence.authority.healthAuthority, false);
+    assert.equal(probeEvidence.authority.completionAuthority, false);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-instance-observation", "--file", output.path, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(parseJson(schema).ok, true);
+
+    const list = runCli(cwd, ["app", "instance", "evidence", "list", "--instance-id", instanceId, "--json"]);
+    assert.equal(list.status, 0, list.stderr);
+    const listed = parseJson(list);
+    assert.equal(listed.observations.length, 1);
+    assert.equal(listed.observations[0].observation.summary, "http_200");
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance HTTP probe does not request when the instance is not running", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeInstance(cwd, "app_test");
+
+    const probe = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "probe",
+      "--instance-id",
+      "app_test",
+      "--url",
+      "http://127.0.0.1:5173/",
+      "--json",
+    ]);
+    assert.equal(probe.status, 0, probe.stderr);
+    const output = parseJson(probe);
+    assert.equal(output.probe.status, "unavailable");
+    assert.equal(output.observation.observation.status, "unavailable");
+    assert.equal(output.observation.observation.reason, "instance_not_running:pid_dead");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const probeEvidence = JSON.parse(await readFile(output.probe.evidencePath, "utf8"));
+    assert.equal(probeEvidence.status, "unavailable");
+    assert.equal(probeEvidence.requestAttempted, false);
+    assert.equal(probeEvidence.authority.controlsInstance, false);
+    assert.equal(probeEvidence.authority.healthAuthority, false);
+    assert.equal(probeEvidence.authority.completionAuthority, false);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance HTTP probe rejects non-loopback URLs", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeInstance(cwd, "app_test");
+    const probe = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "probe",
+      "--instance-id",
+      "app_test",
+      "--url",
+      "https://example.com/",
+      "--json",
+    ]);
+    assert.equal(probe.status, 1);
+    assert.equal(parseJson(probe).code, "invalid_app_instance_probe_url");
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance HTTP probe rejects unbounded timeout values", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeInstance(cwd, "app_test");
+    const probe = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "probe",
+      "--instance-id",
+      "app_test",
+      "--url",
+      "http://127.0.0.1:5173/",
+      "--timeout-ms",
+      "30001",
+      "--json",
+    ]);
+    assert.equal(probe.status, 1);
+    assert.equal(parseJson(probe).code, "invalid_app_instance_probe_timeout");
   } finally {
     await cleanupInstances(cwd);
     await rm(cwd, { recursive: true, force: true });

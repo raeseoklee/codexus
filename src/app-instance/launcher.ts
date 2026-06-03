@@ -5,6 +5,7 @@ import { existsSync } from "node:fs";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
+import { redactSensitiveText } from "../policy/redaction.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { withFileLock } from "../util/lock.ts";
 import { findCodexusPackageRoot } from "../util/package-root.ts";
@@ -218,6 +219,9 @@ const HEARTBEAT_INTERVAL_MS = 1_000;
 const STOP_GRACE_MS = 2_000;
 const HEALTH_DEFAULT_TIMEOUT_MS = 2_000;
 const HOST = "127.0.0.1" as const;
+const DEFAULT_HTTP_OBSERVE_TIMEOUT_MS = 2_000;
+const MAX_HTTP_OBSERVE_TIMEOUT_MS = 30_000;
+const MAX_HTTP_OBSERVATION_BYTES = 2_048;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -1448,6 +1452,126 @@ function parseObservationStatusFlag(value: string | undefined): AppInstanceObser
   throw new Error(`invalid_app_instance_observation_status:${value}`);
 }
 
+function parsePositiveIntegerFlag(value: string | undefined, fallback: number, errorCode: string, max: number | null = null): number {
+  if (value === undefined) return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) throw new Error(errorCode);
+  if (max !== null && parsed > max) throw new Error(errorCode);
+  return parsed;
+}
+
+function parseLoopbackUrl(value: string): URL {
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`invalid_app_instance_probe_url:${value}`);
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error(`invalid_app_instance_probe_url:${value}`);
+  }
+  if (parsed.hostname !== "127.0.0.1" && parsed.hostname !== "localhost" && parsed.hostname !== "::1" && parsed.hostname !== "[::1]") {
+    throw new Error(`invalid_app_instance_probe_url:${value}`);
+  }
+  return parsed;
+}
+
+async function boundedResponsePreview(response: Response): Promise<{ bytesRead: number; truncated: boolean; preview: string }> {
+  const reader = response.body?.getReader();
+  if (!reader) return { bytesRead: 0, truncated: false, preview: "" };
+
+  const chunks: Uint8Array[] = [];
+  let bytesRead = 0;
+  let truncated = false;
+
+  try {
+    while (bytesRead < MAX_HTTP_OBSERVATION_BYTES) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const remaining = MAX_HTTP_OBSERVATION_BYTES - bytesRead;
+      if (value.byteLength > remaining) {
+        chunks.push(value.subarray(0, remaining));
+        bytesRead += remaining;
+        truncated = true;
+        await reader.cancel();
+        break;
+      }
+      chunks.push(value);
+      bytesRead += value.byteLength;
+    }
+
+    if (!truncated && bytesRead === MAX_HTTP_OBSERVATION_BYTES) {
+      const next = await reader.read();
+      if (!next.done) {
+        truncated = true;
+        await reader.cancel();
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const text = Buffer.concat(chunks, bytesRead).toString("utf8");
+  return {
+    bytesRead,
+    truncated,
+    preview: redactSensitiveText(text),
+  };
+}
+
+async function writeObservationArtifact(cwd: string, options: {
+  instance: Awaited<ReturnType<typeof findProjectedInstance>>;
+  kind: AppInstanceObservationKind;
+  source: string;
+  requestedStatus: AppInstanceObservationStatus;
+  url: string | null;
+  evidencePath: string | null;
+  summary: string | null;
+  reason: string | null;
+}) {
+  const instance = options.instance;
+  const status: AppInstanceObservationStatus = options.requestedStatus === "observed" && instance.process.status !== "running"
+    ? "unavailable"
+    : options.requestedStatus;
+  const reason = status === "unavailable" && options.requestedStatus === "observed" && instance.process.status !== "running"
+    ? `instance_not_running:${instance.process.reason}`
+    : options.reason;
+  const observationId = `observation_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
+  const path = observationPath(instance.worktree.path, instance.instanceId, observationId);
+  const artifact: AppInstanceObservationArtifact = {
+    schemaVersion: 1,
+    stability: "experimental",
+    type: "codexus.app.instance.observation",
+    observationId,
+    recordedAt: nowIso(),
+    instance: {
+      instanceId: instance.instanceId,
+      artifactPath: instance.artifactPath,
+      worktreePath: instance.worktree.path,
+      processStatus: instance.process.status,
+      healthStatus: instance.health.status,
+      url: instance.network.url,
+    },
+    observation: {
+      kind: options.kind,
+      status,
+      source: options.source,
+      url: options.url,
+      evidencePath: options.evidencePath,
+      summary: options.summary,
+      reason,
+    },
+    authority: {
+      controlsInstance: false,
+      healthAuthority: false,
+      completionAuthority: false,
+    },
+  };
+  await ensureDir(dirname(path));
+  await writeJsonAtomic(path, artifact);
+  return { path, artifact };
+}
+
 async function findProjectedInstance(cwd: string, instanceId: string) {
   const status = await appInstanceStatus(cwd, { instanceId });
   const instance = status.instances[0];
@@ -1472,51 +1596,154 @@ export async function recordAppInstanceObservation(cwd: string, options: {
   const instance = await findProjectedInstance(cwd, options.instanceId);
   const evidencePath = options.evidencePath ? resolve(cwd, options.evidencePath) : null;
   if (evidencePath && !existsSync(evidencePath)) throw new Error(`app_instance_observation_evidence_missing:${evidencePath}`);
-  const status: AppInstanceObservationStatus = requestedStatus === "observed" && instance.process.status !== "running"
-    ? "unavailable"
-    : requestedStatus;
-  const reason = status === "unavailable" && requestedStatus === "observed" && instance.process.status !== "running"
-    ? `instance_not_running:${instance.process.reason}`
-    : null;
-  const observationId = `observation_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
-  const path = observationPath(instance.worktree.path, instance.instanceId, observationId);
-  const artifact: AppInstanceObservationArtifact = {
-    schemaVersion: 1,
-    stability: "experimental",
-    type: "codexus.app.instance.observation",
-    observationId,
-    recordedAt: nowIso(),
-    instance: {
-      instanceId: instance.instanceId,
-      artifactPath: instance.artifactPath,
-      worktreePath: instance.worktree.path,
-      processStatus: instance.process.status,
-      healthStatus: instance.health.status,
-      url: instance.network.url,
-    },
-    observation: {
-      kind,
-      status,
-      source,
-      url: options.url ?? null,
-      evidencePath,
-      summary: options.summary ?? null,
-      reason,
-    },
-    authority: {
-      controlsInstance: false,
-      healthAuthority: false,
-      completionAuthority: false,
-    },
-  };
-  await ensureDir(dirname(path));
-  await writeJsonAtomic(path, artifact);
+  const { path, artifact } = await writeObservationArtifact(cwd, {
+    instance,
+    kind,
+    source,
+    requestedStatus,
+    url: options.url ?? null,
+    evidencePath,
+    summary: options.summary ?? null,
+    reason: null,
+  });
   return {
     schemaVersion: 1,
     stability: "experimental" as const,
     command: "app instance evidence record" as const,
     cwd,
     path,
+    observation: artifact,
+  };
+}
+
+export async function probeAppInstanceHttpObservation(cwd: string, options: {
+  instanceId?: string;
+  url?: string;
+  timeoutMs?: string;
+}) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const timeoutMs = parsePositiveIntegerFlag(
+    options.timeoutMs,
+    DEFAULT_HTTP_OBSERVE_TIMEOUT_MS,
+    "invalid_app_instance_probe_timeout",
+    MAX_HTTP_OBSERVE_TIMEOUT_MS,
+  );
+  const target = parseLoopbackUrl(options.url ?? instance.network.url ?? "");
+  const observationId = `http_probe_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
+  const evidencePath = join(instancePaths(instance.worktree.path, instance.instanceId).observations, `${observationId}.http.json`);
+  let requestedStatus: AppInstanceObservationStatus = "observed";
+  let summary: string | null = null;
+  let reason: string | null = null;
+  let httpEvidence: Record<string, unknown> | null = null;
+
+  if (instance.process.status !== "running") {
+    requestedStatus = "observed";
+    summary = "probe_not_run";
+    reason = `instance_not_running:${instance.process.reason}`;
+    httpEvidence = {
+      schemaVersion: 1,
+      type: "codexus.app.instance.http-probe",
+      recordedAt: nowIso(),
+      instanceId: instance.instanceId,
+      url: target.toString(),
+      status: "unavailable",
+      reason,
+      requestAttempted: false,
+      authority: {
+        controlsInstance: false,
+        healthAuthority: false,
+        completionAuthority: false,
+      },
+    };
+  } else {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(target, { signal: controller.signal });
+      const preview = await boundedResponsePreview(response);
+      requestedStatus = response.ok ? "observed" : "failed";
+      summary = response.ok ? `http_${response.status}` : `http_non_ok:${response.status}`;
+      reason = response.ok ? null : "http_non_ok";
+      httpEvidence = {
+        schemaVersion: 1,
+        type: "codexus.app.instance.http-probe",
+        recordedAt: nowIso(),
+        instanceId: instance.instanceId,
+        url: target.toString(),
+        status: requestedStatus,
+        statusCode: response.status,
+        ok: response.ok,
+        timeoutMs,
+        headers: {
+          contentType: response.headers.get("content-type"),
+        },
+        body: {
+          bytesRead: preview.bytesRead,
+          truncated: preview.truncated,
+          preview: preview.preview,
+        },
+        authority: {
+          controlsInstance: false,
+          healthAuthority: false,
+          completionAuthority: false,
+        },
+      };
+    } catch (error) {
+      requestedStatus = "failed";
+      summary = "request_failed";
+      reason = error instanceof Error ? error.message : String(error);
+      httpEvidence = {
+        schemaVersion: 1,
+        type: "codexus.app.instance.http-probe",
+        recordedAt: nowIso(),
+        instanceId: instance.instanceId,
+        url: target.toString(),
+        status: "failed",
+        statusCode: null,
+        ok: false,
+        timeoutMs,
+        reason,
+        authority: {
+          controlsInstance: false,
+          healthAuthority: false,
+          completionAuthority: false,
+        },
+      };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  await ensureDir(dirname(evidencePath));
+  await writeJsonAtomic(evidencePath, httpEvidence);
+  const { path, artifact } = await writeObservationArtifact(cwd, {
+    instance,
+    kind: "dev-server",
+    source: "http-probe",
+    requestedStatus,
+    url: target.toString(),
+    evidencePath,
+    summary,
+    reason,
+  });
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence probe" as const,
+    cwd,
+    path,
+    probe: {
+      source: "http-probe" as const,
+      url: target.toString(),
+      timeoutMs,
+      evidencePath,
+      status: artifact.observation.status,
+      reason: artifact.observation.reason,
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
     observation: artifact,
   };
 }

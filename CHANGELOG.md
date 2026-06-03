@@ -9,7 +9,15 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added an experimental app-instance HTTP evidence probe:
+  `cx app instance evidence probe --instance-id <id> [--url <loopback-url>]`
+  records bounded, redacted dev-server response evidence for a Codexus-owned
+  worktree app instance and links it to an `app-instance-observation` artifact.
+  The probe is loopback-only and never claims control, health authority, or
+  completion authority. Browser/DevTools/screenshot adapters remain follow-up
+  work.
 
 ## 0.1.4 - 2026-06-03
 

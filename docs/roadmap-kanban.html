@@ -320,13 +320,14 @@
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
+            <span class="tag gateable">HTTP probe done</span>
           </div>
-          <p>The live ownership, observation descriptor, and stale/orphan lifecycle policy baseline is implemented. The next step is to connect real Browser/DevTools/dev-server adapters to those instance-linked artifacts.</p>
+          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, and first loopback HTTP dev-server probe are implemented. The next step is richer Browser/DevTools/screenshot/log/metric adapters.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale/orphan artifacts report lifecycle policy without implying health, cleanup, completion, or control.</li>
-            <li>Observation evidence references an <code>instanceId</code> and never claims control, health, or completion authority.</li>
-            <li>Adapter outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
+            <li>Done: loopback HTTP probe evidence references an <code>instanceId</code>, is bounded and redacted, and never claims control, health, or completion authority.</li>
+            <li>Next: Browser/DevTools/screenshot/log/metric outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
             <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>
           </ul>
           <span class="label">Sources</span>
@@ -439,7 +440,7 @@
           <div class="tags">
             <span class="tag evidence">adapter descriptors</span>
           </div>
-          <p>Wire real dev-server, browser, log, screenshot, trace, or metric adapters to existing app-instance observation descriptors.</p>
+          <p>The loopback HTTP dev-server probe is implemented. Wire richer browser, screenshot, trace, log, or metric adapters to existing app-instance observation descriptors.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Stack-specific behavior stays outside the workflow kernel.</li>

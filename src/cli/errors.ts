@@ -185,6 +185,10 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing app instance observation source.";
     case "app_instance_observation_evidence_missing":
       return `App instance observation evidence file not found${target ? `: ${target}` : ""}.`;
+    case "invalid_app_instance_probe_url":
+      return `Invalid app instance probe URL${target ? `: ${target}` : ""}.`;
+    case "invalid_app_instance_probe_timeout":
+      return "Invalid app instance probe timeout.";
     case "app_instance_descriptor_invalid":
       return `App instance descriptor is invalid${target ? `: ${target}` : ""}.`;
     case "app_instance_profile_not_found":
@@ -425,6 +429,10 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass `--source <adapter-or-tool>` when recording app instance evidence.";
     case "app_instance_observation_evidence_missing":
       return "Pass an existing file with `--evidence-path`, or omit the flag for URL/summary-only evidence.";
+    case "invalid_app_instance_probe_url":
+      return "Use a loopback HTTP URL such as `http://127.0.0.1:<port>/`.";
+    case "invalid_app_instance_probe_timeout":
+      return "Use `--timeout-ms <n>` with a positive integer up to 30000.";
     case "app_instance_fixed_port_required":
       return "Set `port.preferred` in the descriptor or pass `--port <n>` for a fixed-port profile.";
     case "app_instance_port_unavailable":
