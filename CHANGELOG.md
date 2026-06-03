@@ -9,6 +9,10 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+No changes yet.
+
+## 0.1.6 - 2026-06-03
+
 ### Added
 
 - Added an experimental app-instance log snapshot evidence adapter:

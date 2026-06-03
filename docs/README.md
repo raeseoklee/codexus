@@ -35,6 +35,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [0.1.3 release evidence](release-evidence/0.1.3.md): trusted-publishing evidence for experimental action surfaces that remain gated and outside the frozen stable 0.1.x JSON contract.
 - [0.1.4 release evidence](release-evidence/0.1.4.md): trusted-publishing evidence for the experimental app-server stdio proof harness.
 - [0.1.5 release evidence](release-evidence/0.1.5.md): trusted-publishing evidence for the experimental app-instance HTTP evidence probe.
+- [0.1.6 release evidence](release-evidence/0.1.6.md): trusted-publishing evidence for the experimental app-instance log snapshot evidence adapter.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.
