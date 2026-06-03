@@ -253,6 +253,7 @@ Public bin은 `cx`와 `codexus`입니다.
 - [0.1.2 release evidence](release-evidence/0.1.2.md)
 - [0.1.3 release evidence](release-evidence/0.1.3.md)
 - [0.1.4 release evidence](release-evidence/0.1.4.md)
+- [0.1.5 release evidence](release-evidence/0.1.5.md)
 - [JSON contract](json-contract.md)
 - [Public release checklist](public-release.md)
 - [Roadmap](ROADMAP.md)
