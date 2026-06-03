@@ -192,6 +192,33 @@ gate model.
 Do not add semantic "taste" rules to gate mode. They belong in advisory output
 until they are backed by explicit, local evidence.
 
+## Project LSP Diagnostics
+
+Project language servers can provide useful local diagnostics, but Codexus must
+not silently turn them into an always-on hidden authority.
+
+Implemented first-slice surface:
+
+```bash
+cx lsp status --json
+cx lsp check --gate --json
+```
+
+The first slice is intentionally conservative:
+
+- `status` auto-detects project LSP/diagnostics candidates from local project
+  files and package scripts;
+- `check` runs an explicit diagnostics command such as `npm run typecheck`;
+- Codexus does **not** start or control a long-lived LSP protocol server;
+- bounded stdout/stderr tails are redacted before they enter JSON output;
+- diagnostics can gate only when the user asks for `--gate`;
+- LSP output does not become completion authority by itself.
+
+Future protocol-server adapters must remain descriptor-backed and truthful:
+starting a language server is a lifecycle action, so it needs workspace trust,
+bounded output, timeout/cancellation behavior, and clear reporting of whether
+diagnostics came from an actual LSP server or from a project diagnostic command.
+
 ## Repository Knowledge System
 
 Codexus now has a first repo-knowledge slice after the architecture gate. Its

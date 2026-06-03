@@ -172,7 +172,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     smoke compatibility, stable-readiness smoke coverage, and local release
     integrity gating implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current npm baseline is `0.1.5`; prereleases publish through
+    - Current npm baseline is `0.1.6`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
       trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin
@@ -315,6 +315,13 @@ Harness-engineering alignment adds these evidence-first tracks:
   evidence while preserving the facts-vs-heuristics boundary. The subagent
   behavior checklist counterpart is implemented; remaining work is optional
   future artifacts such as lint/typecheck/coverage reports.
+- Project LSP diagnostics follow-up: `cx lsp status/check` now has an
+  experimental first slice for TypeScript diagnostics evidence. It detects
+  candidate project diagnostics automatically, runs only explicit diagnostics
+  commands, and reports that long-lived LSP protocol servers are not started in
+  this slice. Next work is descriptor-backed protocol-server adapters and
+  multi-language diagnostics only if they can preserve bounded output,
+  no-editing behavior, and no completion authority.
 - Multi-engine relay follow-up: [doc 15](design/15-multi-engine-relay-autopilot.md)
   now has a recorder/checker first slice with `cx autopilot relay
   record/stage-gate/check-agreement`. AC-to-verification matrix
@@ -409,3 +416,7 @@ Harness-engineering alignment adds these evidence-first tracks:
     implemented; next add richer Browser/DevTools/screenshot/metric capture and
     worktree-aware launcher reuse for future
     autopilot surfaces.
+14. Project LSP diagnostics: first-slice `cx lsp status/check` exists for
+    TypeScript diagnostics via explicit local project commands. Keep automatic
+    project LSP application detect-only until protocol-server lifecycle,
+    workspace trust, output bounding, and gate behavior are explicit.

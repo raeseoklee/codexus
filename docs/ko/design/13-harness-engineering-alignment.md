@@ -178,6 +178,33 @@ direction도 같은 facts-vs-heuristics gate model을 사용해야 합니다.
 Semantic taste rule을 gate mode에 넣지 않습니다. 명시적 local evidence가 생길 때까지
 advisory output에 둡니다.
 
+## Project LSP diagnostics
+
+Project language server는 유용한 local diagnostics를 제공할 수 있지만, Codexus가 이를
+조용히 always-on hidden authority로 바꾸면 안 됩니다.
+
+구현된 first-slice surface:
+
+```bash
+cx lsp status --json
+cx lsp check --gate --json
+```
+
+첫 slice는 의도적으로 보수적입니다:
+
+- `status`는 local project file과 package script에서 project LSP/diagnostics 후보를
+  자동 탐지합니다;
+- `check`는 `npm run typecheck` 같은 명시적 diagnostics command를 실행합니다;
+- Codexus는 long-lived LSP protocol server를 시작하거나 제어하지 않습니다;
+- JSON output에 들어가기 전 bounded stdout/stderr tail을 redact합니다;
+- diagnostics는 사용자가 `--gate`를 요청할 때만 gate가 될 수 있습니다;
+- LSP output 자체는 completion authority가 되지 않습니다.
+
+향후 protocol-server adapter는 descriptor-backed이고 정직해야 합니다. Language server를
+시작하는 것은 lifecycle action이므로 workspace trust, bounded output,
+timeout/cancellation behavior, 그리고 diagnostics가 실제 LSP server에서 왔는지 project
+diagnostic command에서 왔는지를 명확히 보고해야 합니다.
+
 ## Repository knowledge system
 
 Architecture gate 이후 첫 repo-knowledge slice가 구현되었습니다. Check는 기계적인

@@ -10,7 +10,7 @@
 
 Public bins: `cx`, `codexus`
 
-현재 stable baseline: `0.1.3`
+현재 stable baseline: `0.1.6`
 
 Npm package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. 기존 `chx`
 alias는 공개 npm bin으로 배포하지 않습니다.
@@ -20,7 +20,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Node 22+ npm-installed CLI entrypoint: `dist/cli/main.js`
 - Source development entrypoint: `node src/cli/main.ts`
 - `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`, `replay parity`
-- `locks list/inspect/clear`, `schema check/engine/validate/validate-run`, `app-server status/roundtrip/experiment`
+- `locks list/inspect/clear`, `schema check/engine/validate/validate-run`, `lsp status/check`, `app-server status/roundtrip/experiment`
 - `app instance profile list/status/logs/start/stop`
 - `slop check`
 - `memory add/search/list/review/curate/prune`
@@ -117,6 +117,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   advisory heuristic claim, 명시적 diff base metadata, optional declared-scope 및
   explicit review-artifact check. `--gate`는 같은 tri-state evidence status를
   automation exit code로 변환하지만 heuristic으로 change를 fail시키지는 않습니다.
+- `cx lsp status`와 `cx lsp check`는 experimental project LSP diagnostics evidence를
+  제공합니다. 첫 slice는 local project file과 명시적 package script에서 TypeScript
+  diagnostics 후보를 자동 탐지하고, `npm run typecheck` 같은 명시적 diagnostics
+  command만 실행하며, bounded stdout/stderr tail을 redact합니다. Long-lived LSP
+  protocol server를 시작하거나 제어하지 않는다고 자기보고하고, 파일을 수정하지 않으며
+  completion authority가 되지 않습니다.
 - `cx session subagent record/attach/status`는 subagent claim bundle을
   `.codexus/session/subagents/` 아래 기록하고 session state에서 link하며, subagent claim을
   verification freshness와 분리합니다. `cx session subagent launch`는

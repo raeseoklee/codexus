@@ -172,14 +172,14 @@
   <header>
     <h1>Codexus Roadmap Kanban</h1>
     <p>
-      A four-column view of indexed Codexus roadmap work after the 0.1.5 release.
+      A four-column view of indexed Codexus roadmap work after the 0.1.6 release.
       Cards are intentionally framed as evidence-first tasks: local facts may gate,
       judgment-heavy claims stay advisory, and experimental surfaces remain blocked
       until their runtime contract exists.
     </p>
     <div class="meta">
       <span class="pill">Updated: 2026-06-03</span>
-      <span class="pill">Baseline: npm 0.1.5 published</span>
+      <span class="pill">Baseline: npm 0.1.6 published</span>
       <span class="pill">Source: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
       <span class="pill"><a href="remaining-work.md">Remaining work</a></span>
@@ -450,6 +450,24 @@
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/13-harness-engineering-alignment.md#observability-track">doc 13 observability</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Project LSP Diagnostics</h3>
+          <div class="tags">
+            <span class="tag evidence">diagnostics evidence</span>
+            <span class="tag gated">protocol server deferred</span>
+          </div>
+          <p>The first slice detects TypeScript project diagnostics and runs explicit diagnostics commands without starting a long-lived language server. The next step is descriptor-backed protocol-server adapters.</p>
+          <span class="label">Acceptance</span>
+          <ul>
+            <li>Done: <code>cx lsp status</code> detects candidates without starting a server.</li>
+            <li>Done: <code>cx lsp check --gate</code> runs explicit project diagnostics and redacts bounded output.</li>
+            <li>Next: protocol-server lifecycle, trust, timeout, and cancellation contracts before automatic project LSP application.</li>
+            <li>LSP diagnostics never edit files or become completion authority.</li>
+          </ul>
+          <span class="label">Sources</span>
+          <p><a href="design/13-harness-engineering-alignment.md#project-lsp-diagnostics">harness alignment LSP diagnostics</a></p>
         </article>
       </section>
 

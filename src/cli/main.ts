@@ -31,6 +31,7 @@ import { releaseCommand } from "./commands/release.ts";
 import { appCommand } from "./commands/app.ts";
 import { wikiCommand } from "./commands/wiki.ts";
 import { policyCommand } from "./commands/policy.ts";
+import { lspCommand } from "./commands/lsp.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -61,6 +62,8 @@ Usage:
   cx session subagent status <task-id> [--json]
   cx session workers status [--json]
   cx slop check [--since <ref>] [--scope <glob>] [--review <path>] [--gate] [--json]
+  cx lsp status [--json]
+  cx lsp check [--gate] [--timeout-ms <n>] [--json]
   cx supply-chain check [--gate] [--json]
   cx policy catalog check [--since <ref>] [--scope <glob>] [--json]
   cx release check [--version <version>] [--live] [--gate] [--json]
@@ -167,6 +170,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "slop") {
     await slopCommand(args);
+    return;
+  }
+  if (args.command === "lsp") {
+    await lspCommand(args);
     return;
   }
   if (args.command === "supply-chain") {

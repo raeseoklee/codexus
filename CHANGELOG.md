@@ -9,7 +9,14 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added experimental project LSP diagnostics evidence:
+  `cx lsp status` detects project language-server candidates without starting a
+  long-lived server, and `cx lsp check [--gate]` runs explicit project
+  diagnostics such as `npm run typecheck`. This first slice is detect/report
+  only for LSP protocol servers: it does not auto-start language servers, does
+  not edit files, and does not claim completion authority.
 
 ## 0.1.6 - 2026-06-03
 

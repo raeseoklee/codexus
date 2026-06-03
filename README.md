@@ -164,7 +164,7 @@ npm run package:smoke
 
 ## Status
 
-Codexus 0.1.2 is usable as a local harness with a narrow stable path around
+Codexus 0.1.6 is usable as a local harness with a narrow stable path around
 `codex exec --json`; live app-server turns, routine live model replay, and
 automatic prompt injection remain intentionally gated. Live cron/gateway
 dispatch is now available as an experimental explicit-approval surface.
@@ -175,7 +175,7 @@ dispatch is now available as an experimental explicit-approval surface.
 | --- | --- |
 | Supervised `codex exec --json` runs, verification/repair, run ledger, resume/cancel/status/events | Stable path |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
-| `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence/gate surface |
+| `slop check`, `supply-chain check`, `lsp status/check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence plus experimental LSP diagnostics surface; LSP protocol servers are detect-only in the first slice |
 | `repo graph build/check` | Experimental graph evidence surface; build/check only, no import/search/injection |
 | `app instance profile list/status/logs/start/stop/evidence record/evidence list` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
 | app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval, and other surfaces stay status/record/launch-contract/gated |
@@ -211,6 +211,8 @@ cx session subagent launch --role reviewer --task "review the staged diff" --jso
 cx session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
 cx session subagent record --file <result.json> --json
 cx session workers status --json
+cx lsp status --json
+cx lsp check --gate --json
 cx schema engine --json
 cx replay parity --json
 cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
@@ -223,6 +225,7 @@ cx app instance start --profile web --worktree . --json
 cx app instance status --json
 cx app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
 cx app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
+cx app instance evidence logs --instance-id <id> --json
 cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json

@@ -149,7 +149,7 @@ npm run package:smoke
 
 ## 상태
 
-Codexus 0.1.2는 좁은 stable path를 가진 local harness로 사용할 수 있습니다.
+Codexus 0.1.6은 좁은 stable path를 가진 local harness로 사용할 수 있습니다.
 안정 경로는 `codex exec --json`을 감싸는 CLI입니다. Live app-server turn,
 routine live model replay, automatic prompt injection은 의도적으로 gate 뒤에
 있습니다. Live cron/gateway dispatch는 experimental explicit-approval
@@ -161,7 +161,7 @@ surface로 제공됩니다.
 | --- | --- |
 | `codex exec --json` supervised run, verification/repair, run ledger, resume/cancel/status/events | 안정 경로 |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | 안정적인 session evidence surface |
-| `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | 안정적인 local evidence/gate surface |
+| `slop check`, `supply-chain check`, `lsp status/check`, schema subset engine, replay parity, memory/skill lifecycle | 안정적인 local evidence와 experimental LSP diagnostics surface; 첫 slice에서 LSP protocol server는 detect-only |
 | `repo graph build/check` | Experimental graph evidence surface; build/check만 지원, import/search/injection 없음 |
 | `app instance profile list/status/logs/start/stop/evidence record/evidence list` | Experimental owned-process와 observation-evidence surface; live start/stop은 Codexus-owned instance에서만 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용 |
 | app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; app-server는 read-only, cron/gateway는 explicit approval live dispatch 지원, 나머지는 status/record/launch-contract/gated surface |
@@ -197,6 +197,8 @@ cx session subagent launch --role reviewer --task "review the staged diff" --jso
 cx session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
 cx session subagent record --file <result.json> --json
 cx session workers status --json
+cx lsp status --json
+cx lsp check --gate --json
 cx schema engine --json
 cx replay parity --json
 cx slop check --scope "src/**" --gate --json
@@ -207,6 +209,7 @@ cx app instance start --profile web --worktree . --json
 cx app instance status --json
 cx app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
 cx app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
+cx app instance evidence logs --instance-id <id> --json
 cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json

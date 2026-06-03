@@ -9,7 +9,14 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
-아직 변경 사항이 없습니다.
+### Added
+
+- Experimental project LSP diagnostics evidence를 추가했습니다:
+  `cx lsp status`는 long-lived server를 시작하지 않고 project language-server
+  candidate를 탐지하며, `cx lsp check [--gate]`는 `npm run typecheck` 같은 명시적
+  project diagnostics를 실행합니다. 첫 slice에서 LSP protocol server는 detect/report
+  only입니다. Language server를 자동 시작하지 않고, 파일을 수정하지 않으며, completion
+  authority를 주장하지 않습니다.
 
 ## 0.1.6 - 2026-06-03
 

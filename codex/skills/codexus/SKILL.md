@@ -46,6 +46,8 @@ node codex/skills/codexus/scripts/cx.mjs skill index --json
 node codex/skills/codexus/scripts/cx.mjs skill improve <skill-id> --reason "<why>" --json
 node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-replay --json
 node codex/skills/codexus/scripts/cx.mjs locks list --json
+node codex/skills/codexus/scripts/cx.mjs lsp status --json
+node codex/skills/codexus/scripts/cx.mjs lsp check --gate --json
 node codex/skills/codexus/scripts/cx.mjs schema check --json
 node codex/skills/codexus/scripts/cx.mjs schema validate-run <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs release check --gate --json

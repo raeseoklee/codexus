@@ -71,6 +71,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported session workers command${target ? `: ${target}` : ""}.`;
     case "unsupported_slop_command":
       return `Unsupported slop command${target ? `: ${target}` : ""}.`;
+    case "unsupported_lsp_command":
+      return `Unsupported LSP command${target ? `: ${target}` : ""}.`;
     case "unsupported_supply_chain_command":
       return `Unsupported supply-chain command${target ? `: ${target}` : ""}.`;
     case "unsupported_policy_command":
@@ -315,6 +317,8 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Run `cx session workers status --json`.";
     case "unsupported_slop_command":
       return "Run `cx slop check --json` or `cx slop check --gate --json`.";
+    case "unsupported_lsp_command":
+      return "Run `cx lsp status --json` to detect project LSP candidates or `cx lsp check --gate --json` to run explicit project diagnostics.";
     case "unsupported_supply_chain_command":
       return "Run `cx supply-chain check --json` or `cx supply-chain check --gate --json`.";
     case "unsupported_policy_command":

@@ -162,7 +162,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
     compatibility, stable-readiness smoke coverage, local release integrity gate 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 현재 npm baseline은 `0.1.5`입니다. Prerelease는 fallback/dev path인
+    - 현재 npm baseline은 `0.1.6`입니다. Prerelease는 fallback/dev path인
       `publish:next`를 통해 배포할 수 있고, stable release는 trusted GitHub Actions
       tag run에서 배포합니다.
     - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,
@@ -295,6 +295,12 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   assumption, verification-artifact, diff-surface evidence를 기록합니다. Fact-vs-heuristic
   경계는 유지했고, subagent behavior checklist counterpart는 구현됐습니다. 남은 작업은
   선택적 lint/typecheck/coverage artifact입니다.
+- Project LSP diagnostics follow-up: `cx lsp status/check`는 TypeScript diagnostics
+  evidence를 위한 experimental 첫 slice를 갖습니다. Project diagnostics 후보는 자동
+  탐지하지만, 명시적 diagnostics command만 실행하며, long-lived LSP protocol server는
+  이 slice에서 시작하지 않는다고 보고합니다. 다음 작업은 bounded output, no-editing
+  behavior, no completion authority를 보존할 수 있을 때만 descriptor-backed protocol-server
+  adapter와 multi-language diagnostics를 추가하는 것입니다.
 - Multi-engine relay follow-up: [15번 문서](design/15-multi-engine-relay-autopilot.md)는
   이제 `cx autopilot relay record/stage-gate/check-agreement` recorder/checker 첫 slice를
   갖습니다. AC-to-verification matrix import/enforcement는 implementation-stage
@@ -387,3 +393,7 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     첫 loopback HTTP dev-server probe와 bounded/redacted log snapshot adapter는
     구현됐습니다. 이후 작업은 더 풍부한 Browser/DevTools/screenshot/metric capture와
     future autopilot surface를 위한 worktree-aware launcher reuse입니다.
+14. Project LSP diagnostics: first-slice `cx lsp status/check`는 명시적 local project
+    command를 통한 TypeScript diagnostics 용도로 구현됐습니다. Protocol-server
+    lifecycle, workspace trust, output bounding, gate behavior가 명시되기 전까지 자동
+    project LSP 적용은 detect-only로 유지합니다.

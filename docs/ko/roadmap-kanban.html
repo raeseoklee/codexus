@@ -172,13 +172,13 @@
   <header>
     <h1>Codexus 로드맵 칸반</h1>
     <p>
-      0.1.5 release 이후 indexed Codexus roadmap 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
+      0.1.6 release 이후 indexed Codexus roadmap 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
       evidence-first 원칙에 맞춰 작성했습니다. 로컬 fact는 gate할 수 있고, 판단이 필요한
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
       <span class="pill">갱신일: 2026-06-03</span>
-      <span class="pill">기준: npm 0.1.5 published</span>
+      <span class="pill">기준: npm 0.1.6 published</span>
       <span class="pill">출처: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
       <span class="pill"><a href="remaining-work.md">남은 작업</a></span>
@@ -449,6 +449,24 @@
           </ul>
           <span class="label">근거</span>
           <p><a href="design/13-harness-engineering-alignment.md#observability-track">doc 13 observability</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Project LSP Diagnostics</h3>
+          <div class="tags">
+            <span class="tag evidence">diagnostics evidence</span>
+            <span class="tag gated">protocol server deferred</span>
+          </div>
+          <p>첫 slice는 long-lived language server를 시작하지 않고 TypeScript project diagnostics를 탐지하고 명시적 diagnostics command를 실행합니다. 다음 단계는 descriptor-backed protocol-server adapter입니다.</p>
+          <span class="label">완료 조건</span>
+          <ul>
+            <li>완료: <code>cx lsp status</code>는 server를 시작하지 않고 candidate를 탐지합니다.</li>
+            <li>완료: <code>cx lsp check --gate</code>는 명시적 project diagnostics를 실행하고 bounded output을 redact합니다.</li>
+            <li>다음: 자동 project LSP 적용 전에 protocol-server lifecycle, trust, timeout, cancellation contract를 정의합니다.</li>
+            <li>LSP diagnostics는 파일을 수정하지 않고 completion authority가 되지 않습니다.</li>
+          </ul>
+          <span class="label">근거</span>
+          <p><a href="design/13-harness-engineering-alignment.md#project-lsp-diagnostics">harness alignment LSP diagnostics</a></p>
         </article>
       </section>
 

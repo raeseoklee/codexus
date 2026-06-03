@@ -106,5 +106,9 @@ The repository now has a working MVP harness spine:
 - optional advanced interop commands that do not affect the normal Codexus runtime,
 - lock inspection/stale recovery, versioned schema artifacts, schema artifact subset enforcement, focused read-path enforcement, and run-ledger validation,
 - owner/liveness-based external run cancellation, approved adapter context artifacts, full replay parity fixture-matrix coverage, gated model replay, app-server dry-run roundtrip/recorded experiment manifests/process-probe/fake-supervision evidence, explicit-budget driver-failure repair, experimental cron/gateway live dispatch with explicit approval plus audit records, installed skill tree diagnosis, and local syntax/static validation.
+- experimental project LSP diagnostics evidence: `cx lsp status` detects
+  candidate language-server diagnostics without starting a server, and
+  `cx lsp check` runs explicit project diagnostics such as `npm run typecheck`
+  without gaining completion authority.
 
 The remaining work is no longer P0-P2 surface construction; it is deeper hardening: full external schema-engine enforcement if dependency policy allows it, preserving replay parity coverage, isolated real app-server process experiments, and maturing the experimental cron/gateway dispatcher into richer scheduler/recovery semantics. See [Remaining work](remaining-work.md).

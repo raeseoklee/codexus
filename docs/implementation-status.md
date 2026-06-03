@@ -10,7 +10,7 @@ Target CLI: `cx`
 
 Public bins: `cx`, `codexus`
 
-Current stable baseline: `0.1.3`
+Current stable baseline: `0.1.6`
 
 The npm package exposes `cx` and `codexus` as canonical bins. The historical
 `chx` alias is not published.
@@ -41,6 +41,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `schema validate`
   - `schema validate-run`
   - `slop check`
+  - `lsp status`
+  - `lsp check`
   - `app-server status`
   - `app-server roundtrip`
   - `app-server experiment`
@@ -199,6 +201,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   declared-scope and explicit review-artifact checks. `--gate` converts the
   same tri-state evidence status into an automation exit code without letting
   heuristics fail a change.
+- `cx lsp status` and `cx lsp check` expose experimental project LSP diagnostics
+  evidence. The first slice auto-detects TypeScript diagnostics from local
+  project files and explicit package scripts, runs only an explicit diagnostics
+  command such as `npm run typecheck`, redacts bounded stdout/stderr tails, and
+  self-reports that no long-lived LSP protocol server is started or controlled.
+  The surface does not edit files and does not become completion authority.
 - `cx session subagent record/attach/status` records subagent claim bundles
   under `.codexus/session/subagents/`, links them from session state, and keeps
   subagent claims separate from verification freshness. `cx session subagent
