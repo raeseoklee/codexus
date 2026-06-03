@@ -9,6 +9,15 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added experimental `cx contract check --target 0.2.0 --json`, a promotion
+  readiness audit that turns the documented 0.2.0 rule into executable evidence.
+  The command identifies viable stable-promotion candidates and keeps action
+  surfaces deferred. `--gate` intentionally fails until at least one audited
+  candidate is promoted to stable and frozen in `docs/json-contract.md`, so
+  0.2.0 is not treated as a countdown after 0.1.9.
+
 ## 0.1.7 - 2026-06-04
 
 ### Added

@@ -292,6 +292,11 @@ process.on("SIGINT", shutdown);
   assert(repo.stability === "experimental", "repo check did not report experimental JSON stability");
   assert(repo.scanAccuracy === "best_effort", "repo check did not report best-effort scan accuracy");
   assert(repo.gate?.status === "passed", "installed repo knowledge gate did not pass");
+  const contract = parseJsonRun(codexus, ["contract", "check", "--cwd", project, "--target", "0.2.0", "--json"]);
+  assert(contract.stability === "experimental", "contract check did not report experimental JSON stability");
+  assert(contract.command === "contract check", "contract check command name was not stable");
+  assert(contract.targetVersion === "0.2.0", "contract check did not report the 0.2.0 target");
+  assert(contract.gate?.status === "not_requested", "contract check should stay report-only without --gate");
 
   const wikiBuild = parseJsonRun(codexus, ["wiki", "build", "--cwd", project, "--mode", "deterministic", "--json"]);
   assert(wikiBuild.stability === "experimental", "wiki build did not report experimental stability");

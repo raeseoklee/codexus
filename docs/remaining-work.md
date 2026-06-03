@@ -434,3 +434,9 @@ Harness-engineering alignment adds these evidence-first tracks:
     supervision. Do not claim always-on behavior unless a notify hook or other
     observed heartbeat has dispatched, and do not move workflow-kernel logic
     into plugin-local scripts.
+17. 0.2.0 promotion readiness: the first audit surface now exists as
+    `cx contract check --target 0.2.0 --json`. It identifies viable promotion
+    candidates and intentionally fails under `--gate` until at least one surface
+    is actually stable and frozen in `docs/json-contract.md`. Continue the
+    `0.1.x` line until a promotion hardening slice completes; do not cut
+    `0.2.0` solely because the patch number is high.

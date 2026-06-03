@@ -32,6 +32,7 @@ import { appCommand } from "./commands/app.ts";
 import { wikiCommand } from "./commands/wiki.ts";
 import { policyCommand } from "./commands/policy.ts";
 import { lspCommand } from "./commands/lsp.ts";
+import { contractCommand } from "./commands/contract.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -67,6 +68,7 @@ Usage:
   cx supply-chain check [--gate] [--json]
   cx policy catalog check [--since <ref>] [--scope <glob>] [--json]
   cx release check [--version <version>] [--live] [--gate] [--json]
+  cx contract check [--target 0.2.0] [--gate] [--json]
   cx architecture check [--policy <path>] [--gate] [--json]
   cx repo map|check [--gate] [--json]
   cx repo graph build --graph-provider codexus-lite [--scope <glob>] [--json]
@@ -186,6 +188,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "release") {
     await releaseCommand(args);
+    return;
+  }
+  if (args.command === "contract") {
+    await contractCommand(args);
     return;
   }
   if (args.command === "architecture") {

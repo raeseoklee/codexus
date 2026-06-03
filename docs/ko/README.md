@@ -253,6 +253,7 @@ Public bin은 `cx`와 `codexus`입니다.
 - [남은 작업](remaining-work.md)
 - [로드맵 칸반](roadmap-kanban.html): 남은 작업을 ready, evidence, gated, later 4컬럼 HTML board로 정리합니다.
 - [0.1.0 stable 준비 계획](plans/2026-05-31-0.1.0-stable-readiness-plan.md)
+- [0.2.0 promotion 준비 계획](plans/2026-06-04-0.2.0-promotion-readiness-plan.md)
 - [0.1.1 release evidence](release-evidence/0.1.1.md)
 - [0.1.2 release evidence](release-evidence/0.1.2.md)
 - [0.1.3 release evidence](release-evidence/0.1.3.md)

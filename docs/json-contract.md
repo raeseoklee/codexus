@@ -74,7 +74,8 @@ in `0.1.x`.
 
 - Experimental/deferred command output for app-server live behavior,
   cron/gateway live dispatch, automatic injection, routine live model replay,
-  statusline integration, worker launch, and release-integrity checks.
+  statusline integration, worker launch, release-integrity checks, and
+  contract-promotion readiness checks.
 - The membership of advisory arrays such as `heuristicClaims`.
 - Human-readable prose fields such as `summary`, `reason`, `recommendation`,
   and `hint`, except that they must stay bounded and non-secret.

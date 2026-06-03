@@ -72,7 +72,8 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
 
 - app-server live behavior, cron/gateway live dispatch, automatic injection,
   routine live model replay, statusline integration, worker launch,
-  release-integrity check의 experimental/deferred output.
+  release-integrity check, contract-promotion readiness check의
+  experimental/deferred output.
 - `heuristicClaims` 같은 advisory array의 membership.
 - `summary`, `reason`, `recommendation`, `hint` 같은 사람이 읽는 prose field. 단,
   bounded/non-secret이어야 합니다.

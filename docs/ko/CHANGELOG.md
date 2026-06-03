@@ -9,6 +9,15 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- Experimental `cx contract check --target 0.2.0 --json`을 추가했습니다. 이
+  promotion readiness audit는 문서화된 0.2.0 규칙을 실행 가능한 evidence로 바꿉니다.
+  이 명령은 viable stable-promotion candidate를 식별하고 action surface는 계속
+  deferred로 둡니다. `--gate`는 audit된 candidate 중 최소 하나가 stable로 승격되고
+  `docs/json-contract.md`에 frozen되기 전까지 의도적으로 실패하므로, 0.2.0을 0.1.9
+  다음 countdown으로 취급하지 않습니다.
+
 ## 0.1.7 - 2026-06-04
 
 ### Added

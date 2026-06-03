@@ -2,7 +2,7 @@
 
 [English](../implementation-status.md)
 
-날짜: 2026-06-03
+날짜: 2026-06-04
 
 제품명: Codexus
 
@@ -10,7 +10,7 @@
 
 Public bins: `cx`, `codexus`
 
-현재 stable baseline: `0.1.6`
+현재 stable baseline: `0.1.7`
 
 Npm package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. 기존 `chx`
 alias는 공개 npm bin으로 배포하지 않습니다.
@@ -20,7 +20,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Node 22+ npm-installed CLI entrypoint: `dist/cli/main.js`
 - Source development entrypoint: `node src/cli/main.ts`
 - `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`, `replay parity`
-- `locks list/inspect/clear`, `schema check/engine/validate/validate-run`, `lsp status/check`, `app-server status/roundtrip/experiment`
+- `locks list/inspect/clear`, `schema check/engine/validate/validate-run`, `lsp status/check`, `release check`, `contract check`, `app-server status/roundtrip/experiment`
 - `app instance profile list/status/logs/start/stop`
 - `slop check`
 - `memory add/search/list/review/curate/prune`
@@ -73,6 +73,13 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   pinned trusted-publishing workflow, GitHub Release `install.sh` asset wiring,
   local release-evidence doc을 확인합니다. `--live`는 npm `latest`, GitHub latest,
   installer asset hash identity를 확인하는 명시적 post-publish sign-off입니다.
+- `cx contract check --json`은 experimental `0.2.0` promotion readiness audit를
+  보고합니다. `repo check`, local-mode `release check`, `lsp check`, 좁은
+  `architecture check` forbidden-import subset 같은 low-risk promotion candidate를
+  식별하되, app-instance start/stop, live autopilot, active relay adapter, Desktop
+  app-server attachment, automatic injection, plugin always-on claim 같은 action
+  surface는 계속 deferred로 둡니다. `--gate`는 audit된 candidate 중 최소 하나가
+  stable로 승격되고 `docs/json-contract.md`에 frozen될 때까지 의도적으로 실패합니다.
 - npm tarball은 `dist`, `schemas`, Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, top-level release metadata만 싣고 source, tests, docs,

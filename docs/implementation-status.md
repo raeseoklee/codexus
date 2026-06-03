@@ -2,7 +2,7 @@
 
 [Korean](ko/implementation-status.md)
 
-Date: 2026-06-03
+Date: 2026-06-04
 
 Product name: Codexus
 
@@ -10,7 +10,7 @@ Target CLI: `cx`
 
 Public bins: `cx`, `codexus`
 
-Current stable baseline: `0.1.6`
+Current stable baseline: `0.1.7`
 
 The npm package exposes `cx` and `codexus` as canonical bins. The historical
 `chx` alias is not published.
@@ -43,6 +43,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `slop check`
   - `lsp status`
   - `lsp check`
+  - `release check`
+  - `contract check`
   - `app-server status`
   - `app-server roundtrip`
   - `app-server experiment`
@@ -151,6 +153,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   trusted-publishing workflow, GitHub Release `install.sh` asset wiring, and
   local release-evidence docs. `--live` is an explicit post-publish sign-off for
   npm `latest`, GitHub latest, and installer asset hash identity.
+- `cx contract check --json` reports the experimental `0.2.0` promotion
+  readiness audit. It identifies low-risk promotion candidates such as
+  `repo check`, local-mode `release check`, `lsp check`, and the narrow
+  `architecture check` forbidden-import subset, while keeping action surfaces
+  such as app-instance start/stop, live autopilot, active relay adapters,
+  Desktop app-server attachment, automatic injection, and plugin always-on
+  claims deferred. `--gate` intentionally fails until at least one audited
+  candidate is promoted to stable and frozen in `docs/json-contract.md`.
 - The npm tarball ships `dist`, `schemas`, the Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, and top-level release metadata. It excludes source, tests, docs,
