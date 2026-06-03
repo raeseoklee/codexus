@@ -9,6 +9,10 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+No changes yet.
+
+## 0.1.4 - 2026-06-03
+
 ### Added
 
 - Added the experimental app-server stdio proof harness:
