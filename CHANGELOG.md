@@ -9,6 +9,8 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.11 - 2026-06-05
+
 ### Added
 
 - Added explicit prerelease update opt-in:
