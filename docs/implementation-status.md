@@ -170,10 +170,16 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - `version --json`, `doctor --json`, and `session status --json` include an
   additive cache-only experimental `update` summary. These primary commands do
   not query the registry and cannot fail because update lookup is unavailable.
+- `cx plugin status --json` reports experimental Codex plugin package evidence:
+  packaged manifest validity, bundled skill count, wrapper-script presence, and
+  explicit non-authority fields. Installed-plugin state remains deferred until
+  Codex exposes a documented plugin install-location contract
+  (`codex_plugin_install_location_contract_deferred`), and plugin packaging
+  never proves always-on supervision by itself.
 - The npm tarball ships `dist`, `schemas`, the Codex skill adapter,
-  `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
-  scripts, and top-level release metadata. It excludes source, tests, docs,
-  replay fixtures, and migration fixtures.
+  the experimental Codex plugin package, `fixtures/app-server/schema.fixture.json`,
+  `install.sh`, package installer scripts, and top-level release metadata. It
+  excludes source, tests, docs, replay fixtures, and migration fixtures.
 - `npm run typecheck` performs syntax/static validation with the local Node runtime.
 - Optional advanced interop capability probes and export commands remain
   outside the normal Codexus runtime path.

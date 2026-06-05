@@ -89,10 +89,16 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `version --json`, `doctor --json`, `session status --json`은 additive
   cache-only experimental `update` summary를 포함합니다. 이 primary command들은
   registry를 조회하지 않고 update lookup이 불가능해도 실패하지 않습니다.
+- `cx plugin status --json`은 experimental Codex plugin package evidence를
+  보고합니다. Packaged manifest validity, bundled skill count, wrapper script
+  presence, explicit non-authority field를 포함합니다. Codex가 문서화된 plugin
+  install-location contract를 제공하기 전까지
+  `codex_plugin_install_location_contract_deferred` 상태로 installed-plugin state는
+  deferred이며, plugin packaging 자체가 always-on supervision을 증명하지 않습니다.
 - npm tarball은 `dist`, `schemas`, Codex skill adapter,
-  `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
-  scripts, top-level release metadata만 싣고 source, tests, docs,
-  replay/migration fixture는 제외합니다.
+  experimental Codex plugin package, `fixtures/app-server/schema.fixture.json`,
+  `install.sh`, package installer scripts, top-level release metadata만 싣고
+  source, tests, docs, replay/migration fixture는 제외합니다.
 - `npm run typecheck` syntax/static validation
 - normal Codexus runtime path 바깥에 둔 optional advanced interop capability probe/export
 - `codex/skills/codexus` 아래 Codex-native skill adapter source

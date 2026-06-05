@@ -9,6 +9,14 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- Experimental Codex plugin packaging surface를 추가했습니다:
+  `cx plugin status --json`은 `codex/plugins/codexus` 아래 포함된 packaged
+  plugin manifest, skill, wrapper script를 검증합니다. npm-installed `$codexus`
+  skill은 계속 stable adapter이며, installed-plugin detection과 always-on
+  supervision claim은 heartbeat evidence가 관측되기 전까지 deferred로 유지합니다.
+
 ## 0.1.9 - 2026-06-05
 
 ### Added

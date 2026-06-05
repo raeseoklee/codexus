@@ -83,6 +83,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported contract target${target ? `: ${target}` : ""}.`;
     case "unsupported_update_command":
       return `Unsupported update command${target ? `: ${target}` : ""}.`;
+    case "unsupported_plugin_command":
+      return `Unsupported plugin command${target ? `: ${target}` : ""}.`;
     case "unsupported_wiki_command":
       return `Unsupported wiki command${target ? `: ${target}` : ""}.`;
     case "unsupported_wiki_build_mode":

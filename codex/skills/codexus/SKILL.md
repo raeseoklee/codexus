@@ -34,6 +34,7 @@ node codex/skills/codexus/scripts/cx.mjs session checkpoint "before risky change
 node codex/skills/codexus/scripts/cx.mjs session verify --verify "npm test" --json
 node codex/skills/codexus/scripts/cx.mjs doctor --json
 node codex/skills/codexus/scripts/cx.mjs update check --json
+node codex/skills/codexus/scripts/cx.mjs plugin status --json
 node codex/skills/codexus/scripts/cx.mjs runs list --json
 node codex/skills/codexus/scripts/cx.mjs cancel <run-id> --reason "<why>" --json
 node codex/skills/codexus/scripts/cx.mjs status <run-id> --json

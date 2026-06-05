@@ -269,6 +269,13 @@ process.on("SIGINT", shutdown);
   assert(update.status === "disabled", "cx update check did not honor CODEXUS_NO_UPDATE_CHECK");
   assert(update.registryChecked === false, "disabled update check should not query the registry");
   assert(update.installationMutated === false, "update check must not mutate the installed package");
+  const pluginStatus = parseJsonRun(cx, ["plugin", "status", "--json"]);
+  assert(pluginStatus.stability === "experimental", "plugin status did not report experimental stability");
+  assert(pluginStatus.pluginPackage?.present === true, "installed package did not include the Codex plugin package");
+  assert(pluginStatus.pluginPackage?.manifestValid === true, "installed plugin manifest did not validate");
+  assert(pluginStatus.installedPlugin?.status === "deferred", "plugin status should keep installed-plugin detection deferred");
+  assert(pluginStatus.authority?.alwaysOnProof === false, "plugin status must not claim always-on proof");
+  assert(pluginStatus.authority?.workflowKernelMoved === false, "plugin status must not move workflow logic into the plugin wrapper");
 
   const doctor = parseJsonRun(codexus, ["doctor", "--cwd", project, "--json", "--strict"], {
     env: { CODEX_HOME: codexHome },

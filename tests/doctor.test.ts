@@ -48,6 +48,11 @@ if (args[0] === "--version") {
     assert.equal(output.driverProbe.capabilities.supportsJsonl, true);
     assert.equal(typeof output.driverProbe.capabilities.supportsApprovalFlag, "boolean");
     assert.ok(output.checks.some((check: { id: string }) => check.id === "driver.codex-exec"));
+    const pluginPackage = output.checks.find((check: { id: string }) => check.id === "codexus.plugin_package");
+    assert.equal(pluginPackage.status, "pass");
+    assert.equal(pluginPackage.details.pluginPackage.manifestValid, true);
+    assert.equal(pluginPackage.details.installedPlugin.detectionSupported, false);
+    assert.equal(pluginPackage.details.authority.alwaysOnProof, false);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

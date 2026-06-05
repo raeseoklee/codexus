@@ -577,12 +577,12 @@
         </article>
 
         <article class="card">
-          <h3>Codex Plugin Packaging</h3>
+          <h3>Plugin Install-State Diagnostics</h3>
           <div class="tags">
-            <span class="tag gated">experimental packaging</span>
-            <span class="tag blocked">not always-on proof</span>
+            <span class="tag gated">experimental packaging exists</span>
+            <span class="tag blocked">install state deferred</span>
           </div>
-          <p>Keep the npm-installed skill as the stable adapter. Explore plugin packaging only as a discoverability/distribution layer until doctor can diagnose installed plugin state.</p>
+          <p>The packaged plugin and <code>cx plugin status</code> now validate manifest freshness. Next: diagnose installed plugin state only after Codex exposes a documented plugin install-location contract.</p>
           <span class="label">Gate</span>
           <p>Plugin install must not imply always-on supervision; observed heartbeat or notify evidence remains the authority.</p>
           <span class="label">Sources</span>

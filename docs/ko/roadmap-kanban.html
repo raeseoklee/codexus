@@ -576,12 +576,12 @@
         </article>
 
         <article class="card">
-          <h3>Codex Plugin Packaging</h3>
+          <h3>Plugin Install-State Diagnostics</h3>
           <div class="tags">
-            <span class="tag gated">experimental packaging</span>
-            <span class="tag blocked">always-on 증거 아님</span>
+            <span class="tag gated">experimental packaging 구현됨</span>
+            <span class="tag blocked">install state deferred</span>
           </div>
-          <p>npm-installed skill을 stable adapter로 유지합니다. Plugin packaging은 doctor가 installed plugin state를 진단할 수 있을 때까지 discoverability/distribution layer로만 탐색합니다.</p>
+          <p>Packaged plugin과 <code>cx plugin status</code>는 이제 manifest freshness를 검증합니다. 다음은 Codex가 문서화된 plugin install-location contract를 제공한 뒤 installed plugin state를 진단하는 것입니다.</p>
           <span class="label">Gate</span>
           <p>Plugin 설치가 always-on supervision을 암시하면 안 됩니다. 관측된 heartbeat나 notify evidence가 여전히 권한입니다.</p>
           <span class="label">근거</span>

@@ -17,6 +17,7 @@ import { buildSupplyChainEvidenceReport } from "../../supply-chain/check.ts";
 import { summarizeDeferredSelfReports } from "../../control/deferred-self-reports.ts";
 import { readCodexusVersionInfo } from "./version.ts";
 import { buildUpdateSummary } from "../../update/check.ts";
+import { buildCodexusPluginPackageReport } from "../../plugin/package.ts";
 
 interface Check {
   id: string;
@@ -151,6 +152,19 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   checks.push(commandCheck("codex.app_server_help", config.codex.command, ["app-server", "--help"], "codex app-server help ok"));
   checks.push(commandCheck("codex.features", config.codex.command, ["features", "list"], "codex features listed", "warn"));
   checks.push(await codexusSkillInstallCheck());
+  const pluginPackage = buildCodexusPluginPackageReport(cwd);
+  checks.push({
+    id: "codexus.plugin_package",
+    status: pluginPackage.pluginPackage.present
+      ? pluginPackage.pluginPackage.manifestValid ? "pass" : "fail"
+      : "warn",
+    summary: pluginPackage.pluginPackage.present
+      ? pluginPackage.pluginPackage.manifestValid
+        ? "Codexus plugin package manifest is valid; installed plugin state remains deferred"
+        : `Codexus plugin package manifest is invalid: ${pluginPackage.pluginPackage.validation.errors.join(",")}`
+      : "Codexus plugin package is not present in this installation",
+    details: pluginPackage,
+  });
   checks.push(commandCheck("git.root", "git", ["-C", cwd, "rev-parse", "--show-toplevel"], "git root detected", "warn"));
   checks.push(commandCheck("tmux.version", "tmux", ["-V"], "tmux available", "warn"));
 

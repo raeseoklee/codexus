@@ -426,16 +426,18 @@ Harness-engineering alignment adds these evidence-first tracks:
     additive `update` fields on `version`, `doctor`, and `session status`. The
     `$codexus` skill may summarize available updates inside Codex chat when
     Codexus is invoked. Remaining follow-up: explicit prerelease/`next` opt-in
-    checks and richer plugin-package freshness diagnostics. Update checks must
-    continue to be informational only, never fail the primary command, and never
-    mutate installation.
-16. Codex plugin packaging experiment: keep the npm-installed `$codexus` skill
-    as the stable adapter, and treat plugin packaging as an experimental
-    distribution/discoverability layer. A plugin can bundle the skill, assets,
-    scripts, and optional MCP/app descriptors, but it does not prove always-on
-    supervision. Do not claim always-on behavior unless a notify hook or other
-    observed heartbeat has dispatched, and do not move workflow-kernel logic
-    into plugin-local scripts.
+    checks. Update checks must continue to be informational only, never fail the
+    primary command, and never mutate installation.
+16. Codex plugin packaging experiment: first package-freshness slice implemented
+    with `cx plugin status --json`, a packaged manifest under
+    `codex/plugins/codexus`, and package-smoke verification that the npm tarball
+    includes the plugin files. The npm-installed `$codexus` skill remains the
+    stable adapter, and plugin packaging remains an experimental
+    distribution/discoverability layer. Remaining follow-up: installed-plugin
+    state diagnostics once Codex exposes a documented install-location contract.
+    Do not claim always-on behavior unless a notify hook or other observed
+    heartbeat has dispatched, and do not move workflow-kernel logic into
+    plugin-local scripts.
 17. 0.2.0 promotion readiness: the first audit surface now exists as
     `cx contract check --target 0.2.0 --json`. It identifies viable promotion
     candidates and intentionally fails under `--gate` until at least one surface

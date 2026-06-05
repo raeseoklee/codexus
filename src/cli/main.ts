@@ -34,6 +34,7 @@ import { policyCommand } from "./commands/policy.ts";
 import { lspCommand } from "./commands/lsp.ts";
 import { contractCommand } from "./commands/contract.ts";
 import { updateCommand } from "./commands/update.ts";
+import { pluginCommand } from "./commands/plugin.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -43,6 +44,7 @@ Usage:
   cx --version
   cx version [--json]
   cx update check [--json]
+  cx plugin status [--json]
   cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]
   cx setup codex-session [--scope user|project] [--always-on] [--enable-notify-hook|--disable-notify-hook] [--json]
@@ -157,6 +159,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "update") {
     await updateCommand(args);
+    return;
+  }
+  if (args.command === "plugin") {
+    await pluginCommand(args);
     return;
   }
   await migrateLegacyHarnessRoot(flagString(args.flags, "cwd") ?? process.cwd());

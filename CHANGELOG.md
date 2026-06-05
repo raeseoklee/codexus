@@ -9,6 +9,15 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added an experimental Codex plugin packaging surface:
+  `cx plugin status --json` validates the packaged plugin manifest, skill, and
+  wrapper script included under `codex/plugins/codexus`. The npm-installed
+  `$codexus` skill remains the stable adapter; installed-plugin detection and
+  always-on supervision claims stay deferred unless heartbeat evidence is
+  observed.
+
 ## 0.1.9 - 2026-06-05
 
 ### Added

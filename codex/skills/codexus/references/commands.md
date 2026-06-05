@@ -7,10 +7,12 @@ Use this reference when choosing which Codexus command to call from inside a Cod
 ```bash
 node codex/skills/codexus/scripts/cx.mjs setup codex-session --scope project --json
 node codex/skills/codexus/scripts/cx.mjs doctor --json
+node codex/skills/codexus/scripts/cx.mjs plugin status --json
 ```
 
 Use for environment readiness, Codex auth, driver capabilities, and Codexus
-state root checks.
+state root checks. `plugin status` validates the experimental Codex plugin
+package included with Codexus, but it does not prove always-on supervision.
 
 `setup codex-session` installs or refreshes only the Codexus marker block in
 `AGENTS.md` and initializes `.codexus/session/state.json`.

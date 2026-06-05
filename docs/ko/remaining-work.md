@@ -401,15 +401,17 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     npm `latest` 조회, `CODEXUS_NO_UPDATE_CHECK=1`, CI/primary-command cache-only
     summary, 그리고 `version`, `doctor`, `session status`의 additive `update` field로
     구현됐습니다. `$codexus` skill은 Codex 안에서 Codexus가 호출될 때 사용 가능한 update를
-    advisory로 요약할 수 있습니다. 남은 후속 작업은 prerelease/`next` 명시적 opt-in check와
-    plugin package freshness diagnostic 보강입니다. Update check는 계속 informational
-    only여야 하며, primary command 실패나 설치 변경으로 이어지면 안 됩니다.
-16. Codex plugin packaging experiment: npm-installed `$codexus` skill은 stable
-    adapter로 유지하고, plugin packaging은 experimental distribution/discoverability
-    layer로 다룹니다. Plugin은 skill, asset, script, optional MCP/app descriptor를 묶을 수
-    있지만 always-on supervision을 증명하지는 않습니다. Notify hook 또는 다른 관측
-    heartbeat가 실제로 dispatch되지 않았다면 always-on 동작을 주장하지 않고,
-    workflow-kernel logic을 plugin-local script로 옮기지 않습니다.
+    advisory로 요약할 수 있습니다. 남은 후속 작업은 prerelease/`next` 명시적 opt-in
+    check입니다. Update check는 계속 informational only여야 하며, primary command 실패나
+    설치 변경으로 이어지면 안 됩니다.
+16. Codex plugin packaging experiment: 첫 package-freshness slice가
+    `cx plugin status --json`, `codex/plugins/codexus` 아래 packaged manifest, 그리고 npm
+    tarball에 plugin file이 포함되는지 확인하는 package-smoke 검증으로 구현됐습니다.
+    npm-installed `$codexus` skill은 stable adapter로 유지하고, plugin packaging은 계속
+    experimental distribution/discoverability layer로 다룹니다. 남은 후속 작업은 Codex가
+    문서화된 install-location contract를 제공한 뒤 installed-plugin 상태를 진단하는
+    것입니다. Notify hook 또는 다른 관측 heartbeat가 실제로 dispatch되지 않았다면 always-on
+    동작을 주장하지 않고, workflow-kernel logic을 plugin-local script로 옮기지 않습니다.
 17. 0.2.0 promotion readiness: 첫 audit surface가
     `cx contract check --target 0.2.0 --json`으로 구현되었습니다. 이 명령은 viable
     promotion candidate를 식별하고, 최소 하나의 surface가 실제로 stable이 되어

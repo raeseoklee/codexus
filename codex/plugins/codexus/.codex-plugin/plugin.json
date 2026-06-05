@@ -1,0 +1,36 @@
+{
+  "name": "codexus",
+  "version": "0.1.9",
+  "description": "Codexus Codex plugin packaging experiment.",
+  "author": {
+    "name": "Codexus"
+  },
+  "homepage": "https://github.com/raeseoklee/codexus",
+  "repository": "https://github.com/raeseoklee/codexus",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "codexus",
+    "agent-harness",
+    "verification"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codexus",
+    "shortDescription": "Run Codexus harness checks from Codex.",
+    "longDescription": "Codexus provides Codex-native access to verification, ledger, session, update, and package diagnostics without claiming always-on supervision from plugin installation alone.",
+    "developerName": "Codexus",
+    "category": "Productivity",
+    "capabilities": [
+      "Command",
+      "Local"
+    ],
+    "websiteURL": "https://github.com/raeseoklee/codexus",
+    "defaultPrompt": [
+      "Check Codexus status",
+      "Run a Codexus session checkpoint",
+      "Verify the current workspace with Codexus"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

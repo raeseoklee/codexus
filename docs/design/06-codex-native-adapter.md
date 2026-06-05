@@ -94,11 +94,13 @@ Codexus currently installs as a Codex skill adapter because the first product
 need is a thin, explicit command surface inside the active Codex conversation.
 That remains the primary path.
 
-A Codex plugin package can still be useful later, but it should not be treated
-as proof of always-on behavior by itself. Based on the local Codex plugin shape,
-a plugin can bundle skills, scripts, assets, MCP/app descriptors, and
-marketplace metadata. That packaging improves distribution and discoverability,
-but it does not replace the existing always-on evidence sources:
+The first Codex plugin package now ships as an experimental packaging surface
+under `codex/plugins/codexus`, and `cx plugin status --json` validates the
+packaged manifest, skill, and wrapper script. It must not be treated as proof of
+always-on behavior by itself. Based on the local Codex plugin shape, a plugin
+can bundle skills, scripts, assets, MCP/app descriptors, and marketplace
+metadata. That packaging improves distribution and discoverability, but it does
+not replace the existing always-on evidence sources:
 
 - AGENTS overlay guidance;
 - trust-gated notify-hook heartbeat;
@@ -108,10 +110,11 @@ but it does not replace the existing always-on evidence sources:
 Recommended direction:
 
 1. Keep the npm-installed `$codexus` skill as the stable adapter.
-2. Add a plugin-packaging experiment only after the update-notification slice
-   lands, so plugin users can also see stale package/adapter status.
-3. Treat plugin packaging as `stability: experimental` until installed-plugin
-   status can be diagnosed by `cx doctor --json`.
+2. Keep `cx plugin status --json` experimental and report-only. It validates the
+   packaged plugin files but does not install, mutate, or infer runtime
+   attachment.
+3. Keep installed-plugin status deferred until `cx doctor --json` can diagnose a
+   documented Codex plugin install location without guessing.
 4. Do not move workflow-kernel logic into plugin-local scripts.
 5. Do not claim plugin installation creates always-on supervision unless a
    notify hook or other observed heartbeat has actually dispatched.
