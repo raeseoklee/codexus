@@ -68,16 +68,15 @@ with the command above.
 Codexus should surface update availability automatically when it is already
 being used, but it must not turn normal commands into noisy network probes.
 
-Planned first slice:
+Implemented first slice:
 
-- add `cx update check --json` as an explicit command;
-- query the npm `latest` dist-tag only through a bounded TTL cache;
-- expose an additive `update` summary on high-signal commands such as
-  `version --json`, `doctor --json`, and `session status --json`;
-- let the `$codexus` skill summarize that update field inside the active Codex
-  chat when the user invokes Codexus from a session;
-- never fail the primary command because the update check could not reach the
-  registry.
+- `cx update check --json` is an explicit experimental command;
+- npm `latest` dist-tag lookup is bounded by a TTL cache and short timeout;
+- `version --json`, `doctor --json`, and `session status --json` expose an
+  additive cache-only `update` summary without querying the registry;
+- the `$codexus` skill can summarize `update.status: "available"` inside the
+  active Codex chat when Codexus is invoked from a session;
+- primary commands do not fail when the update check cannot reach the registry.
 
 Required gates:
 

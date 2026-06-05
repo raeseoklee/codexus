@@ -81,6 +81,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported contract command${target ? `: ${target}` : ""}.`;
     case "unsupported_contract_target":
       return `Unsupported contract target${target ? `: ${target}` : ""}.`;
+    case "unsupported_update_command":
+      return `Unsupported update command${target ? `: ${target}` : ""}.`;
     case "unsupported_wiki_command":
       return `Unsupported wiki command${target ? `: ${target}` : ""}.`;
     case "unsupported_wiki_build_mode":
@@ -331,6 +333,8 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Run `cx contract check --target 0.2.0 --json` or add `--gate` to fail until a stable promotion is ready.";
     case "unsupported_contract_target":
       return "Only `--target 0.2.0` is supported by the current contract readiness audit.";
+    case "unsupported_update_command":
+      return "Run `cx update check --json`.";
     case "unsupported_wiki_command":
       return "Run `cx wiki map --json`, `cx wiki build --mode deterministic --json`, `cx wiki check --gate --json`, or `cx wiki context --topic <name> --json`.";
     case "unsupported_wiki_build_mode":

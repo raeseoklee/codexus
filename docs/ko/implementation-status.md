@@ -10,7 +10,7 @@
 
 Public bins: `cx`, `codexus`
 
-현재 stable baseline: `0.1.7`
+현재 stable baseline: `0.1.8`
 
 Npm package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. 기존 `chx`
 alias는 공개 npm bin으로 배포하지 않습니다.
@@ -21,6 +21,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Source development entrypoint: `node src/cli/main.ts`
 - `doctor`, `init`, `run`, `cancel`, `plan`, `runs list`, `status`, `events tail`, `report`, `resume`, `verify`, `replay`, `replay parity`
 - `locks list/inspect/clear`, `schema check/engine/validate/validate-run`, `lsp status/check`, `release check`, `contract check`, `app-server status/roundtrip/experiment`
+- `update check`
 - `app instance profile list/status/logs/start/stop`
 - `slop check`
 - `memory add/search/list/review/curate/prune`
@@ -80,6 +81,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   app-server attachment, automatic injection, plugin always-on claim 같은 action
   surface는 계속 deferred로 둡니다. `--gate`는 audit된 candidate 중 최소 하나가
   stable로 승격되고 `docs/json-contract.md`에 frozen될 때까지 의도적으로 실패합니다.
+- `cx update check --json`은 bounded TTL cache를 통해 npm `latest` dist-tag에서
+  experimental update availability fact를 보고합니다.
+  `CODEXUS_NO_UPDATE_CHECK=1`은 registry 접근을 비활성화하고, CI/cache-only path는
+  network lookup을 피합니다. 이 명령은 설치를 변경하지 않고 completion,
+  verification, release authority가 되지 않습니다.
+- `version --json`, `doctor --json`, `session status --json`은 additive
+  cache-only experimental `update` summary를 포함합니다. 이 primary command들은
+  registry를 조회하지 않고 update lookup이 불가능해도 실패하지 않습니다.
 - npm tarball은 `dist`, `schemas`, Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, top-level release metadata만 싣고 source, tests, docs,
@@ -277,6 +286,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   schema validation으로 커버됩니다.
 - CLI version reporting은 source CLI test와 installed package smoke test로
   커버됩니다.
+- Update availability는 registry-derived availability, `CODEXUS_NO_UPDATE_CHECK=1`,
+  cache-only primary command summary, unsupported update subcommand, installed
+  package `cx update check` smoke test로 커버됩니다.
 - Repository graph foundation 테스트는 `cx repo graph build/check`, repo-graph schema
   validation, scope 밖 변경을 무시하는 scoped freshness, scope 안 변경 stale detection,
   dangling edge failure, volatile gate output을 제외하는 stable graph id를 커버합니다.

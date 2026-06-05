@@ -24,6 +24,8 @@ import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
 import { completeSubagentArtifact, createSubagentLaunchContract, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
 import { summarizeDeferredSelfReports } from "../../control/deferred-self-reports.ts";
+import { readCodexusVersionInfo } from "./version.ts";
+import { buildUpdateSummary } from "../../update/check.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 
 function statePath(cwd: string): string {
@@ -58,6 +60,8 @@ async function sessionStatusProjection(cwd: string) {
     stability: "experimental" as const,
     deferredSelfReports: summarizeDeferredSelfReports(cwd),
   };
+  const version = readCodexusVersionInfo();
+  const update = buildUpdateSummary({ currentVersion: version.version, cacheOnly: true });
   return {
     schemaVersion: 1,
     stability: "stable" as const,
@@ -71,6 +75,7 @@ async function sessionStatusProjection(cwd: string) {
     loop,
     subagents,
     controlPlane,
+    update,
     verifyDetection: detection,
     overlays: {
       project: await overlayStatus(cwd, "project"),

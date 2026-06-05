@@ -397,12 +397,13 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     command를 통한 TypeScript diagnostics 용도로 구현됐습니다. Protocol-server
     lifecycle, workspace trust, output bounding, gate behavior가 명시되기 전까지 자동
     project LSP 적용은 detect-only로 유지합니다.
-15. Update availability notification: `cx update check --json`과 `version`,
-    `doctor`, `session status`의 cached additive `update` summary를 추가합니다.
-    Registry check는 TTL-bounded여야 하고, `CODEXUS_NO_UPDATE_CHECK=1`로 비활성화할 수
-    있어야 하며, CI에서는 cache-only 또는 off로 둡니다. 이 정보는 informational only이고,
-    `$codexus` skill은 Codex 안에서 Codexus가 호출될 때 update availability를 요약할 수
-    있지만 primary command 실패나 설치 변경으로 이어지면 안 됩니다.
+15. Update availability notification: 첫 slice는 `cx update check --json`, TTL-bounded
+    npm `latest` 조회, `CODEXUS_NO_UPDATE_CHECK=1`, CI/primary-command cache-only
+    summary, 그리고 `version`, `doctor`, `session status`의 additive `update` field로
+    구현됐습니다. `$codexus` skill은 Codex 안에서 Codexus가 호출될 때 사용 가능한 update를
+    advisory로 요약할 수 있습니다. 남은 후속 작업은 prerelease/`next` 명시적 opt-in check와
+    plugin package freshness diagnostic 보강입니다. Update check는 계속 informational
+    only여야 하며, primary command 실패나 설치 변경으로 이어지면 안 됩니다.
 16. Codex plugin packaging experiment: npm-installed `$codexus` skill은 stable
     adapter로 유지하고, plugin packaging은 experimental distribution/discoverability
     layer로 다룹니다. Plugin은 skill, asset, script, optional MCP/app descriptor를 묶을 수

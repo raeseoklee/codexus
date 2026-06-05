@@ -9,6 +9,17 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added experimental update availability checks: `cx update check --json`
+  reads the npm `latest` dist-tag through a bounded TTL cache, supports
+  `CODEXUS_NO_UPDATE_CHECK=1`, and reports only advisory update facts. The
+  command never mutates the installation, never auto-installs, and never becomes
+  completion or verification authority.
+- Added cache-only experimental `update` summaries to `version --json`,
+  `doctor --json`, and `session status --json`. These primary commands do not
+  query the registry, and update lookup failure cannot fail the primary command.
+
 ## 0.1.8 - 2026-06-04
 
 ### Added

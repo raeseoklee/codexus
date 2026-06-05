@@ -9,6 +9,17 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- Experimental update availability check를 추가했습니다. `cx update check
+  --json`은 bounded TTL cache를 통해 npm `latest` dist-tag를 읽고,
+  `CODEXUS_NO_UPDATE_CHECK=1`을 지원하며, advisory update fact만 보고합니다. 이
+  명령은 설치를 변경하지 않고, 자동 설치를 수행하지 않으며, completion 또는
+  verification authority가 되지 않습니다.
+- `version --json`, `doctor --json`, `session status --json`에 cache-only
+  experimental `update` summary를 추가했습니다. 이 primary command들은 registry를
+  조회하지 않으며, update lookup 실패가 primary command 실패로 이어지지 않습니다.
+
 ## 0.1.8 - 2026-06-04
 
 ### Added

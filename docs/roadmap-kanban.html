@@ -493,13 +493,14 @@
             <span class="tag evidence">cached registry fact</span>
             <span class="tag advisory">informational</span>
           </div>
-          <p>Tell users when a newer Codexus package exists while keeping normal commands fast, non-failing, and quiet when registry access is unavailable.</p>
+          <p>The first slice tells users when a newer Codexus package exists while keeping normal commands fast, non-failing, and quiet when registry access is unavailable.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Add <code>cx update check --json</code>.</li>
-            <li>Add a TTL-cached <code>update</code> summary to <code>version</code>, <code>doctor</code>, and <code>session status</code>.</li>
-            <li>Support <code>CODEXUS_NO_UPDATE_CHECK=1</code> and CI cache-only/off behavior.</li>
-            <li>Never mutate installation or fail the primary command because update lookup failed.</li>
+            <li>Done: <code>cx update check --json</code> reports advisory update availability.</li>
+            <li>Done: cache-only <code>update</code> summaries are additive on <code>version</code>, <code>doctor</code>, and <code>session status</code>.</li>
+            <li>Done: <code>CODEXUS_NO_UPDATE_CHECK=1</code> and CI/cache-only behavior prevent noisy registry probes.</li>
+            <li>Next: prerelease/<code>next</code> opt-in checks and plugin-package freshness diagnostics.</li>
+            <li>Update lookup never mutates installation or fails the primary command.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/06-codex-native-adapter.md#update-notifications">Codex-native adapter update notifications</a></p>

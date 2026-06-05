@@ -256,12 +256,27 @@ process.on("SIGINT", shutdown);
   assert(installedVersion.stability === "stable", "cx version --json did not report stable JSON stability");
   assert(installedVersion.version === pkg.version, "cx version --json did not report package version");
   assert(installedVersion.name === "codexus", "cx version --json did not report package name");
+  assert(installedVersion.update?.stability === "experimental", "cx version --json did not include experimental update summary");
+  assert(installedVersion.update?.registryChecked === false, "cx version --json should not query the registry");
+
+  const update = parseJsonRun(cx, ["update", "check", "--json"], {
+    env: {
+      CODEXUS_NO_UPDATE_CHECK: "1",
+      CODEXUS_UPDATE_CACHE_DIR: join(workspace, "update-cache"),
+    },
+  });
+  assert(update.stability === "experimental", "cx update check did not report experimental stability");
+  assert(update.status === "disabled", "cx update check did not honor CODEXUS_NO_UPDATE_CHECK");
+  assert(update.registryChecked === false, "disabled update check should not query the registry");
+  assert(update.installationMutated === false, "update check must not mutate the installed package");
 
   const doctor = parseJsonRun(codexus, ["doctor", "--cwd", project, "--json", "--strict"], {
     env: { CODEX_HOME: codexHome },
   });
   assert(doctor.stability === "stable", "doctor did not report stable JSON stability");
   assert(doctor.ok === true, "doctor --strict did not pass with fake codex fixture");
+  assert(doctor.update?.stability === "experimental", "doctor did not include experimental update summary");
+  assert(doctor.update?.registryChecked === false, "doctor should not query the update registry");
 
   const schema = parseJsonRun(codexus, ["schema", "check", "--json"]);
   assert(schema.stability === "stable", "schema check did not report stable JSON stability");

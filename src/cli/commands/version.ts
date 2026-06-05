@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { findCodexusPackageRoot } from "../../util/package-root.ts";
 import { flagBool, type ParsedArgs } from "../args.ts";
+import { buildUpdateSummary, type UpdateSummary } from "../../update/check.ts";
 
 export interface CodexusVersionInfo {
   schemaVersion: 1;
@@ -10,6 +11,7 @@ export interface CodexusVersionInfo {
   version: string;
   node: string;
   packageRoot: string;
+  update?: UpdateSummary;
 }
 
 function isPackageMetadata(value: unknown): value is { name: string; version: string } {
@@ -37,7 +39,10 @@ export function readCodexusVersionInfo(): CodexusVersionInfo {
 export async function versionCommand(args: ParsedArgs, options: { short?: boolean } = {}): Promise<void> {
   const info = readCodexusVersionInfo();
   if (flagBool(args.flags, "json")) {
-    console.log(JSON.stringify(info, null, 2));
+    console.log(JSON.stringify({
+      ...info,
+      update: buildUpdateSummary({ currentVersion: info.version, cacheOnly: true }),
+    }, null, 2));
     return;
   }
   if (options.short) {

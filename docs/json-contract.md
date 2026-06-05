@@ -41,12 +41,14 @@ schema version; additive fields do not require a bump.
 For supported commands, these top-level field names are frozen through `0.1.x`:
 
 - Common supported JSON payloads: `schemaVersion`, `stability`.
+- Version output: `schemaVersion`, `stability`, `name`, `version`,
+  `packageRoot`, `node`, `update`.
 - Run outputs: `schemaVersion`, `stability`, `runId`, `outcome`,
   `statePath`, `reportPath`, `state`.
 - Run status/report outputs: `state`, `paths`, `verification`, `experience`,
   `eventTail`.
 - Doctor output: `stability`, `ok`, `strict`, `checks`, `warnings`,
-  `configFiles`, `driverProbe`.
+  `configFiles`, `driverProbe`, `update`.
 - Schema output: `ok`, `schemas`, `appServerFixture`, and for
   `schema engine`, `schemaVersion`, `stability`, `activeEngine`,
   `fullJsonSchemaEngine`, `migrationFixtureBoundary`.
@@ -58,7 +60,7 @@ For supported commands, these top-level field names are frozen through `0.1.x`:
 - Session status output: `schemaVersion`, `stability`, `status`, `cwd`,
   `paths`, `evidence`, `changeEvidence`, `riskSummary`, `decisions`, `loop`,
   `subagents`, `verifyDetection`, `overlays`, `notifyHook`, `notifyDispatch`,
-  `migration`, `state`.
+  `migration`, `state`, `update`.
 - Session HUD output: `schemaVersion`, `stability`, `cwd`, `status`,
   `evidence`, `changeEvidence`, `riskSummary`, `decisions`, `loop`,
   `notifyDispatch`, `capabilities`, `counts`, `lastDecision`,
@@ -77,6 +79,9 @@ in `0.1.x`.
   statusline integration, worker launch, release-integrity checks, and
   contract-promotion readiness checks.
 - The membership of advisory arrays such as `heuristicClaims`.
+- The nested content of the additive `update` summary, which is an
+  informational experimental update-availability report and never a release,
+  verification, installation, or completion authority.
 - Human-readable prose fields such as `summary`, `reason`, `recommendation`,
   and `hint`, except that they must stay bounded and non-secret.
 

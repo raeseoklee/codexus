@@ -15,6 +15,8 @@ import { overlayStatus, readSessionStateWithMigration, refreshSessionState, sess
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 import { buildSupplyChainEvidenceReport } from "../../supply-chain/check.ts";
 import { summarizeDeferredSelfReports } from "../../control/deferred-self-reports.ts";
+import { readCodexusVersionInfo } from "./version.ts";
+import { buildUpdateSummary } from "../../update/check.ts";
 
 interface Check {
   id: string;
@@ -277,7 +279,9 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   });
 
   const ok = checks.every((check) => check.status !== "fail");
-  const result = { stability: "stable" as const, ok, strict, checks, warnings, configFiles: filesRead, driverProbe };
+  const version = readCodexusVersionInfo();
+  const update = buildUpdateSummary({ currentVersion: version.version, cacheOnly: true });
+  const result = { stability: "stable" as const, ok, strict, checks, warnings, configFiles: filesRead, driverProbe, update };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
     process.exitCode = strict && !ok ? 1 : 0;

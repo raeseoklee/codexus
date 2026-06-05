@@ -10,7 +10,7 @@ Target CLI: `cx`
 
 Public bins: `cx`, `codexus`
 
-Current stable baseline: `0.1.7`
+Current stable baseline: `0.1.8`
 
 The npm package exposes `cx` and `codexus` as canonical bins. The historical
 `chx` alias is not published.
@@ -45,6 +45,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `lsp check`
   - `release check`
   - `contract check`
+  - `update check`
   - `app-server status`
   - `app-server roundtrip`
   - `app-server experiment`
@@ -161,6 +162,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   Desktop app-server attachment, automatic injection, and plugin always-on
   claims deferred. `--gate` intentionally fails until at least one audited
   candidate is promoted to stable and frozen in `docs/json-contract.md`.
+- `cx update check --json` reports experimental update availability facts from
+  the npm `latest` dist-tag through a bounded TTL cache. `CODEXUS_NO_UPDATE_CHECK=1`
+  disables registry access, CI/cache-only paths avoid network lookup, and the
+  command never mutates installation or becomes completion, verification, or
+  release authority.
+- `version --json`, `doctor --json`, and `session status --json` include an
+  additive cache-only experimental `update` summary. These primary commands do
+  not query the registry and cannot fail because update lookup is unavailable.
 - The npm tarball ships `dist`, `schemas`, the Codex skill adapter,
   `fixtures/app-server/schema.fixture.json`, `install.sh`, package installer
   scripts, and top-level release metadata. It excludes source, tests, docs,
@@ -463,6 +472,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   tests and session-state schema validation.
 - CLI version reporting is covered by source CLI tests and installed package
   smoke tests.
+- Update availability is covered by CLI tests for registry-derived availability,
+  `CODEXUS_NO_UPDATE_CHECK=1`, cache-only primary command summaries, unsupported
+  update subcommands, and installed package smoke for `cx update check`.
 
 ## Acceptance Coverage
 
