@@ -9,6 +9,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.10 - 2026-06-05
+
 ### Added
 
 - Experimental Codex plugin packaging surface를 추가했습니다:
