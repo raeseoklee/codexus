@@ -9,6 +9,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.9 - 2026-06-05
+
 ### Added
 
 - Experimental update availability check를 추가했습니다. `cx update check

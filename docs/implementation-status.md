@@ -10,7 +10,7 @@ Target CLI: `cx`
 
 Public bins: `cx`, `codexus`
 
-Current stable baseline: `0.1.8`
+Current stable baseline: `0.1.9`
 
 The npm package exposes `cx` and `codexus` as canonical bins. The historical
 `chx` alias is not published.
