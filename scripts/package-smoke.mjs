@@ -266,9 +266,23 @@ process.on("SIGINT", shutdown);
     },
   });
   assert(update.stability === "experimental", "cx update check did not report experimental stability");
+  assert(update.channel === "stable", "cx update check did not default to the stable update channel");
+  assert(update.distTag === "latest", "cx update check did not default to the latest dist-tag");
   assert(update.status === "disabled", "cx update check did not honor CODEXUS_NO_UPDATE_CHECK");
   assert(update.registryChecked === false, "disabled update check should not query the registry");
   assert(update.installationMutated === false, "update check must not mutate the installed package");
+  const nextUpdate = parseJsonRun(cx, ["update", "check", "--channel", "next", "--json"], {
+    env: {
+      CODEXUS_NO_UPDATE_CHECK: "1",
+      CODEXUS_UPDATE_CACHE_DIR: join(workspace, "update-cache-next"),
+    },
+  });
+  assert(nextUpdate.stability === "experimental", "next update check did not report experimental stability");
+  assert(nextUpdate.channel === "next", "next update check did not preserve explicit channel opt-in");
+  assert(nextUpdate.distTag === "next", "next update check did not use the next dist-tag");
+  assert(nextUpdate.status === "disabled", "next update check did not honor CODEXUS_NO_UPDATE_CHECK");
+  assert(nextUpdate.registryChecked === false, "disabled next update check should not query the registry");
+  assert(nextUpdate.installationMutated === false, "next update check must not mutate the installed package");
   const pluginStatus = parseJsonRun(cx, ["plugin", "status", "--json"]);
   assert(pluginStatus.stability === "experimental", "plugin status did not report experimental stability");
   assert(pluginStatus.pluginPackage?.present === true, "installed package did not include the Codex plugin package");

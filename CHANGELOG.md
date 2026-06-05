@@ -9,6 +9,14 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added explicit prerelease update opt-in:
+  `cx update check --channel next --json` reads the npm `next` dist-tag through
+  a channel-specific bounded cache. Stable `latest` checks remain the default;
+  prerelease checks are advisory only, never mutate installation, and never run
+  from primary cache-only commands unless explicitly requested.
+
 ## 0.1.10 - 2026-06-05
 
 ### Added

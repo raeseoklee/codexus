@@ -43,7 +43,7 @@ function helpText(): string {
 Usage:
   cx --version
   cx version [--json]
-  cx update check [--json]
+  cx update check [--channel stable|next] [--json]
   cx plugin status [--json]
   cx doctor [--json] [--strict]
   cx init [--with-docs] [--json]

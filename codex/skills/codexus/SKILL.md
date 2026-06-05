@@ -34,6 +34,7 @@ node codex/skills/codexus/scripts/cx.mjs session checkpoint "before risky change
 node codex/skills/codexus/scripts/cx.mjs session verify --verify "npm test" --json
 node codex/skills/codexus/scripts/cx.mjs doctor --json
 node codex/skills/codexus/scripts/cx.mjs update check --json
+node codex/skills/codexus/scripts/cx.mjs update check --channel next --json
 node codex/skills/codexus/scripts/cx.mjs plugin status --json
 node codex/skills/codexus/scripts/cx.mjs runs list --json
 node codex/skills/codexus/scripts/cx.mjs cancel <run-id> --reason "<why>" --json
@@ -71,7 +72,7 @@ node codex/skills/codexus/scripts/cx.mjs run --driver codex-exec --json "<bounde
 2. If using Codexus, run the smallest command that answers the need.
 3. Read the JSON output and summarize the result in the Codex conversation.
 4. If a command creates or updates a run ledger, mention the run id and relevant artifact path.
-5. If an output includes `update.status: "available"`, mention the available version as advisory only; do not install or mutate Codexus unless the user explicitly asks.
+5. If an output includes `update.status: "available"`, mention the available version as advisory only; do not install or mutate Codexus unless the user explicitly asks. Use `update check --channel next` only when the user asks about prerelease/next builds.
 6. If verification fails, keep working in the current session unless the user explicitly wants a supervised repair run.
 
 ## References

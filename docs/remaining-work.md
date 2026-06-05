@@ -422,12 +422,13 @@ Harness-engineering alignment adds these evidence-first tracks:
     workspace trust, output bounding, and gate behavior are explicit.
 15. Update availability notifications: first slice implemented with
     `cx update check --json`, TTL-bounded npm `latest` lookup,
+    explicit `cx update check --channel next --json` prerelease opt-in,
     `CODEXUS_NO_UPDATE_CHECK=1`, cache-only CI/primary-command summaries, and
     additive `update` fields on `version`, `doctor`, and `session status`. The
     `$codexus` skill may summarize available updates inside Codex chat when
-    Codexus is invoked. Remaining follow-up: explicit prerelease/`next` opt-in
-    checks. Update checks must continue to be informational only, never fail the
-    primary command, and never mutate installation.
+    Codexus is invoked. Remaining follow-up: richer notification UX only; update
+    checks must continue to be informational, never fail the primary command,
+    and never mutate installation.
 16. Codex plugin packaging experiment: first package-freshness slice implemented
     with `cx plugin status --json`, a packaged manifest under
     `codex/plugins/codexus`, and package-smoke verification that the npm tarball

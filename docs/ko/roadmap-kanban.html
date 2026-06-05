@@ -496,9 +496,10 @@
           <span class="label">완료 조건</span>
           <ul>
             <li>완료: <code>cx update check --json</code>은 advisory update availability를 보고합니다.</li>
+            <li>완료: 명시적 <code>cx update check --channel next --json</code>은 별도 cache로 prerelease fact를 읽습니다.</li>
             <li>완료: cache-only <code>update</code> summary가 <code>version</code>, <code>doctor</code>, <code>session status</code>에 additive로 붙습니다.</li>
             <li>완료: <code>CODEXUS_NO_UPDATE_CHECK=1</code>과 CI/cache-only 동작이 noisy registry probe를 막습니다.</li>
-            <li>다음: prerelease/<code>next</code> opt-in check와 plugin-package freshness diagnostic.</li>
+            <li>다음: richer notification UX만 남고, plugin-package freshness diagnostic은 별도 항목에서 추적합니다.</li>
             <li>Update lookup은 설치를 변경하지 않고 primary command를 실패시키지 않습니다.</li>
           </ul>
           <span class="label">근거</span>

@@ -82,10 +82,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   surface는 계속 deferred로 둡니다. `--gate`는 audit된 candidate 중 최소 하나가
   stable로 승격되고 `docs/json-contract.md`에 frozen될 때까지 의도적으로 실패합니다.
 - `cx update check --json`은 bounded TTL cache를 통해 npm `latest` dist-tag에서
-  experimental update availability fact를 보고합니다.
-  `CODEXUS_NO_UPDATE_CHECK=1`은 registry 접근을 비활성화하고, CI/cache-only path는
-  network lookup을 피합니다. 이 명령은 설치를 변경하지 않고 completion,
-  verification, release authority가 되지 않습니다.
+  experimental update availability fact를 보고합니다. npm `next` prerelease fact를
+  위한 명시적 opt-in 경로는 `cx update check --channel next --json`이며, 별도 cache
+  file을 사용합니다. `CODEXUS_NO_UPDATE_CHECK=1`은 registry 접근을 비활성화하고,
+  CI/cache-only path는 network lookup을 피합니다. 이 명령은 설치를 변경하지 않고
+  completion, verification, release authority가 되지 않습니다.
 - `version --json`, `doctor --json`, `session status --json`은 additive
   cache-only experimental `update` summary를 포함합니다. 이 primary command들은
   registry를 조회하지 않고 update lookup이 불가능해도 실패하지 않습니다.

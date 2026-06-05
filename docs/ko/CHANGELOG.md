@@ -9,6 +9,14 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- 명시적 prerelease update opt-in을 추가했습니다:
+  `cx update check --channel next --json`은 channel별 bounded cache를 통해 npm
+  `next` dist-tag를 읽습니다. Stable `latest` check는 계속 기본값이며,
+  prerelease check는 advisory only이고 설치를 변경하지 않으며, 명시적으로 요청하지 않는 한
+  primary cache-only command에서 실행되지 않습니다.
+
 ## 0.1.10 - 2026-06-05
 
 ### Added

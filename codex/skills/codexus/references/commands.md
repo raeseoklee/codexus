@@ -17,6 +17,18 @@ package included with Codexus, but it does not prove always-on supervision.
 `setup codex-session` installs or refreshes only the Codexus marker block in
 `AGENTS.md` and initializes `.codexus/session/state.json`.
 
+## Updates
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs update check --json
+node codex/skills/codexus/scripts/cx.mjs update check --channel next --json
+```
+
+Use stable update checks for normal advisory availability facts. Use the
+`next` channel only when the user explicitly asks about prerelease builds. Both
+commands are informational: they do not mutate installation and cannot become
+completion, verification, or release authority.
+
 ## Current Session
 
 ```bash

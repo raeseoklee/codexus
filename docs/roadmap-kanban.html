@@ -497,9 +497,10 @@
           <span class="label">Acceptance</span>
           <ul>
             <li>Done: <code>cx update check --json</code> reports advisory update availability.</li>
+            <li>Done: explicit <code>cx update check --channel next --json</code> reads prerelease facts through a separate cache.</li>
             <li>Done: cache-only <code>update</code> summaries are additive on <code>version</code>, <code>doctor</code>, and <code>session status</code>.</li>
             <li>Done: <code>CODEXUS_NO_UPDATE_CHECK=1</code> and CI/cache-only behavior prevent noisy registry probes.</li>
-            <li>Next: prerelease/<code>next</code> opt-in checks and plugin-package freshness diagnostics.</li>
+            <li>Next: richer notification UX only; plugin-package freshness diagnostics are tracked separately.</li>
             <li>Update lookup never mutates installation or fails the primary command.</li>
           </ul>
           <span class="label">Sources</span>

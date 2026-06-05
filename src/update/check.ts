@@ -5,11 +5,15 @@ import { userHarnessRoot } from "../ledger/paths.ts";
 
 export type UpdateStatus = "current" | "available" | "unknown" | "disabled";
 export type UpdateSource = "registry" | "cache" | "none" | "disabled";
+export type UpdateChannel = "stable" | "next";
+export type UpdateDistTag = "latest" | "next";
 
 export interface UpdateSummary {
   schemaVersion: 1;
   stability: "experimental";
   packageName: "codexus";
+  channel: UpdateChannel;
+  distTag: UpdateDistTag;
   currentVersion: string;
   latestVersion: string | null;
   updateAvailable: boolean | null;
@@ -32,6 +36,8 @@ export interface UpdateSummary {
 interface UpdateCache {
   schemaVersion: 1;
   packageName: "codexus";
+  channel?: UpdateChannel;
+  distTag?: UpdateDistTag;
   latestVersion: string | null;
   checkedAt: string;
   registryError: string | null;
@@ -39,6 +45,7 @@ interface UpdateCache {
 
 export interface UpdateCheckOptions {
   currentVersion: string;
+  channel?: UpdateChannel;
   now?: Date;
   ttlMs?: number;
   cacheOnly?: boolean;
@@ -46,11 +53,26 @@ export interface UpdateCheckOptions {
 
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
-function cachePath(): string {
-  if (process.env.CODEXUS_UPDATE_CACHE_DIR) return join(process.env.CODEXUS_UPDATE_CACHE_DIR, "latest.json");
-  if (process.env.CODEXUS_HOME) return join(process.env.CODEXUS_HOME, "update", "latest.json");
-  if (process.env.XDG_CACHE_HOME) return join(process.env.XDG_CACHE_HOME, "codexus", "update", "latest.json");
-  return join(userHarnessRoot(), "update", "latest.json");
+export function normalizeUpdateChannel(value: string | undefined): UpdateChannel | null {
+  if (!value || value === "stable" || value === "latest") return "stable";
+  if (value === "next" || value === "prerelease") return "next";
+  return null;
+}
+
+function distTagForChannel(channel: UpdateChannel): UpdateDistTag {
+  return channel === "next" ? "next" : "latest";
+}
+
+function cacheFileName(channel: UpdateChannel): string {
+  return channel === "next" ? "next.json" : "latest.json";
+}
+
+function cachePath(channel: UpdateChannel): string {
+  const fileName = cacheFileName(channel);
+  if (process.env.CODEXUS_UPDATE_CACHE_DIR) return join(process.env.CODEXUS_UPDATE_CACHE_DIR, fileName);
+  if (process.env.CODEXUS_HOME) return join(process.env.CODEXUS_HOME, "update", fileName);
+  if (process.env.XDG_CACHE_HOME) return join(process.env.XDG_CACHE_HOME, "codexus", "update", fileName);
+  return join(userHarnessRoot(), "update", fileName);
 }
 
 function parsePositiveInt(value: string | undefined, fallback: number): number {
@@ -72,7 +94,7 @@ function compareVersions(left: string, right: string): number {
   return 0;
 }
 
-function readCache(path: string): { cache: UpdateCache | null; error: UpdateSummary["error"] } {
+function readCache(path: string, expectedChannel: UpdateChannel): { cache: UpdateCache | null; error: UpdateSummary["error"] } {
   if (!existsSync(path)) return { cache: null, error: null };
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8")) as unknown;
@@ -84,11 +106,26 @@ function readCache(path: string): { cache: UpdateCache | null; error: UpdateSumm
       && (parsed as { packageName?: unknown }).packageName === "codexus"
       && typeof (parsed as { checkedAt?: unknown }).checkedAt === "string"
     ) {
-      const candidate = parsed as { latestVersion?: unknown; checkedAt: string; registryError?: unknown };
+      const candidate = parsed as {
+        channel?: unknown;
+        distTag?: unknown;
+        latestVersion?: unknown;
+        checkedAt: string;
+        registryError?: unknown;
+      };
+      const channel = typeof candidate.channel === "string" ? normalizeUpdateChannel(candidate.channel) : expectedChannel;
+      const distTag = typeof candidate.distTag === "string" && (candidate.distTag === "latest" || candidate.distTag === "next")
+        ? candidate.distTag
+        : distTagForChannel(expectedChannel);
+      if (channel !== expectedChannel || distTag !== distTagForChannel(expectedChannel)) {
+        return { cache: null, error: { kind: "cache_unreadable", summary: "update cache belongs to a different channel" } };
+      }
       return {
         cache: {
           schemaVersion: 1,
           packageName: "codexus",
+          channel,
+          distTag,
           latestVersion: typeof candidate.latestVersion === "string" ? candidate.latestVersion : null,
           checkedAt: candidate.checkedAt,
           registryError: typeof candidate.registryError === "string" ? candidate.registryError : null,
@@ -123,7 +160,7 @@ function writeCache(path: string, cache: UpdateCache): UpdateSummary["error"] {
   }
 }
 
-function fetchLatestVersion(timeoutMs: number): { latestVersion: string | null; error: string | null } {
+function fetchLatestVersion(timeoutMs: number, distTag: UpdateDistTag): { latestVersion: string | null; error: string | null } {
   const npmCommand = process.env.CODEXUS_UPDATE_NPM_COMMAND ?? "npm";
   const result = spawnSync(npmCommand, ["view", "codexus", "dist-tags", "--json", "--prefer-online"], {
     encoding: "utf8",
@@ -138,7 +175,7 @@ function fetchLatestVersion(timeoutMs: number): { latestVersion: string | null; 
   try {
     const parsed = JSON.parse(result.stdout) as unknown;
     if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
-      const latest = (parsed as { latest?: unknown }).latest;
+      const latest = (parsed as Record<string, unknown>)[distTag];
       return { latestVersion: typeof latest === "string" ? latest : null, error: null };
     }
     return { latestVersion: null, error: "npm dist-tags output was not an object" };
@@ -149,6 +186,8 @@ function fetchLatestVersion(timeoutMs: number): { latestVersion: string | null; 
 
 function fromKnownVersion(input: {
   currentVersion: string;
+  channel: UpdateChannel;
+  distTag: UpdateDistTag;
   latestVersion: string | null;
   source: UpdateSource;
   checkedAt: string | null;
@@ -171,6 +210,8 @@ function fromKnownVersion(input: {
     schemaVersion: 1,
     stability: "experimental",
     packageName: "codexus",
+    channel: input.channel,
+    distTag: input.distTag,
     currentVersion: input.currentVersion,
     latestVersion: input.latestVersion,
     updateAvailable,
@@ -193,9 +234,11 @@ function fromKnownVersion(input: {
 
 export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
   const now = options.now ?? new Date();
+  const channel = options.channel ?? "stable";
+  const distTag = distTagForChannel(channel);
   const ttlMs = options.ttlMs ?? parsePositiveInt(process.env.CODEXUS_UPDATE_TTL_MS, DEFAULT_TTL_MS);
-  const path = cachePath();
-  const { cache, error: cacheError } = readCache(path);
+  const path = cachePath(channel);
+  const { cache, error: cacheError } = readCache(path, channel);
   const checkedAtMs = cache ? Date.parse(cache.checkedAt) : Number.NaN;
   const freshCache = cache !== null && Number.isFinite(checkedAtMs) && now.getTime() - checkedAtMs < ttlMs;
   const disabledByEnv = process.env.CODEXUS_NO_UPDATE_CHECK === "1";
@@ -204,6 +247,8 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
   if (disabledByEnv) {
     return fromKnownVersion({
       currentVersion: options.currentVersion,
+      channel,
+      distTag,
       latestVersion: cache?.latestVersion ?? null,
       source: "disabled",
       checkedAt: cache?.checkedAt ?? null,
@@ -220,6 +265,8 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
   if (freshCache) {
     return fromKnownVersion({
       currentVersion: options.currentVersion,
+      channel,
+      distTag,
       latestVersion: cache.latestVersion,
       source: "cache",
       checkedAt: cache.checkedAt,
@@ -234,6 +281,8 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
   if (cacheOnly) {
     return fromKnownVersion({
       currentVersion: options.currentVersion,
+      channel,
+      distTag,
       latestVersion: cache?.latestVersion ?? null,
       source: cache ? "cache" : "none",
       checkedAt: cache?.checkedAt ?? null,
@@ -248,19 +297,23 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
   }
 
   const timeoutMs = parsePositiveInt(process.env.CODEXUS_UPDATE_TIMEOUT_MS, 1500);
-  const fetched = fetchLatestVersion(timeoutMs);
+  const fetched = fetchLatestVersion(timeoutMs, distTag);
   const checkedAt = now.toISOString();
   if (fetched.error) {
     const registryError: UpdateSummary["error"] = { kind: "registry_unavailable", summary: fetched.error };
     const writeError = writeCache(path, {
       schemaVersion: 1,
       packageName: "codexus",
+      channel,
+      distTag,
       latestVersion: cache?.latestVersion ?? null,
       checkedAt,
       registryError: fetched.error,
     });
     return fromKnownVersion({
       currentVersion: options.currentVersion,
+      channel,
+      distTag,
       latestVersion: cache?.latestVersion ?? null,
       source: cache ? "cache" : "none",
       checkedAt: cache?.checkedAt ?? checkedAt,
@@ -274,12 +327,16 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
   const writeError = writeCache(path, {
     schemaVersion: 1,
     packageName: "codexus",
+    channel,
+    distTag,
     latestVersion: fetched.latestVersion,
     checkedAt,
     registryError: null,
   });
   return fromKnownVersion({
     currentVersion: options.currentVersion,
+    channel,
+    distTag,
     latestVersion: fetched.latestVersion,
     source: "registry",
     checkedAt,

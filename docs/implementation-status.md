@@ -163,10 +163,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   claims deferred. `--gate` intentionally fails until at least one audited
   candidate is promoted to stable and frozen in `docs/json-contract.md`.
 - `cx update check --json` reports experimental update availability facts from
-  the npm `latest` dist-tag through a bounded TTL cache. `CODEXUS_NO_UPDATE_CHECK=1`
-  disables registry access, CI/cache-only paths avoid network lookup, and the
-  command never mutates installation or becomes completion, verification, or
-  release authority.
+  the npm `latest` dist-tag through a bounded TTL cache. The explicit opt-in
+  path for npm `next` prerelease facts is
+  `cx update check --channel next --json`; it uses a separate cache file.
+  `CODEXUS_NO_UPDATE_CHECK=1` disables registry access, CI/cache-only paths
+  avoid network lookup, and the command never mutates installation or becomes
+  completion, verification, or release authority.
 - `version --json`, `doctor --json`, and `session status --json` include an
   additive cache-only experimental `update` summary. These primary commands do
   not query the registry and cannot fail because update lookup is unavailable.

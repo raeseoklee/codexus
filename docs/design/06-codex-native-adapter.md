@@ -72,6 +72,8 @@ Implemented first slice:
 
 - `cx update check --json` is an explicit experimental command;
 - npm `latest` dist-tag lookup is bounded by a TTL cache and short timeout;
+- npm `next`/prerelease lookup is available only through explicit opt-in:
+  `cx update check --channel next --json`;
 - `version --json`, `doctor --json`, and `session status --json` expose an
   additive cache-only `update` summary without querying the registry;
 - the `$codexus` skill can summarize `update.status: "available"` inside the
@@ -85,7 +87,7 @@ Required gates:
   cache-only update checks;
 - update notifications are informational only and do not affect completion,
   verification, or release gates;
-- prerelease/`next` checks require explicit opt-in;
+- prerelease/`next` checks require explicit opt-in and use a separate cache;
 - automatic installation is out of scope for this slice.
 
 ## Skill Versus Plugin Packaging
