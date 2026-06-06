@@ -378,11 +378,11 @@
             <span class="tag evidence">doc 18</span>
             <span class="tag gated">experimental next</span>
           </div>
-          <p>The deterministic compiled wiki slice is in place. The next step is advisory/export work without turning generated pages into authority.</p>
+          <p>The deterministic compiled wiki and explicit export slices are in place. The next step is advisory synthesis without turning generated pages into authority.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li><code>cx wiki build --mode advisory</code> records driver/model/source bundle evidence and stays advisory.</li>
-            <li><code>cx wiki export</code> is explicit and does not make checked-in pages authoritative.</li>
+            <li>Done: <code>cx wiki export</code> is explicit, requires a fresh check, and does not make checked-in pages authoritative.</li>
             <li>Deterministic freshness and stale-page gate behavior remain intact.</li>
             <li>No automatic context injection from wiki pages.</li>
           </ul>

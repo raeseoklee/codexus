@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
-import { buildWiki, buildWikiContext, buildWikiMap, checkWiki } from "../../wiki/wiki.ts";
+import { buildWiki, buildWikiContext, buildWikiMap, checkWiki, exportWiki } from "../../wiki/wiki.ts";
 
 export async function wikiCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "check";
@@ -61,6 +61,24 @@ export async function wikiCommand(args: ParsedArgs): Promise<void> {
       return;
     }
     console.log(`Wiki context: ${result.selectedPages.length} pages, ${result.tokenEstimate} tokens`);
+    return;
+  }
+
+  if (subcommand === "export") {
+    assertAllowedFlags(args, ["cwd", "json", "target"]);
+    const target = flagString(args.flags, "target");
+    if (!target) throw new Error("missing_wiki_export_target");
+    const result = await exportWiki(cwd, target);
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      process.exitCode = result.gate.exitCode;
+      return;
+    }
+    console.log(`Wiki export: ${result.export.status}`);
+    console.log(`Target: ${result.target}`);
+    console.log(`Pages: ${result.pageCount}`);
+    console.log(`Gate: ${result.gate.status}`);
+    process.exitCode = result.gate.exitCode;
     return;
   }
 

@@ -378,10 +378,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   self-reports into one control-plane summary with `completionAuthority: false`.
 - The compiled repository wiki now has an experimental deterministic first
   slice: `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check
-  --gate`, and `cx wiki context --topic <name> --budget <n>`. It generates
-  regenerable markdown pages under `.codexus/wiki/` with source refs, local
-  links, manifest/page schemas, and scoped freshness. Advisory synthesis,
-  checked-in export, and any automatic context injection remain deferred.
+  --gate`, `cx wiki context --topic <name> --budget <n>`, and explicit
+  `cx wiki export --target <path>`. It generates regenerable markdown pages
+  under `.codexus/wiki/` with source refs, local links, manifest/page schemas,
+  and scoped freshness. Export requires a fresh passing wiki check and does not
+  auto-commit or become source truth. Advisory synthesis and any automatic
+  context injection remain deferred.
 - Deferred self-reports currently documented and enforced by `cx repo check
   --gate --json` are:
   - `acceptance_criteria_extraction_deferred`
@@ -443,9 +445,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   implementation-stage AC-to-verification matrix gate is covered for missing
   matrix, unmapped criteria, missing evidence, approved deferrals, missing
   evidence paths, and passing evidence.
-- Compiled wiki tests cover deterministic `map/build/check/context`, stale-page
-  gate failure after scoped source changes, and honest rejection of advisory
-  build mode.
+- Compiled wiki tests cover deterministic `map/build/check/context/export`,
+  stale-page gate failure after scoped source changes, export blocking on stale
+  pages, unsafe export target rejection, and honest rejection of advisory build
+  mode.
 - App instance launcher tests cover descriptor schema validation, `profile
   list`, `start --dry-run`, live start, duplicate-start rejection, active
   health promotion for a live owned process, bounded log tails, owned stop,
@@ -453,7 +456,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   instance-linked observation evidence, including loopback HTTP probe evidence,
   that never promotes control, health, or completion authority.
 - Installed package smoke also covers deterministic wiki build, wiki-manifest
-  schema validation, `wiki check --gate`, and bounded wiki context generation.
+  schema validation, `wiki check --gate`, explicit wiki export, and bounded wiki
+  context generation.
 - Installed package smoke also covers `cx policy catalog check --json`,
   `cx autopilot presets list --json`, and autopilot draft planning with an
   explicit preset.
@@ -564,7 +568,7 @@ review. Current high-level gaps:
   implemented. Task artifacts, broader policy promotion, and unified control
   aggregation remain future work.
 - Compiled repository wiki now has an experimental deterministic first slice:
-  source-linked page generation, structural freshness gates, and bounded
-  context-pack generation exist. Advisory synthesis, checked-in export, and any
+  source-linked page generation, structural freshness gates, bounded
+  context-pack generation, and explicit export exist. Advisory synthesis and any
   automatic injection path remain future work.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

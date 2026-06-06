@@ -312,14 +312,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   없다는 invariant를 커버합니다. Implementation-stage AC-to-verification matrix gate는
   missing matrix, unmapped criteria, missing evidence, approved deferral, missing
   evidence path, passing evidence를 커버합니다.
-- Compiled wiki 테스트는 deterministic `map/build/check/context`, scoped source
-  변경 후 stale-page gate failure, advisory build mode의 honest rejection을
-  커버합니다.
+- Compiled wiki 테스트는 deterministic `map/build/check/context/export`, scoped source
+  변경 후 stale-page gate failure, stale page export blocking, unsafe export target
+  rejection, advisory build mode의 honest rejection을 커버합니다.
 - App instance launcher 테스트는 descriptor schema validation, `profile list`,
   `start --dry-run`, live start, duplicate-start rejection, live owned process의
   active health promotion, bounded log tail, owned stop을 커버합니다.
 - Installed package smoke는 deterministic wiki build, wiki-manifest schema
-  validation, `wiki check --gate`, bounded wiki context generation,
+  validation, `wiki check --gate`, explicit wiki export, bounded wiki context generation,
   `cx policy catalog check --json`, `cx autopilot presets list --json`,
   explicit-preset autopilot draft planning도 포함합니다.
 - Autopilot contract는 이제 experimental foundation slice를 갖습니다:
@@ -370,10 +370,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `completionAuthority: false`를 유지합니다.
 - Compiled repository wiki는 이제 experimental deterministic 첫 slice를 가집니다:
   `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check --gate`,
-  `cx wiki context --topic <name> --budget <n>`이 동작합니다. `.codexus/wiki/`
-  아래에 source ref, local link, manifest/page schema, scoped freshness를 가진
-  재생성 가능한 markdown page를 만들며, advisory synthesis, checked-in export,
-  automatic context injection은 계속 deferred입니다.
+  `cx wiki context --topic <name> --budget <n>`, 명시적
+  `cx wiki export --target <path>`가 동작합니다. `.codexus/wiki/` 아래에 source ref,
+  local link, manifest/page schema, scoped freshness를 가진 재생성 가능한 markdown
+  page를 만들며, export는 fresh passing wiki check를 요구하고 auto-commit 또는 source
+  truth가 되지 않습니다. Advisory synthesis와 automatic context injection은 계속
+  deferred입니다.
 - `cx repo check --gate --json`가 현재 문서 일치를 강제하는 deferred self-report는
   다음 네 가지입니다:
   - `acceptance_criteria_extraction_deferred`
@@ -435,6 +437,6 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   않았습니다.
 - Compiled repository wiki는 이제 experimental deterministic 첫 slice를
   가집니다. Source-linked page generation, structural freshness gate, bounded
-  context-pack generation이 존재하며 advisory synthesis, checked-in export,
-  automatic injection path는 future work입니다.
+  context-pack generation, explicit export가 존재하며 advisory synthesis와 automatic
+  injection path는 future work입니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.

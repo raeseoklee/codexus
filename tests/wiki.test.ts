@@ -176,3 +176,63 @@ test("wiki advisory build remains honestly deferred", async () => {
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+test("wiki export writes an explicit projection only after a fresh check", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(build.status, 0, build.stderr);
+
+    const exported = runCli(cwd, ["wiki", "export", "--target", "docs/codexus-wiki", "--json"]);
+    assert.equal(exported.status, 0, exported.stderr);
+    const output = JSON.parse(exported.stdout);
+    assert.equal(output.command, "wiki export");
+    assert.equal(output.export.status, "exported");
+    assert.equal(output.export.autoCommitted, false);
+    assert.equal(output.export.sourceTruth, false);
+    assert.equal(output.check.gate, "passed");
+    assert.equal(output.pageCount, 3);
+    assert.ok(output.exportedFiles.includes("docs/codexus-wiki/index.md"));
+    assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "overview.md")));
+    const index = await readFile(join(cwd, "docs", "codexus-wiki", "index.md"), "utf8");
+    assert.match(index, /generated projection, not the source of truth/);
+    assert.match(index, /does not auto-commit/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("wiki export blocks stale pages before writing the target", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(build.status, 0, build.stderr);
+    await writeFile(join(cwd, "package.json"), `${JSON.stringify({ name: "fixture", version: "2.0.0" }, null, 2)}\n`);
+
+    const exported = runCli(cwd, ["wiki", "export", "--target", "docs/codexus-wiki", "--json"]);
+    assert.equal(exported.status, 1);
+    const output = JSON.parse(exported.stdout);
+    assert.equal(output.export.status, "blocked");
+    assert.equal(output.gate.status, "failed");
+    assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "page_stale"));
+    assert.equal(existsSync(join(cwd, "docs", "codexus-wiki")), false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("wiki export rejects unsafe targets", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(build.status, 0, build.stderr);
+
+    const exported = runCli(cwd, ["wiki", "export", "--target", "../outside", "--json"]);
+    assert.equal(exported.status, 1);
+    const output = JSON.parse(exported.stdout);
+    assert.equal(output.type, "error");
+    assert.equal(output.code, "unsafe_wiki_export_target");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});

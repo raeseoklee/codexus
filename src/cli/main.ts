@@ -82,6 +82,7 @@ Usage:
   cx wiki build [--mode deterministic|advisory] [--json]
   cx wiki check [--gate] [--json]
   cx wiki context --topic <name> [--budget <n>] [--json]
+  cx wiki export --target <path> [--json]
   cx autopilot presets [list] [--json]
   cx autopilot plan --from <path> [--from <path>] [--preset <name>] [--json]
   cx autopilot contract validate <path> [--json]

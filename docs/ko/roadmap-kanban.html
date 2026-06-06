@@ -377,11 +377,11 @@
             <span class="tag evidence">18번 문서</span>
             <span class="tag gated">experimental 다음</span>
           </div>
-          <p>Deterministic compiled wiki slice는 구현되었습니다. 다음 단계는 generated page를 authority로 만들지 않는 advisory/export 작업입니다.</p>
+          <p>Deterministic compiled wiki와 explicit export slice는 구현되었습니다. 다음 단계는 generated page를 authority로 만들지 않는 advisory synthesis입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li><code>cx wiki build --mode advisory</code>가 driver/model/source bundle evidence를 기록하고 advisory 상태를 유지합니다.</li>
-            <li><code>cx wiki export</code>는 explicit하게 동작하고 checked-in page를 authoritative하게 만들지 않습니다.</li>
+            <li>완료: <code>cx wiki export</code>는 explicit하게 동작하고 fresh check를 요구하며 checked-in page를 authoritative하게 만들지 않습니다.</li>
             <li>Deterministic freshness와 stale-page gate 동작이 유지됩니다.</li>
             <li>Wiki page에서 automatic context injection을 하지 않습니다.</li>
           </ul>

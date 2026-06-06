@@ -358,6 +358,12 @@ process.on("SIGINT", shutdown);
   const wikiCheck = parseJsonRun(codexus, ["wiki", "check", "--cwd", project, "--gate", "--json"]);
   assert(wikiCheck.stability === "experimental", "wiki check did not report experimental stability");
   assert(wikiCheck.gate?.status === "passed", "wiki check gate did not pass from the installed package");
+  const wikiExport = parseJsonRun(codexus, ["wiki", "export", "--cwd", project, "--target", "docs/codexus-wiki", "--json"]);
+  assert(wikiExport.stability === "experimental", "wiki export did not report experimental stability");
+  assert(wikiExport.export?.status === "exported", "wiki export did not export after a fresh check");
+  assert(wikiExport.export?.autoCommitted === false, "wiki export must not claim auto-commit behavior");
+  assert(wikiExport.export?.sourceTruth === false, "wiki export must not claim source truth authority");
+  assert(wikiExport.exportedFiles?.includes("docs/codexus-wiki/index.md"), "wiki export did not write an index projection");
   const wikiContext = parseJsonRun(codexus, [
     "wiki",
     "context",

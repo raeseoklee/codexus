@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { detectVerifyCandidates } from "../session/verify-detect.ts";
 import { summarizeDecisions } from "../session/decisions.ts";
@@ -174,6 +174,28 @@ export interface WikiContextResult {
   text: string;
 }
 
+export interface WikiExportResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "wiki export";
+  cwd: string;
+  target: string;
+  sourceManifestPath: string;
+  pageCount: number;
+  exportedFiles: string[];
+  check: {
+    status: "pass" | "fail";
+    gate: "passed" | "failed";
+  };
+  export: {
+    status: "exported" | "blocked";
+    autoCommitted: false;
+    sourceTruth: false;
+  };
+  evidenceGaps: WikiEvidenceGap[];
+  gate: WikiGate;
+}
+
 interface SourceDiscovery {
   packageJson: string;
   readme: string;
@@ -240,6 +262,21 @@ function isSafeRelativePath(path: string): boolean {
 
 function resolveRef(cwd: string, ref: string): string {
   return resolve(cwd, ref);
+}
+
+function resolveExportTarget(cwd: string, target: string): { absolute: string; relative: string } {
+  const trimmed = target.trim();
+  if (!isSafeRelativePath(trimmed)) throw new Error("unsafe_wiki_export_target");
+  const absolute = resolve(cwd, trimmed);
+  const relativeTarget = repoRelative(cwd, absolute);
+  if (!isSafeRelativePath(relativeTarget)) throw new Error("unsafe_wiki_export_target");
+  if (relativeTarget === "." || relativeTarget.startsWith(".codexus/") || relativeTarget === ".codexus") {
+    throw new Error("unsafe_wiki_export_target");
+  }
+  if (relativeTarget.startsWith(".git/") || relativeTarget === ".git" || relativeTarget.startsWith("node_modules/") || relativeTarget === "node_modules") {
+    throw new Error("unsafe_wiki_export_target");
+  }
+  return { absolute, relative: relativeTarget };
 }
 
 async function readJsonIfExists(path: string): Promise<unknown | null> {
@@ -1023,5 +1060,92 @@ export async function buildWikiContext(cwd: string, topic: string, budget: numbe
     // Context packs are readable bounded projections only in the first slice.
     eligibleForAutomaticInjection: false,
     text,
+  };
+}
+
+export async function exportWiki(cwd: string, target: string): Promise<WikiExportResult> {
+  const resolved = resolveExportTarget(cwd, target);
+  const check = await checkWiki(cwd, true);
+  if (check.gate.status !== "passed") {
+    return {
+      schemaVersion: 1,
+      stability: "experimental",
+      command: "wiki export",
+      cwd,
+      target: resolved.relative,
+      sourceManifestPath: check.manifestPath,
+      pageCount: 0,
+      exportedFiles: [],
+      check: {
+        status: check.wiki.status,
+        gate: check.gate.status === "passed" ? "passed" : "failed",
+      },
+      export: {
+        status: "blocked",
+        autoCommitted: false,
+        sourceTruth: false,
+      },
+      evidenceGaps: check.evidenceGaps,
+      gate: {
+        enabled: true,
+        status: "failed",
+        exitCode: 1,
+        reason: "wiki export requires a fresh passing wiki check",
+      },
+    };
+  }
+
+  const manifestRaw = await readJsonIfExists(wikiManifestPath(cwd));
+  const manifest = manifestRaw as WikiManifest;
+  await ensureDir(resolved.absolute);
+  const exportedFiles: string[] = [];
+  for (const page of manifest.pages) {
+    const source = resolveRef(cwd, page.path);
+    const targetPath = join(resolved.absolute, basename(page.path));
+    await copyFile(source, targetPath);
+    exportedFiles.push(repoRelative(cwd, targetPath));
+  }
+  const indexPath = join(resolved.absolute, "index.md");
+  const index = [
+    "# Codexus Wiki Export",
+    "",
+    "This directory is an explicit export of `.codexus/wiki/`.",
+    "It is a generated projection, not the source of truth.",
+    "Codexus does not auto-commit exported wiki pages.",
+    "",
+    "Pages:",
+    ...manifest.pages.map((page) => `- [${page.title}](${basename(page.path)})`),
+    "",
+    `Source manifest: \`${repoRelative(cwd, wikiManifestPath(cwd))}\``,
+    "",
+  ].join("\n");
+  await writeFile(indexPath, index);
+  exportedFiles.push(repoRelative(cwd, indexPath));
+
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "wiki export",
+    cwd,
+    target: resolved.relative,
+    sourceManifestPath: repoRelative(cwd, wikiManifestPath(cwd)),
+    pageCount: manifest.pages.length,
+    exportedFiles: exportedFiles.sort(),
+    check: {
+      status: "pass",
+      gate: "passed",
+    },
+    export: {
+      status: "exported",
+      autoCommitted: false,
+      sourceTruth: false,
+    },
+    evidenceGaps: [],
+    gate: {
+      enabled: true,
+      status: "passed",
+      exitCode: 0,
+      reason: "wiki export completed after a passing freshness check",
+    },
   };
 }

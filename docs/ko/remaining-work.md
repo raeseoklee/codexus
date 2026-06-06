@@ -341,8 +341,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 - Compiled repository wiki: [18번 문서](design/18-compiled-repository-wiki.md)는
   repository fact와 Codexus artifact 위의 재생성 가능한 markdown projection을 정의하며,
   이제 experimental deterministic 첫 slice를 가집니다. Schema, `cx wiki
-  map/build/check`, read-only context pack이 존재하고, 다음 작업은 advisory
-  synthesis, checked-in export, richer page set, explicit injection policy입니다.
+  map/build/check`, read-only context pack, explicit export가 존재하고, 다음 작업은
+  advisory synthesis, richer page set, explicit injection policy입니다.
   Stale/advisory page를 run에 자동 주입하지 않습니다.
 
 - Operational control invariant: decision artifact와 ledger-derived loop
@@ -389,9 +389,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     preset metadata, policy catalog reporting, 더 풍부한 risk fact도 구현됐습니다.
     다음은 task artifact, broader policy promotion, unified control aggregation입니다.
     Enforceable policy field가 생기기 전까지 autonomy preset은 contract metadata로 둡니다.
-12. Compiled repository wiki: deterministic `cx wiki map/build/check/context`
-    slice는 구현되었습니다. 다음은 advisory synthesis, explicit checked-in export,
-    richer page coverage이며, injection path는 그 이후에만 검토합니다.
+12. Compiled repository wiki: deterministic `cx wiki map/build/check/context/export`
+    slice는 구현되었습니다. 다음은 advisory synthesis와 richer page coverage이며,
+    injection path는 그 이후에만 검토합니다.
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
     구현된 live ownership과 observation-evidence slice 위에 다음 단계를 쌓습니다.
     첫 loopback HTTP dev-server probe와 bounded/redacted log snapshot adapter는

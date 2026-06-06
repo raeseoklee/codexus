@@ -3,7 +3,7 @@
 [English](../../design/18-compiled-repository-wiki.md)
 
 작성일: 2026-06-02
-상태: experimental 첫 slice 구현 완료, advisory/export track은 계속 deferred
+상태: experimental 첫 slice 구현 완료, advisory synthesis와 automatic injection은 계속 deferred
 
 ## 결정
 
@@ -16,10 +16,12 @@ evidence-linked markdown projection을 만드는 방향입니다.
 - 구현됨: `cx wiki map --json`, deterministic
   `cx wiki build --mode deterministic --json`,
   `cx wiki check --gate --json`,
-  `cx wiki context --topic <name> --budget <n> --json`
+  `cx wiki context --topic <name> --budget <n> --json`,
+  명시적 `cx wiki export --target <path> --json`
 - 구현된 schema: `codexus.wiki.manifest`, `codexus.wiki.page`
-- 계속 deferred: advisory synthesis, checked-in export, run으로의 automatic
-  context injection
+- 계속 deferred: advisory synthesis, run으로의 automatic context injection. Export는 fresh
+  passing wiki check 뒤에만 실행되는 명시적 projection이며, Codexus는 exported page를
+  auto-commit하지 않습니다.
 
 이 설계는 LLM-maintained wiki 패턴을 Codexus에 맞게 적용하되, Codexus를 일반 지식관리 제품으로
 바꾸지 않습니다. Wiki는 source of truth가 아닙니다. 매 session마다 context를 처음부터 다시
@@ -272,6 +274,7 @@ cx autopilot run --context-pack .codexus/wiki/context/context_...json
     check.json
   contexts/
     context_...json
+  export는 `.codexus/` 바깥의 명시적 user target에만 기록
 ```
 
 Manifest가 page identity와 freshness metadata를 소유합니다:
@@ -332,7 +335,9 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
    scoped freshness 검사.
 6. `cx wiki context --topic <name> --budget <n> --json`을 read-only context-pack generator로
    추가.
-7. Deterministic page와 freshness check가 안정될 때까지 advisory synthesis는 deferred.
+7. `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저 요구하고,
+   source truth를 쓰지 않으며, auto-commit하지 않는 명시적 export로 추가.
+8. Deterministic page와 freshness check가 안정될 때까지 advisory synthesis는 deferred.
 
 ## 성공 기준
 

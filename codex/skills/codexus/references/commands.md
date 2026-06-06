@@ -108,6 +108,23 @@ node codex/skills/codexus/scripts/cx.mjs gateway check --dry-run --record --task
 
 Use these for inspection, run-ledger validation, process-probe evidence, deterministic fake lifecycle supervision, and dry-run audit evidence. Live app-server, cron, and gateway behavior remains gated even when feature gates are enabled.
 
+## Repository Knowledge
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs repo check --gate --json
+node codex/skills/codexus/scripts/cx.mjs repo map --json
+node codex/skills/codexus/scripts/cx.mjs wiki map --json
+node codex/skills/codexus/scripts/cx.mjs wiki build --mode deterministic --json
+node codex/skills/codexus/scripts/cx.mjs wiki check --gate --json
+node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --budget 1200 --json
+node codex/skills/codexus/scripts/cx.mjs wiki export --target docs/codexus-wiki --json
+```
+
+Use `repo check` for gateable mechanical docs-code invariants. Use `wiki`
+commands for regenerable projection pages over repository facts and Codexus
+artifacts. `wiki export` is explicit, requires a fresh passing wiki check, and
+does not auto-commit or become source truth.
+
 ## Release Policy
 
 ```bash

@@ -367,8 +367,8 @@ Harness-engineering alignment adds these evidence-first tracks:
   add active autonomy or a new completion authority.
 - Compiled repository wiki: [doc 18](design/18-compiled-repository-wiki.md)
   now has an experimental deterministic first slice: schemas, `cx wiki
-  map/build/check`, and read-only context packs exist. Next work is advisory
-  synthesis, checked-in export, richer page sets, and explicit injection policy.
+  map/build/check`, read-only context packs, and explicit export exist. Next
+  work is advisory synthesis, richer page sets, and explicit injection policy.
   Do not auto-inject stale or advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
@@ -411,9 +411,8 @@ Harness-engineering alignment adds these evidence-first tracks:
     broader policy promotion, and unified control aggregation. Autonomy presets
     remain contract metadata until enforceable policy fields exist.
 12. Compiled repository wiki: the deterministic `cx wiki
-    map/build/check/context` slice now exists. Next implement advisory
-    synthesis, explicit checked-in export, and richer page coverage before any
-    injection path is considered.
+    map/build/check/context/export` slice now exists. Next implement advisory
+    synthesis and richer page coverage before any injection path is considered.
 13. Worktree app instance launcher: build on the implemented live ownership
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback

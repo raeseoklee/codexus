@@ -14,10 +14,12 @@ verification artifacts, decision records, and repository graph outputs.
 Implementation status as of 2026-06-02:
 
 - implemented: `cx wiki map --json`, deterministic `cx wiki build --mode deterministic --json`,
-  `cx wiki check --gate --json`, and `cx wiki context --topic <name> --budget <n> --json`;
+  `cx wiki check --gate --json`, `cx wiki context --topic <name> --budget <n> --json`,
+  and explicit `cx wiki export --target <path> --json`;
 - implemented schemas: `codexus.wiki.manifest` and `codexus.wiki.page`;
-- still deferred: advisory synthesis, checked-in export, and any automatic
-  context injection into runs.
+- still deferred: advisory synthesis and any automatic context injection into
+  runs. Export is implemented only as an explicit projection after a fresh
+  passing wiki check; Codexus does not auto-commit exported pages.
 
 This adapts the LLM-maintained wiki pattern to Codexus without turning Codexus
 into a general knowledge-base product. The wiki is not the source of truth. It is
@@ -278,8 +280,9 @@ Default storage:
     sessions.md
   checks/
     check.json
-  contexts/
+  context/
     context_...json
+  exports are written only to explicit user targets outside `.codexus/`
 ```
 
 The manifest owns page identity and freshness metadata:
@@ -341,7 +344,10 @@ The manifest owns page identity and freshness metadata:
    path sanitization, and scoped freshness.
 6. Add `cx wiki context --topic <name> --budget <n> --json` as a read-only
    context-pack generator.
-7. Defer advisory synthesis until deterministic pages and freshness checks are
+7. Add `cx wiki export --target <path> --json` as an explicit export that first
+   requires a fresh passing wiki check, writes no source truth, and never
+   auto-commits.
+8. Defer advisory synthesis until deterministic pages and freshness checks are
    stable.
 
 ## Success Criteria
