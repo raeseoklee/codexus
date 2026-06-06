@@ -66,6 +66,15 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
 - Quality evidence output(`slop check`, `session slop`): `schemaVersion`,
   `stability`, `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
   `derivableFacts`, `heuristicClaims`, `gate`.
+- Repo knowledge output(`repo check --gate`, `repo map`): `schemaVersion`,
+  `stability`, `command`, `cwd`, `packageRoot`, `scanMode`,
+  `scanAccuracy`, `policy`, `indexes`, `documents`, `evidenceGaps`,
+  `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
+  `informationalUnknowns`, `repoKnowledge`, `deferredSelfReports`, `gate`.
+  Stable contract는 기계적으로 검증 가능한 repository knowledge invariant만
+  포함합니다: required docs index, local index link, 영문/한국어 counterpart,
+  선언된 schema reference, source `*_deferred` self-report 문서화. Semantic
+  freshness와 prose quality는 계속 advisory입니다.
 
 이 필드를 제거하거나 의미를 재정의하려면 `0.2.0`이 필요합니다. `0.1.x`에서 field
 추가는 허용됩니다.
@@ -74,7 +83,8 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
 
 - app-server live behavior, cron/gateway live dispatch, automatic injection,
   routine live model replay, statusline integration, worker launch,
-  release-integrity check, contract-promotion readiness check의
+  release-integrity check, LSP diagnostics check, architecture check,
+  contract-promotion readiness check의
   experimental/deferred output.
 - `heuristicClaims` 같은 advisory array의 membership.
 - Additive `update` summary의 nested content. 이는 informational experimental

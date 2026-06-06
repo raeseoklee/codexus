@@ -418,8 +418,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     것입니다. Notify hook 또는 다른 관측 heartbeat가 실제로 dispatch되지 않았다면 always-on
     동작을 주장하지 않고, workflow-kernel logic을 plugin-local script로 옮기지 않습니다.
 17. 0.2.0 promotion readiness: 첫 audit surface가
-    `cx contract check --target 0.2.0 --json`으로 구현되었습니다. 이 명령은 viable
-    promotion candidate를 식별하고, 최소 하나의 surface가 실제로 stable이 되어
-    `docs/json-contract.md`에 frozen되기 전까지 `--gate`에서 의도적으로 실패합니다.
-    Promotion hardening slice가 끝나기 전에는 `0.1.x` line을 계속 진행하고, patch
-    number가 높다는 이유만으로 `0.2.0`을 자르지 않습니다.
+    `cx contract check --target 0.2.0 --json`으로 구현되었습니다. 첫
+    promotion-hardening slice는 `repo check --gate`를 stable로 승격하고, 기계적
+    docs-code invariant field를 `docs/json-contract.md`에 freeze합니다. 이제
+    `contract check --gate`는 그 최소 requirement를 통과할 수 있습니다. 남은
+    promotion 작업은 local-mode `release check`, 그다음 LSP/architecture hardening입니다.
+    App-instance, live autopilot, active relay, Desktop attachment, automatic
+    injection, plugin always-on claim 같은 action surface는 authority evidence가 더
+    강해질 때까지 승격하지 않습니다.

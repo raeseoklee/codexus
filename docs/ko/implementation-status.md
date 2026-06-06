@@ -80,12 +80,13 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `npm run release:check`는 `release:policy`를 포함하므로 policy 문서가 없으면 tag
   publish 전에 release prep이 막힙니다.
 - `cx contract check --json`은 experimental `0.2.0` promotion readiness audit를
-  보고합니다. `repo check`, local-mode `release check`, `lsp check`, 좁은
-  `architecture check` forbidden-import subset 같은 low-risk promotion candidate를
-  식별하되, app-instance start/stop, live autopilot, active relay adapter, Desktop
-  app-server attachment, automatic injection, plugin always-on claim 같은 action
-  surface는 계속 deferred로 둡니다. `--gate`는 audit된 candidate 중 최소 하나가
-  stable로 승격되고 `docs/json-contract.md`에 frozen될 때까지 의도적으로 실패합니다.
+  보고합니다. `repo check --gate`는 첫 번째 stable 승격 surface이며
+  `docs/json-contract.md`에 frozen되어 있으므로, `cx contract check --target 0.2.0
+  --gate --json`은 최소 stable-promotion requirement를 통과할 수 있습니다.
+  Local-mode `release check`, `lsp check`, 좁은 `architecture check` forbidden-import
+  subset은 계속 후보이고, app-instance start/stop, live autopilot, active relay
+  adapter, Desktop app-server attachment, automatic injection, plugin always-on
+  claim 같은 action surface는 계속 deferred입니다.
 - `cx update check --json`은 bounded TTL cache를 통해 npm `latest` dist-tag에서
   experimental update availability fact를 보고합니다. npm `next` prerelease fact를
   위한 명시적 opt-in 경로는 `cx update check --channel next --json`이며, 별도 cache
@@ -360,8 +361,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `autonomyPreset` metadata, `cx policy catalog check --json`, 그리고 blast
   radius / dependency / schema / migration / scope finding에 대한 더 풍부한
   `riskFacts`가 포함됩니다. 새 완료 권한은 없고 기존 evidence gate 위의
-  advisory/control metadata로만 동작합니다. Deterministic docs-code
-  invariant pass는 여전히 `cx repo check --gate --json`이 맡고 있습니다.
+  advisory/control metadata로만 동작합니다. Stable deterministic docs-code
+  invariant pass는 `cx repo check --gate --json`이 맡고 있습니다. 이 stable
+  contract는 semantic freshness나 prose quality를 gateable로 만들지 않습니다.
   `cx session status --json`, `cx session hud --json`, `doctor --json`은 이제
   deferred self-report를 하나의 control-plane summary로 모으며
   `completionAuthority: false`를 유지합니다.

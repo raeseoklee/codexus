@@ -160,13 +160,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   presence. `npm run release:check` includes `release:policy` so missing policy
   docs block release prep before tag publish.
 - `cx contract check --json` reports the experimental `0.2.0` promotion
-  readiness audit. It identifies low-risk promotion candidates such as
-  `repo check`, local-mode `release check`, `lsp check`, and the narrow
-  `architecture check` forbidden-import subset, while keeping action surfaces
-  such as app-instance start/stop, live autopilot, active relay adapters,
-  Desktop app-server attachment, automatic injection, and plugin always-on
-  claims deferred. `--gate` intentionally fails until at least one audited
-  candidate is promoted to stable and frozen in `docs/json-contract.md`.
+  readiness audit. `repo check --gate` is the first promoted stable surface and
+  is frozen in `docs/json-contract.md`, so `cx contract check --target 0.2.0
+  --gate --json` can pass the minimum stable-promotion requirement. Local-mode
+  `release check`, `lsp check`, and the narrow `architecture check`
+  forbidden-import subset remain candidates, while action surfaces such as
+  app-instance start/stop, live autopilot, active relay adapters, Desktop
+  app-server attachment, automatic injection, and plugin always-on claims remain
+  deferred.
 - `cx update check --json` reports experimental update availability facts from
   the npm `latest` dist-tag through a bounded TTL cache. The explicit opt-in
   path for npm `next` prerelease facts is
@@ -367,11 +368,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   richer `riskFacts` derived from change evidence for blast radius,
   dependency, schema, migration, and scope findings. No new completion
   authority exists; these remain advisory/control metadata over the existing
-  evidence gates. The deterministic docs-code invariant pass in
-  `cx repo check --gate --json` still checks required indexes, index links,
+  evidence gates. The stable deterministic docs-code invariant pass in
+  `cx repo check --gate --json` checks required indexes, index links,
   English/Korean counterparts, declared `schemas/*.schema.json` references,
   and source `*_deferred` self-report claims mirrored in both
-  implementation-status docs. `cx session status --json`,
+  implementation-status docs. Its stable contract does not make semantic
+  freshness or prose quality gateable. `cx session status --json`,
   `cx session hud --json`, and `doctor --json` now aggregate those deferred
   self-reports into one control-plane summary with `completionAuthority: false`.
 - The compiled repository wiki now has an experimental deterministic first

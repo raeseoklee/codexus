@@ -250,26 +250,27 @@ const deferredDefinitions: CandidateDefinition[] = [
   {
     surface: "update-notifications",
     command: "update check",
-    sourceFile: "src/cli/main.ts",
+    sourceFile: "src/update/check.ts",
     disposition: "defer",
     contractRisk: "medium",
     sideEffectRisk: "low",
     reasons: [
-      "Planned but not implemented in the current CLI surface.",
+      "Update checks exist, but richer CLI/chat notification UX is still experimental and non-authoritative.",
     ],
     requiredEvidence: [
       "TTL cache, opt-out, CI-off behavior, and proof that update checks cannot fail primary commands.",
+      "Observed notification UX that remains advisory and never mutates installation.",
     ],
   },
   {
     surface: "codex-plugin-packaging",
     command: "plugin packaging",
-    sourceFile: "docs/design/06-codex-native-adapter.md",
+    sourceFile: "src/plugin/package.ts",
     disposition: "defer",
     contractRisk: "medium",
     sideEffectRisk: "medium",
     reasons: [
-      "Plugin packaging is a distribution experiment, not proof of always-on supervision.",
+      "Plugin packaging and package diagnostics exist, but installed-plugin state and always-on supervision remain unproven.",
     ],
     requiredEvidence: [
       "Doctor-diagnosable install state and observed heartbeat evidence before any always-on claim.",
@@ -306,8 +307,10 @@ function currentStabilityFromSource(packageRoot: string, sourceFile: string): Co
 
 function frozenFieldsDocumented(contractText: string | null, command: string): boolean {
   if (!contractText) return false;
+  const frozenSection = /## Frozen In 0\.1\.x(?<body>[\s\S]*?)\n## Not Frozen/.exec(contractText)?.groups?.body;
+  const searchable = frozenSection ?? contractText;
   const firstWord = command.split(/\s+/)[0];
-  return contractText.includes(command) || contractText.includes(`${firstWord} output`) || contractText.includes(`${firstWord} check`);
+  return searchable.includes(command) || searchable.includes(`${firstWord} output`) || searchable.includes(`${firstWord} check`);
 }
 
 function toCandidate(definition: CandidateDefinition, packageRoot: string, contractText: string | null): ContractPromotionCandidate {

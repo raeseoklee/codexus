@@ -325,7 +325,7 @@ process.on("SIGINT", shutdown);
   assert(architecture.gate?.status === "passed", "installed architecture gate did not pass");
 
   const repo = parseJsonRun(codexus, ["repo", "check", "--gate", "--json"]);
-  assert(repo.stability === "experimental", "repo check did not report experimental JSON stability");
+  assert(repo.stability === "stable", "repo check did not report stable JSON stability");
   assert(repo.scanAccuracy === "best_effort", "repo check did not report best-effort scan accuracy");
   assert(repo.gate?.status === "passed", "installed repo knowledge gate did not pass");
   const contract = parseJsonRun(codexus, ["contract", "check", "--cwd", project, "--target", "0.2.0", "--json"]);

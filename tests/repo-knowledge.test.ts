@@ -51,7 +51,7 @@ test("repo map reports mechanical indexes without enabling the gate", async () =
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
     assert.equal(output.command, "map");
-    assert.equal(output.stability, "experimental");
+    assert.equal(output.stability, "stable");
     assert.equal(output.scanAccuracy, "best_effort");
     assert.equal(output.repoKnowledge.status, "pass");
     assert.equal(output.gate.status, "not_requested");
@@ -196,6 +196,7 @@ test("Codexus package dogfoods repo knowledge gate", () => {
   assert.equal(result.status, 0, result.stderr);
   const output = JSON.parse(result.stdout);
   assert.equal(output.command, "check");
+  assert.equal(output.stability, "stable");
   assert.equal(output.repoKnowledge.status, "pass");
   assert.equal(output.gate.status, "passed");
   assert.equal(output.scanAccuracy, "best_effort");

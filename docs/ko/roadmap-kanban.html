@@ -208,16 +208,16 @@
         </article>
 
         <article class="card">
-          <h3>0.2.0 Promotion Readiness Audit</h3>
+          <h3>0.2.0 Promotion Readiness</h3>
           <div class="tags">
-            <span class="tag done">audit slice 완료</span>
+            <span class="tag done">repo check 승격</span>
             <span class="tag evidence">contract gate</span>
           </div>
-          <p><code>cx contract check</code>는 문서화된 0.2.0 규칙을 실행 가능한 audit로 바꿉니다. 0.2.0은 0.1.9 다음 countdown이 아니라 stable promotion 지점입니다.</p>
+          <p><code>cx contract check</code>는 문서화된 0.2.0 규칙을 실행 가능한 audit로 바꿉니다. 첫 승격 surface는 stable <code>repo check --gate</code>입니다. 0.2.0은 여전히 0.1.9 다음 countdown이 아니라 제품 cut 결정입니다.</p>
           <span class="label">증거</span>
           <ul>
             <li><code>cx contract check --target 0.2.0 --json</code>은 viable promotion candidate를 보고합니다.</li>
-            <li><code>--gate</code>는 audit된 candidate 중 최소 하나가 stable이고 <code>docs/json-contract.md</code>에 frozen되기 전까지 의도적으로 실패합니다.</li>
+            <li><code>repo check --gate</code>는 stable이고 <code>docs/json-contract.md</code>에 frozen되어 있으므로, <code>--gate</code>는 최소 promotion requirement를 통과할 수 있습니다.</li>
             <li>Action surface는 lifecycle과 authority evidence가 더 강해질 때까지 experimental/deferred로 유지됩니다.</li>
           </ul>
           <span class="label">근거</span>

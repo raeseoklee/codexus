@@ -15,18 +15,30 @@ function runCli(args: string[]) {
   });
 }
 
-test("contract readiness identifies 0.2.0 promotion candidates without claiming readiness", () => {
+test("contract readiness reports repo knowledge as the first stable promotion", () => {
   const report = buildContractReadinessReport(root);
   assert.equal(report.schemaVersion, 1);
   assert.equal(report.stability, "experimental");
   assert.equal(report.targetVersion, "0.2.0");
-  assert.equal(report.contractReadiness.status, "not_ready");
-  assert.equal(report.contractReadiness.promotedSurfaceCount, 0);
-  assert.ok(report.candidates.some((candidate) => candidate.surface === "repo-knowledge-check"));
+  assert.equal(report.contractReadiness.status, "ready");
+  assert.equal(report.contractReadiness.promotedSurfaceCount, 1);
+  const repoCandidate = report.candidates.find((candidate) => candidate.surface === "repo-knowledge-check");
+  assert.equal(repoCandidate?.currentStability, "stable");
+  assert.equal(repoCandidate?.frozenFieldsDocumented, true);
+  assert.equal(repoCandidate?.promotionStatus, "promoted");
+  assert.deepEqual(repoCandidate?.blockers, []);
   assert.ok(report.candidates.some((candidate) => candidate.surface === "release-integrity-check"));
-  assert.ok(report.candidates.every((candidate) => candidate.promotionStatus !== "promoted"));
+  assert.ok(report.candidates.some((candidate) => candidate.promotionStatus === "not_promoted"));
   assert.ok(report.deferredSurfaces.some((surface) => surface.surface === "app-instance-launcher"));
-  assert.ok(report.evidenceGaps.some((gap) => gap.kind === "stable_promotion_missing"));
+  const updateSurface = report.deferredSurfaces.find((surface) => surface.surface === "update-notifications");
+  assert.equal(updateSurface?.currentStability, "experimental");
+  assert.match(updateSurface?.reasons.join(" ") ?? "", /exist/);
+  const pluginSurface = report.deferredSurfaces.find((surface) => surface.surface === "codex-plugin-packaging");
+  assert.equal(pluginSurface?.currentStability, "experimental");
+  assert.match(pluginSurface?.reasons.join(" ") ?? "", /diagnostics exist/);
+  const architectureCandidate = report.candidates.find((candidate) => candidate.surface === "architecture-check");
+  assert.equal(architectureCandidate?.frozenFieldsDocumented, false);
+  assert.equal(report.evidenceGaps.some((gap) => gap.kind === "stable_promotion_missing"), false);
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "json_contract_promotion_rule_present"));
   assert.ok(report.heuristicClaims.some((claim) => claim.kind === "promotion_candidate_prioritization"));
   assert.equal(report.gate.status, "not_requested");
@@ -37,16 +49,19 @@ test("contract check --json is report-only by default", () => {
   assert.equal(result.status, 0, result.stderr);
   const output = JSON.parse(result.stdout);
   assert.equal(output.command, "contract check");
-  assert.equal(output.contractReadiness.status, "not_ready");
+  assert.equal(output.contractReadiness.status, "ready");
+  assert.equal(output.contractReadiness.promotedSurfaceCount, 1);
   assert.equal(output.gate.status, "not_requested");
 });
 
-test("contract check --gate fails until at least one surface is promoted and frozen", () => {
+test("contract check --gate passes once a stable surface is promoted and frozen", () => {
   const result = runCli(["contract", "check", "--target", "0.2.0", "--gate", "--json"]);
-  assert.equal(result.status, 1);
+  assert.equal(result.status, 0, result.stderr);
   const output = JSON.parse(result.stdout);
-  assert.equal(output.gate.status, "failed");
-  assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "stable_promotion_missing"));
+  assert.equal(output.gate.status, "passed");
+  assert.equal(output.contractReadiness.status, "ready");
+  assert.equal(output.contractReadiness.promotedSurfaceCount, 1);
+  assert.equal(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "stable_promotion_missing"), false);
 });
 
 test("contract check rejects unsupported targets truthfully", () => {

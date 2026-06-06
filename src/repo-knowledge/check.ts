@@ -81,7 +81,7 @@ export interface RepoDocument {
 
 export interface RepoKnowledgeReport {
   schemaVersion: 1;
-  stability: "experimental";
+  stability: "stable";
   cwd: string;
   packageRoot: string | null;
   scanMode: "static";
@@ -397,7 +397,7 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
     });
     return {
       schemaVersion: 1,
-      stability: "experimental",
+      stability: "stable",
       cwd,
       packageRoot: null,
       scanMode: "static",
@@ -631,7 +631,7 @@ export function buildRepoKnowledgeReport(cwd: string, options: RepoKnowledgeOpti
 
   return {
     schemaVersion: 1,
-    stability: "experimental",
+    stability: "stable",
     cwd,
     packageRoot,
     scanMode: "static",

@@ -68,6 +68,15 @@ For supported commands, these top-level field names are frozen through `0.1.x`:
 - Quality evidence output (`slop check`, `session slop`): `schemaVersion`,
   `stability`, `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
   `derivableFacts`, `heuristicClaims`, `gate`.
+- Repo knowledge output (`repo check --gate`, `repo map`): `schemaVersion`,
+  `stability`, `command`, `cwd`, `packageRoot`, `scanMode`,
+  `scanAccuracy`, `policy`, `indexes`, `documents`, `evidenceGaps`,
+  `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
+  `informationalUnknowns`, `repoKnowledge`, `deferredSelfReports`, `gate`.
+  The stable contract covers mechanical repository knowledge invariants only:
+  required docs indexes, local index links, English/Korean counterparts,
+  declared schema references, and source `*_deferred` self-report
+  documentation. Semantic freshness and prose quality remain advisory.
 
 Removing or redefining these fields requires `0.2.0`. Adding fields is allowed
 in `0.1.x`.
@@ -76,8 +85,9 @@ in `0.1.x`.
 
 - Experimental/deferred command output for app-server live behavior,
   cron/gateway live dispatch, automatic injection, routine live model replay,
-  statusline integration, worker launch, release-integrity checks, and
-  contract-promotion readiness checks.
+  statusline integration, worker launch, release-integrity checks, LSP
+  diagnostics checks, architecture checks, and contract-promotion readiness
+  checks.
 - The membership of advisory arrays such as `heuristicClaims`.
 - The nested content of the additive `update` summary, which is an
   informational experimental update-availability report and never a release,
