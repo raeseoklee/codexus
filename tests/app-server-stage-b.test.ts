@@ -286,6 +286,26 @@ test("live-read-only requires explicit socket path", async () => {
   }
 });
 
+test("app-server observer status starts from recorded evidence only", async () => {
+  const cwd = await tempDir();
+  try {
+    const result = runCli(cwd, ["app-server", "observer", "status", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.observerBridge.status, "no_evidence");
+    assert.equal(output.observerBridge.runtimeSurface, "unknown");
+    assert.equal(output.observerBridge.connectsToLiveSocket, false);
+    assert.equal(output.observerBridge.startsDesktopTurn, false);
+    assert.equal(output.observerBridge.completionAuthority, false);
+    assert.equal(output.counts.discovery, 0);
+    assert.equal(output.counts.stageB, 0);
+    assert.equal(output.counts.stdioProof, 0);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("live-read-only records desktop turn-boundary evidence without transcript values", async () => {
   const cwd = await tempDir();
   const socketDir = await tempDir();
@@ -329,6 +349,18 @@ test("live-read-only records desktop turn-boundary evidence without transcript v
     const schema = runCli(cwd, ["schema", "validate", "--type", "app-server-stage-b", "--file", manifestPath, "--json"]);
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const observer = runCli(cwd, ["app-server", "observer", "status", "--json"]);
+    assert.equal(observer.status, 0, observer.stderr);
+    const observerOutput = JSON.parse(observer.stdout);
+    assert.equal(observerOutput.observerBridge.status, "desktop_turn_boundary_observed");
+    assert.equal(observerOutput.observerBridge.runtimeSurface, "desktop-app-server");
+    assert.equal(observerOutput.observerBridge.sessionMappingAuthority, "stage_b_turn_boundary");
+    assert.equal(observerOutput.observerBridge.connectsToLiveSocket, false);
+    assert.equal(observerOutput.observerBridge.startsDesktopTurn, false);
+    assert.equal(observerOutput.observerBridge.transcriptValuesStored, false);
+    assert.equal(observerOutput.observerBridge.completionAuthority, false);
+    assert.equal(observerOutput.latest.stageB.path, manifestPath);
   } finally {
     await fake.close();
     await rm(cwd, { recursive: true, force: true });
@@ -438,6 +470,15 @@ test("stdio-proof records owned fake process evidence without attaching existing
     const schema = runCli(cwd, ["schema", "validate", "--type", "app-server-stdio-proof", "--file", manifestPath, "--json"]);
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const observer = runCli(cwd, ["app-server", "observer", "status", "--json"]);
+    assert.equal(observer.status, 0, observer.stderr);
+    const observerOutput = JSON.parse(observer.stdout);
+    assert.equal(observerOutput.observerBridge.status, "stdio_mapping_proof_only");
+    assert.equal(observerOutput.observerBridge.runtimeSurface, "unknown");
+    assert.equal(observerOutput.observerBridge.sessionMappingAuthority, "none");
+    assert.equal(observerOutput.observerBridge.connectsToLiveSocket, false);
+    assert.equal(observerOutput.latest.stdioProof.path, manifestPath);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

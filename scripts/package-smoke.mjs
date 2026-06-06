@@ -303,6 +303,11 @@ process.on("SIGINT", shutdown);
   assert(schema.stability === "stable", "schema check did not report stable JSON stability");
   assert(schema.ok === true, "codexus schema check did not return ok=true");
   assert(schema.appServerFixture?.valid === true, "app-server runtime fixture was not readable from the installed package");
+  const appServerObserver = parseJsonRun(codexus, ["app-server", "observer", "status", "--cwd", project, "--json"]);
+  assert(appServerObserver.stability === "experimental", "app-server observer status did not report experimental stability");
+  assert(appServerObserver.observerBridge?.connectsToLiveSocket === false, "app-server observer status must not connect to live sockets");
+  assert(appServerObserver.observerBridge?.startsDesktopTurn === false, "app-server observer status must not start Desktop turns");
+  assert(appServerObserver.observerBridge?.completionAuthority === false, "app-server observer status must not claim completion authority");
 
   const supplyChain = parseJsonRun(codexus, ["supply-chain", "check", "--gate", "--json"]);
   assert(supplyChain.stability === "stable", "supply-chain check did not report stable JSON stability");

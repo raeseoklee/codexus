@@ -107,6 +107,7 @@ Usage:
   cx schema validate-run <run-id> [--json]
   cx app-server status|roundtrip|discover|experiment [--dry-run|--live] [--json]
   cx app-server discover [--record] [--timeout-ms <n>] [--json]
+  cx app-server observer status [--json]
   cx app-server experiment --dry-run --record [--probe-process] [--supervise-fake] [--timeout-ms <n>] [--json]
   cx app-server experiment --isolated-real --record [--timeout-ms <n>] [--json]
   cx app-server experiment --live-read-only --sock <path> --record [--observe-ms <n>] [--timeout-ms <n>] [--json]

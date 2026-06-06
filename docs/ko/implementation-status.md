@@ -262,7 +262,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `stdio_only`입니다. Stdio-observer design contract는 문서화됐습니다. 기존 Desktop
   stdio pipe는 attach target이 아니며 fake/Codexus-owned stdio proof harness는
   구현됐습니다. Positive Desktop attachment는 explicit socket 또는 future supported
-  observer bridge가 증명될 때까지 계속 blocked입니다.
+  observer bridge가 증명될 때까지 계속 blocked입니다. `cx app-server observer status
+  --json`은 기록된 discovery, Stage B, stdio-proof evidence를 live socket 연결 없이
+  하나의 bridge summary로 투영하며, `desktop-app-server`는 기록된 Stage B
+  turn-boundary evidence에서만 보고합니다.
 
 ## 검증
 
@@ -399,7 +402,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 
 - driver-failure repair는 repairable task failure에 한해 explicit budget이 있을 때만 실행됩니다.
 - model replay는 local experiment gate 뒤에 있으며 routine full model-in-the-loop replay는 기본 실행하지 않습니다.
-- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, schema-validatable Stage B read-only evidence를 explicit gate 뒤에 구현했습니다.
+- app-server driver는 live execution disabled이며 fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, schema-validatable Stage B read-only evidence, stdio proof, recorded observer bridge status를 explicit gate 뒤에 구현했습니다.
 - 첫 Stage B maintainer Desktop smoke는 negative였습니다. 사용할 수 있는 app-server
   WebSocket socket을 찾지 못했고, 발견된 IPC socket은 handshake 전에 닫혔습니다.
   Fake/Codexus-owned stdio proof harness는 구현됐지만, 지원되는 socket 또는 future

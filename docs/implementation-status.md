@@ -358,6 +358,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   documented: existing Desktop stdio pipes are not attach targets, so positive
   Desktop attachment remains blocked pending an explicit socket, a fake or
   Codexus-owned stdio proof harness, or a future supported observer bridge.
+  `cx app-server observer status --json` now projects recorded discovery,
+  Stage B, and stdio-proof evidence into one bridge summary without connecting
+  to live sockets; it reports `desktop-app-server` only from recorded Stage B
+  turn-boundary evidence.
 - Multi-engine relay autopilot has an experimental recorder/checker first slice:
   `cx autopilot relay record` imports external author/reviewer artifacts without
   spawning another engine, `cx autopilot relay stage-gate` records
@@ -531,7 +535,7 @@ review. Current high-level gaps:
 
 - Driver-failure repair is implemented only for repairable task failures and only with an explicit budget.
 - Model replay is still local-experiment gated; routine full model-in-the-loop replay scenarios do not run by default.
-- Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, and schema-validatable Stage B read-only evidence are implemented behind explicit gates.
+- Codex app-server driver is intentionally disabled for live execution; fixture/status, dry-run roundtrip, sandbox experiment manifest recording, help-process probe evidence, deterministic fake lifecycle supervision, schema-validatable Stage A isolated real evidence, schema-validatable Stage B read-only evidence, stdio proof, and recorded observer bridge status are implemented behind explicit gates.
 - First Stage B maintainer Desktop smoke was negative: no usable app-server
   WebSocket socket was found, and a discovered IPC socket closed before
   handshake. The fake/Codexus-owned stdio proof harness is implemented, but

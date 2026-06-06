@@ -233,10 +233,12 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    기록합니다. 현재 maintainer evidence는 managed control socket이 없는
    `stdio_only`입니다. Stdio-observer design contract는 문서화됐고 fake
    Codexus-owned `cx app-server experiment --stdio-proof --record --json` proof
-   harness는 구현됐습니다. 다음 slice는 non-disruptive observer bridge 또는 explicit
+   harness는 구현됐습니다. `cx app-server observer status --json`은 기록된
+   discovery, Stage B, stdio-proof evidence를 live socket 연결 없이 하나의 bridge
+   summary로 투영합니다. 다음 slice는 non-disruptive observer bridge 또는 explicit
    user-provided socket이 transcript 값 없이 turn-boundary evidence를 만들 때만 실제
-   session-event mapping으로 진행합니다. app-server driver 활성화는 별도 gate로 계속
-   분리합니다.
+   session-event mapping으로 진행합니다. app-server driver 활성화는 별도 gate로
+   계속 분리합니다.
 4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
    공유하며, 첫 synchronous dispatcher slice가 구현됐습니다. 다음은 richer
    scheduler semantics, retry/recovery policy, foreground dispatch를 넘는

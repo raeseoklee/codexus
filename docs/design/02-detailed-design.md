@@ -258,6 +258,13 @@ local experiment gate is set, and the stable path remains `codex exec --json`.
 still avoiding process startup.
 `--probe-process` may add bounded `codex app-server --help` process evidence,
 but it is not a supervised app-server lifecycle or JSON-RPC turn execution.
+
+`cx app-server observer status --json` reads only recorded discovery, Stage B,
+and stdio-proof artifacts under `.codexus/experiments/app-server/`. It does not
+connect to live sockets, start Desktop turns, store transcript values, or treat
+fake/Codexus-owned stdio proof as live Desktop attachment. `runtimeSurface:
+"desktop-app-server"` is reported only from recorded Stage B turn-boundary
+evidence.
 `--supervise-fake` records deterministic fake process lifecycle evidence with
 pid, timeout, stop signal, cleanup, and bounded stdout/stderr previews; it does
 not start the real app-server.

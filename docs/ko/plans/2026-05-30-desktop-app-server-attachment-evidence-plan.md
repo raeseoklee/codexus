@@ -219,6 +219,7 @@ cx app-server discover --record --json
 cx app-server experiment --isolated-real --record --json
 cx app-server experiment --live-read-only --record --sock <path> --json
 cx app-server experiment --stdio-proof --record --json
+cx app-server observer status --json
 ```
 
 `--isolated-real`은 `CODEXUS_ENABLE_APP_SERVER_ISOLATED=1` 뒤에서 구현됐습니다.
@@ -235,6 +236,13 @@ remote control을 켜지 않습니다.
 `stability: "experimental"`을 보고하고 schema-validatable `app-server-stdio-proof`
 artifact를 기록하지만, live Desktop attachment support로 해석하면 안 됩니다. 기존
 Desktop stdio pipe는 계속 non-target입니다.
+
+`cx app-server observer status --json`은 recorded-evidence projection으로
+구현됐습니다. `.codexus/experiments/app-server/` 아래의 discovery, Stage B,
+stdio-proof artifact를 읽으며 live socket에 연결하거나 Desktop turn을 시작하거나
+transcript 값을 저장하지 않습니다. `desktop-app-server`는 기록된 Stage B
+turn-boundary evidence에서만 보고하고, fake/Codexus-owned stdio proof는 live
+attachment authority가 아니라 design evidence로 유지합니다.
 
 ## 검증
 

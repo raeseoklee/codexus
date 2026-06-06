@@ -223,6 +223,12 @@ formatting합니다. 자동 prompt injection이나 별도 chat loop는 만들지
 - `--probe-process`는 bounded `codex app-server --help` process evidence를
   추가할 수 있지만, supervised app-server lifecycle이나 JSON-RPC turn 실행은
   아닙니다.
+- `cx app-server observer status --json`은 `.codexus/experiments/app-server/`
+  아래에 기록된 discovery, Stage B, stdio-proof artifact만 읽습니다. Live socket에
+  연결하지 않고, Desktop turn을 시작하지 않고, transcript 값을 저장하지 않으며,
+  fake/Codexus-owned stdio proof를 live Desktop attachment로 취급하지 않습니다.
+  `runtimeSurface: "desktop-app-server"`는 기록된 Stage B turn-boundary evidence에서만
+  보고합니다.
 - `--supervise-fake`는 pid, timeout, stop signal, cleanup, bounded stdout/stderr
   preview를 가진 deterministic fake process lifecycle evidence를 기록합니다.
   실제 app-server를 시작하지 않습니다.

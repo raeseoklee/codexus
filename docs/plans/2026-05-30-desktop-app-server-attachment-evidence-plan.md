@@ -227,6 +227,7 @@ cx app-server discover --record --json
 cx app-server experiment --isolated-real --record --json
 cx app-server experiment --live-read-only --record --sock <path> --json
 cx app-server experiment --stdio-proof --record --json
+cx app-server observer status --json
 ```
 
 `--isolated-real` is implemented behind `CODEXUS_ENABLE_APP_SERVER_ISOLATED=1`.
@@ -244,6 +245,13 @@ proof harness. It reports `stability: "experimental"`, records
 `app-server-stdio-proof` schema-validatable artifacts, and must not be treated
 as live Desktop attachment support. Existing Desktop stdio pipes remain
 non-targets.
+
+`cx app-server observer status --json` is implemented as a recorded-evidence
+projection. It reads discovery, Stage B, and stdio-proof artifacts under
+`.codexus/experiments/app-server/` and does not connect to live sockets, start
+Desktop turns, or store transcript values. It reports `desktop-app-server` only
+from recorded Stage B turn-boundary evidence; fake/Codexus-owned stdio proof is
+kept as design evidence, not live attachment authority.
 
 ## Verification
 

@@ -246,10 +246,13 @@ evidence only when the supporting runtime exists:
    evidence. Current maintainer evidence is `stdio_only` with no managed control
    socket. The stdio-observer design contract is documented and the fake
    Codexus-owned `cx app-server experiment --stdio-proof --record --json`
-   proof harness is implemented. The next slice is real session-event mapping
-   only from a non-disruptive observer bridge or an explicit user-provided
-   socket that produces turn-boundary evidence without transcript values. Keep
-   app-server driver enablement separate and still gated.
+   proof harness is implemented. `cx app-server observer status --json` now
+   projects recorded discovery, Stage B, and stdio-proof evidence into one
+   bridge summary without connecting to live sockets. The next slice is real
+   session-event mapping only from a non-disruptive observer bridge or an
+   explicit user-provided socket that produces turn-boundary evidence without
+   transcript values. Keep app-server driver enablement separate and still
+   gated.
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`, and the first synchronous dispatcher
    slice is implemented. Next add richer scheduler semantics, retry/recovery
