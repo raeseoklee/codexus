@@ -47,12 +47,16 @@ export interface LspCommandResult {
 
 export interface LspEvidenceReport {
   schemaVersion: 1;
-  stability: "experimental";
+  stability: "stable";
   command: "lsp status" | "lsp check";
   cwd: string;
   projectRoot: string | null;
   scanMode: "project-files";
   scanAccuracy: "best_effort";
+  limits: {
+    timeoutMs: number | null;
+    outputTailLimit: number;
+  };
   autoApply: {
     status: "detect_only";
     startsLanguageServer: false;
@@ -279,12 +283,16 @@ export function buildLspStatusReport(cwd: string): LspEvidenceReport {
     }));
   return {
     schemaVersion: 1,
-    stability: "experimental",
+    stability: "stable",
     command: "lsp status",
     cwd,
     projectRoot: pkg?.root ?? null,
     scanMode: "project-files",
     scanAccuracy: "best_effort",
+    limits: {
+      timeoutMs: null,
+      outputTailLimit: OUTPUT_TAIL_LIMIT,
+    },
     autoApply: {
       status: "detect_only",
       startsLanguageServer: false,
@@ -309,6 +317,7 @@ export function buildLspStatusReport(cwd: string): LspEvidenceReport {
 
 export function buildLspCheckReport(cwd: string, options: { gate: boolean; timeoutMs?: number }): LspEvidenceReport {
   const status = buildLspStatusReport(cwd);
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const provider = status.providers.find((candidate) => candidate.diagnostics.available);
   const blockingUnknowns = [...status.blockingUnknowns];
   const evidenceGaps = [...status.evidenceGaps];
@@ -326,7 +335,7 @@ export function buildLspCheckReport(cwd: string, options: { gate: boolean; timeo
     const completed = spawnSync(provider.diagnostics.command[0], provider.diagnostics.command.slice(1), {
       cwd: status.projectRoot ?? cwd,
       encoding: "utf8",
-      timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      timeout: timeoutMs,
       env: { ...process.env },
     });
     const durationMs = Date.now() - started;
@@ -357,6 +366,10 @@ export function buildLspCheckReport(cwd: string, options: { gate: boolean; timeo
   return {
     ...status,
     command: "lsp check",
+    limits: {
+      timeoutMs,
+      outputTailLimit: OUTPUT_TAIL_LIMIT,
+    },
     autoApply: {
       status: "detect_only",
       startsLanguageServer: false,

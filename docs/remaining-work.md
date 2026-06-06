@@ -449,7 +449,9 @@ Harness-engineering alignment adds these evidence-first tracks:
     `repo check --gate` and local-mode `release check --gate` to stable and
     freezes their mechanical docs-code and release-wiring invariant fields in
     `docs/json-contract.md`; `contract check --gate` can pass the stable
-    promotion requirement. Remaining promotion work is LSP/architecture
-    hardening. Do not promote action surfaces such as app-instance, live
-    autopilot, active relay, Desktop attachment, automatic injection, or plugin
-    always-on claims until their authority evidence is stronger.
+    promotion requirement. LSP diagnostics are also promoted for explicit
+    bounded diagnostics only; protocol-server lifecycle remains deferred.
+    Remaining promotion work is architecture hardening. Do not promote action
+    surfaces such as app-instance, live autopilot, active relay, Desktop
+    attachment, automatic injection, or plugin always-on claims until their
+    authority evidence is stronger.

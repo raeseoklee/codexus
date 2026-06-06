@@ -143,8 +143,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   global prefix, and verifies `codexus` / `cx` help and version output,
   runtime schema assets, postinstall Codex skill adapter installation,
   `doctor --json --strict` through a fake Codex fixture, `supply-chain check
-  --gate`, and installed-package mock pass/fail/repair/status/events/resume/
-  cancel flows.
+  --gate`, local-mode `release check --gate`, `lsp check --gate`, and
+  installed-package mock pass/fail/repair/status/events/resume/cancel flows.
 - `prepublishOnly` runs `npm run release:check`, which combines local CI,
   source-tree `lsp:check` dogfood, package smoke verification, report-only
   supply-chain dogfood, and `cx release check --gate --json`. Package smoke
@@ -161,11 +161,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   presence. `npm run release:check` includes `release:policy` so missing policy
   docs block release prep before tag publish.
 - `cx contract check --json` reports the experimental `0.2.0` promotion
-  readiness audit. `repo check --gate` and local-mode `release check --gate`
-  are promoted stable surfaces and are frozen in `docs/json-contract.md`, so
-  `cx contract check --target 0.2.0 --gate --json` can pass the stable-promotion
-  requirement. `lsp check` and the narrow `architecture check` forbidden-import
-  subset remain candidates, while action surfaces such as app-instance
+  readiness audit. `repo check --gate`, local-mode `release check --gate`, and
+  `lsp check --gate` are promoted stable surfaces and are frozen in
+  `docs/json-contract.md`, so `cx contract check --target 0.2.0 --gate --json`
+  can pass the stable-promotion requirement. The narrow `architecture check`
+  forbidden-import subset remains a candidate, while action surfaces such as app-instance
   start/stop, live autopilot, active relay adapters, Desktop app-server
   attachment, automatic injection, and plugin always-on claims remain deferred.
 - `cx update check --json` reports experimental update availability facts from

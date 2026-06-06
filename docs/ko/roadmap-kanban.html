@@ -212,13 +212,15 @@
           <div class="tags">
             <span class="tag done">repo check 승격</span>
             <span class="tag done">release local 승격</span>
+            <span class="tag done">LSP 승격</span>
             <span class="tag evidence">contract gate</span>
           </div>
-          <p><code>cx contract check</code>는 문서화된 0.2.0 규칙을 실행 가능한 audit로 바꿉니다. 승격된 surface는 stable <code>repo check --gate</code>와 local-mode <code>release check --gate</code>입니다. 0.2.0은 여전히 0.1.9 다음 countdown이 아니라 제품 cut 결정입니다.</p>
+          <p><code>cx contract check</code>는 문서화된 0.2.0 규칙을 실행 가능한 audit로 바꿉니다. 승격된 surface는 stable <code>repo check --gate</code>, local-mode <code>release check --gate</code>, 명시적 <code>lsp check --gate</code>입니다. 0.2.0은 여전히 0.1.9 다음 countdown이 아니라 제품 cut 결정입니다.</p>
           <span class="label">증거</span>
           <ul>
             <li><code>cx contract check --target 0.2.0 --json</code>은 viable promotion candidate를 보고합니다.</li>
-            <li><code>repo check --gate</code>와 local-mode <code>release check --gate</code>는 stable이고 <code>docs/json-contract.md</code>에 frozen되어 있으므로, <code>--gate</code>는 promotion requirement를 통과할 수 있습니다.</li>
+            <li><code>repo check --gate</code>, local-mode <code>release check --gate</code>, <code>lsp check --gate</code>는 stable이고 <code>docs/json-contract.md</code>에 frozen되어 있으므로, <code>--gate</code>는 promotion requirement를 통과할 수 있습니다.</li>
+            <li>LSP protocol-server lifecycle과 자동 project LSP 적용은 계속 deferred입니다.</li>
             <li>Action surface는 lifecycle과 authority evidence가 더 강해질 때까지 experimental/deferred로 유지됩니다.</li>
           </ul>
           <span class="label">근거</span>

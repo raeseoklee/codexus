@@ -63,6 +63,7 @@ test("architecture check is report-only when no policy is declared", async () =>
     assert.equal(output.gate.status, "not_requested");
     assert.deepEqual(output.evidenceGaps, []);
     assert.ok(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "policy_missing_report_only"));
+    assert.ok(output.heuristicClaims.some((claim: { kind: string }) => claim.kind === "broad_layering_rule_deferred"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -177,4 +178,5 @@ test("Codexus package dogfoods architecture report without forbidden imports", (
   assert.equal(output.gate.status, "passed");
   assert.equal(output.scanAccuracy, "best_effort");
   assert.deepEqual(output.evidenceGaps, []);
+  assert.ok(output.heuristicClaims.some((claim: { kind: string }) => claim.kind === "broad_layering_rule_deferred"));
 });

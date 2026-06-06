@@ -422,7 +422,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     `repo check --gate`와 local-mode `release check --gate`를 stable로 승격하고,
     기계적 docs-code invariant field와 release-wiring invariant field를
     `docs/json-contract.md`에 freeze합니다. 이제 `contract check --gate`는 stable
-    promotion requirement를 통과할 수 있습니다. 남은 promotion 작업은 LSP/architecture
-    hardening입니다. App-instance, live autopilot, active relay, Desktop attachment,
-    automatic injection, plugin always-on claim 같은 action surface는 authority evidence가
-    더 강해질 때까지 승격하지 않습니다.
+    promotion requirement를 통과할 수 있습니다. LSP diagnostics도 명시적 bounded
+    diagnostics에 한해 승격되었고, protocol-server lifecycle은 계속 deferred입니다.
+    남은 promotion 작업은 architecture hardening입니다. App-instance, live autopilot,
+    active relay, Desktop attachment, automatic injection, plugin always-on claim 같은
+    action surface는 authority evidence가 더 강해질 때까지 승격하지 않습니다.

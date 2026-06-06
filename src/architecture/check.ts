@@ -171,7 +171,12 @@ export function buildArchitectureEvidenceReport(cwd: string, options: Architectu
   const policy = readArchitecturePolicy(packageRoot, options.policyPath);
   const evidenceGaps: ArchitectureEvidenceGap[] = [];
   const derivableFacts: ArchitectureDerivableFact[] = [];
-  const heuristicClaims: ArchitectureHeuristicClaim[] = [];
+  const heuristicClaims: ArchitectureHeuristicClaim[] = [{
+    kind: "broad_layering_rule_deferred",
+    confidence: "high",
+    evidence: "Architecture check currently gates only declared forbidden-import facts from the static import scan.",
+    recommendation: "Keep broad layering, type-aware graph claims, and design-quality judgments advisory until a separate stable contract is implemented.",
+  }];
   const blockingUnknowns: ArchitectureUnknown[] = [];
   const effectivePolicy = policy.validation.valid ? policy.validation.policy : null;
   const scanScopes = effectivePolicy && effectivePolicy.rules.length > 0

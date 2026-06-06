@@ -84,6 +84,14 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
   trusted-publishing workflow shape, pinned publish actions, installer asset
   workflow wiring, redacted release-evidence docs. GitHub/npm post-publish live
   sign-off는 계속 명시적 opt-in이 필요한 experimental surface입니다.
+- LSP diagnostics output(`lsp status`, `lsp check --gate`): `schemaVersion`,
+  `stability`, `command`, `cwd`, `projectRoot`, `scanMode`, `scanAccuracy`,
+  `limits`, `autoApply`, `lsp`, `providers`, `result`, `evidenceGaps`,
+  `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
+  `informationalUnknowns`, `gate`. Stable contract는 project detection과 명시적
+  diagnostics command 실행만 포함합니다. `lsp status`는 diagnostics를 실행하지 않고,
+  `lsp check`는 bounded timeout/output-tail field를 사용하며, 두 명령 모두 protocol
+  server를 시작하거나 제어하지 않습니다.
 
 이 필드를 제거하거나 의미를 재정의하려면 `0.2.0`이 필요합니다. `0.1.x`에서 field
 추가는 허용됩니다.
@@ -92,8 +100,8 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
 
 - app-server live behavior, cron/gateway live dispatch, automatic injection,
   routine live model replay, statusline integration, worker launch,
-  `release check --live`, LSP diagnostics check, architecture check,
-  contract-promotion readiness check의
+  `release check --live`, LSP diagnostics protocol-server lifecycle 또는 자동 LSP
+  적용, architecture check, contract-promotion readiness check의
   experimental/deferred output.
 - `heuristicClaims` 같은 advisory array의 membership.
 - Additive `update` summary의 nested content. 이는 informational experimental

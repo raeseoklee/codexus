@@ -41,8 +41,10 @@ test("lsp status detects TypeScript diagnostics without starting a language serv
     const result = runCli(cwd, ["lsp", "status", "--json"]);
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
-    assert.equal(output.stability, "experimental");
+    assert.equal(output.stability, "stable");
     assert.equal(output.command, "lsp status");
+    assert.equal(output.limits.timeoutMs, null);
+    assert.equal(output.limits.outputTailLimit, 4000);
     assert.equal(output.lsp.status, "available");
     assert.equal(output.lsp.providerCount, 1);
     assert.equal(output.providers[0].id, "typescript");
@@ -81,6 +83,7 @@ test("lsp check runs explicit diagnostics and can gate failures", async () => {
     assert.equal(result.status, 1);
     const output = JSON.parse(result.stdout);
     assert.equal(output.command, "lsp check");
+    assert.equal(output.stability, "stable");
     assert.equal(output.lsp.status, "failed");
     assert.equal(output.result.executed, true);
     assert.equal(output.result.status, "failed");
@@ -101,6 +104,7 @@ test("lsp check passes when project diagnostics pass", async () => {
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
     assert.equal(output.lsp.status, "passed");
+    assert.equal(output.limits.timeoutMs, 60000);
     assert.equal(output.result.status, "passed");
     assert.equal(output.gate.status, "passed");
     assert.deepEqual(output.evidenceGaps, []);
@@ -118,10 +122,46 @@ test("lsp check reports unavailable diagnostics without pretending to gate langu
     const result = runCli(cwd, ["lsp", "check", "--gate", "--json"]);
     assert.equal(result.status, 1);
     const output = JSON.parse(result.stdout);
+    assert.equal(output.stability, "stable");
     assert.equal(output.lsp.status, "unavailable");
     assert.equal(output.result, null);
     assert.equal(output.gate.status, "blocked");
     assert.ok(output.blockingUnknowns.some((item: { kind: string }) => item.kind === "lsp_diagnostics_unavailable"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("lsp check reports explicit diagnostic timeouts without claiming protocol-server output", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeTypeScriptProject(cwd, "setTimeout(() => {}, 5000);\n");
+    const result = runCli(cwd, ["lsp", "check", "--gate", "--timeout-ms", "50", "--json"]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.stability, "stable");
+    assert.equal(output.limits.timeoutMs, 50);
+    assert.equal(output.result.status, "failed");
+    assert.equal(output.result.exitCode, null);
+    assert.match(output.result.stderrTail, /diagnostic command timed out/);
+    assert.ok(output.evidenceGaps.some((item: { kind: string }) => item.kind === "lsp_diagnostics_timeout"));
+    assert.equal(output.providers[0].protocol.startsServer, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("lsp check bounds noisy diagnostic output", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeTypeScriptProject(cwd, "console.log('x'.repeat(5000));\nprocess.exit(1);\n");
+    const result = runCli(cwd, ["lsp", "check", "--gate", "--json"]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.stability, "stable");
+    assert.equal(output.limits.outputTailLimit, 4000);
+    assert.match(output.result.stdoutTail, /^\[truncated \d+ chars\]/);
+    assert.ok(output.result.stdoutTail.length <= output.limits.outputTailLimit + 64);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

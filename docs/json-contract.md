@@ -86,6 +86,14 @@ For supported commands, these top-level field names are frozen through `0.1.x`:
   guard, trusted-publishing workflow shape, pinned publish actions, installer
   asset workflow wiring, and redacted release-evidence docs. Live GitHub/npm
   post-publish sign-off remains opt-in and experimental.
+- LSP diagnostics output (`lsp status`, `lsp check --gate`): `schemaVersion`,
+  `stability`, `command`, `cwd`, `projectRoot`, `scanMode`, `scanAccuracy`,
+  `limits`, `autoApply`, `lsp`, `providers`, `result`, `evidenceGaps`,
+  `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
+  `informationalUnknowns`, `gate`. The stable contract covers project detection
+  and explicit diagnostics command execution only. `lsp status` does not run
+  diagnostics, `lsp check` uses bounded timeout/output-tail fields, and neither
+  command starts or controls a protocol server.
 
 Removing or redefining these fields requires `0.2.0`. Adding fields is allowed
 in `0.1.x`.
@@ -95,7 +103,8 @@ in `0.1.x`.
 - Experimental/deferred command output for app-server live behavior,
   cron/gateway live dispatch, automatic injection, routine live model replay,
   statusline integration, worker launch, `release check --live`, LSP diagnostics
-  checks, architecture checks, and contract-promotion readiness checks.
+  protocol-server lifecycle or automatic LSP application, architecture checks,
+  and contract-promotion readiness checks.
 - The membership of advisory arrays such as `heuristicClaims`.
 - The nested content of the additive `update` summary, which is an
   informational experimental update-availability report and never a release,

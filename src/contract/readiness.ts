@@ -156,17 +156,17 @@ const candidateDefinitions: CandidateDefinition[] = [
     surface: "lsp-diagnostics-check",
     command: "lsp check --gate",
     sourceFile: "src/lsp/project.ts",
-    disposition: "candidate_after_hardening",
+    disposition: "promote_candidate",
     contractRisk: "medium",
     sideEffectRisk: "medium",
     reasons: [
       "Runs only explicit local diagnostics and does not start a protocol server.",
-      "Needs more dogfooding across non-TypeScript or no-diagnostics projects before stable promotion.",
+      "Unavailable, passed, failed, timeout, and output-bound branches are covered as stable output.",
     ],
     requiredEvidence: [
-      "Freeze unavailable/passed/failed JSON branches.",
-      "Document timeout and output-bound behavior as stable fields.",
-      "Keep protocol-server lifecycle explicitly deferred.",
+      "Keep unavailable/passed/failed JSON branches frozen in docs/json-contract.md.",
+      "Keep timeout and output-bound behavior visible as stable fields.",
+      "Keep protocol-server lifecycle and automatic LSP application explicitly deferred.",
     ],
   },
   {
