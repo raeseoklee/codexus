@@ -9,6 +9,13 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.12 - 2026-06-06
+
+This release turns the project release cadence into executable policy evidence.
+It keeps the 0.1.x JSON contract boundary unchanged: the new `release policy`
+surface is experimental, while `release:check` now verifies that the release
+policy itself is present before a stable tag is cut.
+
 ### Added
 
 - Added an executable release cadence policy:

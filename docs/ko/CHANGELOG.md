@@ -9,6 +9,13 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.12 - 2026-06-06
+
+이 release는 project release cadence를 실행 가능한 policy evidence로 바꿉니다. 0.1.x
+JSON contract boundary는 그대로 유지합니다. 새 `release policy` surface는
+experimental이고, `release:check`는 stable tag를 자르기 전에 release policy 자체가
+존재하는지 확인합니다.
+
 ### Added
 
 - 실행 가능한 release cadence policy를 추가했습니다:
