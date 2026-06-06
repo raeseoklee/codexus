@@ -74,6 +74,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   pinned trusted-publishing workflow, GitHub Release `install.sh` asset wiring,
   local release-evidence doc을 확인합니다. `--live`는 npm `latest`, GitHub latest,
   installer asset hash identity를 확인하는 명시적 post-publish sign-off입니다.
+- `cx release policy --json`은 active release cadence policy를 보고합니다. 작은 commit을
+  유지하되 더 큰 theme의 stable release로 묶는 cadence, hotfix exception,
+  stable-contract version boundary, 영문/한국어 policy 문서 존재를 포함합니다.
+  `npm run release:check`는 `release:policy`를 포함하므로 policy 문서가 없으면 tag
+  publish 전에 release prep이 막힙니다.
 - `cx contract check --json`은 experimental `0.2.0` promotion readiness audit를
   보고합니다. `repo check`, local-mode `release check`, `lsp check`, 좁은
   `architecture check` forbidden-import subset 같은 low-risk promotion candidate를

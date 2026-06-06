@@ -87,6 +87,10 @@ in `0.1.x`.
 
 ## Breaking Change Rule
 
+Release cadence is governed separately by [Release policy](release-policy.md):
+small commits should normally be bundled into larger thematic stable releases,
+but the version number still follows the frozen-contract boundary below.
+
 - Patch release (`0.1.x`): additive JSON fields only for stable surfaces.
 - Minor release (`0.2.0`): may remove or redefine frozen fields with changelog
   notice.

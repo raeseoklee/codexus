@@ -85,6 +85,10 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
 
 ## Breaking Change Rule
 
+Release cadence는 별도 [릴리즈 정책](release-policy.md)이 다룹니다. 작은 commit은
+보통 더 큰 theme의 stable release로 묶지만, version number는 아래 frozen-contract
+경계를 따릅니다.
+
 - Patch release(`0.1.x`): stable surface에는 additive JSON field만 허용.
 - Minor release(`0.2.0`): changelog notice와 함께 frozen field 제거/재정의 가능.
 - Experimental/deferred surface는 supported처럼 보이지 않도록 stability를 자기보고해야 함.

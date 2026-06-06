@@ -28,6 +28,7 @@ public.
 npm run ci
 npm run package:smoke
 cx supply-chain check --gate --json
+cx release policy --gate --json
 cx release check --gate --json
 node src/cli/main.ts doctor --json
 node src/cli/main.ts schema check --json
@@ -36,6 +37,30 @@ node src/cli/main.ts schema check --json
 Remote GitHub Actions may depend on account or repository runner availability.
 Local `npm run ci` is the canonical verification path while billing or runner
 availability is blocked.
+
+## Release Cadence Policy
+
+Use [Release policy](release-policy.md) before deciding that a stable cut is
+worth publishing. Codexus intentionally uses small, reviewable commits but
+larger thematic releases: normal stable versions should bundle at least two
+substantive slices, preferably three to five related slices, under one visible
+theme.
+
+Hotfixes may be smaller when they fix security/secret exposure, broken install
+or publish assets, CI/release blockers, stable-command regressions, or
+documentation mistakes that could make users run unsafe or wrong commands.
+Hotfix evidence should say why the normal cadence was intentionally bypassed.
+
+The cadence policy is executable:
+
+```bash
+cx release policy --gate --json
+```
+
+`npm run release:check` includes this gate. It verifies that the release policy
+is documented in English and Korean and that the current policy shape is
+visible through the CLI; it does not make a semantic claim that the changelog is
+"big enough."
 
 ## GitHub Actions
 

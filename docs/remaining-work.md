@@ -80,6 +80,11 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   JSON summary, tmux/native-subagent launch surfaces are truthful gates, and
   automation live contracts now dispatch synchronously with explicit approval,
   while richer scheduler/recovery semantics remain follow-up work.
+- Release operations now have an executable cadence policy:
+  `cx release policy --json` reports the active small-commits/larger-releases
+  rule, hotfix exceptions, stable-contract version boundary, and English/Korean
+  policy-doc presence. `npm run release:check` includes this policy gate before
+  tag publish.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
   full external JSON Schema engine enforcement/migrations, richer cron/gateway

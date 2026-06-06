@@ -9,6 +9,14 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- 실행 가능한 release cadence policy를 추가했습니다:
+  `cx release policy --json`은 active "작은 commit, 더 큰 release" 정책, hotfix
+  exception, stable-contract version boundary, 영문/한국어 policy 문서 존재를
+  보고합니다. `npm run release:check`는 이제 policy gate를 포함하므로 policy 문서가
+  없으면 tag publish 전에 release prep이 실패합니다.
+
 ## 0.1.11 - 2026-06-05
 
 ### Added

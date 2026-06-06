@@ -9,6 +9,15 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added an executable release cadence policy:
+  `cx release policy --json` reports the active "small commits, larger
+  releases" policy, hotfix exceptions, stable-contract version boundary, and
+  English/Korean policy-doc presence. `npm run release:check` now includes the
+  policy gate so release prep fails before tag publish if the policy docs are
+  missing.
+
 ## 0.1.11 - 2026-06-05
 
 ### Added

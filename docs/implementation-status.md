@@ -154,6 +154,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   trusted-publishing workflow, GitHub Release `install.sh` asset wiring, and
   local release-evidence docs. `--live` is an explicit post-publish sign-off for
   npm `latest`, GitHub latest, and installer asset hash identity.
+- `cx release policy --json` reports the active release cadence policy:
+  small commits but larger thematic stable releases, hotfix exceptions, the
+  stable-contract version boundary, and English/Korean policy document
+  presence. `npm run release:check` includes `release:policy` so missing policy
+  docs block release prep before tag publish.
 - `cx contract check --json` reports the experimental `0.2.0` promotion
   readiness audit. It identifies low-risk promotion candidates such as
   `repo check`, local-mode `release check`, `lsp check`, and the narrow

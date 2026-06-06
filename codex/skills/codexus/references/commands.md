@@ -108,6 +108,18 @@ node codex/skills/codexus/scripts/cx.mjs gateway check --dry-run --record --task
 
 Use these for inspection, run-ledger validation, process-probe evidence, deterministic fake lifecycle supervision, and dry-run audit evidence. Live app-server, cron, and gateway behavior remains gated even when feature gates are enabled.
 
+## Release Policy
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs release policy --json
+node codex/skills/codexus/scripts/cx.mjs release policy --gate --json
+node codex/skills/codexus/scripts/cx.mjs release check --gate --json
+```
+
+Use `release policy` before cutting a stable version. It reports the project
+cadence policy, hotfix exceptions, version-boundary rules, and English/Korean
+policy-doc presence. Use `release check` for release-integrity evidence.
+
 ## Supervised Handoff
 
 ```bash

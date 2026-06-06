@@ -27,6 +27,7 @@ GitHub repository를 private에서 public으로 변경하기 전에 이 checklis
 npm run ci
 npm run package:smoke
 cx supply-chain check --gate --json
+cx release policy --gate --json
 cx release check --gate --json
 node src/cli/main.ts doctor --json
 node src/cli/main.ts schema check --json
@@ -35,6 +36,28 @@ node src/cli/main.ts schema check --json
 Remote GitHub Actions는 account/repository runner availability에 의존할 수
 있습니다. billing 또는 runner availability가 막힌 동안에는 local `npm run ci`를
 canonical verification path로 둡니다.
+
+## Release Cadence Policy
+
+Stable cut을 결정하기 전에 [릴리즈 정책](release-policy.md)을 사용합니다. Codexus는
+작고 review 가능한 commit을 유지하되, stable release는 더 큰 theme 단위로 묶습니다.
+일반 stable version은 하나의 visible theme 아래 최소 두 개의 substantive slice,
+가능하면 세 개에서 다섯 개의 관련 slice를 포함해야 합니다.
+
+Security/secret exposure, 깨진 install 또는 publish asset, CI/release blocker,
+stable command regression, 사용자가 unsafe하거나 잘못된 command를 실행하게 만들 수
+있는 문서 오류는 더 작은 hotfix로 낼 수 있습니다. Hotfix evidence는 왜 일반 cadence를
+의도적으로 우회했는지 설명해야 합니다.
+
+Cadence policy는 실행 가능합니다:
+
+```bash
+cx release policy --gate --json
+```
+
+`npm run release:check`는 이 gate를 포함합니다. 이 gate는 release policy가 영문/한국어로
+문서화되어 있고 현재 policy shape가 CLI에서 보이는지 확인합니다. Proposed changelog가
+의미상 "충분히 큰지"를 자동 판단하지는 않습니다.
 
 ## GitHub Actions
 

@@ -75,6 +75,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   artifact를 쓰고, HUD는 read-only JSON summary로 제공됩니다. tmux/native-subagent launch
   surface는 truthful gate이고, automation live contract는 이제 explicit approval로
   synchronous dispatch가 가능하며 richer scheduler/recovery semantics는 후속입니다.
+- Release 운영에는 실행 가능한 cadence policy가 생겼습니다.
+  `cx release policy --json`은 작은 commit/더 큰 release 규칙, hotfix exception,
+  stable-contract version boundary, 영문/한국어 policy 문서 존재를 보고합니다.
+  `npm run release:check`는 tag publish 전에 이 policy gate를 포함합니다.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, richer cron/gateway scheduler semantics,

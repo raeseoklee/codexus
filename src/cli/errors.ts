@@ -85,6 +85,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported update command${target ? `: ${target}` : ""}.`;
     case "invalid_update_channel":
       return `Invalid update channel${target ? `: ${target}` : ""}.`;
+    case "unsupported_release_command":
+      return `Unsupported release command${target ? `: ${target}` : ""}.`;
     case "unsupported_plugin_command":
       return `Unsupported plugin command${target ? `: ${target}` : ""}.`;
     case "unsupported_wiki_command":
@@ -341,6 +343,8 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Run `cx update check --json` or `cx update check --channel next --json`.";
     case "invalid_update_channel":
       return "Use `--channel stable` or `--channel next`; prerelease checks require explicit opt-in.";
+    case "unsupported_release_command":
+      return "Run `cx release policy --json` for release cadence policy or `cx release check --gate --json` for release integrity.";
     case "unsupported_wiki_command":
       return "Run `cx wiki map --json`, `cx wiki build --mode deterministic --json`, `cx wiki check --gate --json`, or `cx wiki context --topic <name> --json`.";
     case "unsupported_wiki_build_mode":

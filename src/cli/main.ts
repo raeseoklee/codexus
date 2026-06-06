@@ -72,6 +72,7 @@ Usage:
   cx supply-chain check [--gate] [--json]
   cx policy catalog check [--since <ref>] [--scope <glob>] [--json]
   cx release check [--version <version>] [--live] [--gate] [--json]
+  cx release policy [--gate] [--json]
   cx contract check [--target 0.2.0] [--gate] [--json]
   cx architecture check [--policy <path>] [--gate] [--json]
   cx repo map|check [--gate] [--json]
