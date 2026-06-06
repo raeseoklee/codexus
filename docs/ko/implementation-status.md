@@ -69,24 +69,25 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   report-only supply-chain dogfood, `cx release check --gate --json`을 묶은
   `npm run release:check`를 실행합니다. Package smoke에는 설치된 package에 대한
   gate-mode supply-chain check와 LSP check가 포함됩니다.
-- `cx release check --json`은 source checkout의 experimental release-integrity
+- `cx release check --json`은 source checkout의 stable local-mode release-integrity
   evidence를 보고합니다. Stable installer default, expected-version guard,
   pinned trusted-publishing workflow, GitHub Release `install.sh` asset wiring,
   local release-evidence doc을 확인합니다. `--live`는 npm `latest`, GitHub latest,
-  installer asset hash identity를 확인하는 명시적 post-publish sign-off입니다.
+  installer asset hash identity를 확인하는 명시적 experimental post-publish
+  sign-off입니다.
 - `cx release policy --json`은 active release cadence policy를 보고합니다. 작은 commit을
   유지하되 더 큰 theme의 stable release로 묶는 cadence, hotfix exception,
   stable-contract version boundary, 영문/한국어 policy 문서 존재를 포함합니다.
   `npm run release:check`는 `release:policy`를 포함하므로 policy 문서가 없으면 tag
   publish 전에 release prep이 막힙니다.
 - `cx contract check --json`은 experimental `0.2.0` promotion readiness audit를
-  보고합니다. `repo check --gate`는 첫 번째 stable 승격 surface이며
-  `docs/json-contract.md`에 frozen되어 있으므로, `cx contract check --target 0.2.0
-  --gate --json`은 최소 stable-promotion requirement를 통과할 수 있습니다.
-  Local-mode `release check`, `lsp check`, 좁은 `architecture check` forbidden-import
-  subset은 계속 후보이고, app-instance start/stop, live autopilot, active relay
-  adapter, Desktop app-server attachment, automatic injection, plugin always-on
-  claim 같은 action surface는 계속 deferred입니다.
+  보고합니다. `repo check --gate`와 local-mode `release check --gate`는 stable 승격
+  surface이며 `docs/json-contract.md`에 frozen되어 있으므로,
+  `cx contract check --target 0.2.0 --gate --json`은 stable-promotion requirement를
+  통과할 수 있습니다. `lsp check`, 좁은 `architecture check` forbidden-import subset은
+  계속 후보이고, app-instance start/stop, live autopilot, active relay adapter,
+  Desktop app-server attachment, automatic injection, plugin always-on claim 같은
+  action surface는 계속 deferred입니다.
 - `cx update check --json`은 bounded TTL cache를 통해 npm `latest` dist-tag에서
   experimental update availability fact를 보고합니다. npm `next` prerelease fact를
   위한 명시적 opt-in 경로는 `cx update check --channel next --json`이며, 별도 cache

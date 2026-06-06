@@ -445,11 +445,11 @@ Harness-engineering alignment adds these evidence-first tracks:
     heartbeat has dispatched, and do not move workflow-kernel logic into
     plugin-local scripts.
 17. 0.2.0 promotion readiness: the first audit surface now exists as
-    `cx contract check --target 0.2.0 --json`. The first promotion-hardening
-    slice promotes `repo check --gate` to stable and freezes its mechanical
-    docs-code invariant fields in `docs/json-contract.md`; `contract check
-    --gate` can now pass that minimum requirement. Remaining promotion work is
-    local-mode `release check`, then LSP/architecture hardening. Do not promote
-    action surfaces such as app-instance, live autopilot, active relay, Desktop
-    attachment, automatic injection, or plugin always-on claims until their
-    authority evidence is stronger.
+    `cx contract check --target 0.2.0 --json`. Promotion-hardening has promoted
+    `repo check --gate` and local-mode `release check --gate` to stable and
+    freezes their mechanical docs-code and release-wiring invariant fields in
+    `docs/json-contract.md`; `contract check --gate` can pass the stable
+    promotion requirement. Remaining promotion work is LSP/architecture
+    hardening. Do not promote action surfaces such as app-instance, live
+    autopilot, active relay, Desktop attachment, automatic injection, or plugin
+    always-on claims until their authority evidence is stronger.

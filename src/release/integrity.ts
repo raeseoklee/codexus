@@ -70,7 +70,7 @@ export interface ReleaseIntegrityGate {
 
 export interface ReleaseIntegrityReport {
   schemaVersion: 1;
-  stability: "experimental";
+  stability: "stable" | "experimental";
   cwd: string;
   packageRoot: string | null;
   packageJsonPath: string | null;
@@ -626,7 +626,7 @@ export function buildReleaseIntegrityReport(
 
   return {
     schemaVersion: 1,
-    stability: "experimental",
+    stability: live ? "experimental" : "stable",
     cwd: resolve(cwd),
     packageRoot: root,
     packageJsonPath,

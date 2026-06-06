@@ -15,19 +15,23 @@ function runCli(args: string[]) {
   });
 }
 
-test("contract readiness reports repo knowledge as the first stable promotion", () => {
+test("contract readiness reports repo knowledge and release integrity as stable promotions", () => {
   const report = buildContractReadinessReport(root);
   assert.equal(report.schemaVersion, 1);
   assert.equal(report.stability, "experimental");
   assert.equal(report.targetVersion, "0.2.0");
   assert.equal(report.contractReadiness.status, "ready");
-  assert.equal(report.contractReadiness.promotedSurfaceCount, 1);
+  assert.equal(report.contractReadiness.promotedSurfaceCount, 2);
   const repoCandidate = report.candidates.find((candidate) => candidate.surface === "repo-knowledge-check");
   assert.equal(repoCandidate?.currentStability, "stable");
   assert.equal(repoCandidate?.frozenFieldsDocumented, true);
   assert.equal(repoCandidate?.promotionStatus, "promoted");
   assert.deepEqual(repoCandidate?.blockers, []);
-  assert.ok(report.candidates.some((candidate) => candidate.surface === "release-integrity-check"));
+  const releaseCandidate = report.candidates.find((candidate) => candidate.surface === "release-integrity-check");
+  assert.equal(releaseCandidate?.currentStability, "stable");
+  assert.equal(releaseCandidate?.frozenFieldsDocumented, true);
+  assert.equal(releaseCandidate?.promotionStatus, "promoted");
+  assert.deepEqual(releaseCandidate?.blockers, []);
   assert.ok(report.candidates.some((candidate) => candidate.promotionStatus === "not_promoted"));
   assert.ok(report.deferredSurfaces.some((surface) => surface.surface === "app-instance-launcher"));
   const updateSurface = report.deferredSurfaces.find((surface) => surface.surface === "update-notifications");
@@ -50,7 +54,7 @@ test("contract check --json is report-only by default", () => {
   const output = JSON.parse(result.stdout);
   assert.equal(output.command, "contract check");
   assert.equal(output.contractReadiness.status, "ready");
-  assert.equal(output.contractReadiness.promotedSurfaceCount, 1);
+  assert.equal(output.contractReadiness.promotedSurfaceCount, 2);
   assert.equal(output.gate.status, "not_requested");
 });
 
@@ -60,7 +64,7 @@ test("contract check --gate passes once a stable surface is promoted and frozen"
   const output = JSON.parse(result.stdout);
   assert.equal(output.gate.status, "passed");
   assert.equal(output.contractReadiness.status, "ready");
-  assert.equal(output.contractReadiness.promotedSurfaceCount, 1);
+  assert.equal(output.contractReadiness.promotedSurfaceCount, 2);
   assert.equal(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "stable_promotion_missing"), false);
 });
 

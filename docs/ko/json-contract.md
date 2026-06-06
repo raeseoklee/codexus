@@ -75,6 +75,15 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
   포함합니다: required docs index, local index link, 영문/한국어 counterpart,
   선언된 schema reference, source `*_deferred` self-report 문서화. Semantic
   freshness와 prose quality는 계속 advisory입니다.
+- Release integrity local output(`release check --gate`, `--live` 없음):
+  `schemaVersion`, `stability`, `cwd`, `packageRoot`, `packageJsonPath`,
+  `version`, `repository`, `live`, `releaseIntegrity`, `evidenceGaps`,
+  `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
+  `informationalUnknowns`, `gate`. Stable contract는 local static release wiring
+  evidence만 포함합니다: installer 기본 channel, expected-version guard,
+  trusted-publishing workflow shape, pinned publish actions, installer asset
+  workflow wiring, redacted release-evidence docs. GitHub/npm post-publish live
+  sign-off는 계속 명시적 opt-in이 필요한 experimental surface입니다.
 
 이 필드를 제거하거나 의미를 재정의하려면 `0.2.0`이 필요합니다. `0.1.x`에서 field
 추가는 허용됩니다.
@@ -83,7 +92,7 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
 
 - app-server live behavior, cron/gateway live dispatch, automatic injection,
   routine live model replay, statusline integration, worker launch,
-  release-integrity check, LSP diagnostics check, architecture check,
+  `release check --live`, LSP diagnostics check, architecture check,
   contract-promotion readiness check의
   experimental/deferred output.
 - `heuristicClaims` 같은 advisory array의 membership.

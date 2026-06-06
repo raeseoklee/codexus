@@ -149,25 +149,25 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   source-tree `lsp:check` dogfood, package smoke verification, report-only
   supply-chain dogfood, and `cx release check --gate --json`. Package smoke
   includes the gate-mode supply-chain and LSP checks for the installed package.
-- `cx release check --json` reports experimental release-integrity evidence for
-  the source checkout: stable installer default, expected-version guard, pinned
-  trusted-publishing workflow, GitHub Release `install.sh` asset wiring, and
-  local release-evidence docs. `--live` is an explicit post-publish sign-off for
-  npm `latest`, GitHub latest, and installer asset hash identity.
+- `cx release check --json` reports stable local-mode release-integrity evidence
+  for the source checkout: stable installer default, expected-version guard,
+  pinned trusted-publishing workflow, GitHub Release `install.sh` asset wiring,
+  and local release-evidence docs. `--live` remains an explicit experimental
+  post-publish sign-off for npm `latest`, GitHub latest, and installer asset
+  hash identity.
 - `cx release policy --json` reports the active release cadence policy:
   small commits but larger thematic stable releases, hotfix exceptions, the
   stable-contract version boundary, and English/Korean policy document
   presence. `npm run release:check` includes `release:policy` so missing policy
   docs block release prep before tag publish.
 - `cx contract check --json` reports the experimental `0.2.0` promotion
-  readiness audit. `repo check --gate` is the first promoted stable surface and
-  is frozen in `docs/json-contract.md`, so `cx contract check --target 0.2.0
-  --gate --json` can pass the minimum stable-promotion requirement. Local-mode
-  `release check`, `lsp check`, and the narrow `architecture check`
-  forbidden-import subset remain candidates, while action surfaces such as
-  app-instance start/stop, live autopilot, active relay adapters, Desktop
-  app-server attachment, automatic injection, and plugin always-on claims remain
-  deferred.
+  readiness audit. `repo check --gate` and local-mode `release check --gate`
+  are promoted stable surfaces and are frozen in `docs/json-contract.md`, so
+  `cx contract check --target 0.2.0 --gate --json` can pass the stable-promotion
+  requirement. `lsp check` and the narrow `architecture check` forbidden-import
+  subset remain candidates, while action surfaces such as app-instance
+  start/stop, live autopilot, active relay adapters, Desktop app-server
+  attachment, automatic injection, and plugin always-on claims remain deferred.
 - `cx update check --json` reports experimental update availability facts from
   the npm `latest` dist-tag through a bounded TTL cache. The explicit opt-in
   path for npm `next` prerelease facts is

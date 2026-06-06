@@ -81,7 +81,7 @@ async function writeFixture(rootDir: string, options: { installDefault?: "stable
 test("release integrity passes for local source release wiring", () => {
   const report = buildReleaseIntegrityReport(root, { gate: true });
   assert.equal(report.schemaVersion, 1);
-  assert.equal(report.stability, "experimental");
+  assert.equal(report.stability, "stable");
   assert.equal(report.releaseIntegrity.status, "pass");
   assert.equal(report.gate.status, "passed");
   assert.equal(report.releaseIntegrity.installScript.defaultChannel, "stable");
@@ -164,6 +164,7 @@ test("release integrity live sign-off compares gh latest without relying on isLa
       return { status: 1, stdout: "", stderr: `unexpected command ${command} ${args.join(" ")}` };
     };
     const report = buildReleaseIntegrityReport(cwd, { gate: true, live: true, commandRunner: runner });
+    assert.equal(report.stability, "experimental");
     assert.equal(report.releaseIntegrity.status, "pass");
     assert.equal(report.gate.status, "passed");
     assert.equal(report.releaseIntegrity.githubRelease.isLatest, true);
@@ -174,7 +175,7 @@ test("release integrity live sign-off compares gh latest without relying on isLa
   }
 });
 
-test("release check CLI emits experimental JSON and gate result", () => {
+test("release check CLI emits stable local-mode JSON and gate result", () => {
   const result = spawnSync(process.execPath, ["src/cli/main.ts", "release", "check", "--gate", "--json"], {
     cwd: root,
     encoding: "utf8",
@@ -185,7 +186,24 @@ test("release check CLI emits experimental JSON and gate result", () => {
     releaseIntegrity: { status: string };
     gate: { status: string };
   };
-  assert.equal(payload.stability, "experimental");
+  assert.equal(payload.stability, "stable");
   assert.equal(payload.releaseIntegrity.status, "pass");
   assert.equal(payload.gate.status, "passed");
+});
+
+test("release check --live keeps live sign-off fields experimental", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeFixture(cwd);
+    const result = spawnSync(process.execPath, [resolve(root, "src/cli/main.ts"), "release", "check", "--cwd", cwd, "--live", "--json"], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout) as { stability: string; live: boolean };
+    assert.equal(payload.stability, "experimental");
+    assert.equal(payload.live, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
 });

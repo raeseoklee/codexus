@@ -77,6 +77,15 @@ For supported commands, these top-level field names are frozen through `0.1.x`:
   required docs indexes, local index links, English/Korean counterparts,
   declared schema references, and source `*_deferred` self-report
   documentation. Semantic freshness and prose quality remain advisory.
+- Release integrity local output (`release check --gate` without `--live`):
+  `schemaVersion`, `stability`, `cwd`, `packageRoot`, `packageJsonPath`,
+  `version`, `repository`, `live`, `releaseIntegrity`, `evidenceGaps`,
+  `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
+  `informationalUnknowns`, `gate`. The stable contract covers local, static
+  release wiring evidence only: installer default channel, expected-version
+  guard, trusted-publishing workflow shape, pinned publish actions, installer
+  asset workflow wiring, and redacted release-evidence docs. Live GitHub/npm
+  post-publish sign-off remains opt-in and experimental.
 
 Removing or redefining these fields requires `0.2.0`. Adding fields is allowed
 in `0.1.x`.
@@ -85,9 +94,8 @@ in `0.1.x`.
 
 - Experimental/deferred command output for app-server live behavior,
   cron/gateway live dispatch, automatic injection, routine live model replay,
-  statusline integration, worker launch, release-integrity checks, LSP
-  diagnostics checks, architecture checks, and contract-promotion readiness
-  checks.
+  statusline integration, worker launch, `release check --live`, LSP diagnostics
+  checks, architecture checks, and contract-promotion readiness checks.
 - The membership of advisory arrays such as `heuristicClaims`.
 - The nested content of the additive `update` summary, which is an
   informational experimental update-availability report and never a release,
