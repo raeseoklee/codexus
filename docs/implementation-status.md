@@ -384,8 +384,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   and source `*_deferred` self-report claims mirrored in both
   implementation-status docs. Its stable contract does not make semantic
   freshness or prose quality gateable. `cx session status --json`,
-  `cx session hud --json`, and `doctor --json` now aggregate those deferred
-  self-reports into one control-plane summary with `completionAuthority: false`.
+  `cx session hud --json`, and `doctor --json` now aggregate deferred
+  self-reports and policy catalog counts into one control-plane summary with
+  `completionAuthority: false`; observed/advisory/unavailable control signals
+  remain dashboard metadata, not completion evidence.
 - The compiled repository wiki now has an experimental deterministic first
   slice: `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check
   --gate`, `cx wiki context --topic <name> --budget <n>`, and explicit

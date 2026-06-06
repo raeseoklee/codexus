@@ -375,8 +375,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   invariant pass는 `cx repo check --gate --json`이 맡고 있습니다. 이 stable
   contract는 semantic freshness나 prose quality를 gateable로 만들지 않습니다.
   `cx session status --json`, `cx session hud --json`, `doctor --json`은 이제
-  deferred self-report를 하나의 control-plane summary로 모으며
-  `completionAuthority: false`를 유지합니다.
+  deferred self-report와 policy catalog count를 하나의 control-plane summary로
+  모으며 `completionAuthority: false`를 유지합니다. observed/advisory/unavailable
+  control signal은 dashboard metadata이지 completion evidence가 아닙니다.
 - Compiled repository wiki는 이제 experimental deterministic 첫 slice를 가집니다:
   `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check --gate`,
   `cx wiki context --topic <name> --budget <n>`, 명시적

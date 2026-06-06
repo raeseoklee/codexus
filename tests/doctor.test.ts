@@ -176,6 +176,12 @@ if (args[0] === "--version") {
     assert.deepEqual(check.details.sourceClaims, ["example_capability_deferred"]);
     assert.deepEqual(check.details.documentedClaims, ["example_capability_deferred"]);
     assert.equal(check.details.completionAuthority, false);
+    const control = output.checks.find((item: { id: string }) => item.id === "codexus.control_plane");
+    assert.equal(control.status, "pass");
+    assert.equal(control.details.completionAuthority, false);
+    assert.equal(control.details.deferredSelfReports.status, "clear");
+    assert.equal(control.details.policyCatalog.completionAuthority, false);
+    assert.ok(control.details.policyCatalog.unavailableRules.includes("driver.command.preflight"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

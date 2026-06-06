@@ -338,9 +338,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   artifact를 쓰고, `cx session loop --json`은 반복 verification failure를 요약하며,
   session status/HUD는 decision, risk, loop summary를 포함합니다. 첫
   operational-control slice도 구현되어 autonomy preset metadata, policy catalog
-  reporting, 더 풍부한 risk fact가 포함됩니다. 다음 작업은 task artifact,
-  broader policy promotion, unified control aggregation입니다. Active autonomy나
-  새 완료 권한을 추가하지 않습니다.
+  reporting, 더 풍부한 risk fact가 포함됩니다. session status/HUD/doctor는 이제
+  policy catalog count도 집계하므로 다음 작업은 task artifact와 broader policy
+  promotion입니다. Active autonomy나 새 완료 권한을 추가하지 않습니다.
 - Compiled repository wiki: [18번 문서](design/18-compiled-repository-wiki.md)는
   repository fact와 Codexus artifact 위의 재생성 가능한 markdown projection을 정의하며,
   이제 experimental deterministic 첫 slice를 가집니다. Schema, `cx wiki
@@ -351,10 +351,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 - Operational control invariant: decision artifact와 ledger-derived loop
   summary는 advisory session evidence로 구현됐고, 첫 operational-control slice에는
   autonomy preset metadata, policy catalog reporting, richer risk fact,
-  session status/HUD/doctor의 deferred self-report aggregation이 포함됩니다.
-  다음 작업은 task artifact, broader policy promotion, deferred self-report를
-  넘어서는 unified control aggregation입니다. Active autonomy나 새 completion
-  authority는 추가하지 않습니다.
+  session status/HUD/doctor의 deferred self-report aggregation과 policy catalog
+  count aggregation이 포함됩니다. 다음 작업은 task artifact와 broader policy
+  promotion입니다. Active autonomy나 새 completion authority는 추가하지 않습니다.
 
 1. Desktop app-server attachment: 현재 discovery evidence는 `stdio_only`입니다.
    Non-disruptive stdio observer contract는 문서화됐습니다. 기존 Desktop stdio pipe에
@@ -389,8 +388,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     convergence가 verification을 대체하지 않게 합니다.
 11. Operational control invariant: decision artifact와 ledger-derived loop summary는
     advisory session evidence로 구현됐고, 첫 operational-control slice로 autonomy
-    preset metadata, policy catalog reporting, 더 풍부한 risk fact도 구현됐습니다.
-    다음은 task artifact, broader policy promotion, unified control aggregation입니다.
+    preset metadata, policy catalog reporting, 더 풍부한 risk fact, session
+    control-plane aggregation도 구현됐습니다. 다음은 task artifact와 broader policy
+    promotion입니다.
     Enforceable policy field가 생기기 전까지 autonomy preset은 contract metadata로 둡니다.
 12. Compiled repository wiki: deterministic `cx wiki map/build/check/context/export`
     slice는 구현되었습니다. 다음은 advisory synthesis와 richer page coverage이며,

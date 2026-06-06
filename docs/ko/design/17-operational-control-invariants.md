@@ -329,8 +329,9 @@ control model입니다.
    `cx session loop --json` 추가. Loop result는 boundary signal이지 completion evidence가
    아닙니다.
 6. 구현됨: `cx session status --json`, `cx session hud --json`,
-   `doctor --json`에 `cx repo check`와 같은 docs-code invariant model에서 파생한
-   deferred self-report control summary를 추가. 이 summary는 advisory/control
-   metadata이며 `completionAuthority: false`를 가집니다.
+   `doctor --json`에 deferred self-report와 policy catalog의
+   observed/advisory/unavailable count를 모으는 control-plane dashboard를 추가.
+   이 summary는 advisory/control metadata이며 `completionAuthority: false`를
+   가집니다.
 7. 부분 구현됨: `cx session status --json`과 `cx session hud --json`에 decision, risk,
    loop summary 추가. Task artifact는 별도 future slice로 남습니다.

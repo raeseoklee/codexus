@@ -350,9 +350,10 @@ that preserves the existing evidence-first identity.
    verification failure checker. The loop result is a boundary signal, not
    completion evidence.
 6. Implemented: extend `cx session status --json`, `cx session hud --json`,
-   and `doctor --json` with a deferred self-report control summary derived from
-   the same docs-code invariant model as `cx repo check`. The summary is
-   advisory/control metadata and carries `completionAuthority: false`.
+   and `doctor --json` with a control-plane dashboard that aggregates deferred
+   self-reports and policy catalog observed/advisory/unavailable counts. The
+   summary is advisory/control metadata and carries the non-authority marker
+   `completionAuthority: false`.
 7. Partially implemented: extend `cx session status --json` and
    `cx session hud --json` with decision, risk, and loop summaries. Task
    artifacts remain a separate future slice.

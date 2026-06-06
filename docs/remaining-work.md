@@ -365,9 +365,9 @@ Harness-engineering alignment adds these evidence-first tracks:
   session status/HUD include decision, risk, and loop summaries. The first
   operational-control slice also now exists: autopilot preset metadata, policy
   catalog reporting, richer risk facts, and deferred self-report aggregation in
-  session status/HUD/doctor are implemented. Next work is task
-  artifacts, broader policy promotion, and unified control aggregation beyond
-  deferred self-reports. Do not
+  session status/HUD/doctor are implemented. Session status/HUD/doctor now also
+  aggregate policy catalog counts, so the next work is task artifacts and
+  broader policy promotion. Do not
   add active autonomy or a new completion authority.
 - Compiled repository wiki: [doc 18](design/18-compiled-repository-wiki.md)
   now has an experimental deterministic first slice: schemas, `cx wiki
@@ -411,8 +411,8 @@ Harness-engineering alignment adds these evidence-first tracks:
 11. Operational control invariants: decision artifacts and ledger-derived loop
     summaries are implemented as advisory session evidence, and the first
     operational-control slice now includes autonomy preset metadata, policy
-    catalog reporting, and richer risk facts. Next implement task artifacts,
-    broader policy promotion, and unified control aggregation. Autonomy presets
+    catalog reporting, richer risk facts, and session control-plane aggregation.
+    Next implement task artifacts and broader policy promotion. Autonomy presets
     remain contract metadata until enforceable policy fields exist.
 12. Compiled repository wiki: the deterministic `cx wiki
     map/build/check/context/export` slice now exists. Next implement advisory

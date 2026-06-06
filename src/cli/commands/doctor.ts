@@ -11,10 +11,10 @@ import { createDriver } from "../../drivers/index.ts";
 import type { DriverProbe } from "../../drivers/contract.ts";
 import { trimmedProcessOutput } from "../../util/process-output.ts";
 import { findCodexusPackageRoot } from "../../util/package-root.ts";
-import { overlayStatus, readSessionStateWithMigration, refreshSessionState, sessionPaths, type NotifyDispatchState, type SessionStateMigrationReport } from "../../session/state.ts";
+import { overlayStatus, readSessionStateWithMigration, refreshSessionState, sessionPaths, type CodexusSessionState, type NotifyDispatchState, type SessionStateMigrationReport } from "../../session/state.ts";
 import { inspectNotifyHookConfig } from "../../session/hook-config.ts";
 import { buildSupplyChainEvidenceReport } from "../../supply-chain/check.ts";
-import { summarizeDeferredSelfReports } from "../../control/deferred-self-reports.ts";
+import { buildControlPlaneSummary } from "../../control/control-plane.ts";
 import { readCodexusVersionInfo } from "./version.ts";
 import { buildUpdateSummary } from "../../update/check.ts";
 import { buildCodexusPluginPackageReport } from "../../plugin/package.ts";
@@ -213,14 +213,6 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
     },
   });
 
-  const deferredSelfReports = summarizeDeferredSelfReports(cwd);
-  checks.push({
-    id: "codexus.deferred_self_reports",
-    status: deferredSelfReports.status === "findings" ? "fail" : deferredSelfReports.status === "unknown" ? "warn" : "pass",
-    summary: `Deferred self-reports ${deferredSelfReports.status} (${deferredSelfReports.counts.documented}/${deferredSelfReports.counts.source} documented, ${deferredSelfReports.counts.undocumented} undocumented, ${deferredSelfReports.counts.unbacked} unbacked)`,
-    details: deferredSelfReports,
-  });
-
   const session = sessionPaths(cwd);
   const projectOverlay = await overlayStatus(cwd, "project");
   const userOverlay = await overlayStatus(cwd, "user");
@@ -230,15 +222,31 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   let sessionStateError: string | null = null;
   let sessionStateMigration: SessionStateMigrationReport | null = null;
   let sessionNotifyDispatch: NotifyDispatchState | null = null;
+  let refreshedSessionState: CodexusSessionState | null = null;
   try {
     const stateRead = await readSessionStateWithMigration(cwd);
     const refreshedState = stateRead.state ? await refreshSessionState(cwd, stateRead.state) : null;
     sessionStateInitialized = refreshedState !== null;
     sessionStateMigration = stateRead.migration;
     sessionNotifyDispatch = refreshedState?.notifyDispatch ?? null;
+    refreshedSessionState = refreshedState;
   } catch (error) {
     sessionStateError = error instanceof Error ? error.message : String(error);
   }
+  const controlPlane = buildControlPlaneSummary(cwd, refreshedSessionState);
+  const deferredSelfReports = controlPlane.deferredSelfReports;
+  checks.push({
+    id: "codexus.deferred_self_reports",
+    status: deferredSelfReports.status === "findings" ? "fail" : deferredSelfReports.status === "unknown" ? "warn" : "pass",
+    summary: `Deferred self-reports ${deferredSelfReports.status} (${deferredSelfReports.counts.documented}/${deferredSelfReports.counts.source} documented, ${deferredSelfReports.counts.undocumented} undocumented, ${deferredSelfReports.counts.unbacked} unbacked)`,
+    details: deferredSelfReports,
+  });
+  checks.push({
+    id: "codexus.control_plane",
+    status: controlPlane.status === "unknown" ? "warn" : "pass",
+    summary: `Control plane ${controlPlane.status} (${controlPlane.counts.policyObserved} observed, ${controlPlane.counts.policyAdvisory} advisory, ${controlPlane.counts.policyUnavailable} unavailable policy signals)`,
+    details: controlPlane,
+  });
   checks.push({
     id: "codexus.session_state",
     status: sessionStateError ? "fail" : sessionStateMigration?.migrated ? "warn" : sessionStateExists ? "pass" : "warn",

@@ -298,6 +298,14 @@ process.on("SIGINT", shutdown);
   assert(doctor.ok === true, "doctor --strict did not pass with fake codex fixture");
   assert(doctor.update?.stability === "experimental", "doctor did not include experimental update summary");
   assert(doctor.update?.registryChecked === false, "doctor should not query the update registry");
+  const controlPlaneCheck = doctor.checks?.find((check) => check.id === "codexus.control_plane");
+  assert(controlPlaneCheck?.status === "pass", "doctor did not report a passing control-plane projection");
+  assert(controlPlaneCheck.details?.completionAuthority === false, "control-plane projection must not claim completion authority");
+  assert(controlPlaneCheck.details?.policyCatalog?.completionAuthority === false, "control-plane policy summary must not claim completion authority");
+  assert(
+    controlPlaneCheck.details?.policyCatalog?.unavailableRules?.includes("driver.command.preflight"),
+    "control-plane projection did not surface unavailable driver preflight",
+  );
 
   const schema = parseJsonRun(codexus, ["schema", "check", "--json"]);
   assert(schema.stability === "stable", "schema check did not report stable JSON stability");

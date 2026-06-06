@@ -1180,17 +1180,24 @@ test("session status and hud aggregate documented deferred self-reports", async 
     const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
     assert.equal(status.status, 0, status.stderr);
     const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.controlPlane.status, "findings");
+    assert.equal(statusOutput.controlPlane.completionAuthority, false);
     assert.equal(statusOutput.controlPlane.deferredSelfReports.status, "clear");
     assert.equal(statusOutput.controlPlane.deferredSelfReports.completionAuthority, false);
     assert.deepEqual(statusOutput.controlPlane.deferredSelfReports.sourceClaims, ["example_capability_deferred"]);
     assert.deepEqual(statusOutput.controlPlane.deferredSelfReports.documentedClaims, ["example_capability_deferred"]);
     assert.deepEqual(statusOutput.controlPlane.deferredSelfReports.evidenceGaps, []);
+    assert.equal(statusOutput.controlPlane.policyCatalog.completionAuthority, false);
+    assert.ok(statusOutput.controlPlane.policyCatalog.unavailableRules.includes("driver.command.preflight"));
+    assert.equal(statusOutput.controlPlane.counts.policyUnavailable, 1);
 
     const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
     assert.equal(hud.status, 0, hud.stderr);
     const hudOutput = JSON.parse(hud.stdout);
+    assert.equal(hudOutput.controlPlane.status, "findings");
     assert.equal(hudOutput.controlPlane.deferredSelfReports.status, "clear");
     assert.equal(hudOutput.counts.deferredSelfReports, 1);
+    assert.equal(hudOutput.counts.policyUnavailable, 1);
   } finally {
     await rm(cwd, { recursive: true, force: true });
     await rm(codexHome, { recursive: true, force: true });
