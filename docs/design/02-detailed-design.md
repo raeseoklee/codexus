@@ -283,6 +283,12 @@ policy, approval, lock, dispatch, and completion evidence under
 run result. No unattended scheduler, queue, or retry service is implied by this
 first slice.
 
+Every dispatch plan also records `automation-action-authority-v1`: whether the
+dispatcher may start a linked Codexus run, whether explicit approval and a lock
+are required, and the negative authorities it does not hold. Cron/gateway
+dispatch never mutates scheduler/listener state and never claims cleanup,
+health, or completion authority for the action surface itself.
+
 ### `cx skill ...`
 
 Subcommands:

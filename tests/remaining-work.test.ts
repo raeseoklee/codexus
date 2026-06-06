@@ -491,6 +491,12 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(cronDryRunOutput.policy.decision, "dry_run_allowed");
     assert.equal(cronDryRunOutput.policy.dispatchAllowed, false);
     assert.equal(cronDryRunOutput.approval.status, "not_requested_for_dry_run");
+    assert.equal(cronDryRunOutput.actionAuthority.contractVersion, "automation-action-authority-v1");
+    assert.equal(cronDryRunOutput.actionAuthority.sideEffects.startsRun, false);
+    assert.equal(cronDryRunOutput.actionAuthority.sideEffects.requiresExplicitApproval, false);
+    assert.equal(cronDryRunOutput.actionAuthority.cleanupAuthority, false);
+    assert.equal(cronDryRunOutput.actionAuthority.healthAuthority, false);
+    assert.equal(cronDryRunOutput.actionAuthority.completionAuthority, false);
     assert.ok(existsSync(cronDryRunOutput.record.path));
     assert.ok(cronDryRunOutput.ledgerEvents.includes("automation.policy_checked"));
     assert.ok(cronDryRunOutput.ledgerEvents.includes("approval.resolved"));
@@ -506,6 +512,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(gatewayDryRunOutput.policy.decision, "dry_run_allowed");
     assert.equal(gatewayDryRunOutput.policy.contractVersion, "policy-reviewed-live-dispatch-v1");
     assert.equal(gatewayDryRunOutput.policy.dryRunLiveContractCompatible, true);
+    assert.equal(gatewayDryRunOutput.actionAuthority.actionSurface, "gateway.check");
+    assert.equal(gatewayDryRunOutput.actionAuthority.sideEffects.startsRun, false);
     assert.ok(existsSync(gatewayDryRunOutput.record.path));
     const cronLive = runCli(cwd, ["cron", "run-now", "--json"]);
     assert.equal(cronLive.status, 1);
@@ -514,6 +522,9 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(cronLiveOutput.status, "blocked");
     assert.equal(cronLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(cronLiveOutput.policy.dispatchAllowed, false);
+    assert.equal(cronLiveOutput.actionAuthority.sideEffects.startsRun, false);
+    assert.equal(cronLiveOutput.actionAuthority.sideEffects.requiresExplicitApproval, true);
+    assert.equal(cronLiveOutput.actionAuthority.dispatcherAuthority, "none");
     const cronLiveRecord = JSON.parse(await readFile(cronLiveOutput.record.path, "utf8"));
     assertAutomationBoundaryEvent(cronLiveRecord, "cron", "feature_gate_disabled");
     const cronLiveSchema = runCli(cwd, ["schema", "validate", "--type", "automation-dispatch", "--file", cronLiveOutput.record.path, "--json"]);
@@ -526,6 +537,8 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(gatewayLiveOutput.status, "blocked");
     assert.equal(gatewayLiveOutput.policy.decision, "live_blocked_by_feature_gate");
     assert.equal(gatewayLiveOutput.policy.dispatchAllowed, false);
+    assert.equal(gatewayLiveOutput.actionAuthority.sideEffects.startsRun, false);
+    assert.equal(gatewayLiveOutput.actionAuthority.completionAuthority, false);
     const gatewayLiveRecord = JSON.parse(await readFile(gatewayLiveOutput.record.path, "utf8"));
     assertAutomationBoundaryEvent(gatewayLiveRecord, "gateway", "feature_gate_disabled");
   } finally {
@@ -557,6 +570,9 @@ test("enabled automation live dispatch still requires explicit approval", async 
     assert.equal(cronOutput.policy.contractVersion, "policy-reviewed-live-dispatch-v1");
     assert.equal(cronOutput.policy.liveDispatcherImplemented, true);
     assert.equal(cronOutput.approval.status, "required_but_not_requested");
+    assert.equal(cronOutput.actionAuthority.sideEffects.startsRun, false);
+    assert.equal(cronOutput.actionAuthority.sideEffects.requiresLock, true);
+    assert.equal(cronOutput.actionAuthority.completionAuthority, false);
     assert.ok(existsSync(cronOutput.record.path));
     assert.ok(cronOutput.record.path.includes("/dispatches/"));
     const cronRecord = JSON.parse(await readFile(cronOutput.record.path, "utf8"));
@@ -573,6 +589,8 @@ test("enabled automation live dispatch still requires explicit approval", async 
     assert.equal(gatewayOutput.enabled, true);
     assert.equal(gatewayOutput.policy.decision, "live_blocked_by_missing_approval");
     assert.equal(gatewayOutput.policy.dispatchAllowed, false);
+    assert.equal(gatewayOutput.actionAuthority.sideEffects.startsRun, false);
+    assert.equal(gatewayOutput.actionAuthority.runOutcomeSource, null);
     const gatewayRecord = JSON.parse(await readFile(gatewayOutput.record.path, "utf8"));
     assertAutomationBoundaryEvent(gatewayRecord, "gateway", "approval_missing");
   } finally {
@@ -608,6 +626,12 @@ test("enabled automation live dispatch runs through the normal Codexus run ledge
     assert.equal(cronOutput.policy.decision, "live_dispatch_allowed");
     assert.equal(cronOutput.policy.dispatchAllowed, true);
     assert.equal(cronOutput.approval.status, "approved");
+    assert.equal(cronOutput.actionAuthority.sideEffects.startsRun, true);
+    assert.equal(cronOutput.actionAuthority.dispatcherAuthority, "linked_codexus_run");
+    assert.equal(cronOutput.actionAuthority.runOutcomeSource, "linked_codexus_run");
+    assert.equal(cronOutput.actionAuthority.cleanupAuthority, false);
+    assert.equal(cronOutput.actionAuthority.healthAuthority, false);
+    assert.equal(cronOutput.actionAuthority.completionAuthority, false);
     assert.equal(cronOutput.run.outcome, "complete");
     assert.ok(existsSync(cronOutput.run.statePath));
     assert.ok(existsSync(cronOutput.record.path));
@@ -628,6 +652,8 @@ test("enabled automation live dispatch runs through the normal Codexus run ledge
     assert.equal(gatewayLive.status, 0, gatewayLive.stderr);
     const gatewayOutput = JSON.parse(gatewayLive.stdout);
     assert.equal(gatewayOutput.status, "completed");
+    assert.equal(gatewayOutput.actionAuthority.sideEffects.startsRun, true);
+    assert.equal(gatewayOutput.actionAuthority.actionSurface, "gateway.check");
     assert.equal(gatewayOutput.run.outcome, "complete");
     assert.ok(existsSync(gatewayOutput.record.path));
   } finally {

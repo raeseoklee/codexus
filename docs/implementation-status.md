@@ -125,7 +125,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   dispatch a normal supervised run, and return the linked run ledger. Blocked
   live attempts now write schema-validatable automation dispatch records with
   `automation.boundary_stop` payloads for feature-gate, approval, and lock
-  boundaries.
+  boundaries. Each dispatch plan also records `automation-action-authority-v1`
+  so consumers can see that the dispatcher may start only a linked Codexus run
+  when approved, never mutates scheduler/listener state, and never claims
+  cleanup, health, or completion authority for the action surface itself.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
   descriptors, app instance artifacts, automation dispatch records, subagent
@@ -293,6 +296,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   feature gate is enabled and explicit approval is supplied. Blocked live paths
   share `automation-boundary-v1` audit payloads and
   `cx schema validate --type automation-dispatch --file <path> --json`.
+  Dispatch records also carry `automation-action-authority-v1` to separate an
+  approved linked-run dispatch from scheduler, listener, health, cleanup, or
+  completion authority.
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
 - `schemas/session-state.schema.json` is a first-class schema artifact for the
@@ -409,7 +415,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - Installed package automation smoke: `cx cron run-now` and `cx gateway check`
   with enabled feature gates, explicit approval, and the mock driver prove that
   the experimental automation dispatcher acquires a lock and returns a linked
-  run result from a packed global install.
+  run result from a packed global install while preserving the
+  `automation-action-authority-v1` negative-authority contract.
 - Doctor smoke: `node src/cli/main.ts doctor --json`
 - Doctor strict smoke: missing command diagnostics return `ok: false` and exit 1 with `--strict`.
 - Doctor reports selected driver capabilities, including `supportsApprovalFlag: false` for local `codex exec`.

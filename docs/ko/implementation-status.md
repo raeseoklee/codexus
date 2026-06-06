@@ -50,7 +50,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - app-server schema fixture/status/dry-run roundtrip/sandbox experiment manifest 기록, optional `codex app-server --help` process-probe evidence, deterministic fake lifecycle supervision, isolated real Stage A evidence, explicit opt-in Stage B read-only socket observation, fake/Codexus-owned stdio proof evidence, live execution disabled. Discovery, Stage A, Stage B, stdio-proof app-server evidence manifest는 experimental schema-validatable artifact로 등록되어 있습니다.
 - cron/gateway의 experimental explicit-approval live dispatch, policy/approval
   contract field를 포함한 dry-run automation plan, 그리고 blocked live path용
-  schema-validatable boundary audit record
+  schema-validatable boundary audit record. 각 dispatch plan은
+  `automation-action-authority-v1`도 기록해 dispatcher가 승인된 linked Codexus
+  run만 시작할 수 있고 scheduler/listener state, cleanup, health, completion
+  authority는 갖지 않음을 명시합니다.
 - config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/automation dispatch/subagent result/subagent launch
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
@@ -64,7 +67,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Installed package automation smoke는 enabled feature gate, explicit approval,
   mock driver 조합으로 `cx cron run-now`와 `cx gateway check`를 실행해 packed
   global install에서도 experimental automation dispatcher가 lock을 획득하고
-  연결된 run result를 반환함을 검증합니다.
+  연결된 run result를 반환하면서 `automation-action-authority-v1`
+  negative-authority contract를 보존함을 검증합니다.
 - `prepublishOnly`는 local CI, source-tree `lsp:check` dogfood, package smoke,
   report-only supply-chain dogfood, `cx release check --gate --json`을 묶은
   `npm run release:check`를 실행합니다. Package smoke에는 설치된 package에 대한
@@ -206,7 +210,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   ledger를 통해 dispatch됩니다. Blocked live path는 feature gate, approval, lock
   boundary를 `automation.boundary_stop` payload로 남기며
   `cx schema validate --type automation-dispatch --file <path> --json`으로
-  검증할 수 있습니다.
+  검증할 수 있습니다. Dispatch record는 `automation-action-authority-v1`도
+  포함해 승인된 linked-run dispatch와 scheduler/listener, health, cleanup,
+  completion authority를 분리합니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
 - `schemas/session-state.schema.json`은 v5 session-state shape용 first-class schema
@@ -408,7 +414,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   Statusline integration과 tmux-backed worker launch는 설계됐지만 아직 구현되지
   않았습니다.
 - cron/gateway는 이제 experimental explicit-approval live dispatcher와
-  schema-validatable blocked-dispatch boundary record를 가집니다. 다음 작업은
+  schema-validatable blocked-dispatch boundary record 및
+  `automation-action-authority-v1` negative-authority record를 가집니다. 다음 작업은
   richer scheduler semantics, recovery/retry policy, asynchronous ownership
   증거입니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.

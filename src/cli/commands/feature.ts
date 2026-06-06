@@ -29,6 +29,7 @@ interface AutomationDispatchRecord {
 
 const liveDispatchImplemented = true;
 const automationBoundaryContractVersion = "automation-boundary-v1";
+const automationActionAuthorityContractVersion = "automation-action-authority-v1";
 
 type AutomationBoundaryReason = "feature_gate_disabled" | "approval_missing" | "lock_unavailable";
 
@@ -79,6 +80,29 @@ function automationPolicyContract(feature: GuardedFeature, enabled: boolean, dry
       "automation.dispatched",
       "automation.completed",
     ],
+  };
+}
+
+function automationActionAuthority(feature: GuardedFeature, action: string, dryRun: boolean, dispatchAllowed: boolean) {
+  return {
+    schemaVersion: 1,
+    contractVersion: automationActionAuthorityContractVersion,
+    feature,
+    actionSurface: `${feature}.${action}`,
+    mode: dryRun ? "dry-run" : "live",
+    sideEffects: {
+      startsRun: dispatchAllowed,
+      mutatesScheduler: false,
+      mutatesGatewayListener: false,
+      requiresLock: !dryRun,
+      requiresExplicitApproval: !dryRun,
+    },
+    dispatcherAuthority: dispatchAllowed ? "linked_codexus_run" : "none",
+    runOutcomeSource: dispatchAllowed ? "linked_codexus_run" : null,
+    cleanupAuthority: false,
+    healthAuthority: false,
+    completionAuthority: false,
+    caveat: "Automation dispatch can start a linked supervised Codexus run when approved, but the dispatcher does not own scheduler state, health, cleanup, or completion authority.",
   };
 }
 
@@ -150,6 +174,7 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
     const approvedBy = flagString(args.flags, "approved-by") ?? null;
     const approval = automationApprovalContract(dryRun, approvedBy);
     const policy = automationPolicyContract(feature, status.enabled, dryRun, approval.status === "approved");
+    const actionAuthority = automationActionAuthority(feature, topic, dryRun, policy.dispatchAllowed);
     const plan = {
       schemaVersion: 1,
       stability: "experimental" as const,
@@ -162,6 +187,7 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
       lockName: `automation-${feature}`,
       policy,
       approval,
+      actionAuthority,
       ledgerEvents: [
         "automation.requested",
         "automation.policy_checked",

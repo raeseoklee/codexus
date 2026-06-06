@@ -767,7 +767,29 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
   if (type === "automation-dispatch") {
     requireString(value, "dispatchId", errors);
     requireString(value, "recordedAt", errors);
-    requireRecord(value.plan, errors, "plan");
+    if (requireRecord(value.plan, errors, "plan")) {
+      if (requireRecord(value.plan.actionAuthority, errors, "plan.actionAuthority")) {
+        const authority = value.plan.actionAuthority;
+        if (authority.schemaVersion !== 1) errors.push("plan.actionAuthority.schemaVersion:not_1");
+        requireOneOf(authority, "contractVersion", ["automation-action-authority-v1"], errors, "plan.actionAuthority.contractVersion");
+        requireOneOf(authority, "feature", ["cron", "gateway"], errors, "plan.actionAuthority.feature");
+        requireOneOf(authority, "actionSurface", ["cron.run-now", "gateway.check"], errors, "plan.actionAuthority.actionSurface");
+        requireOneOf(authority, "mode", ["dry-run", "live"], errors, "plan.actionAuthority.mode");
+        if (requireRecord(authority.sideEffects, errors, "plan.actionAuthority.sideEffects")) {
+          requireBoolean(authority.sideEffects, "startsRun", errors, "plan.actionAuthority.sideEffects.startsRun");
+          if (authority.sideEffects.mutatesScheduler !== false) errors.push("plan.actionAuthority.sideEffects.mutatesScheduler:not_false");
+          if (authority.sideEffects.mutatesGatewayListener !== false) errors.push("plan.actionAuthority.sideEffects.mutatesGatewayListener:not_false");
+          requireBoolean(authority.sideEffects, "requiresLock", errors, "plan.actionAuthority.sideEffects.requiresLock");
+          requireBoolean(authority.sideEffects, "requiresExplicitApproval", errors, "plan.actionAuthority.sideEffects.requiresExplicitApproval");
+        }
+        requireOneOf(authority, "dispatcherAuthority", ["none", "linked_codexus_run"], errors, "plan.actionAuthority.dispatcherAuthority");
+        if (!(authority.runOutcomeSource === null || authority.runOutcomeSource === "linked_codexus_run")) errors.push("plan.actionAuthority.runOutcomeSource:invalid");
+        if (authority.cleanupAuthority !== false) errors.push("plan.actionAuthority.cleanupAuthority:not_false");
+        if (authority.healthAuthority !== false) errors.push("plan.actionAuthority.healthAuthority:not_false");
+        if (authority.completionAuthority !== false) errors.push("plan.actionAuthority.completionAuthority:not_false");
+        requireString(authority, "caveat", errors, "plan.actionAuthority.caveat");
+      }
+    }
     requireString(value, "path", errors);
     const ledgerEvents = requireArray(value, "ledgerEvents", errors);
     for (const item of ledgerEvents) {

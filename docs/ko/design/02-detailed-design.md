@@ -245,3 +245,7 @@ formatting합니다. 자동 prompt injection이나 별도 chat loop는 만들지
   계속 lock name과 ledger event intent를 포함한 automation plan만 반환합니다.
 - `--record`는 dry-run/live 모두에서 policy/approval/lock/dispatch/completion
   evidence를 남기는 audit artifact를 씁니다.
+- 모든 dispatch plan은 `automation-action-authority-v1`도 기록합니다. 여기에는
+  dispatcher가 linked Codexus run을 시작할 수 있는지, explicit approval과 lock이
+  필요한지, 그리고 scheduler/listener state, cleanup, health, completion authority를
+  갖지 않는다는 negative authority가 포함됩니다.

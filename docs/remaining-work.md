@@ -78,8 +78,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   engine, replay parity can be audited, adapter injection writes visible
   approval artifacts without auto-injection, HUD is available as a read-only
   JSON summary, tmux/native-subagent launch surfaces are truthful gates, and
-  automation live contracts now dispatch synchronously with explicit approval,
-  while richer scheduler/recovery semantics remain follow-up work.
+  automation live contracts now dispatch synchronously with explicit approval
+  while recording `automation-action-authority-v1` negative-authority evidence.
+  Richer scheduler/recovery semantics remain follow-up work.
 - Release operations now have an executable cadence policy:
   `cx release policy --json` reports the active small-commits/larger-releases
   rule, hotfix exceptions, stable-contract version boundary, and English/Korean
@@ -202,7 +203,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
       `cx report <run-id>`.
     - Keep outputs bounded and JSON-first.
 
-15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch, dry-run audit records, and schema-validatable blocked-dispatch boundary records are implemented; richer scheduler/recovery behavior remains future work.
+15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch, dry-run audit records, schema-validatable blocked-dispatch boundary records, and `automation-action-authority-v1` negative-authority records are implemented; richer scheduler/recovery behavior remains future work.
     - Hermes-style cron and gateway behavior should depend on locks, schema
       migration, permission events, and explicit user policy.
 

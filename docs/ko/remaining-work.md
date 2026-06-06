@@ -74,7 +74,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   replay parity는 audit 가능하며, adapter injection은 자동 주입 없이 visible approval
   artifact를 쓰고, HUD는 read-only JSON summary로 제공됩니다. tmux/native-subagent launch
   surface는 truthful gate이고, automation live contract는 이제 explicit approval로
-  synchronous dispatch가 가능하며 richer scheduler/recovery semantics는 후속입니다.
+  synchronous dispatch가 가능하며 `automation-action-authority-v1` negative-authority
+  evidence를 기록합니다. Richer scheduler/recovery semantics는 후속입니다.
 - Release 운영에는 실행 가능한 cadence policy가 생겼습니다.
   `cx release policy --json`은 작은 commit/더 큰 release 규칙, hotfix exception,
   stable-contract version boundary, 영문/한국어 policy 문서 존재를 보고합니다.
@@ -190,7 +191,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - 제안 command: `cx runs list`, `cx events tail <run-id>`, `cx report <run-id>`.
     - 출력은 bounded, JSON-first로 유지합니다.
 
-15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch, dry-run audit record, schema-validatable blocked-dispatch boundary record가 구현됐고, richer scheduler/recovery 동작이 남아 있습니다.
+15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch, dry-run audit record, schema-validatable blocked-dispatch boundary record, `automation-action-authority-v1` negative-authority record가 구현됐고, richer scheduler/recovery 동작이 남아 있습니다.
     - Hermes-style cron/gateway는 lock, schema migration, permission event,
       explicit user policy 뒤에 둬야 합니다.
 

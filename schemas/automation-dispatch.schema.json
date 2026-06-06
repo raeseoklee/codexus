@@ -7,7 +7,40 @@
     "schemaVersion": { "const": 1 },
     "dispatchId": { "type": "string", "minLength": 1 },
     "recordedAt": { "type": "string", "minLength": 1 },
-    "plan": { "type": "object" },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "actionAuthority": {
+          "type": "object",
+          "properties": {
+            "schemaVersion": { "const": 1 },
+            "contractVersion": { "const": "automation-action-authority-v1" },
+            "feature": { "enum": ["cron", "gateway"] },
+            "actionSurface": { "enum": ["cron.run-now", "gateway.check"] },
+            "mode": { "enum": ["dry-run", "live"] },
+            "sideEffects": {
+              "type": "object",
+              "properties": {
+                "startsRun": { "type": "boolean" },
+                "mutatesScheduler": { "const": false },
+                "mutatesGatewayListener": { "const": false },
+                "requiresLock": { "type": "boolean" },
+                "requiresExplicitApproval": { "type": "boolean" }
+              },
+              "required": ["startsRun", "mutatesScheduler", "mutatesGatewayListener", "requiresLock", "requiresExplicitApproval"]
+            },
+            "dispatcherAuthority": { "enum": ["none", "linked_codexus_run"] },
+            "runOutcomeSource": { "type": ["string", "null"] },
+            "cleanupAuthority": { "const": false },
+            "healthAuthority": { "const": false },
+            "completionAuthority": { "const": false },
+            "caveat": { "type": "string", "minLength": 1 }
+          },
+          "required": ["schemaVersion", "contractVersion", "feature", "actionSurface", "mode", "sideEffects", "dispatcherAuthority", "runOutcomeSource", "cleanupAuthority", "healthAuthority", "completionAuthority", "caveat"]
+        }
+      },
+      "required": ["actionAuthority"]
+    },
     "ledgerEvents": {
       "type": "array",
       "items": {
