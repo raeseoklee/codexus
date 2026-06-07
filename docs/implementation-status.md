@@ -10,7 +10,7 @@ Target CLI: `cx`
 
 Public bins: `cx`, `codexus`
 
-Current stable baseline: `0.1.9`
+Current stable baseline: `0.1.13`
 
 The npm package exposes `cx` and `codexus` as canonical bins. The historical
 `chx` alias is not published.
@@ -46,6 +46,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `release check`
   - `contract check`
   - `update check`
+  - `wiki map`
+  - `wiki build`
+  - `wiki check`
+  - `wiki context`
+  - `wiki export`
   - `app-server status`
   - `app-server roundtrip`
   - `app-server experiment`
@@ -54,6 +59,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `app instance logs`
   - `app instance start`
   - `app instance stop`
+  - `app instance evidence record`
+  - `app instance evidence list`
+  - `app instance evidence probe`
+  - `app instance evidence logs`
+  - `app instance evidence metrics`
   - `memory add`
   - `memory search`
   - `memory list`
@@ -407,7 +417,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - The compiled repository wiki now has an experimental deterministic first
   slice: `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check
   --gate`, `cx wiki context --topic <name> --budget <n>`, and explicit
-  `cx wiki export --target <path>`. `cx wiki build --mode advisory` now records
+  `cx wiki export --target <path>`. `cx wiki context --topic <name> --approve
+  --approved-by <name>` records a visible `codexus.wiki.context-approval`
+  artifact with `approved_not_injected`, `automatic:false`, and no completion
+  authority. `cx wiki build --mode advisory` now records
   a schema-valid local source-bundle synthesis artifact with driver/model
   evidence (`modelInvoked: false`) and non-authority markers. The wiki generates
   regenerable markdown pages under `.codexus/wiki/` with source refs, local
@@ -488,7 +501,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   that never promotes control, health, or completion authority.
 - Installed package smoke also covers deterministic wiki build, wiki-manifest
   schema validation, `wiki check --gate`, explicit wiki export, and bounded wiki
-  context generation.
+  context generation plus non-injected wiki context approval artifact validation
+  and session evidence-loop projection.
 - Installed package smoke also covers `cx policy catalog check --json`,
   `cx autopilot presets list --json`, and autopilot draft planning with an
   explicit preset.
@@ -593,7 +607,10 @@ review. Current high-level gaps:
   `cx app instance evidence logs` for bounded/redacted stdout/stderr tail
   evidence. `cx app instance evidence metrics` records process, heartbeat,
   health-evidence, and log-file metrics for the same owned `instanceId`;
-  explicit stale/orphan lifecycle policy projection is implemented.
+  explicit stale/orphan lifecycle policy projection is implemented. `cx session
+  status --json` and `cx session hud --json` now summarize app-instance
+  observations and wiki context approvals under `evidenceLoop` without adding
+  health, control, source-truth, or completion authority.
   Actual Browser/DevTools/screenshot adapter capture and worktree-aware
   launcher reuse remain follow-up work.
 - Operational control invariants have deterministic docs-code checks plus an

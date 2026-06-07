@@ -142,6 +142,51 @@ test("wiki context returns bounded topic-matched pages", async () => {
   }
 });
 
+test("wiki context approval writes a visible non-injected artifact", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(build.status, 0, build.stderr);
+
+    const approval = runCli(cwd, [
+      "wiki",
+      "context",
+      "--topic",
+      "verification",
+      "--budget",
+      "4000",
+      "--approve",
+      "--approved-by",
+      "tester",
+      "--json",
+    ]);
+    assert.equal(approval.status, 0, approval.stderr);
+    const output = JSON.parse(approval.stdout);
+    assert.equal(output.command, "wiki context approve");
+    assert.equal(output.approval.status, "approved_not_injected");
+    assert.equal(output.approval.approvedBy, "tester");
+    assert.equal(output.approval.injection.automatic, false);
+    assert.equal(output.approval.injection.applied, false);
+    assert.equal(output.approval.authority.sourceTruth, false);
+    assert.equal(output.approval.authority.completionAuthority, false);
+    assert.equal(output.eligibleForAutomaticInjection, false);
+    assert.equal(output.completionAuthority, false);
+    assert.ok(existsSync(output.approval.paths.markdown));
+    assert.ok(existsSync(output.approval.paths.json));
+
+    const markdown = await readFile(output.approval.paths.markdown, "utf8");
+    assert.match(markdown, /approved_not_injected/);
+    assert.match(markdown, /does not inject it automatically/);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "wiki-context-approval", "--file", output.approval.paths.json, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).validation.valid, true);
+    assert.equal(JSON.parse(schema.stdout).artifactValidation.valid, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("wiki check fails when a local link resolves outside the registered wiki pages", async () => {
   const cwd = await fixtureRepo();
   try {

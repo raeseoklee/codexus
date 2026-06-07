@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
-import { buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiMap, checkWiki, exportWiki } from "../../wiki/wiki.ts";
+import { approveWikiContext, buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiMap, checkWiki, exportWiki } from "../../wiki/wiki.ts";
 
 export async function wikiCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "check";
@@ -58,13 +58,20 @@ export async function wikiCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (subcommand === "context") {
-    assertAllowedFlags(args, ["cwd", "json", "topic", "budget"]);
+    assertAllowedFlags(args, ["cwd", "json", "topic", "budget", "approve", "approved-by"]);
     const topic = flagString(args.flags, "topic");
     const budgetRaw = flagString(args.flags, "budget") ?? "1200";
     const budget = Number.parseInt(budgetRaw, 10);
-    const result = await buildWikiContext(cwd, topic ?? "", budget);
+    const result = flagBool(args.flags, "approve")
+      ? await approveWikiContext(cwd, topic ?? "", budget, flagString(args.flags, "approved-by"))
+      : await buildWikiContext(cwd, topic ?? "", budget);
     if (json) {
       console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    if (result.command === "wiki context approve") {
+      console.log(`Wiki context approved: ${result.approval.approvalId}`);
+      console.log(`Context: ${result.approval.paths.markdown}`);
       return;
     }
     console.log(`Wiki context: ${result.selectedPages.length} pages, ${result.tokenEstimate} tokens`);

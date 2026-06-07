@@ -357,7 +357,9 @@ Harness-engineering alignment adds these evidence-first tracks:
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
   port allocation, active health checks, bounded log projections, and
   instance-linked observation evidence records plus explicit stale/orphan
-  lifecycle policy projection. The first adapter capture slice is implemented as
+  lifecycle policy projection. Session status and HUD now summarize app-instance
+  observations under `evidenceLoop` without authority. The first adapter capture
+  slice is implemented as
   loopback HTTP dev-server, bounded log, and metric evidence. Next work is
   richer Browser/DevTools/screenshot capture and worktree-aware launcher reuse for future
   autopilot surfaces.
@@ -379,9 +381,9 @@ Harness-engineering alignment adds these evidence-first tracks:
   add active autonomy or a new completion authority.
 - Compiled repository wiki: [doc 18](design/18-compiled-repository-wiki.md)
   now has an experimental deterministic first slice: schemas, `cx wiki
-  map/build/check`, read-only context packs, explicit export, and advisory
-  source-bundle synthesis exist. Next work is richer page sets, context artifact
-  approval, and explicit injection policy.
+  map/build/check`, read-only context packs, visible non-injected context
+  approval artifacts, explicit export, and advisory source-bundle synthesis
+  exist. Next work is richer page sets and explicit injection policy.
   Do not auto-inject stale or advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
@@ -426,8 +428,9 @@ Harness-engineering alignment adds these evidence-first tracks:
     contract metadata until enforceable policy fields exist.
 12. Compiled repository wiki: the deterministic `cx wiki
     map/build/check/context/export` slice and advisory source-bundle synthesis
-    now exist. Next implement richer page coverage and context artifact approval
-    before any injection path is considered.
+    now exist, and `cx wiki context --approve` writes visible non-injected
+    approval artifacts. Next implement richer page coverage before any injection
+    path is considered.
 13. Worktree app instance launcher: build on the implemented live ownership
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback

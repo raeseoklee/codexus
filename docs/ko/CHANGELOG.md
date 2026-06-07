@@ -9,6 +9,27 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.14 - 2026-06-07
+
+이 release는 compiled wiki context, session HUD/status, installed-package smoke를
+잇는 evidence operating loop를 추가합니다. 새 출력은 experimental projection일
+뿐입니다. Approved context와 app observation을 보이게 만들지만 prompt를 자동
+주입하거나 health, control, source-truth, completion authority를 주장하지 않습니다.
+
+### Added
+
+- Experimental wiki context approval artifact를 추가했습니다:
+  `cx wiki context --topic <name> --approve --approved-by <name> --json`은
+  `approved_not_injected`, `automatic:false`, `completionAuthority:false`를 가진
+  visible `codexus.wiki.context-approval` artifact를 씁니다. Context는 bounded하고
+  명시적으로만 사용되며, Codexus는 active Codex prompt에 자동 주입하지 않습니다.
+- App-instance observation과 wiki context approval을 session evidence loop summary에
+  추가했습니다. `cx session status --json`과 `cx session hud --json`은 이 count를
+  `evidenceLoop` 아래에 보고하지만 health, control, source-truth, completion
+  authority를 부여하지 않습니다.
+- Installed package smoke가 wiki context approval artifact와 새 session
+  evidence-loop projection을 검증하도록 확장했습니다.
+
 ## 0.1.13 - 2026-06-07
 
 이 release는 다섯 개 evidence projection surface 묶음을 닫습니다. 0.1.x stable JSON

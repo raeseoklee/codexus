@@ -227,6 +227,10 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
     추가합니다. 이 command는 하나의 `instanceId`에 대해 process, heartbeat,
     health-evidence, log-file metric을 기록하되 health, control, cleanup,
     completion authority가 되지 않습니다.
+13. 완료: app-instance observation을 `cx session status --json`과
+    `cx session hud --json`의 `evidenceLoop` 아래에 projection합니다. 앱 증거는
+    Codex-native session surface에서 보이지만 health, control, cleanup, completion
+    authority가 되지 않습니다.
 
 ## 다음 Slice
 

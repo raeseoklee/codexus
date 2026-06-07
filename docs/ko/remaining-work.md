@@ -334,9 +334,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   `start --dry-run`, live owned-process start/stop, heartbeat, port allocation,
   active health check, bounded log projection, instance-linked observation
   evidence record, 명시적 stale/orphan lifecycle policy projection이 구현됐습니다.
-  첫 adapter capture slice는 loopback HTTP dev-server, bounded log, metric evidence로
-  구현됐습니다. 다음 작업은 더 풍부한 Browser/DevTools/screenshot capture와 future autopilot
-  surface를 위한 worktree-aware launcher reuse입니다.
+  Session status와 HUD는 app-instance observation을 `evidenceLoop` 아래에 요약하지만
+  authority를 승격하지 않습니다. 첫 adapter capture slice는 loopback HTTP dev-server,
+  bounded log, metric evidence로 구현됐습니다. 다음 작업은 더 풍부한
+  Browser/DevTools/screenshot capture와 future autopilot surface를 위한 worktree-aware
+  launcher reuse입니다.
 - Operational control invariant: [17번 문서](design/17-operational-control-invariants.md)는
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 기존 evidence 위의 control layer로 정의합니다. 첫 deterministic
@@ -354,9 +356,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 - Compiled repository wiki: [18번 문서](design/18-compiled-repository-wiki.md)는
   repository fact와 Codexus artifact 위의 재생성 가능한 markdown projection을 정의하며,
   이제 experimental deterministic 첫 slice를 가집니다. Schema, `cx wiki
-  map/build/check`, read-only context pack, explicit export, advisory source-bundle
-  synthesis가 존재하고, 다음 작업은 richer page set, context artifact approval,
-  explicit injection policy입니다.
+  map/build/check`, read-only context pack, visible non-injected context approval
+  artifact, explicit export, advisory source-bundle synthesis가 존재하고, 다음 작업은
+  richer page set과 explicit injection policy입니다.
   Stale/advisory page를 run에 자동 주입하지 않습니다.
 
 - Operational control invariant: decision artifact와 ledger-derived loop
@@ -405,8 +407,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     host-panel mirroring, task reconciliation, broader policy promotion입니다.
     Enforceable policy field가 생기기 전까지 autonomy preset은 contract metadata로 둡니다.
 12. Compiled repository wiki: deterministic `cx wiki map/build/check/context/export`
-    slice와 advisory source-bundle synthesis는 구현되었습니다. 다음은 richer page
-    coverage와 context artifact approval이며, injection path는 그 이후에만 검토합니다.
+    slice와 advisory source-bundle synthesis는 구현되었습니다. `cx wiki context
+    --approve`는 visible non-injected approval artifact를 씁니다. 다음은 richer page
+    coverage이며, injection path는 그 이후에만 검토합니다.
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
     구현된 live ownership과 observation-evidence slice 위에 다음 단계를 쌓습니다.
     첫 loopback HTTP dev-server probe, bounded/redacted log snapshot adapter, metric

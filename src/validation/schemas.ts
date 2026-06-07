@@ -5,7 +5,7 @@ import { validateArchitecturePolicy } from "../architecture/policy.ts";
 import { validateAppInstanceArtifact, validateAppInstanceDescriptor, validateAppInstanceObservation } from "../app-instance/launcher.ts";
 import { validateAutopilotContract } from "../autopilot/contract.ts";
 import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
-import { validateWikiManifest } from "../wiki/wiki.ts";
+import { validateWikiContextApproval, validateWikiManifest } from "../wiki/wiki.ts";
 import { findCodexusPackageRoot } from "../util/package-root.ts";
 import { inspectJsonSchemaSubset, jsonSchemaSubsetEngine, validateJsonSchemaSubset } from "./json-schema-subset.ts";
 
@@ -62,6 +62,7 @@ export type SchemaValidationType =
   | "autopilot-contract"
   | "wiki-manifest"
   | "wiki-advisory"
+  | "wiki-context-approval"
   | "repo-graph"
   | "relay-session"
   | "stage-gate-evidence"
@@ -107,6 +108,7 @@ export const schemaArtifactNames = [
   "wiki-manifest.schema.json",
   "wiki-page.schema.json",
   "wiki-advisory.schema.json",
+  "wiki-context-approval.schema.json",
   "repo-graph.schema.json",
   "relay-session.schema.json",
   "stage-gate-evidence.schema.json",
@@ -138,6 +140,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "autopilot-contract": "autopilot-contract.schema.json",
   "wiki-manifest": "wiki-manifest.schema.json",
   "wiki-advisory": "wiki-advisory.schema.json",
+  "wiki-context-approval": "wiki-context-approval.schema.json",
   "repo-graph": "repo-graph.schema.json",
   "relay-session": "relay-session.schema.json",
   "stage-gate-evidence": "stage-gate-evidence.schema.json",
@@ -613,6 +616,11 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       requireOneOf(value.check, "gate", ["not_requested", "passed"], errors, "check.gate");
     }
     if (value.completionAuthority !== false) errors.push("completionAuthority:not_false");
+  }
+
+  if (type === "wiki-context-approval") {
+    const validation = validateWikiContextApproval(value);
+    errors.push(...validation.errors);
   }
 
   if (type === "repo-graph") {

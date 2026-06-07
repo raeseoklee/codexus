@@ -59,12 +59,16 @@ For supported commands, these top-level field names are frozen through `0.1.x`:
   `informationalUnknowns`, `supplyChain`, `gate`.
 - Session status output: `schemaVersion`, `stability`, `status`, `cwd`,
   `paths`, `evidence`, `changeEvidence`, `riskSummary`, `decisions`, `loop`,
-  `subagents`, `verifyDetection`, `overlays`, `notifyHook`, `notifyDispatch`,
-  `migration`, `state`, `update`.
+  `subagents`, `controlPlane`, `evidenceLoop`, `verifyDetection`, `overlays`,
+  `notifyHook`, `notifyDispatch`, `migration`, `state`, `update`.
 - Session HUD output: `schemaVersion`, `stability`, `cwd`, `status`,
   `evidence`, `changeEvidence`, `riskSummary`, `decisions`, `loop`,
+  `tasks`, `controlPlane`, `evidenceLoop`,
   `notifyDispatch`, `capabilities`, `counts`, `lastDecision`,
   `lastCheckpoint`, `lastVerification`.
+  `evidenceLoop` is a projection of experimental evidence surfaces such as
+  app-instance observations and wiki context approvals. It is not health,
+  control, source-truth, prompt-injection, or completion authority.
 - Quality evidence output (`slop check`, `session slop`): `schemaVersion`,
   `stability`, `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
   `derivableFacts`, `heuristicClaims`, `gate`.

@@ -1367,6 +1367,114 @@ test("session status and hud aggregate documented deferred self-reports", async 
   }
 });
 
+test("session status and hud summarize app evidence and wiki context approvals without authority", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await mkdir(join(cwd, "docs"), { recursive: true });
+    await writeFile(join(cwd, "README.md"), "# Fixture\n");
+    await writeFile(join(cwd, "docs", "README.md"), "# Docs\n");
+    await writeFile(join(cwd, "package.json"), JSON.stringify({
+      name: "fixture",
+      version: "1.0.0",
+      scripts: { test: "node --test" },
+    }));
+
+    const appDir = join(cwd, ".codexus", "app-instances", "app_test");
+    const observationsDir = join(appDir, "observations");
+    await mkdir(observationsDir, { recursive: true });
+    await writeFile(join(appDir, "instance.json"), `${JSON.stringify({
+      schemaVersion: 1,
+      stability: "experimental",
+      type: "codexus.app.instance",
+      instanceId: "app_test",
+      worktree: { path: cwd, branch: null, head: null },
+      profile: "web",
+      owner: {
+        ownedByCodexus: true,
+        ownerTokenHash: "sha256:test",
+        pid: 123,
+        processGroupId: 123,
+        runnerStartMarker: null,
+        heartbeatPath: join(appDir, "heartbeat.json"),
+      },
+      network: { host: "127.0.0.1", port: 5173, url: "http://127.0.0.1:5173/" },
+      health: { status: "unknown", lastCheckedAt: null, evidencePath: null, url: null, timeoutMs: null },
+      logs: { stdoutPath: null, stderrPath: null },
+      status: "running",
+    }, null, 2)}\n`);
+    await writeFile(join(observationsDir, "observation_test.json"), `${JSON.stringify({
+      schemaVersion: 1,
+      stability: "experimental",
+      type: "codexus.app.instance.observation",
+      observationId: "observation_test",
+      recordedAt: "2026-06-07T00:00:00.000Z",
+      instance: {
+        instanceId: "app_test",
+        artifactPath: join(appDir, "instance.json"),
+        worktreePath: cwd,
+        processStatus: "orphaned",
+        healthStatus: "unknown",
+        url: "http://127.0.0.1:5173/",
+      },
+      observation: {
+        kind: "screenshot",
+        status: "observed",
+        source: "manual",
+        url: "http://127.0.0.1:5173/",
+        evidencePath: null,
+        summary: "manual screenshot reviewed",
+        reason: null,
+      },
+      authority: {
+        controlsInstance: false,
+        healthAuthority: false,
+        completionAuthority: false,
+      },
+    }, null, 2)}\n`);
+
+    const wikiBuild = runCli(cwd, ["wiki", "build", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(wikiBuild.status, 0, wikiBuild.stderr);
+    const wikiApprove = runCli(cwd, [
+      "wiki",
+      "context",
+      "--topic",
+      "verification",
+      "--approve",
+      "--approved-by",
+      "tester",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(wikiApprove.status, 0, wikiApprove.stderr);
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.evidenceLoop.completionAuthority, false);
+    assert.equal(statusOutput.evidenceLoop.appInstances.status, "observed");
+    assert.equal(statusOutput.evidenceLoop.appInstances.instances.total, 1);
+    assert.equal(statusOutput.evidenceLoop.appInstances.observations.total, 1);
+    assert.equal(statusOutput.evidenceLoop.appInstances.observations.byKind.screenshot, 1);
+    assert.equal(statusOutput.evidenceLoop.appInstances.authority.controlsInstance, false);
+    assert.equal(statusOutput.evidenceLoop.appInstances.authority.healthAuthority, false);
+    assert.equal(statusOutput.evidenceLoop.appInstances.authority.completionAuthority, false);
+    assert.equal(statusOutput.evidenceLoop.wikiContext.status, "observed");
+    assert.equal(statusOutput.evidenceLoop.wikiContext.approvals.total, 1);
+    assert.equal(statusOutput.evidenceLoop.wikiContext.eligibleForAutomaticInjection, false);
+    assert.equal(statusOutput.evidenceLoop.wikiContext.completionAuthority, false);
+
+    const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(hud.status, 0, hud.stderr);
+    const hudOutput = JSON.parse(hud.stdout);
+    assert.equal(hudOutput.counts.appInstanceObservations, 1);
+    assert.equal(hudOutput.counts.wikiContextApprovals, 1);
+    assert.equal(hudOutput.evidenceLoop.completionAuthority, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("session decision records advisory artifacts and projects them into status and hud", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();

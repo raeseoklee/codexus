@@ -360,7 +360,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|wiki-context-approval|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_app_command":

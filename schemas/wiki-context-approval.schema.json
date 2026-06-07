@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/wiki-context-approval.schema.json",
+  "title": "Codexus Wiki Context Approval Artifact",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.wiki.context-approval" },
+    "approvalId": { "type": "string", "minLength": 1 },
+    "status": { "const": "approved_not_injected" },
+    "approvedAt": { "type": "string", "minLength": 1 },
+    "approvedBy": { "type": "string", "minLength": 1 },
+    "topic": { "type": "string", "minLength": 1 },
+    "budget": { "type": "number", "minimum": 1 },
+    "tokenEstimate": { "type": "number", "minimum": 0 },
+    "selectedPages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pageId": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "freshness": { "enum": ["fresh", "stale", "partial", "unknown"] },
+          "estimatedTokens": { "type": "number", "minimum": 0 },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": ["pageId", "title", "path", "freshness", "estimatedTokens", "reason"]
+      }
+    },
+    "contextHash": { "type": "string", "minLength": 1 },
+    "sourceManifestPath": { "type": "string", "minLength": 1 },
+    "paths": {
+      "type": "object",
+      "properties": {
+        "dir": { "type": "string", "minLength": 1 },
+        "markdown": { "type": "string", "minLength": 1 },
+        "json": { "type": "string", "minLength": 1 }
+      },
+      "required": ["dir", "markdown", "json"]
+    },
+    "injection": {
+      "type": "object",
+      "properties": {
+        "automatic": { "const": false },
+        "applied": { "const": false },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["automatic", "applied", "reason"]
+    },
+    "authority": {
+      "type": "object",
+      "properties": {
+        "sourceTruth": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["sourceTruth", "completionAuthority"]
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "approvalId", "status", "approvedAt", "approvedBy", "topic", "budget", "tokenEstimate", "selectedPages", "contextHash", "sourceManifestPath", "paths", "injection", "authority"]
+}

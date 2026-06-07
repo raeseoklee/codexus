@@ -57,12 +57,16 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
   `informationalUnknowns`, `supplyChain`, `gate`.
 - Session status output: `schemaVersion`, `stability`, `status`, `cwd`,
   `paths`, `evidence`, `changeEvidence`, `riskSummary`, `decisions`, `loop`,
-  `subagents`, `verifyDetection`, `overlays`, `notifyHook`, `notifyDispatch`,
-  `migration`, `state`, `update`.
+  `subagents`, `controlPlane`, `evidenceLoop`, `verifyDetection`, `overlays`,
+  `notifyHook`, `notifyDispatch`, `migration`, `state`, `update`.
 - Session HUD output: `schemaVersion`, `stability`, `cwd`, `status`,
   `evidence`, `changeEvidence`, `riskSummary`, `decisions`, `loop`,
+  `tasks`, `controlPlane`, `evidenceLoop`,
   `notifyDispatch`, `capabilities`, `counts`, `lastDecision`,
   `lastCheckpoint`, `lastVerification`.
+  `evidenceLoop`는 app-instance observation과 wiki context approval 같은
+  experimental evidence surface의 projection입니다. Health, control, source-truth,
+  prompt-injection, completion authority가 아닙니다.
 - Quality evidence output(`slop check`, `session slop`): `schemaVersion`,
   `stability`, `cwd`, `scope`, `base`, `changeEvidence`, `evidenceGaps`,
   `derivableFacts`, `heuristicClaims`, `gate`.

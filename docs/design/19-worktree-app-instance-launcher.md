@@ -235,6 +235,10 @@ The live `start` and `stop` slices must enforce these local facts:
     capture slice. It records process, heartbeat, health-evidence, and log-file
     metrics for one `instanceId` without becoming health, control, cleanup, or
     completion authority.
+13. Done: project app-instance observations into `cx session status --json` and
+    `cx session hud --json` under `evidenceLoop` so app evidence is visible from
+    the Codex-native session surface without becoming health, control, cleanup,
+    or completion authority.
 
 ## Next Slice
 

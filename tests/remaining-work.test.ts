@@ -225,7 +225,7 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 29);
+    assert.equal(schemaOutput.schemas.length, 30);
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "automation-recovery.schema.json"));
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
@@ -244,6 +244,7 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
       "autopilot-contract.schema.json",
       "wiki-manifest.schema.json",
       "wiki-page.schema.json",
+      "wiki-context-approval.schema.json",
       "repo-graph.schema.json",
       "relay-session.schema.json",
       "stage-gate-evidence.schema.json",

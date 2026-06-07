@@ -154,6 +154,39 @@ export interface AppInstanceObservationValidation {
   artifact: AppInstanceObservationArtifact | null;
 }
 
+export interface AppInstanceEvidenceSummary {
+  schemaVersion: 1;
+  stability: "experimental";
+  status: "empty" | "observed";
+  instances: {
+    total: number;
+    running: number;
+    stopped: number;
+    orphaned: number;
+    unknown: number;
+  };
+  observations: {
+    total: number;
+    observed: number;
+    failed: number;
+    unavailable: number;
+    byKind: Record<AppInstanceObservationKind, number>;
+    latest: {
+      observationId: string;
+      recordedAt: string;
+      instanceId: string;
+      kind: AppInstanceObservationKind;
+      status: AppInstanceObservationStatus;
+      path: string;
+    } | null;
+  };
+  authority: {
+    controlsInstance: false;
+    healthAuthority: false;
+    completionAuthority: false;
+  };
+}
+
 interface AppInstanceHeartbeat {
   schemaVersion: 1;
   type: "codexus.app.instance.heartbeat";
@@ -1952,6 +1985,77 @@ export async function readAppInstanceObservation(path: string): Promise<AppInsta
   } catch (error) {
     return { path, valid: false, errors: [`json_unreadable:${error instanceof Error ? error.message : String(error)}`], artifact: null };
   }
+}
+
+export async function summarizeAppInstanceEvidence(cwd: string): Promise<AppInstanceEvidenceSummary> {
+  const validations = await Promise.all((await listInstanceArtifactPaths(cwd)).map(readInstanceArtifact));
+  const instanceCounts = {
+    total: 0,
+    running: 0,
+    stopped: 0,
+    orphaned: 0,
+    unknown: 0,
+  };
+  const observationCounts = {
+    total: 0,
+    observed: 0,
+    failed: 0,
+    unavailable: 0,
+    byKind: {
+      browser: 0,
+      "dev-server": 0,
+      log: 0,
+      screenshot: 0,
+      metric: 0,
+    } satisfies Record<AppInstanceObservationKind, number>,
+    latest: null as AppInstanceEvidenceSummary["observations"]["latest"],
+  };
+
+  const observations: Array<AppInstanceObservationArtifact & { path: string }> = [];
+  for (const validation of validations) {
+    if (!validation.artifact) continue;
+    const heartbeatPath = resolveArtifactPath(validation.artifact, validation.path, validation.artifact.owner.heartbeatPath);
+    const heartbeat = await readHeartbeat(heartbeatPath);
+    const process = projectProcess(validation.artifact, heartbeat);
+    instanceCounts.total += 1;
+    instanceCounts[process.status] += 1;
+    const observationPaths = await listObservationPaths(validation.artifact.worktree.path, validation.artifact.instanceId);
+    for (const path of observationPaths) {
+      const observation = await readAppInstanceObservation(path);
+      if (observation.artifact) observations.push({ ...observation.artifact, path });
+    }
+  }
+
+  observations.sort((left, right) => right.recordedAt.localeCompare(left.recordedAt));
+  for (const observation of observations) {
+    observationCounts.total += 1;
+    observationCounts[observation.observation.status] += 1;
+    observationCounts.byKind[observation.observation.kind] += 1;
+  }
+  const latest = observations[0] ?? null;
+  observationCounts.latest = latest
+    ? {
+      observationId: latest.observationId,
+      recordedAt: latest.recordedAt,
+      instanceId: latest.instance.instanceId,
+      kind: latest.observation.kind,
+      status: latest.observation.status,
+      path: latest.path,
+    }
+    : null;
+
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    status: instanceCounts.total > 0 || observationCounts.total > 0 ? "observed" : "empty",
+    instances: instanceCounts,
+    observations: observationCounts,
+    authority: {
+      controlsInstance: false,
+      healthAuthority: false,
+      completionAuthority: false,
+    },
+  };
 }
 
 export async function listAppInstanceObservations(cwd: string, options: { instanceId?: string }) {

@@ -9,6 +9,29 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.14 - 2026-06-07
+
+This release adds an evidence operating loop between compiled wiki context,
+session HUD/status, and installed-package smoke. The new outputs are
+experimental projections only: they make approved context and app observations
+visible without injecting prompts automatically or claiming health, control,
+source-truth, or completion authority.
+
+### Added
+
+- Added experimental wiki context approval artifacts:
+  `cx wiki context --topic <name> --approve --approved-by <name> --json`
+  writes a visible `codexus.wiki.context-approval` artifact with
+  `approved_not_injected`, `automatic:false`, and `completionAuthority:false`.
+  The context remains bounded and explicit; Codexus still does not inject it
+  into the active Codex prompt automatically.
+- Added session evidence-loop summaries for app-instance observations and wiki
+  context approvals. `cx session status --json` and `cx session hud --json`
+  now report these counts under `evidenceLoop` without granting health,
+  control, source-truth, or completion authority.
+- Extended the installed package smoke to validate wiki context approval
+  artifacts and the new session evidence-loop projection.
+
 ## 0.1.13 - 2026-06-07
 
 This release closes a five-surface evidence-projection batch. It keeps the

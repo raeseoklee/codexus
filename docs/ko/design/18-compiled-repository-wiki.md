@@ -247,11 +247,15 @@ cx wiki build --mode deterministic --json
 cx wiki build --mode advisory --driver codex-exec --json
 cx wiki check --gate --json
 cx wiki context --topic verification --budget 1200 --json
+cx wiki context --topic verification --approve --approved-by "$USER" --json
 cx wiki export --target docs/codexus-wiki --json
 ```
 
 `cx wiki context`는 bounded context-pack generator입니다. Page id, freshness, source ref,
-token estimate, 선택된 정확한 text를 반환해야 합니다. Run에 context를 조용히 inject하면 안 됩니다.
+token estimate, 선택된 정확한 text를 반환해야 합니다. Run에 context를 조용히 inject하면
+안 됩니다. `--approve`는 `approved_not_injected`, `automatic:false`, completion
+authority 없음을 가진 visible `codexus.wiki.context-approval` artifact를 써서 Codex
+session이 context를 명시적으로 인용할 수 있게 합니다.
 
 Autopilot integration은 명시적이어야 합니다:
 
@@ -340,9 +344,11 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
    scoped freshness 검사.
 6. `cx wiki context --topic <name> --budget <n> --json`을 read-only context-pack generator로
    추가.
-7. `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저 요구하고,
+7. 구현됨: `cx wiki context --topic <name> --approve --approved-by <name> --json`을
+   선택된 bounded context에 대한 visible non-injected approval artifact로 추가.
+8. `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저 요구하고,
    source truth를 쓰지 않으며, auto-commit하지 않는 명시적 export로 추가.
-8. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤
+9. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤
    `cx wiki build --mode advisory --json`을 추가. Advisory artifact는 driver/source-bundle
    evidence를 기록하지만 권위가 없습니다.
 

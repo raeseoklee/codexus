@@ -28,6 +28,8 @@ import { buildControlPlaneSummary } from "../../control/control-plane.ts";
 import { readCodexusVersionInfo } from "./version.ts";
 import { buildUpdateSummary } from "../../update/check.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
+import { summarizeAppInstanceEvidence } from "../../app-instance/launcher.ts";
+import { summarizeWikiContextApprovals } from "../../wiki/wiki.ts";
 
 function statePath(cwd: string): string {
   return sessionPaths(cwd).state;
@@ -61,6 +63,8 @@ async function sessionStatusProjection(cwd: string) {
   const tasks = summarizeSessionTasks(cwd, taskArtifact);
   const version = readCodexusVersionInfo();
   const update = buildUpdateSummary({ currentVersion: version.version, cacheOnly: true });
+  const appInstances = await summarizeAppInstanceEvidence(cwd);
+  const wikiContext = await summarizeWikiContextApprovals(cwd);
   return {
     schemaVersion: 1,
     stability: "stable" as const,
@@ -75,6 +79,13 @@ async function sessionStatusProjection(cwd: string) {
     subagents,
     tasks,
     controlPlane,
+    evidenceLoop: {
+      schemaVersion: 1,
+      stability: "experimental" as const,
+      appInstances,
+      wikiContext,
+      completionAuthority: false as const,
+    },
     update,
     verifyDetection: detection,
     overlays: {
@@ -117,6 +128,8 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`Risk: ${result.riskSummary.status} (${result.riskSummary.fileCount} files)`);
   console.log(`Control plane: ${result.controlPlane.status}`);
   console.log(`Policy catalog: ${result.controlPlane.policyCatalog.status}`);
+  console.log(`App evidence: ${result.evidenceLoop.appInstances.status} (${result.evidenceLoop.appInstances.observations.total} observations)`);
+  console.log(`Wiki context approvals: ${result.evidenceLoop.wikiContext.status} (${result.evidenceLoop.wikiContext.approvals.total})`);
 }
 
 async function hudCommand(cwd: string, json: boolean): Promise<void> {
@@ -142,6 +155,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
     loop: status.loop,
     tasks: status.tasks,
     controlPlane: status.controlPlane,
+    evidenceLoop: status.evidenceLoop,
     notifyDispatch: status.notifyDispatch,
     capabilities: status.state?.capabilities ?? null,
     counts: {
@@ -154,6 +168,8 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
       policyObserved: status.controlPlane.counts.policyObserved,
       policyAdvisory: status.controlPlane.counts.policyAdvisory,
       policyUnavailable: status.controlPlane.counts.policyUnavailable,
+      appInstanceObservations: status.evidenceLoop.appInstances.observations.total,
+      wikiContextApprovals: status.evidenceLoop.wikiContext.approvals.total,
       hookEvents: status.state?.hookEvents.length ?? 0,
     },
     lastDecision: status.decisions.lastDecision,
@@ -174,6 +190,8 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`Control plane: ${result.controlPlane.status}`);
   console.log(`Deferred self-reports: ${result.controlPlane.deferredSelfReports.status}`);
   console.log(`Policy catalog: ${result.controlPlane.policyCatalog.status}`);
+  console.log(`App evidence: ${result.evidenceLoop.appInstances.status}`);
+  console.log(`Wiki context approvals: ${result.evidenceLoop.wikiContext.status}`);
   console.log(`Notify: ${result.notifyDispatch.status}`);
 }
 

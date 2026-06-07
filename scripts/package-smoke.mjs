@@ -391,6 +391,34 @@ process.on("SIGINT", shutdown);
   assert(wikiContext.stability === "experimental", "wiki context did not report experimental stability");
   assert(wikiContext.selectedPages?.some((page) => page.pageId === "wiki.verification"), "wiki context did not include the verification page");
   assert(wikiContext.eligibleForAutomaticInjection === false, "wiki context should not be eligible for automatic injection");
+  const wikiContextApproval = parseJsonRun(codexus, [
+    "wiki",
+    "context",
+    "--cwd",
+    project,
+    "--topic",
+    "verification",
+    "--budget",
+    "1200",
+    "--approve",
+    "--approved-by",
+    "package-smoke",
+    "--json",
+  ]);
+  assert(wikiContextApproval.command === "wiki context approve", "wiki context approval command did not report the approval surface");
+  assert(wikiContextApproval.approval?.status === "approved_not_injected", "wiki context approval did not remain approved_not_injected");
+  assert(wikiContextApproval.approval?.injection?.automatic === false, "wiki context approval must not claim automatic injection");
+  assert(wikiContextApproval.approval?.authority?.completionAuthority === false, "wiki context approval must not claim completion authority");
+  const wikiContextApprovalSchema = parseJsonRun(codexus, [
+    "schema",
+    "validate",
+    "--type",
+    "wiki-context-approval",
+    "--file",
+    wikiContextApproval.approval.paths.json,
+    "--json",
+  ]);
+  assert(wikiContextApprovalSchema.ok === true, "wiki context approval did not validate against schema");
   const autopilotPresets = parseJsonRun(codexus, ["autopilot", "presets", "list", "--json"]);
   assert(autopilotPresets.stability === "experimental", "autopilot presets did not report experimental stability");
   assert(autopilotPresets.defaultPreset === "contracted", "autopilot presets did not report the default preset");
@@ -528,6 +556,10 @@ process.on("SIGINT", shutdown);
   assert(appObservationSchema.ok === true, "app instance observation did not validate against schema");
   const appObservationList = parseJsonRun(codexus, ["app", "instance", "evidence", "list", "--cwd", project, "--instance-id", liveInstanceId, "--json"]);
   assert(appObservationList.observations?.length === 1, "app instance evidence list did not include the recorded observation");
+  const evidenceLoopStatus = parseJsonRun(codexus, ["session", "status", "--cwd", project, "--json"]);
+  assert(evidenceLoopStatus.evidenceLoop?.appInstances?.observations?.total >= 1, "session status did not summarize app instance observations");
+  assert(evidenceLoopStatus.evidenceLoop?.wikiContext?.approvals?.total >= 1, "session status did not summarize wiki context approvals");
+  assert(evidenceLoopStatus.evidenceLoop?.completionAuthority === false, "session evidence loop must not claim completion authority");
 
   const appStop = parseJsonRun(codexus, ["app", "instance", "stop", "--cwd", project, "--instance-id", liveInstanceId, "--json"]);
   assert(appStop.status === "stopped", "app instance stop did not report stopped");

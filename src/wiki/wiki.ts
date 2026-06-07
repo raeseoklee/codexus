@@ -213,6 +213,66 @@ export interface WikiContextResult {
   text: string;
 }
 
+export interface WikiContextApprovalArtifact {
+  schemaVersion: 1;
+  stability: "experimental";
+  type: "codexus.wiki.context-approval";
+  approvalId: string;
+  status: "approved_not_injected";
+  approvedAt: string;
+  approvedBy: string;
+  topic: string;
+  budget: number;
+  tokenEstimate: number;
+  selectedPages: WikiContextPageSelection[];
+  contextHash: string;
+  sourceManifestPath: string;
+  paths: {
+    dir: string;
+    markdown: string;
+    json: string;
+  };
+  injection: {
+    automatic: false;
+    applied: false;
+    reason: string;
+  };
+  authority: {
+    sourceTruth: false;
+    completionAuthority: false;
+  };
+}
+
+export interface WikiContextApprovalResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "wiki context approve";
+  cwd: string;
+  context: WikiContextResult;
+  approval: WikiContextApprovalArtifact;
+  eligibleForAutomaticInjection: false;
+  completionAuthority: false;
+}
+
+export interface WikiContextApprovalSummary {
+  schemaVersion: 1;
+  stability: "experimental";
+  status: "empty" | "observed";
+  approvals: {
+    total: number;
+    latest: {
+      approvalId: string;
+      approvedAt: string;
+      approvedBy: string;
+      topic: string;
+      tokenEstimate: number;
+      path: string;
+    } | null;
+  };
+  eligibleForAutomaticInjection: false;
+  completionAuthority: false;
+}
+
 export interface WikiExportResult {
   schemaVersion: 1;
   stability: "experimental";
@@ -264,6 +324,10 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function wikiRoot(cwd: string): string {
   return join(harnessRoot(cwd), "wiki");
 }
@@ -274,6 +338,10 @@ function wikiPagesDir(cwd: string): string {
 
 function wikiContextDir(cwd: string): string {
   return join(wikiRoot(cwd), "context");
+}
+
+function wikiContextApprovalDir(cwd: string, approvalId: string): string {
+  return join(wikiContextDir(cwd), approvalId);
 }
 
 function wikiManifestPath(cwd: string): string {
@@ -1166,6 +1234,175 @@ export async function buildWikiContext(cwd: string, topic: string, budget: numbe
     // Context packs are readable bounded projections only in the first slice.
     eligibleForAutomaticInjection: false,
     text,
+  };
+}
+
+export function validateWikiContextApproval(value: unknown) {
+  const errors: string[] = [];
+  if (!isRecord(value)) {
+    return { schemaVersion: 1 as const, valid: false, errors: ["approval:not_object"], artifact: null as WikiContextApprovalArtifact | null };
+  }
+  if (value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  if (value.stability !== "experimental") errors.push("stability:not_experimental");
+  if (value.type !== "codexus.wiki.context-approval") errors.push("type:not_codexus_wiki_context_approval");
+  if (value.status !== "approved_not_injected") errors.push("status:not_approved_not_injected");
+  const requireText = (key: string) => {
+    const next = value[key];
+    if (typeof next !== "string" || next.trim().length === 0) {
+      errors.push(`${key}:expected_non_empty_string`);
+      return "";
+    }
+    return next;
+  };
+  const approvalId = requireText("approvalId");
+  const approvedAt = requireText("approvedAt");
+  const approvedBy = requireText("approvedBy");
+  const topic = requireText("topic");
+  const contextHash = requireText("contextHash");
+  const sourceManifestPath = requireText("sourceManifestPath");
+  if (!Number.isInteger(value.budget) || (value.budget as number) <= 0) errors.push("budget:expected_positive_integer");
+  if (!Number.isInteger(value.tokenEstimate) || (value.tokenEstimate as number) < 0) errors.push("tokenEstimate:expected_non_negative_integer");
+  if (!Array.isArray(value.selectedPages)) errors.push("selectedPages:expected_array");
+  if (!isRecord(value.paths)) {
+    errors.push("paths:expected_object");
+  } else {
+    for (const key of ["dir", "markdown", "json"]) {
+      if (typeof value.paths[key] !== "string" || String(value.paths[key]).trim().length === 0) errors.push(`paths.${key}:expected_non_empty_string`);
+    }
+  }
+  if (!isRecord(value.injection)) {
+    errors.push("injection:expected_object");
+  } else {
+    if (value.injection.automatic !== false) errors.push("injection.automatic:not_false");
+    if (value.injection.applied !== false) errors.push("injection.applied:not_false");
+    if (typeof value.injection.reason !== "string" || value.injection.reason.trim().length === 0) errors.push("injection.reason:expected_non_empty_string");
+  }
+  if (!isRecord(value.authority)) {
+    errors.push("authority:expected_object");
+  } else {
+    if (value.authority.sourceTruth !== false) errors.push("authority.sourceTruth:not_false");
+    if (value.authority.completionAuthority !== false) errors.push("authority.completionAuthority:not_false");
+  }
+  return {
+    schemaVersion: 1 as const,
+    valid: errors.length === 0,
+    errors,
+    artifact: errors.length === 0
+      ? value as unknown as WikiContextApprovalArtifact
+      : null,
+  };
+}
+
+export async function approveWikiContext(cwd: string, topic: string, budget: number, approvedBy?: string): Promise<WikiContextApprovalResult> {
+  const context = await buildWikiContext(cwd, topic, budget);
+  const approvedAt = nowIso();
+  const approvalId = `wiki_context_${Date.now().toString(36)}`;
+  const dir = wikiContextApprovalDir(cwd, approvalId);
+  const markdown = join(dir, "context.md");
+  const json = join(dir, "approval.json");
+  const contextHash = sha256Text(context.text);
+  const approval: WikiContextApprovalArtifact = {
+    schemaVersion: 1,
+    stability: "experimental",
+    type: "codexus.wiki.context-approval",
+    approvalId,
+    status: "approved_not_injected",
+    approvedAt,
+    approvedBy: approvedBy?.trim() || "codexus-wiki-context",
+    topic: context.topic,
+    budget: context.budget,
+    tokenEstimate: context.tokenEstimate,
+    selectedPages: context.selectedPages,
+    contextHash,
+    sourceManifestPath: repoRelative(cwd, wikiManifestPath(cwd)),
+    paths: {
+      dir,
+      markdown,
+      json,
+    },
+    injection: {
+      automatic: false,
+      applied: false,
+      reason: "Codexus records approved wiki context as an artifact but does not inject it into the active Codex prompt automatically.",
+    },
+    authority: {
+      sourceTruth: false,
+      completionAuthority: false,
+    },
+  };
+  await ensureDir(dir);
+  await writeFile(markdown, [
+    "# Codexus Wiki Context Approval",
+    "",
+    "Status: approved_not_injected",
+    "",
+    "This context is approved for explicit human/model reading. Codexus does not inject it automatically and it is not source truth.",
+    "",
+    `- approvalId: ${approvalId}`,
+    `- approvedAt: ${approvedAt}`,
+    `- approvedBy: ${approval.approvedBy}`,
+    `- topic: ${context.topic}`,
+    `- contextHash: ${contextHash}`,
+    "",
+    "## Context",
+    "",
+    context.text,
+  ].join("\n"));
+  await writeJsonAtomic(json, approval);
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "wiki context approve",
+    cwd,
+    context,
+    approval,
+    eligibleForAutomaticInjection: false,
+    completionAuthority: false,
+  };
+}
+
+async function readWikiContextApproval(path: string) {
+  try {
+    const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;
+    return validateWikiContextApproval(parsed).artifact;
+  } catch {
+    return null;
+  }
+}
+
+export async function summarizeWikiContextApprovals(cwd: string): Promise<WikiContextApprovalSummary> {
+  const root = wikiContextDir(cwd);
+  const approvals: Array<WikiContextApprovalArtifact & { path: string }> = [];
+  if (existsSync(root)) {
+    for (const entry of await readdir(root, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const path = join(root, entry.name, "approval.json");
+      if (!existsSync(path)) continue;
+      const approval = await readWikiContextApproval(path);
+      if (approval) approvals.push({ ...approval, path });
+    }
+  }
+  approvals.sort((left, right) => right.approvedAt.localeCompare(left.approvedAt));
+  const latest = approvals[0] ?? null;
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    status: approvals.length > 0 ? "observed" : "empty",
+    approvals: {
+      total: approvals.length,
+      latest: latest
+        ? {
+          approvalId: latest.approvalId,
+          approvedAt: latest.approvedAt,
+          approvedBy: latest.approvedBy,
+          topic: latest.topic,
+          tokenEstimate: latest.tokenEstimate,
+          path: latest.path,
+        }
+        : null,
+    },
+    eligibleForAutomaticInjection: false,
+    completionAuthority: false,
   };
 }
 

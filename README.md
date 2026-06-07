@@ -165,7 +165,7 @@ npm run package:smoke
 
 ## Status
 
-Codexus 0.1.6 is usable as a local harness with a narrow stable path around
+Codexus 0.1.13 is usable as a local harness with a narrow stable path around
 `codex exec --json`; live app-server turns, routine live model replay, and
 automatic prompt injection remain intentionally gated. Live cron/gateway
 dispatch is now available as an experimental explicit-approval surface.
@@ -177,8 +177,8 @@ dispatch is now available as an experimental explicit-approval surface.
 | Supervised `codex exec --json` runs, verification/repair, run ledger, resume/cancel/status/events | Stable path |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
 | `slop check`, `supply-chain check`, `lsp status/check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence plus experimental LSP diagnostics surface; LSP protocol servers are detect-only in the first slice |
-| `repo graph build/check` | Experimental graph evidence surface; build/check only, no import/search/injection |
-| `app instance profile list/status/logs/start/stop/evidence record/evidence list` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
+| `repo graph build/check/import/search/explain`, `wiki build/check/context/export` | Experimental graph/wiki evidence surface; context approval artifacts are visible and non-injected |
+| `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
 | app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval, and other surfaces stay status/record/launch-contract/gated |
 | autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`); live `autopilot run` remains deferred to the 0.2/0.3 track |
 
@@ -218,6 +218,8 @@ cx schema engine --json
 cx replay parity --json
 cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
 cx repo graph check --graph <graph-id-or-path> --gate --json
+cx wiki build --json
+cx wiki context --topic verification --approve --approved-by "$USER" --json
 cx slop check --scope "src/**" --gate --json
 cx supply-chain check --gate --json
 cx release check --gate --json
@@ -227,6 +229,7 @@ cx app instance status --json
 cx app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
 cx app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
 cx app instance evidence logs --instance-id <id> --json
+cx app instance evidence metrics --instance-id <id> --json
 cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json
