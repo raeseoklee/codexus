@@ -45,6 +45,8 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [0.1.10 release evidence](release-evidence/0.1.10.md): trusted-publishing evidence for experimental Codex plugin packaging diagnostics.
 - [0.1.11 release evidence](release-evidence/0.1.11.md): trusted-publishing evidence for explicit npm `next` update-check opt-in.
 - [0.1.12 release evidence](release-evidence/0.1.12.md): trusted-publishing evidence for the executable release cadence policy.
+- [0.1.13 release evidence](release-evidence/0.1.13.md): trusted-publishing evidence for the five-surface evidence projection patch.
+- [0.1.14 release evidence](release-evidence/0.1.14.md): trusted-publishing evidence for the evidence operating loop patch.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.

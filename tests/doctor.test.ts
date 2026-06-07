@@ -43,6 +43,7 @@ if (args[0] === "--version") {
     });
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
+    assert.equal(output.schemaVersion, 1);
     assert.equal(output.stability, "stable");
     assert.equal(output.ok, true);
     assert.equal(output.driverProbe.capabilities.supportsJsonl, true);

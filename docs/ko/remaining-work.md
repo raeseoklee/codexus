@@ -2,7 +2,7 @@
 
 [English](../remaining-work.md)
 
-날짜: 2026-05-31
+날짜: 2026-06-08
 
 이 문서는 MVP spine과 high-risk promotion slice 이후의 현재 backlog입니다. 남은
 항목, 필요한 이유, 다음 구현에서 지켜야 할 설계 제약을 정리합니다.
@@ -169,7 +169,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
     compatibility, stable-readiness smoke coverage, local release integrity gate 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 현재 npm baseline은 `0.1.6`입니다. Prerelease는 fallback/dev path인
+    - 현재 npm baseline은 `0.1.14`입니다. Prerelease는 fallback/dev path인
       `publish:next`를 통해 배포할 수 있고, stable release는 trusted GitHub Actions
       tag run에서 배포합니다.
     - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,

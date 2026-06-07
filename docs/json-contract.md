@@ -47,7 +47,7 @@ For supported commands, these top-level field names are frozen through `0.1.x`:
   `statePath`, `reportPath`, `state`.
 - Run status/report outputs: `state`, `paths`, `verification`, `experience`,
   `eventTail`.
-- Doctor output: `stability`, `ok`, `strict`, `checks`, `warnings`,
+- Doctor output: `schemaVersion`, `stability`, `ok`, `strict`, `checks`, `warnings`,
   `configFiles`, `driverProbe`, `update`.
 - Schema output: `ok`, `schemas`, `appServerFixture`, and for
   `schema engine`, `schemaVersion`, `stability`, `activeEngine`,

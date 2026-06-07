@@ -2,7 +2,7 @@
 
 [Korean](ko/remaining-work.md)
 
-Date: 2026-05-31
+Date: 2026-06-08
 
 This document is the current backlog after the MVP spine and the high-risk
 promotion slice. It lists what remains, why it matters, and what design
@@ -180,7 +180,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     smoke compatibility, stable-readiness smoke coverage, and local release
     integrity gating implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current npm baseline is `0.1.6`; prereleases publish through
+    - Current npm baseline is `0.1.14`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
       trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin

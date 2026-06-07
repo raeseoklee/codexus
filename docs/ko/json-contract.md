@@ -45,7 +45,7 @@ Supported command에 대해 아래 top-level field name은 `0.1.x` 동안 frozen
   `statePath`, `reportPath`, `state`.
 - Run status/report output: `state`, `paths`, `verification`, `experience`,
   `eventTail`.
-- Doctor output: `stability`, `ok`, `strict`, `checks`, `warnings`,
+- Doctor output: `schemaVersion`, `stability`, `ok`, `strict`, `checks`, `warnings`,
   `configFiles`, `driverProbe`, `update`.
 - Schema output: `ok`, `schemas`, `appServerFixture`, 그리고 `schema engine`의
   `schemaVersion`, `stability`, `activeEngine`, `fullJsonSchemaEngine`,

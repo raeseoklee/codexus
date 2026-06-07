@@ -201,6 +201,7 @@ test("stable primary JSON commands include cache-only update summaries and never
     const doctor = runCli(cwd, ["doctor", "--json"], env);
     assert.equal(doctor.status, 0, doctor.stderr);
     const doctorOutput = JSON.parse(doctor.stdout);
+    assert.equal(doctorOutput.schemaVersion, 1);
     assert.equal(doctorOutput.stability, "stable");
     assert.equal(doctorOutput.update.stability, "experimental");
     assert.equal(doctorOutput.update.channel, "stable");

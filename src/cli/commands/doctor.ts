@@ -303,7 +303,7 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   const ok = checks.every((check) => check.status !== "fail");
   const version = readCodexusVersionInfo();
   const update = buildUpdateSummary({ currentVersion: version.version, cacheOnly: true });
-  const result = { stability: "stable" as const, ok, strict, checks, warnings, configFiles: filesRead, driverProbe, update };
+  const result = { schemaVersion: 1 as const, stability: "stable" as const, ok, strict, checks, warnings, configFiles: filesRead, driverProbe, update };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
     process.exitCode = strict && !ok ? 1 : 0;
