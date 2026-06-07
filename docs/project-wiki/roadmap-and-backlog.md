@@ -22,6 +22,22 @@ These are suitable for release-sized goals when grouped with verification:
 - Repository knowledge and compiled wiki: expand deterministic repository facts,
   page manifests, and explicit context approval while keeping injection manual.
 
+## Recommended Sequence
+
+Work through the roadmap in this order unless a release blocker appears:
+
+1. Keep docs, kanban, project wiki, and stable JSON contracts current.
+2. Harden app-instance observation evidence without promoting health or cleanup
+   authority.
+3. Strengthen relay/autopilot stage gates and stop-at-boundary behavior.
+4. Expand deterministic repository knowledge and compiled wiki context while
+   keeping injection manual.
+5. Re-run contract-promotion readiness before any `0.2.0` stable-surface
+   promotion.
+6. Investigate evidence-needed tracks only after their non-disruptive observer
+   contracts are clear: Desktop app-server, plugin always-on behavior, LSP
+   protocol servers, and app-instance health modeling.
+
 ## Evidence Needed
 
 These need more evidence before promotion:

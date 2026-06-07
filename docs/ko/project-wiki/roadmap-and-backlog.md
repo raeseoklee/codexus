@@ -21,6 +21,22 @@ design docs 위에 얹은 프로젝트 관리용 projection입니다. 짧게 유
 - Repository knowledge와 compiled wiki: deterministic repository fact, page manifest,
   explicit context approval을 확장하되 injection은 manual로 유지합니다.
 
+## 권장 순서
+
+Release blocker가 생기지 않는 한 아래 순서로 진행합니다:
+
+1. Docs, kanban, project wiki, stable JSON contract를 최신 상태로 유지합니다.
+2. Health 또는 cleanup authority를 승격하지 않고 app-instance observation evidence를
+   강화합니다.
+3. Relay/autopilot stage gate와 stop-at-boundary behavior를 강화합니다.
+4. Injection은 manual로 유지하면서 deterministic repository knowledge와 compiled wiki
+   context를 확장합니다.
+5. `0.2.0` stable-surface promotion 전에는 contract-promotion readiness를 다시
+   실행합니다.
+6. Desktop app-server, plugin always-on behavior, LSP protocol server,
+   app-instance health modeling은 non-disruptive observer contract가 분명해진 뒤
+   조사합니다.
+
 ## Evidence Needed
 
 승격 전에 더 많은 evidence가 필요한 항목:
