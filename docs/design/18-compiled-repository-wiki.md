@@ -31,6 +31,13 @@ into a general knowledge-base product. The wiki is not the source of truth. It i
 a navigable projection that helps agents and humans understand the project
 without rebuilding context from scratch every session.
 
+Separate boundary: the checked-in
+[Project LLM Wiki](../project-wiki/README.md) is a project-management artifact
+for Codexus maintainers and LLM agents. This design document describes the
+Codexus product surface that builds regenerable wiki artifacts. The two should
+not be merged: project-management wiki pages can guide maintainers, while
+generated wiki pages remain projections and never become completion authority.
+
 The ownership model is:
 
 ```text

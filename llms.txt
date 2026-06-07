@@ -1,0 +1,43 @@
+# Codexus
+
+Codexus is a harness engineering layer for OpenAI Codex CLI. It keeps the local
+Codex engine and authentication boundary, then adds durable run ledgers,
+verification gates, bounded repair loops, session evidence, memory, and
+truthful status reporting.
+
+## Start Here
+
+- [Project LLM Wiki](docs/project-wiki/README.md): checked-in project-management context for maintainers and LLM agents.
+- [Current State](docs/project-wiki/current-state.md): what is stable, experimental, and gated.
+- [Operating Model](docs/project-wiki/operating-model.md): evidence rules and completion standards.
+- [Release Management](docs/project-wiki/release-management.md): release gates, version policy, and post-publish evidence.
+- [Agent Onboarding](docs/project-wiki/agent-onboarding.md): first-read checklist for LLM agents.
+
+## Source Truth
+
+- [README](README.md): public project overview and install instructions.
+- [Documentation Index](docs/README.md): full documentation map.
+- [Implementation Status](docs/implementation-status.md): current implemented surfaces and known gaps.
+- [JSON Contract](docs/json-contract.md): frozen stable JSON fields and stability markers.
+- [Release Policy](docs/release-policy.md): release cadence and executable release policy.
+- [Remaining Work](docs/remaining-work.md): active backlog and deferred surfaces.
+- [Roadmap Kanban](docs/roadmap-kanban.html): four-column roadmap board.
+
+## Key Design Docs
+
+- [Harness Engineering Alignment](docs/design/13-harness-engineering-alignment.md)
+- [Repository Knowledge Graph](docs/design/14-repository-knowledge-graph.md)
+- [Multi-Engine Relay Autopilot](docs/design/15-multi-engine-relay-autopilot.md)
+- [Operational Control Invariants](docs/design/17-operational-control-invariants.md)
+- [Compiled Repository Wiki](docs/design/18-compiled-repository-wiki.md)
+- [Worktree App Instance Launcher](docs/design/19-worktree-app-instance-launcher.md)
+
+## Latest Release Evidence
+
+- [0.1.14 Release Evidence](docs/release-evidence/0.1.14.md)
+
+## Boundary
+
+This file is a navigation aid. It is not a completion authority. If it disagrees
+with code, tests, schemas, release workflows, or release evidence, update this
+file.

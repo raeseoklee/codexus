@@ -32,6 +32,12 @@ evidence-linked markdown projection을 만드는 방향입니다.
 바꾸지 않습니다. Wiki는 source of truth가 아닙니다. 매 session마다 context를 처음부터 다시
 구축하지 않도록 agent와 사람이 프로젝트를 이해하는 데 쓰는 navigable projection입니다.
 
+분리된 경계: 체크인된 [Project LLM Wiki](../../project-wiki/README.md)는 Codexus maintainer와
+LLM agent를 위한 project-management artifact입니다. 이 design doc은 Codexus 제품 surface가
+regenerable wiki artifact를 만드는 방향을 설명합니다. 두 항목은 합치면 안 됩니다. 프로젝트 관리
+wiki page는 maintainer를 안내할 수 있지만, generated wiki page는 projection이며 completion
+authority가 되지 않습니다.
+
 소유권 모델:
 
 ```text

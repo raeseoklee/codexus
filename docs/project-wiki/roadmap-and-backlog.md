@@ -1,0 +1,56 @@
+# Roadmap And Backlog
+
+[Korean](../ko/project-wiki/roadmap-and-backlog.md)
+
+This page is a project-management projection over [Remaining work](../remaining-work.md),
+[Roadmap Kanban](../roadmap-kanban.html), and design docs. It should stay short
+and point back to source docs.
+
+## Ready Themes
+
+These are suitable for release-sized goals when grouped with verification:
+
+- Project context and LLM wiki management: keep checked-in project context
+  current without making generated wiki pages authority.
+- App-instance observation hardening: improve owned-process evidence,
+  lifecycle boundaries, and log/probe/metric adapters without claiming app
+  health authority.
+- Relay and autopilot gates: strengthen stage evidence, agreement structure,
+  verification matrix handling, and stop-at-boundary behavior.
+- Contract promotion readiness: audit experimental surfaces before promoting
+  any to stable `0.2.0` contract.
+- Repository knowledge and compiled wiki: expand deterministic repository facts,
+  page manifests, and explicit context approval while keeping injection manual.
+
+## Evidence Needed
+
+These need more evidence before promotion:
+
+- Desktop app-server attachment and live event observation.
+- Plugin always-on behavior in Codex, because packaging evidence is not the
+  same as runtime supervision.
+- LSP protocol-server integration beyond detect-only project diagnostics.
+- App-instance health modeling that distinguishes process liveness, endpoint
+  checks, and user-observed behavior.
+
+## Gated Or Deferred
+
+These must stay visibly gated until their contracts exist:
+
+- live `cx autopilot run`,
+- automatic context or prompt injection,
+- active relay engine spawning beyond artifact import,
+- routine live model replay,
+- full unattended cron/gateway scheduler ownership,
+- tmux or native worker launch authority beyond honest status and recorder
+  surfaces.
+
+## Review Cadence
+
+When a release closes a theme, update:
+
+- [Implementation status](../implementation-status.md),
+- [Remaining work](../remaining-work.md),
+- [Roadmap Kanban](../roadmap-kanban.html),
+- this page,
+- the Korean counterparts.

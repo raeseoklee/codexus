@@ -22,6 +22,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 
 - [Quick start](quickstart.md): local setup, deterministic test run, real Codex run, and Codex-native adapter installation.
 - [Using Codexus inside Codex](codex-session-usage.md): how to invoke the `$codexus` skill from an interactive Codex session, what to ask it to do, and when not to use it.
+- [Project LLM Wiki](project-wiki/README.md): checked-in project-management context for maintainers and LLM agents, separate from the generated experimental repository wiki.
 - [Engineering plan](plans/2026-05-29-codex-harness-engineering-plan.md): migrated planning baseline, research findings, constraints, MVP scope, and risks.
 - [Harness remediation plan](plans/2026-05-29-harness-remediation-plan.md): accepted review findings and implemented remediation slices for repair, supervision, and evolution depth.
 - [npm packaging plan](plans/2026-05-30-npm-packaging-plan.md): bundled npm CLI entrypoint, package contents, installer strategy, and release gate.

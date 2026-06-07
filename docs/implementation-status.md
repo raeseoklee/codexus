@@ -2,7 +2,7 @@
 
 [Korean](ko/implementation-status.md)
 
-Date: 2026-06-04
+Date: 2026-06-07
 
 Product name: Codexus
 
@@ -10,7 +10,7 @@ Target CLI: `cx`
 
 Public bins: `cx`, `codexus`
 
-Current stable baseline: `0.1.13`
+Current stable baseline: `0.1.14`
 
 The npm package exposes `cx` and `codexus` as canonical bins. The historical
 `chx` alias is not published.

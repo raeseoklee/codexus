@@ -89,6 +89,13 @@ skill evidence. It does not create a competing chat session.
 
 Full guide: [Using Codexus inside Codex](docs/codex-session-usage.md).
 
+## Project Management Wiki
+
+Maintainers and LLM agents should use the checked-in
+[Project LLM Wiki](docs/project-wiki/README.md) for fast project context. It is
+a management/navigation artifact, not the experimental generated repository
+wiki and not a completion authority.
+
 ## Quick Start
 
 Install the current stable package:
@@ -165,7 +172,7 @@ npm run package:smoke
 
 ## Status
 
-Codexus 0.1.13 is usable as a local harness with a narrow stable path around
+Codexus 0.1.14 is usable as a local harness with a narrow stable path around
 `codex exec --json`; live app-server turns, routine live model replay, and
 automatic prompt injection remain intentionally gated. Live cron/gateway
 dispatch is now available as an experimental explicit-approval surface.

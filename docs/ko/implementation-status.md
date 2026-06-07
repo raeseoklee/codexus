@@ -2,7 +2,7 @@
 
 [English](../implementation-status.md)
 
-날짜: 2026-06-04
+날짜: 2026-06-07
 
 제품명: Codexus
 
@@ -10,7 +10,7 @@
 
 Public bins: `cx`, `codexus`
 
-현재 stable baseline: `0.1.13`
+현재 stable baseline: `0.1.14`
 
 Npm package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. 기존 `chx`
 alias는 공개 npm bin으로 배포하지 않습니다.

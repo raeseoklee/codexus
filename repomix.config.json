@@ -1,0 +1,70 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 1000000
+  },
+  "output": {
+    "filePath": ".codexus/context/repomix-project-management.md",
+    "style": "markdown",
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "showLineNumbers": false,
+    "truncateBase64": true,
+    "copyToClipboard": false,
+    "includeEmptyDirectories": false,
+    "git": {
+      "sortByChanges": true,
+      "sortByChangesMaxCommits": 50,
+      "includeDiffs": false,
+      "includeLogs": false,
+      "includeLogsCount": 25
+    }
+  },
+  "include": [
+    "AGENTS.md",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json",
+    "package-lock.json",
+    "llms.txt",
+    "docs/README.md",
+    "docs/project-wiki/**/*.md",
+    "docs/implementation-status.md",
+    "docs/json-contract.md",
+    "docs/release-policy.md",
+    "docs/remaining-work.md",
+    "docs/roadmap-kanban.html",
+    "docs/design/13-harness-engineering-alignment.md",
+    "docs/design/14-repository-knowledge-graph.md",
+    "docs/design/15-multi-engine-relay-autopilot.md",
+    "docs/design/17-operational-control-invariants.md",
+    "docs/design/18-compiled-repository-wiki.md",
+    "docs/design/19-worktree-app-instance-launcher.md",
+    "docs/plans/2026-06-04-0.2.0-promotion-readiness-plan.md",
+    "docs/release-evidence/0.1.14.md",
+    "docs/ko/project-wiki/**/*.md"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      ".codexus/**",
+      ".codex-harness/**",
+      "dist/**",
+      "node_modules/**",
+      "coverage/**",
+      "fixtures/**",
+      "tests/**",
+      "*.log"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
