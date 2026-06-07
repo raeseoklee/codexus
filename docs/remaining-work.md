@@ -472,7 +472,8 @@ Harness-engineering alignment adds these evidence-first tracks:
     `docs/json-contract.md`; `contract check --gate` can pass the stable
     promotion requirement. LSP diagnostics are also promoted for explicit
     bounded diagnostics only; protocol-server lifecycle remains deferred.
-    Remaining promotion work is architecture hardening and manual wiki context
-    hardening. Do not promote action surfaces such as app-instance, live
-    autopilot, active relay, Desktop attachment, automatic injection, or plugin
-    always-on claims until their authority evidence is stronger.
+    Remaining promotion work is architecture hardening, manual wiki context
+    hardening, and deferred evidence-track hardening. Do not promote app-instance
+    health modeling, live autopilot, active relay, Desktop attachment, automatic
+    injection, LSP protocol-server lifecycle, or plugin always-on claims until
+    their authority evidence is stronger.

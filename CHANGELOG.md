@@ -24,6 +24,9 @@ occur before 1.0, but they should be called out clearly.
 - Added `wiki context --fresh-only --gate` to the `cx contract check --target
   0.2.0` candidate audit as a manual-context hardening candidate, not an
   automatic-injection promotion.
+- Made `cx contract check --target 0.2.0` explicitly track deferred evidence
+  tracks for app-instance health modeling, automatic context injection, LSP
+  protocol-server lifecycle, and plugin always-on supervision.
 
 ### Fixed
 

@@ -223,7 +223,7 @@
             <li><code>repo check --gate</code>, local-mode <code>release check --gate</code>, <code>lsp check --gate</code>는 stable이고 <code>docs/json-contract.md</code>에 frozen되어 있으므로, <code>--gate</code>는 promotion requirement를 통과할 수 있습니다.</li>
             <li><code>wiki context --fresh-only --gate</code>는 automatic prompt injection이 아니라 non-injected manual-context 후보로 추적됩니다.</li>
             <li>LSP protocol-server lifecycle과 자동 project LSP 적용은 계속 deferred입니다.</li>
-            <li>Action surface는 lifecycle과 authority evidence가 더 강해질 때까지 experimental/deferred로 유지됩니다.</li>
+            <li>App health modeling, automatic injection, LSP protocol-server lifecycle, plugin always-on supervision 같은 deferred evidence track은 authority evidence가 더 강해질 때까지 experimental/deferred로 유지됩니다.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="plans/2026-06-04-0.2.0-promotion-readiness-plan.md">0.2.0 promotion readiness plan</a></p>

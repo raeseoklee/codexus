@@ -446,7 +446,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     `docs/json-contract.md`에 freeze합니다. 이제 `contract check --gate`는 stable
     promotion requirement를 통과할 수 있습니다. LSP diagnostics도 명시적 bounded
     diagnostics에 한해 승격되었고, protocol-server lifecycle은 계속 deferred입니다.
-    남은 promotion 작업은 architecture hardening과 manual wiki context hardening입니다.
-    App-instance, live autopilot, active relay, Desktop attachment, automatic injection,
-    plugin always-on claim 같은 action surface는 authority evidence가 더 강해질 때까지
-    승격하지 않습니다.
+    남은 promotion 작업은 architecture hardening, manual wiki context hardening,
+    deferred evidence-track hardening입니다. App-instance health modeling, live
+    autopilot, active relay, Desktop attachment, automatic injection, LSP
+    protocol-server lifecycle, plugin always-on claim은 authority evidence가 더 강해질
+    때까지 승격하지 않습니다.

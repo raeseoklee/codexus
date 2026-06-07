@@ -40,6 +40,14 @@ test("contract readiness reports repo, release, and LSP as stable promotions", (
   assert.deepEqual(lspCandidate?.blockers, []);
   assert.ok(report.candidates.some((candidate) => candidate.promotionStatus === "not_promoted"));
   assert.ok(report.deferredSurfaces.some((surface) => surface.surface === "app-instance-launcher"));
+  const appHealthSurface = report.deferredSurfaces.find((surface) => surface.surface === "app-instance-health-modeling");
+  assert.equal(appHealthSurface?.currentStability, "deferred");
+  const lspProtocolSurface = report.deferredSurfaces.find((surface) => surface.surface === "lsp-protocol-server-lifecycle");
+  assert.equal(lspProtocolSurface?.currentStability, "deferred");
+  const injectionSurface = report.deferredSurfaces.find((surface) => surface.surface === "automatic-context-injection");
+  assert.equal(injectionSurface?.currentStability, "deferred");
+  const pluginAlwaysOnSurface = report.deferredSurfaces.find((surface) => surface.surface === "plugin-always-on-supervision");
+  assert.equal(pluginAlwaysOnSurface?.currentStability, "deferred");
   const updateSurface = report.deferredSurfaces.find((surface) => surface.surface === "update-notifications");
   assert.equal(updateSurface?.currentStability, "experimental");
   assert.match(updateSurface?.reasons.join(" ") ?? "", /exist/);

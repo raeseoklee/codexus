@@ -24,6 +24,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - `cx contract check --target 0.2.0` candidate audit에 `wiki context --fresh-only
   --gate`를 manual-context hardening 후보로 추가했습니다. Automatic injection 승격은
   아닙니다.
+- `cx contract check --target 0.2.0`이 app-instance health modeling, automatic
+  context injection, LSP protocol-server lifecycle, plugin always-on supervision
+  같은 deferred evidence track을 명시적으로 추적하도록 했습니다.
 
 ### Fixed
 

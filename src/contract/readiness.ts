@@ -110,6 +110,7 @@ interface CandidateDefinition {
   surface: string;
   command: string;
   sourceFile: string;
+  currentStabilityOverride?: ContractCurrentStability;
   disposition: ContractPromotionDisposition;
   contractRisk: "low" | "medium" | "high";
   sideEffectRisk: "low" | "medium" | "high";
@@ -223,6 +224,22 @@ const deferredDefinitions: CandidateDefinition[] = [
     ],
   },
   {
+    surface: "app-instance-health-modeling",
+    command: "app instance health modeling",
+    sourceFile: "src/app-instance/launcher.ts",
+    currentStabilityOverride: "deferred",
+    disposition: "defer",
+    contractRisk: "high",
+    sideEffectRisk: "medium",
+    reasons: [
+      "Probe, log, metric, and screenshot evidence exists, but Codexus still does not claim app health authority.",
+    ],
+    requiredEvidence: [
+      "Descriptor-backed health model that distinguishes process liveness, endpoint probes, user-observed screenshots, and verification.",
+      "Longer dogfood evidence that health findings never become completion authority.",
+    ],
+  },
+  {
     surface: "autopilot-live-run",
     command: "autopilot run",
     sourceFile: "src/autopilot/contract.ts",
@@ -251,6 +268,21 @@ const deferredDefinitions: CandidateDefinition[] = [
     ],
   },
   {
+    surface: "automatic-context-injection",
+    command: "wiki context automatic injection",
+    sourceFile: "src/wiki/wiki.ts",
+    currentStabilityOverride: "deferred",
+    disposition: "defer",
+    contractRisk: "high",
+    sideEffectRisk: "medium",
+    reasons: [
+      "Manual context selection and approval exist, but Codexus still does not mutate prompts or inject context automatically.",
+    ],
+    requiredEvidence: [
+      "Visible approval step, reversible disable path, sanitization policy, audit artifact, and proof that failed freshness gates cannot inject.",
+    ],
+  },
+  {
     surface: "desktop-app-server-attachment",
     command: "app-server live attachment",
     sourceFile: "src/experiments/app-server-discovery.ts",
@@ -262,6 +294,21 @@ const deferredDefinitions: CandidateDefinition[] = [
     ],
     requiredEvidence: [
       "Non-disruptive observer bridge or explicit supported socket evidence.",
+    ],
+  },
+  {
+    surface: "lsp-protocol-server-lifecycle",
+    command: "lsp protocol-server lifecycle",
+    sourceFile: "src/lsp/project.ts",
+    currentStabilityOverride: "deferred",
+    disposition: "defer",
+    contractRisk: "high",
+    sideEffectRisk: "medium",
+    reasons: [
+      "Explicit diagnostics are stable, but long-lived protocol-server lifecycle and automatic project LSP application remain deferred.",
+    ],
+    requiredEvidence: [
+      "Descriptor-backed server start/stop, timeout, cancellation, trust, and cleanup contracts before automatic project LSP application.",
     ],
   },
   {
@@ -277,6 +324,21 @@ const deferredDefinitions: CandidateDefinition[] = [
     requiredEvidence: [
       "TTL cache, opt-out, CI-off behavior, and proof that update checks cannot fail primary commands.",
       "Observed notification UX that remains advisory and never mutates installation.",
+    ],
+  },
+  {
+    surface: "plugin-always-on-supervision",
+    command: "plugin always-on supervision",
+    sourceFile: "src/plugin/package.ts",
+    currentStabilityOverride: "deferred",
+    disposition: "defer",
+    contractRisk: "high",
+    sideEffectRisk: "medium",
+    reasons: [
+      "Plugin packaging exists, but installed plugin state and observed heartbeat evidence are still not available through a documented Codex contract.",
+    ],
+    requiredEvidence: [
+      "Doctor-diagnosable install state, observed notify or heartbeat dispatch, and proof that packaging does not imply runtime supervision.",
     ],
   },
   {
@@ -331,7 +393,7 @@ function frozenFieldsDocumented(contractText: string | null, command: string): b
 }
 
 function toCandidate(definition: CandidateDefinition, packageRoot: string, contractText: string | null): ContractPromotionCandidate {
-  const currentStability = currentStabilityFromSource(packageRoot, definition.sourceFile);
+  const currentStability = definition.currentStabilityOverride ?? currentStabilityFromSource(packageRoot, definition.sourceFile);
   const documented = frozenFieldsDocumented(contractText, definition.command);
   const promotionStatus = definition.disposition === "defer"
     ? "deferred"
