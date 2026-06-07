@@ -330,6 +330,66 @@ test("implementation matrix evidence allows convergence when verification passes
   }
 });
 
+test("implementation matrix evidence requires approved acceptance criteria", async () => {
+  const cwd = await tempDir();
+  try {
+    const files = await writeFixtureFiles(cwd);
+    const evidencePath = join(cwd, "parser-test.log");
+    await writeFile(evidencePath, "ok parser tests\n");
+    const matrix = await writeMatrix(cwd, [
+      {
+        acceptanceCriterion: "AC-1",
+        planStep: "Step 1",
+        verification: "npm test -- parser.test.ts",
+        status: "passed",
+        evidencePath,
+        deferredReason: null,
+        deferredApproved: false,
+      },
+    ]);
+    const stageGate = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "stage-gate",
+      "--stage",
+      "implementation",
+      "--scope",
+      "full-gate",
+      "--artifact",
+      files.stage,
+      "--verification-matrix",
+      matrix,
+      "--verification-status",
+      "passed",
+      "--json",
+    ]);
+    assert.equal(stageGate.status, 0, stageGate.stderr);
+    const stageGateOutput = JSON.parse(stageGate.stdout);
+    const agreementPath = await writeAgreement(cwd, stageGateOutput.stageArtifactHash, { stage: "implementation" });
+
+    const check = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "check-agreement",
+      "--agreement",
+      agreementPath,
+      "--stage-gate",
+      stageGateOutput.artifactPath,
+      "--verification-status",
+      "passed",
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(check.status, 1);
+    const output = JSON.parse(check.stdout);
+    assert.equal(output.relay.convergence, "invalid");
+    assert.equal(output.relay.canComplete, false);
+    assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "verification_matrix_acceptance_missing"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("implementation matrix evidence path must exist", async () => {
   const cwd = await tempDir();
   try {
@@ -384,6 +444,67 @@ test("implementation matrix evidence path must exist", async () => {
     const output = JSON.parse(check.stdout);
     assert.equal(output.relay.convergence, "invalid");
     assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "verification_matrix_evidence_missing"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("implementation matrix evidence path must be a file", async () => {
+  const cwd = await tempDir();
+  try {
+    const files = await writeFixtureFiles(cwd);
+    const evidenceDir = join(cwd, "evidence-dir");
+    await mkdir(evidenceDir, { recursive: true });
+    const matrix = await writeMatrix(cwd, [
+      {
+        acceptanceCriterion: "AC-1",
+        planStep: "Step 1",
+        verification: "npm test -- parser.test.ts",
+        status: "passed",
+        evidencePath: evidenceDir,
+        deferredReason: null,
+        deferredApproved: false,
+      },
+    ]);
+    const stageGate = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "stage-gate",
+      "--stage",
+      "implementation",
+      "--scope",
+      "full-gate",
+      "--artifact",
+      files.stage,
+      "--acceptance-criterion",
+      "AC-1: parser tests pass",
+      "--verification-matrix",
+      matrix,
+      "--verification-status",
+      "passed",
+      "--json",
+    ]);
+    assert.equal(stageGate.status, 0, stageGate.stderr);
+    const stageGateOutput = JSON.parse(stageGate.stdout);
+    const agreementPath = await writeAgreement(cwd, stageGateOutput.stageArtifactHash, { stage: "implementation" });
+
+    const check = runCli(cwd, [
+      "autopilot",
+      "relay",
+      "check-agreement",
+      "--agreement",
+      agreementPath,
+      "--stage-gate",
+      stageGateOutput.artifactPath,
+      "--verification-status",
+      "passed",
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(check.status, 1);
+    const output = JSON.parse(check.stdout);
+    assert.equal(output.relay.convergence, "invalid");
+    assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "verification_matrix_evidence_not_file"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

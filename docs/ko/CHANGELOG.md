@@ -18,6 +18,12 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   pixel을 직접 capture하지 않고, health, control, cleanup, completion authority를
   주장하지 않습니다.
 
+### Fixed
+
+- Experimental relay implementation-stage convergence check를 강화했습니다.
+  Acceptance-criteria matrix는 승인된 criteria 없이 통과할 수 없고, 각 matrix evidence
+  path는 구체적인 local evidence file로 resolve되어야 합니다.
+
 ## 0.1.14 - 2026-06-07
 
 이 release는 compiled wiki context, session HUD/status, installed-package smoke를

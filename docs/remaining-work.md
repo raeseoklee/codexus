@@ -338,10 +338,11 @@ Harness-engineering alignment adds these evidence-first tracks:
 - Multi-engine relay follow-up: [doc 15](design/15-multi-engine-relay-autopilot.md)
   now has a recorder/checker first slice with `cx autopilot relay
   record/stage-gate/check-agreement`. AC-to-verification matrix
-  import/enforcement is implemented for implementation-stage convergence. Next
-  work is adapter evidence: supported external engine descriptors, read-only
-  handoff contracts, and eventual active relay execution without letting
-  convergence replace verification.
+  import/enforcement is implemented for implementation-stage convergence,
+  including non-empty approved criteria and file-backed local evidence paths.
+  Next work is adapter evidence: supported external engine descriptors,
+  read-only handoff contracts, and eventual active relay execution without
+  letting convergence replace verification.
 - Observability adapters: app-instance observation descriptors now exist for
   browser/dev-server/log/screenshot/metric evidence, and the first real
   dev-server adapter exists as `cx app instance evidence probe`: a loopback-only,

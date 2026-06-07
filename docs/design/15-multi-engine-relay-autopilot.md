@@ -259,11 +259,14 @@ matrix before implementation:
 
 Rules:
 
+- implementation convergence requires at least one approved acceptance
+  criterion before verification can be mapped;
 - every approved acceptance criterion must map to at least one verification row;
 - implementation cannot converge on `delta-check` only;
 - implementation convergence requires the latest verification matrix rows to have
   passing local evidence paths or an approved deferred reason;
-- a matrix evidence path must resolve to a local evidence artifact;
+- a matrix evidence path must resolve to a local evidence artifact file, not just
+  an existing path;
 - a patch log is supporting evidence, not the source of truth for acceptance.
 
 Current implementation status: the first structural matrix gate is implemented
@@ -271,10 +274,11 @@ for implementation-stage convergence. `cx autopilot relay stage-gate` can import
 matrix rows with `--verification-matrix <path>` and approved acceptance criteria
 with `--acceptance-criteria <path>` or repeated `--acceptance-criterion <id>`.
 `cx autopilot relay check-agreement --gate` fails implementation convergence
-when the matrix is missing, when an approved criterion has no row, when a
-non-deferred row lacks passing evidence, or when its evidence path does not
-resolve to a local artifact. Approved deferrals must be explicit in the matrix
-row; model agreement alone never fills the matrix.
+when the matrix is missing, when no approved acceptance criteria are present,
+when an approved criterion has no row, when a non-deferred row lacks passing
+evidence, or when its evidence path does not resolve to a local artifact file.
+Approved deferrals must be explicit in the matrix row; model agreement alone
+never fills the matrix.
 
 ## Stop Conditions
 

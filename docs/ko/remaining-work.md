@@ -316,9 +316,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 - Multi-engine relay follow-up: [15번 문서](design/15-multi-engine-relay-autopilot.md)는
   이제 `cx autopilot relay record/stage-gate/check-agreement` recorder/checker 첫 slice를
   갖습니다. AC-to-verification matrix import/enforcement는 implementation-stage
-  convergence의 structural gate로 구현됐습니다. 다음 작업은 adapter evidence입니다:
-  지원되는 external engine descriptor, read-only handoff contract, 그리고 convergence가
-  verification을 대체하지 않는 active relay execution입니다.
+  convergence의 structural gate로 구현됐고, non-empty approved criteria와 file-backed
+  local evidence path를 요구합니다. 다음 작업은 adapter evidence입니다: 지원되는
+  external engine descriptor, read-only handoff contract, 그리고 convergence가 verification을
+  대체하지 않는 active relay execution입니다.
 - Observability adapter: app-instance observation descriptor는
   browser/dev-server/log/screenshot/metric evidence용으로 구현됐고, 첫 real
   dev-server adapter는 `cx app instance evidence probe`로 존재합니다. 이 command는

@@ -1,5 +1,5 @@
 import { copyFile, readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { basename, join, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
@@ -50,9 +50,11 @@ export interface RelayEvidenceGap {
     | "stage_gate_artifact_hash_mismatch"
     | "stage_gate_residual_findings"
     | "verification_matrix_missing"
+    | "verification_matrix_acceptance_missing"
     | "verification_matrix_acceptance_unmapped"
     | "verification_matrix_row_missing_evidence"
     | "verification_matrix_evidence_missing"
+    | "verification_matrix_evidence_not_file"
     | "verification_matrix_row_not_passed"
     | "verification_matrix_deferred_not_approved"
     | "verification_failed_blocks_completion";
@@ -253,9 +255,11 @@ const agreementStructuralGapKinds = new Set<RelayEvidenceGap["kind"]>([
   "stage_gate_artifact_hash_mismatch",
   "stage_gate_residual_findings",
   "verification_matrix_missing",
+  "verification_matrix_acceptance_missing",
   "verification_matrix_acceptance_unmapped",
   "verification_matrix_row_missing_evidence",
   "verification_matrix_evidence_missing",
+  "verification_matrix_evidence_not_file",
   "verification_matrix_row_not_passed",
   "verification_matrix_deferred_not_approved",
 ]);
@@ -699,6 +703,15 @@ function enforceVerificationMatrix(cwd: string, stageGate: StageGateEvidenceArti
   const matrix = Array.isArray(stageGate.verificationMatrix) ? stageGate.verificationMatrix : [];
   const acceptanceCriteria = Array.isArray(stageGate.acceptanceCriteria) ? stageGate.acceptanceCriteria : [];
 
+  if (acceptanceCriteria.length === 0) {
+    evidenceGaps.push(gap(
+      "verification_matrix_acceptance_missing",
+      "acceptanceCriteria:[]",
+      "Implementation convergence requires approved acceptance criteria before mapping verification evidence.",
+      "Record approved acceptance criteria with --acceptance-criteria or --acceptance-criterion before accepting implementation convergence.",
+    ));
+  }
+
   if (matrix.length === 0) {
     evidenceGaps.push(gap(
       "verification_matrix_missing",
@@ -770,6 +783,16 @@ function enforceVerificationMatrix(cwd: string, stageGate: StageGateEvidenceArti
         row.evidencePath,
         "Verification matrix evidence paths must resolve to local evidence artifacts.",
         "Write or import the verification evidence artifact before accepting implementation convergence.",
+      ));
+      continue;
+    }
+    if (!statSync(evidencePath).isFile()) {
+      rowsEvidenced = false;
+      evidenceGaps.push(gap(
+        "verification_matrix_evidence_not_file",
+        row.evidencePath,
+        "Verification matrix evidence paths must resolve to local evidence files.",
+        "Attach a concrete command output artifact file instead of a directory or non-file path.",
       ));
       continue;
     }

@@ -18,6 +18,12 @@ occur before 1.0, but they should be called out clearly.
   does not open browsers, capture pixels itself, or claim health, control,
   cleanup, or completion authority.
 
+### Fixed
+
+- Hardened experimental relay implementation-stage convergence checks so an
+  acceptance-criteria matrix cannot pass without approved criteria and each
+  matrix evidence path must resolve to a concrete local evidence file.
+
 ## 0.1.14 - 2026-06-07
 
 This release adds an evidence operating loop between compiled wiki context,

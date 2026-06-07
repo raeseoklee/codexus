@@ -250,11 +250,14 @@ Relay는 implementation 전에 verification matrix를 요구해 `acceptanceCrite
 
 규칙:
 
+- implementation convergence는 verification을 mapping하기 전에 최소 하나의 승인된
+  acceptance criterion을 요구함;
 - 승인된 모든 acceptance criterion은 최소 하나의 verification row에 매핑;
 - implementation은 `delta-check`만으로 converge 불가;
 - implementation convergence는 최신 verification matrix row가 passing local evidence
   path 또는 승인된 deferred reason을 가져야 함;
-- matrix evidence path는 local evidence artifact로 resolve되어야 함;
+- matrix evidence path는 단순히 존재하는 path가 아니라 local evidence artifact file로
+  resolve되어야 함;
 - patch log는 supporting evidence이지 acceptance의 source of truth가 아님.
 
 현재 구현 상태: implementation-stage convergence를 위한 첫 structural matrix gate가
@@ -262,9 +265,10 @@ Relay는 implementation 전에 verification matrix를 요구해 `acceptanceCrite
 matrix row를 import하고, `--acceptance-criteria <path>` 또는 반복
 `--acceptance-criterion <id>`로 승인된 acceptance criterion을 기록할 수 있습니다.
 `cx autopilot relay check-agreement --gate`는 matrix가 없거나, 승인된 criterion에
-row가 없거나, non-deferred row에 passing evidence가 없거나, evidence path가 local
-artifact로 resolve되지 않으면 implementation convergence를 실패시킵니다. 승인된 deferral은
-matrix row 안에 명시되어야 하며, model agreement만으로 matrix를 채우지 않습니다.
+row가 없거나, 승인된 acceptance criteria가 없거나, non-deferred row에 passing
+evidence가 없거나, evidence path가 local artifact file로 resolve되지 않으면
+implementation convergence를 실패시킵니다. 승인된 deferral은 matrix row 안에
+명시되어야 하며, model agreement만으로 matrix를 채우지 않습니다.
 
 ## Stop Conditions
 
