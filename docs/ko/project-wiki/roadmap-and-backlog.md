@@ -17,7 +17,7 @@ design docs 위에 얹은 프로젝트 관리용 projection입니다. 짧게 유
 - Relay와 autopilot gate: stage evidence, agreement structure, verification matrix
   handling, stop-at-boundary behavior를 강화합니다.
 - Contract promotion readiness: experimental surface를 stable `0.2.0` contract로 승격하기
-  전에 audit합니다.
+  전에 audit하고, architecture와 manual wiki context hardening 후보를 포함합니다.
 - Repository knowledge와 compiled wiki: deterministic repository fact, page manifest,
   explicit context approval을 확장하되 injection은 manual로 유지합니다.
 
@@ -32,7 +32,7 @@ Release blocker가 생기지 않는 한 아래 순서로 진행합니다:
 4. Injection은 manual로 유지하면서 deterministic repository knowledge와 compiled wiki
    context를 확장합니다.
 5. `0.2.0` stable-surface promotion 전에는 contract-promotion readiness를 다시
-   실행합니다.
+   실행하고, manual wiki context를 automatic injection과 분리해 둡니다.
 6. Desktop app-server, plugin always-on behavior, LSP protocol server,
    app-instance health modeling은 non-disruptive observer contract가 분명해진 뒤
    조사합니다.

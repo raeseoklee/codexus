@@ -18,7 +18,8 @@ These are suitable for release-sized goals when grouped with verification:
 - Relay and autopilot gates: strengthen stage evidence, agreement structure,
   verification matrix handling, and stop-at-boundary behavior.
 - Contract promotion readiness: audit experimental surfaces before promoting
-  any to stable `0.2.0` contract.
+  any to stable `0.2.0` contract, including architecture and manual wiki context
+  hardening candidates.
 - Repository knowledge and compiled wiki: expand deterministic repository facts,
   page manifests, and explicit context approval while keeping injection manual.
 
@@ -33,7 +34,7 @@ Work through the roadmap in this order unless a release blocker appears:
 4. Expand deterministic repository knowledge and compiled wiki context while
    keeping injection manual.
 5. Re-run contract-promotion readiness before any `0.2.0` stable-surface
-   promotion.
+   promotion, and keep manual wiki context separate from automatic injection.
 6. Investigate evidence-needed tracks only after their non-disruptive observer
    contracts are clear: Desktop app-server, plugin always-on behavior, LSP
    protocol servers, and app-instance health modeling.

@@ -22,6 +22,7 @@ test("contract readiness reports repo, release, and LSP as stable promotions", (
   assert.equal(report.targetVersion, "0.2.0");
   assert.equal(report.contractReadiness.status, "ready");
   assert.equal(report.contractReadiness.promotedSurfaceCount, 3);
+  assert.equal(report.contractReadiness.candidateCount, 5);
   const repoCandidate = report.candidates.find((candidate) => candidate.surface === "repo-knowledge-check");
   assert.equal(repoCandidate?.currentStability, "stable");
   assert.equal(repoCandidate?.frozenFieldsDocumented, true);
@@ -47,6 +48,10 @@ test("contract readiness reports repo, release, and LSP as stable promotions", (
   assert.match(pluginSurface?.reasons.join(" ") ?? "", /diagnostics exist/);
   const architectureCandidate = report.candidates.find((candidate) => candidate.surface === "architecture-check");
   assert.equal(architectureCandidate?.frozenFieldsDocumented, false);
+  const wikiCandidate = report.candidates.find((candidate) => candidate.surface === "compiled-wiki-context");
+  assert.equal(wikiCandidate?.currentStability, "experimental");
+  assert.equal(wikiCandidate?.frozenFieldsDocumented, false);
+  assert.deepEqual(wikiCandidate?.blockers, ["current_output_not_stable", "frozen_fields_not_documented"]);
   assert.equal(report.evidenceGaps.some((gap) => gap.kind === "stable_promotion_missing"), false);
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "json_contract_promotion_rule_present"));
   assert.ok(report.heuristicClaims.some((claim) => claim.kind === "promotion_candidate_prioritization"));

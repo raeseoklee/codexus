@@ -186,6 +186,23 @@ const candidateDefinitions: CandidateDefinition[] = [
       "Document broad_layering_rule_deferred as outside the stable promotion.",
     ],
   },
+  {
+    surface: "compiled-wiki-context",
+    command: "wiki context --fresh-only --gate",
+    sourceFile: "src/wiki/wiki.ts",
+    disposition: "candidate_after_hardening",
+    contractRisk: "medium",
+    sideEffectRisk: "low",
+    reasons: [
+      "Fresh-only context gating is explicit, local, and still ineligible for automatic injection.",
+      "The surface needs more installed-package and stale/fresh branch evidence before stable promotion.",
+    ],
+    requiredEvidence: [
+      "Freeze only manual context selection, freshnessPolicy, evidenceGaps, derivableFacts, and gate fields.",
+      "Keep eligibleForAutomaticInjection false in the stable contract.",
+      "Add installed-package smoke for fresh and stale context branches.",
+    ],
+  },
 ];
 
 const deferredDefinitions: CandidateDefinition[] = [
@@ -550,7 +567,7 @@ export function buildContractReadinessReport(cwd: string, options: ContractReadi
       kind: "promotion_candidate_prioritization",
       confidence: "medium",
       evidence: "Candidate ordering is based on current dogfood usage, side-effect risk, and local-only evidence boundaries.",
-      recommendation: "Promote repo check or release check first; keep action surfaces experimental until longer owner/lifecycle evidence exists.",
+      recommendation: "Promote already-stable repo/release/LSP surfaces first; harden architecture and manual wiki context before considering them for a later stable contract.",
       surfaces: candidates.map((candidate) => candidate.surface),
     }],
     blockingUnknowns,

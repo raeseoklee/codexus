@@ -214,13 +214,15 @@
             <span class="tag done">repo check promoted</span>
             <span class="tag done">release local promoted</span>
             <span class="tag done">LSP promoted</span>
+            <span class="tag evidence">wiki context candidate</span>
             <span class="tag evidence">contract gate</span>
           </div>
-          <p><code>cx contract check</code> now turns the documented 0.2.0 rule into an executable audit. The promoted surfaces are stable <code>repo check --gate</code>, local-mode <code>release check --gate</code>, and explicit <code>lsp check --gate</code>; 0.2.0 remains a product cut decision, not a countdown after 0.1.9.</p>
+          <p><code>cx contract check</code> now turns the documented 0.2.0 rule into an executable audit. The promoted surfaces are stable <code>repo check --gate</code>, local-mode <code>release check --gate</code>, and explicit <code>lsp check --gate</code>; manual <code>wiki context --fresh-only --gate</code> is a hardening candidate. 0.2.0 remains a product cut decision, not a countdown after 0.1.9.</p>
           <span class="label">Evidence</span>
           <ul>
             <li><code>cx contract check --target 0.2.0 --json</code> reports viable promotion candidates.</li>
             <li><code>repo check --gate</code>, local-mode <code>release check --gate</code>, and <code>lsp check --gate</code> are stable and frozen in <code>docs/json-contract.md</code>, so <code>--gate</code> can pass the promotion requirement.</li>
+            <li><code>wiki context --fresh-only --gate</code> is tracked as a non-injected manual-context candidate, not as automatic prompt injection.</li>
             <li>LSP protocol-server lifecycle and automatic project LSP application remain deferred.</li>
             <li>Action surfaces remain experimental/deferred until lifecycle and authority evidence is stronger.</li>
           </ul>

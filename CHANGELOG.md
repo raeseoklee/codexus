@@ -21,6 +21,9 @@ occur before 1.0, but they should be called out clearly.
   `cx wiki context --topic <name> --fresh-only --gate --json` fails instead of
   returning stale topic context when no fresh wiki page is available. Context
   remains visible, manual, and ineligible for automatic injection.
+- Added `wiki context --fresh-only --gate` to the `cx contract check --target
+  0.2.0` candidate audit as a manual-context hardening candidate, not an
+  automatic-injection promotion.
 
 ### Fixed
 

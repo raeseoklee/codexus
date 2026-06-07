@@ -21,6 +21,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   `cx wiki context --topic <name> --fresh-only --gate --json`은 fresh wiki page가 없을
   때 stale topic context를 반환하지 않고 실패합니다. Context는 계속 visible/manual이며
   automatic injection 대상이 아닙니다.
+- `cx contract check --target 0.2.0` candidate audit에 `wiki context --fresh-only
+  --gate`를 manual-context hardening 후보로 추가했습니다. Automatic injection 승격은
+  아닙니다.
 
 ### Fixed
 
