@@ -326,9 +326,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   probe입니다. 첫 log adapter도 `cx app instance evidence logs`로 존재하며, bounded,
   redacted stdout/stderr tail evidence를 health/control/completion authority 없이
   기록합니다. `cx app instance evidence metrics`는 같은 authority 제한 아래 process,
-  heartbeat, health-evidence, log-file metric을 기록합니다. 다음 작업은
-  Browser/DevTools/screenshot adapter를 추가하되 stack-specific behavior를 workflow
-  kernel 밖에 두는 것입니다.
+  heartbeat, health-evidence, log-file metric을 기록합니다. `cx app instance evidence
+  screenshot`은 이미 캡처된 로컬 screenshot 파일을 file metadata와 SHA-256으로 같은
+  `instanceId`에 연결합니다. 다음 작업은 Browser/DevTools live capture adapter를
+  추가하되 stack-specific behavior를 workflow kernel 밖에 두는 것입니다.
 - Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)는
   experimental live ownership 첫 slice를 갖습니다. Descriptor/profile listing,
   `start --dry-run`, live owned-process start/stop, heartbeat, port allocation,
@@ -336,9 +337,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   evidence record, 명시적 stale/orphan lifecycle policy projection이 구현됐습니다.
   Session status와 HUD는 app-instance observation을 `evidenceLoop` 아래에 요약하지만
   authority를 승격하지 않습니다. 첫 adapter capture slice는 loopback HTTP dev-server,
-  bounded log, metric evidence로 구현됐습니다. 다음 작업은 더 풍부한
-  Browser/DevTools/screenshot capture와 future autopilot surface를 위한 worktree-aware
-  launcher reuse입니다.
+  bounded log, metric, screenshot-file evidence로 구현됐습니다. 다음 작업은 더 풍부한
+  Browser/DevTools live capture와 future autopilot surface를 위한 worktree-aware launcher
+  reuse입니다.
 - Operational control invariant: [17번 문서](design/17-operational-control-invariants.md)는
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 기존 evidence 위의 control layer로 정의합니다. 첫 deterministic
@@ -413,8 +414,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
     구현된 live ownership과 observation-evidence slice 위에 다음 단계를 쌓습니다.
     첫 loopback HTTP dev-server probe, bounded/redacted log snapshot adapter, metric
-    snapshot adapter는 구현됐습니다. 이후 작업은 더 풍부한 Browser/DevTools/screenshot capture와
-    future autopilot surface를 위한 worktree-aware launcher reuse입니다.
+    snapshot adapter, screenshot-file adapter는 구현됐습니다. 이후 작업은 더 풍부한
+    Browser/DevTools live capture와 future autopilot surface를 위한 worktree-aware
+    launcher reuse입니다.
 14. Project LSP diagnostics: first-slice `cx lsp status/check`는 명시적 local project
     command를 통한 TypeScript diagnostics 용도로 구현됐습니다. Protocol-server
     lifecycle, workspace trust, output bounding, gate behavior가 명시되기 전까지 자동

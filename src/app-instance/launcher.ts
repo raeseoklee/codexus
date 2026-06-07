@@ -3,7 +3,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:net";
 import { existsSync } from "node:fs";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { dirname, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
 import { redactSensitiveText } from "../policy/redaction.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
@@ -255,6 +255,7 @@ const HOST = "127.0.0.1" as const;
 const DEFAULT_HTTP_OBSERVE_TIMEOUT_MS = 2_000;
 const MAX_HTTP_OBSERVE_TIMEOUT_MS = 30_000;
 const MAX_HTTP_OBSERVATION_BYTES = 2_048;
+const MAX_SCREENSHOT_EVIDENCE_BYTES = 20 * 1024 * 1024;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -1872,6 +1873,31 @@ async function fileMetric(path: string | null) {
   };
 }
 
+function inferScreenshotMediaType(path: string): string | null {
+  const extension = extname(path).toLowerCase();
+  if (extension === ".png") return "image/png";
+  if (extension === ".jpg" || extension === ".jpeg") return "image/jpeg";
+  if (extension === ".webp") return "image/webp";
+  if (extension === ".gif") return "image/gif";
+  return null;
+}
+
+async function screenshotFileEvidence(path: string) {
+  if (!existsSync(path)) throw new Error(`app_instance_screenshot_missing:${path}`);
+  const info = await stat(path);
+  if (!info.isFile()) throw new Error(`app_instance_screenshot_not_file:${path}`);
+  if (info.size > MAX_SCREENSHOT_EVIDENCE_BYTES) throw new Error(`app_instance_screenshot_too_large:${path}`);
+  const bytes = await readFile(path);
+  return {
+    path,
+    exists: true as const,
+    bytes: info.size,
+    modifiedAt: info.mtime.toISOString(),
+    mediaType: inferScreenshotMediaType(path),
+    sha256: `sha256:${createHash("sha256").update(bytes).digest("hex")}`,
+  };
+}
+
 export async function recordAppInstanceMetricObservation(cwd: string, options: {
   instanceId?: string;
 }) {
@@ -1963,6 +1989,75 @@ export async function recordAppInstanceMetricObservation(cwd: string, options: {
       heartbeatFresh: instance.heartbeat.fresh,
       stdoutBytes: metricEvidence.logs.stdout.bytes,
       stderrBytes: metricEvidence.logs.stderr.bytes,
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
+    observation,
+  };
+}
+
+export async function recordAppInstanceScreenshotObservation(cwd: string, options: {
+  instanceId?: string;
+  evidencePath?: string;
+  url?: string;
+  summary?: string;
+}) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  if (!options.evidencePath) throw new Error("missing_app_instance_screenshot_evidence_path");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const sourcePath = resolve(cwd, options.evidencePath);
+  const source = await screenshotFileEvidence(sourcePath);
+  const targetUrl = options.url ? parseLoopbackUrl(options.url).toString() : instance.network.url;
+  const observationId = `screenshot_snapshot_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
+  const evidencePath = join(instancePaths(instance.worktree.path, instance.instanceId).observations, `${observationId}.screenshot.json`);
+  const reason = instance.process.status === "running" ? null : `instance_not_running:${instance.process.reason}`;
+  const screenshotEvidence = {
+    schemaVersion: 1,
+    type: "codexus.app.instance.screenshot-snapshot",
+    recordedAt: nowIso(),
+    instanceId: instance.instanceId,
+    status: instance.process.status === "running" ? "observed" as const : "unavailable" as const,
+    reason,
+    url: targetUrl,
+    source: "screenshot-file" as const,
+    file: source,
+    summary: options.summary?.trim() || `screenshot_file:${source.bytes} bytes`,
+    authority: {
+      controlsInstance: false,
+      healthAuthority: false,
+      completionAuthority: false,
+    },
+  };
+
+  await ensureDir(dirname(evidencePath));
+  await writeJsonAtomic(evidencePath, screenshotEvidence);
+  const { path, artifact: observation } = await writeObservationArtifact(cwd, {
+    instance,
+    kind: "screenshot",
+    source: "screenshot-file",
+    requestedStatus: "observed",
+    url: targetUrl,
+    evidencePath,
+    summary: screenshotEvidence.summary,
+    reason,
+  });
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence screenshot" as const,
+    cwd,
+    path,
+    screenshot: {
+      source: "screenshot-file" as const,
+      sourcePath,
+      evidencePath,
+      url: targetUrl,
+      status: observation.observation.status,
+      reason: observation.observation.reason,
+      bytes: source.bytes,
+      mediaType: source.mediaType,
+      sha256: source.sha256,
       controlsInstance: false as const,
       healthAuthority: false as const,
       completionAuthority: false as const,

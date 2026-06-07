@@ -619,6 +619,131 @@ test("app instance metric evidence is unavailable for non-running instances with
   }
 });
 
+test("app instance screenshot evidence binds a local capture file without authority", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+
+    const start = runCli(cwd, [
+      "app",
+      "instance",
+      "start",
+      "--descriptor",
+      descriptorPath,
+      "--profile",
+      "web",
+      "--worktree",
+      cwd,
+      "--json",
+    ]);
+    assert.equal(start.status, 0, start.stderr);
+    const started = parseJson(start);
+    const instanceId = started.launch.instanceId;
+
+    await waitFor(async () => {
+      const status = runCli(cwd, ["app", "instance", "status", "--instance-id", instanceId, "--json"]);
+      if (status.status !== 0) return false;
+      const output = parseJson(status);
+      return output.instances[0]?.process?.status === "running";
+    });
+
+    const screenshotPath = join(cwd, "screen.png");
+    await writeFile(screenshotPath, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x01, 0x02]));
+    const screenshot = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "screenshot",
+      "--instance-id",
+      instanceId,
+      "--evidence-path",
+      screenshotPath,
+      "--url",
+      started.launch.url,
+      "--summary",
+      "manual screenshot",
+      "--json",
+    ]);
+    assert.equal(screenshot.status, 0, screenshot.stderr);
+    const output = parseJson(screenshot);
+    assert.equal(output.command, "app instance evidence screenshot");
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.screenshot.status, "observed");
+    assert.equal(output.screenshot.source, "screenshot-file");
+    assert.equal(output.screenshot.bytes, 10);
+    assert.equal(output.screenshot.mediaType, "image/png");
+    assert.match(output.screenshot.sha256, /^sha256:[a-f0-9]{64}$/);
+    assert.equal(output.screenshot.controlsInstance, false);
+    assert.equal(output.screenshot.healthAuthority, false);
+    assert.equal(output.screenshot.completionAuthority, false);
+    assert.equal(output.observation.observation.kind, "screenshot");
+    assert.equal(output.observation.observation.source, "screenshot-file");
+    assert.equal(output.observation.observation.status, "observed");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const screenshotEvidence = JSON.parse(await readFile(output.screenshot.evidencePath, "utf8"));
+    assert.equal(screenshotEvidence.type, "codexus.app.instance.screenshot-snapshot");
+    assert.equal(screenshotEvidence.status, "observed");
+    assert.equal(screenshotEvidence.file.path, screenshotPath);
+    assert.equal(screenshotEvidence.file.bytes, 10);
+    assert.match(screenshotEvidence.file.sha256, /^sha256:[a-f0-9]{64}$/);
+    assert.equal(screenshotEvidence.authority.controlsInstance, false);
+    assert.equal(screenshotEvidence.authority.healthAuthority, false);
+    assert.equal(screenshotEvidence.authority.completionAuthority, false);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-instance-observation", "--file", output.path, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(parseJson(schema).ok, true);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance screenshot evidence is unavailable for non-running instances without authority", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeInstance(cwd, "app_test");
+    const screenshotPath = join(cwd, "screen.png");
+    await writeFile(screenshotPath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+
+    const screenshot = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "screenshot",
+      "--instance-id",
+      "app_test",
+      "--evidence-path",
+      screenshotPath,
+      "--json",
+    ]);
+    assert.equal(screenshot.status, 0, screenshot.stderr);
+    const output = parseJson(screenshot);
+    assert.equal(output.screenshot.status, "unavailable");
+    assert.equal(output.screenshot.reason, "instance_not_running:pid_dead");
+    assert.equal(output.observation.observation.kind, "screenshot");
+    assert.equal(output.observation.observation.status, "unavailable");
+    assert.equal(output.observation.observation.reason, "instance_not_running:pid_dead");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const screenshotEvidence = JSON.parse(await readFile(output.screenshot.evidencePath, "utf8"));
+    assert.equal(screenshotEvidence.status, "unavailable");
+    assert.equal(screenshotEvidence.reason, "instance_not_running:pid_dead");
+    assert.equal(screenshotEvidence.authority.controlsInstance, false);
+    assert.equal(screenshotEvidence.authority.healthAuthority, false);
+    assert.equal(screenshotEvidence.authority.completionAuthority, false);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("app instance HTTP probe does not request when the instance is not running", async () => {
   const cwd = await tempDir();
   try {

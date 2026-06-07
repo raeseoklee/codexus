@@ -8,6 +8,7 @@ import {
   recordAppInstanceLogObservation,
   recordAppInstanceMetricObservation,
   recordAppInstanceObservation,
+  recordAppInstanceScreenshotObservation,
   startAppInstance,
   stopAppInstance,
 } from "../../app-instance/launcher.ts";
@@ -125,6 +126,20 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
         return;
       }
       console.log(`app instance evidence metrics: ${result.metricSnapshot.status}`);
+      return;
+    }
+    if (subaction === "screenshot") {
+      const result = await recordAppInstanceScreenshotObservation(cwd, {
+        instanceId: flagString(args.flags, "instance-id"),
+        evidencePath: flagString(args.flags, "evidence-path"),
+        url: flagString(args.flags, "url"),
+        summary: flagString(args.flags, "summary"),
+      });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`app instance evidence screenshot: ${result.screenshot.status}`);
       return;
     }
     throw new Error(`unsupported_app_instance_command:evidence-${subaction ?? "missing"}`);

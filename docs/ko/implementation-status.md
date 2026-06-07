@@ -24,7 +24,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `update check`
 - `wiki map/build/check/context/export`
 - `app instance profile list/status/logs/start/stop`
-- `app instance evidence record/list/probe/logs/metrics`
+- `app instance evidence record/list/probe/logs/metrics/screenshot`
 - `slop check`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
@@ -360,12 +360,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `cx app instance evidence logs`는 같은 owned instance의 stdout/stderr tail
   evidence를 bounded/redacted snapshot으로 기록합니다. `cx app instance evidence
   metrics`는 같은 `instanceId`의 process, heartbeat, health-evidence, log-file
-  metric을 기록합니다. 이 evidence surface들은 control, health authority,
+  metric을 기록합니다. `cx app instance evidence screenshot`은 이미 캡처된 로컬
+  screenshot 파일의 metadata, media type, size, mtime, SHA-256을 기록하고 같은
+  `instanceId`에 연결합니다. 이 evidence surface들은 control, health authority,
   completion authority를 주장하지 않습니다. `cx session status --json`과
   `cx session hud --json`은 app-instance observation과 wiki context approval을
   `evidenceLoop` 아래에 요약하지만 health, control, source-truth, completion
-  authority를 추가하지 않습니다. 실제 Browser/DevTools/screenshot adapter 연동은
-  후속 작업입니다.
+  authority를 추가하지 않습니다. 실제 Browser/DevTools live capture 연동은 후속
+  작업입니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
@@ -467,11 +469,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `cx app instance evidence record/list`로 구현됐고, 첫 real adapter로
   `cx app instance evidence probe`가 loopback HTTP dev-server evidence를 기록합니다.
   `cx app instance evidence logs`와 `cx app instance evidence metrics`도 bounded log 및
-  metric evidence를 기록합니다. 명시적 stale/orphan lifecycle policy projection도
-  구현됐습니다. `cx session status --json`과 `cx session hud --json`은 이 observation과
-  wiki context approval을 `evidenceLoop`에 요약하되 권한을 승격하지 않습니다.
-  실제 Browser/DevTools/screenshot adapter capture와 worktree-aware
-  launcher reuse가 후속 작업입니다.
+  metric evidence를 기록합니다. `cx app instance evidence screenshot`은 이미 캡처된
+  로컬 screenshot 파일을 bounded file metadata와 SHA-256으로 같은 `instanceId`에
+  연결합니다. 명시적 stale/orphan lifecycle policy projection도 구현됐습니다.
+  `cx session status --json`과 `cx session hud --json`은 이 observation과 wiki context
+  approval을 `evidenceLoop`에 요약하되 권한을 승격하지 않습니다. 실제 Browser/DevTools
+  live capture와 worktree-aware launcher reuse가 후속 작업입니다.
 - Operational control invariant는 deterministic docs-code check와 실험적
   control-plane 첫 slice까지 구현됐습니다. Decision artifact, 반복
   verification loop summary, HUD/status projection, autonomy preset metadata,

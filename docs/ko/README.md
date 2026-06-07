@@ -171,7 +171,7 @@ surface로 제공됩니다.
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | 안정적인 session evidence surface |
 | `slop check`, `supply-chain check`, `lsp status/check`, schema subset engine, replay parity, memory/skill lifecycle | 안정적인 local evidence와 experimental LSP diagnostics surface; 첫 slice에서 LSP protocol server는 detect-only |
 | `repo graph build/check/import/search/explain`, `wiki build/check/context/export` | Experimental graph/wiki evidence surface; context approval artifact는 visible하고 non-injected |
-| `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics` | Experimental owned-process와 observation-evidence surface; live start/stop은 Codexus-owned instance에서만 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용 |
+| `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics/screenshot` | Experimental owned-process와 observation-evidence surface; live start/stop은 Codexus-owned instance에서만 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용 |
 | app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; app-server는 read-only, cron/gateway는 explicit approval live dispatch 지원, 나머지는 status/record/launch-contract/gated surface |
 | autopilot contract layer | Experimental foundation slice 구현 (`plan`, `contract validate/approve/scope-check`); live `autopilot run`은 계속 0.2/0.3 트랙에서 deferred |
 
@@ -223,6 +223,7 @@ cx app instance evidence record --instance-id <id> --kind browser --source manua
 cx app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
 cx app instance evidence logs --instance-id <id> --json
 cx app instance evidence metrics --instance-id <id> --json
+cx app instance evidence screenshot --instance-id <id> --evidence-path ./screen.png --json
 cx app instance stop --instance-id <id> --json
 cx run --verify "npm test" "fix the failing parser tests"
 cx cancel <run-id> --reason "no longer needed" --json

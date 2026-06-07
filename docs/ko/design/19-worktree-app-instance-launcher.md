@@ -231,10 +231,15 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
     `cx session hud --json`의 `evidenceLoop` 아래에 projection합니다. 앱 증거는
     Codex-native session surface에서 보이지만 health, control, cleanup, completion
     authority가 되지 않습니다.
+14. 완료: screenshot-file binding adapter로 `cx app instance evidence screenshot`을
+    추가합니다. 이 command는 이미 캡처된 로컬 screenshot 파일의 metadata, size, mtime,
+    media type, SHA-256을 기록하고 하나의 `instanceId`에 연결합니다. Browser를 열거나
+    pixel을 직접 capture하지 않으며 health, control, cleanup, completion authority가
+    되지 않습니다.
 
 ## 다음 Slice
 
-1. 실제 Browser/DevTools/screenshot adapter를 observation artifact contract에
-   연결하되 browser 자동 open이나 health/control 주장을 하지 않게 유지합니다.
+1. 실제 Browser/DevTools capture adapter를 observation artifact contract에 연결하되
+   browser 자동 open이나 health/control 주장을 하지 않게 유지합니다.
 2. Future autopilot surface가 launcher를 worktree-aware 방식으로 재사용하되 completion
    authority는 verification과 policy gate에만 유지합니다.

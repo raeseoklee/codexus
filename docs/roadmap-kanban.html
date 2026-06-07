@@ -341,16 +341,17 @@
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
-            <span class="tag gateable">HTTP/log/metric done</span>
+            <span class="tag gateable">HTTP/log/metric/screenshot done</span>
           </div>
-          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, and metric snapshot adapter are implemented. The next step is richer Browser/DevTools/screenshot adapters.</p>
+          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, metric snapshot adapter, and screenshot-file binding adapter are implemented. The next step is richer Browser/DevTools live capture adapters.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale/orphan artifacts report lifecycle policy without implying health, cleanup, completion, or control.</li>
             <li>Done: loopback HTTP probe evidence references an <code>instanceId</code>, is bounded and redacted, and never claims control, health, or completion authority.</li>
             <li>Done: log snapshot evidence records bounded/redacted stdout/stderr tails for the same <code>instanceId</code> without becoming health, control, or completion authority.</li>
             <li>Done: metric snapshot evidence records process, heartbeat, health-evidence, and log-file metrics for the same <code>instanceId</code> without becoming health, control, or completion authority.</li>
-            <li>Next: Browser/DevTools/screenshot outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
+            <li>Done: screenshot-file evidence binds an already captured local screenshot to the same <code>instanceId</code> using file metadata and SHA-256 without becoming health, control, or completion authority.</li>
+            <li>Next: Browser/DevTools live capture outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
             <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>
           </ul>
           <span class="label">Sources</span>
@@ -470,7 +471,7 @@
           <div class="tags">
             <span class="tag evidence">adapter descriptors</span>
           </div>
-          <p>The loopback HTTP dev-server probe, bounded log adapter, metric adapter, and session evidence-loop projection are implemented. Wire richer browser, screenshot, or trace adapters to existing app-instance observation descriptors.</p>
+          <p>The loopback HTTP dev-server probe, bounded log adapter, metric adapter, screenshot-file binding adapter, and session evidence-loop projection are implemented. Wire richer Browser/DevTools live capture or trace adapters to existing app-instance observation descriptors.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Stack-specific behavior stays outside the workflow kernel.</li>

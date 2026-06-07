@@ -9,6 +9,15 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- Experimental app-instance screenshot-file evidence를 추가했습니다:
+  `cx app instance evidence screenshot --instance-id <id> --evidence-path <path>
+  --json`은 이미 캡처된 로컬 screenshot 파일의 metadata, media type, size, mtime,
+  SHA-256을 기록하고 하나의 `instanceId`에 연결합니다. 이 adapter는 browser를 열거나
+  pixel을 직접 capture하지 않고, health, control, cleanup, completion authority를
+  주장하지 않습니다.
+
 ## 0.1.14 - 2026-06-07
 
 이 release는 compiled wiki context, session HUD/status, installed-package smoke를

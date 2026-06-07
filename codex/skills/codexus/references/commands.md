@@ -111,14 +111,15 @@ node codex/skills/codexus/scripts/cx.mjs app instance logs --instance-id <id> --
 node codex/skills/codexus/scripts/cx.mjs app instance evidence probe --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence logs --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence screenshot --instance-id <id> --evidence-path <path> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence list --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance stop --instance-id <id> --json
 ```
 
 Use app instance commands for experimental worktree-local dev-server ownership
-and observation. The HTTP, log, and metric evidence adapters record bounded
-artifacts tied to an `instanceId`; they do not become health, cleanup, control,
-or completion authority.
+and observation. The HTTP, log, metric, and screenshot-file evidence adapters
+record bounded artifacts tied to an `instanceId`; they do not become health,
+cleanup, control, or completion authority.
 
 ## Runtime Gates
 

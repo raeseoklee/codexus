@@ -239,10 +239,15 @@ The live `start` and `stop` slices must enforce these local facts:
     `cx session hud --json` under `evidenceLoop` so app evidence is visible from
     the Codex-native session surface without becoming health, control, cleanup,
     or completion authority.
+14. Done: add `cx app instance evidence screenshot` as a screenshot-file binding
+    adapter. It records file metadata, size, mtime, media type, and SHA-256 for
+    an already captured local screenshot and links that evidence to one
+    `instanceId`; it does not open browsers, capture pixels itself, or become
+    health, control, cleanup, or completion authority.
 
 ## Next Slice
 
-1. Wire real Browser/DevTools/screenshot adapters to the observation artifact
+1. Wire real Browser/DevTools capture adapters to the observation artifact
    contract without auto-opening browsers or claiming health/control.
 2. Add worktree-aware launcher reuse for future autopilot surfaces while keeping
    completion authority on verification and policy gates.

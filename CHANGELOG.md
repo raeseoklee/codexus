@@ -9,6 +9,15 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added experimental app-instance screenshot-file evidence:
+  `cx app instance evidence screenshot --instance-id <id> --evidence-path <path>
+  --json` records metadata, media type, size, mtime, and SHA-256 for an already
+  captured local screenshot file and binds it to one `instanceId`. The adapter
+  does not open browsers, capture pixels itself, or claim health, control,
+  cleanup, or completion authority.
+
 ## 0.1.14 - 2026-06-07
 
 This release adds an evidence operating loop between compiled wiki context,
