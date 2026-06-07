@@ -9,6 +9,37 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.13 - 2026-06-07
+
+이 release는 다섯 개 evidence projection surface 묶음을 닫습니다. 0.1.x stable JSON
+contract boundary는 그대로 유지합니다. 새 task, graph, wiki, metric, automation
+recovery 출력은 experimental 또는 advisory이며 completion, health, scheduler, retry,
+cleanup, prompt-injection authority를 주장하지 않습니다.
+
+### Added
+
+- Experimental session task projection을 추가했습니다:
+  `cx session tasks list/add/update/complete/block --json`은 session ledger 아래
+  Codexus-owned task state를 기록합니다. Task completion은 projection일 뿐이며,
+  실패한 verification을 complete처럼 만들 수 없습니다.
+- Experimental repository graph import/retrieval을 추가했습니다:
+  `cx repo graph import --graph-provider understand-anything --source <file>`,
+  `cx repo graph search`, `cx repo graph explain`은 bounded JSON-only graph
+  artifact를 읽고 read-only graph query를 처리합니다. Imported graph content는
+  prompt에 자동 주입되지 않습니다.
+- Experimental compiled-wiki advisory synthesis를 추가했습니다:
+  `cx wiki build --mode advisory --json`은 fresh compiled wiki page에서 local
+  deterministic advisory projection을 만들며, model을 호출하지 않고 source truth가
+  되지 않습니다.
+- Experimental app-instance metric evidence를 추가했습니다:
+  `cx app instance evidence metrics --instance-id <id> --json`은 Codexus-owned app
+  instance의 process, heartbeat, network, health, log file-size observation을
+  기록합니다. 이 출력은 health 또는 control authority를 주장하지 않습니다.
+- Experimental automation recovery projection을 추가했습니다:
+  `cx cron recovery --json`과 `cx gateway recovery --json`은 기록된 foreground
+  dispatch artifact와 manual-review candidate를 요약합니다. Unattended scheduler나
+  automatic retry loop를 소유하지 않습니다.
+
 ## 0.1.12 - 2026-06-06
 
 이 release는 project release cadence를 실행 가능한 policy evidence로 바꿉니다. 0.1.x

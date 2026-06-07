@@ -9,6 +9,38 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.13 - 2026-06-07
+
+This release closes a five-surface evidence-projection batch. It keeps the
+0.1.x stable JSON contract boundary unchanged: the new task, graph, wiki,
+metric, and automation recovery outputs are experimental or advisory and do not
+claim completion, health, scheduler, retry, cleanup, or prompt-injection
+authority.
+
+### Added
+
+- Added experimental session task projection:
+  `cx session tasks list/add/update/complete/block --json` records
+  Codexus-owned task state under the session ledger. Task completion remains a
+  projection only and cannot make failed verification look complete.
+- Added experimental repository graph import and retrieval:
+  `cx repo graph import --graph-provider understand-anything --source <file>`,
+  `cx repo graph search`, and `cx repo graph explain` can consume bounded
+  JSON-only graph artifacts and answer read-only graph queries. Imported graph
+  content is never injected into prompts automatically.
+- Added experimental compiled-wiki advisory synthesis:
+  `cx wiki build --mode advisory --json` creates a local deterministic
+  advisory projection from fresh compiled wiki pages without invoking a model or
+  becoming source truth.
+- Added experimental app-instance metric evidence:
+  `cx app instance evidence metrics --instance-id <id> --json` records process,
+  heartbeat, network, health, and log file-size observations for a
+  Codexus-owned app instance without claiming health or control authority.
+- Added experimental automation recovery projection:
+  `cx cron recovery --json` and `cx gateway recovery --json` summarize recorded
+  foreground dispatch artifacts and manual-review candidates without owning an
+  unattended scheduler or automatic retry loop.
+
 ## 0.1.12 - 2026-06-06
 
 This release turns the project release cadence into executable policy evidence.
