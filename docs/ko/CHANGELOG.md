@@ -17,6 +17,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   SHA-256을 기록하고 하나의 `instanceId`에 연결합니다. 이 adapter는 browser를 열거나
   pixel을 직접 capture하지 않고, health, control, cleanup, completion authority를
   주장하지 않습니다.
+- Experimental fresh-only wiki context gate를 추가했습니다:
+  `cx wiki context --topic <name> --fresh-only --gate --json`은 fresh wiki page가 없을
+  때 stale topic context를 반환하지 않고 실패합니다. Context는 계속 visible/manual이며
+  automatic injection 대상이 아닙니다.
 
 ### Fixed
 

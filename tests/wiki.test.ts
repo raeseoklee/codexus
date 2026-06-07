@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
@@ -125,6 +125,8 @@ test("wiki context returns bounded topic-matched pages", async () => {
     assert.ok(output.selectedPages.every((page: { reason: string }) => typeof page.reason === "string" && page.reason.length > 0));
     assert.ok(output.tokenEstimate > 0);
     assert.equal(output.eligibleForAutomaticInjection, false);
+    assert.equal(output.freshnessPolicy.freshOnly, false);
+    assert.equal(output.gate.status, "not_requested");
 
     await writeFile(join(cwd, "package.json"), `${JSON.stringify({
       name: "fixture",
@@ -137,6 +139,75 @@ test("wiki context returns bounded topic-matched pages", async () => {
     assert.equal(staleContext.status, 0, staleContext.stderr);
     const staleOutput = JSON.parse(staleContext.stdout);
     assert.ok(staleOutput.selectedPages.some((page: { freshness: string }) => page.freshness === "stale"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("wiki context fresh-only gate rejects stale context without injection authority", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(build.status, 0, build.stderr);
+    await writeFile(join(cwd, "package.json"), `${JSON.stringify({
+      name: "fixture",
+      version: "2.0.0",
+      scripts: {
+        test: "node --test",
+      },
+    }, null, 2)}\n`);
+
+    const context = runCli(cwd, [
+      "wiki",
+      "context",
+      "--topic",
+      "verification",
+      "--budget",
+      "4000",
+      "--fresh-only",
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(context.status, 1);
+    const output = JSON.parse(context.stdout);
+    assert.equal(output.command, "wiki context");
+    assert.equal(output.freshnessPolicy.freshOnly, true);
+    assert.equal(output.freshnessPolicy.status, "fail");
+    assert.equal(output.selectedPages.length, 0);
+    assert.equal(output.gate.status, "failed");
+    assert.equal(output.eligibleForAutomaticInjection, false);
+    assert.ok(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "page_stale"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("wiki context approval refuses failed fresh-only context even without gate", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(build.status, 0, build.stderr);
+    await writeFile(join(cwd, "package.json"), `${JSON.stringify({ name: "fixture", version: "2.0.0" }, null, 2)}\n`);
+
+    const approval = runCli(cwd, [
+      "wiki",
+      "context",
+      "--topic",
+      "verification",
+      "--budget",
+      "4000",
+      "--fresh-only",
+      "--approve",
+      "--approved-by",
+      "tester",
+      "--json",
+    ]);
+    assert.equal(approval.status, 1);
+    const output = JSON.parse(approval.stdout);
+    assert.equal(output.code, "wiki_context_freshness_gate_failed");
+    const contextDir = join(cwd, ".codexus", "wiki", "context");
+    const entries = existsSync(contextDir) ? await readdir(contextDir) : [];
+    assert.deepEqual(entries, []);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

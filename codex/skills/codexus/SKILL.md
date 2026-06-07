@@ -52,6 +52,7 @@ node codex/skills/codexus/scripts/cx.mjs locks list --json
 node codex/skills/codexus/scripts/cx.mjs lsp status --json
 node codex/skills/codexus/scripts/cx.mjs lsp check --gate --json
 node codex/skills/codexus/scripts/cx.mjs wiki build --json
+node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --fresh-only --gate --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --approve --approved-by "$USER" --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence screenshot --instance-id <id> --evidence-path <path> --json

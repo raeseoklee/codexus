@@ -17,6 +17,10 @@ occur before 1.0, but they should be called out clearly.
   captured local screenshot file and binds it to one `instanceId`. The adapter
   does not open browsers, capture pixels itself, or claim health, control,
   cleanup, or completion authority.
+- Added an experimental fresh-only wiki context gate:
+  `cx wiki context --topic <name> --fresh-only --gate --json` fails instead of
+  returning stale topic context when no fresh wiki page is available. Context
+  remains visible, manual, and ineligible for automatic injection.
 
 ### Fixed
 

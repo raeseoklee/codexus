@@ -404,10 +404,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Compiled repository wiki는 이제 experimental deterministic 첫 slice를 가집니다:
   `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check --gate`,
   `cx wiki context --topic <name> --budget <n>`, 명시적
-  `cx wiki export --target <path>`가 동작합니다. `cx wiki context --topic <name>
-  --approve --approved-by <name>`은 `approved_not_injected`, `automatic:false`,
-  completion authority 없음이 명시된 visible `codexus.wiki.context-approval`
-  artifact를 기록합니다. `cx wiki build --mode advisory`는
+  `cx wiki export --target <path>`가 동작합니다. `cx wiki context --fresh-only --gate`는
+  fresh manual context가 필요할 때 사용하며, 선택된 topic에 fresh page가 없으면 stale
+  page를 반환하지 않고 실패합니다. `cx wiki context --topic <name> --approve
+  --approved-by <name>`은 `approved_not_injected`, `automatic:false`, completion
+  authority 없음이 명시된 visible `codexus.wiki.context-approval` artifact를 기록합니다.
+  `cx wiki build --mode advisory`는
   driver/model evidence(`modelInvoked: false`)와 non-authority marker를 가진
   schema-valid local source-bundle synthesis artifact를 기록합니다. `.codexus/wiki/`
   아래에 source ref, local link, manifest/page/advisory schema, scoped freshness를 가진

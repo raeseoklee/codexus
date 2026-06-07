@@ -17,7 +17,7 @@ evidence-linked markdown projection을 만드는 방향입니다.
 - 구현됨: `cx wiki map --json`, deterministic
   `cx wiki build --mode deterministic --json`,
   `cx wiki check --gate --json`,
-  `cx wiki context --topic <name> --budget <n> --json`,
+  `cx wiki context --topic <name> --budget <n> [--fresh-only --gate] --json`,
   명시적 `cx wiki export --target <path> --json`,
   `cx wiki build --mode advisory --json`
 - 구현된 schema: `codexus.wiki.manifest`, `codexus.wiki.page`,
@@ -253,6 +253,7 @@ cx wiki build --mode deterministic --json
 cx wiki build --mode advisory --driver codex-exec --json
 cx wiki check --gate --json
 cx wiki context --topic verification --budget 1200 --json
+cx wiki context --topic verification --budget 1200 --fresh-only --gate --json
 cx wiki context --topic verification --approve --approved-by "$USER" --json
 cx wiki export --target docs/codexus-wiki --json
 ```
@@ -261,7 +262,9 @@ cx wiki export --target docs/codexus-wiki --json
 token estimate, 선택된 정확한 text를 반환해야 합니다. Run에 context를 조용히 inject하면
 안 됩니다. `--approve`는 `approved_not_injected`, `automatic:false`, completion
 authority 없음을 가진 visible `codexus.wiki.context-approval` artifact를 써서 Codex
-session이 context를 명시적으로 인용할 수 있게 합니다.
+session이 context를 명시적으로 인용할 수 있게 합니다. `--fresh-only --gate`는 manual
+context-pack freshness guard입니다. 선택된 topic에 fresh page가 없으면 stale context를
+반환하지 않고 실패합니다.
 
 Autopilot integration은 명시적이어야 합니다:
 
@@ -352,9 +355,11 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
    추가.
 7. 구현됨: `cx wiki context --topic <name> --approve --approved-by <name> --json`을
    선택된 bounded context에 대한 visible non-injected approval artifact로 추가.
-8. `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저 요구하고,
+8. 구현됨: `cx wiki context --fresh-only --gate --json`을 추가해 automatic injection 없이
+   fresh manual context를 요구할 수 있게 합니다.
+9. `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저 요구하고,
    source truth를 쓰지 않으며, auto-commit하지 않는 명시적 export로 추가.
-9. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤
+10. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤
    `cx wiki build --mode advisory --json`을 추가. Advisory artifact는 driver/source-bundle
    evidence를 기록하지만 권위가 없습니다.
 

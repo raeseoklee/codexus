@@ -207,9 +207,18 @@ export interface WikiContextResult {
   cwd: string;
   topic: string;
   budget: number;
+  freshnessPolicy: {
+    freshOnly: boolean;
+    status: "pass" | "fail";
+    selectedFresh: number;
+    selectedStale: number;
+  };
   selectedPages: WikiContextPageSelection[];
   tokenEstimate: number;
   eligibleForAutomaticInjection: boolean;
+  evidenceGaps: WikiEvidenceGap[];
+  derivableFacts: WikiDerivableFact[];
+  gate: WikiGate;
   text: string;
 }
 
@@ -1180,7 +1189,10 @@ function topicScore(topic: string, page: WikiManifestPageEntry, text: string, fr
   return score;
 }
 
-export async function buildWikiContext(cwd: string, topic: string, budget: number): Promise<WikiContextResult> {
+export async function buildWikiContext(cwd: string, topic: string, budget: number, options: {
+  freshOnly?: boolean;
+  gate?: boolean;
+} = {}): Promise<WikiContextResult> {
   if (!topic.trim()) throw new Error("missing_wiki_topic");
   if (!Number.isFinite(budget) || budget <= 0) throw new Error("invalid_wiki_budget");
   const manifestPath = wikiManifestPath(cwd);
@@ -1199,10 +1211,11 @@ export async function buildWikiContext(cwd: string, topic: string, budget: numbe
     .filter((item) => item.score > 0)
     .sort((left, right) => right.score - left.score || left.page.pageId.localeCompare(right.page.pageId));
   const fallback = sorted.length > 0 ? sorted : pages.filter((item) => item.page.pageId === "wiki.overview");
+  const eligiblePages = options.freshOnly ? fallback.filter((item) => item.freshness === "fresh") : fallback;
   const selectedPages: WikiContextPageSelection[] = [];
   let text = "";
   let tokens = 0;
-  for (const item of fallback) {
+  for (const item of eligiblePages) {
     const nextText = text.length === 0
       ? item.raw
       : `${text}\n\n---\n\n${item.raw}`;
@@ -1222,6 +1235,26 @@ export async function buildWikiContext(cwd: string, topic: string, budget: numbe
     });
     if (tokens >= budget) break;
   }
+  const selectedFresh = selectedPages.filter((page) => page.freshness === "fresh").length;
+  const selectedStale = selectedPages.filter((page) => page.freshness !== "fresh").length;
+  const evidenceGaps: WikiEvidenceGap[] = [];
+  if (options.freshOnly && selectedPages.length === 0) {
+    evidenceGaps.push({
+      kind: "page_stale",
+      gate: true,
+      evidence: "fresh-only context selected no fresh pages",
+      recommendation: "Run `cx wiki build --mode deterministic --json` and `cx wiki check --gate --json` before requesting fresh-only context.",
+      files: fallback.map((item) => item.page.path),
+    });
+  }
+  const derivableFacts: WikiDerivableFact[] = selectedFresh > 0
+    ? [{
+      kind: "page_fresh",
+      gate: true,
+      evidence: `${selectedFresh} fresh context pages selected`,
+      files: selectedPages.filter((page) => page.freshness === "fresh").map((page) => page.path),
+    }]
+    : [];
   return {
     schemaVersion: 1,
     stability: "experimental",
@@ -1229,10 +1262,19 @@ export async function buildWikiContext(cwd: string, topic: string, budget: numbe
     cwd,
     topic,
     budget,
+    freshnessPolicy: {
+      freshOnly: Boolean(options.freshOnly),
+      status: evidenceGaps.length === 0 ? "pass" : "fail",
+      selectedFresh,
+      selectedStale,
+    },
     selectedPages,
     tokenEstimate: tokens,
     // Context packs are readable bounded projections only in the first slice.
     eligibleForAutomaticInjection: false,
+    evidenceGaps,
+    derivableFacts,
+    gate: buildGate(Boolean(options.gate), evidenceGaps),
     text,
   };
 }
@@ -1293,8 +1335,12 @@ export function validateWikiContextApproval(value: unknown) {
   };
 }
 
-export async function approveWikiContext(cwd: string, topic: string, budget: number, approvedBy?: string): Promise<WikiContextApprovalResult> {
-  const context = await buildWikiContext(cwd, topic, budget);
+export async function approveWikiContext(cwd: string, topic: string, budget: number, approvedBy?: string, options: {
+  freshOnly?: boolean;
+  gate?: boolean;
+} = {}): Promise<WikiContextApprovalResult> {
+  const context = await buildWikiContext(cwd, topic, budget, options);
+  if (context.freshnessPolicy.status === "fail") throw new Error("wiki_context_freshness_gate_failed");
   const approvedAt = nowIso();
   const approvalId = `wiki_context_${Date.now().toString(36)}`;
   const dir = wikiContextApprovalDir(cwd, approvalId);

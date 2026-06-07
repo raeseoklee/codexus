@@ -15,7 +15,8 @@ verification artifacts, decision records, and repository graph outputs.
 Implementation status as of 2026-06-02:
 
 - implemented: `cx wiki map --json`, deterministic `cx wiki build --mode deterministic --json`,
-  `cx wiki check --gate --json`, `cx wiki context --topic <name> --budget <n> --json`,
+  `cx wiki check --gate --json`, `cx wiki context --topic <name> --budget <n>
+  [--fresh-only --gate] --json`,
   explicit `cx wiki export --target <path> --json`, and
   `cx wiki build --mode advisory --json`;
 - implemented schemas: `codexus.wiki.manifest`, `codexus.wiki.page`, and
@@ -261,6 +262,7 @@ cx wiki build --mode deterministic --json
 cx wiki build --mode advisory --driver codex-exec --json
 cx wiki check --gate --json
 cx wiki context --topic verification --budget 1200 --json
+cx wiki context --topic verification --budget 1200 --fresh-only --gate --json
 cx wiki context --topic verification --approve --approved-by "$USER" --json
 cx wiki export --target docs/codexus-wiki --json
 ```
@@ -270,7 +272,9 @@ freshness, source refs, token estimate, and the exact text selected. It should
 not silently inject context into a run. `--approve` writes a visible
 `codexus.wiki.context-approval` artifact with `approved_not_injected`,
 `automatic:false`, and no completion authority so a Codex session can cite the
-context explicitly.
+context explicitly. `--fresh-only --gate` is a manual context-pack freshness
+guard: it fails when the selected topic has no fresh pages instead of returning
+stale context.
 
 Autopilot integration should be explicit:
 
@@ -363,10 +367,12 @@ The manifest owns page identity and freshness metadata:
 7. Implemented: add `cx wiki context --topic <name> --approve --approved-by
    <name> --json` as a visible non-injected approval artifact for the selected
    bounded context.
-8. Add `cx wiki export --target <path> --json` as an explicit export that first
+8. Implemented: add `cx wiki context --fresh-only --gate --json` so callers can
+   require fresh manual context without enabling automatic injection.
+9. Add `cx wiki export --target <path> --json` as an explicit export that first
    requires a fresh passing wiki check, writes no source truth, and never
    auto-commits.
-9. Implemented: add `cx wiki build --mode advisory --json` after deterministic
+10. Implemented: add `cx wiki build --mode advisory --json` after deterministic
    pages and freshness checks are stable enough to provide a source bundle.
    The advisory artifact records driver/source-bundle evidence and remains
    non-authoritative.

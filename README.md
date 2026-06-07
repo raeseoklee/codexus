@@ -226,6 +226,7 @@ cx replay parity --json
 cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
 cx repo graph check --graph <graph-id-or-path> --gate --json
 cx wiki build --json
+cx wiki context --topic verification --fresh-only --gate --json
 cx wiki context --topic verification --approve --approved-by "$USER" --json
 cx slop check --scope "src/**" --gate --json
 cx supply-chain check --gate --json

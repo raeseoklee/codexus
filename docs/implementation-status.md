@@ -420,10 +420,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
 - The compiled repository wiki now has an experimental deterministic first
   slice: `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check
   --gate`, `cx wiki context --topic <name> --budget <n>`, and explicit
-  `cx wiki export --target <path>`. `cx wiki context --topic <name> --approve
-  --approved-by <name>` records a visible `codexus.wiki.context-approval`
-  artifact with `approved_not_injected`, `automatic:false`, and no completion
-  authority. `cx wiki build --mode advisory` now records
+  `cx wiki export --target <path>`. `cx wiki context --fresh-only --gate` lets
+  callers require fresh manual context; it fails instead of returning stale topic
+  pages when no fresh page is selected. `cx wiki context --topic <name>
+  --approve --approved-by <name>` records a visible
+  `codexus.wiki.context-approval` artifact with `approved_not_injected`,
+  `automatic:false`, and no completion authority. `cx wiki build --mode advisory` now records
   a schema-valid local source-bundle synthesis artifact with driver/model
   evidence (`modelInvoked: false`) and non-authority markers. The wiki generates
   regenerable markdown pages under `.codexus/wiki/` with source refs, local

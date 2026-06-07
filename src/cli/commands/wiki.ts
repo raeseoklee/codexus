@@ -58,23 +58,31 @@ export async function wikiCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (subcommand === "context") {
-    assertAllowedFlags(args, ["cwd", "json", "topic", "budget", "approve", "approved-by"]);
+    assertAllowedFlags(args, ["cwd", "json", "topic", "budget", "approve", "approved-by", "fresh-only", "gate"]);
     const topic = flagString(args.flags, "topic");
     const budgetRaw = flagString(args.flags, "budget") ?? "1200";
     const budget = Number.parseInt(budgetRaw, 10);
+    const contextOptions = {
+      freshOnly: flagBool(args.flags, "fresh-only"),
+      gate: flagBool(args.flags, "gate"),
+    };
     const result = flagBool(args.flags, "approve")
-      ? await approveWikiContext(cwd, topic ?? "", budget, flagString(args.flags, "approved-by"))
-      : await buildWikiContext(cwd, topic ?? "", budget);
+      ? await approveWikiContext(cwd, topic ?? "", budget, flagString(args.flags, "approved-by"), contextOptions)
+      : await buildWikiContext(cwd, topic ?? "", budget, contextOptions);
     if (json) {
       console.log(JSON.stringify(result, null, 2));
+      process.exitCode = result.command === "wiki context" ? result.gate.exitCode : result.context.gate.exitCode;
       return;
     }
     if (result.command === "wiki context approve") {
       console.log(`Wiki context approved: ${result.approval.approvalId}`);
       console.log(`Context: ${result.approval.paths.markdown}`);
+      process.exitCode = result.context.gate.exitCode;
       return;
     }
     console.log(`Wiki context: ${result.selectedPages.length} pages, ${result.tokenEstimate} tokens`);
+    console.log(`Gate: ${result.gate.status}`);
+    process.exitCode = result.gate.exitCode;
     return;
   }
 
