@@ -1,4 +1,6 @@
-import { resolve } from "node:path";
+import { existsSync } from "node:fs";
+import { readFile, readdir } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import { loadConfig } from "../../config/loader.ts";
 import { executeRun } from "../../workflow/kernel.ts";
 import { harnessRoot } from "../../ledger/paths.ts";
@@ -25,6 +27,20 @@ interface AutomationDispatchRecord {
   plan: Record<string, unknown>;
   ledgerEvents: Array<{ type: string; dryRun: false; payload?: Record<string, unknown> }>;
   path: string;
+}
+
+interface AutomationRecoveryCandidate {
+  dispatchId: string;
+  path: string;
+  recordedAt: string;
+  planStatus: string | null;
+  action: string | null;
+  mode: string | null;
+  runId: string | null;
+  runOutcome: string | null;
+  boundaryReason: string | null;
+  needsManualReview: boolean;
+  recoveryHint: string;
 }
 
 const liveDispatchImplemented = true;
@@ -157,6 +173,146 @@ async function recordAutomationDispatch(cwd: string, plan: Record<string, unknow
   return record;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function stringOrNull(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
+async function readAutomationDispatchRecords(cwd: string, feature: GuardedFeature) {
+  const dir = join(harnessRoot(cwd), "automation", feature, "dispatches");
+  if (!existsSync(dir)) return { dir, records: [] as Array<{ path: string; record: AutomationDispatchRecord | null; errors: string[] }> };
+  const entries = (await readdir(dir)).filter((entry) => entry.endsWith(".json")).sort();
+  const records = await Promise.all(entries.map(async (entry) => {
+    const path = join(dir, entry);
+    try {
+      const parsed = JSON.parse(await readFile(path, "utf8")) as unknown;
+      if (!isRecord(parsed)) return { path, record: null, errors: ["dispatch_record:not_object"] };
+      const record = parsed as AutomationDispatchRecord;
+      const errors: string[] = [];
+      if (record.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+      if (typeof record.dispatchId !== "string") errors.push("dispatchId:missing");
+      if (typeof record.recordedAt !== "string") errors.push("recordedAt:missing");
+      if (!Array.isArray(record.ledgerEvents)) errors.push("ledgerEvents:not_array");
+      if (!isRecord(record.plan)) errors.push("plan:not_object");
+      return { path, record: errors.length === 0 ? { ...record, path } : null, errors };
+    } catch (error) {
+      return { path, record: null, errors: [`json_unreadable:${error instanceof Error ? error.message : String(error)}`] };
+    }
+  }));
+  return { dir, records };
+}
+
+function automationRecoveryCandidate(record: AutomationDispatchRecord): AutomationRecoveryCandidate {
+  const boundary = record.ledgerEvents.find((event) => event.type === "automation.boundary_stop");
+  const completed = record.ledgerEvents.find((event) => event.type === "automation.completed");
+  const dispatched = record.ledgerEvents.find((event) => event.type === "automation.dispatched");
+  const boundaryReason = isRecord(boundary?.payload) ? stringOrNull(boundary.payload.reason) : null;
+  const runId = isRecord(dispatched?.payload)
+    ? stringOrNull(dispatched.payload.runId)
+    : isRecord(completed?.payload)
+      ? stringOrNull(completed.payload.runId)
+      : null;
+  const runOutcome = isRecord(completed?.payload)
+    ? stringOrNull(completed.payload.outcome) ?? stringOrNull(completed.payload.status)
+    : null;
+  const planStatus = isRecord(record.plan) ? stringOrNull(record.plan.status) : null;
+  const action = isRecord(record.plan) ? stringOrNull(record.plan.action) : null;
+  const mode = isRecord(record.plan) ? stringOrNull(record.plan.mode) : null;
+  const needsManualReview = boundaryReason !== null || (runOutcome !== null && runOutcome !== "complete") || planStatus === "blocked";
+  const recoveryHint = boundaryReason !== null
+    ? `Resolve boundary '${boundaryReason}', then rerun with explicit approval if still desired.`
+    : runOutcome !== null && runOutcome !== "complete"
+      ? `Inspect linked run '${runId ?? "unknown"}' before any manual retry.`
+      : needsManualReview
+        ? "Inspect this dispatch record before any manual retry."
+        : "No recovery action is implied by this dispatch record.";
+  return {
+    dispatchId: record.dispatchId,
+    path: record.path,
+    recordedAt: record.recordedAt,
+    planStatus,
+    action,
+    mode,
+    runId,
+    runOutcome,
+    boundaryReason,
+    needsManualReview,
+    recoveryHint,
+  };
+}
+
+async function automationRecoveryProjection(cwd: string, feature: GuardedFeature, record: boolean) {
+  const loaded = await readAutomationDispatchRecords(cwd, feature);
+  const readable = loaded.records.filter((item): item is { path: string; record: AutomationDispatchRecord; errors: string[] } => item.record !== null);
+  const candidates = readable.map((item) => automationRecoveryCandidate(item.record));
+  const manualReviewCandidates = candidates.filter((candidate) => candidate.needsManualReview);
+  const recordedAt = new Date().toISOString();
+  const projection = {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    type: "codexus.automation.recovery" as const,
+    feature,
+    command: `${feature} recovery` as const,
+    cwd,
+    recordedAt,
+    dispatchStore: {
+      path: loaded.dir,
+      total: loaded.records.length,
+      readable: readable.length,
+      unreadable: loaded.records.length - readable.length,
+      latestRecordedAt: candidates.map((candidate) => candidate.recordedAt).sort().at(-1) ?? null,
+    },
+    scheduler: {
+      status: "foreground_dispatch_only" as const,
+      queueOwned: false as const,
+      unattendedOwner: false as const,
+      mutatesScheduler: false as const,
+      recoveryAuthority: false as const,
+      completionAuthority: false as const,
+      caveat: "Codexus can inspect foreground dispatch records, but it does not own an unattended scheduler queue in this slice.",
+    },
+    retry: {
+      automaticRetry: false as const,
+      retryAuthority: false as const,
+      manualReviewRequired: manualReviewCandidates.length > 0,
+      candidateCount: manualReviewCandidates.length,
+      caveat: "Recovery candidates are advisory. Codexus will not retry automation dispatch without a fresh explicit command and approval.",
+    },
+    recovery: {
+      status: loaded.records.length === 0
+        ? "no_dispatches" as const
+        : manualReviewCandidates.length > 0
+          ? "manual_review_required" as const
+          : "clear" as const,
+      candidates,
+      manualReviewCandidates,
+      unreadableArtifacts: loaded.records
+        .filter((item) => item.record === null)
+        .map((item) => ({ path: item.path, errors: item.errors })),
+      cleanupAuthority: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
+    authority: {
+      schedulerAuthority: false as const,
+      retryAuthority: false as const,
+      cleanupAuthority: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
+    path: null as string | null,
+  };
+  if (!record) return projection;
+  const recoveryId = `recovery_${feature}_${Date.now()}`;
+  const path = join(harnessRoot(cwd), "automation", feature, "recovery", `${recoveryId}.json`);
+  const recordedProjection = { ...projection, path };
+  await writeJsonAtomic(path, recordedProjection);
+  return recordedProjection;
+}
+
 export async function featureCommand(args: ParsedArgs, feature: GuardedFeature): Promise<void> {
   const topic = args.positionals[0] ?? "status";
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
@@ -166,6 +322,15 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
     config.driver = driver;
   }
   const status = featureStatus(config, feature);
+  if (topic === "recovery") {
+    const result = await automationRecoveryProjection(cwd, feature, flagBool(args.flags, "record"));
+    if (flagBool(args.flags, "json")) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`${feature} recovery: ${result.recovery.status}`);
+    return;
+  }
   if (topic !== "status") {
     const expectedTopic = feature === "cron" ? "run-now" : "check";
     if (topic !== expectedTopic) throw new Error(`unsupported_feature:${feature}`);
@@ -336,7 +501,18 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
     return;
   }
   if (flagBool(args.flags, "json")) {
-    console.log(JSON.stringify(status, null, 2));
+    const recovery = await automationRecoveryProjection(cwd, feature, false);
+    console.log(JSON.stringify({
+      ...status,
+      scheduler: recovery.scheduler,
+      recovery: {
+        status: recovery.recovery.status,
+        manualReviewCandidates: recovery.retry.candidateCount,
+        automaticRetry: recovery.retry.automaticRetry,
+        cleanupAuthority: recovery.recovery.cleanupAuthority,
+        completionAuthority: recovery.recovery.completionAuthority,
+      },
+    }, null, 2));
     return;
   }
   console.log(`${feature}: ${status.status}`);

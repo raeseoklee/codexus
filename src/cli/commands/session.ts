@@ -23,6 +23,7 @@ import { summarizeVerificationLoop } from "../../session/loop.ts";
 import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
 import { completeSubagentArtifact, createSubagentLaunchContract, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
+import { addSessionTask, blockSessionTask, completeSessionTask, listSessionTasks, readSessionTasks, summarizeSessionTasks, updateSessionTask } from "../../session/tasks.ts";
 import { buildControlPlaneSummary } from "../../control/control-plane.ts";
 import { readCodexusVersionInfo } from "./version.ts";
 import { buildUpdateSummary } from "../../update/check.ts";
@@ -56,6 +57,8 @@ async function sessionStatusProjection(cwd: string) {
   const loop = summarizeVerificationLoop(state);
   const subagents = summarizeSubagentClaims(state);
   const controlPlane = buildControlPlaneSummary(cwd, state);
+  const taskArtifact = await readSessionTasks(cwd);
+  const tasks = summarizeSessionTasks(cwd, taskArtifact);
   const version = readCodexusVersionInfo();
   const update = buildUpdateSummary({ currentVersion: version.version, cacheOnly: true });
   return {
@@ -70,6 +73,7 @@ async function sessionStatusProjection(cwd: string) {
     decisions,
     loop,
     subagents,
+    tasks,
     controlPlane,
     update,
     verifyDetection: detection,
@@ -109,6 +113,7 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   }
   console.log(`Decisions: ${result.decisions.count}`);
   console.log(`Loop: ${result.loop.status} (${result.loop.repeatedFailureCount}/${result.loop.threshold})`);
+  console.log(`Tasks: ${result.tasks.status} (${result.tasks.counts.total})`);
   console.log(`Risk: ${result.riskSummary.status} (${result.riskSummary.fileCount} files)`);
   console.log(`Control plane: ${result.controlPlane.status}`);
   console.log(`Policy catalog: ${result.controlPlane.policyCatalog.status}`);
@@ -135,6 +140,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
     riskSummary: status.riskSummary,
     decisions: status.decisions,
     loop: status.loop,
+    tasks: status.tasks,
     controlPlane: status.controlPlane,
     notifyDispatch: status.notifyDispatch,
     capabilities: status.state?.capabilities ?? null,
@@ -143,6 +149,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
       verifications: status.state?.verifications.length ?? 0,
       subagentClaims: status.subagents.count,
       decisions: status.decisions.count,
+      tasks: status.tasks.counts.total,
       deferredSelfReports: status.controlPlane.counts.deferredSelfReports,
       policyObserved: status.controlPlane.counts.policyObserved,
       policyAdvisory: status.controlPlane.counts.policyAdvisory,
@@ -162,6 +169,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`Change evidence: ${result.changeEvidence.status}`);
   console.log(`Risk: ${result.riskSummary.status}`);
   console.log(`Loop: ${result.loop.status}`);
+  console.log(`Tasks: ${result.tasks.status} (${result.tasks.counts.total})`);
   console.log(`Decisions: ${result.counts.decisions}`);
   console.log(`Control plane: ${result.controlPlane.status}`);
   console.log(`Deferred self-reports: ${result.controlPlane.deferredSelfReports.status}`);
@@ -650,6 +658,89 @@ async function workersCommand(args: ParsedArgs, cwd: string, json: boolean): Pro
   console.log(result.reason);
 }
 
+async function tasksCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
+  const action = args.positionals[1] ?? "list";
+  if (action === "list") {
+    assertAllowedFlags(args, ["json", "cwd"]);
+    assertMaxPositionals(args, 2);
+    const result = await listSessionTasks(cwd);
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Session tasks: ${result.summary.status} (${result.summary.counts.total})`);
+    for (const task of result.artifact.tasks) {
+      console.log(`${task.taskId} [${task.status}] ${task.title}`);
+    }
+    return;
+  }
+  if (action === "add") {
+    assertAllowedFlags(args, ["json", "cwd", "title", "status", "kind", "source"]);
+    assertMaxPositionals(args, 2);
+    const title = flagString(args.flags, "title") ?? args.positionals.slice(2).join(" ").trim();
+    const result = await addSessionTask(cwd, {
+      title,
+      status: flagString(args.flags, "status"),
+      kind: flagString(args.flags, "kind"),
+      source: flagString(args.flags, "source"),
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Session task added: ${result.task?.taskId}`);
+    console.log(result.artifactPath);
+    return;
+  }
+  if (action === "update") {
+    assertAllowedFlags(args, ["json", "cwd", "title", "status", "kind", "source"]);
+    const taskId = args.positionals[2];
+    assertMaxPositionals(args, 3);
+    const result = await updateSessionTask(cwd, taskId, {
+      title: flagString(args.flags, "title"),
+      status: flagString(args.flags, "status"),
+      kind: flagString(args.flags, "kind"),
+      source: flagString(args.flags, "source"),
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Session task updated: ${result.task?.taskId}`);
+    console.log(result.artifactPath);
+    return;
+  }
+  if (action === "complete") {
+    assertAllowedFlags(args, ["json", "cwd", "evidence", "evidence-link"]);
+    const taskId = args.positionals[2];
+    assertMaxPositionals(args, 3);
+    const result = await completeSessionTask(cwd, taskId, {
+      evidence: flagString(args.flags, "evidence") ?? flagString(args.flags, "evidence-link"),
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Session task completed: ${result.task?.taskId}`);
+    console.log(result.artifactPath);
+    return;
+  }
+  if (action === "block") {
+    assertAllowedFlags(args, ["json", "cwd", "reason"]);
+    const taskId = args.positionals[2];
+    assertMaxPositionals(args, 3);
+    const result = await blockSessionTask(cwd, taskId, flagString(args.flags, "reason") ?? "");
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Session task blocked: ${result.task?.taskId}`);
+    console.log(result.artifactPath);
+    return;
+  }
+  throw new Error(`unsupported_session_tasks_command:${action}`);
+}
+
 export async function sessionCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "status";
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
@@ -686,6 +777,10 @@ export async function sessionCommand(args: ParsedArgs): Promise<void> {
   }
   if (subcommand === "subagent") {
     await subagentCommand(args, cwd, json);
+    return;
+  }
+  if (subcommand === "tasks") {
+    await tasksCommand(args, cwd, json);
     return;
   }
   if (subcommand === "workers") {

@@ -3,7 +3,8 @@
 [Korean](../ko/design/18-compiled-repository-wiki.md)
 
 Date: 2026-06-02
-Status: experimental first slice implemented; advisory/export track remains deferred.
+Status: deterministic wiki, explicit export, and advisory source-bundle
+synthesis implemented; automatic context injection remains deferred.
 
 ## Decision
 
@@ -15,11 +16,15 @@ Implementation status as of 2026-06-02:
 
 - implemented: `cx wiki map --json`, deterministic `cx wiki build --mode deterministic --json`,
   `cx wiki check --gate --json`, `cx wiki context --topic <name> --budget <n> --json`,
-  and explicit `cx wiki export --target <path> --json`;
-- implemented schemas: `codexus.wiki.manifest` and `codexus.wiki.page`;
-- still deferred: advisory synthesis and any automatic context injection into
-  runs. Export is implemented only as an explicit projection after a fresh
-  passing wiki check; Codexus does not auto-commit exported pages.
+  explicit `cx wiki export --target <path> --json`, and
+  `cx wiki build --mode advisory --json`;
+- implemented schemas: `codexus.wiki.manifest`, `codexus.wiki.page`, and
+  `codexus.wiki.advisory`;
+- still deferred: any automatic context injection into runs. Export is
+  implemented only as an explicit projection after a fresh passing wiki check;
+  Codexus does not auto-commit exported pages. Advisory synthesis is a local
+  source-bundle artifact with `modelInvoked: false`, `sourceTruth: false`,
+  `eligibleForAutomaticInjection: false`, and `completionAuthority: false`.
 
 This adapts the LLM-maintained wiki pattern to Codexus without turning Codexus
 into a general knowledge-base product. The wiki is not the source of truth. It is
@@ -347,8 +352,10 @@ The manifest owns page identity and freshness metadata:
 7. Add `cx wiki export --target <path> --json` as an explicit export that first
    requires a fresh passing wiki check, writes no source truth, and never
    auto-commits.
-8. Defer advisory synthesis until deterministic pages and freshness checks are
-   stable.
+8. Implemented: add `cx wiki build --mode advisory --json` after deterministic
+   pages and freshness checks are stable enough to provide a source bundle.
+   The advisory artifact records driver/source-bundle evidence and remains
+   non-authoritative.
 
 ## Success Criteria
 

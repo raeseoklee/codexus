@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/automation-recovery.schema.json",
+  "title": "Codexus Automation Recovery Projection",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.automation.recovery" },
+    "feature": { "enum": ["cron", "gateway"] },
+    "recordedAt": { "type": "string", "minLength": 1 },
+    "dispatchStore": { "type": "object" },
+    "scheduler": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "foreground_dispatch_only" },
+        "queueOwned": { "const": false },
+        "unattendedOwner": { "const": false },
+        "mutatesScheduler": { "const": false },
+        "recoveryAuthority": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["status", "queueOwned", "unattendedOwner", "mutatesScheduler", "recoveryAuthority", "completionAuthority"]
+    },
+    "retry": {
+      "type": "object",
+      "properties": {
+        "automaticRetry": { "const": false },
+        "retryAuthority": { "const": false },
+        "manualReviewRequired": { "type": "boolean" },
+        "candidateCount": { "type": "number" }
+      },
+      "required": ["automaticRetry", "retryAuthority", "manualReviewRequired", "candidateCount"]
+    },
+    "recovery": {
+      "type": "object",
+      "properties": {
+        "status": { "enum": ["no_dispatches", "manual_review_required", "clear"] },
+        "candidates": { "type": "array" },
+        "manualReviewCandidates": { "type": "array" },
+        "unreadableArtifacts": { "type": "array" },
+        "cleanupAuthority": { "const": false },
+        "healthAuthority": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["status", "candidates", "manualReviewCandidates", "unreadableArtifacts", "cleanupAuthority", "healthAuthority", "completionAuthority"]
+    },
+    "authority": {
+      "type": "object",
+      "properties": {
+        "schedulerAuthority": { "const": false },
+        "retryAuthority": { "const": false },
+        "cleanupAuthority": { "const": false },
+        "healthAuthority": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["schedulerAuthority", "retryAuthority", "cleanupAuthority", "healthAuthority", "completionAuthority"]
+    },
+    "path": { "type": ["string", "null"] }
+  },
+  "required": ["schemaVersion", "stability", "type", "feature", "recordedAt", "dispatchStore", "scheduler", "retry", "recovery", "authority", "path"]
+}

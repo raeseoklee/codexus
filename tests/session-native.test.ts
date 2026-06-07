@@ -1166,6 +1166,169 @@ test("session hud reports compact evidence without statusline support", async ()
   }
 });
 
+test("session tasks manage advisory task projection without verification authority", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    const empty = runCli(cwd, ["session", "tasks", "list", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(empty.status, 0, empty.stderr);
+    const emptyOutput = JSON.parse(empty.stdout);
+    assert.equal(emptyOutput.stability, "experimental");
+    assert.equal(emptyOutput.summary.status, "empty");
+    assert.equal(emptyOutput.summary.completionAuthority, false);
+    assert.equal(emptyOutput.artifact.completionAuthority, false);
+
+    const add = runCli(cwd, [
+      "session",
+      "tasks",
+      "add",
+      "--title",
+      "Wire task projection",
+      "--kind",
+      "implementation",
+      "--status",
+      "in_progress",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(add.status, 0, add.stderr);
+    const added = JSON.parse(add.stdout);
+    assert.equal(added.task.status, "in_progress");
+    assert.equal(added.task.kind, "implementation");
+    assert.equal(added.task.completionAuthority, false);
+    assert.equal(added.summary.status, "active");
+    assert.equal(added.summary.currentTaskId, added.task.taskId);
+    assert.ok(existsSync(added.artifactPath));
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "session-tasks", "--file", added.artifactPath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const conflict = runCli(cwd, [
+      "session",
+      "tasks",
+      "add",
+      "--title",
+      "Second in-progress task",
+      "--status",
+      "in_progress",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(conflict.status, 1);
+    assert.equal(JSON.parse(conflict.stdout).code, "session_task_in_progress_conflict");
+
+    const update = runCli(cwd, [
+      "session",
+      "tasks",
+      "update",
+      added.task.taskId,
+      "--status",
+      "pending",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(update.status, 0, update.stderr);
+    assert.equal(JSON.parse(update.stdout).task.status, "pending");
+
+    const evidenceDir = join(cwd, ".codexus", "session", "verification", "manual");
+    await mkdir(evidenceDir, { recursive: true });
+    const evidencePath = join(evidenceDir, "verification.json");
+    await writeFile(evidencePath, JSON.stringify({ schemaVersion: 1, status: "passed" }));
+
+    const complete = runCli(cwd, [
+      "session",
+      "tasks",
+      "complete",
+      added.task.taskId,
+      "--evidence",
+      ".codexus/session/verification/manual/verification.json",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(complete.status, 0, complete.stderr);
+    const completed = JSON.parse(complete.stdout);
+    assert.equal(completed.task.status, "completed");
+    assert.deepEqual(completed.task.evidenceLinks, [".codexus/session/verification/manual/verification.json"]);
+    assert.equal(completed.completionAuthority, false);
+
+    const second = runCli(cwd, ["session", "tasks", "add", "--title", "External review", "--kind", "review", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(second.status, 0, second.stderr);
+    const secondTask = JSON.parse(second.stdout).task;
+    const blocked = runCli(cwd, [
+      "session",
+      "tasks",
+      "block",
+      secondTask.taskId,
+      "--reason",
+      "Waiting on external reviewer",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(blocked.status, 0, blocked.stderr);
+    const blockedOutput = JSON.parse(blocked.stdout);
+    assert.equal(blockedOutput.task.status, "blocked");
+    assert.equal(blockedOutput.task.blockedReason, "Waiting on external reviewer");
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.status, "not_initialized");
+    assert.equal(statusOutput.evidence, null);
+    assert.equal(statusOutput.tasks.counts.completed, 1);
+    assert.equal(statusOutput.tasks.completionAuthority, false);
+
+    const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(hud.status, 0, hud.stderr);
+    const hudOutput = JSON.parse(hud.stdout);
+    assert.equal(hudOutput.counts.tasks, 2);
+    assert.equal(hudOutput.tasks.counts.blocked, 1);
+    assert.equal(hudOutput.tasks.completionAuthority, false);
+
+    const invalidEvidence = runCli(cwd, [
+      "session",
+      "tasks",
+      "complete",
+      secondTask.taskId,
+      "--evidence",
+      "https://example.com/proof.json",
+      "--json",
+    ], { CODEX_HOME: codexHome });
+    assert.equal(invalidEvidence.status, 1);
+    assert.equal(JSON.parse(invalidEvidence.stdout).code, "invalid_session_task_evidence");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
+test("completed session task cannot turn failed verification into completion evidence", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const add = runCli(cwd, ["session", "tasks", "add", "--title", "Fix failing check", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(add.status, 0, add.stderr);
+    const task = JSON.parse(add.stdout).task;
+
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"process.exit(1)\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 1);
+    const verification = JSON.parse(verify.stdout).verification;
+    const evidence = `.codexus/session/verification/${verification.id}/verification.json`;
+
+    const complete = runCli(cwd, ["session", "tasks", "complete", task.taskId, "--evidence", evidence, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(complete.status, 0, complete.stderr);
+    const completed = JSON.parse(complete.stdout);
+    assert.equal(completed.task.status, "completed");
+    assert.equal(completed.task.completionAuthority, false);
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const output = JSON.parse(status.stdout);
+    assert.equal(output.evidence.verification, "failed");
+    assert.equal(output.tasks.counts.completed, 1);
+    assert.equal(output.tasks.completionAuthority, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("session status and hud aggregate documented deferred self-reports", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();

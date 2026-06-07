@@ -511,6 +511,114 @@ test("app instance log evidence records a redacted snapshot without authority", 
   }
 });
 
+test("app instance metric evidence records process and artifact metrics without authority", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+
+    const start = runCli(cwd, [
+      "app",
+      "instance",
+      "start",
+      "--descriptor",
+      descriptorPath,
+      "--profile",
+      "web",
+      "--worktree",
+      cwd,
+      "--json",
+    ]);
+    assert.equal(start.status, 0, start.stderr);
+    const started = parseJson(start);
+    const instanceId = started.launch.instanceId;
+
+    await waitFor(async () => {
+      const status = runCli(cwd, ["app", "instance", "status", "--instance-id", instanceId, "--json"]);
+      if (status.status !== 0) return false;
+      const output = parseJson(status);
+      return output.instances[0]?.process?.status === "running";
+    });
+
+    const metrics = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "metrics",
+      "--instance-id",
+      instanceId,
+      "--json",
+    ]);
+    assert.equal(metrics.status, 0, metrics.stderr);
+    const output = parseJson(metrics);
+    assert.equal(output.command, "app instance evidence metrics");
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.metricSnapshot.status, "observed");
+    assert.equal(output.metricSnapshot.processStatus, "running");
+    assert.equal(output.metricSnapshot.controlsInstance, false);
+    assert.equal(output.metricSnapshot.healthAuthority, false);
+    assert.equal(output.metricSnapshot.completionAuthority, false);
+    assert.equal(output.observation.observation.kind, "metric");
+    assert.equal(output.observation.observation.source, "metric-snapshot");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const metricEvidence = JSON.parse(await readFile(output.metricSnapshot.evidencePath, "utf8"));
+    assert.equal(metricEvidence.type, "codexus.app.instance.metric-snapshot");
+    assert.equal(metricEvidence.status, "observed");
+    assert.equal(metricEvidence.process.status, "running");
+    assert.equal(metricEvidence.logs.stdout.exists, true);
+    assert.equal(metricEvidence.logs.stderr.exists, true);
+    assert.equal(metricEvidence.authority.controlsInstance, false);
+    assert.equal(metricEvidence.authority.healthAuthority, false);
+    assert.equal(metricEvidence.authority.completionAuthority, false);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-instance-observation", "--file", output.path, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(parseJson(schema).ok, true);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance metric evidence is unavailable for non-running instances without authority", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeInstance(cwd, "app_test");
+
+    const metrics = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "metrics",
+      "--instance-id",
+      "app_test",
+      "--json",
+    ]);
+    assert.equal(metrics.status, 0, metrics.stderr);
+    const output = parseJson(metrics);
+    assert.equal(output.metricSnapshot.status, "unavailable");
+    assert.equal(output.metricSnapshot.processStatus, "orphaned");
+    assert.equal(output.observation.observation.kind, "metric");
+    assert.equal(output.observation.observation.status, "unavailable");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const metricEvidence = JSON.parse(await readFile(output.metricSnapshot.evidencePath, "utf8"));
+    assert.equal(metricEvidence.status, "unavailable");
+    assert.equal(metricEvidence.reason, "instance_not_running:pid_dead");
+    assert.equal(metricEvidence.authority.controlsInstance, false);
+    assert.equal(metricEvidence.authority.healthAuthority, false);
+    assert.equal(metricEvidence.authority.completionAuthority, false);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("app instance HTTP probe does not request when the instance is not running", async () => {
   const cwd = await tempDir();
   try {

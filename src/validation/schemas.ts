@@ -61,15 +61,18 @@ export type SchemaValidationType =
   | "architecture-policy"
   | "autopilot-contract"
   | "wiki-manifest"
+  | "wiki-advisory"
   | "repo-graph"
   | "relay-session"
   | "stage-gate-evidence"
   | "convergence-agreement"
   | "decision"
+  | "session-tasks"
   | "app-instance-descriptor"
   | "app-instance"
   | "app-instance-observation"
   | "automation-dispatch"
+  | "automation-recovery"
   | "subagent-result"
   | "subagent-launch-contract"
   | "app-server-discovery"
@@ -103,15 +106,18 @@ export const schemaArtifactNames = [
   "autopilot-contract.schema.json",
   "wiki-manifest.schema.json",
   "wiki-page.schema.json",
+  "wiki-advisory.schema.json",
   "repo-graph.schema.json",
   "relay-session.schema.json",
   "stage-gate-evidence.schema.json",
   "convergence-agreement.schema.json",
   "decision.schema.json",
+  "session-tasks.schema.json",
   "app-instance-descriptor.schema.json",
   "app-instance.schema.json",
   "app-instance-observation.schema.json",
   "automation-dispatch.schema.json",
+  "automation-recovery.schema.json",
   "subagent-result.schema.json",
   "subagent-launch-contract.schema.json",
   "app-server-discovery.schema.json",
@@ -131,15 +137,18 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "architecture-policy": "architecture-policy.schema.json",
   "autopilot-contract": "autopilot-contract.schema.json",
   "wiki-manifest": "wiki-manifest.schema.json",
+  "wiki-advisory": "wiki-advisory.schema.json",
   "repo-graph": "repo-graph.schema.json",
   "relay-session": "relay-session.schema.json",
   "stage-gate-evidence": "stage-gate-evidence.schema.json",
   "convergence-agreement": "convergence-agreement.schema.json",
   decision: "decision.schema.json",
+  "session-tasks": "session-tasks.schema.json",
   "app-instance-descriptor": "app-instance-descriptor.schema.json",
   "app-instance": "app-instance.schema.json",
   "app-instance-observation": "app-instance-observation.schema.json",
   "automation-dispatch": "automation-dispatch.schema.json",
+  "automation-recovery": "automation-recovery.schema.json",
   "subagent-result": "subagent-result.schema.json",
   "subagent-launch-contract": "subagent-launch-contract.schema.json",
   "app-server-discovery": "app-server-discovery.schema.json",
@@ -563,6 +572,49 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     errors.push(...validation.errors);
   }
 
+  if (type === "wiki-advisory") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "command", ["wiki build"], errors);
+    requireString(value, "cwd", errors);
+    requireOneOf(value, "mode", ["advisory"], errors);
+    requireString(value, "advisoryManifestPath", errors);
+    requireString(value, "sourceManifestPath", errors);
+    const sourcePages = requireArray(value, "sourcePages", errors);
+    for (const item of sourcePages) {
+      if (!isRecord(item)) {
+        errors.push("sourcePages:non_object_item");
+        continue;
+      }
+      requireString(item, "pageId", errors, "sourcePages.pageId");
+      requireString(item, "title", errors, "sourcePages.title");
+      requireString(item, "path", errors, "sourcePages.path");
+      requireOneOf(item, "freshness", ["fresh", "stale", "partial", "unknown"], errors, "sourcePages.freshness");
+      requireString(item, "sourceFingerprint", errors, "sourcePages.sourceFingerprint");
+    }
+    if (requireRecord(value.synthesis, errors, "synthesis")) {
+      if (requireRecord(value.synthesis.driver, errors, "synthesis.driver")) {
+        requireString(value.synthesis.driver, "id", errors, "synthesis.driver.id");
+        requireOneOf(value.synthesis.driver, "kind", ["local-deterministic"], errors, "synthesis.driver.kind");
+        if (!(value.synthesis.driver.model === null || typeof value.synthesis.driver.model === "string")) errors.push("synthesis.driver.model:invalid");
+        if (value.synthesis.driver.modelInvoked !== false) errors.push("synthesis.driver.modelInvoked:not_false");
+      }
+      requireString(value.synthesis, "sourceBundleHash", errors, "synthesis.sourceBundleHash");
+      requireString(value.synthesis, "advisoryText", errors, "synthesis.advisoryText");
+      if (requireRecord(value.synthesis.claimClasses, errors, "synthesis.claimClasses")) {
+        requireNumber(value.synthesis.claimClasses, "derivableFacts", errors, "synthesis.claimClasses.derivableFacts");
+        requireNumber(value.synthesis.claimClasses, "advisoryClaims", errors, "synthesis.claimClasses.advisoryClaims");
+      }
+      if (value.synthesis.eligibleForAutomaticInjection !== false) errors.push("synthesis.eligibleForAutomaticInjection:not_false");
+      if (value.synthesis.sourceTruth !== false) errors.push("synthesis.sourceTruth:not_false");
+      if (value.synthesis.completionAuthority !== false) errors.push("synthesis.completionAuthority:not_false");
+    }
+    if (requireRecord(value.check, errors, "check")) {
+      requireOneOf(value.check, "status", ["pass"], errors, "check.status");
+      requireOneOf(value.check, "gate", ["not_requested", "passed"], errors, "check.gate");
+    }
+    if (value.completionAuthority !== false) errors.push("completionAuthority:not_false");
+  }
+
   if (type === "repo-graph") {
     requireOneOf(value, "stability", ["experimental"], errors);
     requireOneOf(value, "type", ["codexus.repo.graph"], errors);
@@ -749,6 +801,55 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
     if (value.completionAuthority !== false) errors.push("completionAuthority:not_false");
   }
 
+  if (type === "session-tasks") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "type", ["codexus.session.tasks"], errors);
+    if (!(value.sessionId === null || typeof value.sessionId === "string")) errors.push("sessionId:invalid");
+    requireString(value, "cwd", errors);
+    requireString(value, "updatedAt", errors);
+    const tasks = requireArray(value, "tasks", errors);
+    let inProgressCount = 0;
+    for (const item of tasks) {
+      if (!isRecord(item)) {
+        errors.push("tasks:non_object_item");
+        continue;
+      }
+      requireString(item, "taskId", errors, "tasks.taskId");
+      requireNumber(item, "order", errors, "tasks.order");
+      requireString(item, "title", errors, "tasks.title");
+      requireOneOf(item, "status", ["pending", "in_progress", "completed", "blocked", "skipped"], errors, "tasks.status");
+      if (item.status === "in_progress") inProgressCount += 1;
+      requireOneOf(item, "kind", ["planning", "implementation", "verification", "review", "release", "other"], errors, "tasks.kind");
+      requireOneOf(item, "source", ["manual", "autopilot", "relay", "subagent", "codexus"], errors, "tasks.source");
+      requireString(item, "createdAt", errors, "tasks.createdAt");
+      requireString(item, "updatedAt", errors, "tasks.updatedAt");
+      if (requireArray(item, "evidenceLinks", errors, "tasks.evidenceLinks").some((link) => typeof link !== "string")) {
+        errors.push("tasks.evidenceLinks:non_string_item");
+      }
+      if (!(item.blockedReason === null || typeof item.blockedReason === "string")) errors.push("tasks.blockedReason:invalid");
+      if (requireRecord(item.related, errors, "tasks.related")) {
+        if (requireArray(item.related, "acceptanceCriteria", errors, "tasks.related.acceptanceCriteria").some((entry) => typeof entry !== "string")) {
+          errors.push("tasks.related.acceptanceCriteria:non_string_item");
+        }
+        if (requireArray(item.related, "verificationRows", errors, "tasks.related.verificationRows").some((entry) => typeof entry !== "string")) {
+          errors.push("tasks.related.verificationRows:non_string_item");
+        }
+        if (!(item.related.relayStage === null || typeof item.related.relayStage === "string")) errors.push("tasks.related.relayStage:invalid");
+        if (!(item.related.subagentTaskId === null || typeof item.related.subagentTaskId === "string")) errors.push("tasks.related.subagentTaskId:invalid");
+      }
+      if (item.completionAuthority !== false) errors.push("tasks.completionAuthority:not_false");
+    }
+    if (inProgressCount > 1) errors.push("tasks.in_progress:multiple");
+    if (requireRecord(value.projection, errors, "projection")) {
+      requireOneOf(value.projection, "sourceOfTruth", ["codexus-session-tasks"], errors, "projection.sourceOfTruth");
+      if (!(value.projection.lastProjectedAt === null || typeof value.projection.lastProjectedAt === "string")) errors.push("projection.lastProjectedAt:invalid");
+      if (!(value.projection.surface === null || typeof value.projection.surface === "string")) errors.push("projection.surface:invalid");
+      if (!(value.projection.adapter === null || typeof value.projection.adapter === "string")) errors.push("projection.adapter:invalid");
+      if (value.projection.completionAuthority !== false) errors.push("projection.completionAuthority:not_false");
+    }
+    if (value.completionAuthority !== false) errors.push("completionAuthority:not_false");
+  }
+
   if (type === "app-instance-descriptor") {
     const validation = validateAppInstanceDescriptor(value);
     errors.push(...validation.errors);
@@ -809,6 +910,42 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
         requireBoolean(item.payload, "required_approval", errors, "ledgerEvents.boundary_stop.payload.required_approval");
         if (item.payload.completionAuthority !== false) errors.push("ledgerEvents.boundary_stop.payload.completionAuthority:not_false");
       }
+    }
+  }
+
+  if (type === "automation-recovery") {
+    requireOneOf(value, "type", ["codexus.automation.recovery"], errors);
+    requireString(value, "recordedAt", errors);
+    requireOneOf(value, "feature", ["cron", "gateway"], errors);
+    if (requireRecord(value.scheduler, errors, "scheduler")) {
+      requireOneOf(value.scheduler, "status", ["foreground_dispatch_only"], errors, "scheduler.status");
+      if (value.scheduler.queueOwned !== false) errors.push("scheduler.queueOwned:not_false");
+      if (value.scheduler.unattendedOwner !== false) errors.push("scheduler.unattendedOwner:not_false");
+      if (value.scheduler.mutatesScheduler !== false) errors.push("scheduler.mutatesScheduler:not_false");
+      if (value.scheduler.recoveryAuthority !== false) errors.push("scheduler.recoveryAuthority:not_false");
+      if (value.scheduler.completionAuthority !== false) errors.push("scheduler.completionAuthority:not_false");
+    }
+    if (requireRecord(value.retry, errors, "retry")) {
+      if (value.retry.automaticRetry !== false) errors.push("retry.automaticRetry:not_false");
+      if (value.retry.retryAuthority !== false) errors.push("retry.retryAuthority:not_false");
+      requireBoolean(value.retry, "manualReviewRequired", errors, "retry.manualReviewRequired");
+      if (typeof value.retry.candidateCount !== "number") errors.push("retry.candidateCount:not_number");
+    }
+    if (requireRecord(value.recovery, errors, "recovery")) {
+      requireOneOf(value.recovery, "status", ["no_dispatches", "manual_review_required", "clear"], errors, "recovery.status");
+      requireArray(value.recovery, "candidates", errors, "recovery.candidates");
+      requireArray(value.recovery, "manualReviewCandidates", errors, "recovery.manualReviewCandidates");
+      requireArray(value.recovery, "unreadableArtifacts", errors, "recovery.unreadableArtifacts");
+      if (value.recovery.cleanupAuthority !== false) errors.push("recovery.cleanupAuthority:not_false");
+      if (value.recovery.healthAuthority !== false) errors.push("recovery.healthAuthority:not_false");
+      if (value.recovery.completionAuthority !== false) errors.push("recovery.completionAuthority:not_false");
+    }
+    if (requireRecord(value.authority, errors, "authority")) {
+      if (value.authority.schedulerAuthority !== false) errors.push("authority.schedulerAuthority:not_false");
+      if (value.authority.retryAuthority !== false) errors.push("authority.retryAuthority:not_false");
+      if (value.authority.cleanupAuthority !== false) errors.push("authority.cleanupAuthority:not_false");
+      if (value.authority.healthAuthority !== false) errors.push("authority.healthAuthority:not_false");
+      if (value.authority.completionAuthority !== false) errors.push("authority.completionAuthority:not_false");
     }
   }
 

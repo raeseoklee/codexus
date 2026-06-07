@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.dev/schemas/session-tasks.schema.json",
+  "title": "Codexus Session Tasks",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.session.tasks" },
+    "sessionId": { "type": ["string", "null"] },
+    "cwd": { "type": "string" },
+    "updatedAt": { "type": "string" },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "taskId": { "type": "string" },
+          "order": { "type": "number" },
+          "title": { "type": "string" },
+          "status": { "enum": ["pending", "in_progress", "completed", "blocked", "skipped"] },
+          "kind": { "enum": ["planning", "implementation", "verification", "review", "release", "other"] },
+          "source": { "enum": ["manual", "autopilot", "relay", "subagent", "codexus"] },
+          "createdAt": { "type": "string" },
+          "updatedAt": { "type": "string" },
+          "evidenceLinks": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "blockedReason": { "type": ["string", "null"] },
+          "related": {
+            "type": "object",
+            "properties": {
+              "acceptanceCriteria": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "verificationRows": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "relayStage": { "type": ["string", "null"] },
+              "subagentTaskId": { "type": ["string", "null"] }
+            },
+            "required": ["acceptanceCriteria", "verificationRows", "relayStage", "subagentTaskId"]
+          },
+          "completionAuthority": { "const": false }
+        },
+        "required": ["taskId", "order", "title", "status", "kind", "source", "createdAt", "updatedAt", "evidenceLinks", "blockedReason", "related", "completionAuthority"]
+      }
+    },
+    "projection": {
+      "type": "object",
+      "properties": {
+        "sourceOfTruth": { "const": "codexus-session-tasks" },
+        "lastProjectedAt": { "type": ["string", "null"] },
+        "surface": { "type": ["string", "null"] },
+        "adapter": { "type": ["string", "null"] },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["sourceOfTruth", "lastProjectedAt", "surface", "adapter", "completionAuthority"]
+    },
+    "completionAuthority": { "const": false }
+  },
+  "required": ["schemaVersion", "stability", "type", "sessionId", "cwd", "updatedAt", "tasks", "projection", "completionAuthority"]
+}

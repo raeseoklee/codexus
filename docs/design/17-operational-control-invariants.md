@@ -354,6 +354,9 @@ that preserves the existing evidence-first identity.
    self-reports and policy catalog observed/advisory/unavailable counts. The
    summary is advisory/control metadata and carries the non-authority marker
    `completionAuthority: false`.
-7. Partially implemented: extend `cx session status --json` and
-   `cx session hud --json` with decision, risk, and loop summaries. Task
-   artifacts remain a separate future slice.
+7. Implemented: extend `cx session status --json` and
+   `cx session hud --json` with decision, risk, loop, and task summaries.
+   Session task artifacts live at `.codexus/session/tasks.json`, carry the
+   `codexus.session.tasks` schema, and remain projection metadata with
+   `completionAuthority: false`. Native host-panel mirroring and autopilot
+   task reconciliation remain separate future slices.

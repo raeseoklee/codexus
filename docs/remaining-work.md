@@ -79,8 +79,10 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   approval artifacts without auto-injection, HUD is available as a read-only
   JSON summary, tmux/native-subagent launch surfaces are truthful gates, and
   automation live contracts now dispatch synchronously with explicit approval
-  while recording `automation-action-authority-v1` negative-authority evidence.
-  Richer scheduler/recovery semantics remain follow-up work.
+  while recording `automation-action-authority-v1` negative-authority evidence
+  plus foreground recovery projections that report manual-review candidates
+  without scheduler, retry, cleanup, health, or completion authority. Richer
+  unattended scheduler ownership remains follow-up work.
 - Release operations now have an executable cadence policy:
   `cx release policy --json` reports the active small-commits/larger-releases
   rule, hotfix exceptions, stable-contract version boundary, and English/Korean
@@ -91,10 +93,10 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   full external JSON Schema engine enforcement/migrations, richer cron/gateway
   scheduler semantics, statusline/HUD integration, tmux-backed workers, and
   richer wait/remote-host UX around cancellation. The repository knowledge graph
-  now has an experimental first slice (`cx repo graph build/check`) for
-  codexus-lite graph artifacts, scoped freshness, and structural gates. Autopilot,
-  graph import/search/explain/context injection, and multi-engine relay autopilot
-  remain deferred to the 0.2/0.3 track. Autopilot now has an experimental
+  now has experimental build/check/import/search/explain slices for codexus-lite
+  graph artifacts, JSON-only external graph import, scoped freshness, structural
+  gates, and read-only advisory retrieval. Autopilot, graph context injection,
+  and multi-engine relay autopilot remain deferred to the 0.2/0.3 track. Autopilot now has an experimental
   foundation slice (`cx autopilot plan`, contract validate/approve/scope-check),
   but live `cx autopilot run` and worktree-attached execution are still
   intentionally unbuilt.
@@ -203,7 +205,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
       `cx report <run-id>`.
     - Keep outputs bounded and JSON-first.
 
-15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch, dry-run audit records, schema-validatable blocked-dispatch boundary records, and `automation-action-authority-v1` negative-authority records are implemented; richer scheduler/recovery behavior remains future work.
+15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch, dry-run audit records, schema-validatable blocked-dispatch boundary records, `automation-action-authority-v1` negative-authority records, and `cx cron|gateway recovery` foreground recovery projections are implemented; richer unattended scheduler ownership remains future work.
     - Hermes-style cron and gateway behavior should depend on locks, schema
       migration, permission events, and explicit user policy.
 
@@ -255,8 +257,9 @@ evidence only when the supporting runtime exists:
    gated.
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`, and the first synchronous dispatcher
-   slice is implemented. Next add richer scheduler semantics, retry/recovery
-   policy, and durable ownership beyond one foreground dispatch.
+   slice is implemented. Foreground recovery projections now report dispatch
+   records and manual-review candidates without automatic retry. Next add richer
+   scheduler semantics and durable ownership beyond one foreground dispatch.
 5. Retrieved context surfaces only as approved, user-visible artifacts, with no
    auto-injection of prompt context.
 6. `cx session hud --json` is the supported fallback; statusline integration
@@ -278,9 +281,10 @@ evidence only when the supporting runtime exists:
     refusing unsupported policy fields instead of silently downgrading them.
 12. Repository knowledge graph now has an experimental first slice: canonical
     graph identity hashing, graph schema validation, scoped freshness, and
-    structural graph gates. Keep external import, search/explain, and context
-    injection deferred until freshness, sanitization, and gate behavior are
-    stable.
+    structural graph gates. JSON-only external import and read-only
+    search/explain retrieval are implemented. Keep context artifact approval and
+    injection policy deferred until freshness, sanitization, and gate behavior
+    are stable.
 13. Multi-engine relay autopilot now has an experimental recorder/checker first
     slice: external author/reviewer artifact import, stage-gate evidence,
     same-artifact convergence validation, and the proof that convergence cannot
@@ -315,10 +319,10 @@ Harness-engineering alignment adds these evidence-first tracks:
 - Repository knowledge graph follow-up: [doc 14](design/14-repository-knowledge-graph.md)
   now has an experimental first slice with `cx repo graph build/check`,
   canonical graph identity hashing, graph schema validation, scoped freshness,
-  persisted Codexus graph artifacts, and structural graph gates. Next work is
-  JSON-only external import, read-only search/explain, and context artifact
-  approval. Do not expose graph context injection before freshness, sanitization,
-  and gate behavior are stable.
+  persisted Codexus graph artifacts, structural graph gates, JSON-only external
+  import, and read-only search/explain retrieval. Next work is context artifact
+  approval and explicit injection policy. Do not expose graph context injection
+  before freshness, sanitization, and gate behavior are stable.
 - Behavior evidence follow-up: `cx slop check` now records first-slice
   surgicality, simplicity, assumption, verification-artifact, and diff-surface
   evidence while preserving the facts-vs-heuristics boundary. The subagent
@@ -344,16 +348,18 @@ Harness-engineering alignment adds these evidence-first tracks:
   bounded, redacted HTTP probe linked to one Codexus-owned `instanceId`. The
   first log adapter also exists as `cx app instance evidence logs`, which records
   bounded, redacted stdout/stderr tail evidence without becoming health, control,
-  or completion authority. Next work is Browser/DevTools/screenshot/metric
-  adapters while keeping stack-specific behavior outside the workflow kernel.
+  or completion authority. `cx app instance evidence metrics` records process,
+  heartbeat, health-evidence, and log-file metrics with the same authority
+  limits. Next work is Browser/DevTools/screenshot adapters while keeping
+  stack-specific behavior outside the workflow kernel.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
   now has an experimental live ownership first slice: descriptor/profile
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
   port allocation, active health checks, bounded log projections, and
   instance-linked observation evidence records plus explicit stale/orphan
   lifecycle policy projection. The first adapter capture slice is implemented as
-  loopback HTTP dev-server evidence. Next work is richer Browser/DevTools/
-  screenshot/log/metric capture and worktree-aware launcher reuse for future
+  loopback HTTP dev-server, bounded log, and metric evidence. Next work is
+  richer Browser/DevTools/screenshot capture and worktree-aware launcher reuse for future
   autopilot surfaces.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
@@ -366,13 +372,16 @@ Harness-engineering alignment adds these evidence-first tracks:
   operational-control slice also now exists: autopilot preset metadata, policy
   catalog reporting, richer risk facts, and deferred self-report aggregation in
   session status/HUD/doctor are implemented. Session status/HUD/doctor now also
-  aggregate policy catalog counts, so the next work is task artifacts and
-  broader policy promotion. Do not
+  aggregate policy catalog counts. Session task artifacts are implemented via
+  `cx session tasks list/add/update/complete/block --json` and remain
+  projection metadata with `completionAuthority: false`, so the next work is
+  host-panel mirroring, task reconciliation, and broader policy promotion. Do not
   add active autonomy or a new completion authority.
 - Compiled repository wiki: [doc 18](design/18-compiled-repository-wiki.md)
   now has an experimental deterministic first slice: schemas, `cx wiki
-  map/build/check`, read-only context packs, and explicit export exist. Next
-  work is advisory synthesis, richer page sets, and explicit injection policy.
+  map/build/check`, read-only context packs, explicit export, and advisory
+  source-bundle synthesis exist. Next work is richer page sets, context artifact
+  approval, and explicit injection policy.
   Do not auto-inject stale or advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
@@ -384,8 +393,8 @@ Harness-engineering alignment adds these evidence-first tracks:
    app-server product behavior yet.
 2. Cron/gateway dispatcher: the first explicit-approval live slice and
    schema-validatable blocked-dispatch boundary audit records are now
-   implemented. Next add scheduler semantics, recovery/retry policy, and
-   stronger long-lived ownership evidence.
+   implemented. Foreground recovery projections are implemented; next add
+   scheduler semantics, retry policy, and stronger long-lived ownership evidence.
 3. Full JSON Schema engine: replace the local subset engine only if dependency
    policy allows it; keep current schema artifacts as regression fixtures.
 4. Statusline integration: wait for a stable Codex-supported configuration
@@ -411,17 +420,19 @@ Harness-engineering alignment adds these evidence-first tracks:
 11. Operational control invariants: decision artifacts and ledger-derived loop
     summaries are implemented as advisory session evidence, and the first
     operational-control slice now includes autonomy preset metadata, policy
-    catalog reporting, richer risk facts, and session control-plane aggregation.
-    Next implement task artifacts and broader policy promotion. Autonomy presets
-    remain contract metadata until enforceable policy fields exist.
+    catalog reporting, richer risk facts, session control-plane aggregation, and
+    Codexus-owned task artifacts. Next implement host-panel mirroring, task
+    reconciliation, and broader policy promotion. Autonomy presets remain
+    contract metadata until enforceable policy fields exist.
 12. Compiled repository wiki: the deterministic `cx wiki
-    map/build/check/context/export` slice now exists. Next implement advisory
-    synthesis and richer page coverage before any injection path is considered.
+    map/build/check/context/export` slice and advisory source-bundle synthesis
+    now exist. Next implement richer page coverage and context artifact approval
+    before any injection path is considered.
 13. Worktree app instance launcher: build on the implemented live ownership
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback
-    HTTP dev-server probe and bounded/redacted log snapshot adapter are
-    implemented; next add richer Browser/DevTools/screenshot/metric capture and
+    HTTP dev-server probe, bounded/redacted log snapshot adapter, and metric
+    snapshot adapter are implemented; next add richer Browser/DevTools/screenshot capture and
     worktree-aware launcher reuse for future
     autopilot surfaces.
 14. Project LSP diagnostics: first-slice `cx lsp status/check` exists for

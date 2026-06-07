@@ -165,6 +165,89 @@ export interface RepoGraphCheckResult extends RepoGraphArtifact {
   };
 }
 
+export interface RepoGraphImportOptions {
+  cwd: string;
+  graphProvider?: string;
+  source: string;
+  scope?: string[];
+}
+
+export interface RepoGraphImportResult extends RepoGraphArtifact {
+  command: "graph import";
+  artifactPath: string;
+  sourcePath: string;
+  sourceHash: string;
+  imported: {
+    nodeCount: number;
+    edgeCount: number;
+    execution: "none";
+    packageImported: false;
+    completionAuthority: false;
+  };
+}
+
+export interface RepoGraphSearchOptions {
+  cwd: string;
+  graph: string;
+  query: string;
+  limit?: number;
+}
+
+export interface RepoGraphSearchResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "graph search";
+  cwd: string;
+  graphRef: string;
+  graphId: string;
+  query: string;
+  results: Array<{
+    id: string;
+    kind: "node" | "edge";
+    label: string;
+    score: number;
+    evidence: string | null;
+  }>;
+  check: {
+    status: RepoGraphStatus;
+    freshness: RepoGraphCheckResult["repoGraph"]["freshness"];
+    evidenceGaps: number;
+    blockingUnknowns: number;
+  };
+  eligibleForAutomaticInjection: false;
+  completionAuthority: false;
+}
+
+export interface RepoGraphExplainOptions {
+  cwd: string;
+  graph: string;
+  id: string;
+}
+
+export interface RepoGraphExplainResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "graph explain";
+  cwd: string;
+  graphRef: string;
+  graphId: string;
+  id: string;
+  found: boolean;
+  kind: "node" | "edge" | "missing";
+  node: RepoGraphNode | null;
+  edge: RepoGraphEdge | null;
+  adjacentEdges: RepoGraphEdge[];
+  check: {
+    status: RepoGraphStatus;
+    freshness: RepoGraphCheckResult["repoGraph"]["freshness"];
+    evidenceGaps: number;
+    blockingUnknowns: number;
+  };
+  advisoryOnly: true;
+  eligibleForAutomaticInjection: false;
+  completionAuthority: false;
+}
+
 export interface RepoGraphBuildOptions {
   cwd: string;
   graphProvider?: string;
@@ -178,6 +261,7 @@ export interface RepoGraphCheckOptions {
 }
 
 const DEFAULT_SCOPE = ["src/**"];
+const MAX_IMPORTED_GRAPH_BYTES = 5 * 1024 * 1024;
 const MAX_SCOPED_UNTRACKED_FILES = 200;
 const MAX_SCOPED_UNTRACKED_BYTES = 5 * 1024 * 1024;
 const EXCLUDED_UNTRACKED_PREFIXES = [".codexus/", ".codex-harness/"];
@@ -394,6 +478,22 @@ function codexusLiteProvider(): RepoGraphProviderDescriptor {
   };
 }
 
+function externalJsonProvider(id: string): RepoGraphProviderDescriptor {
+  return {
+    id,
+    type: "codexus.repo.graph.provider",
+    external: true,
+    runtimeDeps: false,
+    accuracy: "external_json_declared",
+    capabilities: {
+      build: false,
+      import: true,
+      check: true,
+      semanticClaims: true,
+    },
+  };
+}
+
 function fileNodeId(path: string): string {
   return `file:${path}`;
 }
@@ -489,6 +589,138 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function graphStoragePath(packageRoot: string, graphId: string): string {
   return join(harnessRoot(packageRoot), "repo-graphs", graphId.replace(/^sha256:/, "sha256-"), "graph.json");
+}
+
+function resolveSafeSourcePath(packageRoot: string, source: string): { absolute: string; relative: string } {
+  const absolute = resolve(packageRoot, source);
+  if (!isPathInside(packageRoot, absolute)) throw new Error(`invalid_repo_graph_source:${source}`);
+  const relativePath = normalizePath(relative(packageRoot, absolute));
+  if (!isSafeRelativePath(relativePath)) throw new Error(`invalid_repo_graph_source:${source}`);
+  if (!existsSync(absolute)) throw new Error(`repo_graph_source_missing:${source}`);
+  const stat = statSync(absolute);
+  if (!stat.isFile()) throw new Error(`invalid_repo_graph_source:${source}`);
+  if (stat.size > MAX_IMPORTED_GRAPH_BYTES) throw new Error(`repo_graph_source_too_large:${source}`);
+  return { absolute, relative: relativePath };
+}
+
+function stringField(value: unknown, fallback: string): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function externalNodes(raw: unknown): unknown[] {
+  if (isRecord(raw) && Array.isArray(raw.nodes)) return raw.nodes;
+  if (isRecord(raw) && isRecord(raw.graph) && Array.isArray(raw.graph.nodes)) return raw.graph.nodes;
+  return [];
+}
+
+function externalEdges(raw: unknown): unknown[] {
+  if (isRecord(raw) && Array.isArray(raw.edges)) return raw.edges;
+  if (isRecord(raw) && isRecord(raw.graph) && Array.isArray(raw.graph.edges)) return raw.graph.edges;
+  return [];
+}
+
+function normalizeImportedNodes(raw: unknown): RepoGraphNode[] {
+  const nodes = new Map<string, RepoGraphNode>();
+  for (const [index, item] of externalNodes(raw).entries()) {
+    if (!isRecord(item)) continue;
+    const id = stringField(item.id, `external-node:${index}`);
+    const kind = stringField(item.kind, "external");
+    const label = typeof item.label === "string" ? item.label : typeof item.name === "string" ? item.name : undefined;
+    let path: string | undefined;
+    if (typeof item.path === "string" && item.path.trim()) {
+      const normalized = normalizePath(item.path);
+      if (!isSafeRelativePath(normalized)) throw new Error(`invalid_repo_graph_import_path:${item.path}`);
+      path = normalized;
+    }
+    nodes.set(id, {
+      id,
+      kind,
+      ...(path ? { path } : {}),
+      ...(label ? { label } : {}),
+    });
+  }
+  return [...nodes.values()].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function normalizeImportedEdges(raw: unknown): RepoGraphEdge[] {
+  const edges: RepoGraphEdge[] = [];
+  for (const [index, item] of externalEdges(raw).entries()) {
+    if (!isRecord(item)) continue;
+    const from = typeof item.from === "string" ? item.from : typeof item.source === "string" ? item.source : null;
+    const to = typeof item.to === "string" ? item.to : typeof item.target === "string" ? item.target : null;
+    if (!from || !to) continue;
+    const kind = stringField(item.kind, typeof item.type === "string" ? item.type : "external");
+    const evidence = typeof item.evidence === "string" ? item.evidence : typeof item.label === "string" ? item.label : undefined;
+    edges.push({
+      id: stringField(item.id, sha256CanonicalJson({ kind, from, to, evidence: evidence ?? null, index })),
+      kind,
+      from,
+      to,
+      ...(evidence ? { evidence } : {}),
+    });
+  }
+  return edges.sort((left, right) => left.id.localeCompare(right.id));
+}
+
+export async function importRepoGraph(options: RepoGraphImportOptions): Promise<RepoGraphImportResult> {
+  const packageRoot = findPackageRoot(options.cwd);
+  if (!packageRoot) throw new Error("package_json_missing");
+  const providerId = options.graphProvider ?? "understand-anything";
+  if (providerId !== "understand-anything" && providerId !== "external-json") throw new Error(`unsupported_graph_provider:${providerId}`);
+  const sourcePath = resolveSafeSourcePath(packageRoot, options.source);
+  const rawBytes = readFileSync(sourcePath.absolute);
+  const raw = JSON.parse(rawBytes.toString("utf8")) as unknown;
+  const nodes = normalizeImportedNodes(raw);
+  const edges = normalizeImportedEdges(raw);
+  const patterns = normalizeScopes(options.scope);
+  const fingerprint = computeScopedWorkspaceFingerprint(packageRoot, patterns);
+  const sourceHash = sha256Bytes(rawBytes);
+  const base: Omit<RepoGraphArtifact, "graphId"> = {
+    schemaVersion: 1,
+    stability: "experimental",
+    type: "codexus.repo.graph",
+    provider: externalJsonProvider(providerId),
+    scope: { patterns, root: "." },
+    sourceWorkspaceFingerprint: fingerprint,
+    source: { kind: providerId, path: sourcePath.relative, hash: sourceHash, sanitized: true },
+    nodes,
+    edges,
+    layers: [],
+    tour: [],
+    evidenceGaps: [],
+    derivableFacts: [{
+      kind: "source_provenance_recorded",
+      gate: true,
+      evidence: `${providerId}:${sourcePath.relative}`,
+      count: nodes.length,
+      files: [sourcePath.relative],
+    }],
+    heuristicClaims: [{
+      kind: "semantic_graph_meaning_not_evaluated",
+      confidence: "high",
+      evidence: "External JSON graph import normalizes nodes and edges but does not evaluate semantic meaning.",
+      recommendation: "Treat imported graph meaning as advisory until review evidence confirms it.",
+    }],
+    blockingUnknowns: [],
+    informationalUnknowns: [],
+    gate: graphGateFor("pass", false, false),
+  };
+  const graph: RepoGraphArtifact = { ...base, graphId: computeRepoGraphId(base) };
+  const artifactPath = await writeGraphArtifact(packageRoot, graph);
+  return {
+    ...graph,
+    command: "graph import",
+    artifactPath,
+    sourcePath: sourcePath.relative,
+    sourceHash,
+    imported: {
+      nodeCount: nodes.length,
+      edgeCount: edges.length,
+      execution: "none",
+      packageImported: false,
+      completionAuthority: false,
+    },
+  };
 }
 
 async function writeGraphArtifact(packageRoot: string, graph: RepoGraphArtifact): Promise<string> {
@@ -913,4 +1145,100 @@ export async function checkRepoGraph(options: RepoGraphCheckOptions): Promise<Re
     result.repoGraph.freshness = "unknown";
     return result;
   }
+}
+
+function graphCheckSummary(check: RepoGraphCheckResult): RepoGraphSearchResult["check"] {
+  return {
+    status: check.repoGraph.status,
+    freshness: check.repoGraph.freshness,
+    evidenceGaps: check.evidenceGaps.length,
+    blockingUnknowns: check.blockingUnknowns.length,
+  };
+}
+
+function searchableTextForNode(node: RepoGraphNode): string {
+  return [node.id, node.kind, node.path, node.label].filter((item): item is string => typeof item === "string").join(" ");
+}
+
+function searchableTextForEdge(edge: RepoGraphEdge): string {
+  return [edge.id, edge.kind, edge.from, edge.to, edge.evidence].filter((item): item is string => typeof item === "string").join(" ");
+}
+
+function scoreText(text: string, terms: string[]): number {
+  const lower = text.toLowerCase();
+  return terms.reduce((score, term) => score + (lower.includes(term) ? 1 : 0), 0);
+}
+
+export async function searchRepoGraph(options: RepoGraphSearchOptions): Promise<RepoGraphSearchResult> {
+  const query = options.query.trim();
+  if (!query) throw new Error("missing_repo_graph_query");
+  const limit = Number.isFinite(options.limit) && options.limit && options.limit > 0 ? Math.min(Math.floor(options.limit), 50) : 10;
+  const check = await checkRepoGraph({ cwd: options.cwd, graph: options.graph, gate: false });
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const nodeResults = check.nodes.map((node) => {
+    const label = searchableTextForNode(node);
+    return {
+      id: node.id,
+      kind: "node" as const,
+      label,
+      score: scoreText(label, terms),
+      evidence: node.path ?? node.label ?? null,
+    };
+  });
+  const edgeResults = check.edges.map((edge) => {
+    const label = searchableTextForEdge(edge);
+    return {
+      id: edge.id,
+      kind: "edge" as const,
+      label,
+      score: scoreText(label, terms),
+      evidence: edge.evidence ?? `${edge.from}->${edge.to}`,
+    };
+  });
+  const results = [...nodeResults, ...edgeResults]
+    .filter((result) => result.score > 0)
+    .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
+    .slice(0, limit);
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "graph search",
+    cwd: findPackageRoot(options.cwd) ?? resolve(options.cwd),
+    graphRef: options.graph,
+    graphId: check.graphId,
+    query,
+    results,
+    check: graphCheckSummary(check),
+    eligibleForAutomaticInjection: false,
+    completionAuthority: false,
+  };
+}
+
+export async function explainRepoGraph(options: RepoGraphExplainOptions): Promise<RepoGraphExplainResult> {
+  const id = options.id.trim();
+  if (!id) throw new Error("missing_repo_graph_explain_id");
+  const check = await checkRepoGraph({ cwd: options.cwd, graph: options.graph, gate: false });
+  const node = check.nodes.find((candidate) => candidate.id === id) ?? null;
+  const edge = node ? null : check.edges.find((candidate) => candidate.id === id) ?? null;
+  const adjacentEdges = node
+    ? check.edges.filter((candidate) => candidate.from === node.id || candidate.to === node.id)
+    : edge ? [edge] : [];
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "graph explain",
+    cwd: findPackageRoot(options.cwd) ?? resolve(options.cwd),
+    graphRef: options.graph,
+    graphId: check.graphId,
+    id,
+    found: Boolean(node || edge),
+    kind: node ? "node" : edge ? "edge" : "missing",
+    node,
+    edge,
+    adjacentEdges,
+    check: graphCheckSummary(check),
+    advisoryOnly: true,
+    eligibleForAutomaticInjection: false,
+    completionAuthority: false,
+  };
 }

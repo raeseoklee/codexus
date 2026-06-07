@@ -231,11 +231,20 @@ and conflict check.
 
 ## First Slice
 
-1. Add the `codexus.session.tasks` schema artifact.
-2. Add `cx session tasks list/add/update/complete/block --json`.
-3. Add task summary to `cx session hud --json`.
-4. Update the Codexus skill guidance so the adapter mirrors tasks into the host
-   plan panel when the plan tool is available.
-5. Add tests proving task status cannot complete a run when verification fails.
-6. Dogfood with a docs-only autopilot plan before connecting it to code-writing
-   autopilot.
+Implemented:
+
+1. Added the `codexus.session.tasks` schema artifact.
+2. Added `cx session tasks list/add/update/complete/block --json`.
+3. Added task summary to `cx session status --json` and `cx session hud --json`.
+4. Updated the Codexus skill guidance and command reference with task commands.
+5. Added tests proving task status cannot turn failed verification into
+   completion evidence.
+
+Still deferred:
+
+1. Native host-plan-panel mirroring remains unavailable until Codex exposes a
+   supported plan-panel adapter surface.
+2. `cx session tasks reconcile` remains deferred until an autopilot plan format
+   is stable enough to import without silently changing meaning.
+3. Dogfood with a docs-only autopilot plan before connecting tasks to
+   code-writing autopilot.

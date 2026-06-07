@@ -69,8 +69,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `skill improve`
   - `skill deprecate`
   - `cron status`
+  - `cron recovery`
   - `cron run-now`
   - `gateway status`
+  - `gateway recovery`
   - `gateway check`
 - Config loader with defaults, project/user config merge, unknown-key warnings, normalization, and focused schema enforcement.
 - Run ledger under `.codexus/runs/<run-id>/`.
@@ -129,6 +131,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   so consumers can see that the dispatcher may start only a linked Codexus run
   when approved, never mutates scheduler/listener state, and never claims
   cleanup, health, or completion authority for the action surface itself.
+  `cx cron recovery` and `cx gateway recovery` scan foreground dispatch records
+  and can record `automation-recovery` projections with manual-review
+  candidates; these projections do not own a scheduler queue, retry
+  automatically, clean up, claim health authority, or claim completion authority.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
   descriptors, app instance artifacts, automation dispatch records, subagent
@@ -298,7 +304,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `cx schema validate --type automation-dispatch --file <path> --json`.
   Dispatch records also carry `automation-action-authority-v1` to separate an
   approved linked-run dispatch from scheduler, listener, health, cleanup, or
-  completion authority.
+  completion authority. Recovery projections are schema-validatable with
+  `cx schema validate --type automation-recovery --file <path> --json` and
+  remain advisory/manual-review only.
 - Session state reads perform focused structure validation, and mutable session
   state updates are protected by the Codexus `session` lock.
 - `schemas/session-state.schema.json` is a first-class schema artifact for the
@@ -341,9 +349,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   against one `instanceId`, and `cx app instance evidence probe` records
   loopback-only bounded/redacted HTTP dev-server evidence for a running owned
   instance. `cx app instance evidence logs` records bounded/redacted stdout and
-  stderr tail evidence for the same owned instance. None of these evidence
-  surfaces claim control, health authority, or completion authority;
-  Browser/DevTools/screenshot adapter integration remains
+  stderr tail evidence for the same owned instance. `cx app instance evidence
+  metrics` records process, heartbeat, health-evidence, and log-file metrics
+  for that same `instanceId`. None of these evidence surfaces claim control,
+  health authority, or completion authority; Browser/DevTools/screenshot adapter integration remains
   follow-up work.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
@@ -388,14 +397,23 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   self-reports and policy catalog counts into one control-plane summary with
   `completionAuthority: false`; observed/advisory/unavailable control signals
   remain dashboard metadata, not completion evidence.
+- Codexus session tasks now have an experimental projection artifact:
+  `cx session tasks list/add/update/complete/block --json` writes
+  `.codexus/session/tasks.json` with the `codexus.session.tasks` schema.
+  `cx session status --json` and `cx session hud --json` include compact task
+  summaries, but task status, checked-off items, and evidence links remain
+  projection metadata only. They never turn failed verification into completion
+  evidence and always carry `completionAuthority: false`.
 - The compiled repository wiki now has an experimental deterministic first
   slice: `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check
   --gate`, `cx wiki context --topic <name> --budget <n>`, and explicit
-  `cx wiki export --target <path>`. It generates regenerable markdown pages
-  under `.codexus/wiki/` with source refs, local links, manifest/page schemas,
-  and scoped freshness. Export requires a fresh passing wiki check and does not
-  auto-commit or become source truth. Advisory synthesis and any automatic
-  context injection remain deferred.
+  `cx wiki export --target <path>`. `cx wiki build --mode advisory` now records
+  a schema-valid local source-bundle synthesis artifact with driver/model
+  evidence (`modelInvoked: false`) and non-authority markers. The wiki generates
+  regenerable markdown pages under `.codexus/wiki/` with source refs, local
+  links, manifest/page/advisory schemas, and scoped freshness. Export requires
+  a fresh passing wiki check and does not auto-commit or become source truth.
+  Automatic context injection remains deferred.
 - Deferred self-reports currently documented and enforced by `cx repo check
   --gate --json` are:
   - `acceptance_criteria_extraction_deferred`
@@ -552,18 +570,20 @@ review. Current high-level gaps:
   statusline integration and tmux-backed worker launch are designed but not
   implemented.
 - Cron/gateway now have an experimental explicit-approval live dispatcher and
-  schema-validatable blocked-dispatch boundary records. Future work is richer
-  scheduler semantics, recovery/retry policy, and asynchronous ownership beyond
-  the first synchronous dispatch slice.
+  schema-validatable blocked-dispatch boundary records plus foreground recovery
+  projections. Future work is richer unattended scheduler semantics, retry
+  policy, and asynchronous ownership beyond the first synchronous dispatch slice.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
 - Autopilot active execution remains deferred for the 0.2/0.3 track. The
   experimental foundation now covers `cx autopilot plan` plus contract
   validate/approve/scope-check, but `cx autopilot run` and worktree-attached
   long-running execution are still intentionally unbuilt. `cx repo graph
   build/check` and `cx autopilot relay record/stage-gate/check-agreement`
-  exist as experimental foundations, but graph import/search/explain/context
-  injection and active multi-engine relay adapters remain deferred outside the
-  0.1.x stable surface.
+  exist as experimental foundations. `cx repo graph import` now imports bounded
+  JSON-only external graphs without executing provider packages, and
+  `cx repo graph search/explain` provide read-only advisory retrieval with
+  `eligibleForAutomaticInjection: false`. Graph context injection and active
+  multi-engine relay adapters remain deferred outside the 0.1.x stable surface.
 - Worktree app instance launcher now has an experimental live ownership slice:
   start/stop, process ownership tokens, heartbeat, port allocation, liveness,
   and active health probes are implemented for Codexus-owned instances.
@@ -571,7 +591,9 @@ review. Current high-level gaps:
   `cx app instance evidence record/list`, with a first real adapter in
   `cx app instance evidence probe` for loopback HTTP dev-server evidence and
   `cx app instance evidence logs` for bounded/redacted stdout/stderr tail
-  evidence; explicit stale/orphan lifecycle policy projection is implemented.
+  evidence. `cx app instance evidence metrics` records process, heartbeat,
+  health-evidence, and log-file metrics for the same owned `instanceId`;
+  explicit stale/orphan lifecycle policy projection is implemented.
   Actual Browser/DevTools/screenshot adapter capture and worktree-aware
   launcher reuse remain follow-up work.
 - Operational control invariants have deterministic docs-code checks plus an

@@ -63,6 +63,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported setup command${target ? `: ${target}` : ""}.`;
     case "unsupported_session_command":
       return `Unsupported session command${target ? `: ${target}` : ""}.`;
+    case "unsupported_session_tasks_command":
+      return `Unsupported session tasks command${target ? `: ${target}` : ""}.`;
     case "unsupported_session_subagent_command":
       return `Unsupported session subagent command${target ? `: ${target}` : ""}.`;
     case "unsupported_session_decision_command":
@@ -77,6 +79,12 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return `Unsupported supply-chain command${target ? `: ${target}` : ""}.`;
     case "unsupported_policy_command":
       return `Unsupported policy command${target ? `: ${target}` : ""}.`;
+    case "unsupported_repo_command":
+      return `Unsupported repo command${target ? `: ${target}` : ""}.`;
+    case "unsupported_repo_graph_command":
+      return `Unsupported repo graph command${target ? `: ${target}` : ""}.`;
+    case "unsupported_graph_provider":
+      return `Unsupported repository graph provider${target ? `: ${target}` : ""}.`;
     case "unsupported_contract_command":
       return `Unsupported contract command${target ? `: ${target}` : ""}.`;
     case "unsupported_contract_target":
@@ -111,6 +119,28 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing session checkpoint label.";
     case "missing_session_verification_command":
       return "Missing session verification command.";
+    case "missing_session_task_title":
+      return "Missing session task title.";
+    case "missing_session_task_id":
+      return "Missing session task id.";
+    case "missing_session_task_block_reason":
+      return "Missing session task block reason.";
+    case "invalid_session_task_status":
+      return `Invalid session task status${target ? `: ${target}` : ""}.`;
+    case "invalid_session_task_kind":
+      return `Invalid session task kind${target ? `: ${target}` : ""}.`;
+    case "invalid_session_task_source":
+      return `Invalid session task source${target ? `: ${target}` : ""}.`;
+    case "invalid_session_task_evidence":
+      return `Invalid session task evidence link${target ? `: ${target}` : ""}.`;
+    case "session_task_evidence_missing":
+      return `Session task evidence file not found${target ? `: ${target}` : ""}.`;
+    case "session_task_not_found":
+      return `Session task not found${target ? `: ${target}` : ""}.`;
+    case "session_task_in_progress_conflict":
+      return "Only one Codexus session task may be in progress at a time.";
+    case "session_tasks_artifact_invalid":
+      return "Codexus session tasks artifact is invalid.";
     case "missing_decision_summary":
       return "Missing decision summary.";
     case "missing_decision_id":
@@ -149,6 +179,24 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing autopilot contract file.";
     case "missing_autopilot_approved_by":
       return "Missing autopilot approver identity.";
+    case "missing_repo_graph":
+      return "Missing repository graph id or path.";
+    case "missing_repo_graph_source":
+      return "Missing repository graph source JSON path.";
+    case "missing_repo_graph_query":
+      return "Missing repository graph search query.";
+    case "missing_repo_graph_explain_id":
+      return "Missing repository graph node or edge id.";
+    case "invalid_repo_graph_limit":
+      return "Invalid repository graph search limit.";
+    case "invalid_repo_graph_source":
+      return `Invalid repository graph source${target ? `: ${target}` : ""}.`;
+    case "repo_graph_source_missing":
+      return `Repository graph source not found${target ? `: ${target}` : ""}.`;
+    case "repo_graph_source_too_large":
+      return `Repository graph source is too large${target ? `: ${target}` : ""}.`;
+    case "invalid_repo_graph_import_path":
+      return `Imported repository graph path is unsafe${target ? `: ${target}` : ""}.`;
     case "missing_automation_task":
       return "Missing automation task prompt.";
     case "missing_wiki_topic":
@@ -159,6 +207,8 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Wiki manifest is missing.";
     case "wiki_manifest_invalid":
       return "Wiki manifest is invalid.";
+    case "wiki_advisory_source_not_fresh":
+      return "Wiki advisory source manifest is not fresh.";
     case "autopilot_source_doc_missing":
       return `Autopilot source document not found${target ? `: ${target}` : ""}.`;
     case "autopilot_source_doc_outside_workspace":
@@ -310,7 +360,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|subagent-result|subagent-launch-contract|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_app_command":
@@ -320,7 +370,9 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_setup_command":
       return "Run `cx setup codex-session --scope project --json`.";
     case "unsupported_session_command":
-      return "Run `cx session status --json`, `cx session hud --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, `cx session decision list --json`, `cx session loop --json`, `cx session slop --json`, or `cx session notify --event <name> --json`.";
+      return "Run `cx session status --json`, `cx session hud --json`, `cx session tasks list --json`, `cx session migrate --json`, `cx session checkpoint <label> --json`, `cx session verify --verify <cmd> --json`, `cx session decision list --json`, `cx session loop --json`, `cx session slop --json`, or `cx session notify --event <name> --json`.";
+    case "unsupported_session_tasks_command":
+      return "Run `cx session tasks list --json`, `cx session tasks add --title <text> --json`, `cx session tasks update <task-id> --status in_progress --json`, `cx session tasks complete <task-id> --evidence <path> --json`, or `cx session tasks block <task-id> --reason <text> --json`.";
     case "unsupported_session_subagent_command":
       return "Codexus does not directly spawn native subagents from the CLI; run `cx session subagent launch --role <role> --task <task> --json` to record a capability-gated launcher contract, `cx session subagent complete --task-id <id> --claim <text> --json` to record the result of a native subagent used in the current Codex session, `cx session subagent record --file <result.json> --json`, `cx session subagent attach --role <role> --claim-file <claims.json> --json`, or `cx session subagent status <task-id> --json`.";
     case "unsupported_session_decision_command":
@@ -335,6 +387,12 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Run `cx supply-chain check --json` or `cx supply-chain check --gate --json`.";
     case "unsupported_policy_command":
       return "Run `cx policy catalog check --json`.";
+    case "unsupported_repo_command":
+      return "Run `cx repo map --json`, `cx repo check --gate --json`, or `cx repo graph ... --json`.";
+    case "unsupported_repo_graph_command":
+      return "Run `cx repo graph build --graph-provider codexus-lite --json`, `cx repo graph import --graph-provider understand-anything --source <path> --json`, `cx repo graph check --graph <graph> --gate --json`, `cx repo graph search --graph <graph> <query> --json`, or `cx repo graph explain --graph <graph> <id> --json`.";
+    case "unsupported_graph_provider":
+      return "Use `codexus-lite` for graph build, or `understand-anything` / `external-json` for JSON-only graph import.";
     case "unsupported_contract_command":
       return "Run `cx contract check --target 0.2.0 --json` or add `--gate` to fail until a stable promotion is ready.";
     case "unsupported_contract_target":
@@ -348,7 +406,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_wiki_command":
       return "Run `cx wiki map --json`, `cx wiki build --mode deterministic --json`, `cx wiki check --gate --json`, or `cx wiki context --topic <name> --json`.";
     case "unsupported_wiki_build_mode":
-      return "Use `--mode deterministic`; advisory wiki synthesis remains deferred.";
+      return "Use `--mode deterministic` or `--mode advisory`. Advisory build requires a fresh deterministic wiki manifest.";
     case "unsupported_autopilot_command":
       return "Run `cx autopilot presets list --json`, `cx autopilot plan --from <path> --preset <name> --json`, `cx autopilot contract validate <path> --json`, `cx autopilot contract approve <path> --approved-by <name> --json`, `cx autopilot contract scope-check <path> --json`, or `cx autopilot relay ...`.";
     case "unsupported_autopilot_contract_command":
@@ -361,6 +419,28 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass a short label after `cx session checkpoint`.";
     case "missing_session_verification_command":
       return "Pass at least one `--verify <cmd>` argument.";
+    case "missing_session_task_title":
+      return "Pass `--title <text>` or a positional title after `cx session tasks add`.";
+    case "missing_session_task_id":
+      return "Pass a task id from `cx session tasks list --json`.";
+    case "missing_session_task_block_reason":
+      return "Pass `--reason <text>` when blocking a session task.";
+    case "invalid_session_task_status":
+      return "Use `pending`, `in_progress`, `completed`, `blocked`, or `skipped`.";
+    case "invalid_session_task_kind":
+      return "Use `planning`, `implementation`, `verification`, `review`, `release`, or `other`.";
+    case "invalid_session_task_source":
+      return "Use `manual`, `autopilot`, `relay`, `subagent`, or `codexus`.";
+    case "invalid_session_task_evidence":
+      return "Task evidence links must be relative workspace paths, not URLs, absolute paths, or parent-directory paths.";
+    case "session_task_evidence_missing":
+      return "Record or choose an existing workspace evidence file before linking it to a task.";
+    case "session_task_not_found":
+      return "Run `cx session tasks list --json` to inspect available task ids.";
+    case "session_task_in_progress_conflict":
+      return "Move the current in-progress task to another status before starting a different one.";
+    case "session_tasks_artifact_invalid":
+      return "Inspect `.codexus/session/tasks.json`; Codexus will not silently repair malformed task state.";
     case "missing_decision_summary":
       return "Pass `--summary <text>` or a positional summary after `cx session decision record`.";
     case "missing_decision_id":
@@ -393,6 +473,24 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass an autopilot contract path, for example `cx autopilot contract validate .codexus/autopilot/drafts/<id>.json --json`.";
     case "missing_autopilot_approved_by":
       return "Pass `--approved-by <name>` when approving a draft contract.";
+    case "missing_repo_graph":
+      return "Pass `--graph <graph-id-or-path>`.";
+    case "missing_repo_graph_source":
+      return "Pass `--source <relative-json-path>`; Codexus reads JSON only and does not execute provider packages.";
+    case "missing_repo_graph_query":
+      return "Pass a positional query after `cx repo graph search --graph <graph>`.";
+    case "missing_repo_graph_explain_id":
+      return "Pass a node id or edge id after `cx repo graph explain --graph <graph>`.";
+    case "invalid_repo_graph_limit":
+      return "Use a positive integer `--limit <n>`.";
+    case "invalid_repo_graph_source":
+      return "Repository graph sources must be existing JSON files inside the workspace.";
+    case "repo_graph_source_missing":
+      return "Create the graph JSON artifact first or pass a correct relative path.";
+    case "repo_graph_source_too_large":
+      return "Use a bounded source artifact; Codexus refuses oversized imports by default.";
+    case "invalid_repo_graph_import_path":
+      return "Imported node paths must be sanitized relative paths.";
     case "missing_automation_task":
       return "Pass `--task <text>` when running live `cx cron run-now` or `cx gateway check`.";
     case "invalid_autopilot_preset":
@@ -405,6 +503,8 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Run `cx wiki build --mode deterministic --json` before requesting wiki context or checks.";
     case "wiki_manifest_invalid":
       return "Rebuild the wiki so the manifest matches the current schema and page set.";
+    case "wiki_advisory_source_not_fresh":
+      return "Run `cx wiki check --gate --json`; rebuild deterministic wiki pages before advisory synthesis.";
     case "autopilot_source_doc_missing":
       return "Pass an existing workspace document path with `--from`.";
     case "autopilot_source_doc_outside_workspace":

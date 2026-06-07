@@ -333,5 +333,8 @@ control model입니다.
    observed/advisory/unavailable count를 모으는 control-plane dashboard를 추가.
    이 summary는 advisory/control metadata이며 `completionAuthority: false`를
    가집니다.
-7. 부분 구현됨: `cx session status --json`과 `cx session hud --json`에 decision, risk,
-   loop summary 추가. Task artifact는 별도 future slice로 남습니다.
+7. 구현됨: `cx session status --json`과 `cx session hud --json`에 decision, risk,
+   loop, task summary 추가. Session task artifact는 `.codexus/session/tasks.json`에
+   있으며 `codexus.session.tasks` schema를 가지고, `completionAuthority: false`인
+   projection metadata로만 남습니다. Native host-panel mirroring과 autopilot task
+   reconciliation은 별도 future slice로 남습니다.

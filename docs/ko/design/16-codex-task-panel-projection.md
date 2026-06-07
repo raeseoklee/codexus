@@ -223,9 +223,18 @@ Codexus task state -> host panel projection
 
 ## 첫 슬라이스
 
+구현됨:
+
 1. `codexus.session.tasks` schema artifact 추가.
 2. `cx session tasks list/add/update/complete/block --json` 추가.
-3. `cx session hud --json`에 task summary 추가.
-4. plan tool이 있을 때 adapter가 task를 host plan panel에 mirror하도록 Codexus skill guidance 갱신.
-5. task status만으로 verification 실패 run을 complete할 수 없음을 테스트로 증명.
-6. code-writing autopilot에 연결하기 전에 docs-only autopilot plan으로 dogfood.
+3. `cx session status --json`과 `cx session hud --json`에 task summary 추가.
+4. Codexus skill guidance와 command reference에 task command 추가.
+5. task status가 실패한 verification을 completion evidence로 바꿀 수 없음을 테스트로 증명.
+
+아직 deferred:
+
+1. Native host plan panel mirror는 Codex가 지원되는 plan-panel adapter surface를
+   제공할 때까지 unavailable입니다.
+2. `cx session tasks reconcile`은 autopilot plan format이 의미를 조용히 바꾸지 않고
+   import할 만큼 안정될 때까지 deferred입니다.
+3. Code-writing autopilot에 연결하기 전에 docs-only autopilot plan으로 dogfood합니다.

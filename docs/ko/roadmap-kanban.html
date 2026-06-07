@@ -340,15 +340,16 @@
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
-            <span class="tag gateable">HTTP/log 완료</span>
+            <span class="tag gateable">HTTP/log/metric 완료</span>
           </div>
-          <p>Live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter는 구현됐습니다. 다음 단계는 더 풍부한 Browser/DevTools/screenshot/metric adapter입니다.</p>
+          <p>Live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, metric snapshot adapter는 구현됐습니다. 다음 단계는 더 풍부한 Browser/DevTools/screenshot adapter입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>구현된 baseline은 정직해야 합니다. Codexus-owned instance만 중지할 수 있고, stale/orphan artifact는 lifecycle policy를 보고하되 health, cleanup, completion, control을 주장하지 않습니다.</li>
             <li>완료: loopback HTTP probe evidence는 <code>instanceId</code>를 참조하고 bounded/redacted이며 control, health, completion authority를 주장하지 않습니다.</li>
             <li>완료: log snapshot evidence는 같은 <code>instanceId</code>에 대해 bounded/redacted stdout/stderr tail을 기록하되 health, control, completion authority가 되지 않습니다.</li>
-            <li>다음: Browser/DevTools/screenshot/metric 출력은 “이 server를 관측했다”와 “이 owned worktree instance를 관측했다”를 구분할 수 있어야 합니다.</li>
+            <li>완료: metric snapshot evidence는 같은 <code>instanceId</code>에 대해 process, heartbeat, health-evidence, log-file metric을 기록하되 health, control, completion authority가 되지 않습니다.</li>
+            <li>다음: Browser/DevTools/screenshot 출력은 “이 server를 관측했다”와 “이 owned worktree instance를 관측했다”를 구분할 수 있어야 합니다.</li>
             <li>Future autopilot surface는 generic localhost port가 아니라 per-worktree instance artifact를 재사용해야 합니다.</li>
           </ul>
           <span class="label">근거</span>
@@ -359,13 +360,14 @@
           <h3>Repository Graph Import와 Retrieval</h3>
           <div class="tags">
             <span class="tag evidence">첫 slice 이후</span>
-            <span class="tag gated">experimental</span>
+            <span class="tag done">import/search 완료</span>
+            <span class="tag gated">injection deferred</span>
           </div>
-          <p>구현된 codexus-lite graph build/check foundation 위에 JSON-only external import와 read-only search/explain을 올립니다.</p>
+          <p>Codexus는 이제 codexus-lite graph를 build/check하고, bounded external JSON graph를 import하며, read-only search/explain retrieval을 제공합니다. Context artifact approval과 injection policy는 deferred입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>External graph import는 sanitized source provenance와 bounded source hash를 기록합니다.</li>
-            <li>Search/explain은 read-only advisory context로 유지합니다.</li>
+            <li>완료: external graph import는 provider package를 실행하지 않고 sanitized source provenance와 bounded source hash를 기록합니다.</li>
+            <li>완료: search/explain은 read-only advisory context로 유지하고 <code>eligibleForAutomaticInjection: false</code>를 보고합니다.</li>
             <li>Approved artifact와 fresh structural check 없이 graph context를 run에 주입하지 않습니다.</li>
           </ul>
           <span class="label">근거</span>
@@ -376,12 +378,13 @@
           <h3>Compiled Wiki Advisory Slice</h3>
           <div class="tags">
             <span class="tag evidence">18번 문서</span>
-            <span class="tag gated">experimental 다음</span>
+            <span class="tag done">advisory 완료</span>
+            <span class="tag gated">injection deferred</span>
           </div>
-          <p>Deterministic compiled wiki와 explicit export slice는 구현되었습니다. 다음 단계는 generated page를 authority로 만들지 않는 advisory synthesis입니다.</p>
+          <p>Deterministic compiled wiki, explicit export, advisory source-bundle synthesis slice는 구현되었습니다. 다음 단계는 generated page를 authority로 만들지 않는 richer page coverage와 explicit context artifact approval입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li><code>cx wiki build --mode advisory</code>가 driver/model/source bundle evidence를 기록하고 advisory 상태를 유지합니다.</li>
+            <li>완료: <code>cx wiki build --mode advisory</code>가 driver/model/source bundle evidence를 기록하고 advisory 상태를 유지합니다.</li>
             <li>완료: <code>cx wiki export</code>는 explicit하게 동작하고 fresh check를 요구하며 checked-in page를 authoritative하게 만들지 않습니다.</li>
             <li>Deterministic freshness와 stale-page gate 동작이 유지됩니다.</li>
             <li>Wiki page에서 automatic context injection을 하지 않습니다.</li>
@@ -394,12 +397,15 @@
           <h3>Operational Control Task Artifacts</h3>
           <div class="tags">
             <span class="tag evidence">17번 문서</span>
-            <span class="tag gated">control metadata</span>
+            <span class="tag done">task projection 완료</span>
+            <span class="tag gated">host panel deferred</span>
           </div>
-          <p>Autonomy preset, policy catalog, richer risk fact, session control aggregation은 live입니다. 다음은 advisory state를 completion authority로 승격하지 않으면서 durable task artifact와 broader policy promotion을 추가하는 일입니다.</p>
+          <p>Autonomy preset, policy catalog, richer risk fact, session control aggregation, Codexus 소유 durable task artifact는 live입니다. Host-panel mirroring과 broader policy promotion은 advisory state를 completion authority로 승격하지 않는 조건에서 계속 deferred입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>Task artifact는 자체 schema를 가지며 completion authority가 되지 않습니다.</li>
+            <li>완료: <code>cx session tasks list/add/update/complete/block --json</code>은 자체 schema를 가진 <code>.codexus/session/tasks.json</code>을 씁니다.</li>
+            <li>완료: task summary는 <code>cx session status --json</code>와 <code>cx session hud --json</code>에 표시됩니다.</li>
+            <li>완료: task artifact는 completion authority가 되지 않으며 실패한 verification을 completion evidence로 바꿀 수 없습니다.</li>
             <li>Control summary는 이미 unavailable capability를 숨기지 않고 advisory/deferred status를 집계합니다.</li>
             <li>Warning은 이미 선언된 policy surface가 승격시키지 않는 한 advisory로 남습니다.</li>
           </ul>
@@ -429,12 +435,14 @@
           <div class="tags">
             <span class="tag gated">policy-reviewed-live-dispatch-v1</span>
             <span class="tag evidence">experimental next</span>
+            <span class="tag gateable">recovery 완료</span>
           </div>
-          <p>첫 explicit-approval dispatcher는 live이며, blocked live attempt는 이제 schema-validatable boundary audit record를 남깁니다. 다음은 unattended ownership을 과장하지 않으면서 durable scheduler/retry semantics를 추가하는 일입니다.</p>
+          <p>첫 explicit-approval dispatcher는 live이며, blocked live attempt는 schema-validatable boundary audit record를 남기고 foreground recovery projection은 manual-review candidate를 보고합니다. 다음은 autonomy를 과장하지 않는 durable unattended scheduler ownership입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>Dry-run/live path가 계속 같은 policy contract를 공유합니다.</li>
-            <li>Retry, recovery, queue ownership이 durable evidence로 기록됩니다.</li>
+            <li>완료: recovery projection은 dispatch history와 manual-review candidate를 automatic retry authority 없이 기록합니다.</li>
+            <li>다음: queue ownership과 unattended retry semantic을 durable evidence로 기록합니다.</li>
             <li>Explicit ownership/recovery proof 없이는 unattended scheduler를 주장하지 않습니다.</li>
           </ul>
           <span class="label">근거</span>
@@ -461,7 +469,7 @@
           <div class="tags">
             <span class="tag evidence">adapter descriptor</span>
           </div>
-          <p>Loopback HTTP dev-server probe는 구현됐습니다. 더 풍부한 browser, screenshot, trace, log, metric adapter를 기존 app-instance observation descriptor에 연결합니다.</p>
+          <p>Loopback HTTP dev-server probe, bounded log adapter, metric adapter는 구현됐습니다. 더 풍부한 browser, screenshot, trace adapter를 기존 app-instance observation descriptor에 연결합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>Stack-specific behavior는 workflow kernel 밖에 둡니다.</li>
@@ -532,7 +540,7 @@
             <span class="tag advisory">experimental live slice</span>
             <span class="tag gated">automation</span>
           </div>
-          <p>Explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence는 이미 있습니다. 남은 작업은 autonomy를 과장하지 않으면서 unattended scheduler, retry, ownership evidence를 추가하는 것입니다.</p>
+          <p>Explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, foreground recovery projection은 이미 있습니다. 남은 작업은 autonomy를 과장하지 않으면서 unattended scheduler, retry, ownership evidence를 추가하는 것입니다.</p>
           <span class="label">Gate</span>
           <p>Permission, approval, lock, dispatch, completion, recovery, owner-liveness evidence가 durable해야 합니다.</p>
         </article>

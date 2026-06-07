@@ -26,7 +26,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `slop check`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
-- `cron status/run-now`, `gateway status/check`
+- `cron status/recovery/run-now`, `gateway status/recovery/check`
 - config merge, normalization, focused schema enforcement
 - `.codexus/runs/<run-id>/` ledger
 - focused read-path validation이 붙은 atomic `state.json`, append-only `events.jsonl`
@@ -53,7 +53,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   schema-validatable boundary audit record. 각 dispatch plan은
   `automation-action-authority-v1`도 기록해 dispatcher가 승인된 linked Codexus
   run만 시작할 수 있고 scheduler/listener state, cleanup, health, completion
-  authority는 갖지 않음을 명시합니다.
+  authority는 갖지 않음을 명시합니다. `cx cron recovery`와 `cx gateway recovery`는
+  foreground dispatch record를 scan하고 manual-review candidate를 담은
+  `automation-recovery` projection을 기록할 수 있습니다. 이 projection은 scheduler
+  queue ownership, automatic retry, cleanup, health authority, completion authority를
+  주장하지 않습니다.
 - config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/automation dispatch/subagent result/subagent launch
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
@@ -212,7 +216,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `cx schema validate --type automation-dispatch --file <path> --json`으로
   검증할 수 있습니다. Dispatch record는 `automation-action-authority-v1`도
   포함해 승인된 linked-run dispatch와 scheduler/listener, health, cleanup,
-  completion authority를 분리합니다.
+  completion authority를 분리합니다. Recovery projection은
+  `cx schema validate --type automation-recovery --file <path> --json`으로 검증할
+  수 있으며 advisory/manual-review only입니다.
 - Session state read path는 focused structure validation을 수행하고, mutable session
   state update는 Codexus `session` lock으로 보호합니다.
 - `schemas/session-state.schema.json`은 v5 session-state shape용 first-class schema
@@ -349,9 +355,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   연결해 기록하고, `cx app instance evidence probe`는 running owned instance에 대한
   loopback-only bounded/redacted HTTP dev-server evidence를 기록합니다.
   `cx app instance evidence logs`는 같은 owned instance의 stdout/stderr tail
-  evidence를 bounded/redacted snapshot으로 기록합니다. 이 evidence surface들은 control,
-  health authority, completion authority를 주장하지 않습니다. 실제 Browser/DevTools/
-  screenshot adapter 연동은 후속 작업입니다.
+  evidence를 bounded/redacted snapshot으로 기록합니다. `cx app instance evidence
+  metrics`는 같은 `instanceId`의 process, heartbeat, health-evidence, log-file
+  metric을 기록합니다. 이 evidence surface들은 control, health authority,
+  completion authority를 주장하지 않습니다. 실제 Browser/DevTools/screenshot adapter
+  연동은 후속 작업입니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
@@ -378,13 +386,22 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   deferred self-report와 policy catalog count를 하나의 control-plane summary로
   모으며 `completionAuthority: false`를 유지합니다. observed/advisory/unavailable
   control signal은 dashboard metadata이지 completion evidence가 아닙니다.
+- Codexus session task는 이제 experimental projection artifact를 가집니다.
+  `cx session tasks list/add/update/complete/block --json`은
+  `codexus.session.tasks` schema를 가진 `.codexus/session/tasks.json`을 씁니다.
+  `cx session status --json`과 `cx session hud --json`은 compact task summary를
+  포함하지만, task status, checked-off item, evidence link는 projection metadata일
+  뿐입니다. 실패한 verification을 completion evidence로 바꾸지 않으며 항상
+  `completionAuthority: false`를 유지합니다.
 - Compiled repository wiki는 이제 experimental deterministic 첫 slice를 가집니다:
   `cx wiki map`, `cx wiki build --mode deterministic`, `cx wiki check --gate`,
   `cx wiki context --topic <name> --budget <n>`, 명시적
-  `cx wiki export --target <path>`가 동작합니다. `.codexus/wiki/` 아래에 source ref,
-  local link, manifest/page schema, scoped freshness를 가진 재생성 가능한 markdown
-  page를 만들며, export는 fresh passing wiki check를 요구하고 auto-commit 또는 source
-  truth가 되지 않습니다. Advisory synthesis와 automatic context injection은 계속
+  `cx wiki export --target <path>`가 동작합니다. `cx wiki build --mode advisory`는
+  driver/model evidence(`modelInvoked: false`)와 non-authority marker를 가진
+  schema-valid local source-bundle synthesis artifact를 기록합니다. `.codexus/wiki/`
+  아래에 source ref, local link, manifest/page/advisory schema, scoped freshness를 가진
+  재생성 가능한 markdown page를 만들며, export는 fresh passing wiki check를 요구하고
+  auto-commit 또는 source truth가 되지 않습니다. Automatic context injection은 계속
   deferred입니다.
 - `cx repo check --gate --json`가 현재 문서 일치를 강제하는 deferred self-report는
   다음 네 가지입니다:
@@ -419,8 +436,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   않았습니다.
 - cron/gateway는 이제 experimental explicit-approval live dispatcher와
   schema-validatable blocked-dispatch boundary record 및
-  `automation-action-authority-v1` negative-authority record를 가집니다. 다음 작업은
-  richer scheduler semantics, recovery/retry policy, asynchronous ownership
+  `automation-action-authority-v1` negative-authority record, foreground recovery
+  projection을 가집니다. 다음 작업은 richer unattended scheduler semantics, retry policy,
+  asynchronous ownership
   증거입니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - Autopilot active execution은 계속 0.2/0.3 트랙에서 deferred입니다. Experimental
@@ -428,18 +446,21 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   validate/approve/scope-check까지 포함하지만, `cx autopilot run`과 worktree에
   붙는 장시간 실행은 의도적으로 아직 구현하지 않았습니다. `cx repo graph
   build/check`와 `cx autopilot relay record/stage-gate/check-agreement`는
-  experimental foundation으로 존재하지만, graph import/search/explain/context
-  injection과 active multi-engine relay adapter는 0.1.x stable surface 밖에서
-  deferred입니다.
+  experimental foundation으로 존재합니다. `cx repo graph import`는 provider package를
+  실행하지 않고 bounded JSON-only external graph를 import하며,
+  `cx repo graph search/explain`은 `eligibleForAutomaticInjection: false`인 read-only
+  advisory retrieval을 제공합니다. Graph context injection과 active multi-engine relay
+  adapter는 0.1.x stable surface 밖에서 deferred입니다.
 - Worktree app instance launcher는 이제 experimental live ownership slice를
   갖습니다. start/stop, process ownership token, heartbeat, liveness, port
   allocation, active health probe는 Codexus-owned instance에 대해 구현됐습니다.
   Instance-linked observation evidence descriptor는
   `cx app instance evidence record/list`로 구현됐고, 첫 real adapter로
   `cx app instance evidence probe`가 loopback HTTP dev-server evidence를 기록합니다.
-  명시적 stale/orphan lifecycle policy projection도 구현됐습니다. 실제
-  Browser/DevTools/screenshot adapter capture와 worktree-aware launcher reuse가 후속
-  작업입니다.
+  `cx app instance evidence logs`와 `cx app instance evidence metrics`도 bounded log 및
+  metric evidence를 기록합니다. 명시적 stale/orphan lifecycle policy projection도
+  구현됐습니다. 실제 Browser/DevTools/screenshot adapter capture와 worktree-aware
+  launcher reuse가 후속 작업입니다.
 - Operational control invariant는 deterministic docs-code check와 실험적
   control-plane 첫 slice까지 구현됐습니다. Decision artifact, 반복
   verification loop summary, HUD/status projection, autonomy preset metadata,

@@ -165,13 +165,32 @@ test("wiki check fails when a local link resolves outside the registered wiki pa
   }
 });
 
-test("wiki advisory build remains honestly deferred", async () => {
+test("wiki advisory build records source-bundle evidence without injection authority", async () => {
   const cwd = await fixtureRepo();
   try {
+    const deterministic = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(deterministic.status, 0, deterministic.stderr);
+
     const result = runCli(cwd, ["wiki", "build", "--mode", "advisory", "--json"]);
-    assert.equal(result.status, 1);
+    assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
-    assert.equal(output.code, "unsupported_wiki_build_mode");
+    assert.equal(output.command, "wiki build");
+    assert.equal(output.mode, "advisory");
+    assert.equal(output.synthesis.driver.modelInvoked, false);
+    assert.equal(output.synthesis.eligibleForAutomaticInjection, false);
+    assert.equal(output.synthesis.sourceTruth, false);
+    assert.equal(output.synthesis.completionAuthority, false);
+    assert.equal(output.completionAuthority, false);
+    assert.ok(existsSync(join(cwd, ".codexus", "wiki", "advisory", "advisory.json")));
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "wiki-advisory", "--file", ".codexus/wiki/advisory/advisory.json", "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    await writeFile(join(cwd, "package.json"), `${JSON.stringify({ name: "fixture", version: "2.0.0" }, null, 2)}\n`);
+    const stale = runCli(cwd, ["wiki", "build", "--mode", "advisory", "--json"]);
+    assert.equal(stale.status, 1);
+    assert.equal(JSON.parse(stale.stdout).code, "wiki_advisory_source_not_fresh");
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
-import { buildWiki, buildWikiContext, buildWikiMap, checkWiki, exportWiki } from "../../wiki/wiki.ts";
+import { buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiMap, checkWiki, exportWiki } from "../../wiki/wiki.ts";
 
 export async function wikiCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "check";
@@ -23,9 +23,16 @@ export async function wikiCommand(args: ParsedArgs): Promise<void> {
   if (subcommand === "build") {
     assertAllowedFlags(args, ["cwd", "json", "mode", "driver"]);
     const mode = (flagString(args.flags, "mode") ?? "deterministic") as "deterministic" | "advisory";
-    const result = await buildWiki(cwd, mode);
+    const result = mode === "advisory"
+      ? await buildWikiAdvisory(cwd, flagString(args.flags, "driver") ?? "local-deterministic")
+      : await buildWiki(cwd, mode);
     if (json) {
       console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    if (result.mode === "advisory") {
+      console.log(`Wiki advisory build: ${result.sourcePages.length} source pages`);
+      console.log(`Advisory: ${result.advisoryManifestPath}`);
       return;
     }
     console.log(`Wiki build: ${result.manifest.pages.length} pages`);

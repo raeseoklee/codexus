@@ -341,15 +341,16 @@
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
-            <span class="tag gateable">HTTP/log done</span>
+            <span class="tag gateable">HTTP/log/metric done</span>
           </div>
-          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, and bounded log snapshot adapter are implemented. The next step is richer Browser/DevTools/screenshot/metric adapters.</p>
+          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, and metric snapshot adapter are implemented. The next step is richer Browser/DevTools/screenshot adapters.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale/orphan artifacts report lifecycle policy without implying health, cleanup, completion, or control.</li>
             <li>Done: loopback HTTP probe evidence references an <code>instanceId</code>, is bounded and redacted, and never claims control, health, or completion authority.</li>
             <li>Done: log snapshot evidence records bounded/redacted stdout/stderr tails for the same <code>instanceId</code> without becoming health, control, or completion authority.</li>
-            <li>Next: Browser/DevTools/screenshot/metric outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
+            <li>Done: metric snapshot evidence records process, heartbeat, health-evidence, and log-file metrics for the same <code>instanceId</code> without becoming health, control, or completion authority.</li>
+            <li>Next: Browser/DevTools/screenshot outputs can distinguish "observed this server" from "observed the owned worktree instance".</li>
             <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>
           </ul>
           <span class="label">Sources</span>
@@ -360,13 +361,14 @@
           <h3>Repository Graph Import and Retrieval</h3>
           <div class="tags">
             <span class="tag evidence">after first slice</span>
-            <span class="tag gated">experimental</span>
+            <span class="tag done">import/search done</span>
+            <span class="tag gated">injection deferred</span>
           </div>
-          <p>Build on the implemented codexus-lite graph build/check foundation with JSON-only external import and read-only search/explain.</p>
+          <p>Codexus now builds/checks codexus-lite graphs, imports bounded external JSON graphs, and offers read-only search/explain retrieval. Context artifact approval and injection policy remain deferred.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>External graph imports record sanitized source provenance and bounded source hashes.</li>
-            <li>Search/explain stays read-only advisory context.</li>
+            <li>Done: external graph imports record sanitized source provenance and bounded source hashes without executing provider packages.</li>
+            <li>Done: search/explain stays read-only advisory context and reports <code>eligibleForAutomaticInjection: false</code>.</li>
             <li>No graph context is injected into runs without an approved artifact and fresh structural check.</li>
           </ul>
           <span class="label">Sources</span>
@@ -377,12 +379,13 @@
           <h3>Compiled Wiki Advisory Slice</h3>
           <div class="tags">
             <span class="tag evidence">doc 18</span>
-            <span class="tag gated">experimental next</span>
+            <span class="tag done">advisory done</span>
+            <span class="tag gated">injection deferred</span>
           </div>
-          <p>The deterministic compiled wiki and explicit export slices are in place. The next step is advisory synthesis without turning generated pages into authority.</p>
+          <p>The deterministic compiled wiki, explicit export, and advisory source-bundle synthesis slices are in place. The next step is richer page coverage and explicit context artifact approval without turning generated pages into authority.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li><code>cx wiki build --mode advisory</code> records driver/model/source bundle evidence and stays advisory.</li>
+            <li>Done: <code>cx wiki build --mode advisory</code> records driver/model/source bundle evidence and stays advisory.</li>
             <li>Done: <code>cx wiki export</code> is explicit, requires a fresh check, and does not make checked-in pages authoritative.</li>
             <li>Deterministic freshness and stale-page gate behavior remain intact.</li>
             <li>No automatic context injection from wiki pages.</li>
@@ -395,12 +398,15 @@
           <h3>Operational Control Task Artifacts</h3>
           <div class="tags">
             <span class="tag evidence">doc 17</span>
-            <span class="tag gated">control metadata</span>
+            <span class="tag done">task projection done</span>
+            <span class="tag gated">host panel deferred</span>
           </div>
-          <p>Autonomy presets, policy catalogs, richer risk facts, and session control aggregation are live. The next step is durable task artifacts and broader policy promotion without promoting advisory state into completion authority.</p>
+          <p>Autonomy presets, policy catalogs, richer risk facts, session control aggregation, and durable Codexus-owned task artifacts are live. Host-panel mirroring and broader policy promotion remain deferred without promoting advisory state into completion authority.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Task artifacts have their own schema and never become completion authority.</li>
+            <li>Done: <code>cx session tasks list/add/update/complete/block --json</code> writes <code>.codexus/session/tasks.json</code> with its own schema.</li>
+            <li>Done: task summaries appear in <code>cx session status --json</code> and <code>cx session hud --json</code>.</li>
+            <li>Done: task artifacts never become completion authority and cannot turn failed verification into completion evidence.</li>
             <li>Control summaries already aggregate advisory/deferred status without hiding unavailable capabilities.</li>
             <li>Warnings stay advisory unless an already-declared policy surface promotes them.</li>
           </ul>
@@ -430,12 +436,14 @@
           <div class="tags">
             <span class="tag gated">policy-reviewed-live-dispatch-v1</span>
             <span class="tag evidence">experimental next</span>
+            <span class="tag gateable">recovery done</span>
           </div>
-          <p>The first explicit-approval dispatcher is live, and blocked live attempts now have schema-validatable boundary audit records. The next step is durable scheduler/retry semantics without overstating unattended ownership.</p>
+          <p>The first explicit-approval dispatcher is live, blocked live attempts have schema-validatable boundary audit records, and foreground recovery projections report manual-review candidates. The next step is durable unattended scheduler ownership without overstating autonomy.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Dry-run and live paths continue to share the same policy contract.</li>
-            <li>Retries, recovery, and queue ownership are recorded as durable evidence.</li>
+            <li>Done: recovery projections record dispatch history and manual-review candidates without automatic retry authority.</li>
+            <li>Next: queue ownership and unattended retry semantics are recorded as durable evidence.</li>
             <li>No unattended scheduler claims without explicit ownership and recovery proofs.</li>
           </ul>
           <span class="label">Sources</span>
@@ -462,7 +470,7 @@
           <div class="tags">
             <span class="tag evidence">adapter descriptors</span>
           </div>
-          <p>The loopback HTTP dev-server probe is implemented. Wire richer browser, screenshot, trace, log, or metric adapters to existing app-instance observation descriptors.</p>
+          <p>The loopback HTTP dev-server probe, bounded log adapter, and metric adapter are implemented. Wire richer browser, screenshot, or trace adapters to existing app-instance observation descriptors.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Stack-specific behavior stays outside the workflow kernel.</li>
@@ -533,7 +541,7 @@
             <span class="tag advisory">experimental live slice</span>
             <span class="tag gated">automation</span>
           </div>
-          <p>An explicit-approval live dispatcher, blocked-dispatch boundary audit record, and action-authority negative evidence now exist. The remaining work is unattended scheduler, retry, and ownership evidence without overstating autonomy.</p>
+          <p>An explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, and foreground recovery projection now exist. The remaining work is unattended scheduler, retry, and ownership evidence without overstating autonomy.</p>
           <span class="label">Gate</span>
           <p>Permission, approval, lock, dispatch, completion, recovery, and owner-liveness evidence must stay durable.</p>
         </article>

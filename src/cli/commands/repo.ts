@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { buildRepoGraph, checkRepoGraph } from "../../repo-graph/graph.ts";
+import { buildRepoGraph, checkRepoGraph, explainRepoGraph, importRepoGraph, searchRepoGraph } from "../../repo-graph/graph.ts";
 import { buildRepoKnowledgeReport } from "../../repo-knowledge/check.ts";
 import { assertAllowedFlags, assertMaxPositionals, flagArray, flagBool, flagString, type ParsedArgs } from "../args.ts";
 
@@ -7,12 +7,11 @@ export async function repoCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "check";
   if (subcommand === "graph") {
     const action = args.positionals[1] ?? "check";
-    if (action !== "build" && action !== "check") throw new Error(`unsupported_repo_graph_command:${action}`);
-    assertMaxPositionals(args, 2);
-    assertAllowedFlags(args, ["json", "cwd", "gate", "graph-provider", "scope", "graph"]);
     const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
     const json = flagBool(args.flags, "json");
     if (action === "build") {
+      assertMaxPositionals(args, 2);
+      assertAllowedFlags(args, ["json", "cwd", "gate", "graph-provider", "scope", "graph"]);
       const result = await buildRepoGraph({
         cwd,
         graphProvider: flagString(args.flags, "graph-provider"),
@@ -30,6 +29,70 @@ export async function repoCommand(args: ParsedArgs): Promise<void> {
       console.log(`Artifact: ${result.artifactPath}`);
       return;
     }
+    if (action === "import") {
+      assertMaxPositionals(args, 2);
+      assertAllowedFlags(args, ["json", "cwd", "graph-provider", "source", "scope"]);
+      const source = flagString(args.flags, "source");
+      if (!source) throw new Error("missing_repo_graph_source");
+      const result = await importRepoGraph({
+        cwd,
+        graphProvider: flagString(args.flags, "graph-provider"),
+        source,
+        scope: flagArray(args.flags, "scope"),
+      });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`Repo graph: imported ${result.graphId}`);
+      console.log(`Provider: ${result.provider.id}`);
+      console.log(`Source: ${result.sourcePath}`);
+      console.log(`Nodes: ${result.nodes.length}`);
+      console.log(`Edges: ${result.edges.length}`);
+      console.log(`Artifact: ${result.artifactPath}`);
+      return;
+    }
+    if (action === "search") {
+      assertAllowedFlags(args, ["json", "cwd", "graph", "limit"]);
+      const graph = flagString(args.flags, "graph");
+      if (!graph) throw new Error("missing_repo_graph");
+      const query = args.positionals.slice(2).join(" ").trim();
+      const limitRaw = flagString(args.flags, "limit");
+      const limit = limitRaw ? Number(limitRaw) : undefined;
+      if (limitRaw && (!Number.isFinite(limit) || Number(limit) <= 0)) throw new Error("invalid_repo_graph_limit");
+      const result = await searchRepoGraph({ cwd, graph, query, limit });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`Repo graph search: ${result.results.length} results`);
+      console.log(`Graph: ${result.graphId}`);
+      console.log(`Freshness: ${result.check.freshness}`);
+      for (const item of result.results) {
+        console.log(`${item.kind} ${item.id}: ${item.label}`);
+      }
+      return;
+    }
+    if (action === "explain") {
+      assertMaxPositionals(args, 3);
+      assertAllowedFlags(args, ["json", "cwd", "graph"]);
+      const graph = flagString(args.flags, "graph");
+      if (!graph) throw new Error("missing_repo_graph");
+      const id = args.positionals[2] ?? "";
+      const result = await explainRepoGraph({ cwd, graph, id });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`Repo graph explain: ${result.found ? result.kind : "missing"}`);
+      console.log(`Graph: ${result.graphId}`);
+      console.log(`Freshness: ${result.check.freshness}`);
+      console.log(`Adjacent edges: ${result.adjacentEdges.length}`);
+      return;
+    }
+    if (action !== "check") throw new Error(`unsupported_repo_graph_command:${action}`);
+    assertMaxPositionals(args, 2);
+    assertAllowedFlags(args, ["json", "cwd", "gate", "graph-provider", "scope", "graph"]);
     const graph = flagString(args.flags, "graph");
     if (!graph) throw new Error("missing_repo_graph");
     const result = await checkRepoGraph({ cwd, graph, gate: flagBool(args.flags, "gate") });

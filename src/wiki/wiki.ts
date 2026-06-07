@@ -86,6 +86,45 @@ export interface WikiBuildResult {
   pagesDir: string;
 }
 
+export interface WikiAdvisoryBuildResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "wiki build";
+  cwd: string;
+  mode: "advisory";
+  advisoryManifestPath: string;
+  sourceManifestPath: string;
+  sourcePages: Array<{
+    pageId: string;
+    title: string;
+    path: string;
+    freshness: WikiFreshness;
+    sourceFingerprint: string;
+  }>;
+  synthesis: {
+    driver: {
+      id: string;
+      kind: "local-deterministic";
+      model: string | null;
+      modelInvoked: false;
+    };
+    sourceBundleHash: string;
+    advisoryText: string;
+    claimClasses: {
+      derivableFacts: number;
+      advisoryClaims: number;
+    };
+    eligibleForAutomaticInjection: false;
+    sourceTruth: false;
+    completionAuthority: false;
+  };
+  check: {
+    status: "pass";
+    gate: "not_requested" | "passed";
+  };
+  completionAuthority: false;
+}
+
 export interface WikiEvidenceGap {
   kind:
     | "manifest_missing"
@@ -239,6 +278,14 @@ function wikiContextDir(cwd: string): string {
 
 function wikiManifestPath(cwd: string): string {
   return join(wikiRoot(cwd), "manifest.json");
+}
+
+function wikiAdvisoryDir(cwd: string): string {
+  return join(wikiRoot(cwd), "advisory");
+}
+
+function wikiAdvisoryManifestPath(cwd: string): string {
+  return join(wikiAdvisoryDir(cwd), "advisory.json");
 }
 
 function repoRelative(cwd: string, path: string): string {
@@ -728,6 +775,65 @@ export async function buildWiki(cwd: string, mode: WikiBuildMode): Promise<WikiB
     manifestPath,
     pagesDir: repoRelative(cwd, wikiPagesDir(cwd)),
   };
+}
+
+export async function buildWikiAdvisory(cwd: string, driver = "local-deterministic"): Promise<WikiAdvisoryBuildResult> {
+  if (!existsSync(wikiManifestPath(cwd))) throw new Error("wiki_manifest_missing");
+  const check = await checkWiki(cwd, false);
+  if (check.wiki.status !== "pass") throw new Error("wiki_advisory_source_not_fresh");
+  const manifestRaw = await readJsonIfExists(wikiManifestPath(cwd));
+  const manifest = manifestRaw as WikiManifest;
+  const sourcePages = manifest.pages.map((page) => ({
+    pageId: page.pageId,
+    title: page.title,
+    path: page.path,
+    freshness: computePageFreshness(cwd, page),
+    sourceFingerprint: page.sourceFingerprint,
+  }));
+  const sourceBundleHash = sha256CanonicalJson(sourcePages);
+  const pageLines = sourcePages.map((page) => `- ${page.title} (${page.pageId}) from ${page.path}`);
+  const advisoryText = [
+    "This advisory synthesis summarizes the deterministic Codexus wiki page set.",
+    "It is generated from already-built page metadata and does not invoke a model.",
+    "It is not source truth and is not eligible for automatic prompt injection.",
+    "",
+    ...pageLines,
+  ].join("\n");
+  const result: WikiAdvisoryBuildResult = {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "wiki build",
+    cwd,
+    mode: "advisory",
+    advisoryManifestPath: repoRelative(cwd, wikiAdvisoryManifestPath(cwd)),
+    sourceManifestPath: repoRelative(cwd, wikiManifestPath(cwd)),
+    sourcePages,
+    synthesis: {
+      driver: {
+        id: driver.trim() || "local-deterministic",
+        kind: "local-deterministic",
+        model: null,
+        modelInvoked: false,
+      },
+      sourceBundleHash,
+      advisoryText,
+      claimClasses: {
+        derivableFacts: sourcePages.length,
+        advisoryClaims: 1,
+      },
+      eligibleForAutomaticInjection: false,
+      sourceTruth: false,
+      completionAuthority: false,
+    },
+    check: {
+      status: "pass",
+      gate: check.gate.status === "passed" ? "passed" : "not_requested",
+    },
+    completionAuthority: false,
+  };
+  await ensureDir(wikiAdvisoryDir(cwd));
+  await writeJsonAtomic(wikiAdvisoryManifestPath(cwd), result);
+  return result;
 }
 
 function buildGate(enabled: boolean, evidenceGaps: WikiEvidenceGap[]): WikiGate {

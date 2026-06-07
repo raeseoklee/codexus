@@ -225,7 +225,8 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 26);
+    assert.equal(schemaOutput.schemas.length, 29);
+    assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "automation-recovery.schema.json"));
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
@@ -593,6 +594,68 @@ test("enabled automation live dispatch still requires explicit approval", async 
     assert.equal(gatewayOutput.actionAuthority.runOutcomeSource, null);
     const gatewayRecord = JSON.parse(await readFile(gatewayOutput.record.path, "utf8"));
     assertAutomationBoundaryEvent(gatewayRecord, "gateway", "approval_missing");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("automation recovery reports dispatch candidates without scheduler or retry authority", async () => {
+  const cwd = await tempDir();
+  try {
+    await mkdir(join(cwd, ".codexus"), { recursive: true });
+    await writeFile(join(cwd, ".codexus", "config.json"), `${JSON.stringify({
+      driver: "mock",
+      automation: {
+        cronEnabled: true,
+        gatewayEnabled: true,
+      },
+    }, null, 2)}\n`);
+
+    const blocked = runCli(cwd, ["cron", "run-now", "--json"]);
+    assert.equal(blocked.status, 1);
+    const blockedOutput = JSON.parse(blocked.stdout);
+    assert.equal(blockedOutput.status, "blocked");
+    assert.ok(existsSync(blockedOutput.record.path));
+
+    const recovery = runCli(cwd, ["cron", "recovery", "--record", "--json"]);
+    assert.equal(recovery.status, 0, recovery.stderr);
+    const output = JSON.parse(recovery.stdout);
+    assert.equal(output.schemaVersion, 1);
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.type, "codexus.automation.recovery");
+    assert.equal(output.recovery.status, "manual_review_required");
+    assert.equal(output.dispatchStore.total, 1);
+    assert.equal(output.retry.automaticRetry, false);
+    assert.equal(output.retry.retryAuthority, false);
+    assert.equal(output.retry.manualReviewRequired, true);
+    assert.equal(output.scheduler.queueOwned, false);
+    assert.equal(output.scheduler.unattendedOwner, false);
+    assert.equal(output.scheduler.recoveryAuthority, false);
+    assert.equal(output.scheduler.completionAuthority, false);
+    assert.equal(output.authority.schedulerAuthority, false);
+    assert.equal(output.authority.retryAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+    assert.equal(output.recovery.manualReviewCandidates[0].boundaryReason, "approval_missing");
+    assert.match(output.recovery.manualReviewCandidates[0].recoveryHint, /explicit approval/);
+    assert.ok(existsSync(output.path));
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "automation-recovery", "--file", output.path, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+
+    const status = runCli(cwd, ["cron", "status", "--json"]);
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.recovery.status, "manual_review_required");
+    assert.equal(statusOutput.recovery.automaticRetry, false);
+    assert.equal(statusOutput.recovery.completionAuthority, false);
+
+    const gatewayRecovery = runCli(cwd, ["gateway", "recovery", "--json"]);
+    assert.equal(gatewayRecovery.status, 0, gatewayRecovery.stderr);
+    const gatewayOutput = JSON.parse(gatewayRecovery.stdout);
+    assert.equal(gatewayOutput.recovery.status, "no_dispatches");
+    assert.equal(gatewayOutput.retry.automaticRetry, false);
+    assert.equal(gatewayOutput.scheduler.queueOwned, false);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

@@ -2,8 +2,8 @@
 
 [English](../../design/14-repository-knowledge-graph.md)
 
-상태: experimental 첫 slice 구현됨. 외부 import, search/explain, context injection은
-계속 deferred입니다.
+상태: experimental graph build/check, JSON-only 외부 import, read-only
+search/explain 구현됨. Automatic context injection은 계속 deferred입니다.
 
 이 문서는 [13번 문서](13-harness-engineering-alignment.md)의 기계적
 repo-knowledge slice에서 이어지는 repository knowledge graph 트랙을 정의합니다. 13번
@@ -36,7 +36,7 @@ cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
 cx repo graph check --graph <graph-id-or-path> --gate --json
 ```
 
-Deferred import/retrieval slice:
+구현된 import/retrieval slice:
 
 ```bash
 cx repo graph import --graph-provider understand-anything --source .understand-anything/knowledge-graph.json --scope "src/**" --json
@@ -292,8 +292,11 @@ path는 persistence 전에 sanitize해야 합니다.
 5. 기존 architecture/repo evidence를 projection하는 `codexus-lite` 추가. 상태: 초기
    file/import projection 구현됨.
 6. `cx repo graph import --graph-provider understand-anything`을 JSON-only로 추가. 상태:
-   deferred.
-7. Graph artifact와 freshness가 안정된 뒤 read-only search/explain command 추가.
+   구현됨. Codexus는 bounded JSON을 읽고 정규화하며 sanitized relative source path와
+   source hash를 기록합니다. 외부 provider package를 import하거나 실행하지 않습니다.
+7. Graph artifact와 freshness가 안정된 뒤 read-only search/explain command 추가. 상태:
+   구현됨. Search/explain은 structural check summary를 포함하고 항상
+   `eligibleForAutomaticInjection: false`, `completionAuthority: false`를 보고합니다.
 
 Graph freshness, path sanitization, gate behavior가 안정되고 기록되기 전에는 automatic context
 injection이나 autopilot graph 사용을 노출하지 않습니다.

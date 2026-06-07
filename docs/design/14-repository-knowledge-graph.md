@@ -2,8 +2,9 @@
 
 [Korean](../ko/design/14-repository-knowledge-graph.md)
 
-Status: experimental first slice implemented; external import, search/explain,
-and context injection remain deferred.
+Status: experimental graph build/check plus JSON-only external import and
+read-only search/explain implemented; automatic context injection remains
+deferred.
 
 This document defines the repository knowledge graph track that grows out of the
 mechanical repo-knowledge slice in [doc 13](13-harness-engineering-alignment.md).
@@ -36,7 +37,7 @@ cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
 cx repo graph check --graph <graph-id-or-path> --gate --json
 ```
 
-Deferred import and retrieval slices:
+Implemented import and retrieval slices:
 
 ```bash
 cx repo graph import --graph-provider understand-anything --source .understand-anything/knowledge-graph.json --scope "src/**" --json
@@ -306,9 +307,13 @@ from external tools must be sanitized before persistence.
 5. Add `codexus-lite` by projecting existing architecture/repo evidence. Status:
    initial file/import projection implemented.
 6. Add `cx repo graph import --graph-provider understand-anything` as JSON-only.
-   Status: deferred.
+   Status: implemented. Codexus reads and normalizes bounded JSON, records a
+   sanitized relative source path and source hash, and does not import or execute
+   external provider packages.
 7. Add read-only search/explain commands after graph artifacts and freshness are
-   stable.
+   stable. Status: implemented. Search/explain include structural check summary
+   and always report `eligibleForAutomaticInjection: false` and
+   `completionAuthority: false`.
 
 Do not expose automatic context injection or autopilot use of graphs until graph
 freshness, path sanitization, and gate behavior are stable and recorded.

@@ -1827,6 +1827,117 @@ export async function recordAppInstanceLogObservation(cwd: string, options: {
   };
 }
 
+async function fileMetric(path: string | null) {
+  if (!path) return { path: null, exists: false, bytes: null as number | null, modifiedAt: null as string | null };
+  if (!existsSync(path)) return { path, exists: false, bytes: null as number | null, modifiedAt: null as string | null };
+  const info = await stat(path);
+  return {
+    path,
+    exists: true,
+    bytes: info.size,
+    modifiedAt: info.mtime.toISOString(),
+  };
+}
+
+export async function recordAppInstanceMetricObservation(cwd: string, options: {
+  instanceId?: string;
+}) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const validation = await readInstanceArtifact(instance.artifactPath);
+  if (!validation.artifact) throw new Error(`app_instance_artifact_invalid:${options.instanceId}`);
+  const artifact = validation.artifact;
+  const observationId = `metric_snapshot_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
+  const evidencePath = join(instancePaths(instance.worktree.path, instance.instanceId).observations, `${observationId}.metric.json`);
+  const stdoutPath = resolveArtifactPath(artifact, validation.path, artifact.logs.stdoutPath);
+  const stderrPath = resolveArtifactPath(artifact, validation.path, artifact.logs.stderrPath);
+  const heartbeatPath = resolveArtifactPath(artifact, validation.path, artifact.owner.heartbeatPath);
+  const healthEvidencePath = resolveArtifactPath(artifact, validation.path, artifact.health.evidencePath);
+  const metricEvidence = {
+    schemaVersion: 1,
+    type: "codexus.app.instance.metric-snapshot",
+    recordedAt: nowIso(),
+    instanceId: instance.instanceId,
+    status: instance.process.status === "running" ? "observed" : "unavailable",
+    reason: instance.process.status === "running" ? null : `instance_not_running:${instance.process.reason}`,
+    process: {
+      status: instance.process.status,
+      reason: instance.process.reason,
+      pid: instance.process.pid,
+      processGroupId: instance.process.processGroupId,
+      heartbeatFresh: instance.process.heartbeatFresh,
+      heartbeatAgeMs: instance.process.heartbeatAgeMs,
+      heartbeatStaleAfterMs: instance.process.heartbeatStaleAfterMs,
+      lifecycle: instance.process.lifecycle,
+    },
+    heartbeat: {
+      path: heartbeatPath,
+      status: instance.heartbeat.status,
+      updatedAt: instance.heartbeat.updatedAt,
+      fresh: instance.heartbeat.fresh,
+      ageMs: instance.heartbeat.ageMs,
+      staleAfterMs: instance.heartbeat.staleAfterMs,
+      runnerPid: instance.heartbeat.runnerPid,
+      appPid: instance.heartbeat.appPid,
+    },
+    network: {
+      url: instance.network.url,
+      port: instance.network.port,
+      host: instance.network.host,
+    },
+    health: {
+      status: instance.health.status,
+      rawStatus: instance.health.rawStatus,
+      reason: instance.health.reason,
+      lastCheckedAt: instance.health.lastCheckedAt,
+      evidence: await fileMetric(healthEvidencePath),
+    },
+    logs: {
+      stdout: await fileMetric(stdoutPath),
+      stderr: await fileMetric(stderrPath),
+    },
+    authority: {
+      controlsInstance: false,
+      healthAuthority: false,
+      completionAuthority: false,
+    },
+  };
+
+  await ensureDir(dirname(evidencePath));
+  await writeJsonAtomic(evidencePath, metricEvidence);
+  const { path, artifact: observation } = await writeObservationArtifact(cwd, {
+    instance,
+    kind: "metric",
+    source: "metric-snapshot",
+    requestedStatus: "observed",
+    url: instance.network.url,
+    evidencePath,
+    summary: `process:${instance.process.status};heartbeat:${instance.heartbeat.status}`,
+    reason: metricEvidence.reason,
+  });
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence metrics" as const,
+    cwd,
+    path,
+    metricSnapshot: {
+      source: "metric-snapshot" as const,
+      evidencePath,
+      status: observation.observation.status,
+      reason: observation.observation.reason,
+      processStatus: instance.process.status,
+      heartbeatFresh: instance.heartbeat.fresh,
+      stdoutBytes: metricEvidence.logs.stdout.bytes,
+      stderrBytes: metricEvidence.logs.stderr.bytes,
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
+    observation,
+  };
+}
+
 async function listObservationPaths(worktree: string, instanceId: string): Promise<string[]> {
   const dir = instancePaths(worktree, instanceId).observations;
   if (!existsSync(dir)) return [];

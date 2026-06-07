@@ -33,13 +33,22 @@ completion, verification, or release authority.
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs session status --json
+node codex/skills/codexus/scripts/cx.mjs session hud --json
+node codex/skills/codexus/scripts/cx.mjs session tasks list --json
+node codex/skills/codexus/scripts/cx.mjs session tasks add --title "Wire CLI and tests" --kind implementation --json
+node codex/skills/codexus/scripts/cx.mjs session tasks update <task-id> --status in_progress --json
+node codex/skills/codexus/scripts/cx.mjs session tasks complete <task-id> --evidence .codexus/session/verification/.../verification.json --json
+node codex/skills/codexus/scripts/cx.mjs session tasks block <task-id> --reason "scope boundary reached" --json
 node codex/skills/codexus/scripts/cx.mjs session checkpoint "before risky refactor" --json
 node codex/skills/codexus/scripts/cx.mjs session verify --verify "npm test" --json
 ```
 
 Use these first when the active Codex conversation needs durable session
 evidence. `session verify` writes command output under
-`.codexus/session/verification/`.
+`.codexus/session/verification/`. `session tasks` writes the Codexus-owned
+projection artifact at `.codexus/session/tasks.json`; task state is useful for
+host-panel mirroring and HUD summaries, but it never becomes verification,
+health, or completion authority.
 
 ## Run State
 
@@ -92,6 +101,25 @@ node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-re
 Promotion should remain explicit. Do not auto-promote a skill just because a proposal exists.
 Live model replay is blocked unless the local experiment gate is explicitly enabled.
 
+## App Instances
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs app instance profile list --json
+node codex/skills/codexus/scripts/cx.mjs app instance status --json
+node codex/skills/codexus/scripts/cx.mjs app instance start --profile web --worktree . --dry-run --json
+node codex/skills/codexus/scripts/cx.mjs app instance logs --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence probe --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence logs --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence list --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance stop --instance-id <id> --json
+```
+
+Use app instance commands for experimental worktree-local dev-server ownership
+and observation. The HTTP, log, and metric evidence adapters record bounded
+artifacts tied to an `instanceId`; they do not become health, cleanup, control,
+or completion authority.
+
 ## Runtime Gates
 
 ```bash
@@ -104,27 +132,38 @@ node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json
 node codex/skills/codexus/scripts/cx.mjs app-server observer status --json
 node codex/skills/codexus/scripts/cx.mjs app-server experiment --dry-run --record --probe-process --supervise-fake --timeout-ms 30000 --json
 node codex/skills/codexus/scripts/cx.mjs cron run-now --dry-run --record --task "<task>" --json
+node codex/skills/codexus/scripts/cx.mjs cron recovery --record --json
 node codex/skills/codexus/scripts/cx.mjs gateway check --dry-run --record --task "<event>" --json
+node codex/skills/codexus/scripts/cx.mjs gateway recovery --record --json
 ```
 
-Use these for inspection, run-ledger validation, recorded app-server observer bridge summaries, process-probe evidence, deterministic fake lifecycle supervision, and dry-run audit evidence. Live app-server, cron, and gateway behavior remains gated even when feature gates are enabled.
+Use these for inspection, run-ledger validation, recorded app-server observer bridge summaries, process-probe evidence, deterministic fake lifecycle supervision, dry-run audit evidence, and foreground automation recovery projections. Recovery projections inspect dispatch records and may identify manual-review candidates, but they do not own a scheduler queue, retry automatically, clean up, or claim completion authority. Live app-server, cron, and gateway behavior remains gated even when feature gates are enabled.
 
 ## Repository Knowledge
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs repo check --gate --json
 node codex/skills/codexus/scripts/cx.mjs repo map --json
+node codex/skills/codexus/scripts/cx.mjs repo graph import --graph-provider understand-anything --source .understand-anything/knowledge-graph.json --scope "src/**" --json
+node codex/skills/codexus/scripts/cx.mjs repo graph search --graph <graph-id-or-path> verification --json
+node codex/skills/codexus/scripts/cx.mjs repo graph explain --graph <graph-id-or-path> <node-or-edge-id> --json
 node codex/skills/codexus/scripts/cx.mjs wiki map --json
 node codex/skills/codexus/scripts/cx.mjs wiki build --mode deterministic --json
+node codex/skills/codexus/scripts/cx.mjs wiki build --mode advisory --json
 node codex/skills/codexus/scripts/cx.mjs wiki check --gate --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --budget 1200 --json
 node codex/skills/codexus/scripts/cx.mjs wiki export --target docs/codexus-wiki --json
 ```
 
-Use `repo check` for gateable mechanical docs-code invariants. Use `wiki`
-commands for regenerable projection pages over repository facts and Codexus
-artifacts. `wiki export` is explicit, requires a fresh passing wiki check, and
-does not auto-commit or become source truth.
+Use `repo check` for gateable mechanical docs-code invariants. Graph import is
+JSON-only: Codexus records sanitized source provenance and source hashes without
+executing provider packages. Graph search/explain is read-only advisory context
+and must not be treated as automatic prompt injection. Use `wiki` commands for
+regenerable projection pages over repository facts and Codexus artifacts. `wiki
+build --mode advisory` records a local source-bundle synthesis artifact without
+invoking a model and remains ineligible for automatic injection. `wiki export`
+is explicit, requires a fresh passing wiki check, and does not auto-commit or
+become source truth.
 
 ## Release Policy
 

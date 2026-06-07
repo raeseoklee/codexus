@@ -231,10 +231,14 @@ The live `start` and `stop` slices must enforce these local facts:
     Codexus-owned instance and links the snapshot to an
     `app-instance-observation` artifact without becoming health, control, or
     completion authority.
+12. Done: add `cx app instance evidence metrics` as the first metric adapter
+    capture slice. It records process, heartbeat, health-evidence, and log-file
+    metrics for one `instanceId` without becoming health, control, cleanup, or
+    completion authority.
 
 ## Next Slice
 
-1. Wire real Browser/DevTools/screenshot/metric adapters to the observation
-   artifact contract without auto-opening browsers or claiming health/control.
+1. Wire real Browser/DevTools/screenshot adapters to the observation artifact
+   contract without auto-opening browsers or claiming health/control.
 2. Add worktree-aware launcher reuse for future autopilot surfaces while keeping
    completion authority on verification and policy gates.

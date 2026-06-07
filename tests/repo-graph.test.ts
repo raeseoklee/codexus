@@ -148,3 +148,70 @@ test("repo graph id ignores volatile gate output but fails dangling edges", asyn
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+test("repo graph import/search/explain stay JSON-only and advisory", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    await mkdir(join(cwd, ".understand-anything"), { recursive: true });
+    await writeFile(join(cwd, ".understand-anything", "knowledge-graph.json"), JSON.stringify({
+      nodes: [
+        { id: "file:src/a.ts", kind: "file", path: "src/a.ts" },
+        { id: "file:src/b.ts", kind: "file", path: "src/b.ts", label: "b value module" },
+      ],
+      edges: [
+        { id: "edge:a-b", kind: "imports", from: "file:src/a.ts", to: "file:src/b.ts", evidence: "src/a.ts:1" },
+      ],
+    }, null, 2));
+
+    const imported = runCli(cwd, [
+      "repo",
+      "graph",
+      "import",
+      "--graph-provider",
+      "understand-anything",
+      "--source",
+      ".understand-anything/knowledge-graph.json",
+      "--scope",
+      "src/**",
+      "--json",
+    ]);
+    assert.equal(imported.status, 0, imported.stderr);
+    const importedOutput = JSON.parse(imported.stdout);
+    assert.equal(importedOutput.command, "graph import");
+    assert.equal(importedOutput.provider.external, true);
+    assert.equal(importedOutput.provider.runtimeDeps, false);
+    assert.equal(importedOutput.imported.execution, "none");
+    assert.equal(importedOutput.imported.packageImported, false);
+    assert.equal(importedOutput.imported.completionAuthority, false);
+    assert.equal(importedOutput.source.path, ".understand-anything/knowledge-graph.json");
+    assert.equal(importedOutput.source.sanitized, true);
+    assert.equal(typeof importedOutput.source.hash, "string");
+
+    const check = runCli(cwd, ["repo", "graph", "check", "--graph", importedOutput.graphId, "--gate", "--json"]);
+    assert.equal(check.status, 0, check.stderr);
+    const checked = JSON.parse(check.stdout);
+    assert.equal(checked.gate.status, "passed");
+    assert.equal(checked.repoGraph.freshness, "fresh");
+
+    const search = runCli(cwd, ["repo", "graph", "search", "--graph", importedOutput.graphId, "value", "--json"]);
+    assert.equal(search.status, 0, search.stderr);
+    const searchOutput = JSON.parse(search.stdout);
+    assert.equal(searchOutput.command, "graph search");
+    assert.equal(searchOutput.eligibleForAutomaticInjection, false);
+    assert.equal(searchOutput.completionAuthority, false);
+    assert.ok(searchOutput.results.some((item: { id: string }) => item.id === "file:src/b.ts"));
+
+    const explain = runCli(cwd, ["repo", "graph", "explain", "--graph", importedOutput.graphId, "file:src/a.ts", "--json"]);
+    assert.equal(explain.status, 0, explain.stderr);
+    const explainOutput = JSON.parse(explain.stdout);
+    assert.equal(explainOutput.command, "graph explain");
+    assert.equal(explainOutput.found, true);
+    assert.equal(explainOutput.kind, "node");
+    assert.equal(explainOutput.advisoryOnly, true);
+    assert.equal(explainOutput.eligibleForAutomaticInjection, false);
+    assert.equal(explainOutput.completionAuthority, false);
+    assert.equal(explainOutput.adjacentEdges.length, 1);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
