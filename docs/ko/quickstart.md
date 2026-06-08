@@ -16,7 +16,7 @@ codexus doctor --json
 
 일반적인 CLI 사용에는 global install 형식을 사용하세요. npmjs package page의
 자동 install box는 `npm i codexus`를 보여줄 수 있지만, 이 명령은 Codexus를 현재
-project의 local dependency로 설치하며 `codexus` / `cx` 명령을 일반 `PATH`에
+project의 local dependency로 설치하며 `codexus` 명령 또는 `cx` short alias을 일반 `PATH`에
 올리지 않습니다.
 
 Global npm 설치는 기본적으로 CLI와 Codex-native skill adapter를 함께 설치합니다.
@@ -49,7 +49,8 @@ Installer environment variable:
 - `CODEXUS_NPM_SPEC`: 설치할 npm package spec, 기본값 `codexus`
 - `CODEXUS_EXPECTED_VERSION`: optional installed package version check
 - `CODEXUS_NPM_PREFIX`: npm global prefix, 기본값 `~/.local`
-- `CODEXUS_BIN_DIR`: `cx`, `codexus`를 둘 bin directory, 기본값 `~/.local/bin`
+- `CODEXUS_BIN_DIR`: canonical `codexus`와 지원되는 `cx` short alias를 둘 bin
+  directory, 기본값 `~/.local/bin`
 - `CODEXUS_INSTALL_CODEX_SKILL=0`: Codex skill adapter 설치 생략
 
 ## 1. Clone
@@ -106,7 +107,7 @@ node src/cli/main.ts schema validate-run <run-id> --json
 다른 terminal에서 실행 중인 supervised run을 취소할 수 있습니다:
 
 ```bash
-cx cancel <run-id> --reason "no longer needed" --json
+codexus cancel <run-id> --reason "no longer needed" --json
 ```
 
 ## 5. Local Bin 사용
@@ -115,24 +116,24 @@ cx cancel <run-id> --reason "no longer needed" --json
 
 ```bash
 npm link
-cx doctor --json
+codexus doctor --json
 codexus runs list --json
 ```
 
-공개 bin 이름은 `cx`와 `codexus`입니다.
+Canonical public bin은 `codexus`이고, `cx`는 지원되는 short alias입니다.
 
 ## 6. 실제 Codex 실행 사용
 
 먼저 local Codex CLI를 설치하고 인증합니다. 그 다음 실행합니다:
 
 ```bash
-cx run --driver codex-exec --json "Reply exactly CODEXUS-OK"
+codexus run --driver codex-exec --json "Reply exactly CODEXUS-OK"
 ```
 
 프로젝트 작업에는 verification을 붙입니다:
 
 ```bash
-cx run --verify "npm test" "fix the failing parser tests"
+codexus run --verify "npm test" "fix the failing parser tests"
 ```
 
 ## 7. Codex CLI 채팅 안에서 Codexus 사용
@@ -159,7 +160,7 @@ memory, schema, context evidence가 필요할 때 사용합니다.
 대상 project 안에서 session-native overlay를 설치합니다:
 
 ```bash
-cx setup codex-session --scope project --always-on --enable-notify-hook --json
+codexus setup codex-session --scope project --always-on --enable-notify-hook --json
 ```
 
 그 다음 해당 project에서 Codex를 열고 채팅창에 이렇게 요청합니다:
@@ -170,7 +171,7 @@ codexus skill을 사용해서 현재 session status를 보여줘.
 
 always-on overlay는 guidance이지 proof가 아닙니다. Notify hook은 CLI/TUI dispatch가
 발화할 때 bounded `turn-ended` heartbeat와 derived evidence snapshot을 기록하지만,
-현재 상태의 기준은 항상 `cx session status --json`의 on-demand 재계산입니다.
+현재 상태의 기준은 항상 `codexus session status --json`의 on-demand 재계산입니다.
 
 ```text
 Codexus로 "before risky refactor" checkpoint를 만들어줘.
@@ -189,9 +190,9 @@ node codex/skills/codexus/scripts/cx.mjs <command>
 nested supervised run보다 먼저 명시적 session evidence를 남기는 쪽을 선호합니다:
 
 ```bash
-cx session status --json
-cx session checkpoint "before risky refactor" --json
-cx session verify --verify "npm test" --json
+codexus session status --json
+codexus session checkpoint "before risky refactor" --json
+codexus session verify --verify "npm test" --json
 ```
 
 별도 non-interactive Codex sub-run이 필요할 때만 명시적으로 요청합니다:
@@ -210,7 +211,7 @@ Codexus로 "<bounded task>" supervised run을 시작하고 run id를 알려줘.
 대상 project 안에서:
 
 ```bash
-cx init --with-docs --json
+codexus init --with-docs --json
 ```
 
 이 명령은 관련 없는 tool state를 변경하지 않고 `.codexus/` directory와
@@ -219,16 +220,16 @@ config를 생성합니다.
 ## Troubleshooting
 
 - **Node version:** npm-installed Codexus는 Node.js 22 이상이 필요합니다.
-  `cx`가 JSON을 출력하기 전에 실패하면 `node --version`을 먼저 확인하세요.
+  `codexus` 또는 `cx`가 JSON을 출력하기 전에 실패하면 `node --version`을 먼저 확인하세요.
 - **`codex` CLI 없음:** 실제 `codex-exec` run에는 local `codex` command가
-  필요합니다. `cx doctor --json`은 이를 Codex check failure로 보고합니다. Mock
+  필요합니다. `codexus doctor --json`은 이를 Codex check failure로 보고합니다. Mock
   driver test는 `codex` 없이도 동작합니다.
 - **Codex auth:** 실제 run에는 인증된 local Codex CLI session이 필요합니다.
   `doctor`가 auth failure를 보고하면 `codex login status`를 직접 확인하세요.
-- **Notify hook 미관측:** `cx setup codex-session --enable-notify-hook`은
-  configuration을 설치하지만, `cx session status --json`은 실제 CLI/TUI
+- **Notify hook 미관측:** `codexus setup codex-session --enable-notify-hook`은
+  configuration을 설치하지만, `codexus session status --json`은 실제 CLI/TUI
   `turn-ended` event가 한 번 관측된 뒤에만 dispatch observed로 보고합니다.
   Desktop/app-server session은 CLI notify hook을 호출하지 않을 수 있습니다.
-- **npm install path:** global npm install은 `cx`를 현재 shell `PATH` 밖에 둘 수
+- **npm install path:** global npm install은 `codexus` 또는 `cx`를 현재 shell `PATH` 밖에 둘 수
   있습니다. 특정 bin directory가 필요하면 `npm prefix -g`를 확인하거나
   `install.sh`에서 `CODEXUS_NPM_PREFIX` / `CODEXUS_BIN_DIR`를 지정하세요.

@@ -57,8 +57,8 @@ test("install.sh delegates to npm install and links canonical bins", async () =>
     });
     assert.equal(install.status, 0, install.stderr ?? install.error?.message);
     assert.match(install.stdout, new RegExp(`Installed Codexus ${escapeRegExp(pkg.version)}`));
-    assert.match(install.stdout, new RegExp(`Linked cx and codexus into ${escapeRegExp(binDir)}`));
-    assert.match(install.stdout, new RegExp(`Try: ${escapeRegExp(join(binDir, "cx"))} schema check --json`));
+    assert.match(install.stdout, new RegExp(`Linked codexus and cx into ${escapeRegExp(binDir)}`));
+    assert.match(install.stdout, new RegExp(`Try: ${escapeRegExp(join(binDir, "codexus"))} schema check --json`));
 
     for (const name of ["cx", "codexus"]) {
       const stat = await lstat(join(binDir, name));
@@ -136,17 +136,18 @@ test("npm local install postinstall does not mutate Codex home by default", asyn
   }
 });
 
-test("publish helper enforces latest not older than next", async () => {
-  const { compareVersions, assertLatestAtLeastNext, publishPlanForArgs } = await import("../scripts/publish-next.mjs");
+test("publish helper enforces next not older than latest", async () => {
+  const { compareVersions, assertNextNotOlderThanLatest, publishPlanForArgs } = await import("../scripts/publish-next.mjs");
   assert.ok(compareVersions("0.1.0-alpha.2", "0.1.0-alpha.1") > 0);
   assert.ok(compareVersions("0.1.0", "0.1.0-alpha.9") > 0);
-  assert.doesNotThrow(() => assertLatestAtLeastNext({ latest: "0.1.0-alpha.2", next: "0.1.0-alpha.2" }));
-  assert.throws(() => assertLatestAtLeastNext({ latest: "0.1.0-alpha.1", next: "0.1.0-alpha.2" }), /latest 0\.1\.0-alpha\.1 is older than next 0\.1\.0-alpha\.2/);
+  assert.doesNotThrow(() => assertNextNotOlderThanLatest({ latest: "0.2.0", next: "0.2.0" }));
+  assert.doesNotThrow(() => assertNextNotOlderThanLatest({ latest: "0.2.0", next: "0.3.0-alpha.1" }));
+  assert.throws(() => assertNextNotOlderThanLatest({ latest: "0.2.0", next: "0.1.0-alpha.7" }), /next 0\.1\.0-alpha\.7 is older than latest 0\.2\.0/);
 
   const nextPlan = publishPlanForArgs([], { name: "codexus", version: "0.1.0-alpha.5" });
   assert.equal(nextPlan.mode, "next");
-  assert.equal(nextPlan.syncDistTags, true);
-  assert.deepEqual(nextPlan.expectedTags, { latest: "0.1.0-alpha.5", next: "0.1.0-alpha.5" });
+  assert.equal(nextPlan.syncDistTags, false);
+  assert.deepEqual(nextPlan.expectedTags, { next: "0.1.0-alpha.5" });
   assert.deepEqual(nextPlan.publishArgs, ["publish", "--access", "public", "--tag", "next"]);
 
   const trustedNextPlan = publishPlanForArgs(["--no-dist-tag-sync"], { name: "codexus", version: "0.1.0-alpha.5" });
@@ -175,7 +176,7 @@ test("release workflow is wired for trusted publishing and stable-only tag publi
   assert.match(workflow, /registry-url:\s*"https:\/\/registry\.npmjs\.org"/);
   assert.match(workflow, /npm run publish:stable/);
   assert.match(workflow, /npm run publish:next/);
-  assert.match(workflow, /--no-dist-tag-sync/);
+  assert.doesNotMatch(workflow, /npm run publish:stable -- --no-dist-tag-sync/);
   assert.match(workflow, /Prerelease tags must publish via workflow_dispatch mode=next/);
   assert.match(workflow, /actions\/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd/);
   assert.match(workflow, /actions\/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/);

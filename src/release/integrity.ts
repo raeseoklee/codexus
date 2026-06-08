@@ -14,12 +14,14 @@ export interface ReleaseIntegrityEvidenceGap {
     | "installer_expected_version_guard_missing"
     | "release_workflow_missing"
     | "release_workflow_not_trusted_publishing"
+    | "release_workflow_dist_tag_sync_missing"
     | "release_workflow_unpinned_action"
     | "release_workflow_installer_asset_missing"
     | "release_evidence_missing"
     | "github_release_not_latest"
     | "github_release_asset_mismatch"
-    | "npm_latest_mismatch";
+    | "npm_latest_mismatch"
+    | "npm_next_older_than_latest";
   gate: true;
   evidence: string | null;
   policy: string;
@@ -35,12 +37,14 @@ export interface ReleaseIntegrityDerivableFact {
     | "installer_default_stable_channel"
     | "installer_expected_version_guard"
     | "release_workflow_trusted_publishing"
+    | "release_workflow_dist_tag_sync"
     | "release_workflow_pinned_actions"
     | "release_workflow_installer_asset"
     | "release_evidence_present"
     | "github_release_latest"
     | "github_release_asset_matches_local"
-    | "npm_latest_matches_version";
+    | "npm_latest_matches_version"
+    | "npm_next_not_older_than_latest";
   gate: boolean;
   evidence: string;
   files?: string[];
@@ -88,6 +92,7 @@ export interface ReleaseIntegrityReport {
     workflow: {
       path: string | null;
       trustedPublishing: boolean;
+      stableDistTagSync: boolean;
       installerAssetAttached: boolean;
       pinnedActions: string[];
       unpinnedActions: string[];
@@ -102,6 +107,7 @@ export interface ReleaseIntegrityReport {
     npm: {
       checked: boolean;
       latest: string | null;
+      next: string | null;
     };
   };
   evidenceGaps: ReleaseIntegrityEvidenceGap[];
@@ -214,9 +220,13 @@ function trustedPublishingConfigured(workflowText: string): boolean {
   return (
     /id-token:\s*write/.test(workflowText) &&
     /registry-url:\s*"https:\/\/registry\.npmjs\.org"/.test(workflowText) &&
-    /npm run publish:stable -- --no-dist-tag-sync/.test(workflowText) &&
+    /npm run publish:stable/.test(workflowText) &&
     /Prerelease tags must publish via workflow_dispatch mode=next/.test(workflowText)
   );
+}
+
+function stableDistTagSyncConfigured(workflowText: string): boolean {
+  return /npm run publish:stable/.test(workflowText) && !/npm run publish:stable -- --no-dist-tag-sync/.test(workflowText);
 }
 
 function installerAssetAttached(workflowText: string): boolean {
@@ -271,6 +281,39 @@ function commandError(result: CommandResult): string {
   return (result.stderr || result.stdout || `exit ${result.status ?? "unknown"}`).trim();
 }
 
+function compareSemverish(left: string, right: string): number {
+  const parse = (value: string) => {
+    const [core, prereleaseRaw = ""] = value.split("-", 2);
+    const [major = 0, minor = 0, patch = 0] = core.split(".").map((part) => Number.parseInt(part, 10));
+    const prerelease = prereleaseRaw
+      ? prereleaseRaw.split(".").map((part) => (/^\d+$/.test(part) ? Number.parseInt(part, 10) : part))
+      : [];
+    return { major, minor, patch, prerelease };
+  };
+  const a = parse(left);
+  const b = parse(right);
+  for (const key of ["major", "minor", "patch"] as const) {
+    const delta = a[key] - b[key];
+    if (delta !== 0) return delta;
+  }
+  if (a.prerelease.length === 0 && b.prerelease.length === 0) return 0;
+  if (a.prerelease.length === 0) return 1;
+  if (b.prerelease.length === 0) return -1;
+  const length = Math.max(a.prerelease.length, b.prerelease.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftPart = a.prerelease[index];
+    const rightPart = b.prerelease[index];
+    if (leftPart === undefined) return -1;
+    if (rightPart === undefined) return 1;
+    if (leftPart === rightPart) continue;
+    if (typeof leftPart === "number" && typeof rightPart === "number") return leftPart - rightPart;
+    if (typeof leftPart === "number") return -1;
+    if (typeof rightPart === "number") return 1;
+    return leftPart.localeCompare(rightPart);
+  }
+  return 0;
+}
+
 function readJsonCommand(command: string, args: string[], runner: CommandRunner, cwd: string): { value: unknown; error: string | null } {
   const result = runner(command, args, { cwd });
   if (result.status !== 0) return { value: null, error: commandError(result) };
@@ -303,6 +346,7 @@ export function buildReleaseIntegrityReport(
   let expectedVersionGuard = false;
   let workflowPath: string | null = null;
   let trustedPublishing = false;
+  let stableDistTagSync = false;
   let releaseInstallerAsset = false;
   let pinnedActions: string[] = [];
   let unpinnedActions: string[] = [];
@@ -316,6 +360,7 @@ export function buildReleaseIntegrityReport(
   let npm: ReleaseIntegrityReport["releaseIntegrity"]["npm"] = {
     checked: false,
     latest: null,
+    next: null,
   };
 
   if (!root) {
@@ -423,6 +468,7 @@ export function buildReleaseIntegrityReport(
     } else {
       const workflowText = readFileSync(workflowPath, "utf8");
       trustedPublishing = trustedPublishingConfigured(workflowText);
+      stableDistTagSync = stableDistTagSyncConfigured(workflowText);
       releaseInstallerAsset = installerAssetAttached(workflowText);
       const refs = actionRefs(workflowText);
       pinnedActions = refs.pinned;
@@ -439,6 +485,21 @@ export function buildReleaseIntegrityReport(
           evidence: ".github/workflows/release.yml",
           policy: "stable publish must use GitHub Actions trusted publishing",
           recommendation: "Keep id-token: write, npm registry-url, stable publish helper, and prerelease tag rejection wired.",
+          files: [".github/workflows/release.yml"],
+        });
+      }
+      if (stableDistTagSync) {
+        appendFact(derivableFacts, {
+          kind: "release_workflow_dist_tag_sync",
+          evidence: "stable publish syncs npm latest and next dist-tags to the stable package version",
+          files: [".github/workflows/release.yml"],
+        });
+      } else {
+        appendGap(evidenceGaps, {
+          kind: "release_workflow_dist_tag_sync_missing",
+          evidence: ".github/workflows/release.yml",
+          policy: "stable publish must not leave npm next pointing at an older prerelease",
+          recommendation: "Run stable publish through npm run publish:stable without --no-dist-tag-sync.",
           files: [".github/workflows/release.yml"],
         });
       }
@@ -603,6 +664,7 @@ export function buildReleaseIntegrityReport(
       npm = {
         checked: true,
         latest: typeof tags.value.latest === "string" ? tags.value.latest : null,
+        next: typeof tags.value.next === "string" ? tags.value.next : null,
       };
       if (npm.latest === version) {
         appendFact(derivableFacts, {
@@ -615,6 +677,19 @@ export function buildReleaseIntegrityReport(
           evidence: `npm latest is ${npm.latest ?? "unknown"}, expected ${version}`,
           policy: "npm latest must match the stable release being signed off",
           recommendation: "Wait for npm propagation or fix the dist-tag before declaring release completion.",
+        });
+      }
+      if (npm.latest && npm.next && compareSemverish(npm.next, npm.latest) >= 0) {
+        appendFact(derivableFacts, {
+          kind: "npm_next_not_older_than_latest",
+          evidence: `npm next ${npm.next} is not older than latest ${npm.latest}`,
+        });
+      } else {
+        appendGap(evidenceGaps, {
+          kind: "npm_next_older_than_latest",
+          evidence: `npm next is ${npm.next ?? "unknown"}, latest is ${npm.latest ?? "unknown"}`,
+          policy: "npm next must not point at a version older than npm latest",
+          recommendation: "Move next to the current stable release or a newer prerelease before declaring release completion.",
         });
       }
     }
@@ -644,6 +719,7 @@ export function buildReleaseIntegrityReport(
       workflow: {
         path: workflowPath,
         trustedPublishing,
+        stableDistTagSync,
         installerAssetAttached: releaseInstallerAsset,
         pinnedActions,
         unpinnedActions,

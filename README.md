@@ -1,10 +1,10 @@
 # Codexus
 
 [![CI](https://github.com/raeseoklee/codexus/actions/workflows/ci.yml/badge.svg)](https://github.com/raeseoklee/codexus/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node.js >=22](https://img.shields.io/badge/Node.js-%3E%3D22-339933.svg)](package.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/raeseoklee/codexus/blob/main/LICENSE)
+[![Node.js >=22](https://img.shields.io/badge/Node.js-%3E%3D22-339933.svg)](https://github.com/raeseoklee/codexus/blob/main/package.json)
 
-[Korean](docs/ko/README.md)
+[Korean](https://github.com/raeseoklee/codexus/blob/main/docs/ko/README.md)
 
 **Codexus is a harness engineering layer for OpenAI's Codex CLI.**
 
@@ -42,7 +42,7 @@ codexus run --verify "npm test" "fix the failing parser tests"
 
 Codexus is a command-line tool, so install it globally. The npmjs sidebar may
 show `npm i codexus`; that is npm's local dependency form and will not put the
-`codexus` / `cx` commands on your normal `PATH`.
+`codexus` command or the `cx` short alias on your normal `PATH`.
 
 Codexus runs Codex, then runs `npm test`. If the test fails, Codexus gives Codex
 the real failing output and retries within the configured repair budget. The run
@@ -55,7 +55,7 @@ is `complete` only when the verification command passes.
 
 ## Use It In Codex CLI Chat
 
-Codexus is not only a standalone `cx` command. The npm package installs a
+Codexus is not only a standalone `codexus` command. The npm package installs a
 Codex-native `codexus` skill, so you can stay inside your current Codex CLI/TUI
 chat and ask Codex to call the local Codexus core for evidence.
 
@@ -87,12 +87,12 @@ The current Codex conversation remains the main working loop. Codexus adds
 durable state, checkpoints, verification artifacts, memory lookup, replay, and
 skill evidence. It does not create a competing chat session.
 
-Full guide: [Using Codexus inside Codex](docs/codex-session-usage.md).
+Full guide: [Using Codexus inside Codex](https://github.com/raeseoklee/codexus/blob/main/docs/codex-session-usage.md).
 
 ## Project Management Wiki
 
 Maintainers and LLM agents should use the checked-in
-[Project LLM Wiki](docs/project-wiki/README.md) for fast project context. It is
+[Project LLM Wiki](https://github.com/raeseoklee/codexus/blob/main/docs/project-wiki/README.md) for fast project context. It is
 a management/navigation artifact, not the experimental generated repository
 wiki and not a completion authority.
 
@@ -120,7 +120,7 @@ Global npm installs also install the Codex-native skill adapter into
 `${CODEX_HOME:-~/.codex}/skills/codexus` by default. Set
 `CODEXUS_INSTALL_CODEX_SKILL=0` when you need a CLI-only install.
 
-Detailed setup: [Quick start](docs/quickstart.md).
+Detailed setup: [Quick start](https://github.com/raeseoklee/codexus/blob/main/docs/quickstart.md).
 
 ## Install Options
 
@@ -191,8 +191,10 @@ gated.
 | app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval, and other surfaces stay status/record/launch-contract/gated |
 | autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`); live `autopilot run` remains deferred to the 0.2/0.3 track |
 
-See [Implementation status](docs/implementation-status.md) and
-[Remaining work](docs/remaining-work.md) for exact coverage and gaps.
+See [Feature reference](https://github.com/raeseoklee/codexus/blob/main/docs/features.md),
+[Implementation status](https://github.com/raeseoklee/codexus/blob/main/docs/implementation-status.md),
+and [Remaining work](https://github.com/raeseoklee/codexus/blob/main/docs/remaining-work.md)
+for exact coverage and gaps.
 
 ## Requirements
 
@@ -208,74 +210,75 @@ network access; real runs use the local authenticated Codex CLI.
 ## Common Commands
 
 ```bash
-cx doctor --json
-cx init --with-docs --json
-cx setup codex-session --scope project --always-on --enable-notify-hook --json
-cx session status --json
-cx session hud --json
-cx session checkpoint "before risky refactor" --json
-cx session verify --auto --json
-cx session verify --verify "npm test" --json
-cx session slop --json
-cx session subagent launch --role reviewer --task "review the staged diff" --json
-cx session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
-cx session subagent record --file <result.json> --json
-cx session workers status --json
-cx lsp status --json
-cx lsp check --gate --json
-cx schema engine --json
-cx replay parity --json
-cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
-cx repo graph check --graph <graph-id-or-path> --gate --json
-cx wiki build --json
-cx wiki context --topic verification --fresh-only --gate --json
-cx wiki context --topic verification --approve --approved-by "$USER" --json
-cx slop check --scope "src/**" --gate --json
-cx supply-chain check --gate --json
-cx release check --gate --json
-cx app instance profile list --json
-cx app instance start --profile web --worktree . --json
-cx app instance status --json
-cx app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
-cx app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
-cx app instance evidence logs --instance-id <id> --json
-cx app instance evidence metrics --instance-id <id> --json
-cx app instance evidence screenshot --instance-id <id> --evidence-path ./screen.png --json
-cx app instance stop --instance-id <id> --json
-cx run --verify "npm test" "fix the failing parser tests"
-cx cancel <run-id> --reason "no longer needed" --json
-cx status <run-id> --json
-cx events tail <run-id> --json
-cx verify <run-id> --json
-cx replay skill <skill-id> --json
-cx memory search "parser regression" --json
-cx skill review <skill-id> --json
-cx skill export <skill-id> --target codex --json
-cx schema check --json
-cx app-server experiment --dry-run --record --supervise-fake --json
+codexus doctor --json
+codexus init --with-docs --json
+codexus setup codex-session --scope project --always-on --enable-notify-hook --json
+codexus session status --json
+codexus session hud --json
+codexus session checkpoint "before risky refactor" --json
+codexus session verify --auto --json
+codexus session verify --verify "npm test" --json
+codexus session slop --json
+codexus session subagent launch --role reviewer --task "review the staged diff" --json
+codexus session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
+codexus session subagent record --file <result.json> --json
+codexus session workers status --json
+codexus lsp status --json
+codexus lsp check --gate --json
+codexus schema engine --json
+codexus replay parity --json
+codexus repo graph build --graph-provider codexus-lite --scope "src/**" --json
+codexus repo graph check --graph <graph-id-or-path> --gate --json
+codexus wiki build --json
+codexus wiki context --topic verification --fresh-only --gate --json
+codexus wiki context --topic verification --approve --approved-by "$USER" --json
+codexus slop check --scope "src/**" --gate --json
+codexus supply-chain check --gate --json
+codexus release check --gate --json
+codexus app instance profile list --json
+codexus app instance start --profile web --worktree . --json
+codexus app instance status --json
+codexus app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
+codexus app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
+codexus app instance evidence logs --instance-id <id> --json
+codexus app instance evidence metrics --instance-id <id> --json
+codexus app instance evidence screenshot --instance-id <id> --evidence-path ./screen.png --json
+codexus app instance stop --instance-id <id> --json
+codexus run --verify "npm test" "fix the failing parser tests"
+codexus cancel <run-id> --reason "no longer needed" --json
+codexus status <run-id> --json
+codexus events tail <run-id> --json
+codexus verify <run-id> --json
+codexus replay skill <skill-id> --json
+codexus memory search "parser regression" --json
+codexus skill review <skill-id> --json
+codexus skill export <skill-id> --target codex --json
+codexus schema check --json
+codexus app-server experiment --dry-run --record --supervise-fake --json
 ```
 
-Public bins: `cx` and `codexus` are canonical.
+Canonical bin: `codexus`. Supported short alias: `cx`.
 
 ## Documentation
 
-- [Documentation index](docs/README.md)
-- [Quick start](docs/quickstart.md)
-- [Using Codexus inside Codex](docs/codex-session-usage.md)
-- [Architecture](docs/design/01-architecture.md)
-- [Detailed design](docs/design/02-detailed-design.md)
-- [Evolution engine](docs/design/03-evolution-engine.md)
-- [Codex-native adapter](docs/design/06-codex-native-adapter.md)
-- [Session-native supervision](docs/design/07-supervised-sessions.md)
-- [Supply-chain evidence](docs/design/11-supply-chain-evidence.md)
-- [Autopilot contract](docs/design/12-autopilot-contract.md)
-- [Reference governance](docs/references/README.md)
-- [Implementation status](docs/implementation-status.md)
-- [Remaining work](docs/remaining-work.md)
-- [0.1.0 stable readiness plan](docs/plans/2026-05-31-0.1.0-stable-readiness-plan.md)
-- [0.1.1 release evidence](docs/release-evidence/0.1.1.md)
-- [JSON contract](docs/json-contract.md)
-- [Public release checklist](docs/public-release.md)
+- [Documentation index](https://github.com/raeseoklee/codexus/blob/main/docs/README.md)
+- [Quick start](https://github.com/raeseoklee/codexus/blob/main/docs/quickstart.md)
+- [Feature reference](https://github.com/raeseoklee/codexus/blob/main/docs/features.md)
+- [Using Codexus inside Codex](https://github.com/raeseoklee/codexus/blob/main/docs/codex-session-usage.md)
+- [Architecture](https://github.com/raeseoklee/codexus/blob/main/docs/design/01-architecture.md)
+- [Detailed design](https://github.com/raeseoklee/codexus/blob/main/docs/design/02-detailed-design.md)
+- [Evolution engine](https://github.com/raeseoklee/codexus/blob/main/docs/design/03-evolution-engine.md)
+- [Codex-native adapter](https://github.com/raeseoklee/codexus/blob/main/docs/design/06-codex-native-adapter.md)
+- [Session-native supervision](https://github.com/raeseoklee/codexus/blob/main/docs/design/07-supervised-sessions.md)
+- [Supply-chain evidence](https://github.com/raeseoklee/codexus/blob/main/docs/design/11-supply-chain-evidence.md)
+- [Autopilot contract](https://github.com/raeseoklee/codexus/blob/main/docs/design/12-autopilot-contract.md)
+- [Reference governance](https://github.com/raeseoklee/codexus/blob/main/docs/references/README.md)
+- [Implementation status](https://github.com/raeseoklee/codexus/blob/main/docs/implementation-status.md)
+- [Remaining work](https://github.com/raeseoklee/codexus/blob/main/docs/remaining-work.md)
+- [0.1.0 stable readiness plan](https://github.com/raeseoklee/codexus/blob/main/docs/plans/2026-05-31-0.1.0-stable-readiness-plan.md)
+- [0.2.0 release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.0.md)
+- [JSON contract](https://github.com/raeseoklee/codexus/blob/main/docs/json-contract.md)
+- [Public release checklist](https://github.com/raeseoklee/codexus/blob/main/docs/public-release.md)
 
 Selected documents have Korean translations under `docs/ko/`, and English
 documents link to them as `Korean`.
@@ -305,12 +308,12 @@ any live dispatch path is enabled.
 ## Contributing
 
 Contributions are welcome after the repository is public. Start with
-[CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and
-[ROADMAP.md](ROADMAP.md).
+[CONTRIBUTING.md](https://github.com/raeseoklee/codexus/blob/main/CONTRIBUTING.md), [SECURITY.md](https://github.com/raeseoklee/codexus/blob/main/SECURITY.md), and
+[ROADMAP.md](https://github.com/raeseoklee/codexus/blob/main/ROADMAP.md).
 
 ## License
 
-Codexus is released under the [MIT License](LICENSE).
+Codexus is released under the [MIT License](https://github.com/raeseoklee/codexus/blob/main/LICENSE).
 
 OpenAI and Codex are trademarks of their respective owners. This project is not
 affiliated with or endorsed by OpenAI.

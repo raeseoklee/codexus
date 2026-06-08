@@ -66,11 +66,11 @@ jobs:
 
       - name: Publish stable from tag
         if: startsWith(github.ref, 'refs/tags/v')
-        run: npm run publish:stable -- --no-dist-tag-sync
+        run: npm run publish:stable
 
       - name: Publish stable from workflow dispatch
         if: github.event_name == 'workflow_dispatch' && inputs.mode == 'stable' && !inputs.dry_run
-        run: npm run publish:stable -- --no-dist-tag-sync
+        run: npm run publish:stable
 
       - name: Publish next from workflow dispatch
         if: github.event_name == 'workflow_dispatch' && inputs.mode == 'next' && !inputs.dry_run

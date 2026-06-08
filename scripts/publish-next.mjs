@@ -57,28 +57,28 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function assertLatestAtLeastNext(tags) {
+export function assertNextNotOlderThanLatest(tags) {
   if (!tags.latest || !tags.next) throw new Error("missing latest or next dist-tag");
-  if (compareVersions(tags.latest, tags.next) < 0) {
-    throw new Error(`npm dist-tag invariant failed: latest ${tags.latest} is older than next ${tags.next}`);
+  if (compareVersions(tags.next, tags.latest) < 0) {
+    throw new Error(`npm dist-tag invariant failed: next ${tags.next} is older than latest ${tags.latest}`);
   }
 }
 
 export function publishPlanForArgs(args, pkg) {
   const dryRun = args.includes("--dry-run");
   const stable = args.includes("--stable");
-  const syncDistTags = !args.includes("--no-dist-tag-sync");
+  const syncDistTags = stable && !args.includes("--no-dist-tag-sync");
   if (stable && !dryRun && String(pkg.version).includes("-")) {
     throw new Error("stable publish requires a non-prerelease package version; use publish:next for prereleases");
   }
   const publishArgs = ["publish", "--access", "public"];
   if (!stable) publishArgs.push("--tag", "next");
   if (dryRun) publishArgs.push("--dry-run");
-  const expectedTags = syncDistTags
-    ? { latest: pkg.version, next: pkg.version }
-    : stable
-      ? { latest: pkg.version }
-      : { next: pkg.version };
+  const expectedTags = stable
+    ? syncDistTags
+      ? { latest: pkg.version, next: pkg.version }
+      : { latest: pkg.version }
+    : { next: pkg.version };
   return {
     mode: stable ? "stable" : "next",
     dryRun,
@@ -114,8 +114,8 @@ async function main() {
   if (!tags || !tagsMatch(tags, plan.expectedTags)) {
     throw new Error(`published ${pkg.version}, but dist-tags are ${JSON.stringify(tags)}`);
   }
-  if (plan.syncDistTags) {
-    assertLatestAtLeastNext(tags);
+  if (plan.mode === "stable" && plan.syncDistTags) {
+    assertNextNotOlderThanLatest(tags);
   }
   const expected = Object.entries(plan.expectedTags).map(([key, value]) => `${key}=${value}`).join(", ");
   console.log(`Published ${pkg.name}@${pkg.version} (${plan.mode}); verified ${expected}.`);

@@ -7,6 +7,7 @@ import { join } from "node:path";
 
 const root = process.cwd();
 const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+const readme = await readFile(join(root, "README.md"), "utf8");
 
 function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -93,6 +94,19 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function assertNpmReadmeLinksArePortable() {
+  const localLinkPattern = /\]\(((?:\.\/)?docs\/|(?:\.\/)?(?:CONTRIBUTING|SECURITY|ROADMAP|CHANGELOG|LICENSE|package\.json)(?:#|\)|$))/g;
+  const matches = [...readme.matchAll(localLinkPattern)].map((match) => match[1]);
+  assert(
+    matches.length === 0,
+    `README contains npm-unsafe local repository links: ${matches.join(", ")}`
+  );
+  assert(
+    readme.includes("Canonical bin: `codexus`. Supported short alias: `cx`."),
+    "README must present codexus as the canonical CLI name and cx as a supported short alias"
+  );
+}
+
 function binPath(prefix, name) {
   return process.platform === "win32" ? join(prefix, `${name}.cmd`) : join(prefix, "bin", name);
 }
@@ -121,6 +135,7 @@ const project = join(workspace, "project");
 const codexHome = join(workspace, "codex-home");
 
 try {
+  assertNpmReadmeLinksArePortable();
   await mkdir(packDir, { recursive: true });
   await mkdir(project, { recursive: true });
   await mkdir(codexHome, { recursive: true });

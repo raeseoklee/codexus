@@ -16,7 +16,7 @@ codexus doctor --json
 
 Use the global install form for normal CLI use. The npmjs package page may show
 `npm i codexus` in its generated install box; that installs Codexus as a local
-project dependency and does not put the `codexus` / `cx` commands on your normal
+project dependency and does not put the `codexus` command or `cx` short alias on your normal
 `PATH`.
 
 Global npm installation installs both the CLI and the Codex-native skill
@@ -49,7 +49,8 @@ Installer environment variables:
 - `CODEXUS_NPM_SPEC`: npm package spec to install, default `codexus`
 - `CODEXUS_EXPECTED_VERSION`: optional installed package version check
 - `CODEXUS_NPM_PREFIX`: npm global prefix, default `~/.local`
-- `CODEXUS_BIN_DIR`: bin directory for `cx` and `codexus`, default `~/.local/bin`
+- `CODEXUS_BIN_DIR`: bin directory for canonical `codexus` and the supported
+  `cx` short alias, default `~/.local/bin`
 - `CODEXUS_INSTALL_CODEX_SKILL=0`: skip Codex skill adapter installation
 
 ## 1. Clone
@@ -106,7 +107,7 @@ node src/cli/main.ts schema validate-run <run-id> --json
 Cancel a live supervised run from another terminal:
 
 ```bash
-cx cancel <run-id> --reason "no longer needed" --json
+codexus cancel <run-id> --reason "no longer needed" --json
 ```
 
 ## 5. Use the Local Bins
@@ -115,24 +116,24 @@ For development, link the package:
 
 ```bash
 npm link
-cx doctor --json
+codexus doctor --json
 codexus runs list --json
 ```
 
-The public bin names are `cx` and `codexus`.
+The canonical public bin is `codexus`; `cx` is a supported short alias.
 
 ## 6. Use Real Codex Execution
 
 Install and authenticate the local Codex CLI first. Then run:
 
 ```bash
-cx run --driver codex-exec --json "Reply exactly CODEXUS-OK"
+codexus run --driver codex-exec --json "Reply exactly CODEXUS-OK"
 ```
 
 For project work, add verification:
 
 ```bash
-cx run --verify "npm test" "fix the failing parser tests"
+codexus run --verify "npm test" "fix the failing parser tests"
 ```
 
 ## 7. Use Codexus From Codex CLI Chat
@@ -160,7 +161,7 @@ separate manual flow.
 Inside a target project, install the session-native overlay:
 
 ```bash
-cx setup codex-session --scope project --always-on --enable-notify-hook --json
+codexus setup codex-session --scope project --always-on --enable-notify-hook --json
 ```
 
 Then open Codex in that project and type chat requests like these:
@@ -171,7 +172,7 @@ Use the codexus skill and show the current session status.
 
 The always-on overlay is guidance, not proof. The notify hook records a bounded
 `turn-ended` heartbeat and derived evidence snapshot when CLI/TUI dispatch
-fires, but `cx session status --json` recomputes the current state on demand and
+fires, but `codexus session status --json` recomputes the current state on demand and
 remains authoritative.
 
 ```text
@@ -191,9 +192,9 @@ node codex/skills/codexus/scripts/cx.mjs <command>
 Prefer explicit session evidence before nested supervised runs:
 
 ```bash
-cx session status --json
-cx session checkpoint "before risky refactor" --json
-cx session verify --verify "npm test" --json
+codexus session status --json
+codexus session checkpoint "before risky refactor" --json
+codexus session verify --verify "npm test" --json
 ```
 
 If you want a separate non-interactive Codex sub-run, ask for one explicitly:
@@ -212,7 +213,7 @@ More examples: [Using Codexus inside Codex](codex-session-usage.md).
 Inside a target project:
 
 ```bash
-cx init --with-docs --json
+codexus init --with-docs --json
 ```
 
 This creates `.codexus/` directories and config without mutating unrelated
@@ -221,16 +222,16 @@ tool state.
 ## Troubleshooting
 
 - **Node version:** npm-installed Codexus requires Node.js 22 or newer. Run
-  `node --version` when `cx` fails before rendering JSON.
+  `node --version` when `codexus` or `cx` fails before rendering JSON.
 - **Missing `codex` CLI:** real `codex-exec` runs require the local `codex`
-  command. `cx doctor --json` reports this as a failed Codex check; mock-driver
+  command. `codexus doctor --json` reports this as a failed Codex check; mock-driver
   tests still work without it.
 - **Codex auth:** real runs require an authenticated local Codex CLI session.
   Run `codex login status` directly if `doctor` reports an auth failure.
-- **Notify hook not observed:** `cx setup codex-session --enable-notify-hook`
-  installs configuration, but `cx session status --json` only reports dispatch
+- **Notify hook not observed:** `codexus setup codex-session --enable-notify-hook`
+  installs configuration, but `codexus session status --json` only reports dispatch
   as observed after a real CLI/TUI `turn-ended` event. Desktop/app-server
   sessions may not invoke the CLI notify hook.
-- **npm install path:** global npm installs may place `cx` outside your shell
+- **npm install path:** global npm installs may place `codexus` or `cx` outside your shell
   `PATH`. Use `npm prefix -g` or install with `CODEXUS_NPM_PREFIX` /
   `CODEXUS_BIN_DIR` through `install.sh` when you need a specific bin directory.

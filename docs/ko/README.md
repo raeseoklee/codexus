@@ -47,7 +47,7 @@ Codexus는 Codex를 실행한 뒤 `npm test`를 실행합니다. 테스트가 �
 
 ## Codex CLI 채팅 안에서 사용하기
 
-Codexus는 standalone `cx` 명령만 제공하는 도구가 아닙니다. Npm package는
+Codexus는 standalone `codexus` 명령만 제공하는 도구가 아닙니다. Npm package는
 Codex-native `codexus` skill도 설치하므로, 현재 Codex CLI/TUI 채팅 안에 머무른 채
 Codex에게 로컬 Codexus core를 호출해 상태와 결과를 기록하게 할 수 있습니다.
 
@@ -192,59 +192,60 @@ automatic prompt injection은 의도적으로 gate 뒤에 있습니다.
 ## 자주 쓰는 명령
 
 ```bash
-cx doctor --json
-cx init --with-docs --json
-cx setup codex-session --scope project --always-on --enable-notify-hook --json
-cx session status --json
-cx session hud --json
-cx session checkpoint "before risky refactor" --json
-cx session verify --auto --json
-cx session verify --verify "npm test" --json
-cx session slop --json
-cx session subagent launch --role reviewer --task "review the staged diff" --json
-cx session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
-cx session subagent record --file <result.json> --json
-cx session workers status --json
-cx lsp status --json
-cx lsp check --gate --json
-cx schema engine --json
-cx replay parity --json
-cx repo graph build --graph-provider codexus-lite --scope "src/**" --json
-cx repo graph check --graph <graph-id-or-path> --gate --json
-cx wiki build --json
-cx wiki context --topic verification --fresh-only --gate --json
-cx wiki context --topic verification --approve --approved-by "$USER" --json
-cx slop check --scope "src/**" --gate --json
-cx supply-chain check --gate --json
-cx release check --gate --json
-cx app instance profile list --json
-cx app instance start --profile web --worktree . --json
-cx app instance status --json
-cx app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
-cx app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
-cx app instance evidence logs --instance-id <id> --json
-cx app instance evidence metrics --instance-id <id> --json
-cx app instance evidence screenshot --instance-id <id> --evidence-path ./screen.png --json
-cx app instance stop --instance-id <id> --json
-cx run --verify "npm test" "fix the failing parser tests"
-cx cancel <run-id> --reason "no longer needed" --json
-cx status <run-id> --json
-cx events tail <run-id> --json
-cx verify <run-id> --json
-cx replay skill <skill-id> --json
-cx memory search "parser regression" --json
-cx skill review <skill-id> --json
-cx skill export <skill-id> --target codex --json
-cx schema check --json
-cx app-server experiment --dry-run --record --supervise-fake --json
+codexus doctor --json
+codexus init --with-docs --json
+codexus setup codex-session --scope project --always-on --enable-notify-hook --json
+codexus session status --json
+codexus session hud --json
+codexus session checkpoint "before risky refactor" --json
+codexus session verify --auto --json
+codexus session verify --verify "npm test" --json
+codexus session slop --json
+codexus session subagent launch --role reviewer --task "review the staged diff" --json
+codexus session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
+codexus session subagent record --file <result.json> --json
+codexus session workers status --json
+codexus lsp status --json
+codexus lsp check --gate --json
+codexus schema engine --json
+codexus replay parity --json
+codexus repo graph build --graph-provider codexus-lite --scope "src/**" --json
+codexus repo graph check --graph <graph-id-or-path> --gate --json
+codexus wiki build --json
+codexus wiki context --topic verification --fresh-only --gate --json
+codexus wiki context --topic verification --approve --approved-by "$USER" --json
+codexus slop check --scope "src/**" --gate --json
+codexus supply-chain check --gate --json
+codexus release check --gate --json
+codexus app instance profile list --json
+codexus app instance start --profile web --worktree . --json
+codexus app instance status --json
+codexus app instance evidence record --instance-id <id> --kind browser --source manual --summary "checked app" --json
+codexus app instance evidence probe --instance-id <id> --url http://127.0.0.1:<port>/ --json
+codexus app instance evidence logs --instance-id <id> --json
+codexus app instance evidence metrics --instance-id <id> --json
+codexus app instance evidence screenshot --instance-id <id> --evidence-path ./screen.png --json
+codexus app instance stop --instance-id <id> --json
+codexus run --verify "npm test" "fix the failing parser tests"
+codexus cancel <run-id> --reason "no longer needed" --json
+codexus status <run-id> --json
+codexus events tail <run-id> --json
+codexus verify <run-id> --json
+codexus replay skill <skill-id> --json
+codexus memory search "parser regression" --json
+codexus skill review <skill-id> --json
+codexus skill export <skill-id> --target codex --json
+codexus schema check --json
+codexus app-server experiment --dry-run --record --supervise-fake --json
 ```
 
-Public bin은 `cx`와 `codexus`입니다.
+Canonical bin은 `codexus`이고, `cx`는 지원되는 short alias입니다.
 
 ## 문서 지도
 
 - [빠른 시작](quickstart.md)
 - [Codex 안에서 Codexus 사용하기](codex-session-usage.md)
+- [기능 레퍼런스](features.md)
 - [아키텍처](design/01-architecture.md)
 - [상세 설계](design/02-detailed-design.md)
 - [진화 엔진](design/03-evolution-engine.md)

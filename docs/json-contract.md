@@ -88,9 +88,11 @@ current stable line:
   `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
   `informationalUnknowns`, `gate`. The stable contract covers local, static
   release wiring evidence only: installer default channel, expected-version
-  guard, trusted-publishing workflow shape, pinned publish actions, installer
-  asset workflow wiring, and redacted release-evidence docs. Live GitHub/npm
-  post-publish sign-off remains opt-in and experimental.
+  guard, trusted-publishing workflow shape, stable dist-tag sync wiring, pinned
+  publish actions, installer asset workflow wiring, and redacted
+  release-evidence docs. Live GitHub/npm post-publish sign-off remains opt-in
+  and experimental; when used, it reports both npm `latest` and npm `next` and
+  gates stale `next` tags that point behind `latest`.
 - LSP diagnostics output (`lsp status`, `lsp check --gate`): `schemaVersion`,
   `stability`, `command`, `cwd`, `projectRoot`, `scanMode`, `scanAccuracy`,
   `limits`, `autoApply`, `lsp`, `providers`, `result`, `evidenceGaps`,

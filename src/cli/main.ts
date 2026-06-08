@@ -41,6 +41,8 @@ function helpText(): string {
   return `Codexus
 
 Usage:
+  codexus is the canonical command. cx is a supported short alias.
+
   cx --version
   cx version [--json]
   cx update check [--channel stable|next] [--json]
@@ -153,7 +155,7 @@ Usage:
   cx gateway status|recovery|check [--dry-run] [--record] [--task <task>] [--approved-by <name>] [--driver mock|codex-exec] [--json]
 
 Public bins:
-  codexus and cx are the supported command names.
+  codexus is canonical. cx is a supported short alias.
 `;
 }
 

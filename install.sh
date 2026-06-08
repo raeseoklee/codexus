@@ -60,14 +60,14 @@ fi
 
 log "Installed Codexus $package_version to $package_root"
 if [ "$bin_dir" = "$prefix_bin" ]; then
-  log "Linked cx and codexus into $bin_dir"
+  log "Linked codexus and cx into $bin_dir"
 else
-  log "Linked cx and codexus into $bin_dir (targeting $prefix_bin)"
+  log "Linked codexus and cx into $bin_dir (targeting $prefix_bin)"
 fi
 
 case ":$PATH:" in
   *":$bin_dir:"*) ;;
-  *) log "Add $bin_dir to PATH to run cx from any shell." ;;
+  *) log "Add $bin_dir to PATH to run codexus from any shell." ;;
 esac
 
-log "Try: $bin_dir/cx schema check --json"
+log "Try: $bin_dir/codexus schema check --json"

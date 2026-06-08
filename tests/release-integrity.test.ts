@@ -57,7 +57,7 @@ async function writeFixture(rootDir: string, options: { installDefault?: "stable
       "      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
       "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",
       '        with: { registry-url: "https://registry.npmjs.org" }',
-      "      - run: npm run publish:stable -- --no-dist-tag-sync",
+      "      - run: npm run publish:stable",
       '      - run: echo "Prerelease tags must publish via workflow_dispatch mode=next"',
       "  github-release:",
       "    permissions:",
@@ -85,7 +85,9 @@ test("release integrity passes for local source release wiring", () => {
   assert.equal(report.releaseIntegrity.status, "pass");
   assert.equal(report.gate.status, "passed");
   assert.equal(report.releaseIntegrity.installScript.defaultChannel, "stable");
+  assert.equal(report.releaseIntegrity.workflow.stableDistTagSync, true);
   assert.equal(report.releaseIntegrity.workflow.installerAssetAttached, true);
+  assert.ok(report.derivableFacts.some((fact) => fact.kind === "release_workflow_dist_tag_sync"));
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "installer_expected_version_guard"));
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "release_workflow_installer_asset"));
   assert.ok(report.informationalUnknowns.some((unknown) => unknown.kind === "github_release_not_checked"));
@@ -159,7 +161,7 @@ test("release integrity live sign-off compares gh latest without relying on isLa
         return { status: 0, stdout: "", stderr: "" };
       }
       if (command === "npm" && args[0] === "view") {
-        return { status: 0, stdout: JSON.stringify({ latest: "9.9.9" }), stderr: "" };
+        return { status: 0, stdout: JSON.stringify({ latest: "9.9.9", next: "9.9.9" }), stderr: "" };
       }
       return { status: 1, stdout: "", stderr: `unexpected command ${command} ${args.join(" ")}` };
     };
@@ -169,7 +171,39 @@ test("release integrity live sign-off compares gh latest without relying on isLa
     assert.equal(report.gate.status, "passed");
     assert.equal(report.releaseIntegrity.githubRelease.isLatest, true);
     assert.equal(report.releaseIntegrity.npm.latest, "9.9.9");
+    assert.equal(report.releaseIntegrity.npm.next, "9.9.9");
     assert.ok(report.derivableFacts.some((fact) => fact.kind === "github_release_asset_matches_local"));
+    assert.ok(report.derivableFacts.some((fact) => fact.kind === "npm_next_not_older_than_latest"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("release integrity live sign-off gates stale npm next dist-tag", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeFixture(cwd);
+    const runner = (command: string, args: string[]) => {
+      if (command === "gh" && args[0] === "release" && args[1] === "view" && args[2] === "v9.9.9") {
+        return { status: 0, stdout: JSON.stringify({ tagName: "v9.9.9", url: "https://example.test/releases/v9.9.9" }), stderr: "" };
+      }
+      if (command === "gh" && args[0] === "release" && args[1] === "view") {
+        return { status: 0, stdout: JSON.stringify({ tagName: "v9.9.9", url: "https://example.test/releases/v9.9.9" }), stderr: "" };
+      }
+      if (command === "gh" && args[0] === "release" && args[1] === "download") {
+        const dir = args[args.indexOf("--dir") + 1];
+        writeFileSync(join(dir, "install.sh"), readFileSync(join(cwd, "install.sh")));
+        return { status: 0, stdout: "", stderr: "" };
+      }
+      if (command === "npm" && args[0] === "view") {
+        return { status: 0, stdout: JSON.stringify({ latest: "9.9.9", next: "0.1.0-alpha.7" }), stderr: "" };
+      }
+      return { status: 1, stdout: "", stderr: `unexpected command ${command} ${args.join(" ")}` };
+    };
+    const report = buildReleaseIntegrityReport(cwd, { gate: true, live: true, commandRunner: runner });
+    assert.equal(report.releaseIntegrity.status, "fail");
+    assert.equal(report.gate.status, "failed");
+    assert.ok(report.evidenceGaps.some((gap) => gap.kind === "npm_next_older_than_latest"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

@@ -55,6 +55,9 @@ large a feature feels.
   stable contract surfaces or for breaking/redefining already frozen stable
   fields.
 - Prerelease builds stay on the explicit npm `next` channel.
+- Stable publishes synchronize both `latest` and `next` to the stable version.
+  A later prerelease publish may move `next` forward again, but `next` must not
+  point at a version older than `latest`.
 
 Therefore a large experimental bundle can still be a patch release if it does
 not change the frozen stable contract. Conversely, a small breaking contract
@@ -68,10 +71,12 @@ Every stable release must keep the release loop auditable:
 - `npm run release:check` passes before tag publish.
 - The tag-triggered trusted-publishing workflow publishes npm and creates or
   refreshes the matching GitHub Release.
-- After publish, `cx release check --version <version> --live --gate --json`
+- After publish, `codexus release check --version <version> --live --gate --json`
   passes.
 - Post-publish install smoke verifies `codexus@latest` and release
   `install.sh`.
+- Live release sign-off verifies npm `latest` and ensures npm `next` is not
+  older than `latest`.
 - Release evidence is updated after publish with bounded, redacted facts.
 
 Do not commit raw workflow logs, run ledgers, local private paths, tokens,
@@ -82,8 +87,8 @@ transcripts, or model prompts.
 The policy is intentionally visible through the CLI:
 
 ```bash
-cx release policy --json
-cx release policy --gate --json
+codexus release policy --json
+codexus release policy --gate --json
 ```
 
 `npm run release:check` includes `release:policy`, so stable release prep fails

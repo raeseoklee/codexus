@@ -49,6 +49,9 @@ Codexus pre-1.0 versioning은 기능이 커 보이는지보다 stable JSON contr
 - Minor release는 experimental evidence surface를 stable contract surface로 승격하거나 이미
   frozen된 stable field를 breaking/redefine할 때 사용합니다.
 - Prerelease build는 명시적 npm `next` channel에 남깁니다.
+- Stable publish는 `latest`와 `next`를 모두 stable version으로 동기화합니다.
+  이후 prerelease publish가 `next`를 다시 앞으로 이동할 수 있지만, `next`는
+  `latest`보다 오래된 version을 가리키면 안 됩니다.
 
 따라서 큰 experimental bundle도 frozen stable contract를 바꾸지 않으면 patch release일 수
 있습니다. 반대로 작은 breaking contract change는 다음 minor release가 필요합니다.
@@ -61,8 +64,10 @@ Codexus pre-1.0 versioning은 기능이 커 보이는지보다 stable JSON contr
 - Tag publish 전에 `npm run release:check`가 통과합니다.
 - Tag-triggered trusted-publishing workflow가 npm publish를 수행하고 matching GitHub
   Release를 생성 또는 갱신합니다.
-- Publish 후 `cx release check --version <version> --live --gate --json`이 통과합니다.
+- Publish 후 `codexus release check --version <version> --live --gate --json`이 통과합니다.
 - Post-publish install smoke가 `codexus@latest`와 release `install.sh`를 검증합니다.
+- Live release sign-off는 npm `latest`를 검증하고 npm `next`가 `latest`보다
+  오래되지 않았는지 확인합니다.
 - Publish 후 release evidence를 bounded, redacted fact로 갱신합니다.
 
 Raw workflow log, run ledger, private local path, token, transcript, model prompt를
@@ -73,8 +78,8 @@ Raw workflow log, run ledger, private local path, token, transcript, model promp
 이 정책은 CLI에서 명시적으로 확인할 수 있어야 합니다:
 
 ```bash
-cx release policy --json
-cx release policy --gate --json
+codexus release policy --json
+codexus release policy --gate --json
 ```
 
 `npm run release:check`는 `release:policy`를 포함하므로, policy 문서가 없으면 stable
