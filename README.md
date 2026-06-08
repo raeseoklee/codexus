@@ -48,10 +48,10 @@ Codexus runs Codex, then runs `npm test`. If the test fails, Codexus gives Codex
 the real failing output and retries within the configured repair budget. The run
 is `complete` only when the verification command passes.
 
-> The 0.1.x stable line is intentionally narrow: live app-server turns, routine
-> live model replay, and automatic prompt injection remain gated off. Live
-> cron/gateway dispatch now exists as an explicit-approval experimental surface.
-> See [Status](#status).
+> The 0.2 stable contract is intentionally narrow: live app-server turns,
+> routine live model replay, and automatic prompt injection remain gated off.
+> Architecture checks and manual wiki context are stable only for the bounded
+> evidence surfaces documented in [Status](#status).
 
 ## Use It In Codex CLI Chat
 
@@ -172,19 +172,21 @@ npm run package:smoke
 
 ## Status
 
-Codexus 0.1.14 is usable as a local harness with a narrow stable path around
-`codex exec --json`; live app-server turns, routine live model replay, and
-automatic prompt injection remain intentionally gated. Live cron/gateway
-dispatch is now available as an experimental explicit-approval surface.
+Codexus 0.2.0 is usable as a local harness with a narrow stable path around
+`codex exec --json`, stable local evidence gates, and a first stable promotion
+of architecture and manual wiki context surfaces. Live app-server turns,
+routine live model replay, and automatic prompt injection remain intentionally
+gated.
 
 ## Support Matrix
 
-| Surface | 0.1.x status |
+| Surface | 0.2 status |
 | --- | --- |
 | Supervised `codex exec --json` runs, verification/repair, run ledger, resume/cancel/status/events | Stable path |
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
-| `slop check`, `supply-chain check`, `lsp status/check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence plus experimental LSP diagnostics surface; LSP protocol servers are detect-only in the first slice |
-| `repo graph build/check/import/search/explain`, `wiki build/check/context/export` | Experimental graph/wiki evidence surface; context approval artifacts are visible and non-injected |
+| `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence surfaces |
+| `architecture check --gate`, `repo check --gate`, `release check --gate`, `lsp check --gate`, `wiki context --fresh-only --gate` | Stable local evidence gates for their documented bounded contracts |
+| `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve` | Experimental graph/wiki evidence surface; context approval artifacts are visible and non-injected |
 | `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics/screenshot` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
 | app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval, and other surfaces stay status/record/launch-contract/gated |
 | autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`); live `autopilot run` remains deferred to the 0.2/0.3 track |

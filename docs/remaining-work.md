@@ -180,7 +180,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     smoke compatibility, stable-readiness smoke coverage, and local release
     integrity gating implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current npm baseline is `0.1.14`; prereleases publish through
+    - Current npm baseline is `0.2.0`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
       trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin
@@ -467,13 +467,12 @@ Harness-engineering alignment adds these evidence-first tracks:
     plugin-local scripts.
 17. 0.2.0 promotion readiness: the first audit surface now exists as
     `cx contract check --target 0.2.0 --json`. Promotion-hardening has promoted
-    `repo check --gate` and local-mode `release check --gate` to stable and
-    freezes their mechanical docs-code and release-wiring invariant fields in
-    `docs/json-contract.md`; `contract check --gate` can pass the stable
-    promotion requirement. LSP diagnostics are also promoted for explicit
-    bounded diagnostics only; protocol-server lifecycle remains deferred.
-    Remaining promotion work is architecture hardening, manual wiki context
-    hardening, and deferred evidence-track hardening. Do not promote app-instance
-    health modeling, live autopilot, active relay, Desktop attachment, automatic
-    injection, LSP protocol-server lifecycle, or plugin always-on claims until
-    their authority evidence is stronger.
+    `repo check --gate`, local-mode `release check --gate`, explicit
+    `lsp check --gate`, the narrow `architecture check --gate`
+    forbidden-import subset, and manual `wiki context --fresh-only --gate` to
+    stable and freezes their named fields in `docs/json-contract.md`;
+    `contract check --gate` can pass the stable promotion requirement.
+    Remaining promotion work is deferred evidence-track hardening. Do not
+    promote app-instance health modeling, live autopilot, active relay, Desktop
+    attachment, automatic injection, LSP protocol-server lifecycle, or plugin
+    always-on claims until their authority evidence is stronger.

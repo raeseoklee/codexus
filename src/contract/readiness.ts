@@ -174,34 +174,34 @@ const candidateDefinitions: CandidateDefinition[] = [
     surface: "architecture-check",
     command: "architecture check --gate",
     sourceFile: "src/architecture/check.ts",
-    disposition: "candidate_after_hardening",
+    disposition: "promote_candidate",
     contractRisk: "medium",
     sideEffectRisk: "low",
     reasons: [
-      "Forbidden-import facts are derivable and already share the static import scanner.",
-      "Broad layering analysis remains deferred and must not be promoted with the first stable slice.",
+      "Promoted for declared-policy forbidden-import facts derived from the shared static import scanner.",
+      "Broad layering analysis remains deferred and is not part of the stable contract.",
     ],
     requiredEvidence: [
-      "Freeze only the declared-policy forbidden-import subset.",
+      "Keep the frozen contract limited to the declared-policy forbidden-import subset.",
       "Keep scanAccuracy and computed dynamic import caveats visible.",
-      "Document broad_layering_rule_deferred as outside the stable promotion.",
+      "Keep broad_layering_rule_deferred outside the stable promotion.",
     ],
   },
   {
     surface: "compiled-wiki-context",
     command: "wiki context --fresh-only --gate",
     sourceFile: "src/wiki/wiki.ts",
-    disposition: "candidate_after_hardening",
+    disposition: "promote_candidate",
     contractRisk: "medium",
     sideEffectRisk: "low",
     reasons: [
-      "Fresh-only context gating is explicit, local, and still ineligible for automatic injection.",
-      "The surface needs more installed-package and stale/fresh branch evidence before stable promotion.",
+      "Promoted for explicit manual context selection and local fresh-only context gating.",
+      "Automatic context injection remains deferred and is not part of the stable contract.",
     ],
     requiredEvidence: [
-      "Freeze only manual context selection, freshnessPolicy, evidenceGaps, derivableFacts, and gate fields.",
+      "Keep the frozen contract limited to manual context selection, freshnessPolicy, evidenceGaps, derivableFacts, and gate fields.",
       "Keep eligibleForAutomaticInjection false in the stable contract.",
-      "Add installed-package smoke for fresh and stale context branches.",
+      "Keep installed-package smoke for fresh and stale context branches.",
     ],
   },
 ];
@@ -386,7 +386,7 @@ function currentStabilityFromSource(packageRoot: string, sourceFile: string): Co
 
 function frozenFieldsDocumented(contractText: string | null, command: string): boolean {
   if (!contractText) return false;
-  const frozenSection = /## Frozen In 0\.1\.x(?<body>[\s\S]*?)\n## Not Frozen/.exec(contractText)?.groups?.body;
+  const frozenSection = /## (?:Frozen In 0\.1\.x|Frozen Stable Fields)(?<body>[\s\S]*?)\n## Not Frozen/.exec(contractText)?.groups?.body;
   const searchable = frozenSection ?? contractText;
   const firstWord = command.split(/\s+/)[0];
   return searchable.includes(command) || searchable.includes(`${firstWord} output`) || searchable.includes(`${firstWord} check`);

@@ -9,6 +9,44 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.0 - 2026-06-08
+
+This release is Codexus's first stable-contract promotion milestone. It promotes
+the narrow architecture check and manual fresh-only wiki context surfaces into
+the stable JSON contract, while keeping live app control, Desktop attachment,
+autopilot live execution, active relay adapters, automatic context injection,
+LSP protocol-server lifecycle, and plugin always-on supervision explicitly
+experimental or deferred.
+
+### Stable Contract
+
+- Promoted `cx architecture check --gate --json` to stable for declared-policy
+  `forbidden-import` facts derived from the static best-effort import scan.
+  Broad layering, type-aware graph claims, and design-quality judgments remain
+  advisory/deferred.
+- Promoted `cx wiki context --topic <name> --fresh-only --gate --json` to stable
+  for explicit manual context selection and local freshness gating. The surface
+  remains ineligible for automatic prompt injection and does not claim
+  source-truth or completion authority.
+- Expanded `docs/json-contract.md` and the Korean counterpart with the 0.2
+  frozen fields for architecture and manual wiki context, while generalizing
+  patch/minor release language for the current stable line.
+
+### Added
+
+- Added installed-package smoke coverage for promoted architecture output and
+  both fresh and stale `wiki context --fresh-only --gate` branches.
+- Updated the 0.2 promotion readiness plan, implementation status, remaining
+  work, roadmap kanban, project wiki, README, and release policy to reflect the
+  promoted surfaces and the still-deferred authority surfaces.
+
+### Deferred
+
+- Live app-instance health authority, live `autopilot run`, active relay engine
+  spawning, Desktop app-server attachment, automatic prompt injection, LSP
+  protocol-server lifecycle, and plugin always-on supervision are not part of
+  the 0.2 stable contract.
+
 ## 0.1.15 - 2026-06-08
 
 This release closes the recommended roadmap sequence with evidence-first

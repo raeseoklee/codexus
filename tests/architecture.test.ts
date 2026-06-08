@@ -54,7 +54,7 @@ test("architecture check is report-only when no policy is declared", async () =>
     const result = runCli(cwd, ["architecture", "check", "--json"]);
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
-    assert.equal(output.stability, "experimental");
+    assert.equal(output.stability, "stable");
     assert.equal(output.scanMode, "static");
     assert.equal(output.scanAccuracy, "best_effort");
     assert.equal(output.policy.declared, false);
@@ -176,6 +176,7 @@ test("Codexus package dogfoods architecture report without forbidden imports", (
   assert.equal(output.policy.validation.valid, true);
   assert.equal(output.architecture.status, "pass");
   assert.equal(output.gate.status, "passed");
+  assert.equal(output.stability, "stable");
   assert.equal(output.scanAccuracy, "best_effort");
   assert.deepEqual(output.evidenceGaps, []);
   assert.ok(output.heuristicClaims.some((claim: { kind: string }) => claim.kind === "broad_layering_rule_deferred"));

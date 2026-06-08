@@ -8,12 +8,13 @@ Use this page to orient release work. The canonical policy remains
 
 ## Version Policy
 
-- `0.1.x` keeps stable JSON contract fields frozen.
-- Additive stable fields are allowed in `0.1.x`.
-- Experimental surfaces may be added in `0.1.x` without freezing their JSON
-  contract.
-- `0.2.0` is the promotion point for turning experimental evidence surfaces
-  into stable contract surfaces, or for making breaking stable-contract changes.
+- The current stable line keeps stable JSON contract fields frozen.
+- Additive stable fields are allowed in patch releases.
+- Experimental surfaces may be added in patch releases without freezing their
+  JSON contract.
+- Minor releases are the promotion point for turning experimental evidence
+  surfaces into stable contract surfaces, or for making breaking
+  stable-contract changes.
 
 Release scope should be thematic. Small commits are good, but versions should
 bundle enough related work to be understandable.

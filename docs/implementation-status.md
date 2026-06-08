@@ -10,7 +10,7 @@ Target CLI: `cx`
 
 Public bins: `cx`, `codexus`
 
-Current stable baseline: `0.1.14`
+Current stable baseline: `0.2.0`
 
 The npm package exposes `cx` and `codexus` as canonical bins. The historical
 `chx` alias is not published.
@@ -181,13 +181,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   presence. `npm run release:check` includes `release:policy` so missing policy
   docs block release prep before tag publish.
 - `cx contract check --json` reports the experimental `0.2.0` promotion
-  readiness audit. `repo check --gate`, local-mode `release check --gate`, and
-  `lsp check --gate` are promoted stable surfaces and are frozen in
-  `docs/json-contract.md`, so `cx contract check --target 0.2.0 --gate --json`
-  can pass the stable-promotion requirement. The narrow `architecture check`
-  forbidden-import subset remains a candidate, while action surfaces such as app-instance
-  start/stop, live autopilot, active relay adapters, Desktop app-server
-  attachment, automatic injection, and plugin always-on claims remain deferred.
+  readiness audit. `repo check --gate`, local-mode `release check --gate`,
+  `lsp check --gate`, the narrow `architecture check --gate` forbidden-import
+  subset, and manual `wiki context --fresh-only --gate` are promoted stable
+  surfaces and are frozen in `docs/json-contract.md`, so
+  `cx contract check --target 0.2.0 --gate --json` can pass the
+  stable-promotion requirement. Action surfaces such as app-instance start/stop,
+  live autopilot, active relay adapters, Desktop app-server attachment,
+  automatic injection, and plugin always-on claims remain deferred.
 - `cx update check --json` reports experimental update availability facts from
   the npm `latest` dist-tag through a bounded TTL cache. The explicit opt-in
   path for npm `next` prerelease facts is
@@ -349,13 +350,13 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `cx autopilot contract scope-check <file> [--gate]` exist. The contract body
   is schema-validated, approval records include a canonical subject hash, and
   scope checking reuses change-evidence facts against the approved contract.
-  Live `cx autopilot run` remains deferred outside the 0.1.x stable contract.
+  Live `cx autopilot run` remains deferred outside the stable contract.
 - A generic worktree app instance launcher now has an experimental live
   ownership first slice: `cx app instance profile list/status/logs/start/stop`
   reads descriptor-backed profiles, starts one Codexus-owned process per
   worktree, writes owned instance artifacts plus heartbeat, probes active HTTP
   health, tails bounded logs, and stops only owned processes. The surface
-  remains outside the 0.1.x stable contract. `cx app instance evidence
+  remains outside the stable contract. `cx app instance evidence
   record/list` records browser/dev-server/log/screenshot/metric observations
   against one `instanceId`, and `cx app instance evidence probe` records
   loopback-only bounded/redacted HTTP dev-server evidence for a running owned
@@ -371,7 +372,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External
   graph import, search/explain, and context injection remain deferred outside
-  the 0.1.x stable contract.
+  the stable contract.
 - Desktop app-server discovery has an experimental read-only evidence command:
   `cx app-server discover --json/--record` reports default control-socket
   availability, running app-server transport modes, and Stage B readiness
@@ -393,7 +394,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   verification fails. Implementation-stage convergence now requires a full-gate
   acceptance-criteria-to-verification matrix with passing evidence or explicit
   approved deferrals. Active relay execution and external engine adapters remain
-  deferred outside the 0.1.x stable contract.
+  deferred outside the stable contract.
 - Operational control invariants now have an experimental first slice:
   `cx autopilot presets list --json`, schema-validated `autonomyPreset`
   metadata in autopilot draft contracts, `cx policy catalog check --json`, and
@@ -602,7 +603,7 @@ review. Current high-level gaps:
   JSON-only external graphs without executing provider packages, and
   `cx repo graph search/explain` provide read-only advisory retrieval with
   `eligibleForAutomaticInjection: false`. Graph context injection and active
-  multi-engine relay adapters remain deferred outside the 0.1.x stable surface.
+  multi-engine relay adapters remain deferred outside the stable surface.
 - Worktree app instance launcher now has an experimental live ownership slice:
   start/stop, process ownership tokens, heartbeat, port allocation, liveness,
   and active health probes are implemented for Codexus-owned instances.

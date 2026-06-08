@@ -15,13 +15,13 @@ function runCli(args: string[]) {
   });
 }
 
-test("contract readiness reports repo, release, and LSP as stable promotions", () => {
+test("contract readiness reports all 0.2 promotion candidates as stable promotions", () => {
   const report = buildContractReadinessReport(root);
   assert.equal(report.schemaVersion, 1);
   assert.equal(report.stability, "experimental");
   assert.equal(report.targetVersion, "0.2.0");
   assert.equal(report.contractReadiness.status, "ready");
-  assert.equal(report.contractReadiness.promotedSurfaceCount, 3);
+  assert.equal(report.contractReadiness.promotedSurfaceCount, 5);
   assert.equal(report.contractReadiness.candidateCount, 5);
   const repoCandidate = report.candidates.find((candidate) => candidate.surface === "repo-knowledge-check");
   assert.equal(repoCandidate?.currentStability, "stable");
@@ -38,7 +38,17 @@ test("contract readiness reports repo, release, and LSP as stable promotions", (
   assert.equal(lspCandidate?.frozenFieldsDocumented, true);
   assert.equal(lspCandidate?.promotionStatus, "promoted");
   assert.deepEqual(lspCandidate?.blockers, []);
-  assert.ok(report.candidates.some((candidate) => candidate.promotionStatus === "not_promoted"));
+  const architectureCandidate = report.candidates.find((candidate) => candidate.surface === "architecture-check");
+  assert.equal(architectureCandidate?.currentStability, "stable");
+  assert.equal(architectureCandidate?.frozenFieldsDocumented, true);
+  assert.equal(architectureCandidate?.promotionStatus, "promoted");
+  assert.deepEqual(architectureCandidate?.blockers, []);
+  const wikiCandidate = report.candidates.find((candidate) => candidate.surface === "compiled-wiki-context");
+  assert.equal(wikiCandidate?.currentStability, "stable");
+  assert.equal(wikiCandidate?.frozenFieldsDocumented, true);
+  assert.equal(wikiCandidate?.promotionStatus, "promoted");
+  assert.deepEqual(wikiCandidate?.blockers, []);
+  assert.equal(report.candidates.some((candidate) => candidate.promotionStatus === "not_promoted"), false);
   assert.ok(report.deferredSurfaces.some((surface) => surface.surface === "app-instance-launcher"));
   const appHealthSurface = report.deferredSurfaces.find((surface) => surface.surface === "app-instance-health-modeling");
   assert.equal(appHealthSurface?.currentStability, "deferred");
@@ -54,12 +64,6 @@ test("contract readiness reports repo, release, and LSP as stable promotions", (
   const pluginSurface = report.deferredSurfaces.find((surface) => surface.surface === "codex-plugin-packaging");
   assert.equal(pluginSurface?.currentStability, "experimental");
   assert.match(pluginSurface?.reasons.join(" ") ?? "", /diagnostics exist/);
-  const architectureCandidate = report.candidates.find((candidate) => candidate.surface === "architecture-check");
-  assert.equal(architectureCandidate?.frozenFieldsDocumented, false);
-  const wikiCandidate = report.candidates.find((candidate) => candidate.surface === "compiled-wiki-context");
-  assert.equal(wikiCandidate?.currentStability, "experimental");
-  assert.equal(wikiCandidate?.frozenFieldsDocumented, false);
-  assert.deepEqual(wikiCandidate?.blockers, ["current_output_not_stable", "frozen_fields_not_documented"]);
   assert.equal(report.evidenceGaps.some((gap) => gap.kind === "stable_promotion_missing"), false);
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "json_contract_promotion_rule_present"));
   assert.ok(report.heuristicClaims.some((claim) => claim.kind === "promotion_candidate_prioritization"));
@@ -72,7 +76,7 @@ test("contract check --json is report-only by default", () => {
   const output = JSON.parse(result.stdout);
   assert.equal(output.command, "contract check");
   assert.equal(output.contractReadiness.status, "ready");
-  assert.equal(output.contractReadiness.promotedSurfaceCount, 3);
+  assert.equal(output.contractReadiness.promotedSurfaceCount, 5);
   assert.equal(output.gate.status, "not_requested");
 });
 
@@ -82,7 +86,7 @@ test("contract check --gate passes once a stable surface is promoted and frozen"
   const output = JSON.parse(result.stdout);
   assert.equal(output.gate.status, "passed");
   assert.equal(output.contractReadiness.status, "ready");
-  assert.equal(output.contractReadiness.promotedSurfaceCount, 3);
+  assert.equal(output.contractReadiness.promotedSurfaceCount, 5);
   assert.equal(output.evidenceGaps.some((gap: { kind: string }) => gap.kind === "stable_promotion_missing"), false);
 });
 

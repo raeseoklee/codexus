@@ -61,7 +61,7 @@ export type ImportEdge = StaticImportEdge;
 
 export interface ArchitectureEvidenceReport {
   schemaVersion: 1;
-  stability: "experimental";
+  stability: "stable";
   cwd: string;
   packageRoot: string | null;
   packageJsonPath: string | null;
@@ -145,7 +145,7 @@ export function buildArchitectureEvidenceReport(cwd: string, options: Architectu
     const status: ArchitectureEvidenceStatus = "unknown";
     return {
       schemaVersion: 1,
-      stability: "experimental",
+      stability: "stable",
       cwd,
       packageRoot: null,
       packageJsonPath: null,
@@ -284,7 +284,7 @@ export function buildArchitectureEvidenceReport(cwd: string, options: Architectu
 
   return {
     schemaVersion: 1,
-    stability: "experimental",
+    stability: "stable",
     cwd,
     packageRoot,
     packageJsonPath,

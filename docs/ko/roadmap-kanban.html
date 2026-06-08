@@ -172,13 +172,13 @@
   <header>
     <h1>Codexus 로드맵 칸반</h1>
     <p>
-      0.1.14 release 이후 indexed Codexus roadmap 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
+      0.2 stable contract line 기준 indexed Codexus roadmap 작업을 4컬럼으로 정리한 문서입니다. 각 카드는 Codexus의
       evidence-first 원칙에 맞춰 작성했습니다. 로컬 fact는 gate할 수 있고, 판단이 필요한
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
       <span class="pill">갱신일: 2026-06-08</span>
-      <span class="pill">기준: npm 0.1.14 published</span>
+      <span class="pill">기준: npm 0.2.0 published</span>
       <span class="pill">출처: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
       <span class="pill"><a href="remaining-work.md">남은 작업</a></span>
@@ -193,12 +193,12 @@
         <p class="summary">최근 완료된 evidence 작업과 deferred runtime을 켜지 않고 구현할 수 있는 작은 derivable gate입니다.</p>
 
         <article class="card">
-          <h3>0.1.x Patch Queue</h3>
+          <h3>Stable Patch Queue</h3>
           <div class="tags">
             <span class="tag ready">triage</span>
             <span class="tag evidence">contract safe</span>
           </div>
-          <p>작은 0.1.x 작업을 모아두는 holding lane입니다. Stable surface에는 additive만 적용하고, 새 runtime surface는 experimental/deferred로 자기보고해야 합니다.</p>
+          <p>작은 patch-line 작업을 모아두는 holding lane입니다. Stable surface에는 additive만 적용하고, 새 runtime surface는 experimental/deferred로 자기보고해야 합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>Stable JSON field는 additive-only입니다.</li>
@@ -213,15 +213,16 @@
             <span class="tag done">repo check 승격</span>
             <span class="tag done">release local 승격</span>
             <span class="tag done">LSP 승격</span>
-            <span class="tag evidence">wiki context 후보</span>
+            <span class="tag done">architecture 승격</span>
+            <span class="tag done">wiki context 승격</span>
             <span class="tag evidence">contract gate</span>
           </div>
-          <p><code>cx contract check</code>는 문서화된 0.2.0 규칙을 실행 가능한 audit로 바꿉니다. 승격된 surface는 stable <code>repo check --gate</code>, local-mode <code>release check --gate</code>, 명시적 <code>lsp check --gate</code>입니다. Manual <code>wiki context --fresh-only --gate</code>는 hardening 후보입니다. 0.2.0은 여전히 0.1.9 다음 countdown이 아니라 제품 cut 결정입니다.</p>
+          <p><code>cx contract check</code>는 문서화된 0.2.0 규칙을 실행 가능한 audit로 바꿉니다. 승격된 surface는 stable <code>repo check --gate</code>, local-mode <code>release check --gate</code>, 명시적 <code>lsp check --gate</code>, 좁은 <code>architecture check --gate</code>, manual <code>wiki context --fresh-only --gate</code>입니다. 0.2.0은 이 frozen contract에 근거한 제품 cut 결정이지, 0.1.9 다음 countdown이 아닙니다.</p>
           <span class="label">증거</span>
           <ul>
             <li><code>cx contract check --target 0.2.0 --json</code>은 viable promotion candidate를 보고합니다.</li>
-            <li><code>repo check --gate</code>, local-mode <code>release check --gate</code>, <code>lsp check --gate</code>는 stable이고 <code>docs/json-contract.md</code>에 frozen되어 있으므로, <code>--gate</code>는 promotion requirement를 통과할 수 있습니다.</li>
-            <li><code>wiki context --fresh-only --gate</code>는 automatic prompt injection이 아니라 non-injected manual-context 후보로 추적됩니다.</li>
+            <li><code>repo check --gate</code>, local-mode <code>release check --gate</code>, <code>lsp check --gate</code>, 좁은 <code>architecture check --gate</code>, manual <code>wiki context --fresh-only --gate</code>는 stable이고 <code>docs/json-contract.md</code>에 frozen되어 있으므로, <code>--gate</code>는 promotion requirement를 통과할 수 있습니다.</li>
+            <li><code>wiki context --fresh-only --gate</code>는 automatic prompt injection이 아니라 non-injected manual context로만 승격됩니다.</li>
             <li>LSP protocol-server lifecycle과 자동 project LSP 적용은 계속 deferred입니다.</li>
             <li>App health modeling, automatic injection, LSP protocol-server lifecycle, plugin always-on supervision 같은 deferred evidence track은 authority evidence가 더 강해질 때까지 experimental/deferred로 유지됩니다.</li>
           </ul>
@@ -688,13 +689,13 @@
         </article>
 
         <article class="card">
-          <h3>0.1.x 이후 Schema Migration</h3>
+          <h3>현재 Stable Line 이후 Schema Migration</h3>
           <div class="tags">
             <span class="tag later">contract line</span>
           </div>
           <p>State와 JSON contract는 explicit migration boundary를 통해서만 확장합니다.</p>
           <span class="label">Gate</span>
-          <p>0.1.x frozen field는 additive-only입니다. Breaking change는 0.2.0까지 기다립니다.</p>
+          <p>현재 stable-line frozen field는 additive-only입니다. Breaking change는 다음 minor release까지 기다립니다.</p>
         </article>
 
         <article class="card">
@@ -751,7 +752,7 @@
     <a href="design/14-repository-knowledge-graph.md">design/14</a>,
     <a href="design/15-multi-engine-relay-autopilot.md">design/15</a>,
     <a href="plans/2026-05-31-0.1.0-stable-readiness-plan.md">0.1.0 stable readiness</a>,
-    <a href="release-evidence/0.1.14.md">0.1.14 release evidence</a>.
+    <a href="release-evidence/0.2.0.md">0.2.0 release evidence</a>.
     이 보드는 planning artifact이며, 실제 command contract는 링크된 design 문서를 기준으로 합니다.
   </footer>
 </body>

@@ -47,16 +47,18 @@ normal bundle cadence.
 Codexus pre-1.0 versioning is governed by the stable JSON contract, not by how
 large a feature feels.
 
-- `0.1.x` patch releases may add stable JSON fields only additively.
-- Experimental/deferred surfaces may be added in `0.1.x` if they self-report
-  their stability and stay outside the frozen stable contract.
-- `0.2.0` is reserved for promoting experimental evidence surfaces into stable
-  contract surfaces or for breaking/redefining already frozen stable fields.
+- Patch releases on the current stable line may add stable JSON fields only
+  additively.
+- Experimental/deferred surfaces may be added in patch releases if they
+  self-report their stability and stay outside the frozen stable contract.
+- Minor releases are reserved for promoting experimental evidence surfaces into
+  stable contract surfaces or for breaking/redefining already frozen stable
+  fields.
 - Prerelease builds stay on the explicit npm `next` channel.
 
-Therefore a large experimental bundle can still be `0.1.x` if it does not
-change the frozen stable contract. Conversely, a small breaking contract change
-requires `0.2.0`.
+Therefore a large experimental bundle can still be a patch release if it does
+not change the frozen stable contract. Conversely, a small breaking contract
+change requires the next minor release.
 
 ## Release Evidence
 

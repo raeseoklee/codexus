@@ -10,7 +10,7 @@
 
 Public bins: `cx`, `codexus`
 
-현재 stable baseline: `0.1.14`
+현재 stable baseline: `0.2.0`
 
 Npm package는 `cx`와 `codexus`를 canonical bin으로 노출합니다. 기존 `chx`
 alias는 공개 npm bin으로 배포하지 않습니다.
@@ -92,12 +92,13 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   publish 전에 release prep이 막힙니다.
 - `cx contract check --json`은 experimental `0.2.0` promotion readiness audit를
   보고합니다. `repo check --gate`, local-mode `release check --gate`,
-  `lsp check --gate`는 stable 승격 surface이며 `docs/json-contract.md`에 frozen되어
-  있으므로, `cx contract check --target 0.2.0 --gate --json`은 stable-promotion
-  requirement를 통과할 수 있습니다. 좁은 `architecture check` forbidden-import
-  subset은 계속 후보이고, app-instance start/stop, live autopilot, active relay
-  adapter, Desktop app-server attachment, automatic injection, plugin always-on
-  claim 같은 action surface는 계속 deferred입니다.
+  `lsp check --gate`, 좁은 `architecture check --gate` forbidden-import subset,
+  manual `wiki context --fresh-only --gate`는 stable 승격 surface이며
+  `docs/json-contract.md`에 frozen되어 있으므로,
+  `cx contract check --target 0.2.0 --gate --json`은 stable-promotion requirement를
+  통과할 수 있습니다. App-instance start/stop, live autopilot, active relay adapter,
+  Desktop app-server attachment, automatic injection, plugin always-on claim 같은
+  action surface는 계속 deferred입니다.
 - `cx update check --json`은 bounded TTL cache를 통해 npm `latest` dist-tag에서
   experimental update availability fact를 보고합니다. npm `next` prerelease fact를
   위한 명시적 opt-in 경로는 `cx update check --channel next --json`이며, 별도 cache
@@ -347,12 +348,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `cx autopilot contract scope-check <file> [--gate]`가 구현됐습니다. 계약 body는
   schema 검증되고, approval record는 canonical subject hash를 포함하며, scope
   check는 승인된 계약을 기준으로 change-evidence fact를 재사용합니다. Live
-  `cx autopilot run`은 여전히 0.1.x stable contract 밖에서 deferred입니다.
+  `cx autopilot run`은 여전히 stable contract 밖에서 deferred입니다.
 - Generic worktree app instance launcher는 experimental live ownership 첫 slice를
   갖습니다. `cx app instance profile list/status/logs/start/stop`는
   descriptor-backed profile을 읽고, worktree별 Codexus-owned process를 하나씩 띄우고,
   owned instance artifact와 heartbeat를 쓰며, active HTTP health를 probe하고,
-  bounded log를 tail하며, owned process만 중지합니다. 이 surface는 여전히 0.1.x
+  bounded log를 tail하며, owned process만 중지합니다. 이 surface는 여전히
   stable contract 밖에 있습니다. `cx app instance evidence record/list`는
   browser/dev-server/log/screenshot/metric observation을 하나의 `instanceId`에
   연결해 기록하고, `cx app instance evidence probe`는 running owned instance에 대한
@@ -371,7 +372,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
-  search/explain, context injection은 0.1.x stable contract 밖에서 deferred입니다.
+  search/explain, context injection은 stable contract 밖에서 deferred입니다.
 - Multi-engine relay autopilot은 experimental recorder/checker 첫 slice를 갖습니다:
   `cx autopilot relay record`는 다른 engine을 spawn하지 않고 외부 author/reviewer
   artifact를 import하고, `cx autopilot relay stage-gate`는 `delta-check`/`full-gate`
@@ -380,7 +381,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   verification 실패 시 convergence가 완료를 만들 수 없음을 증명합니다.
   Implementation-stage convergence는 이제 passing evidence 또는 명시적으로 승인된
   deferral이 있는 full-gate acceptance-criteria-to-verification matrix를 요구합니다.
-  Active relay execution과 external engine adapter는 0.1.x stable contract 밖에서
+  Active relay execution과 external engine adapter는 stable contract 밖에서
   deferred입니다.
 - Operational control invariant는 이제 실험적 첫 slice를 가집니다:
   `cx autopilot presets list --json`, autopilot contract의 schema-validated
@@ -463,7 +464,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   실행하지 않고 bounded JSON-only external graph를 import하며,
   `cx repo graph search/explain`은 `eligibleForAutomaticInjection: false`인 read-only
   advisory retrieval을 제공합니다. Graph context injection과 active multi-engine relay
-  adapter는 0.1.x stable surface 밖에서 deferred입니다.
+  adapter는 stable surface 밖에서 deferred입니다.
 - Worktree app instance launcher는 이제 experimental live ownership slice를
   갖습니다. start/stop, process ownership token, heartbeat, liveness, port
   allocation, active health probe는 Codexus-owned instance에 대해 구현됐습니다.

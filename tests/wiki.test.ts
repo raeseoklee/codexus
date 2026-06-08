@@ -120,6 +120,7 @@ test("wiki context returns bounded topic-matched pages", async () => {
     assert.equal(context.status, 0, context.stderr);
     const output = JSON.parse(context.stdout);
     assert.equal(output.command, "wiki context");
+    assert.equal(output.stability, "stable");
     assert.ok(output.selectedPages.length >= 1);
     assert.ok(output.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.verification"));
     assert.ok(output.selectedPages.every((page: { reason: string }) => typeof page.reason === "string" && page.reason.length > 0));
@@ -171,6 +172,7 @@ test("wiki context fresh-only gate rejects stale context without injection autho
     assert.equal(context.status, 1);
     const output = JSON.parse(context.stdout);
     assert.equal(output.command, "wiki context");
+    assert.equal(output.stability, "stable");
     assert.equal(output.freshnessPolicy.freshOnly, true);
     assert.equal(output.freshnessPolicy.status, "fail");
     assert.equal(output.selectedPages.length, 0);

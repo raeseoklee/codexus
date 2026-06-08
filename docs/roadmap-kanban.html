@@ -172,14 +172,14 @@
   <header>
     <h1>Codexus Roadmap Kanban</h1>
     <p>
-      A four-column view of indexed Codexus roadmap work after the 0.1.14 release.
+      A four-column view of indexed Codexus roadmap work for the 0.2 stable contract line.
       Cards are intentionally framed as evidence-first tasks: local facts may gate,
       judgment-heavy claims stay advisory, and experimental surfaces remain blocked
       until their runtime contract exists.
     </p>
     <div class="meta">
       <span class="pill">Updated: 2026-06-08</span>
-      <span class="pill">Baseline: npm 0.1.14 published</span>
+      <span class="pill">Baseline: npm 0.2.0 published</span>
       <span class="pill">Source: indexed docs 01-19 + remaining work</span>
       <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
       <span class="pill"><a href="remaining-work.md">Remaining work</a></span>
@@ -194,12 +194,12 @@
         <p class="summary">Recently completed evidence work plus small derivable maintenance gates that do not enable deferred runtime behavior.</p>
 
         <article class="card">
-          <h3>0.1.x Patch Queue</h3>
+          <h3>Stable Patch Queue</h3>
           <div class="tags">
             <span class="tag ready">triage</span>
             <span class="tag evidence">contract safe</span>
           </div>
-          <p>Use this holding lane for small 0.1.x work. Stable surfaces stay additive; new runtime surfaces must self-report as experimental or deferred.</p>
+          <p>Use this holding lane for small patch-line work. Stable surfaces stay additive; new runtime surfaces must self-report as experimental or deferred.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Stable JSON fields are additive-only.</li>
@@ -214,15 +214,16 @@
             <span class="tag done">repo check promoted</span>
             <span class="tag done">release local promoted</span>
             <span class="tag done">LSP promoted</span>
-            <span class="tag evidence">wiki context candidate</span>
+            <span class="tag done">architecture promoted</span>
+            <span class="tag done">wiki context promoted</span>
             <span class="tag evidence">contract gate</span>
           </div>
-          <p><code>cx contract check</code> now turns the documented 0.2.0 rule into an executable audit. The promoted surfaces are stable <code>repo check --gate</code>, local-mode <code>release check --gate</code>, and explicit <code>lsp check --gate</code>; manual <code>wiki context --fresh-only --gate</code> is a hardening candidate. 0.2.0 remains a product cut decision, not a countdown after 0.1.9.</p>
+          <p><code>cx contract check</code> now turns the documented 0.2.0 rule into an executable audit. The promoted surfaces are stable <code>repo check --gate</code>, local-mode <code>release check --gate</code>, explicit <code>lsp check --gate</code>, narrow <code>architecture check --gate</code>, and manual <code>wiki context --fresh-only --gate</code>. 0.2.0 is a product cut decision backed by these frozen contracts, not a countdown after 0.1.9.</p>
           <span class="label">Evidence</span>
           <ul>
             <li><code>cx contract check --target 0.2.0 --json</code> reports viable promotion candidates.</li>
-            <li><code>repo check --gate</code>, local-mode <code>release check --gate</code>, and <code>lsp check --gate</code> are stable and frozen in <code>docs/json-contract.md</code>, so <code>--gate</code> can pass the promotion requirement.</li>
-            <li><code>wiki context --fresh-only --gate</code> is tracked as a non-injected manual-context candidate, not as automatic prompt injection.</li>
+            <li><code>repo check --gate</code>, local-mode <code>release check --gate</code>, <code>lsp check --gate</code>, narrow <code>architecture check --gate</code>, and manual <code>wiki context --fresh-only --gate</code> are stable and frozen in <code>docs/json-contract.md</code>, so <code>--gate</code> can pass the promotion requirement.</li>
+            <li><code>wiki context --fresh-only --gate</code> is promoted only as non-injected manual context, not as automatic prompt injection.</li>
             <li>LSP protocol-server lifecycle and automatic project LSP application remain deferred.</li>
             <li>Deferred evidence tracks such as app health modeling, automatic injection, LSP protocol-server lifecycle, and plugin always-on supervision remain experimental/deferred until authority evidence is stronger.</li>
           </ul>
@@ -689,13 +690,13 @@
         </article>
 
         <article class="card">
-          <h3>Schema Migrations Beyond 0.1.x</h3>
+          <h3>Schema Migrations Beyond Current Stable Line</h3>
           <div class="tags">
             <span class="tag later">contract line</span>
           </div>
           <p>Extend state and JSON contracts only through explicit migration boundaries.</p>
           <span class="label">Gate</span>
-          <p>0.1.x frozen fields remain additive-only; breaking changes wait for 0.2.0.</p>
+          <p>Current stable-line frozen fields remain additive-only; breaking changes wait for the next minor release.</p>
         </article>
 
         <article class="card">
@@ -752,7 +753,7 @@
     <a href="design/14-repository-knowledge-graph.md">design/14</a>,
     <a href="design/15-multi-engine-relay-autopilot.md">design/15</a>,
     <a href="plans/2026-05-31-0.1.0-stable-readiness-plan.md">0.1.0 stable readiness</a>,
-    <a href="release-evidence/0.1.14.md">0.1.14 release evidence</a>.
+    <a href="release-evidence/0.2.0.md">0.2.0 release evidence</a>.
     This board is a planning artifact; command contracts in the linked design docs remain authoritative.
   </footer>
 </body>

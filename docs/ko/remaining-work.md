@@ -169,7 +169,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
     compatibility, stable-readiness smoke coverage, local release integrity gate 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 현재 npm baseline은 `0.1.14`입니다. Prerelease는 fallback/dev path인
+    - 현재 npm baseline은 `0.2.0`입니다. Prerelease는 fallback/dev path인
       `publish:next`를 통해 배포할 수 있고, stable release는 trusted GitHub Actions
       tag run에서 배포합니다.
     - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,
@@ -441,13 +441,12 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     동작을 주장하지 않고, workflow-kernel logic을 plugin-local script로 옮기지 않습니다.
 17. 0.2.0 promotion readiness: 첫 audit surface가
     `cx contract check --target 0.2.0 --json`으로 구현되었습니다. Promotion-hardening은
-    `repo check --gate`와 local-mode `release check --gate`를 stable로 승격하고,
-    기계적 docs-code invariant field와 release-wiring invariant field를
+    `repo check --gate`, local-mode `release check --gate`, 명시적
+    `lsp check --gate`, 좁은 `architecture check --gate` forbidden-import subset,
+    manual `wiki context --fresh-only --gate`를 stable로 승격하고, named field를
     `docs/json-contract.md`에 freeze합니다. 이제 `contract check --gate`는 stable
-    promotion requirement를 통과할 수 있습니다. LSP diagnostics도 명시적 bounded
-    diagnostics에 한해 승격되었고, protocol-server lifecycle은 계속 deferred입니다.
-    남은 promotion 작업은 architecture hardening, manual wiki context hardening,
-    deferred evidence-track hardening입니다. App-instance health modeling, live
-    autopilot, active relay, Desktop attachment, automatic injection, LSP
-    protocol-server lifecycle, plugin always-on claim은 authority evidence가 더 강해질
-    때까지 승격하지 않습니다.
+    promotion requirement를 통과할 수 있습니다. 남은 promotion 작업은 deferred
+    evidence-track hardening입니다. App-instance health modeling, live autopilot,
+    active relay, Desktop attachment, automatic injection, LSP protocol-server
+    lifecycle, plugin always-on claim은 authority evidence가 더 강해질 때까지 승격하지
+    않습니다.

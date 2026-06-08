@@ -131,7 +131,7 @@ export function buildReleasePolicyReport(cwd: string, options: { gate?: boolean 
   });
   appendFact(derivableFacts, {
     kind: "stable_contract_boundary_preserved",
-    evidence: "0.1.x patches may add stable fields only additively; breaking or promoted stable contract changes wait for 0.2.0",
+    evidence: "patch releases may add stable fields only additively; breaking or promoted stable contract changes wait for the next minor release",
   });
   appendFact(derivableFacts, {
     kind: "release_evidence_required",

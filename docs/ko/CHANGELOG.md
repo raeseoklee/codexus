@@ -9,6 +9,43 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.0 - 2026-06-08
+
+이 release는 Codexus의 첫 stable-contract promotion milestone입니다. 좁은
+architecture check와 manual fresh-only wiki context surface를 stable JSON contract로
+승격하고, live app control, Desktop attachment, autopilot live execution, active relay
+adapter, automatic context injection, LSP protocol-server lifecycle, plugin always-on
+supervision은 계속 experimental/deferred로 명시합니다.
+
+### Stable Contract
+
+- `cx architecture check --gate --json`을 declared-policy `forbidden-import` fact에
+  한해 stable로 승격했습니다. 이 fact는 static best-effort import scan에서 도출됩니다.
+  Broad layering, type-aware graph claim, design-quality judgment는 계속
+  advisory/deferred입니다.
+- `cx wiki context --topic <name> --fresh-only --gate --json`을 명시적 manual context
+  selection과 local freshness gate에 한해 stable로 승격했습니다. 이 surface는 계속
+  automatic prompt injection 대상이 아니며 source-truth나 completion authority를
+  주장하지 않습니다.
+- `docs/json-contract.md`와 한국어 counterpart에 architecture와 manual wiki context의
+  0.2 frozen field를 추가하고, 현재 stable line 기준 patch/minor release language로
+  정리했습니다.
+
+### Added
+
+- 승격된 architecture output과 `wiki context --fresh-only --gate`의 fresh/stale branch를
+  installed-package smoke에 추가했습니다.
+- 0.2 promotion readiness plan, implementation status, remaining work, roadmap kanban,
+  project wiki, README, release policy를 승격된 surface와 아직 deferred인 authority
+  surface에 맞게 갱신했습니다.
+
+### Deferred
+
+- Live app-instance health authority, live `autopilot run`, active relay engine
+  spawning, Desktop app-server attachment, automatic prompt injection, LSP
+  protocol-server lifecycle, plugin always-on supervision은 0.2 stable contract에
+  포함되지 않습니다.
+
 ## 0.1.15 - 2026-06-08
 
 이 release는 추천 roadmap sequence를 evidence-first hardening으로 닫습니다. 0.1.x

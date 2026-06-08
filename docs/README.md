@@ -30,7 +30,7 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [Memory quality curation plan](plans/2026-05-30-memory-quality-curation-plan.md): 29148-inspired memory quality characteristics, tri-state curator findings, conflict detection, and supersession review boundaries.
 - [0.1.0 stable readiness plan](plans/2026-05-31-0.1.0-stable-readiness-plan.md): the 0.1.0 cut — supported vs deferred surface, contract-frozen 0.1.x JSON, trusted publishing, E2E smoke matrix, and the release procedure.
 - [0.2.0 promotion readiness plan](plans/2026-06-04-0.2.0-promotion-readiness-plan.md): contract-promotion audit for deciding when experimental evidence surfaces are ready to become stable instead of treating 0.2.0 as a countdown.
-- [JSON contract](json-contract.md): frozen `0.1.x` JSON fields, stability markers, and breaking-change rules for automation consumers.
+- [JSON contract](json-contract.md): frozen stable JSON fields, stability markers, and breaking-change rules for automation consumers.
 - [Release policy](release-policy.md): small commits, larger thematic releases, hotfix exceptions, version-boundary rules, and the executable `cx release policy` gate.
 - [0.1.0 release evidence](release-evidence/0.1.0.md): redacted manual sign-off template for the stable cut.
 - [0.1.1 release evidence](release-evidence/0.1.1.md): trusted-publishing evidence and installed-package smoke for the harness-engineering first pass.
@@ -47,6 +47,8 @@ The package now exposes `cx` and `codexus` as canonical public bins.
 - [0.1.12 release evidence](release-evidence/0.1.12.md): trusted-publishing evidence for the executable release cadence policy.
 - [0.1.13 release evidence](release-evidence/0.1.13.md): trusted-publishing evidence for the five-surface evidence projection patch.
 - [0.1.14 release evidence](release-evidence/0.1.14.md): trusted-publishing evidence for the evidence operating loop patch.
+- [0.1.15 release evidence](release-evidence/0.1.15.md): trusted-publishing evidence for roadmap-sequence hardening before the 0.2 promotion.
+- [0.2.0 release evidence](release-evidence/0.2.0.md): trusted-publishing evidence for the first stable-contract promotion milestone.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.

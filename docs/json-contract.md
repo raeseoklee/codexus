@@ -2,11 +2,11 @@
 
 [Korean](ko/json-contract.md)
 
-Status: 0.1.x stable contract, introduced in 0.1.0 and expanded in 0.1.1
+Status: 0.2.0 stable contract, introduced in 0.1.0 and expanded in 0.2.0
 
 Codexus is an automation-facing harness, so JSON output stability is part of the
-product contract. `0.1.0` is not 1.0, but it freezes the supported command JSON
-contract for the `0.1.x` patch line.
+product contract. `0.2.0` is not 1.0, but it freezes the supported command JSON
+contract for the `0.2.x` patch line.
 
 ## Stability Markers
 
@@ -18,7 +18,7 @@ JSON payloads may include:
 
 Allowed values:
 
-- `stable`: named fields are frozen through `0.1.x`; only additive fields may
+- `stable`: named fields are frozen through the current stable line; only additive fields may
   appear.
 - `experimental`: output is useful evidence, but the surface is not part of the
   frozen contract.
@@ -36,9 +36,10 @@ Experimental and deferred command outputs continue to self-report
 a whole. A breaking change to one command's JSON contract bumps that command's
 schema version; additive fields do not require a bump.
 
-## Frozen In 0.1.x
+## Frozen Stable Fields
 
-For supported commands, these top-level field names are frozen through `0.1.x`:
+For supported commands, these top-level field names are frozen through the
+current stable line:
 
 - Common supported JSON payloads: `schemaVersion`, `stability`.
 - Version output: `schemaVersion`, `stability`, `name`, `version`,
@@ -98,17 +99,33 @@ For supported commands, these top-level field names are frozen through `0.1.x`:
   and explicit diagnostics command execution only. `lsp status` does not run
   diagnostics, `lsp check` uses bounded timeout/output-tail fields, and neither
   command starts or controls a protocol server.
+- Architecture output (`architecture check --gate`): `schemaVersion`,
+  `stability`, `cwd`, `packageRoot`, `packageJsonPath`, `scanMode`,
+  `scanAccuracy`, `policy`, `importGraph`, `evidenceGaps`, `derivableFacts`,
+  `heuristicClaims`, `blockingUnknowns`, `informationalUnknowns`,
+  `architecture`, `gate`. The stable contract covers only declared-policy
+  `forbidden-import` facts derived from the static best-effort import scan.
+  Broad layering analysis, type-aware graph claims, and design-quality
+  judgments remain advisory/deferred.
+- Wiki context output (`wiki context --fresh-only --gate`): `schemaVersion`,
+  `stability`, `command`, `cwd`, `topic`, `budget`, `freshnessPolicy`,
+  `selectedPages`, `tokenEstimate`, `eligibleForAutomaticInjection`,
+  `evidenceGaps`, `derivableFacts`, `gate`, `text`. The stable contract covers
+  explicit manual context selection and freshness gating only.
+  `eligibleForAutomaticInjection` remains `false`; Codexus does not mutate
+  prompts or claim source-truth/completion authority for wiki context.
 
-Removing or redefining these fields requires `0.2.0`. Adding fields is allowed
-in `0.1.x`.
+Removing or redefining these fields requires the next minor release for the
+current stable line. Adding fields is allowed in patch releases.
 
 ## Not Frozen
 
 - Experimental/deferred command output for app-server live behavior,
   cron/gateway live dispatch, automatic injection, routine live model replay,
   statusline integration, worker launch, `release check --live`, LSP diagnostics
-  protocol-server lifecycle or automatic LSP application, architecture checks,
-  and contract-promotion readiness checks.
+  protocol-server lifecycle or automatic LSP application, broad architecture
+  layering beyond declared `forbidden-import` policy, wiki build/check/export,
+  wiki context approval artifacts, and contract-promotion readiness checks.
 - The membership of advisory arrays such as `heuristicClaims`.
 - The nested content of the additive `update` summary, which is an
   informational experimental update-availability report and never a release,
@@ -122,12 +139,14 @@ Release cadence is governed separately by [Release policy](release-policy.md):
 small commits should normally be bundled into larger thematic stable releases,
 but the version number still follows the frozen-contract boundary below.
 
-- Patch release (`0.1.x`): additive JSON fields only for stable surfaces.
-- Minor release (`0.2.0`): may remove or redefine frozen fields with changelog
-  notice.
+- Patch release (`0.2.x` after `0.2.0`): additive JSON fields only for stable
+  surfaces.
+- Minor release (`0.3.0` and later): may remove or redefine frozen fields with
+  changelog notice, or promote another experimental surface into the stable
+  contract.
 - Experimental/deferred surfaces must self-report their stability instead of
   looking supported.
-- Experimental surfaces may be added in `0.1.x` without freezing their JSON
-  contract. `0.2.0` is the promotion point for turning experimental evidence
-  surfaces into stable contract surfaces, or for making any breaking change to
-  already-frozen stable fields.
+- Experimental surfaces may be added in patch releases without freezing their
+  JSON contract. `0.2.0` is the first promotion point: it promotes the
+  architecture check and manual wiki context surfaces into the stable contract
+  while keeping higher-risk action and injection surfaces deferred.

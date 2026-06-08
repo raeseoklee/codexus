@@ -335,7 +335,7 @@ process.on("SIGINT", shutdown);
   assert(policyCatalog.rules?.some((rule) => rule.ruleId === "driver.command.preflight" && rule.status === "unavailable"), "policy catalog did not report honest driver preflight unavailability");
 
   const architecture = parseJsonRun(codexus, ["architecture", "check", "--gate", "--json"]);
-  assert(architecture.stability === "experimental", "architecture check did not report experimental JSON stability");
+  assert(architecture.stability === "stable", "architecture check did not report stable JSON stability");
   assert(architecture.scanAccuracy === "best_effort", "architecture check did not report best-effort scan accuracy");
   assert(architecture.gate?.status === "passed", "installed architecture gate did not pass");
 
@@ -388,9 +388,51 @@ process.on("SIGINT", shutdown);
     "1200",
     "--json",
   ]);
-  assert(wikiContext.stability === "experimental", "wiki context did not report experimental stability");
+  assert(wikiContext.stability === "stable", "wiki context did not report stable JSON stability");
   assert(wikiContext.selectedPages?.some((page) => page.pageId === "wiki.verification"), "wiki context did not include the verification page");
   assert(wikiContext.eligibleForAutomaticInjection === false, "wiki context should not be eligible for automatic injection");
+  const freshWikiContext = parseJsonRun(codexus, [
+    "wiki",
+    "context",
+    "--cwd",
+    project,
+    "--topic",
+    "verification",
+    "--budget",
+    "1200",
+    "--fresh-only",
+    "--gate",
+    "--json",
+  ]);
+  assert(freshWikiContext.stability === "stable", "fresh-only wiki context did not report stable JSON stability");
+  assert(freshWikiContext.freshnessPolicy?.status === "pass", "fresh-only wiki context did not pass with fresh pages");
+  assert(freshWikiContext.gate?.status === "passed", "fresh-only wiki context gate did not pass with fresh pages");
+  assert(freshWikiContext.eligibleForAutomaticInjection === false, "fresh-only wiki context should not be eligible for automatic injection");
+  const staleWikiProject = join(workspace, "wiki-stale-project");
+  await mkdir(join(staleWikiProject, "docs"), { recursive: true });
+  await writeFile(join(staleWikiProject, "README.md"), "# Stale Wiki Fixture\n");
+  await writeFile(join(staleWikiProject, "docs", "README.md"), "# Docs Index\n");
+  await writeFile(join(staleWikiProject, "package.json"), `${JSON.stringify({ name: "stale-wiki-project", version: "1.0.0" }, null, 2)}\n`);
+  parseJsonRun(codexus, ["wiki", "build", "--cwd", staleWikiProject, "--mode", "deterministic", "--json"]);
+  await writeFile(join(staleWikiProject, "package.json"), `${JSON.stringify({ name: "stale-wiki-project", version: "2.0.0" }, null, 2)}\n`);
+  const staleWikiContext = JSON.parse(run(codexus, [
+    "wiki",
+    "context",
+    "--cwd",
+    staleWikiProject,
+    "--topic",
+    "verification",
+    "--budget",
+    "1200",
+    "--fresh-only",
+    "--gate",
+    "--json",
+  ], { allowFailure: true }).stdout);
+  assert(staleWikiContext.stability === "stable", "stale fresh-only wiki context did not report stable JSON stability");
+  assert(staleWikiContext.freshnessPolicy?.status === "fail", "stale fresh-only wiki context should fail freshness policy");
+  assert(staleWikiContext.gate?.status === "failed", "stale fresh-only wiki context gate did not fail");
+  assert(staleWikiContext.eligibleForAutomaticInjection === false, "stale fresh-only wiki context should not be eligible for automatic injection");
+  assert(staleWikiContext.evidenceGaps?.some((gap) => gap.kind === "page_stale"), "stale fresh-only wiki context did not report page_stale");
   const wikiContextApproval = parseJsonRun(codexus, [
     "wiki",
     "context",

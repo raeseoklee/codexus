@@ -202,7 +202,7 @@ export interface WikiContextPageSelection {
 
 export interface WikiContextResult {
   schemaVersion: 1;
-  stability: "experimental";
+  stability: "stable";
   command: "wiki context";
   cwd: string;
   topic: string;
@@ -1257,7 +1257,7 @@ export async function buildWikiContext(cwd: string, topic: string, budget: numbe
     : [];
   return {
     schemaVersion: 1,
-    stability: "experimental",
+    stability: "stable",
     command: "wiki context",
     cwd,
     topic,

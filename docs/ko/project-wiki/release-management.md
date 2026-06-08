@@ -8,11 +8,12 @@
 
 ## Version Policy
 
-- `0.1.x`는 stable JSON contract field를 frozen 상태로 유지합니다.
-- Additive stable field는 `0.1.x`에서 허용됩니다.
-- Experimental surface는 JSON contract를 freeze하지 않고 `0.1.x`에 추가될 수 있습니다.
-- `0.2.0`은 experimental evidence surface를 stable contract surface로 승격하거나 stable
-  contract breaking change를 만들 때 사용하는 promotion point입니다.
+- 현재 stable line은 stable JSON contract field를 frozen 상태로 유지합니다.
+- Additive stable field는 patch release에서 허용됩니다.
+- Experimental surface는 JSON contract를 freeze하지 않고 patch release에 추가될 수
+  있습니다.
+- Minor release는 experimental evidence surface를 stable contract surface로 승격하거나
+  stable contract breaking change를 만들 때 사용하는 promotion point입니다.
 
 Release scope는 thematic해야 합니다. Commit은 작게 유지하되, version은 이해 가능한
 관련 작업 묶음이어야 합니다.
