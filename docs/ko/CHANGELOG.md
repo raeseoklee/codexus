@@ -9,6 +9,13 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.1.15 - 2026-06-08
+
+이 release는 추천 roadmap sequence를 evidence-first hardening으로 닫습니다. 0.1.x
+stable JSON contract boundary는 그대로 유지합니다. 새 runtime surface는 계속
+experimental이고, manual context는 non-injected 상태이며, deferred track은 승격하지
+않고 더 명확하게 보이도록 했습니다.
+
 ### Added
 
 - Experimental app-instance screenshot-file evidence를 추가했습니다:

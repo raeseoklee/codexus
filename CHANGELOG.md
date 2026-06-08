@@ -9,6 +9,13 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.1.15 - 2026-06-08
+
+This release closes the recommended roadmap sequence with evidence-first
+hardening. It keeps the 0.1.x stable JSON contract boundary unchanged: new
+runtime surfaces remain experimental, manual context stays non-injected, and
+deferred tracks are made more visible instead of being promoted.
+
 ### Added
 
 - Added experimental app-instance screenshot-file evidence:
