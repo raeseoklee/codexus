@@ -51,7 +51,7 @@ Experimental surface는 배포되어 있지만 stable JSON contract로 freeze되
 | Surface | Commands | Boundary |
 | --- | --- | --- |
 | Repository graph | `codexus repo graph build/check/import/search/explain` | Local graph projection, JSON-only external graph import, structural check, read-only search/explain. |
-| Compiled wiki | `codexus wiki map/build/check/export`, `codexus wiki context --approve` | Regenerable markdown projection과 visible non-injected context approval artifact. |
+| Compiled wiki | `codexus wiki map/build/check/export`, `codexus wiki context --approve`, `codexus wiki injection-policy` | Regenerable markdown projection, visible non-injected context approval artifact, 명시적인 manual-only injection policy report. |
 | App instance launcher | `codexus app instance profile list/status/logs/start/stop/evidence *` | Worktree-local owned process launcher와 observation evidence. Stop은 owner evidence가 있는 Codexus-owned instance만 대상으로 합니다. |
 | App-server experiments | `codexus app-server status/discover/observer/experiment` | Read-only/isolated evidence experiment. Live Desktop attachment는 계속 gated입니다. |
 | Autopilot contract | `codexus autopilot plan`, `codexus autopilot contract *`, `codexus autopilot relay *` | Plan, approval, scope-check, relay artifact, stage-gate evidence. Live `autopilot run`은 blocked입니다. |

@@ -24,6 +24,9 @@ Implementation status as of 2026-06-02:
   `architecture.md`, `decisions.md`, and `risks.md`;
 - implemented context handoff policy: `cx wiki context --approve --json` records
   a manual-only handoff policy requiring fresh context and explicit reference;
+- implemented injection policy report: `cx wiki injection-policy --json` reports
+  the manual-only boundary, keeps automatic injection deferred, and lists the
+  evidence required before any future injection path;
 - implemented schemas: `codexus.wiki.manifest`, `codexus.wiki.page`, and
   `codexus.wiki.advisory`;
 - still deferred: any automatic context injection into runs. Export is
@@ -273,6 +276,7 @@ cx wiki check --gate --json
 cx wiki context --topic verification --budget 1200 --json
 cx wiki context --topic verification --budget 1200 --fresh-only --gate --json
 cx wiki context --topic verification --approve --approved-by "$USER" --json
+cx wiki injection-policy --json
 cx wiki export --target docs/codexus-wiki --json
 ```
 
@@ -286,7 +290,11 @@ handoff policy: fresh context is required, explicit reference is required,
 automatic injection remains false, and applied/source-truth/completion authority
 all remain false. `--fresh-only --gate` is a manual context-pack freshness guard:
 it fails when the selected topic has no fresh pages instead of returning stale
-context.
+context. `cx wiki injection-policy` reports the explicit policy boundary for
+that handoff: current use is manual-only, automatic prompt mutation remains
+deferred, and future injection requires fresh-context gating, explicit approval,
+sanitization, an audit artifact, a reversible disable path, and proof that failed
+freshness cannot inject.
 
 Autopilot integration should be explicit:
 
@@ -385,6 +393,9 @@ The manifest owns page identity and freshness metadata:
 8a. Implemented: add a manual-only handoff policy to
    `codexus.wiki.context-approval` artifacts. The policy rejects stale selected
    pages, requires explicit reference, and keeps automatic injection false.
+8b. Implemented: add `cx wiki injection-policy --json` as a report-only policy
+   surface. It makes the manual-only boundary visible, keeps automatic injection
+   deferred, and does not mutate prompts.
 9. Implemented: add `cx wiki export --target <path> --json` as an explicit
    export that first requires a fresh passing wiki check, writes no source
    truth, and never auto-commits.

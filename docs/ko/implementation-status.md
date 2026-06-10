@@ -428,7 +428,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   --approved-by <name>`은 `approved_not_injected`, `automatic:false`, completion
   authority 없음과 manual-only handoff policy가 명시된 visible
   `codexus.wiki.context-approval` artifact를 기록합니다. Handoff policy는 fresh context와
-  explicit reference를 요구합니다.
+  explicit reference를 요구합니다. `cx wiki injection-policy --json`은 manual-only
+  boundary를 보고하고 automatic injection을 deferred로 유지하며 future injection path 전에
+  필요한 evidence를 나열합니다.
   `cx wiki build --mode advisory`는
   driver/model evidence(`modelInvoked: false`)와 non-authority marker를 가진
   schema-valid local source-bundle synthesis artifact를 기록합니다. `.codexus/wiki/`
@@ -437,10 +439,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   commands, verification에 더해 release/contract, runtime-boundary, repository graph,
   session-state, architecture, decision, risk projection을 포함합니다. Export는 fresh
   passing wiki check를 요구하고 auto-commit 또는 source truth가 되지 않습니다.
-  Automatic context injection은 계속 deferred입니다.
+  Explicit injection policy report는 존재하지만 automatic context injection path는 계속
+  deferred입니다.
 - `cx repo check --gate --json`가 현재 문서 일치를 강제하는 deferred self-report는
-  다음 네 가지입니다:
+  다음 항목입니다:
   - `acceptance_criteria_extraction_deferred`
+  - `automatic_context_injection_deferred`
   - `autopilot_run_deferred`
   - `broad_layering_rule_deferred`
   - `typosquat_name_similarity_deferred`

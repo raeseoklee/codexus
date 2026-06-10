@@ -40,6 +40,10 @@ occur before 1.0, but they should be called out clearly.
   context-pack handoff policy. Handoff requires fresh context and explicit
   reference, keeps automatic injection and applied state false, and never gains
   source-truth or completion authority.
+- `cx wiki injection-policy --json` now reports the explicit wiki context
+  injection boundary. The policy is manual-only, keeps automatic injection
+  deferred, and lists the evidence required before any future injection path can
+  be considered.
 
 ### Fixed
 

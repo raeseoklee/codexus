@@ -447,7 +447,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   --approve --approved-by <name>` records a visible
   `codexus.wiki.context-approval` artifact with `approved_not_injected`,
   `automatic:false`, no completion authority, and a manual-only handoff policy
-  that requires fresh context and explicit reference. `cx wiki build --mode advisory` now records
+  that requires fresh context and explicit reference. `cx wiki injection-policy
+  --json` reports the manual-only boundary, keeps automatic injection deferred,
+  and lists the evidence required before any future injection path. `cx wiki build --mode advisory` now records
   a schema-valid local source-bundle synthesis artifact with driver/model
   evidence (`modelInvoked: false`) and non-authority markers. The wiki generates
   regenerable markdown pages under `.codexus/wiki/` with source refs, local
@@ -455,11 +457,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   page set now includes release/contract, runtime-boundary, repository graph,
   session, architecture, decision, and risk projections in addition to overview,
   commands, and verification. Export requires a fresh passing wiki check and
-  does not auto-commit or become source truth. Automatic context injection
-  remains deferred.
+  does not auto-commit or become source truth. The explicit injection policy
+  report exists, but automatic context injection remains deferred.
 - Deferred self-reports currently documented and enforced by `cx repo check
   --gate --json` are:
   - `acceptance_criteria_extraction_deferred`
+  - `automatic_context_injection_deferred`
   - `autopilot_run_deferred`
   - `broad_layering_rule_deferred`
   - `typosquat_name_similarity_deferred`
@@ -657,6 +660,7 @@ review. Current high-level gaps:
 - Compiled repository wiki now has an experimental deterministic first slice:
   source-linked page generation, structural freshness gates, bounded
   context-pack generation, explicit export, advisory synthesis, and deterministic
-  graph/session/architecture/decision/risk projection pages exist. Any automatic
-  injection path remains future work.
+  graph/session/architecture/decision/risk projection pages exist. The explicit
+  injection policy report exists, but any automatic injection path remains future
+  work.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

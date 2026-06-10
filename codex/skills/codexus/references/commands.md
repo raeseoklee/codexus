@@ -153,6 +153,7 @@ node codex/skills/codexus/scripts/cx.mjs wiki build --mode deterministic --json
 node codex/skills/codexus/scripts/cx.mjs wiki build --mode advisory --json
 node codex/skills/codexus/scripts/cx.mjs wiki check --gate --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --budget 1200 --fresh-only --gate --json
+node codex/skills/codexus/scripts/cx.mjs wiki injection-policy --json
 node codex/skills/codexus/scripts/cx.mjs wiki export --target docs/codexus-wiki --json
 ```
 
@@ -164,8 +165,10 @@ regenerable projection pages over repository facts and Codexus artifacts. `wiki
 build --mode advisory` records a local source-bundle synthesis artifact without
 invoking a model and remains ineligible for automatic injection. `wiki context
 --fresh-only --gate` fails instead of returning stale pages when a caller needs
-fresh manual context. `wiki export` is explicit, requires a fresh passing wiki
-check, and does not auto-commit or become source truth.
+fresh manual context. `wiki injection-policy` reports the manual-only context
+handoff boundary and keeps automatic prompt injection deferred. `wiki export` is
+explicit, requires a fresh passing wiki check, and does not auto-commit or become
+source truth.
 
 ## Release Policy
 

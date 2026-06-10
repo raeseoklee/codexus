@@ -404,7 +404,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_release_command":
       return "Run `cx release policy --json` for release cadence policy or `cx release check --gate --json` for release integrity.";
     case "unsupported_wiki_command":
-      return "Run `cx wiki map --json`, `cx wiki build --mode deterministic --json`, `cx wiki check --gate --json`, or `cx wiki context --topic <name> --json`.";
+      return "Run `cx wiki map --json`, `cx wiki build --mode deterministic --json`, `cx wiki check --gate --json`, `cx wiki context --topic <name> --json`, or `cx wiki injection-policy --json`.";
     case "unsupported_wiki_build_mode":
       return "Use `--mode deterministic` or `--mode advisory`. Advisory build requires a fresh deterministic wiki manifest.";
     case "unsupported_autopilot_command":

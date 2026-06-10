@@ -25,6 +25,9 @@ evidence-linked markdown projection을 만드는 방향입니다.
   `decisions.md`, `risks.md`
 - 구현된 context handoff policy: `cx wiki context --approve --json`은 fresh
   context와 explicit reference를 요구하는 manual-only handoff policy를 기록합니다.
+- 구현된 injection policy report: `cx wiki injection-policy --json`은 manual-only
+  boundary를 보고하고 automatic injection을 deferred로 유지하며 future injection path 전에
+  필요한 evidence를 나열합니다.
 - 구현된 schema: `codexus.wiki.manifest`, `codexus.wiki.page`,
   `codexus.wiki.advisory`
 - 계속 deferred: run으로의 automatic context injection. Export는 fresh passing wiki
@@ -262,6 +265,7 @@ cx wiki check --gate --json
 cx wiki context --topic verification --budget 1200 --json
 cx wiki context --topic verification --budget 1200 --fresh-only --gate --json
 cx wiki context --topic verification --approve --approved-by "$USER" --json
+cx wiki injection-policy --json
 cx wiki export --target docs/codexus-wiki --json
 ```
 
@@ -273,7 +277,11 @@ session이 context를 명시적으로 인용할 수 있게 합니다. Approval a
 manual-only handoff policy도 포함합니다. Fresh context와 explicit reference가 필요하고,
 automatic injection은 false이며 applied/source-truth/completion authority도 모두 false로
 남습니다. `--fresh-only --gate`는 manual context-pack freshness guard입니다. 선택된 topic에
-fresh page가 없으면 stale context를 반환하지 않고 실패합니다.
+fresh page가 없으면 stale context를 반환하지 않고 실패합니다. `cx wiki injection-policy`는
+이 handoff의 명시적 policy boundary를 보고합니다. 현재 사용은 manual-only이고 automatic
+prompt mutation은 계속 deferred이며, future injection에는 fresh-context gate, explicit
+approval, sanitization, audit artifact, reversible disable path, failed freshness가 inject할 수
+없다는 증명이 필요합니다.
 
 Autopilot integration은 명시적이어야 합니다:
 
@@ -369,6 +377,9 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
 8a. 구현됨: `codexus.wiki.context-approval` artifact에 manual-only handoff policy를 추가.
    이 policy는 stale selected page를 거부하고 explicit reference를 요구하며 automatic
    injection을 false로 유지합니다.
+8b. 구현됨: `cx wiki injection-policy --json`을 report-only policy surface로 추가.
+   Manual-only boundary를 보이게 만들고 automatic injection은 deferred로 유지하며 prompt를
+   변경하지 않습니다.
 9. 구현됨: `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저
    요구하고, source truth를 쓰지 않으며, auto-commit하지 않는 명시적 export로 추가.
 10. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤

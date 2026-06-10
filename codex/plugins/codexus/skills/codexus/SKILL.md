@@ -19,6 +19,7 @@ node codex/plugins/codexus/scripts/cx.mjs doctor --json
 node codex/plugins/codexus/scripts/cx.mjs update check --json
 node codex/plugins/codexus/scripts/cx.mjs session status --json
 node codex/plugins/codexus/scripts/cx.mjs wiki context --topic verification --approve --approved-by "$USER" --json
+node codex/plugins/codexus/scripts/cx.mjs wiki injection-policy --json
 ```
 
 If the plugin has been copied outside the Codexus package, set `CODEXUS_HOME`

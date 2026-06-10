@@ -329,6 +329,54 @@ test("wiki context approval writes a visible non-injected artifact", async () =>
   }
 });
 
+test("wiki injection policy reports manual-only handoff without enabling injection", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    const emptyPolicy = runCli(cwd, ["wiki", "injection-policy", "--gate", "--json"]);
+    assert.equal(emptyPolicy.status, 0, emptyPolicy.stderr);
+    const emptyOutput = JSON.parse(emptyPolicy.stdout);
+    assert.equal(emptyOutput.command, "wiki injection-policy");
+    assert.equal(emptyOutput.policy.status, "manual_only");
+    assert.equal(emptyOutput.policy.automaticInjection.supported, false);
+    assert.equal(emptyOutput.policy.automaticInjection.status, "deferred");
+    assert.equal(emptyOutput.policy.approvedContextUse.requiresFreshContext, true);
+    assert.equal(emptyOutput.policy.approvedContextUse.requiresExplicitReference, true);
+    assert.equal(emptyOutput.policy.authority.promptMutation, false);
+    assert.equal(emptyOutput.policy.authority.sourceTruth, false);
+    assert.equal(emptyOutput.policy.authority.completionAuthority, false);
+    assert.equal(emptyOutput.eligibleForAutomaticInjection, false);
+    assert.equal(emptyOutput.policy.handoff.approvalCount, 0);
+    assert.equal(emptyOutput.policy.handoff.latestHandoffStatus, null);
+    assert.equal(emptyOutput.gate.status, "passed");
+    assert.ok(emptyOutput.derivableFacts.some((fact: { kind: string }) => fact.kind === "automatic_context_injection_deferred"));
+
+    const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(build.status, 0, build.stderr);
+    const approval = runCli(cwd, [
+      "wiki",
+      "context",
+      "--topic",
+      "verification",
+      "--budget",
+      "4000",
+      "--approve",
+      "--approved-by",
+      "tester",
+      "--json",
+    ]);
+    assert.equal(approval.status, 0, approval.stderr);
+
+    const observedPolicy = runCli(cwd, ["wiki", "injection-policy", "--json"]);
+    assert.equal(observedPolicy.status, 0, observedPolicy.stderr);
+    const observedOutput = JSON.parse(observedPolicy.stdout);
+    assert.equal(observedOutput.policy.handoff.approvalCount, 1);
+    assert.equal(observedOutput.policy.handoff.latestHandoffStatus, "manual_only");
+    assert.equal(observedOutput.policy.automaticInjection.supported, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("wiki check fails when a local link resolves outside the registered wiki pages", async () => {
   const cwd = await fixtureRepo();
   try {

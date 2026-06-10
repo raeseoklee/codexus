@@ -37,6 +37,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   handoff policy를 기록합니다. Handoff는 fresh context와 explicit reference를 요구하며,
   automatic injection과 applied state를 false로 유지하고 source-truth 또는 completion
   authority를 얻지 않습니다.
+- `cx wiki injection-policy --json`은 이제 wiki context injection boundary를 명시적으로
+  보고합니다. Policy는 manual-only이고 automatic injection을 deferred로 유지하며, future
+  injection path를 검토하기 전에 필요한 evidence를 나열합니다.
 
 ### Fixed
 

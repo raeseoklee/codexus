@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
-import { approveWikiContext, buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiMap, checkWiki, exportWiki } from "../../wiki/wiki.ts";
+import { approveWikiContext, buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiInjectionPolicy, buildWikiMap, checkWiki, exportWiki } from "../../wiki/wiki.ts";
 
 export async function wikiCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "check";
@@ -81,6 +81,21 @@ export async function wikiCommand(args: ParsedArgs): Promise<void> {
       return;
     }
     console.log(`Wiki context: ${result.selectedPages.length} pages, ${result.tokenEstimate} tokens`);
+    console.log(`Gate: ${result.gate.status}`);
+    process.exitCode = result.gate.exitCode;
+    return;
+  }
+
+  if (subcommand === "injection-policy") {
+    assertAllowedFlags(args, ["cwd", "json", "gate"]);
+    const result = await buildWikiInjectionPolicy(cwd, flagBool(args.flags, "gate"));
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      process.exitCode = result.gate.exitCode;
+      return;
+    }
+    console.log(`Wiki injection policy: ${result.policy.status}`);
+    console.log(`Automatic injection: ${result.policy.automaticInjection.status}`);
     console.log(`Gate: ${result.gate.status}`);
     process.exitCode = result.gate.exitCode;
     return;

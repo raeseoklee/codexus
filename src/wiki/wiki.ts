@@ -158,7 +158,9 @@ export interface WikiDerivableFact {
     | "page_valid"
     | "source_refs_resolved"
     | "local_links_resolved"
-    | "page_fresh";
+    | "page_fresh"
+    | "manual_context_handoff_policy"
+    | "automatic_context_injection_deferred";
   gate: boolean;
   evidence: string;
   files?: string[];
@@ -299,6 +301,49 @@ export interface WikiContextApprovalSummary {
   };
   eligibleForAutomaticInjection: false;
   completionAuthority: false;
+}
+
+export interface WikiInjectionPolicyResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "wiki injection-policy";
+  cwd: string;
+  policy: {
+    status: "manual_only";
+    automaticInjection: {
+      status: "deferred";
+      supported: false;
+      reason: string;
+      requiredBeforeEnable: string[];
+    };
+    approvedContextUse: {
+      status: "manual_only";
+      requiresFreshContext: true;
+      requiresExplicitReference: true;
+      allowedConsumers: string[];
+    };
+    handoff: {
+      approvalCount: number;
+      latestHandoffStatus: string | null;
+    };
+    authority: {
+      promptMutation: false;
+      sourceTruth: false;
+      completionAuthority: false;
+    };
+  };
+  eligibleForAutomaticInjection: false;
+  evidenceGaps: WikiEvidenceGap[];
+  derivableFacts: WikiDerivableFact[];
+  heuristicClaims: [];
+  blockingUnknowns: [];
+  informationalUnknowns: Array<{
+    kind: "automatic_context_injection_deferred";
+    gate: false;
+    evidence: null;
+    recommendation: string;
+  }>;
+  gate: WikiGate;
 }
 
 export interface WikiExportResult {
@@ -1750,11 +1795,7 @@ export async function approveWikiContext(cwd: string, topic: string, budget: num
     handoffPolicy: {
       status: "manual_only",
       contextPackPath: markdown,
-      allowedConsumers: [
-        "human",
-        "codex-session-explicit-reference",
-        "autopilot-context-pack-argument",
-      ],
+      allowedConsumers: manualContextConsumers,
       requiresFreshContext: true,
       requiresExplicitReference: true,
       automaticInjection: false,
@@ -1850,6 +1891,79 @@ export async function summarizeWikiContextApprovals(cwd: string): Promise<WikiCo
     },
     eligibleForAutomaticInjection: false,
     completionAuthority: false,
+  };
+}
+
+const manualContextConsumers = [
+  "human",
+  "codex-session-explicit-reference",
+  "autopilot-context-pack-argument",
+];
+
+export async function buildWikiInjectionPolicy(cwd: string, gate = false): Promise<WikiInjectionPolicyResult> {
+  const approvals = await summarizeWikiContextApprovals(cwd);
+  const evidenceGaps: WikiEvidenceGap[] = [];
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "wiki injection-policy",
+    cwd,
+    policy: {
+      status: "manual_only",
+      automaticInjection: {
+        status: "deferred",
+        supported: false,
+        reason: "Codexus can prepare and approve bounded wiki context packs, but it does not mutate prompts or inject context automatically.",
+        requiredBeforeEnable: [
+          "fresh-context-gate",
+          "explicit-user-approval",
+          "sanitization-policy",
+          "audit-artifact",
+          "reversible-disable-path",
+          "proof-failed-freshness-cannot-inject",
+        ],
+      },
+      approvedContextUse: {
+        status: "manual_only",
+        requiresFreshContext: true,
+        requiresExplicitReference: true,
+        allowedConsumers: manualContextConsumers,
+      },
+      handoff: {
+        approvalCount: approvals.approvals.total,
+        latestHandoffStatus: approvals.approvals.latest?.handoffStatus ?? null,
+      },
+      authority: {
+        promptMutation: false,
+        sourceTruth: false,
+        completionAuthority: false,
+      },
+    },
+    eligibleForAutomaticInjection: false,
+    evidenceGaps,
+    derivableFacts: [
+      {
+        kind: "manual_context_handoff_policy",
+        gate: true,
+        evidence: "Manual context handoff requires fresh context and explicit reference.",
+      },
+      {
+        kind: "automatic_context_injection_deferred",
+        gate: true,
+        evidence: "Automatic context injection is unsupported and remains deferred.",
+      },
+    ],
+    heuristicClaims: [],
+    blockingUnknowns: [],
+    informationalUnknowns: [
+      {
+        kind: "automatic_context_injection_deferred",
+        gate: false,
+        evidence: null,
+        recommendation: "Use `cx wiki context --approve --approved-by <name> --json` and reference the returned context path explicitly.",
+      },
+    ],
+    gate: buildGate(gate, evidenceGaps),
   };
 }
 
