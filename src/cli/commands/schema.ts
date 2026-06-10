@@ -30,6 +30,7 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "wiki-injection-plan",
   "repo-graph",
   "relay-session",
+  "relay-adapter",
   "stage-gate-evidence",
   "convergence-agreement",
   "decision",

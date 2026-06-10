@@ -12,6 +12,8 @@ export type RelayRole = "author-engine" | "review-engine" | string;
 export type RelayVerificationStatus = "passed" | "failed" | "skipped" | "unknown";
 export type RelayVerificationMatrixStatus = RelayVerificationStatus | "planned" | "deferred";
 export type RelayStatus = "pass" | "fail" | "unknown";
+export type RelayAdapterRole = "artifact-import" | "driver-mediated" | "protocol-mediated";
+export type RelayAdapterStatus = "implemented" | "unavailable";
 
 export interface RelayEngineDescriptor {
   engine: string;
@@ -22,6 +24,69 @@ export interface RelayEngineDescriptor {
     review: boolean;
     verification: "external" | "none" | "unknown";
     spawn: boolean;
+  };
+}
+
+export interface RelayAdapterDescriptor {
+  id: string;
+  role: RelayAdapterRole;
+  status: RelayAdapterStatus;
+  engineRole: "author-engine" | "review-engine";
+  driverId: string | null;
+  command: string | null;
+  input: {
+    kind: "author-artifact" | "review-artifact" | "codex-exec" | "external-protocol";
+    existingArtifactRequired: boolean;
+  };
+  capability: {
+    canImportArtifact: boolean;
+    canSpawnEngine: boolean;
+    canMutateSource: boolean;
+    canInstallHooks: boolean;
+    canReadTranscript: boolean;
+    canDeclareCompletion: false;
+  };
+  authority: {
+    spawnAuthority: false;
+    sourceMutationAuthority: false;
+    completionAuthority: false;
+    verificationAuthority: false;
+    hookInstallAuthority: false;
+    transcriptAuthority: false;
+  };
+  boundaries: {
+    recordOnly: boolean;
+    boundedArtifactShape: boolean;
+    storesFilesByPathAndHash: boolean;
+    requiresExplicitApproval: boolean;
+    requiresFreshStageGate: boolean;
+    engineIdentityProofRequired: boolean;
+  };
+  caveat: string;
+}
+
+export interface RelayAdapterReport {
+  schemaVersion: 1;
+  stability: "experimental";
+  type: "codexus.autopilot.relay.adapters";
+  command: "autopilot relay adapters";
+  cwd: string;
+  adapters: RelayAdapterDescriptor[];
+  summary: {
+    total: number;
+    implemented: number;
+    unavailable: number;
+    artifactImportImplemented: boolean;
+    activeDriverImplemented: false;
+    protocolAdapterImplemented: false;
+  };
+  authority: {
+    spawnAuthority: false;
+    sourceMutationAuthority: false;
+    completionAuthority: false;
+    verificationAuthority: false;
+    hookInstallAuthority: false;
+    transcriptAuthority: false;
   };
 }
 
@@ -264,8 +329,300 @@ const agreementStructuralGapKinds = new Set<RelayEvidenceGap["kind"]>([
   "verification_matrix_deferred_not_approved",
 ]);
 
+const noRelayAdapterAuthority = {
+  spawnAuthority: false,
+  sourceMutationAuthority: false,
+  completionAuthority: false,
+  verificationAuthority: false,
+  hookInstallAuthority: false,
+  transcriptAuthority: false,
+} as const;
+
+export function listRelayAdapters(cwd: string): RelayAdapterReport {
+  const adapters: RelayAdapterDescriptor[] = [
+    {
+      id: "author-artifact-import",
+      role: "artifact-import",
+      status: "implemented",
+      engineRole: "author-engine",
+      driverId: "artifact-import",
+      command: "autopilot relay record --author-file <path>",
+      input: {
+        kind: "author-artifact",
+        existingArtifactRequired: true,
+      },
+      capability: {
+        canImportArtifact: true,
+        canSpawnEngine: false,
+        canMutateSource: false,
+        canInstallHooks: false,
+        canReadTranscript: false,
+        canDeclareCompletion: false,
+      },
+      authority: noRelayAdapterAuthority,
+      boundaries: {
+        recordOnly: true,
+        boundedArtifactShape: true,
+        storesFilesByPathAndHash: true,
+        requiresExplicitApproval: false,
+        requiresFreshStageGate: false,
+        engineIdentityProofRequired: false,
+      },
+      caveat: "Imports an existing author artifact; it does not start or control an author engine.",
+    },
+    {
+      id: "review-artifact-import",
+      role: "artifact-import",
+      status: "implemented",
+      engineRole: "review-engine",
+      driverId: "external-relay",
+      command: "autopilot relay record --review-file <path>",
+      input: {
+        kind: "review-artifact",
+        existingArtifactRequired: true,
+      },
+      capability: {
+        canImportArtifact: true,
+        canSpawnEngine: false,
+        canMutateSource: false,
+        canInstallHooks: false,
+        canReadTranscript: false,
+        canDeclareCompletion: false,
+      },
+      authority: noRelayAdapterAuthority,
+      boundaries: {
+        recordOnly: true,
+        boundedArtifactShape: true,
+        storesFilesByPathAndHash: true,
+        requiresExplicitApproval: false,
+        requiresFreshStageGate: false,
+        engineIdentityProofRequired: false,
+      },
+      caveat: "Imports an existing review artifact; it cannot prove reviewer identity beyond the imported file metadata.",
+    },
+    {
+      id: "codex-exec-author-driver",
+      role: "driver-mediated",
+      status: "unavailable",
+      engineRole: "author-engine",
+      driverId: "codex-exec",
+      command: null,
+      input: {
+        kind: "codex-exec",
+        existingArtifactRequired: false,
+      },
+      capability: {
+        canImportArtifact: false,
+        canSpawnEngine: false,
+        canMutateSource: false,
+        canInstallHooks: false,
+        canReadTranscript: false,
+        canDeclareCompletion: false,
+      },
+      authority: noRelayAdapterAuthority,
+      boundaries: {
+        recordOnly: false,
+        boundedArtifactShape: true,
+        storesFilesByPathAndHash: true,
+        requiresExplicitApproval: true,
+        requiresFreshStageGate: true,
+        engineIdentityProofRequired: true,
+      },
+      caveat: "Active relay author execution remains unavailable until the approved autopilot contract and worktree-owned start gates can supervise it.",
+    },
+    {
+      id: "external-review-engine-driver",
+      role: "driver-mediated",
+      status: "unavailable",
+      engineRole: "review-engine",
+      driverId: null,
+      command: null,
+      input: {
+        kind: "external-protocol",
+        existingArtifactRequired: false,
+      },
+      capability: {
+        canImportArtifact: false,
+        canSpawnEngine: false,
+        canMutateSource: false,
+        canInstallHooks: false,
+        canReadTranscript: false,
+        canDeclareCompletion: false,
+      },
+      authority: noRelayAdapterAuthority,
+      boundaries: {
+        recordOnly: false,
+        boundedArtifactShape: true,
+        storesFilesByPathAndHash: true,
+        requiresExplicitApproval: true,
+        requiresFreshStageGate: true,
+        engineIdentityProofRequired: true,
+      },
+      caveat: "No supported external review-engine driver is installed; externally produced review artifacts must be imported instead.",
+    },
+    {
+      id: "mcp-agent-relay-protocol",
+      role: "protocol-mediated",
+      status: "unavailable",
+      engineRole: "review-engine",
+      driverId: null,
+      command: null,
+      input: {
+        kind: "external-protocol",
+        existingArtifactRequired: false,
+      },
+      capability: {
+        canImportArtifact: false,
+        canSpawnEngine: false,
+        canMutateSource: false,
+        canInstallHooks: false,
+        canReadTranscript: false,
+        canDeclareCompletion: false,
+      },
+      authority: noRelayAdapterAuthority,
+      boundaries: {
+        recordOnly: false,
+        boundedArtifactShape: true,
+        storesFilesByPathAndHash: true,
+        requiresExplicitApproval: true,
+        requiresFreshStageGate: true,
+        engineIdentityProofRequired: true,
+      },
+      caveat: "Codexus does not vendor ai-devkit agent-relay or install relay hooks; any protocol bridge needs a separate descriptor-backed adapter.",
+    },
+  ];
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    type: "codexus.autopilot.relay.adapters",
+    command: "autopilot relay adapters",
+    cwd,
+    adapters,
+    summary: {
+      total: adapters.length,
+      implemented: adapters.filter((adapter) => adapter.status === "implemented").length,
+      unavailable: adapters.filter((adapter) => adapter.status === "unavailable").length,
+      artifactImportImplemented: adapters.some((adapter) => adapter.role === "artifact-import" && adapter.status === "implemented"),
+      activeDriverImplemented: false,
+      protocolAdapterImplemented: false,
+    },
+    authority: noRelayAdapterAuthority,
+  };
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isRelayAdapterRole(value: unknown): value is RelayAdapterRole {
+  return value === "artifact-import" || value === "driver-mediated" || value === "protocol-mediated";
+}
+
+function isRelayAdapterStatus(value: unknown): value is RelayAdapterStatus {
+  return value === "implemented" || value === "unavailable";
+}
+
+function validateRelayAdapterAuthority(value: unknown, errors: string[], path: string): void {
+  if (!isRecord(value)) {
+    errors.push(`${path}:expected_object`);
+    return;
+  }
+  if (value.spawnAuthority !== false) errors.push(`${path}.spawnAuthority:not_false`);
+  if (value.sourceMutationAuthority !== false) errors.push(`${path}.sourceMutationAuthority:not_false`);
+  if (value.completionAuthority !== false) errors.push(`${path}.completionAuthority:not_false`);
+  if (value.verificationAuthority !== false) errors.push(`${path}.verificationAuthority:not_false`);
+  if (value.hookInstallAuthority !== false) errors.push(`${path}.hookInstallAuthority:not_false`);
+  if (value.transcriptAuthority !== false) errors.push(`${path}.transcriptAuthority:not_false`);
+}
+
+function validateRelayAdapterCapability(value: unknown, errors: string[], path: string): void {
+  if (!isRecord(value)) {
+    errors.push(`${path}:expected_object`);
+    return;
+  }
+  for (const key of [
+    "canImportArtifact",
+    "canSpawnEngine",
+    "canMutateSource",
+    "canInstallHooks",
+    "canReadTranscript",
+  ]) {
+    if (typeof value[key] !== "boolean") errors.push(`${path}.${key}:expected_boolean`);
+  }
+  if (value.canDeclareCompletion !== false) errors.push(`${path}.canDeclareCompletion:not_false`);
+}
+
+function validateRelayAdapterBoundaries(value: unknown, errors: string[], path: string): void {
+  if (!isRecord(value)) {
+    errors.push(`${path}:expected_object`);
+    return;
+  }
+  for (const key of [
+    "recordOnly",
+    "boundedArtifactShape",
+    "storesFilesByPathAndHash",
+    "requiresExplicitApproval",
+    "requiresFreshStageGate",
+    "engineIdentityProofRequired",
+  ]) {
+    if (typeof value[key] !== "boolean") errors.push(`${path}.${key}:expected_boolean`);
+  }
+}
+
+export function validateRelayAdapterReport(value: unknown, path = "relay-adapter") {
+  const errors: string[] = [];
+  if (!isRecord(value)) return { path, valid: false, errors: [`${path}:not_object`] };
+  if (value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  if (value.stability !== "experimental") errors.push("stability:not_experimental");
+  if (value.type !== "codexus.autopilot.relay.adapters") errors.push("type:not_codexus_autopilot_relay_adapters");
+  if (value.command !== "autopilot relay adapters") errors.push("command:not_autopilot_relay_adapters");
+  if (typeof value.cwd !== "string" || !value.cwd) errors.push("cwd:missing_string");
+  if (!Array.isArray(value.adapters)) {
+    errors.push("adapters:expected_array");
+  } else {
+    for (const [index, adapter] of value.adapters.entries()) {
+      const prefix = `adapters.${index}`;
+      if (!isRecord(adapter)) {
+        errors.push(`${prefix}:expected_object`);
+        continue;
+      }
+      if (typeof adapter.id !== "string" || !adapter.id) errors.push(`${prefix}.id:missing_string`);
+      if (!isRelayAdapterRole(adapter.role)) errors.push(`${prefix}.role:invalid_enum`);
+      if (!isRelayAdapterStatus(adapter.status)) errors.push(`${prefix}.status:invalid_enum`);
+      if (adapter.engineRole !== "author-engine" && adapter.engineRole !== "review-engine") errors.push(`${prefix}.engineRole:invalid_enum`);
+      if (!(adapter.driverId === null || typeof adapter.driverId === "string")) errors.push(`${prefix}.driverId:invalid`);
+      if (!(adapter.command === null || typeof adapter.command === "string")) errors.push(`${prefix}.command:invalid`);
+      if (!isRecord(adapter.input)) {
+        errors.push(`${prefix}.input:expected_object`);
+      } else {
+        if (
+          adapter.input.kind !== "author-artifact"
+          && adapter.input.kind !== "review-artifact"
+          && adapter.input.kind !== "codex-exec"
+          && adapter.input.kind !== "external-protocol"
+        ) {
+          errors.push(`${prefix}.input.kind:invalid_enum`);
+        }
+        if (typeof adapter.input.existingArtifactRequired !== "boolean") errors.push(`${prefix}.input.existingArtifactRequired:expected_boolean`);
+      }
+      validateRelayAdapterCapability(adapter.capability, errors, `${prefix}.capability`);
+      validateRelayAdapterAuthority(adapter.authority, errors, `${prefix}.authority`);
+      validateRelayAdapterBoundaries(adapter.boundaries, errors, `${prefix}.boundaries`);
+      if (typeof adapter.caveat !== "string" || !adapter.caveat) errors.push(`${prefix}.caveat:missing_string`);
+    }
+  }
+  if (!isRecord(value.summary)) {
+    errors.push("summary:expected_object");
+  } else {
+    for (const key of ["total", "implemented", "unavailable"]) {
+      if (!Number.isInteger(value.summary[key]) || (value.summary[key] as number) < 0) errors.push(`summary.${key}:invalid_integer`);
+    }
+    if (typeof value.summary.artifactImportImplemented !== "boolean") errors.push("summary.artifactImportImplemented:expected_boolean");
+    if (value.summary.activeDriverImplemented !== false) errors.push("summary.activeDriverImplemented:not_false");
+    if (value.summary.protocolAdapterImplemented !== false) errors.push("summary.protocolAdapterImplemented:not_false");
+  }
+  validateRelayAdapterAuthority(value.authority, errors, "authority");
+  return { path, valid: errors.length === 0, errors };
 }
 
 function safeSegment(value: string): string {

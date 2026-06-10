@@ -277,8 +277,11 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 13. Multi-engine relay autopilot은 experimental recorder/checker 첫 slice를 갖습니다:
    external author/reviewer artifact import, stage-gate evidence, 같은 artifact convergence
    validation, verification 실패 시 convergence가 run을 complete하지 못한다는 증명입니다.
-   Active relay execution과 external engine adapter는 descriptor-backed adapter와 일반
-   evidence gate가 증명될 때까지 deferred로 유지합니다.
+   Active relay execution과 active external engine adapter는 descriptor-backed adapter
+   status, identity proof, 일반 evidence gate가 증명될 때까지 deferred로 유지합니다.
+   `cx autopilot relay adapters --json`은 descriptor/status boundary를 제공합니다:
+   artifact import는 구현됐고 active Codex exec / external review / MCP protocol driver는
+   unavailable입니다.
 14. Harness-engineering alignment는 더 넓은 autonomy 전에 작은 0.2 track을 추가합니다:
     첫 derivable import invariant는 이제 `cx architecture check`가 다루고, 기계적인
     repository-knowledge validation은 `cx repo map/check`가 다룹니다. `cx slop check`는
@@ -321,9 +324,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   이제 `cx autopilot relay record/stage-gate/check-agreement` recorder/checker 첫 slice를
   갖습니다. AC-to-verification matrix import/enforcement는 implementation-stage
   convergence의 structural gate로 구현됐고, non-empty approved criteria와 file-backed
-  local evidence path를 요구합니다. 다음 작업은 adapter evidence입니다: 지원되는
-  external engine descriptor, read-only handoff contract, 그리고 convergence가 verification을
-  대체하지 않는 active relay execution입니다.
+  local evidence path를 요구합니다. `cx autopilot relay adapters --json`은 이제
+  descriptor-backed relay adapter status를 보고합니다. Artifact-import author/reviewer
+  경로는 구현됐고 active Codex exec, external review-engine, MCP/protocol driver는
+  unavailable입니다. 다음 작업은 active adapter identity proof, read-only handoff
+  contract, 그리고 convergence가 verification을 대체하지 않는 active relay execution입니다.
 - Observability adapter: app-instance observation descriptor는
   browser/dev-server/log/screenshot/metric evidence용으로 구현됐고, 첫 real
   dev-server adapter는 `cx app instance evidence probe`로 존재합니다. 이 command는

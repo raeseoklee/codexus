@@ -11,6 +11,14 @@ occur before 1.0, but they should be called out clearly.
 
 ### Added
 
+- `cx autopilot relay adapters --json` now reports the experimental
+  multi-engine relay adapter descriptor/status boundary. It exposes the
+  implemented artifact-import author/reviewer paths and marks Codex exec,
+  external review-engine, and MCP/protocol relay drivers unavailable, while
+  keeping spawn, source-mutation, hook-install, transcript, verification, and
+  completion authority false.
+- `cx schema validate --type relay-adapter --file <path> --json` now validates
+  the relay adapter descriptor/status report.
 - `cx app instance evidence adapters --json` now reports the experimental
   observability adapter descriptor/status boundary. It exposes the implemented
   import-only Browser/DevTools capture-file adapter and marks host-mediated and

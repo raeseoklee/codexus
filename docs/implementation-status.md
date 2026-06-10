@@ -152,8 +152,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   health, and completion authority false.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
-  descriptors, app instance artifacts, observability adapter reports, automation
-  dispatch records, subagent result/launch artifacts, and app-server
+  descriptors, app instance artifacts, observability adapter reports, relay
+  adapter reports, automation dispatch records, subagent result/launch artifacts, and app-server
   discovery/experiment evidence
   manifests, with focused enforcement plus
   zero-dependency schema-artifact subset validation on single-record and
@@ -423,8 +423,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   same-artifact convergence while proving convergence cannot complete work when
   verification fails. Implementation-stage convergence now requires a full-gate
   acceptance-criteria-to-verification matrix with passing evidence or explicit
-  approved deferrals. Active relay execution and external engine adapters remain
-  deferred outside the stable contract.
+  approved deferrals. `cx autopilot relay adapters --json` now reports
+  descriptor-backed relay adapter status: artifact-import author/reviewer paths
+  are implemented, while Codex exec, external review-engine, and MCP/protocol
+  relay drivers remain unavailable without spawn, source-mutation, transcript,
+  verification, hook, or completion authority. Active relay execution and active
+  external engine adapters remain deferred outside the stable contract.
 - Operational control invariants now have an experimental first slice:
   `cx autopilot presets list --json`, schema-validated `autonomyPreset`
   metadata in autopilot draft contracts, `cx policy catalog check --json`, and
@@ -645,12 +649,12 @@ review. Current high-level gaps:
   experimental foundation now covers `cx autopilot plan` plus contract
   validate/approve/scope-check, but `cx autopilot run` and worktree-attached
   long-running execution are still intentionally unbuilt. `cx repo graph
-  build/check` and `cx autopilot relay record/stage-gate/check-agreement`
+  build/check` and `cx autopilot relay record/adapters/stage-gate/check-agreement`
   exist as experimental foundations. `cx repo graph import` now imports bounded
   JSON-only external graphs without executing provider packages, and
   `cx repo graph search/explain` provide read-only advisory retrieval with
   `eligibleForAutomaticInjection: false`. Graph context injection and active
-  multi-engine relay adapters remain deferred outside the stable surface.
+  active multi-engine relay adapters remain deferred outside the stable surface.
 - Worktree app instance launcher now has an experimental live ownership slice:
   start/stop, process ownership tokens, heartbeat, port allocation, liveness,
   and active health probes are implemented for Codexus-owned instances.

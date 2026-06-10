@@ -61,7 +61,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   dispatch store path/count를 담은 `automation-scheduler-ownership-v1` evidence를
   포함하며 scheduler queue ownership, lease, unattended retry, cleanup, health,
   completion authority를 모두 false로 유지합니다.
-- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/observability adapter/automation dispatch/subagent result/subagent launch
+- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/observability adapter/relay adapter/automation dispatch/subagent result/subagent launch
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
@@ -408,7 +408,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   verification 실패 시 convergence가 완료를 만들 수 없음을 증명합니다.
   Implementation-stage convergence는 이제 passing evidence 또는 명시적으로 승인된
   deferral이 있는 full-gate acceptance-criteria-to-verification matrix를 요구합니다.
-  Active relay execution과 external engine adapter는 stable contract 밖에서
+  `cx autopilot relay adapters --json`은 descriptor-backed relay adapter status를
+  보고합니다. Artifact-import author/reviewer 경로는 구현됐고, Codex exec,
+  external review-engine, MCP/protocol relay driver는 spawn, source-mutation,
+  transcript, verification, hook, completion authority 없이 unavailable로 남아 있습니다.
+  Active relay execution과 active external engine adapter는 stable contract 밖에서
   deferred입니다.
 - Operational control invariant는 이제 실험적 첫 slice를 가집니다:
   `cx autopilot presets list --json`, autopilot contract의 schema-validated

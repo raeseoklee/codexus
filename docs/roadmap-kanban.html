@@ -677,16 +677,18 @@
           <div class="tags">
             <span class="tag later">0.2 / 0.3</span>
             <span class="tag gateable">first slice done</span>
-            <span class="tag gated">adapter deferred</span>
+            <span class="tag done">adapter status done</span>
+            <span class="tag gated">active adapter deferred</span>
           </div>
-          <p>First slice records external author/reviewer artifacts and validates convergence without letting model convergence replace verification.</p>
+          <p>First slice records external author/reviewer artifacts, reports relay adapter status, and validates convergence without letting model convergence replace verification.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Done: recorder/checker surface does not spawn a second engine.</li>
             <li>Done: convergence declarations must reference the same stage artifact hash.</li>
             <li>Done: valid convergence cannot complete a run when verification or evidence gates fail.</li>
             <li>Done: implementation-stage AC matrix enforcement blocks convergence without passing evidence.</li>
-            <li>Next: descriptor-backed external engine adapter evidence.</li>
+            <li>Done: <code>cx autopilot relay adapters --json</code> reports artifact-import implemented while active Codex exec, external review-engine, and MCP/protocol drivers remain unavailable.</li>
+            <li>Next: active adapter identity proof and read-only handoff contracts before any external engine spawn.</li>
           </ul>
           <span class="label">Sources</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md">multi-engine relay autopilot</a></p>

@@ -173,7 +173,7 @@ automatic prompt injection은 의도적으로 gate 뒤에 있습니다.
 | `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve` | Experimental graph/wiki evidence surface; context approval artifact는 visible하고 non-injected |
 | `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics/screenshot` | Experimental owned-process와 observation-evidence surface; live start/stop은 Codexus-owned instance에서만 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용 |
 | app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; app-server는 read-only, cron/gateway는 explicit approval live dispatch 지원, 나머지는 status/record/launch-contract/gated surface |
-| autopilot contract layer | Experimental foundation slice 구현 (`plan`, `contract validate/approve/scope-check`); live `autopilot run`은 계속 0.2/0.3 트랙에서 deferred |
+| autopilot contract layer | Experimental foundation slice 구현 (`plan`, `contract validate/approve/scope-check`, relay recorder/checker, relay adapter status); live `autopilot run`과 active relay driver는 계속 0.2/0.3 트랙에서 deferred |
 
 정확한 coverage와 gap은 [구현 상태](implementation-status.md)와
 [남은 작업](remaining-work.md)을 확인하세요.
@@ -261,7 +261,7 @@ Canonical bin은 `codexus`이고, `cx`는 지원되는 short alias입니다.
 - [Autopilot 계약](design/12-autopilot-contract.md): 장시간 supervised run을 위한 experimental foundation slice입니다. `cx autopilot plan`, contract validate/approve/scope-check, 사람이 승인한 scope, worktree 격리, detect-then-stop, evidence-gated acceptance를 다루며, live `autopilot run`은 계속 deferred입니다.
 - [하네스 엔지니어링 정렬](design/13-harness-engineering-alignment.md): OpenAI harness engineering 글과 Karpathy-style behavior contract를 종합한 정렬 문서. repository map, architecture gate, behavior evidence, non-goal을 정의합니다.
 - [Repository knowledge graph](design/14-repository-knowledge-graph.md): experimental codexus-lite graph build/check 첫 slice와, deferred Understand-Anything JSON import용 graph-provider boundary, scoped freshness, structural graph gate를 정의합니다.
-- [Multi-engine relay autopilot](design/15-multi-engine-relay-autopilot.md): author/reviewer artifact, stage-gate evidence, convergence validation을 위한 experimental recorder/checker 첫 slice입니다. Convergence는 완료 권한이 아닙니다.
+- [Multi-engine relay autopilot](design/15-multi-engine-relay-autopilot.md): author/reviewer artifact, stage-gate evidence, relay adapter status, convergence validation을 위한 experimental recorder/checker 첫 slice입니다. Convergence는 완료 권한이 아닙니다.
 - [Codex task panel projection](design/16-codex-task-panel-projection.md): durable Codexus task state를 native Codex task panel로 projection하되, host UI를 source of truth로 만들지 않는 0.2 제안 설계입니다.
 - [Operational control invariants](design/17-operational-control-invariants.md): autonomy preset, policy catalog reporting, docs-code invariant, decision record, loop breaker, HUD projection의 실험적 첫 slice를 정리하되 새 완료 권한은 만들지 않습니다.
 - [Compiled repository wiki](design/18-compiled-repository-wiki.md): repository fact, ledger, graph artifact, decision, verification evidence 위의 재생성 가능한 markdown page를 위한 experimental deterministic 첫 slice입니다. `cx wiki map/build/check/context/export`가 local하게 동작하며 advisory synthesis는 계속 deferred이고, export는 자동이 아니라 명시적으로만 수행됩니다.

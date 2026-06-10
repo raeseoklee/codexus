@@ -8,6 +8,7 @@ import {
 import { DEFAULT_AUTONOMY_PRESET, listAutonomyPresets } from "../../control/autonomy.ts";
 import {
   checkConvergenceAgreement,
+  listRelayAdapters,
   readRelaySession,
   recordRelayRound,
   recordStageGateEvidence,
@@ -118,6 +119,19 @@ export async function autopilotCommand(args: ParsedArgs): Promise<void> {
   const action = args.positionals[1] ?? "status";
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
   const json = flagBool(args.flags, "json");
+
+  if (action === "adapters") {
+    assertMaxPositionals(args, 2);
+    assertAllowedFlags(args, ["json", "cwd"]);
+    const result = listRelayAdapters(cwd);
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Relay adapters: ${result.summary.implemented}/${result.summary.total} implemented`);
+    console.log(`Active drivers: ${result.summary.activeDriverImplemented ? "implemented" : "unavailable"}`);
+    return;
+  }
 
   if (action === "record") {
     assertMaxPositionals(args, 2);

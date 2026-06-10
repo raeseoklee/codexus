@@ -11,6 +11,13 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ### Added
 
+- `cx autopilot relay adapters --json`은 이제 experimental multi-engine relay
+  adapter descriptor/status boundary를 보고합니다. 구현된 artifact-import author/reviewer
+  경로를 노출하고 Codex exec, external review-engine, MCP/protocol relay driver는
+  unavailable로 표시하며 spawn, source-mutation, hook-install, transcript,
+  verification, completion authority는 false로 유지합니다.
+- `cx schema validate --type relay-adapter --file <path> --json`은 이제 relay
+  adapter descriptor/status report를 검증합니다.
 - `cx app instance evidence adapters --json`은 이제 experimental observability
   adapter descriptor/status boundary를 보고합니다. 구현된 import-only Browser/DevTools
   capture-file adapter를 노출하고 host-mediated/driver-mediated capture는 unavailable로

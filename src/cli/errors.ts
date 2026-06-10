@@ -372,7 +372,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|wiki-context-approval|wiki-injection-plan|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|observability-adapter|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|subagent-bridge-probe|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|wiki-context-approval|wiki-injection-plan|repo-graph|relay-session|relay-adapter|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|observability-adapter|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|subagent-bridge-probe|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_app_command":
@@ -420,9 +420,11 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_wiki_build_mode":
       return "Use `--mode deterministic` or `--mode advisory`. Advisory build requires a fresh deterministic wiki manifest.";
     case "unsupported_autopilot_command":
-      return "Run `cx autopilot presets list --json`, `cx autopilot plan --from <path> --preset <name> --json`, `cx autopilot contract validate <path> --json`, `cx autopilot contract approve <path> --approved-by <name> --json`, `cx autopilot contract scope-check <path> --json`, or `cx autopilot relay ...`.";
+      return "Run `cx autopilot presets list --json`, `cx autopilot plan --from <path> --preset <name> --json`, `cx autopilot contract validate <path> --json`, `cx autopilot contract approve <path> --approved-by <name> --json`, `cx autopilot contract scope-check <path> --json`, or `cx autopilot relay adapters|record|stage-gate|check-agreement|status ...`.";
     case "unsupported_autopilot_contract_command":
       return "Run `cx autopilot contract validate <path> --json`, `cx autopilot contract approve <path> --approved-by <name> --json`, or `cx autopilot contract scope-check <path> --json`.";
+    case "unsupported_autopilot_relay_command":
+      return "Run `cx autopilot relay adapters --json`, `cx autopilot relay record --stage <stage> --artifact <path> --author-file <path> --review-file <path> --json`, `cx autopilot relay stage-gate ... --json`, `cx autopilot relay check-agreement ... --json`, or `cx autopilot relay status <relay-id> --json`.";
     case "autopilot_run_deferred":
       return "Use `cx autopilot plan` and `cx autopilot contract scope-check` first; live `autopilot run` stays blocked until capability and scope gates are promoted.";
     case "invalid_session_setup_scope":

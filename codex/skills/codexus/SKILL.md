@@ -56,6 +56,7 @@ node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --fre
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --approve --approved-by "$USER" --json
 node codex/skills/codexus/scripts/cx.mjs wiki injection-policy --json
 node codex/skills/codexus/scripts/cx.mjs wiki injection plan --approval <approval-id-or-path> --target session:current --json
+node codex/skills/codexus/scripts/cx.mjs autopilot relay adapters --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence screenshot --instance-id <id> --evidence-path <path> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence browser --instance-id <id> --capture <browser-capture.json> --json

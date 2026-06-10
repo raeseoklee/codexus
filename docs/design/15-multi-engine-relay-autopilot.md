@@ -2,8 +2,9 @@
 
 [Korean](../ko/design/15-multi-engine-relay-autopilot.md)
 
-Status: experimental recorder/checker first slice implemented; active relay
-execution and external engine adapters remain deferred 0.2/0.3 design work.
+Status: experimental recorder/checker first slice implemented; relay adapter
+descriptor/status reporting implemented; active relay execution and active
+external engine adapters remain deferred 0.2/0.3 design work.
 
 This document extends the [autopilot contract](12-autopilot-contract.md) with a
 multi-engine review loop. It is informed by the ai-devkit `agent-relay` /
@@ -75,6 +76,7 @@ Implemented first-slice surface:
 
 ```bash
 cx autopilot relay record --stage plan --artifact docs/plan.md --author-file author.json --review-file review.json --json
+cx autopilot relay adapters --json
 cx autopilot relay stage-gate --stage plan --scope full-gate --artifact docs/plan.md --verification-status passed --json
 cx autopilot relay check-agreement --agreement agreement.json --stage-gate <stage-gate.json> --verification-status failed --gate --json
 cx autopilot relay status <relay-id> --json
@@ -99,11 +101,14 @@ contract and a start-gate proof, exactly like normal autopilot.
 
 The first implementation can be report-only: run a single author/reviewer round,
 record artifacts, and prove that convergence does not bypass verification.
-For that first slice, `review-engine` means **artifact import only** unless a
-supported adapter already exists. Codexus should record an externally produced
-review artifact and validate its shape; it must not imply that it can spawn
-Claude Code, another engine, or an MCP relay before a descriptor-backed adapter
-is implemented and gated.
+For the implemented slice, `review-engine` means **artifact import only** unless
+a supported active adapter already exists. `cx autopilot relay adapters --json`
+now reports descriptor-backed adapter status: author/reviewer artifact import is
+implemented, while Codex exec, external review-engine, and MCP/protocol relay
+drivers remain unavailable. Codexus can record an externally produced review
+artifact and validate its shape; it must not imply that it can spawn Claude
+Code, another engine, or an MCP relay before an active adapter is implemented
+and gated.
 
 ## Stage Model
 
@@ -321,7 +326,12 @@ resume.
    verification fails.
 7. Done: implementation-stage convergence enforces the acceptance-criteria to
    verification matrix before completion.
-8. Deferred: only then consider an external relay adapter.
+8. Done: `cx autopilot relay adapters --json` reports descriptor-backed relay
+   adapter status. Artifact-import author/reviewer paths are implemented;
+   Codex exec, external review-engine, and MCP/protocol relay drivers remain
+   unavailable without spawn, source-mutation, transcript, verification, hook,
+   or completion authority.
+9. Deferred: only then consider an active external relay adapter.
 
 Dogfood target: use Codexus docs work where Codex authors a proposal and an
 external reviewer produces a review artifact, but keep completion tied to

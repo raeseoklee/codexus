@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/relay-adapter.schema.json",
+  "title": "Codexus Relay Adapter Report",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.autopilot.relay.adapters" },
+    "command": { "const": "autopilot relay adapters" },
+    "cwd": { "type": "string", "minLength": 1 },
+    "adapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["artifact-import", "driver-mediated", "protocol-mediated"] },
+          "status": { "enum": ["implemented", "unavailable"] },
+          "engineRole": { "enum": ["author-engine", "review-engine"] },
+          "driverId": { "type": ["string", "null"] },
+          "command": { "type": ["string", "null"] },
+          "input": {
+            "type": "object",
+            "properties": {
+              "kind": { "enum": ["author-artifact", "review-artifact", "codex-exec", "external-protocol"] },
+              "existingArtifactRequired": { "type": "boolean" }
+            },
+            "required": ["kind", "existingArtifactRequired"]
+          },
+          "capability": {
+            "type": "object",
+            "properties": {
+              "canImportArtifact": { "type": "boolean" },
+              "canSpawnEngine": { "type": "boolean" },
+              "canMutateSource": { "type": "boolean" },
+              "canInstallHooks": { "type": "boolean" },
+              "canReadTranscript": { "type": "boolean" },
+              "canDeclareCompletion": { "const": false }
+            },
+            "required": ["canImportArtifact", "canSpawnEngine", "canMutateSource", "canInstallHooks", "canReadTranscript", "canDeclareCompletion"]
+          },
+          "authority": {
+            "type": "object",
+            "properties": {
+              "spawnAuthority": { "const": false },
+              "sourceMutationAuthority": { "const": false },
+              "completionAuthority": { "const": false },
+              "verificationAuthority": { "const": false },
+              "hookInstallAuthority": { "const": false },
+              "transcriptAuthority": { "const": false }
+            },
+            "required": ["spawnAuthority", "sourceMutationAuthority", "completionAuthority", "verificationAuthority", "hookInstallAuthority", "transcriptAuthority"]
+          },
+          "boundaries": {
+            "type": "object",
+            "properties": {
+              "recordOnly": { "type": "boolean" },
+              "boundedArtifactShape": { "type": "boolean" },
+              "storesFilesByPathAndHash": { "type": "boolean" },
+              "requiresExplicitApproval": { "type": "boolean" },
+              "requiresFreshStageGate": { "type": "boolean" },
+              "engineIdentityProofRequired": { "type": "boolean" }
+            },
+            "required": ["recordOnly", "boundedArtifactShape", "storesFilesByPathAndHash", "requiresExplicitApproval", "requiresFreshStageGate", "engineIdentityProofRequired"]
+          },
+          "caveat": { "type": "string", "minLength": 1 }
+        },
+        "required": ["id", "role", "status", "engineRole", "driverId", "command", "input", "capability", "authority", "boundaries", "caveat"]
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "number", "minimum": 0 },
+        "implemented": { "type": "number", "minimum": 0 },
+        "unavailable": { "type": "number", "minimum": 0 },
+        "artifactImportImplemented": { "type": "boolean" },
+        "activeDriverImplemented": { "const": false },
+        "protocolAdapterImplemented": { "const": false }
+      },
+      "required": ["total", "implemented", "unavailable", "artifactImportImplemented", "activeDriverImplemented", "protocolAdapterImplemented"]
+    },
+    "authority": {
+      "type": "object",
+      "properties": {
+        "spawnAuthority": { "const": false },
+        "sourceMutationAuthority": { "const": false },
+        "completionAuthority": { "const": false },
+        "verificationAuthority": { "const": false },
+        "hookInstallAuthority": { "const": false },
+        "transcriptAuthority": { "const": false }
+      },
+      "required": ["spawnAuthority", "sourceMutationAuthority", "completionAuthority", "verificationAuthority", "hookInstallAuthority", "transcriptAuthority"]
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "command", "cwd", "adapters", "summary", "authority"]
+}

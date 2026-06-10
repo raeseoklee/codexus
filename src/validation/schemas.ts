@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { validateArchitecturePolicy } from "../architecture/policy.ts";
 import { validateAppInstanceArtifact, validateAppInstanceDescriptor, validateAppInstanceObservation, validateObservabilityAdapterReport } from "../app-instance/launcher.ts";
 import { validateAutopilotContract } from "../autopilot/contract.ts";
+import { validateRelayAdapterReport } from "../relay/artifacts.ts";
 import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
 import { validateWikiContextApproval, validateWikiInjectionPlan, validateWikiManifest } from "../wiki/wiki.ts";
 import { findCodexusPackageRoot } from "../util/package-root.ts";
@@ -66,6 +67,7 @@ export type SchemaValidationType =
   | "wiki-injection-plan"
   | "repo-graph"
   | "relay-session"
+  | "relay-adapter"
   | "stage-gate-evidence"
   | "convergence-agreement"
   | "decision"
@@ -115,6 +117,7 @@ export const schemaArtifactNames = [
   "wiki-injection-plan.schema.json",
   "repo-graph.schema.json",
   "relay-session.schema.json",
+  "relay-adapter.schema.json",
   "stage-gate-evidence.schema.json",
   "convergence-agreement.schema.json",
   "decision.schema.json",
@@ -150,6 +153,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "wiki-injection-plan": "wiki-injection-plan.schema.json",
   "repo-graph": "repo-graph.schema.json",
   "relay-session": "relay-session.schema.json",
+  "relay-adapter": "relay-adapter.schema.json",
   "stage-gate-evidence": "stage-gate-evidence.schema.json",
   "convergence-agreement": "convergence-agreement.schema.json",
   decision: "decision.schema.json",
@@ -736,6 +740,11 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       requireNumber(value.gate, "exitCode", errors, "gate.exitCode");
       requireString(value.gate, "reason", errors, "gate.reason");
     }
+  }
+
+  if (type === "relay-adapter") {
+    const validation = validateRelayAdapterReport(value);
+    errors.push(...validation.errors);
   }
 
   if (type === "stage-gate-evidence") {

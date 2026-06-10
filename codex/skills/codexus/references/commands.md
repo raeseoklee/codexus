@@ -123,6 +123,21 @@ and observation. The HTTP, log, metric, and screenshot-file evidence adapters
 record bounded artifacts tied to an `instanceId`; they do not become health,
 cleanup, control, or completion authority.
 
+## Relay Adapters
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs autopilot relay adapters --json
+node codex/skills/codexus/scripts/cx.mjs autopilot relay record --stage plan --artifact docs/plan.md --author-file author.json --review-file review.json --json
+node codex/skills/codexus/scripts/cx.mjs autopilot relay stage-gate --stage implementation --scope full-gate --artifact docs/plan.md --verification-status passed --json
+node codex/skills/codexus/scripts/cx.mjs autopilot relay check-agreement --agreement agreement.json --stage-gate stage-gate.json --gate --json
+```
+
+Use `relay adapters` before assuming a multi-engine relay can spawn or contact a
+review engine. The current supported relay path is artifact import only:
+author/reviewer files can be recorded and validated, while active Codex exec,
+external review-engine, and MCP/protocol relay drivers remain unavailable
+without spawn, transcript, hook, verification, or completion authority.
+
 ## Runtime Gates
 
 ```bash

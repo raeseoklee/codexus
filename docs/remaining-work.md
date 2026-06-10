@@ -294,8 +294,11 @@ evidence only when the supporting runtime exists:
     slice: external author/reviewer artifact import, stage-gate evidence,
     same-artifact convergence validation, and the proof that convergence cannot
     complete a run when verification fails. Keep active relay execution and
-    external engine adapters deferred until descriptor-backed adapters and
-    normal evidence gates are proven.
+    active external engine adapters deferred until descriptor-backed adapter
+    status, identity proof, and normal evidence gates are proven. `cx autopilot
+    relay adapters --json` now provides the descriptor/status boundary: artifact
+    import is implemented, active Codex exec / external review / MCP protocol
+    drivers remain unavailable.
 14. Harness-engineering alignment adds small 0.2 tracks before broader
     autonomy: `cx architecture check` now covers the first derivable import
     invariant, `cx repo map/check` now covers mechanical repository-knowledge
@@ -345,9 +348,12 @@ Harness-engineering alignment adds these evidence-first tracks:
   record/stage-gate/check-agreement`. AC-to-verification matrix
   import/enforcement is implemented for implementation-stage convergence,
   including non-empty approved criteria and file-backed local evidence paths.
-  Next work is adapter evidence: supported external engine descriptors,
-  read-only handoff contracts, and eventual active relay execution without
-  letting convergence replace verification.
+  `cx autopilot relay adapters --json` now reports descriptor-backed relay
+  adapter status: artifact-import author/reviewer paths are implemented while
+  active Codex exec, external review-engine, and MCP/protocol drivers remain
+  unavailable. Next work is active adapter identity proof, read-only handoff
+  contracts, and eventual active relay execution without letting convergence
+  replace verification.
 - Observability adapters: app-instance observation descriptors now exist for
   browser/dev-server/log/screenshot/metric evidence, and the first real
   dev-server adapter exists as `cx app instance evidence probe`: a loopback-only,

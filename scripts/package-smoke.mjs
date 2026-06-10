@@ -573,6 +573,17 @@ process.on("SIGINT", shutdown);
   const appAdaptersSchema = parseJsonRun(codexus, ["schema", "validate", "--cwd", project, "--type", "observability-adapter", "--file", appAdaptersPath, "--json"]);
   assert(appAdaptersSchema.ok === true, "observability adapter report did not validate against schema");
 
+  const relayAdapters = parseJsonRun(codexus, ["autopilot", "relay", "adapters", "--cwd", project, "--json"]);
+  assert(relayAdapters.summary?.artifactImportImplemented === true, "relay adapter report did not expose artifact-import support");
+  assert(relayAdapters.summary?.activeDriverImplemented === false, "relay adapter report must not claim active driver support");
+  assert(relayAdapters.summary?.protocolAdapterImplemented === false, "relay adapter report must not claim protocol adapter support");
+  assert(relayAdapters.authority?.spawnAuthority === false, "relay adapter report must not gain spawn authority");
+  assert(relayAdapters.authority?.completionAuthority === false, "relay adapter report must not gain completion authority");
+  const relayAdaptersPath = join(project, "relay-adapters.json");
+  await writeFile(relayAdaptersPath, `${JSON.stringify(relayAdapters, null, 2)}\n`);
+  const relayAdaptersSchema = parseJsonRun(codexus, ["schema", "validate", "--cwd", project, "--type", "relay-adapter", "--file", relayAdaptersPath, "--json"]);
+  assert(relayAdaptersSchema.ok === true, "relay adapter report did not validate against schema");
+
   const appLive = parseJsonRun(codexus, [
     "app",
     "instance",

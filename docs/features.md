@@ -56,7 +56,7 @@ Experimental surfaces are shipped but not frozen as stable JSON contracts.
 | Compiled wiki | `codexus wiki map/build/check/export`, `codexus wiki context --approve`, `codexus wiki injection-policy`, `codexus wiki injection plan` | Regenerable markdown projection, visible non-injected context approval artifacts, explicit manual-only injection policy reporting, and report-only injection planning. |
 | App instance launcher | `codexus app instance profile list/status/logs/start/stop/evidence *` | Worktree-local owned process launcher, observation evidence, and report-only observability adapter status. Stop only targets Codexus-owned instances with owner evidence; adapter status does not imply health, control, or completion authority. |
 | App-server experiments | `codexus app-server status/discover/observer/experiment` | Read-only and isolated evidence experiments. Live Desktop attachment remains gated. |
-| Autopilot contract | `codexus autopilot plan`, `codexus autopilot contract *`, `codexus autopilot relay *` | Plan, approval, scope-check, relay artifact, and stage-gate evidence. Live `autopilot run` remains blocked. |
+| Autopilot contract | `codexus autopilot plan`, `codexus autopilot contract *`, `codexus autopilot relay *` | Plan, approval, scope-check, relay artifact, stage-gate evidence, and relay adapter status. Live `autopilot run` and active relay drivers remain blocked. |
 | Cron/gateway automation | `codexus cron *`, `codexus gateway *` | Dry-run, explicit approval, recorded dispatch, and recovery projections. Rich unattended ownership is future work. |
 | Update and plugin checks | `codexus update check`, `codexus plugin status` | Advisory availability and plugin packaging facts. They never mutate installation automatically. |
 

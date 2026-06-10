@@ -98,6 +98,50 @@ test("autopilot relay record persists import-only author and review artifacts", 
   }
 });
 
+test("autopilot relay adapters report artifact import without active spawn authority", async () => {
+  const cwd = await tempDir();
+  try {
+    const result = runCli(cwd, ["autopilot", "relay", "adapters", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.schemaVersion, 1);
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.type, "codexus.autopilot.relay.adapters");
+    assert.equal(output.command, "autopilot relay adapters");
+    assert.equal(output.summary.artifactImportImplemented, true);
+    assert.equal(output.summary.activeDriverImplemented, false);
+    assert.equal(output.summary.protocolAdapterImplemented, false);
+    assert.equal(output.authority.spawnAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+    assert.equal(output.authority.transcriptAuthority, false);
+
+    const reviewImport = output.adapters.find((adapter: { id: string }) => adapter.id === "review-artifact-import");
+    assert.equal(reviewImport.status, "implemented");
+    assert.equal(reviewImport.role, "artifact-import");
+    assert.equal(reviewImport.engineRole, "review-engine");
+    assert.equal(reviewImport.capability.canImportArtifact, true);
+    assert.equal(reviewImport.capability.canSpawnEngine, false);
+    assert.equal(reviewImport.capability.canDeclareCompletion, false);
+    assert.equal(reviewImport.authority.spawnAuthority, false);
+    assert.equal(reviewImport.authority.sourceMutationAuthority, false);
+    assert.equal(reviewImport.authority.completionAuthority, false);
+
+    const externalDriver = output.adapters.find((adapter: { id: string }) => adapter.id === "external-review-engine-driver");
+    assert.equal(externalDriver.status, "unavailable");
+    assert.equal(externalDriver.role, "driver-mediated");
+    assert.equal(externalDriver.capability.canSpawnEngine, false);
+    assert.equal(externalDriver.boundaries.engineIdentityProofRequired, true);
+
+    const artifactPath = join(cwd, "relay-adapters.json");
+    await writeFile(artifactPath, `${JSON.stringify(output, null, 2)}\n`);
+    const schema = runCli(cwd, ["schema", "validate", "--type", "relay-adapter", "--file", artifactPath, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("valid convergence remains unable to complete when verification fails", async () => {
   const cwd = await tempDir();
   try {

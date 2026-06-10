@@ -676,16 +676,18 @@
           <div class="tags">
             <span class="tag later">0.2 / 0.3</span>
             <span class="tag gateable">첫 slice 완료</span>
-            <span class="tag gated">adapter deferred</span>
+            <span class="tag done">adapter status 완료</span>
+            <span class="tag gated">active adapter deferred</span>
           </div>
-          <p>첫 slice는 external author/reviewer artifact를 기록하고, model convergence가 verification을 대체하지 않도록 convergence를 검증합니다.</p>
+          <p>첫 slice는 external author/reviewer artifact를 기록하고, relay adapter status를 보고하며, model convergence가 verification을 대체하지 않도록 convergence를 검증합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>완료: recorder/checker surface는 두 번째 engine을 spawn하지 않습니다.</li>
             <li>완료: Convergence declaration은 같은 stage artifact hash를 참조해야 합니다.</li>
             <li>완료: Verification 또는 evidence gate가 실패하면 valid convergence도 run을 complete할 수 없습니다.</li>
             <li>완료: implementation-stage AC matrix enforcement는 passing evidence 없이 convergence를 막습니다.</li>
-            <li>다음: descriptor-backed external engine adapter evidence.</li>
+            <li>완료: <code>cx autopilot relay adapters --json</code>은 artifact-import를 implemented로 보고하고 active Codex exec, external review-engine, MCP/protocol driver는 unavailable로 유지합니다.</li>
+            <li>다음: external engine spawn 전 active adapter identity proof와 read-only handoff contract.</li>
           </ul>
           <span class="label">근거</span>
           <p><a href="design/15-multi-engine-relay-autopilot.md">multi-engine relay autopilot</a></p>

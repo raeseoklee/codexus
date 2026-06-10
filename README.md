@@ -189,7 +189,7 @@ gated.
 | `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve` | Experimental graph/wiki evidence surface; context approval artifacts are visible and non-injected |
 | `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics/screenshot` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
 | app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval, and other surfaces stay status/record/launch-contract/gated |
-| autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`); live `autopilot run` remains deferred to the 0.2/0.3 track |
+| autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`, relay recorder/checker, relay adapter status); live `autopilot run` and active relay drivers remain deferred to the 0.2/0.3 track |
 
 See [Feature reference](https://github.com/raeseoklee/codexus/blob/main/docs/features.md),
 [Implementation status](https://github.com/raeseoklee/codexus/blob/main/docs/implementation-status.md),
