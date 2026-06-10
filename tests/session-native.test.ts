@@ -1472,6 +1472,21 @@ test("session status and hud summarize app evidence and wiki context approvals w
       },
     }, null, 2)}\n`);
 
+    const appServerExperimentDir = join(cwd, ".codexus", "experiments", "app-server", "app_server_live_read_only_test");
+    await mkdir(appServerExperimentDir, { recursive: true });
+    await writeFile(join(appServerExperimentDir, "manifest.json"), `${JSON.stringify({
+      schemaVersion: 1,
+      stability: "experimental",
+      experimentId: "app_server_live_read_only_test",
+      mode: "live-read-only",
+      eventObservation: {
+        status: "observed",
+        runtimeSurface: "desktop-app-server",
+        turnBoundaryObserved: true,
+      },
+      promotionRecommendation: "allow_session_mapping_design",
+    }, null, 2)}\n`);
+
     const wikiBuild = runCli(cwd, ["wiki", "build", "--json"], { CODEX_HOME: codexHome });
     assert.equal(wikiBuild.status, 0, wikiBuild.stderr);
     const wikiApprove = runCli(cwd, [
@@ -1501,11 +1516,17 @@ test("session status and hud summarize app evidence and wiki context approvals w
     assert.equal(statusOutput.evidenceLoop.wikiContext.approvals.total, 1);
     assert.equal(statusOutput.evidenceLoop.wikiContext.eligibleForAutomaticInjection, false);
     assert.equal(statusOutput.evidenceLoop.wikiContext.completionAuthority, false);
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.observerBridge.status, "desktop_turn_boundary_observed");
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.observerBridge.runtimeSurface, "desktop-app-server");
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.observerBridge.sessionMappingAuthority, "stage_b_turn_boundary");
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.observerBridge.connectsToLiveSocket, false);
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.observerBridge.completionAuthority, false);
 
     const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
     assert.equal(hud.status, 0, hud.stderr);
     const hudOutput = JSON.parse(hud.stdout);
     assert.equal(hudOutput.counts.appInstanceObservations, 1);
+    assert.equal(hudOutput.counts.appServerObserverStageB, 1);
     assert.equal(hudOutput.counts.wikiContextApprovals, 1);
     assert.equal(hudOutput.evidenceLoop.completionAuthority, false);
   } finally {

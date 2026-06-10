@@ -395,6 +395,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   Stage B, and stdio-proof evidence into one bridge summary without connecting
   to live sockets; it reports `desktop-app-server` only from recorded Stage B
   turn-boundary evidence.
+- `cx session status --json` and `cx session hud --json` include the same
+  recorded app-server observer projection under `evidenceLoop.appServerObserver`.
+  This maps turn-boundary evidence into session visibility without mutating
+  session runtime surface, attaching to Desktop, or creating completion
+  authority.
 - Multi-engine relay autopilot has an experimental recorder/checker first slice:
   `cx autopilot relay record` imports external author/reviewer artifacts without
   spawning another engine, `cx autopilot relay stage-gate` records

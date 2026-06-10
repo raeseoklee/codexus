@@ -329,13 +329,16 @@
           <h3>App-Server Session Event Mapping</h3>
           <div class="tags">
             <span class="tag evidence">design after observation</span>
+            <span class="tag done">session projection done</span>
           </div>
-          <p>Only after real observation, map app-server turn events into Codexus session evidence without enabling product execution.</p>
+          <p>Recorded app-server observer evidence is now projected into <code>cx session status</code> and <code>cx session hud</code> without enabling product execution.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Method shapes are versioned and bounded.</li>
-            <li>Runtime surface becomes <code>desktop-app-server</code> only from observed evidence.</li>
+            <li>Done: session projections reuse the same recorded-evidence observer model as <code>cx app-server observer status</code>.</li>
+            <li>Method shapes remain versioned and bounded in the underlying Stage B artifact.</li>
+            <li>Runtime surface becomes <code>desktop-app-server</code> only from recorded Stage B turn-boundary evidence.</li>
             <li>CLI notify absence is never used as Desktop proof.</li>
+            <li>No session projection connects to a live socket, starts a Desktop turn, or gains completion authority.</li>
           </ul>
         </article>
 

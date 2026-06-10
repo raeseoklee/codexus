@@ -30,6 +30,7 @@ import { buildUpdateSummary } from "../../update/check.ts";
 import { ensureDir, writeJsonAtomic } from "../../util/fs.ts";
 import { summarizeAppInstanceEvidence } from "../../app-instance/launcher.ts";
 import { summarizeWikiContextApprovals } from "../../wiki/wiki.ts";
+import { appServerObserverStatus } from "../../experiments/app-server-observer.ts";
 
 function statePath(cwd: string): string {
   return sessionPaths(cwd).state;
@@ -65,6 +66,7 @@ async function sessionStatusProjection(cwd: string) {
   const update = buildUpdateSummary({ currentVersion: version.version, cacheOnly: true });
   const appInstances = await summarizeAppInstanceEvidence(cwd);
   const wikiContext = await summarizeWikiContextApprovals(cwd);
+  const appServerObserver = await appServerObserverStatus(cwd);
   return {
     schemaVersion: 1,
     stability: "stable" as const,
@@ -84,6 +86,7 @@ async function sessionStatusProjection(cwd: string) {
       stability: "experimental" as const,
       appInstances,
       wikiContext,
+      appServerObserver,
       completionAuthority: false as const,
     },
     update,
@@ -129,6 +132,7 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`Control plane: ${result.controlPlane.status}`);
   console.log(`Policy catalog: ${result.controlPlane.policyCatalog.status}`);
   console.log(`App evidence: ${result.evidenceLoop.appInstances.status} (${result.evidenceLoop.appInstances.observations.total} observations)`);
+  console.log(`App-server observer: ${result.evidenceLoop.appServerObserver.observerBridge.status}`);
   console.log(`Wiki context approvals: ${result.evidenceLoop.wikiContext.status} (${result.evidenceLoop.wikiContext.approvals.total})`);
 }
 
@@ -169,6 +173,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
       policyAdvisory: status.controlPlane.counts.policyAdvisory,
       policyUnavailable: status.controlPlane.counts.policyUnavailable,
       appInstanceObservations: status.evidenceLoop.appInstances.observations.total,
+      appServerObserverStageB: status.evidenceLoop.appServerObserver.counts.stageB,
       wikiContextApprovals: status.evidenceLoop.wikiContext.approvals.total,
       hookEvents: status.state?.hookEvents.length ?? 0,
     },
@@ -191,6 +196,7 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`Deferred self-reports: ${result.controlPlane.deferredSelfReports.status}`);
   console.log(`Policy catalog: ${result.controlPlane.policyCatalog.status}`);
   console.log(`App evidence: ${result.evidenceLoop.appInstances.status}`);
+  console.log(`App-server observer: ${result.evidenceLoop.appServerObserver.observerBridge.status}`);
   console.log(`Wiki context approvals: ${result.evidenceLoop.wikiContext.status}`);
   console.log(`Notify: ${result.notifyDispatch.status}`);
 }

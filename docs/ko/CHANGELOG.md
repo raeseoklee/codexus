@@ -19,6 +19,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   bridge-availability artifact를 기록합니다. 현재 local CLI bridge는
   `unavailable`로 보고되며 native spawn, workspace mutation, completion authority는
   계속 false입니다.
+- `cx session status --json`와 `cx session hud --json`은 이제 기록된 app-server
+  observer evidence를 session evidence loop에 표시합니다. `desktop-app-server`는
+  여전히 기록된 Stage B turn-boundary evidence에서만 나타나며, 이 projection은 live
+  socket에 연결하거나 completion authority를 얻지 않습니다.
 
 ### Fixed
 

@@ -328,13 +328,16 @@
           <h3>App-Server Session Event Mapping</h3>
           <div class="tags">
             <span class="tag evidence">관측 이후 설계</span>
+            <span class="tag done">session projection 완료</span>
           </div>
-          <p>실제 관측 이후에만 app-server turn event를 Codexus session evidence로 매핑합니다.</p>
+          <p>Recorded app-server observer evidence는 이제 product execution 없이 <code>cx session status</code>와 <code>cx session hud</code>에 projection됩니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>Method shape가 versioned/bounded입니다.</li>
-            <li><code>desktop-app-server</code> runtime surface는 관측 증거에서만 나옵니다.</li>
+            <li>완료: session projection은 <code>cx app-server observer status</code>와 같은 recorded-evidence observer model을 재사용합니다.</li>
+            <li>Method shape는 underlying Stage B artifact에서 계속 versioned/bounded입니다.</li>
+            <li>Runtime surface는 recorded Stage B turn-boundary evidence에서만 <code>desktop-app-server</code>가 됩니다.</li>
             <li>CLI notify 부재를 Desktop 증거로 쓰지 않습니다.</li>
+            <li>Session projection은 live socket에 연결하거나 Desktop turn을 시작하거나 completion authority를 얻지 않습니다.</li>
           </ul>
         </article>
 

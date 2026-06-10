@@ -20,6 +20,10 @@ occur before 1.0, but they should be called out clearly.
   bridge-availability artifact. The current local CLI bridge reports
   `unavailable` and keeps native spawn, workspace mutation, and completion
   authority false.
+- `cx session status --json` and `cx session hud --json` now project recorded
+  app-server observer evidence into the session evidence loop. `desktop-app-server`
+  still appears only from recorded Stage B turn-boundary evidence, and the
+  projection never connects to live sockets or gains completion authority.
 
 ### Fixed
 

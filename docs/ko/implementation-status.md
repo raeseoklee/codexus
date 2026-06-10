@@ -284,6 +284,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   --json`은 기록된 discovery, Stage B, stdio-proof evidence를 live socket 연결 없이
   하나의 bridge summary로 투영하며, `desktop-app-server`는 기록된 Stage B
   turn-boundary evidence에서만 보고합니다.
+- `cx session status --json`와 `cx session hud --json`은 같은 recorded app-server
+  observer projection을 `evidenceLoop.appServerObserver` 아래 포함합니다. 이는
+  turn-boundary evidence를 session visibility로 매핑하지만 session runtime surface를
+  mutate하거나 Desktop에 attach하거나 completion authority를 만들지 않습니다.
 
 ## 검증
 
