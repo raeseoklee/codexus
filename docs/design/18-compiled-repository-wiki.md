@@ -19,6 +19,9 @@ Implementation status as of 2026-06-02:
   [--fresh-only --gate] --json`,
   explicit `cx wiki export --target <path> --json`, and
   `cx wiki build --mode advisory --json`;
+- implemented deterministic pages: `overview.md`, `commands.md`,
+  `verification.md`, `release.md`, `runtime.md`, `graph.md`, `sessions.md`,
+  `architecture.md`, `decisions.md`, and `risks.md`;
 - implemented schemas: `codexus.wiki.manifest`, `codexus.wiki.page`, and
   `codexus.wiki.advisory`;
 - still deferred: any automatic context injection into runs. Export is

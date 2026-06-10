@@ -1,10 +1,13 @@
 import { existsSync, readFileSync } from "node:fs";
 import { copyFile, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
+import { buildArchitectureEvidenceReport } from "../architecture/check.ts";
 import { detectVerifyCandidates } from "../session/verify-detect.ts";
 import { summarizeDecisions } from "../session/decisions.ts";
+import { buildChangeEvidenceReport } from "../session/change-evidence.ts";
 import { readSessionState, sessionPaths } from "../session/state.ts";
 import { harnessRoot } from "../ledger/paths.ts";
+import { redactSensitiveText } from "../policy/redaction.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
 import { sha256CanonicalJson, sha256Text } from "../util/hash.ts";
 
@@ -335,7 +338,10 @@ interface PageDefinition {
     | "wiki.release"
     | "wiki.runtime"
     | "wiki.graph"
-    | "wiki.sessions";
+    | "wiki.sessions"
+    | "wiki.architecture"
+    | "wiki.decisions"
+    | "wiki.risks";
   title: string;
   required: string[];
   sourceRefs: string[];
@@ -671,15 +677,67 @@ function recordString(record: Record<string, unknown> | null, key: string): stri
   return typeof value === "string" ? value : null;
 }
 
+function boundedWikiText(value: string | null | undefined, max = 180): string {
+  const normalized = redactSensitiveText(String(value ?? "none").replace(/\s+/g, " ").trim());
+  if (normalized.length <= max) return normalized || "none";
+  return `${normalized.slice(0, max - 15)}...[truncated]`;
+}
+
+function renderRecentDecisions(recent: Array<{ decisionId: string; kind: string; summary: string }>): string[] {
+  if (recent.length === 0) return ["- none"];
+  return recent.slice(0, 5).map((decision) => {
+    return `- ${decision.decisionId} (${decision.kind}): ${boundedWikiText(decision.summary)}`;
+  });
+}
+
+function renderRiskFacts(facts: Array<{ kind: string; severity: string; evidence: string }>): string[] {
+  if (facts.length === 0) return ["- none"];
+  return facts.slice(0, 8).map((fact) => `- ${fact.kind} (${fact.severity}): ${boundedWikiText(fact.evidence)}`);
+}
+
+const relatedPages = [
+  { filename: "overview.md", title: "Overview" },
+  { filename: "commands.md", title: "Commands" },
+  { filename: "verification.md", title: "Verification" },
+  { filename: "release.md", title: "Release And Contract" },
+  { filename: "runtime.md", title: "Runtime Boundaries" },
+  { filename: "graph.md", title: "Repository Graph" },
+  { filename: "sessions.md", title: "Sessions" },
+  { filename: "architecture.md", title: "Architecture" },
+  { filename: "decisions.md", title: "Decisions" },
+  { filename: "risks.md", title: "Risks" },
+];
+
+function renderRelatedPageLinks(self: string): string[] {
+  return relatedPages
+    .filter((page) => page.filename !== self)
+    .map((page) => `- [${page.title}](${page.filename})`);
+}
+
 async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
   const discovered = await discoverSources(cwd);
   const pkg = readPackageMeta(cwd);
   const verify = detectVerifyCandidates(cwd);
   const sessionState = await readSessionState(cwd).catch(() => null);
   const decisionSummary = await summarizeDecisions(cwd).catch(() => ({ count: 0, lastDecision: null }));
+  const architectureReport = buildArchitectureEvidenceReport(cwd, {});
+  const changeReport = buildChangeEvidenceReport(cwd, sessionState, { includeHeuristics: true });
   const latestVerification = discovered.latestVerification ? await readJsonIfExists(discovered.latestVerification) : null;
   const latestRepoGraph = discovered.latestRepoGraph ? await readJsonIfExists(discovered.latestRepoGraph) : null;
   const codexusCommands = extractCodexusCommands(discovered.cliMain).slice(0, 12);
+  const coreWikiLinks = [
+    "overview.md",
+    "commands.md",
+    "verification.md",
+    "release.md",
+    "runtime.md",
+    "graph.md",
+    "sessions.md",
+    "architecture.md",
+    "decisions.md",
+    "risks.md",
+  ];
+  const pageLinks = (self: string) => coreWikiLinks.filter((link) => link !== self);
 
   const overviewSources = [
     discovered.packageJson,
@@ -723,6 +781,26 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
     discovered.latestDecision,
   ].filter((value): value is string => typeof value === "string" && existsSync(value))
     .map((path) => repoRelative(cwd, path));
+  const architectureSources = [
+    discovered.packageJson,
+    discovered.implementationStatus,
+    join(cwd, "src", "architecture", "check.ts"),
+    join(cwd, "src", "architecture", "policy.ts"),
+    join(cwd, "src", "util", "static-import-scan.ts"),
+  ].filter((value) => existsSync(value)).map((path) => repoRelative(cwd, path));
+  const decisionSources = [
+    sessionPaths(cwd).state,
+    discovered.latestDecision,
+    discovered.implementationStatus,
+  ].filter((value): value is string => typeof value === "string" && existsSync(value))
+    .map((path) => repoRelative(cwd, path));
+  const riskSources = [
+    sessionPaths(cwd).state,
+    discovered.latestVerification,
+    discovered.implementationStatus,
+    join(cwd, "src", "session", "change-evidence.ts"),
+  ].filter((value): value is string => typeof value === "string" && existsSync(value))
+    .map((path) => repoRelative(cwd, path));
 
   const verificationRecord = latestVerification && typeof latestVerification === "object" && latestVerification !== null
     ? latestVerification as Record<string, unknown>
@@ -737,7 +815,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Overview",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: overviewSources.length > 0 ? overviewSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["commands.md", "verification.md", "release.md", "runtime.md", "graph.md", "sessions.md"],
+      localLinks: pageLinks("overview.md"),
       claimClasses: { derivableFacts: 6, advisoryClaims: 0 },
       body: [
         "# Overview",
@@ -751,12 +829,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         `- Session verification records: ${sessionState?.verifications.length ?? 0}`,
         "",
         "Related pages:",
-        "- [Commands](commands.md)",
-        "- [Verification](verification.md)",
-        "- [Release And Contract](release.md)",
-        "- [Runtime Boundaries](runtime.md)",
-        "- [Repository Graph](graph.md)",
-        "- [Sessions](sessions.md)",
+        ...renderRelatedPageLinks("overview.md"),
         "",
         "Source refs:",
         renderSourceRefs(overviewSources.length > 0 ? overviewSources : [repoRelative(cwd, discovered.packageJson)]),
@@ -767,7 +840,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Commands",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: commandsSources.length > 0 ? commandsSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["overview.md", "verification.md", "release.md", "runtime.md", "graph.md", "sessions.md"],
+      localLinks: pageLinks("commands.md"),
       claimClasses: { derivableFacts: 8, advisoryClaims: 0 },
       body: [
         "# Commands",
@@ -790,12 +863,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
           : ["- No local Codexus CLI command registry detected in this repository."],
         "",
         "Related pages:",
-        "- [Overview](overview.md)",
-        "- [Verification](verification.md)",
-        "- [Release And Contract](release.md)",
-        "- [Runtime Boundaries](runtime.md)",
-        "- [Repository Graph](graph.md)",
-        "- [Sessions](sessions.md)",
+        ...renderRelatedPageLinks("commands.md"),
         "",
         "Source refs:",
         renderSourceRefs(commandsSources.length > 0 ? commandsSources : [repoRelative(cwd, discovered.packageJson)]),
@@ -806,7 +874,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Verification",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: verificationSources.length > 0 ? verificationSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["overview.md", "commands.md", "release.md", "runtime.md", "graph.md", "sessions.md"],
+      localLinks: pageLinks("verification.md"),
       claimClasses: { derivableFacts: 7, advisoryClaims: 0 },
       body: [
         "# Verification",
@@ -820,12 +888,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         `- Latest verification artifact: ${verificationRecord && typeof verificationRecord.id === "string" ? String(verificationRecord.id) : "none"}`,
         "",
         "Related pages:",
-        "- [Overview](overview.md)",
-        "- [Commands](commands.md)",
-        "- [Release And Contract](release.md)",
-        "- [Runtime Boundaries](runtime.md)",
-        "- [Repository Graph](graph.md)",
-        "- [Sessions](sessions.md)",
+        ...renderRelatedPageLinks("verification.md"),
         "",
         "Source refs:",
         renderSourceRefs(verificationSources.length > 0 ? verificationSources : [repoRelative(cwd, discovered.packageJson)]),
@@ -836,7 +899,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Release And Contract",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: releaseSources.length > 0 ? releaseSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["overview.md", "commands.md", "verification.md", "runtime.md", "graph.md", "sessions.md"],
+      localLinks: pageLinks("release.md"),
       claimClasses: { derivableFacts: 7, advisoryClaims: 0 },
       body: [
         "# Release And Contract",
@@ -850,12 +913,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         "This page is a deterministic projection over release metadata. It is not a release gate and does not replace the release policy or JSON contract documents.",
         "",
         "Related pages:",
-        "- [Overview](overview.md)",
-        "- [Commands](commands.md)",
-        "- [Verification](verification.md)",
-        "- [Runtime Boundaries](runtime.md)",
-        "- [Repository Graph](graph.md)",
-        "- [Sessions](sessions.md)",
+        ...renderRelatedPageLinks("release.md"),
         "",
         "Source refs:",
         renderSourceRefs(releaseSources.length > 0 ? releaseSources : [repoRelative(cwd, discovered.packageJson)]),
@@ -866,7 +924,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Runtime Boundaries",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: runtimeSources.length > 0 ? runtimeSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["overview.md", "commands.md", "verification.md", "release.md", "graph.md", "sessions.md"],
+      localLinks: pageLinks("runtime.md"),
       claimClasses: { derivableFacts: 6, advisoryClaims: 1 },
       body: [
         "# Runtime Boundaries",
@@ -879,12 +937,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         "Use the source refs below for the authoritative runtime boundaries. This page summarizes where to look; it does not grant health, cleanup, control, injection, or completion authority.",
         "",
         "Related pages:",
-        "- [Overview](overview.md)",
-        "- [Commands](commands.md)",
-        "- [Verification](verification.md)",
-        "- [Release And Contract](release.md)",
-        "- [Repository Graph](graph.md)",
-        "- [Sessions](sessions.md)",
+        ...renderRelatedPageLinks("runtime.md"),
         "",
         "Source refs:",
         renderSourceRefs(runtimeSources.length > 0 ? runtimeSources : [repoRelative(cwd, discovered.packageJson)]),
@@ -895,7 +948,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Repository Graph",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: graphSources.length > 0 ? graphSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["overview.md", "commands.md", "verification.md", "release.md", "runtime.md", "sessions.md"],
+      localLinks: pageLinks("graph.md"),
       claimClasses: { derivableFacts: 7, advisoryClaims: 0 },
       body: [
         "# Repository Graph",
@@ -910,12 +963,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         "This page is a deterministic projection over graph artifacts. It is not an import-injection approval, code-intelligence authority, or completion gate.",
         "",
         "Related pages:",
-        "- [Overview](overview.md)",
-        "- [Commands](commands.md)",
-        "- [Verification](verification.md)",
-        "- [Release And Contract](release.md)",
-        "- [Runtime Boundaries](runtime.md)",
-        "- [Sessions](sessions.md)",
+        ...renderRelatedPageLinks("graph.md"),
         "",
         "Source refs:",
         renderSourceRefs(graphSources.length > 0 ? graphSources : [repoRelative(cwd, discovered.packageJson)]),
@@ -926,7 +974,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Sessions",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: sessionSources.length > 0 ? sessionSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["overview.md", "commands.md", "verification.md", "release.md", "runtime.md", "graph.md"],
+      localLinks: pageLinks("sessions.md"),
       claimClasses: { derivableFacts: 8, advisoryClaims: 0 },
       body: [
         "# Sessions",
@@ -941,15 +989,97 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         "This page is a deterministic projection over local session artifacts. It does not replace the session ledger, mark tasks complete, or make advisory decisions authoritative.",
         "",
         "Related pages:",
-        "- [Overview](overview.md)",
-        "- [Commands](commands.md)",
-        "- [Verification](verification.md)",
-        "- [Release And Contract](release.md)",
-        "- [Runtime Boundaries](runtime.md)",
-        "- [Repository Graph](graph.md)",
+        ...renderRelatedPageLinks("sessions.md"),
         "",
         "Source refs:",
         renderSourceRefs(sessionSources.length > 0 ? sessionSources : [repoRelative(cwd, discovered.packageJson)]),
+      ].join("\n"),
+    },
+    {
+      pageId: "wiki.architecture",
+      title: "Architecture",
+      required: [repoRelative(cwd, discovered.packageJson)],
+      sourceRefs: architectureSources.length > 0 ? architectureSources : [repoRelative(cwd, discovered.packageJson)],
+      localLinks: pageLinks("architecture.md"),
+      claimClasses: { derivableFacts: 8, advisoryClaims: 1 },
+      body: [
+        "# Architecture",
+        "",
+        `- Architecture status: ${architectureReport.architecture.status}`,
+        `- Policy mode: ${architectureReport.architecture.policyMode}`,
+        `- Scan mode: ${architectureReport.scanMode}`,
+        `- Scan accuracy: ${architectureReport.scanAccuracy}`,
+        `- Files scanned: ${architectureReport.importGraph.filesScanned}`,
+        `- Import edge count: ${architectureReport.importGraph.edges.length}`,
+        `- Evidence gap count: ${architectureReport.evidenceGaps.length}`,
+        `- Blocking unknown count: ${architectureReport.blockingUnknowns.length}`,
+        `- Informational unknown count: ${architectureReport.informationalUnknowns.length}`,
+        `- Heuristic claim count: ${architectureReport.heuristicClaims.length}`,
+        "",
+        "This page is a deterministic projection over the static architecture check. It is not type-aware graph authority, design-quality judgment, import-injection approval, or completion evidence.",
+        "",
+        "Related pages:",
+        ...renderRelatedPageLinks("architecture.md"),
+        "",
+        "Source refs:",
+        renderSourceRefs(architectureSources.length > 0 ? architectureSources : [repoRelative(cwd, discovered.packageJson)]),
+      ].join("\n"),
+    },
+    {
+      pageId: "wiki.decisions",
+      title: "Decisions",
+      required: [repoRelative(cwd, discovered.packageJson)],
+      sourceRefs: decisionSources.length > 0 ? decisionSources : [repoRelative(cwd, discovered.packageJson)],
+      localLinks: pageLinks("decisions.md"),
+      claimClasses: { derivableFacts: 7, advisoryClaims: 1 },
+      body: [
+        "# Decisions",
+        "",
+        `- Decision artifact count: ${decisionSummary.count}`,
+        `- Latest decision id: ${decisionSummary.lastDecision?.decisionId ?? "none"}`,
+        `- Latest decision kind: ${decisionSummary.lastDecision?.kind ?? "none"}`,
+        `- Latest decision summary: ${boundedWikiText(decisionSummary.lastDecision?.summary)}`,
+        "",
+        "Recent decisions:",
+        ...renderRecentDecisions(decisionSummary.recent ?? []),
+        "",
+        "This page is a deterministic projection over local decision artifacts. It records decision history, but it does not make advisory decisions authoritative or replace verification.",
+        "",
+        "Related pages:",
+        ...renderRelatedPageLinks("decisions.md"),
+        "",
+        "Source refs:",
+        renderSourceRefs(decisionSources.length > 0 ? decisionSources : [repoRelative(cwd, discovered.packageJson)]),
+      ].join("\n"),
+    },
+    {
+      pageId: "wiki.risks",
+      title: "Risks",
+      required: [repoRelative(cwd, discovered.packageJson)],
+      sourceRefs: riskSources.length > 0 ? riskSources : [repoRelative(cwd, discovered.packageJson)],
+      localLinks: pageLinks("risks.md"),
+      claimClasses: { derivableFacts: 8, advisoryClaims: 2 },
+      body: [
+        "# Risks",
+        "",
+        `- Change-evidence status: ${changeReport.changeEvidence.status}`,
+        `- Verification state: ${changeReport.changeEvidence.verification}`,
+        `- Diff base: ${changeReport.changeEvidence.diffBase}`,
+        `- Changed file count: ${changeReport.diff.files.length}`,
+        `- Evidence gap count: ${changeReport.evidenceGaps.length}`,
+        `- Risk fact count: ${changeReport.riskFacts.length}`,
+        `- Heuristic claim count: ${changeReport.heuristicClaims.length}`,
+        "",
+        "Risk facts:",
+        ...renderRiskFacts(changeReport.riskFacts),
+        "",
+        "This page is a deterministic projection over local change evidence. Risk facts may guide review, but this page is not a release gate, health check, or completion authority.",
+        "",
+        "Related pages:",
+        ...renderRelatedPageLinks("risks.md"),
+        "",
+        "Source refs:",
+        renderSourceRefs(riskSources.length > 0 ? riskSources : [repoRelative(cwd, discovered.packageJson)]),
       ].join("\n"),
     },
   ];

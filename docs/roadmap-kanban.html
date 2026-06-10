@@ -388,15 +388,15 @@
           <div class="tags">
             <span class="tag evidence">doc 18</span>
             <span class="tag done">advisory done</span>
-            <span class="tag done">release/runtime/graph/session pages done</span>
+            <span class="tag done">release/runtime/graph/session/architecture/decision/risk pages done</span>
             <span class="tag gated">injection deferred</span>
           </div>
-          <p>The deterministic compiled wiki, explicit export, context approval, advisory source-bundle synthesis, and release/runtime/graph/session page coverage slices are in place. The next step is architecture/decision/risk page coverage without turning generated pages into authority.</p>
+          <p>The deterministic compiled wiki, explicit export, context approval, advisory source-bundle synthesis, and release/runtime/graph/session/architecture/decision/risk page coverage slices are in place. The next step is explicit context-pack handoff policy without turning generated pages into authority.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Done: <code>cx wiki build --mode advisory</code> records driver/model/source bundle evidence and stays advisory.</li>
             <li>Done: <code>cx wiki export</code> is explicit, requires a fresh check, and does not make checked-in pages authoritative.</li>
-            <li>Done: deterministic wiki builds include <code>release.md</code>, <code>runtime.md</code>, <code>graph.md</code>, and <code>sessions.md</code> projection pages.</li>
+            <li>Done: deterministic wiki builds include <code>release.md</code>, <code>runtime.md</code>, <code>graph.md</code>, <code>sessions.md</code>, <code>architecture.md</code>, <code>decisions.md</code>, and <code>risks.md</code> projection pages.</li>
             <li>Done: context approval artifacts remain <code>approved_not_injected</code> and never become prompt injection.</li>
             <li>Deterministic freshness and stale-page gate behavior remain intact.</li>
             <li>No automatic context injection from wiki pages.</li>

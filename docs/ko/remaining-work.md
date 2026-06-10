@@ -362,8 +362,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   이제 experimental deterministic 첫 slice를 가집니다. Schema, `cx wiki
   map/build/check`, read-only context pack, visible non-injected context approval
   artifact, explicit export, advisory source-bundle synthesis가 존재하고, deterministic
-  graph/session projection page도 구현됐습니다. 다음 작업은 architecture/decision/risk
-  page coverage와 explicit injection policy입니다.
+  graph/session projection page와 architecture/decision/risk projection page도 구현됐습니다.
+  다음 작업은 explicit injection policy와 context-pack handoff rule입니다.
   Stale/advisory page를 run에 자동 주입하지 않습니다.
 
 - Operational control invariant: decision artifact와 ledger-derived loop
@@ -415,8 +415,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     slice와 advisory source-bundle synthesis는 구현되었습니다. `cx wiki context
     --approve`는 visible non-injected approval artifact를 쓰고, `cx wiki context
     --fresh-only --gate`는 사용 전 fresh manual context를 요구할 수 있습니다.
-    Graph/session projection page는 구현됐습니다. 다음은 architecture/decision/risk page
-    coverage이며, injection path는 그 이후에만 검토합니다.
+    Graph/session/architecture/decision/risk projection page는 구현됐습니다. 다음은
+    explicit injection policy와 context-pack handoff rule이며, injection path는 그
+    이후에만 검토합니다.
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
     구현된 live ownership과 observation-evidence slice 위에 다음 단계를 쌓습니다.
     첫 loopback HTTP dev-server probe, bounded/redacted log snapshot adapter, metric

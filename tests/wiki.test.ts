@@ -53,6 +53,9 @@ test("wiki map lists deterministic source candidates and page plans", async () =
     assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.runtime"));
     assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.graph"));
     assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.sessions"));
+    assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.architecture"));
+    assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.decisions"));
+    assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.risks"));
     assert.ok(output.candidates.some((candidate: { category: string; path: string }) =>
       candidate.category === "json-contract" && candidate.path === "docs/json-contract.md"));
     assert.ok(output.candidates.some((candidate: { category: string; path: string }) =>
@@ -151,6 +154,13 @@ test("wiki context returns bounded topic-matched pages", async () => {
     const graphOutput = JSON.parse(graphContext.stdout);
     assert.ok(graphOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.graph"));
     assert.ok(graphOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.sessions"));
+
+    const architectureContext = runCli(cwd, ["wiki", "context", "--topic", "architecture decision risk", "--budget", "5000", "--json"]);
+    assert.equal(architectureContext.status, 0, architectureContext.stderr);
+    const architectureOutput = JSON.parse(architectureContext.stdout);
+    assert.ok(architectureOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.architecture"));
+    assert.ok(architectureOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.decisions"));
+    assert.ok(architectureOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.risks"));
 
     await writeFile(join(cwd, "package.json"), `${JSON.stringify({
       name: "fixture",
@@ -351,13 +361,16 @@ test("wiki export writes an explicit projection only after a fresh check", async
     assert.equal(output.export.autoCommitted, false);
     assert.equal(output.export.sourceTruth, false);
     assert.equal(output.check.gate, "passed");
-    assert.equal(output.pageCount, 7);
+    assert.equal(output.pageCount, 10);
     assert.ok(output.exportedFiles.includes("docs/codexus-wiki/index.md"));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "overview.md")));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "release.md")));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "runtime.md")));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "graph.md")));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "sessions.md")));
+    assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "architecture.md")));
+    assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "decisions.md")));
+    assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "risks.md")));
     const index = await readFile(join(cwd, "docs", "codexus-wiki", "index.md"), "utf8");
     assert.match(index, /generated projection, not the source of truth/);
     assert.match(index, /does not auto-commit/);

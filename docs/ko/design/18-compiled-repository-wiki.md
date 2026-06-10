@@ -20,6 +20,9 @@ evidence-linked markdown projection을 만드는 방향입니다.
   `cx wiki context --topic <name> --budget <n> [--fresh-only --gate] --json`,
   명시적 `cx wiki export --target <path> --json`,
   `cx wiki build --mode advisory --json`
+- 구현된 deterministic page: `overview.md`, `commands.md`, `verification.md`,
+  `release.md`, `runtime.md`, `graph.md`, `sessions.md`, `architecture.md`,
+  `decisions.md`, `risks.md`
 - 구현된 schema: `codexus.wiki.manifest`, `codexus.wiki.page`,
   `codexus.wiki.advisory`
 - 계속 deferred: run으로의 automatic context injection. Export는 fresh passing wiki

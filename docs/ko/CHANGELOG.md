@@ -29,9 +29,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   loopback endpoint가 instance endpoint와 일치하는지 보고하지만, process identity
   증명, health, control, cleanup, completion authority는 계속 false로 유지합니다.
 - Deterministic `cx wiki build --mode deterministic --json`은 이제 overview,
-  commands, verification, release, runtime page에 더해 `graph.md`와 `sessions.md`
-  projection page를 생성합니다. 새 page들은 repository graph와 session artifact를
-  요약하지만 source truth, injection approval, task completion evidence가 되지 않습니다.
+  commands, verification, release, runtime page에 더해 `graph.md`, `sessions.md`,
+  `architecture.md`, `decisions.md`, `risks.md` projection page를 생성합니다. 새 page들은
+  repository graph, session, architecture, decision, change-risk artifact를 요약하지만
+  source truth, injection approval, task completion evidence가 되지 않습니다.
 
 ### Fixed
 

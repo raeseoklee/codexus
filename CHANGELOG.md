@@ -31,10 +31,11 @@ occur before 1.0, but they should be called out clearly.
   keeping process-identity proof, health, control, cleanup, and completion
   authority false.
 - Deterministic `cx wiki build --mode deterministic --json` now emits
-  `graph.md` and `sessions.md` projection pages in addition to overview,
-  commands, verification, release, and runtime pages. The new pages summarize
-  repository graph and session artifacts without becoming source truth,
-  injection approval, or task completion evidence.
+  `graph.md`, `sessions.md`, `architecture.md`, `decisions.md`, and `risks.md`
+  projection pages in addition to overview, commands, verification, release,
+  and runtime pages. The new pages summarize repository graph, session,
+  architecture, decision, and change-risk artifacts without becoming source
+  truth, injection approval, or task completion evidence.
 
 ### Fixed
 

@@ -451,10 +451,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   evidence (`modelInvoked: false`) and non-authority markers. The wiki generates
   regenerable markdown pages under `.codexus/wiki/` with source refs, local
   links, manifest/page/advisory schemas, and scoped freshness. The deterministic
-  page set now includes release/contract and runtime-boundary projections in
-  addition to overview, commands, and verification. Export requires a fresh
-  passing wiki check and does not auto-commit or become source truth. Automatic
-  context injection remains deferred.
+  page set now includes release/contract, runtime-boundary, repository graph,
+  session, architecture, decision, and risk projections in addition to overview,
+  commands, and verification. Export requires a fresh passing wiki check and
+  does not auto-commit or become source truth. Automatic context injection
+  remains deferred.
 - Deferred self-reports currently documented and enforced by `cx repo check
   --gate --json` are:
   - `acceptance_criteria_extraction_deferred`
@@ -655,6 +656,6 @@ review. Current high-level gaps:
 - Compiled repository wiki now has an experimental deterministic first slice:
   source-linked page generation, structural freshness gates, bounded
   context-pack generation, explicit export, advisory synthesis, and deterministic
-  graph/session projection pages exist. Any automatic injection path remains
-  future work.
+  graph/session/architecture/decision/risk projection pages exist. Any automatic
+  injection path remains future work.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.
