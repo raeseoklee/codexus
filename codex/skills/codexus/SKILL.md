@@ -60,6 +60,7 @@ node codex/skills/codexus/scripts/cx.mjs schema check --json
 node codex/skills/codexus/scripts/cx.mjs schema validate-run <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs release policy --gate --json
 node codex/skills/codexus/scripts/cx.mjs release check --gate --json
+node codex/skills/codexus/scripts/cx.mjs session subagent probe --record --json
 node codex/skills/codexus/scripts/cx.mjs session subagent launch --role reviewer --task "review the staged diff" --json
 node codex/skills/codexus/scripts/cx.mjs session subagent complete --task-id <id> --claim "<bounded subagent claim>" --assumptions-surfaced pass --json
 node codex/skills/codexus/scripts/cx.mjs app-server roundtrip --dry-run --json

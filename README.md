@@ -219,6 +219,7 @@ codexus session checkpoint "before risky refactor" --json
 codexus session verify --auto --json
 codexus session verify --verify "npm test" --json
 codexus session slop --json
+codexus session subagent probe --record --json
 codexus session subagent launch --role reviewer --task "review the staged diff" --json
 codexus session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
 codexus session subagent record --file <result.json> --json

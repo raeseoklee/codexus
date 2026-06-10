@@ -22,7 +22,7 @@ import { listDecisionArtifacts, readDecisionArtifact, recordDecisionArtifact, su
 import { summarizeVerificationLoop } from "../../session/loop.ts";
 import { computeWorkspaceFingerprint } from "../../session/workspace-fingerprint.ts";
 import { detectVerifyCandidates } from "../../session/verify-detect.ts";
-import { completeSubagentArtifact, createSubagentLaunchContract, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
+import { completeSubagentArtifact, createSubagentLaunchContract, probeSubagentBridge, readSubagentStatusArtifact, recordSubagentArtifact, summarizeSubagentClaims } from "../../session/subagents.ts";
 import { addSessionTask, blockSessionTask, completeSessionTask, listSessionTasks, readSessionTasks, summarizeSessionTasks, updateSessionTask } from "../../session/tasks.ts";
 import { buildControlPlaneSummary } from "../../control/control-plane.ts";
 import { readCodexusVersionInfo } from "./version.ts";
@@ -514,6 +514,19 @@ async function loopCommand(args: ParsedArgs, cwd: string, json: boolean): Promis
 
 async function subagentCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {
   const action = args.positionals[1] ?? "status";
+  if (action === "probe") {
+    assertAllowedFlags(args, ["json", "cwd", "record"]);
+    assertMaxPositionals(args, 2);
+    const result = await probeSubagentBridge(cwd, { record: flagBool(args.flags, "record") });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Subagent bridge: ${result.probe.outcome}`);
+    console.log(result.probe.caveat);
+    if (result.artifactPath) console.log(result.artifactPath);
+    return;
+  }
   if (action === "record") {
     assertAllowedFlags(args, ["json", "cwd", "file"]);
     assertMaxPositionals(args, 2);

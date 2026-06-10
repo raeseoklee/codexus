@@ -424,12 +424,13 @@
           <h3>Subagent Bridge Evidence 조사</h3>
           <div class="tags">
             <span class="tag evidence">bridge probe</span>
+            <span class="tag done">probe 완료</span>
             <span class="tag gated">spawn claim 금지</span>
           </div>
-          <p>Recorder artifact는 schema-validatable입니다. 다음은 Codexus를 recorder-only에서 launcher로 바꾸기 전에 Codex가 지원되는 native subagent bridge를 노출하는지 조사하는 일입니다.</p>
+          <p>Recorder artifact와 bridge probe artifact는 schema-validatable입니다. <code>cx session subagent probe --record</code>는 현재 local CLI bridge를 unavailable로 기록하며, 지원되는 bridge가 생기기 전까지 active launch는 계속 blocked입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
-            <li>Probe한 surface, version, outcome을 evidence로 기록합니다.</li>
+            <li>완료: bridge probe는 probed surface, outcome, <code>supportedBridgeObserved: false</code>를 기록합니다.</li>
             <li>Negative 또는 unavailable result도 정상 outcome입니다.</li>
             <li>지원되는 bridge가 생기기 전에는 active launch를 주장하지 않습니다.</li>
           </ul>

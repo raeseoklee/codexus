@@ -113,6 +113,7 @@
         "schemas/decision.schema.json",
         "schemas/app-instance-descriptor.schema.json",
         "schemas/app-instance.schema.json",
+        "schemas/subagent-bridge-probe.schema.json",
         "fixtures/app-server/schema.fixture.json",
         "codex/skills/codexus/SKILL.md",
         "codex/plugins/codexus/.codex-plugin/plugin.json",

@@ -272,12 +272,15 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   under `.codexus/session/subagents/`, links them from session state, and keeps
   subagent claims separate from verification freshness. `cx session subagent
   launch` records a deferred launcher contract with `launcher.supported: false`;
+  `cx session subagent probe --record` records bridge-availability evidence that
+  reports the current local CLI bridge as `unavailable` without spawn,
+  workspace-mutation, or completion authority;
   `cx session subagent complete` records final claims from a native subagent
   used in the current Codex session and optional `pass|fail|unknown` behavior
   checklist assertions without claiming Codexus spawned it. Result and launch
-  artifacts are schema-validatable via `subagent-result` and
-  `subagent-launch-contract`. Codexus still does not spawn native subagents
-  from the CLI.
+  artifacts are schema-validatable via `subagent-result`,
+  `subagent-launch-contract`, and `subagent-bridge-probe`. Codexus still does
+  not spawn native subagents from the CLI.
 - `cx session workers status --json` reports the tmux-backed worker launch gate
   without starting worker panes.
 - `cx setup codex-session --enable-notify-hook` installs a Codex notify hook

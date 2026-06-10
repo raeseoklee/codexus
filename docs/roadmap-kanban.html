@@ -425,12 +425,13 @@
           <h3>Subagent Bridge Evidence Investigation</h3>
           <div class="tags">
             <span class="tag evidence">bridge probe</span>
+            <span class="tag done">probe done</span>
             <span class="tag gated">no spawn claim</span>
           </div>
-          <p>Recorder artifacts are schema-validatable. Next, investigate whether Codex exposes a supported native subagent bridge before changing Codexus from recorder-only to launcher.</p>
+          <p>Recorder artifacts and bridge probe artifacts are schema-validatable. <code>cx session subagent probe --record</code> records the current local CLI bridge as unavailable; active launch remains blocked until a supported bridge exists.</p>
           <span class="label">Acceptance</span>
           <ul>
-            <li>Evidence records the probed surface, version, and outcome.</li>
+            <li>Done: bridge probes record the probed surface, outcome, and <code>supportedBridgeObserved: false</code>.</li>
             <li>Negative or unavailable results are accepted outcomes.</li>
             <li>No command claims active launch until a supported bridge exists.</li>
           </ul>

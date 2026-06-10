@@ -1032,6 +1032,45 @@ test("session subagent launch records unavailable launcher contract without prom
   }
 });
 
+test("session subagent probe records bridge availability without spawn authority", async () => {
+  const cwd = await tempDir();
+  const codexHome = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    const verify = runCli(cwd, ["session", "verify", "--verify", "node -e \"console.log('ok')\"", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(verify.status, 0, verify.stderr);
+
+    const probe = runCli(cwd, ["session", "subagent", "probe", "--record", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(probe.status, 0, probe.stderr);
+    const output = JSON.parse(probe.stdout);
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.recorded, true);
+    assert.equal(output.probe.type, "codexus.session.subagent_bridge_probe");
+    assert.equal(output.probe.outcome, "unavailable");
+    assert.equal(output.probe.detection.supportedBridgeObserved, false);
+    assert.equal(output.probe.capability.canSpawn, false);
+    assert.equal(output.probe.capability.canModifyWorkspace, false);
+    assert.equal(output.probe.capability.completionAuthority, false);
+    assert.ok(existsSync(output.artifactPath));
+
+    const status = runCli(cwd, ["session", "status", "--json"], { CODEX_HOME: codexHome });
+    assert.equal(status.status, 0, status.stderr);
+    const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.subagents.count, 0);
+    assert.deepEqual(statusOutput.subagents.unverifiedClaims, []);
+    assert.equal(statusOutput.evidence.evidenceFresh, true);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "subagent-bridge-probe", "--file", output.artifactPath, "--json"], { CODEX_HOME: codexHome });
+    assert.equal(schema.status, 0, schema.stderr);
+    const schemaOutput = JSON.parse(schema.stdout);
+    assert.equal(schemaOutput.validation.valid, true);
+    assert.equal(schemaOutput.artifactValidation.valid, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(codexHome, { recursive: true, force: true });
+  }
+});
+
 test("session subagent complete records hosted subagent claims without promoting evidence", async () => {
   const cwd = await tempDir();
   const codexHome = await tempDir();

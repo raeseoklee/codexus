@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/subagent-bridge-probe.schema.json",
+  "title": "Codexus Session Subagent Bridge Probe",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.session.subagent_bridge_probe" },
+    "probeId": { "type": "string", "minLength": 1 },
+    "recordedAt": { "type": "string", "minLength": 1 },
+    "surface": { "const": "codex-native-subagent" },
+    "outcome": { "const": "unavailable" },
+    "detection": {
+      "type": "object",
+      "properties": {
+        "method": { "const": "cli-boundary-static" },
+        "cwd": { "type": "string", "minLength": 1 },
+        "supportedBridgeObserved": { "const": false },
+        "evidence": { "type": "string", "minLength": 1 }
+      },
+      "required": ["method", "cwd", "supportedBridgeObserved", "evidence"]
+    },
+    "capability": {
+      "type": "object",
+      "properties": {
+        "canDetectNativeBridge": { "const": false },
+        "canSpawn": { "const": false },
+        "canModifyWorkspace": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["canDetectNativeBridge", "canSpawn", "canModifyWorkspace", "completionAuthority"]
+    },
+    "recommendation": { "type": "string", "minLength": 1 },
+    "caveat": { "type": "string", "minLength": 1 }
+  },
+  "required": ["schemaVersion", "stability", "type", "probeId", "recordedAt", "surface", "outcome", "detection", "capability", "recommendation", "caveat"]
+}

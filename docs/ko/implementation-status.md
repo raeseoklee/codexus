@@ -175,11 +175,14 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `.codexus/session/subagents/` 아래 기록하고 session state에서 link하며, subagent claim을
   verification freshness와 분리합니다. `cx session subagent launch`는
   `launcher.supported: false`인 deferred launcher contract를 기록합니다.
+  `cx session subagent probe --record`는 현재 local CLI bridge를 `unavailable`로
+  보고하는 bridge-availability evidence를 기록하며 spawn, workspace mutation,
+  completion authority를 주장하지 않습니다.
   `cx session subagent complete`는 현재 Codex session에서 사용한 native subagent의 최종
   claim과 optional `pass|fail|unknown` behavior checklist assertion을 기록하되 Codexus가
-  spawn했다고 주장하지 않습니다. Result/launch artifact는 `subagent-result`와
-  `subagent-launch-contract`로 schema validation할 수 있습니다. Codexus는 여전히
-  CLI에서 native subagent를 spawn하지 않습니다.
+  spawn했다고 주장하지 않습니다. Result/launch/probe artifact는 `subagent-result`,
+  `subagent-launch-contract`, `subagent-bridge-probe`로 schema validation할 수 있습니다.
+  Codexus는 여전히 CLI에서 native subagent를 spawn하지 않습니다.
 - `cx session workers status --json`은 worker pane을 시작하지 않고 tmux-backed worker
   launch gate를 보고합니다.
 - `cx setup codex-session --enable-notify-hook`은 현재 project가 Codex config에서

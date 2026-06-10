@@ -15,6 +15,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   `release.md`와 `runtime.md` page를 생성합니다. 이 page들은 release/contract
   pointer와 runtime authority boundary를 재생성 가능한 projection으로 요약하며,
   source-truth, injection, health, cleanup, completion authority를 얻지 않습니다.
+- `cx session subagent probe --record --json`은 이제 schema-valid
+  bridge-availability artifact를 기록합니다. 현재 local CLI bridge는
+  `unavailable`로 보고되며 native spawn, workspace mutation, completion authority는
+  계속 false입니다.
 
 ### Fixed
 

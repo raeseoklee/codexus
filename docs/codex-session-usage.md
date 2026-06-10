@@ -245,6 +245,7 @@ session verify --auto --execute --json
 session verify --verify "npm test" --json
 session slop --json
 session slop --gate --json
+session subagent probe --record --json
 session subagent launch --role reviewer --task "review the staged diff" --json
 session subagent complete --task-id <id> --claim "review found no API drift" --assumptions-surfaced pass --json
 session subagent record --file <result.json> --json
@@ -274,8 +275,10 @@ chat. Use `session slop --json` when you want Codex to summarize whether the
 current workspace has fresh verification, objective diff facts, declared-scope
 escapes, linked review artifacts, or advisory quality claims. Use
 `session slop --gate --json` when an automation step should return nonzero
-unless the current change has passing evidence. `session subagent launch`
-records a launcher contract and the current `unavailable` native-spawn
+unless the current change has passing evidence. `session subagent probe
+--record` records the local native-subagent bridge as an evidence artifact; the
+current CLI boundary reports that bridge as `unavailable`. `session subagent
+launch` records a launcher contract and the current `unavailable` native-spawn
 capability state; it does not spawn a subagent from the CLI. Use `session
 subagent complete` after a native subagent has run in the current Codex session
 to record its final claims against the launch id. Optional behavior checklist

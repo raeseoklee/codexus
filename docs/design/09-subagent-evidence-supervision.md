@@ -3,7 +3,7 @@
 [Korean](../ko/design/09-subagent-evidence-supervision.md)
 
 Date: 2026-05-30
-Status: recorder, completion handoff, and launcher contract implemented; active spawn deferred
+Status: recorder, completion handoff, bridge probe, and launcher contract implemented; active spawn deferred
 
 ## Decision
 
@@ -245,6 +245,7 @@ First slice:
 ```bash
 cx session subagent record --file <result.json> --json
 cx session subagent attach --role explore --claim-file <claims.json> --json
+cx session subagent probe --record --json
 cx session subagent launch --role explore --task "review the staged diff" --json
 cx session subagent complete --task-id <id> --claim "bounded claim" --assumptions-surfaced pass --json
 cx session subagent status <task-id> --json
@@ -271,9 +272,9 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
   artifact without claiming Codexus performed the native spawn.
 - `session status` distinguishes unverified subagent claims from verification
   evidence.
-- Active spawning commands are capability-gated: if Codex native subagents are
-  unavailable, Codexus reports `unavailable` with a recovery hint and records
-  only launcher-contract evidence.
+- Active spawning commands are capability-gated: `session subagent probe
+  --record` records the current local CLI bridge as `unavailable`, and
+  `launch` records only launcher-contract evidence with a recovery hint.
 - No fixed frontier model names are hardcoded; inherit/default routing is
   preferred unless the caller explicitly chooses otherwise.
 
@@ -292,5 +293,8 @@ codexus, subagent claims를 evidence와 분리해서 status에 보여줘.
 6. Implemented: add a hosted completion handoff command that records final
    claims from a subagent run by the current Codex session without changing
    evidence freshness.
-7. Deferred: native subagent capability detection, spawning, and parallel
-   planning until a supported Codex bridge exists.
+7. Implemented: add `cx session subagent probe --record --json` as a
+   bridge-availability evidence artifact. It records the current local CLI
+   boundary as `unavailable` without claiming native spawn support.
+8. Deferred: native subagent spawning and parallel planning until a supported
+   Codex bridge exists.

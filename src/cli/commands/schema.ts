@@ -40,6 +40,7 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "automation-recovery",
   "subagent-result",
   "subagent-launch-contract",
+  "subagent-bridge-probe",
   "app-server-discovery",
   "app-server-stage-a",
   "app-server-stage-b",

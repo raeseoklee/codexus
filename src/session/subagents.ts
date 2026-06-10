@@ -93,6 +93,30 @@ export interface SubagentLaunchContractArtifact {
   };
 }
 
+export interface SubagentBridgeProbeArtifact {
+  schemaVersion: 1;
+  stability: "experimental";
+  type: "codexus.session.subagent_bridge_probe";
+  probeId: string;
+  recordedAt: string;
+  surface: "codex-native-subagent";
+  outcome: "unavailable";
+  detection: {
+    method: "cli-boundary-static";
+    cwd: string;
+    supportedBridgeObserved: false;
+    evidence: string;
+  };
+  capability: {
+    canDetectNativeBridge: false;
+    canSpawn: false;
+    canModifyWorkspace: false;
+    completionAuthority: false;
+  };
+  recommendation: string;
+  caveat: string;
+}
+
 export interface SubagentRecordResult {
   schemaVersion: 1;
   stability: "stable";
@@ -117,6 +141,14 @@ export interface SubagentLaunchContractResult {
   artifactPath: string;
   statePath: string;
   state: CodexusSessionState;
+}
+
+export interface SubagentBridgeProbeResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  probe: SubagentBridgeProbeArtifact;
+  artifactPath: string | null;
+  recorded: boolean;
 }
 
 export type SubagentStatusArtifact =
@@ -290,6 +322,10 @@ function taskIdFrom(parsed: unknown): string {
 
 function taskIdFromString(value: string | undefined): string {
   return value && value.trim() ? safeSegment(value.trim()) : createSubagentId();
+}
+
+function createSubagentProbeId(): string {
+  return createSubagentId().replace(/^subagent_/, "subagent_probe_");
 }
 
 async function parseJsonFile(path: string): Promise<unknown> {
@@ -557,6 +593,43 @@ export async function createSubagentLaunchContract(cwd: string, options: {
     statePath: paths.state,
     state,
   };
+}
+
+export async function probeSubagentBridge(cwd: string, options: { record?: boolean }): Promise<SubagentBridgeProbeResult> {
+  const probeId = createSubagentProbeId();
+  const recordedAt = new Date().toISOString();
+  const artifact: SubagentBridgeProbeArtifact = {
+    schemaVersion: 1,
+    stability: "experimental",
+    type: "codexus.session.subagent_bridge_probe",
+    probeId,
+    recordedAt,
+    surface: "codex-native-subagent",
+    outcome: "unavailable",
+    detection: {
+      method: "cli-boundary-static",
+      cwd,
+      supportedBridgeObserved: false,
+      evidence: "Codexus CLI has no documented API for invoking Codex native subagent tools from outside the active Codex host runtime.",
+    },
+    capability: {
+      canDetectNativeBridge: false,
+      canSpawn: false,
+      canModifyWorkspace: false,
+      completionAuthority: false,
+    },
+    recommendation: "Use `cx session subagent launch` to record an unavailable launch contract, then record externally produced claims with `complete`, `record`, or `attach`.",
+    caveat: "This probe only proves the local Codexus CLI bridge state. It does not inspect private Codex host internals and must not be treated as active spawn support.",
+  };
+  if (!options.record) {
+    return { schemaVersion: 1, stability: "experimental", probe: artifact, artifactPath: null, recorded: false };
+  }
+  const paths = sessionPaths(cwd);
+  const artifactDir = join(paths.subagentsDir, "bridge-probes");
+  const artifactPath = join(artifactDir, `${probeId}.json`);
+  await ensureDir(artifactDir);
+  await writeJsonAtomic(artifactPath, artifact);
+  return { schemaVersion: 1, stability: "experimental", probe: artifact, artifactPath, recorded: true };
 }
 
 export async function readSubagentArtifact(cwd: string, taskId: string): Promise<SubagentResultArtifact> {

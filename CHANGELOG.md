@@ -16,6 +16,10 @@ occur before 1.0, but they should be called out clearly.
   release/contract pointers and runtime authority boundaries as regenerable
   projections without gaining source-truth, injection, health, cleanup, or
   completion authority.
+- `cx session subagent probe --record --json` now records a schema-valid
+  bridge-availability artifact. The current local CLI bridge reports
+  `unavailable` and keeps native spawn, workspace mutation, and completion
+  authority false.
 
 ### Fixed
 

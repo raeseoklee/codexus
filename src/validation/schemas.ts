@@ -76,6 +76,7 @@ export type SchemaValidationType =
   | "automation-recovery"
   | "subagent-result"
   | "subagent-launch-contract"
+  | "subagent-bridge-probe"
   | "app-server-discovery"
   | "app-server-stage-a"
   | "app-server-stage-b"
@@ -122,6 +123,7 @@ export const schemaArtifactNames = [
   "automation-recovery.schema.json",
   "subagent-result.schema.json",
   "subagent-launch-contract.schema.json",
+  "subagent-bridge-probe.schema.json",
   "app-server-discovery.schema.json",
   "app-server-stage-a.schema.json",
   "app-server-stage-b.schema.json",
@@ -154,6 +156,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "automation-recovery": "automation-recovery.schema.json",
   "subagent-result": "subagent-result.schema.json",
   "subagent-launch-contract": "subagent-launch-contract.schema.json",
+  "subagent-bridge-probe": "subagent-bridge-probe.schema.json",
   "app-server-discovery": "app-server-discovery.schema.json",
   "app-server-stage-a": "app-server-stage-a.schema.json",
   "app-server-stage-b": "app-server-stage-b.schema.json",
@@ -1022,6 +1025,29 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       requireString(value.handoff, "completeCommand", errors, "handoff.completeCommand");
       requireRecord(value.handoff.claimFileShape, errors, "handoff.claimFileShape");
     }
+  }
+
+  if (type === "subagent-bridge-probe") {
+    requireOneOf(value, "stability", ["experimental"], errors);
+    requireOneOf(value, "type", ["codexus.session.subagent_bridge_probe"], errors);
+    requireString(value, "probeId", errors);
+    requireString(value, "recordedAt", errors);
+    requireOneOf(value, "surface", ["codex-native-subagent"], errors);
+    requireOneOf(value, "outcome", ["unavailable"], errors);
+    if (requireRecord(value.detection, errors, "detection")) {
+      requireOneOf(value.detection, "method", ["cli-boundary-static"], errors, "detection.method");
+      requireString(value.detection, "cwd", errors, "detection.cwd");
+      if (value.detection.supportedBridgeObserved !== false) errors.push("detection.supportedBridgeObserved:not_false");
+      requireString(value.detection, "evidence", errors, "detection.evidence");
+    }
+    if (requireRecord(value.capability, errors, "capability")) {
+      if (value.capability.canDetectNativeBridge !== false) errors.push("capability.canDetectNativeBridge:not_false");
+      if (value.capability.canSpawn !== false) errors.push("capability.canSpawn:not_false");
+      if (value.capability.canModifyWorkspace !== false) errors.push("capability.canModifyWorkspace:not_false");
+      if (value.capability.completionAuthority !== false) errors.push("capability.completionAuthority:not_false");
+    }
+    requireString(value, "recommendation", errors);
+    requireString(value, "caveat", errors);
   }
 
   if (type === "app-server-discovery") {

@@ -225,8 +225,9 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 30);
+    assert.equal(schemaOutput.schemas.length, 31);
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "automation-recovery.schema.json"));
+    assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "subagent-bridge-probe.schema.json"));
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
