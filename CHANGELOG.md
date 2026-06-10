@@ -24,6 +24,12 @@ occur before 1.0, but they should be called out clearly.
   app-server observer evidence into the session evidence loop. `desktop-app-server`
   still appears only from recorded Stage B turn-boundary evidence, and the
   projection never connects to live sockets or gains completion authority.
+- `cx app instance evidence browser --instance-id <id> --capture <file> --json`
+  now binds a Browser/DevTools capture JSON file to one Codexus-owned app
+  instance. The capture records bounded, redacted URL/title evidence and reports
+  whether the observed loopback endpoint matches the instance endpoint, while
+  keeping process-identity proof, health, control, cleanup, and completion
+  authority false.
 
 ### Fixed
 
@@ -40,6 +46,7 @@ occur before 1.0, but they should be called out clearly.
   freshness/age, and lifecycle state snapshots so observations are more clearly
   bound to instance evidence without gaining health, cleanup, or completion
   authority.
+- CLI schema error hints now include the `subagent-bridge-probe` validation type.
 
 ## 0.2.0 - 2026-06-08
 

@@ -252,10 +252,19 @@ The live `start` and `stop` slices must enforce these local facts:
     session evidence summaries expose the latest observation's process and
     lifecycle state without promoting that observation to health or completion
     authority.
+16. Done: add `cx app instance evidence browser` as a Browser/DevTools capture
+    binding adapter. It imports an existing JSON capture file, records bounded
+    redacted URL/title metadata plus capture-file SHA-256, and distinguishes an
+    observed loopback server from an owned worktree instance by reporting
+    `matchesInstanceEndpoint` and `ownedWorktreeInstanceEvidence:
+    "endpoint_match_only"`. It does not open a browser, drive DevTools, prove
+    process identity, or become health, control, cleanup, or completion
+    authority.
 
 ## Next Slice
 
-1. Wire real Browser/DevTools capture adapters to the observation artifact
-   contract without auto-opening browsers or claiming health/control.
+1. Add optional live Browser/DevTools capture drivers that create the capture
+   JSON consumed by `cx app instance evidence browser`, without claiming process
+   identity or health/control authority.
 2. Add worktree-aware launcher reuse for future autopilot surfaces while keeping
    completion authority on verification and policy gates.

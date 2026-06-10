@@ -5,6 +5,7 @@ import {
   listAppInstanceObservations,
   listAppInstanceProfiles,
   probeAppInstanceHttpObservation,
+  recordAppInstanceBrowserObservation,
   recordAppInstanceLogObservation,
   recordAppInstanceMetricObservation,
   recordAppInstanceObservation,
@@ -140,6 +141,20 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
         return;
       }
       console.log(`app instance evidence screenshot: ${result.screenshot.status}`);
+      return;
+    }
+    if (subaction === "browser") {
+      const result = await recordAppInstanceBrowserObservation(cwd, {
+        instanceId: flagString(args.flags, "instance-id"),
+        capturePath: flagString(args.flags, "capture") ?? flagString(args.flags, "evidence-path"),
+        url: flagString(args.flags, "url"),
+        summary: flagString(args.flags, "summary"),
+      });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`app instance evidence browser: ${result.browserCapture.status}`);
       return;
     }
     throw new Error(`unsupported_app_instance_command:evidence-${subaction ?? "missing"}`);

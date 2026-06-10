@@ -761,6 +761,160 @@ test("app instance screenshot evidence is unavailable for non-running instances 
   }
 });
 
+test("app instance browser evidence binds capture URL without proving process identity", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+
+    const start = runCli(cwd, [
+      "app",
+      "instance",
+      "start",
+      "--descriptor",
+      descriptorPath,
+      "--profile",
+      "web",
+      "--worktree",
+      cwd,
+      "--json",
+    ]);
+    assert.equal(start.status, 0, start.stderr);
+    const started = parseJson(start);
+    const instanceId = started.launch.instanceId;
+
+    await waitFor(async () => {
+      const status = runCli(cwd, ["app", "instance", "status", "--instance-id", instanceId, "--json"]);
+      if (status.status !== 0) return false;
+      const output = parseJson(status);
+      return output.instances[0]?.process?.status === "running";
+    });
+
+    const capturePath = join(cwd, "browser-capture.json");
+    await writeFile(capturePath, `${JSON.stringify({
+      tool: "browser-plugin",
+      url: `${started.launch.url}?token=should-redact#fragment`,
+      title: "Local app token=should-redact",
+      observedAt: "2026-06-10T00:00:00.000Z",
+      screenshotPath: join(cwd, "screen.png"),
+    }, null, 2)}\n`);
+
+    const browser = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "browser",
+      "--instance-id",
+      instanceId,
+      "--capture",
+      capturePath,
+      "--json",
+    ]);
+    assert.equal(browser.status, 0, browser.stderr);
+    const output = parseJson(browser);
+    assert.equal(output.command, "app instance evidence browser");
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.browserCapture.status, "observed");
+    assert.equal(output.browserCapture.observedUrl, started.launch.url);
+    assert.equal(output.browserCapture.instanceUrl, started.launch.url);
+    assert.equal(output.browserCapture.observedLoopbackServer, true);
+    assert.equal(output.browserCapture.matchesInstanceEndpoint, true);
+    assert.equal(output.browserCapture.ownedWorktreeInstanceEvidence, "endpoint_match_only");
+    assert.equal(output.browserCapture.provesProcessIdentity, false);
+    assert.equal(output.browserCapture.title, "Local app token=[REDACTED:possible-secret]");
+    assert.equal(output.browserCapture.controlsInstance, false);
+    assert.equal(output.browserCapture.healthAuthority, false);
+    assert.equal(output.browserCapture.completionAuthority, false);
+    assert.equal(output.observation.observation.kind, "browser");
+    assert.equal(output.observation.observation.source, "browser-capture-file");
+    assert.equal(output.observation.observation.status, "observed");
+    assert.equal(output.observation.authority.controlsInstance, false);
+    assert.equal(output.observation.authority.healthAuthority, false);
+    assert.equal(output.observation.authority.completionAuthority, false);
+
+    const browserEvidence = JSON.parse(await readFile(output.browserCapture.evidencePath, "utf8"));
+    assert.equal(browserEvidence.type, "codexus.app.instance.browser-capture");
+    assert.equal(browserEvidence.binding.matchesInstanceEndpoint, true);
+    assert.equal(browserEvidence.binding.ownedWorktreeInstanceEvidence, "endpoint_match_only");
+    assert.equal(browserEvidence.binding.provesProcessIdentity, false);
+    assert.equal(browserEvidence.capture.title, "Local app token=[REDACTED:possible-secret]");
+    assert.equal(browserEvidence.authority.controlsInstance, false);
+    assert.equal(browserEvidence.authority.healthAuthority, false);
+    assert.equal(browserEvidence.authority.completionAuthority, false);
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "app-instance-observation", "--file", output.path, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(parseJson(schema).ok, true);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance browser evidence fails when capture URL is not the instance endpoint", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+
+    const start = runCli(cwd, [
+      "app",
+      "instance",
+      "start",
+      "--descriptor",
+      descriptorPath,
+      "--profile",
+      "web",
+      "--worktree",
+      cwd,
+      "--json",
+    ]);
+    assert.equal(start.status, 0, start.stderr);
+    const started = parseJson(start);
+    const instanceId = started.launch.instanceId;
+
+    await waitFor(async () => {
+      const status = runCli(cwd, ["app", "instance", "status", "--instance-id", instanceId, "--json"]);
+      if (status.status !== 0) return false;
+      const output = parseJson(status);
+      return output.instances[0]?.process?.status === "running";
+    });
+
+    const capturePath = join(cwd, "wrong-browser-capture.json");
+    await writeFile(capturePath, `${JSON.stringify({
+      tool: "browser-plugin",
+      url: "http://127.0.0.1:9/",
+      title: "Wrong server",
+    }, null, 2)}\n`);
+
+    const browser = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "browser",
+      "--instance-id",
+      instanceId,
+      "--capture",
+      capturePath,
+      "--json",
+    ]);
+    assert.equal(browser.status, 0, browser.stderr);
+    const output = parseJson(browser);
+    assert.equal(output.browserCapture.status, "failed");
+    assert.equal(output.browserCapture.reason, "browser_url_not_instance_endpoint");
+    assert.equal(output.browserCapture.observedLoopbackServer, true);
+    assert.equal(output.browserCapture.matchesInstanceEndpoint, false);
+    assert.equal(output.browserCapture.ownedWorktreeInstanceEvidence, "not_matched");
+    assert.equal(output.browserCapture.provesProcessIdentity, false);
+    assert.equal(output.observation.observation.kind, "browser");
+    assert.equal(output.observation.observation.status, "failed");
+    assert.equal(output.observation.authority.completionAuthority, false);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("app instance HTTP probe does not request when the instance is not running", async () => {
   const cwd = await tempDir();
   try {

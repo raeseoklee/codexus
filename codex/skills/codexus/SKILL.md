@@ -56,6 +56,7 @@ node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --fre
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --approve --approved-by "$USER" --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence screenshot --instance-id <id> --evidence-path <path> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence browser --instance-id <id> --capture <browser-capture.json> --json
 node codex/skills/codexus/scripts/cx.mjs schema check --json
 node codex/skills/codexus/scripts/cx.mjs schema validate-run <run-id> --json
 node codex/skills/codexus/scripts/cx.mjs release policy --gate --json

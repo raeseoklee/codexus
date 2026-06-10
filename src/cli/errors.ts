@@ -360,13 +360,13 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|wiki-context-approval|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|wiki-context-approval|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|subagent-bridge-probe|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_app_command":
       return "Run `cx app instance status --json`.";
     case "unsupported_app_instance_command":
-      return "Run `cx app instance profile list --json`, `cx app instance status --json`, `cx app instance logs --instance-id <id> --json`, or `cx app instance start --profile <name> --worktree <path> --dry-run --json`.";
+      return "Run `cx app instance profile list --json`, `cx app instance status --json`, `cx app instance logs --instance-id <id> --json`, `cx app instance evidence browser --instance-id <id> --capture <file> --json`, or `cx app instance start --profile <name> --worktree <path> --dry-run --json`.";
     case "unsupported_setup_command":
       return "Run `cx setup codex-session --scope project --json`.";
     case "unsupported_session_command":
@@ -559,6 +559,18 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Use a loopback HTTP URL such as `http://127.0.0.1:<port>/`.";
     case "invalid_app_instance_probe_timeout":
       return "Use `--timeout-ms <n>` with a positive integer up to 30000.";
+    case "missing_app_instance_browser_capture_path":
+      return "Pass `--capture <browser-capture.json>` or `--evidence-path <browser-capture.json>`.";
+    case "app_instance_browser_capture_missing":
+      return "Pass an existing Browser/DevTools capture JSON file with `--capture <path>`.";
+    case "app_instance_browser_capture_not_file":
+      return "Pass a regular JSON file with `--capture <path>`.";
+    case "app_instance_browser_capture_too_large":
+      return "Keep Browser/DevTools capture files at or below 1 MiB.";
+    case "invalid_app_instance_browser_capture_json":
+      return "Use a JSON object capture with a loopback `url` or `page.url` field.";
+    case "missing_app_instance_browser_url":
+      return "Provide a loopback URL in the capture JSON `url`/`page.url` field, or pass `--url <loopback-url>`.";
     case "app_instance_fixed_port_required":
       return "Set `port.preferred` in the descriptor or pass `--port <n>` for a fixed-port profile.";
     case "app_instance_port_unavailable":

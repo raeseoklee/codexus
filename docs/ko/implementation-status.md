@@ -376,11 +376,15 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   metrics`는 같은 `instanceId`의 process, heartbeat, health-evidence, log-file
   metric을 기록합니다. `cx app instance evidence screenshot`은 이미 캡처된 로컬
   screenshot 파일의 metadata, media type, size, mtime, SHA-256을 기록하고 같은
-  `instanceId`에 연결합니다. 이 evidence surface들은 control, health authority,
-  completion authority를 주장하지 않습니다. `cx session status --json`과
+  `instanceId`에 연결합니다. `cx app instance evidence browser`는 기존
+  Browser/DevTools capture JSON 파일을 import하고 bounded/redacted URL/title metadata와
+  capture-file SHA-256을 기록하며 `matchesInstanceEndpoint`와
+  `ownedWorktreeInstanceEvidence: "endpoint_match_only"` 같은 endpoint binding fact를
+  보고합니다. 이 evidence surface들은 process identity 증명, control, health authority,
+  cleanup authority, completion authority를 주장하지 않습니다. `cx session status --json`과
   `cx session hud --json`은 app-instance observation과 wiki context approval을
   `evidenceLoop` 아래에 요약하지만 health, control, source-truth, completion
-  authority를 추가하지 않습니다. 실제 Browser/DevTools live capture 연동은 후속
+  authority를 추가하지 않습니다. 실제 live Browser/DevTools capture driver는 후속
   작업입니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
@@ -488,10 +492,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `cx app instance evidence logs`와 `cx app instance evidence metrics`도 bounded log 및
   metric evidence를 기록합니다. `cx app instance evidence screenshot`은 이미 캡처된
   로컬 screenshot 파일을 bounded file metadata와 SHA-256으로 같은 `instanceId`에
-  연결합니다. 명시적 stale/orphan lifecycle policy projection도 구현됐습니다.
+  연결합니다. `cx app instance evidence browser`는 기존 Browser/DevTools capture JSON
+  파일을 import하고 process identity를 증명하지 않는 bounded/redacted endpoint binding
+  fact를 기록합니다. 명시적 stale/orphan lifecycle policy projection도 구현됐습니다.
   `cx session status --json`과 `cx session hud --json`은 이 observation과 wiki context
-  approval을 `evidenceLoop`에 요약하되 권한을 승격하지 않습니다. 실제 Browser/DevTools
-  live capture와 worktree-aware launcher reuse가 후속 작업입니다.
+  approval을 `evidenceLoop`에 요약하되 권한을 승격하지 않습니다. 실제 live
+  Browser/DevTools capture driver와 worktree-aware launcher reuse가 후속 작업입니다.
 - Operational control invariant는 deterministic docs-code check와 실험적
   control-plane 첫 slice까지 구현됐습니다. Decision artifact, 반복
   verification loop summary, HUD/status projection, autonomy preset metadata,

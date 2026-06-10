@@ -375,9 +375,14 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   metrics` records process, heartbeat, health-evidence, and log-file metrics
   for that same `instanceId`. `cx app instance evidence screenshot` records
   metadata, media type, size, mtime, and SHA-256 for an already captured local
-  screenshot file and binds it to that same `instanceId`. None of these evidence
-  surfaces claim control, health authority, or completion authority;
-  Browser/DevTools live capture integration remains follow-up work.
+  screenshot file and binds it to that same `instanceId`. `cx app instance
+  evidence browser` imports an existing Browser/DevTools capture JSON file,
+  records bounded/redacted URL/title metadata plus capture-file SHA-256, and
+  reports endpoint binding facts such as `matchesInstanceEndpoint` and
+  `ownedWorktreeInstanceEvidence: "endpoint_match_only"`. None of these evidence
+  surfaces claim process-identity proof, control, health authority, cleanup
+  authority, or completion authority; live Browser/DevTools capture drivers
+  remain follow-up work.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External
@@ -632,12 +637,15 @@ review. Current high-level gaps:
   health-evidence, and log-file metrics for the same owned `instanceId`, and
   `cx app instance evidence screenshot` binds an already captured local
   screenshot file to the same `instanceId` by recording bounded file metadata
-  and SHA-256. Explicit stale/orphan lifecycle policy projection is implemented.
+  and SHA-256. `cx app instance evidence browser` imports an existing
+  Browser/DevTools capture JSON file and records bounded/redacted endpoint
+  binding facts without proving process identity. Explicit stale/orphan
+  lifecycle policy projection is implemented.
   `cx session status --json` and `cx session hud --json` now summarize
   app-instance observations and wiki context approvals under `evidenceLoop`
   without adding health, control, source-truth, or completion authority.
-  Actual Browser/DevTools live capture and worktree-aware launcher reuse remain
-  follow-up work.
+  Actual live Browser/DevTools capture drivers and worktree-aware launcher reuse
+  remain follow-up work.
 - Operational control invariants have deterministic docs-code checks plus an
   experimental control-plane first slice: decision artifacts, repeated
   verification loop summaries, HUD/status projections, autonomy preset

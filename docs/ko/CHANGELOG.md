@@ -23,6 +23,11 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   observer evidence를 session evidence loop에 표시합니다. `desktop-app-server`는
   여전히 기록된 Stage B turn-boundary evidence에서만 나타나며, 이 projection은 live
   socket에 연결하거나 completion authority를 얻지 않습니다.
+- `cx app instance evidence browser --instance-id <id> --capture <file> --json`은
+  이제 Browser/DevTools capture JSON 파일을 하나의 Codexus-owned app instance에
+  연결합니다. Capture는 bounded/redacted URL/title evidence를 기록하고 관측된
+  loopback endpoint가 instance endpoint와 일치하는지 보고하지만, process identity
+  증명, health, control, cleanup, completion authority는 계속 false로 유지합니다.
 
 ### Fixed
 
@@ -38,6 +43,7 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   lifecycle state snapshot을 포함합니다. 이를 통해 observation이 어떤 instance
   evidence에 묶였는지 더 명확히 드러내되 health, cleanup, completion authority는
   얻지 않습니다.
+- CLI schema error hint에 `subagent-bridge-probe` validation type을 추가했습니다.
 
 ## 0.2.0 - 2026-06-08
 

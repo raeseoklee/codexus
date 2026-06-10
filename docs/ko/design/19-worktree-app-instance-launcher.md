@@ -244,10 +244,19 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
     `processReason`, heartbeat freshness/age, lifecycle state를 snapshot하고,
     session evidence summary는 최신 observation의 process/lifecycle state를 노출하되
     이를 health 또는 completion authority로 승격하지 않습니다.
+16. 완료: Browser/DevTools capture binding adapter로
+    `cx app instance evidence browser`를 추가합니다. 이 command는 이미 존재하는 JSON
+    capture 파일을 import하고 bounded/redacted URL/title metadata와 capture-file
+    SHA-256을 기록합니다. 관측된 loopback server와 owned worktree instance를 구분하기
+    위해 `matchesInstanceEndpoint`와 `ownedWorktreeInstanceEvidence:
+    "endpoint_match_only"`를 보고하지만, browser를 열거나 DevTools를 직접 구동하거나
+    process identity를 증명하거나 health, control, cleanup, completion authority가
+    되지는 않습니다.
 
 ## 다음 Slice
 
-1. 실제 Browser/DevTools capture adapter를 observation artifact contract에 연결하되
-   browser 자동 open이나 health/control 주장을 하지 않게 유지합니다.
+1. `cx app instance evidence browser`가 소비하는 capture JSON을 생성하는 선택적 live
+   Browser/DevTools capture driver를 추가하되 process identity, health/control
+   authority를 주장하지 않게 유지합니다.
 2. Future autopilot surface가 launcher를 worktree-aware 방식으로 재사용하되 completion
    authority는 verification과 policy gate에만 유지합니다.

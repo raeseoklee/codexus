@@ -352,9 +352,11 @@ Harness-engineering alignment adds these evidence-first tracks:
   or completion authority. `cx app instance evidence metrics` records process,
   heartbeat, health-evidence, and log-file metrics with the same authority
   limits. `cx app instance evidence screenshot` binds an already captured local
-  screenshot file to the same `instanceId` with file metadata and SHA-256. Next
-  work is Browser/DevTools live capture adapters while keeping stack-specific
-  behavior outside the workflow kernel.
+  screenshot file to the same `instanceId` with file metadata and SHA-256.
+  `cx app instance evidence browser` imports an existing Browser/DevTools JSON
+  capture file and records endpoint binding facts without proving process
+  identity. Next work is optional live Browser/DevTools capture drivers while
+  keeping stack-specific behavior outside the workflow kernel.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
   now has an experimental live ownership first slice: descriptor/profile
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
@@ -362,9 +364,10 @@ Harness-engineering alignment adds these evidence-first tracks:
   instance-linked observation evidence records plus explicit stale/orphan
   lifecycle policy projection. Session status and HUD now summarize app-instance
   observations under `evidenceLoop` without authority. The first adapter capture
-  slice is implemented as loopback HTTP dev-server, bounded log, metric, and
-  screenshot-file evidence. Next work is richer Browser/DevTools live capture
-  and worktree-aware launcher reuse for future autopilot surfaces.
+  slice is implemented as loopback HTTP dev-server, bounded log, metric,
+  screenshot-file evidence, and Browser/DevTools capture-file binding. Next work
+  is optional live Browser/DevTools capture drivers and worktree-aware launcher
+  reuse for future autopilot surfaces.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
@@ -439,9 +442,10 @@ Harness-engineering alignment adds these evidence-first tracks:
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback
     HTTP dev-server probe, bounded/redacted log snapshot adapter, metric
-    snapshot adapter, and screenshot-file adapter are implemented; next add
-    richer Browser/DevTools live capture and worktree-aware launcher reuse for future
-    autopilot surfaces.
+    snapshot adapter, screenshot-file adapter, and Browser/DevTools capture-file
+    binding adapter are implemented; next add optional live Browser/DevTools
+    capture drivers and worktree-aware launcher reuse for future autopilot
+    surfaces.
 14. Project LSP diagnostics: first-slice `cx lsp status/check` exists for
     TypeScript diagnostics via explicit local project commands. Keep automatic
     project LSP application detect-only until protocol-server lifecycle,

@@ -262,6 +262,8 @@ const DEFAULT_HTTP_OBSERVE_TIMEOUT_MS = 2_000;
 const MAX_HTTP_OBSERVE_TIMEOUT_MS = 30_000;
 const MAX_HTTP_OBSERVATION_BYTES = 2_048;
 const MAX_SCREENSHOT_EVIDENCE_BYTES = 20 * 1024 * 1024;
+const MAX_BROWSER_CAPTURE_EVIDENCE_BYTES = 1024 * 1024;
+const MAX_BROWSER_CAPTURE_TEXT_CHARS = 512;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -1559,6 +1561,125 @@ function parseLoopbackUrl(value: string): URL {
   return parsed;
 }
 
+function boundedCaptureText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const text = redactSensitiveText(value.trim());
+  if (!text) return null;
+  return text.length > MAX_BROWSER_CAPTURE_TEXT_CHARS
+    ? `${text.slice(0, MAX_BROWSER_CAPTURE_TEXT_CHARS)}[truncated ${text.length - MAX_BROWSER_CAPTURE_TEXT_CHARS} chars]`
+    : text;
+}
+
+function rawCaptureText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const text = value.trim();
+  return text || null;
+}
+
+function nestedString(record: Record<string, unknown>, path: string[]): string | null {
+  let current: unknown = record;
+  for (const part of path) {
+    if (!isRecord(current)) return null;
+    current = current[part];
+  }
+  return boundedCaptureText(current);
+}
+
+function nestedRawString(record: Record<string, unknown>, path: string[]): string | null {
+  let current: unknown = record;
+  for (const part of path) {
+    if (!isRecord(current)) return null;
+    current = current[part];
+  }
+  return rawCaptureText(current);
+}
+
+function sanitizeLoopbackUrlForEvidence(value: string): string {
+  const parsed = parseLoopbackUrl(value);
+  parsed.username = "";
+  parsed.password = "";
+  parsed.search = "";
+  parsed.hash = "";
+  return parsed.toString();
+}
+
+function extractBrowserCaptureFields(value: unknown) {
+  if (!isRecord(value)) throw new Error("invalid_app_instance_browser_capture_json");
+  const rawUrl = rawCaptureText(value.url)
+    ?? rawCaptureText(value.observedUrl)
+    ?? nestedRawString(value, ["page", "url"])
+    ?? nestedRawString(value, ["target", "url"]);
+  const url = rawUrl ? sanitizeLoopbackUrlForEvidence(rawUrl) : null;
+  const title = boundedCaptureText(value.title)
+    ?? nestedString(value, ["page", "title"])
+    ?? nestedString(value, ["target", "title"]);
+  const tool = boundedCaptureText(value.tool)
+    ?? boundedCaptureText(value.source)
+    ?? nestedString(value, ["browser", "tool"])
+    ?? "browser-capture-file";
+  const screenshotPath = boundedCaptureText(value.screenshotPath)
+    ?? nestedString(value, ["screenshot", "path"]);
+  const observedAt = boundedCaptureText(value.observedAt)
+    ?? boundedCaptureText(value.recordedAt)
+    ?? null;
+  return {
+    url,
+    title,
+    tool,
+    screenshotPath,
+    observedAt,
+    topLevelKeys: Object.keys(value).sort().slice(0, 20),
+  };
+}
+
+async function browserCaptureFileEvidence(path: string) {
+  if (!existsSync(path)) throw new Error(`app_instance_browser_capture_missing:${path}`);
+  const info = await stat(path);
+  if (!info.isFile()) throw new Error(`app_instance_browser_capture_not_file:${path}`);
+  if (info.size > MAX_BROWSER_CAPTURE_EVIDENCE_BYTES) throw new Error(`app_instance_browser_capture_too_large:${path}`);
+  const bytes = await readFile(path);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(bytes.toString("utf8")) as unknown;
+  } catch {
+    throw new Error(`invalid_app_instance_browser_capture_json:${path}`);
+  }
+  return {
+    path,
+    exists: true as const,
+    bytes: info.size,
+    modifiedAt: info.mtime.toISOString(),
+    sha256: `sha256:${createHash("sha256").update(bytes).digest("hex")}`,
+    capture: extractBrowserCaptureFields(parsed),
+  };
+}
+
+function loopbackEndpointKey(url: URL): string {
+  const port = url.port || (url.protocol === "https:" ? "443" : "80");
+  return `${url.protocol}//loopback:${port}`;
+}
+
+function endpointBinding(observedUrl: string, instanceUrl: string | null) {
+  const observed = parseLoopbackUrl(observedUrl);
+  let instance: URL | null = null;
+  if (instanceUrl) {
+    try {
+      instance = parseLoopbackUrl(instanceUrl);
+    } catch {
+      instance = null;
+    }
+  }
+  const matchesInstanceEndpoint = instance ? loopbackEndpointKey(observed) === loopbackEndpointKey(instance) : false;
+  return {
+    observedUrl: observed.toString(),
+    instanceUrl,
+    observedLoopbackServer: true,
+    matchesInstanceEndpoint,
+    ownedWorktreeInstanceEvidence: matchesInstanceEndpoint ? "endpoint_match_only" as const : "not_matched" as const,
+    provesProcessIdentity: false as const,
+  };
+}
+
 async function boundedResponsePreview(response: Response): Promise<{ bytesRead: number; truncated: boolean; preview: string }> {
   const reader = response.body?.getReader();
   if (!reader) return { bytesRead: 0, truncated: false, preview: "" };
@@ -2103,6 +2224,97 @@ export async function recordAppInstanceScreenshotObservation(cwd: string, option
       reason: observation.observation.reason,
       bytes: source.bytes,
       mediaType: source.mediaType,
+      sha256: source.sha256,
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
+    observation,
+  };
+}
+
+export async function recordAppInstanceBrowserObservation(cwd: string, options: {
+  instanceId?: string;
+  capturePath?: string;
+  url?: string;
+  summary?: string;
+}) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  if (!options.capturePath) throw new Error("missing_app_instance_browser_capture_path");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const sourcePath = resolve(cwd, options.capturePath);
+  const source = await browserCaptureFileEvidence(sourcePath);
+  const observedUrl = options.url ? parseLoopbackUrl(options.url).toString() : source.capture.url;
+  if (!observedUrl) throw new Error("missing_app_instance_browser_url");
+  const binding = endpointBinding(observedUrl, instance.network.url);
+  const observationId = `browser_capture_${Date.now().toString(36)}_${randomBytes(3).toString("hex")}`;
+  const evidencePath = join(instancePaths(instance.worktree.path, instance.instanceId).observations, `${observationId}.browser.json`);
+  const processUnavailable = instance.process.status !== "running";
+  const status: AppInstanceObservationStatus = processUnavailable
+    ? "unavailable"
+    : binding.matchesInstanceEndpoint ? "observed" : "failed";
+  const reason = processUnavailable
+    ? `instance_not_running:${instance.process.reason}`
+    : binding.matchesInstanceEndpoint ? null : "browser_url_not_instance_endpoint";
+  const summary = boundedCaptureText(options.summary)
+    || (source.capture.title ? `browser_capture:${source.capture.title}` : `browser_capture:${binding.observedUrl}`);
+  const browserEvidence = {
+    schemaVersion: 1,
+    type: "codexus.app.instance.browser-capture",
+    recordedAt: nowIso(),
+    instanceId: instance.instanceId,
+    status,
+    reason,
+    source: "browser-capture-file" as const,
+    file: {
+      path: source.path,
+      exists: source.exists,
+      bytes: source.bytes,
+      modifiedAt: source.modifiedAt,
+      sha256: source.sha256,
+    },
+    capture: source.capture,
+    binding,
+    authority: {
+      controlsInstance: false,
+      healthAuthority: false,
+      completionAuthority: false,
+    },
+  };
+
+  await ensureDir(dirname(evidencePath));
+  await writeJsonAtomic(evidencePath, browserEvidence);
+  const { path, artifact: observation } = await writeObservationArtifact(cwd, {
+    instance,
+    kind: "browser",
+    source: "browser-capture-file",
+    requestedStatus: status,
+    url: binding.observedUrl,
+    evidencePath,
+    summary,
+    reason,
+  });
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence browser" as const,
+    cwd,
+    path,
+    browserCapture: {
+      source: "browser-capture-file" as const,
+      sourcePath,
+      evidencePath,
+      status: observation.observation.status,
+      reason: observation.observation.reason,
+      observedUrl: binding.observedUrl,
+      instanceUrl: binding.instanceUrl,
+      observedLoopbackServer: binding.observedLoopbackServer,
+      matchesInstanceEndpoint: binding.matchesInstanceEndpoint,
+      ownedWorktreeInstanceEvidence: binding.ownedWorktreeInstanceEvidence,
+      provesProcessIdentity: binding.provesProcessIdentity,
+      title: source.capture.title,
+      tool: source.capture.tool,
+      bytes: source.bytes,
       sha256: source.sha256,
       controlsInstance: false as const,
       healthAuthority: false as const,

@@ -346,9 +346,9 @@
           <div class="tags">
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
-            <span class="tag gateable">HTTP/log/metric/screenshot 완료</span>
+            <span class="tag gateable">HTTP/log/metric/screenshot/browser binding 완료</span>
           </div>
-          <p>Live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, metric snapshot adapter, screenshot-file binding adapter는 구현됐습니다. 다음 단계는 더 풍부한 Browser/DevTools live capture adapter입니다.</p>
+          <p>Live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, metric snapshot adapter, screenshot-file binding adapter, Browser/DevTools capture-file binding adapter는 구현됐습니다. 다음 단계는 선택적 live Browser/DevTools capture driver입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>구현된 baseline은 정직해야 합니다. Codexus-owned instance만 중지할 수 있고, stale/orphan artifact는 lifecycle policy를 보고하되 health, cleanup, completion, control을 주장하지 않습니다.</li>
@@ -356,7 +356,8 @@
             <li>완료: log snapshot evidence는 같은 <code>instanceId</code>에 대해 bounded/redacted stdout/stderr tail을 기록하되 health, control, completion authority가 되지 않습니다.</li>
             <li>완료: metric snapshot evidence는 같은 <code>instanceId</code>에 대해 process, heartbeat, health-evidence, log-file metric을 기록하되 health, control, completion authority가 되지 않습니다.</li>
             <li>완료: screenshot-file evidence는 이미 캡처된 로컬 screenshot을 file metadata와 SHA-256으로 같은 <code>instanceId</code>에 연결하되 health, control, completion authority가 되지 않습니다.</li>
-            <li>다음: Browser/DevTools live capture 출력은 “이 server를 관측했다”와 “이 owned worktree instance를 관측했다”를 구분할 수 있어야 합니다.</li>
+            <li>완료: Browser/DevTools capture-file evidence는 기존 JSON capture를 import하고 bounded/redacted endpoint fact를 기록하며 endpoint match와 process-identity proof를 구분합니다.</li>
+            <li>다음: 선택적 live Browser/DevTools capture driver는 health, control, completion authority가 되지 않으면서 그 capture JSON을 생성할 수 있어야 합니다.</li>
             <li>Future autopilot surface는 generic localhost port가 아니라 per-worktree instance artifact를 재사용해야 합니다.</li>
           </ul>
           <span class="label">근거</span>
@@ -480,7 +481,7 @@
           <div class="tags">
             <span class="tag evidence">adapter descriptor</span>
           </div>
-          <p>Loopback HTTP dev-server probe, bounded log adapter, metric adapter, screenshot-file binding adapter, session evidence-loop projection은 구현됐습니다. 더 풍부한 Browser/DevTools live capture 또는 trace adapter를 기존 app-instance observation descriptor에 연결합니다.</p>
+          <p>Loopback HTTP dev-server probe, bounded log adapter, metric adapter, screenshot-file binding adapter, Browser/DevTools capture-file binding adapter, session evidence-loop projection은 구현됐습니다. 선택적 live Browser/DevTools capture 또는 trace adapter를 기존 app-instance observation descriptor에 연결합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>Stack-specific behavior는 workflow kernel 밖에 둡니다.</li>

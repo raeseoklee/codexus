@@ -131,6 +131,7 @@ Usage:
   cx app instance evidence logs --instance-id <id> [--tail <n>] [--json]
   cx app instance evidence metrics --instance-id <id> [--json]
   cx app instance evidence screenshot --instance-id <id> --evidence-path <path> [--url <loopback-url>] [--summary <text>] [--json]
+  cx app instance evidence browser --instance-id <id> --capture <browser-capture.json> [--url <loopback-url>] [--summary <text>] [--json]
   cx app instance evidence list --instance-id <id> [--json]
   cx app instance start --profile <name> --worktree <path> [--dry-run] [--descriptor <path>] [--port <n>] [--json]
   cx app instance stop --instance-id <id> [--json]
