@@ -46,6 +46,7 @@ interface AutomationRecoveryCandidate {
 const liveDispatchImplemented = true;
 const automationBoundaryContractVersion = "automation-boundary-v1";
 const automationActionAuthorityContractVersion = "automation-action-authority-v1";
+const automationSchedulerOwnershipContractVersion = "automation-scheduler-ownership-v1";
 
 type AutomationBoundaryReason = "feature_gate_disabled" | "approval_missing" | "lock_unavailable";
 
@@ -119,6 +120,48 @@ function automationActionAuthority(feature: GuardedFeature, action: string, dryR
     healthAuthority: false,
     completionAuthority: false,
     caveat: "Automation dispatch can start a linked supervised Codexus run when approved, but the dispatcher does not own scheduler state, health, cleanup, or completion authority.",
+  };
+}
+
+function automationSchedulerOwnership(feature: GuardedFeature, dispatchStorePath: string, dispatchRecordCount: number) {
+  return {
+    schemaVersion: 1,
+    contractVersion: automationSchedulerOwnershipContractVersion,
+    feature,
+    status: "not_owned" as const,
+    dispatchStorePath,
+    dispatchRecordCount,
+    queue: {
+      owned: false as const,
+      durableQueue: false as const,
+      path: null as string | null,
+      reason: "Codexus records foreground dispatch artifacts but does not own an unattended scheduler queue in this slice.",
+    },
+    lease: {
+      supported: false as const,
+      active: false as const,
+      ownerId: null as string | null,
+      heartbeat: false as const,
+      reason: "No scheduler lease or heartbeat exists for unattended ownership.",
+    },
+    unattendedRetry: {
+      supported: false as const,
+      automaticRetry: false as const,
+      requires: [
+        "durable-queue-owner",
+        "lease-heartbeat",
+        "retry-policy",
+        "fresh-explicit-approval-or-declared-policy",
+        "recovery-proof",
+      ],
+    },
+    authority: {
+      schedulerAuthority: false as const,
+      retryAuthority: false as const,
+      cleanupAuthority: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
   };
 }
 
@@ -274,6 +317,7 @@ async function automationRecoveryProjection(cwd: string, feature: GuardedFeature
       completionAuthority: false as const,
       caveat: "Codexus can inspect foreground dispatch records, but it does not own an unattended scheduler queue in this slice.",
     },
+    ownership: automationSchedulerOwnership(feature, loaded.dir, loaded.records.length),
     retry: {
       automaticRetry: false as const,
       retryAuthority: false as const,
@@ -505,6 +549,7 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
     console.log(JSON.stringify({
       ...status,
       scheduler: recovery.scheduler,
+      ownership: recovery.ownership,
       recovery: {
         status: recovery.recovery.status,
         manualReviewCandidates: recovery.retry.candidateCount,

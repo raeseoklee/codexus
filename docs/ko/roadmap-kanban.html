@@ -456,13 +456,15 @@
             <span class="tag gated">policy-reviewed-live-dispatch-v1</span>
             <span class="tag evidence">experimental next</span>
             <span class="tag gateable">recovery 완료</span>
+            <span class="tag evidence">ownership contract 완료</span>
           </div>
-          <p>첫 explicit-approval dispatcher는 live이며, blocked live attempt는 schema-validatable boundary audit record를 남기고 foreground recovery projection은 manual-review candidate를 보고합니다. 다음은 autonomy를 과장하지 않는 durable unattended scheduler ownership입니다.</p>
+          <p>첫 explicit-approval dispatcher는 live이며, blocked live attempt는 schema-validatable boundary audit record를 남기고 foreground recovery projection은 manual-review candidate와 <code>automation-scheduler-ownership-v1</code> evidence를 보고합니다. 다음은 autonomy를 과장하지 않는 실제 durable queue, lease heartbeat, retry policy입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>Dry-run/live path가 계속 같은 policy contract를 공유합니다.</li>
             <li>완료: recovery projection은 dispatch history와 manual-review candidate를 automatic retry authority 없이 기록합니다.</li>
-            <li>다음: queue ownership과 unattended retry semantic을 durable evidence로 기록합니다.</li>
+            <li>완료: queue ownership과 unattended retry semantic은 <code>automation-scheduler-ownership-v1</code> negative evidence로 기록됩니다.</li>
+            <li>다음: 실제 queue owner, lease heartbeat, retry policy는 fresh recovery proof가 있을 때만 검토합니다.</li>
             <li>Explicit ownership/recovery proof 없이는 unattended scheduler를 주장하지 않습니다.</li>
           </ul>
           <span class="label">근거</span>
@@ -561,7 +563,7 @@
             <span class="tag advisory">experimental live slice</span>
             <span class="tag gated">automation</span>
           </div>
-          <p>Explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, foreground recovery projection은 이미 있습니다. 남은 작업은 autonomy를 과장하지 않으면서 unattended scheduler, retry, ownership evidence를 추가하는 것입니다.</p>
+          <p>Explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, foreground recovery projection, <code>automation-scheduler-ownership-v1</code> evidence는 이미 있습니다. 남은 작업은 autonomy를 과장하지 않으면서 실제 durable scheduler queue, retry policy, long-lived owner proof를 추가하는 것입니다.</p>
           <span class="label">Gate</span>
           <p>Permission, approval, lock, dispatch, completion, recovery, owner-liveness evidence가 durable해야 합니다.</p>
         </article>

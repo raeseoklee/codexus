@@ -80,9 +80,10 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   JSON summary, tmux/native-subagent launch surfaces are truthful gates, and
   automation live contracts now dispatch synchronously with explicit approval
   while recording `automation-action-authority-v1` negative-authority evidence
-  plus foreground recovery projections that report manual-review candidates
-  without scheduler, retry, cleanup, health, or completion authority. Richer
-  unattended scheduler ownership remains follow-up work.
+  plus foreground recovery projections that report manual-review candidates and
+  `automation-scheduler-ownership-v1` dispatch-store ownership evidence without
+  queue, lease, unattended retry, cleanup, health, or completion authority. A
+  real durable queue/lease/retry loop remains follow-up work.
 - Release operations now have an executable cadence policy:
   `cx release policy --json` reports the active small-commits/larger-releases
   rule, hotfix exceptions, stable-contract version boundary, and English/Korean
@@ -205,7 +206,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
       `cx report <run-id>`.
     - Keep outputs bounded and JSON-first.
 
-15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch, dry-run audit records, schema-validatable blocked-dispatch boundary records, `automation-action-authority-v1` negative-authority records, and `cx cron|gateway recovery` foreground recovery projections are implemented; richer unattended scheduler ownership remains future work.
+15. Add cron/gateway automation only after P0 safety work. Status: experimental explicit-approval live dispatch, dry-run audit records, schema-validatable blocked-dispatch boundary records, `automation-action-authority-v1` negative-authority records, `cx cron|gateway recovery` foreground recovery projections, and `automation-scheduler-ownership-v1` ownership evidence are implemented; a real durable queue, lease heartbeat, retry policy, and unattended scheduler owner remain future work.
     - Hermes-style cron and gateway behavior should depend on locks, schema
       migration, permission events, and explicit user policy.
 
@@ -258,8 +259,9 @@ evidence only when the supporting runtime exists:
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`, and the first synchronous dispatcher
    slice is implemented. Foreground recovery projections now report dispatch
-   records and manual-review candidates without automatic retry. Next add richer
-   scheduler semantics and durable ownership beyond one foreground dispatch.
+   records, manual-review candidates, and `automation-scheduler-ownership-v1`
+   evidence without automatic retry. Next add a real durable queue, lease
+   heartbeat, retry policy, and ownership beyond one foreground dispatch.
 5. Retrieved context surfaces only as approved, user-visible artifacts, with no
    auto-injection of prompt context.
 6. `cx session hud --json` is the supported fallback; statusline integration
@@ -407,8 +409,10 @@ Harness-engineering alignment adds these evidence-first tracks:
    app-server product behavior yet.
 2. Cron/gateway dispatcher: the first explicit-approval live slice and
    schema-validatable blocked-dispatch boundary audit records are now
-   implemented. Foreground recovery projections are implemented; next add
-   scheduler semantics, retry policy, and stronger long-lived ownership evidence.
+   implemented. Foreground recovery projections and
+   `automation-scheduler-ownership-v1` ownership evidence are implemented; next
+   add a real durable queue, retry policy, and stronger long-lived ownership
+   evidence.
 3. Full JSON Schema engine: replace the local subset engine only if dependency
    policy allows it; keep current schema artifacts as regression fixtures.
 4. Statusline integration: wait for a stable Codex-supported configuration

@@ -144,8 +144,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   cleanup, health, or completion authority for the action surface itself.
   `cx cron recovery` and `cx gateway recovery` scan foreground dispatch records
   and can record `automation-recovery` projections with manual-review
-  candidates; these projections do not own a scheduler queue, retry
-  automatically, clean up, claim health authority, or claim completion authority.
+  candidates; these projections now include
+  `automation-scheduler-ownership-v1` evidence with dispatch store path/count
+  while keeping scheduler queue ownership, leases, unattended retry, cleanup,
+  health, and completion authority false.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
   descriptors, app instance artifacts, automation dispatch records, subagent
@@ -622,10 +624,11 @@ review. Current high-level gaps:
   trust checks. `cx session hud --json` is available as the statusline fallback;
   statusline integration and tmux-backed worker launch are designed but not
   implemented.
-- Cron/gateway now have an experimental explicit-approval live dispatcher and
-  schema-validatable blocked-dispatch boundary records plus foreground recovery
-  projections. Future work is richer unattended scheduler semantics, retry
-  policy, and asynchronous ownership beyond the first synchronous dispatch slice.
+- Cron/gateway now have an experimental explicit-approval live dispatcher,
+  schema-validatable blocked-dispatch boundary records, foreground recovery
+  projections, and `automation-scheduler-ownership-v1` scheduler ownership
+  evidence. Future work is a real durable queue, lease heartbeat, retry policy,
+  and asynchronous ownership beyond the first synchronous dispatch slice.
 - Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
 - Autopilot active execution remains deferred for the 0.2/0.3 track. The
   experimental foundation now covers `cx autopilot plan` plus contract

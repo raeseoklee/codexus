@@ -57,9 +57,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   run만 시작할 수 있고 scheduler/listener state, cleanup, health, completion
   authority는 갖지 않음을 명시합니다. `cx cron recovery`와 `cx gateway recovery`는
   foreground dispatch record를 scan하고 manual-review candidate를 담은
-  `automation-recovery` projection을 기록할 수 있습니다. 이 projection은 scheduler
-  queue ownership, automatic retry, cleanup, health authority, completion authority를
-  주장하지 않습니다.
+  `automation-recovery` projection을 기록할 수 있습니다. 이 projection은 이제
+  dispatch store path/count를 담은 `automation-scheduler-ownership-v1` evidence를
+  포함하며 scheduler queue ownership, lease, unattended retry, cleanup, health,
+  completion authority를 모두 false로 유지합니다.
 - config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/automation dispatch/subagent result/subagent launch
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
@@ -479,12 +480,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   구현됐습니다. `cx session hud --json`은 statusline fallback으로 사용할 수 있습니다.
   Statusline integration과 tmux-backed worker launch는 설계됐지만 아직 구현되지
   않았습니다.
-- cron/gateway는 이제 experimental explicit-approval live dispatcher와
-  schema-validatable blocked-dispatch boundary record 및
+- cron/gateway는 이제 experimental explicit-approval live dispatcher,
+  schema-validatable blocked-dispatch boundary record,
   `automation-action-authority-v1` negative-authority record, foreground recovery
-  projection을 가집니다. 다음 작업은 richer unattended scheduler semantics, retry policy,
-  asynchronous ownership
-  증거입니다.
+  projection, `automation-scheduler-ownership-v1` scheduler ownership evidence를
+  가집니다. 다음 작업은 실제 durable queue, lease heartbeat, retry policy,
+  asynchronous ownership 증거입니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
 - Autopilot active execution은 계속 0.2/0.3 트랙에서 deferred입니다. Experimental
   foundation은 이제 `cx autopilot plan`과 contract

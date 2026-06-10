@@ -52,6 +52,11 @@ occur before 1.0, but they should be called out clearly.
   false, and completion authority false; `cx wiki injection apply` remains
   deferred. The artifact is schema-validatable with
   `cx schema validate --type wiki-injection-plan`.
+- `cx cron recovery --json`, `cx gateway recovery --json`, and
+  `cx cron|gateway status --json` now report
+  `automation-scheduler-ownership-v1` evidence. The projection records dispatch
+  store path/count while keeping queue ownership, leases, unattended retry,
+  cleanup, health, scheduler, and completion authority false.
 
 ### Fixed
 

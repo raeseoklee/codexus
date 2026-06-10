@@ -47,6 +47,11 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   target을 기록하지만 `applySupported:false`, prompt mutation false, completion authority
   false를 유지합니다. `cx wiki injection apply`는 계속 deferred입니다. 이 artifact는
   `cx schema validate --type wiki-injection-plan`으로 schema validation할 수 있습니다.
+- `cx cron recovery --json`, `cx gateway recovery --json`, 그리고
+  `cx cron|gateway status --json`은 이제 `automation-scheduler-ownership-v1`
+  evidence를 보고합니다. Projection은 dispatch store path/count를 기록하지만 queue
+  ownership, lease, unattended retry, cleanup, health, scheduler, completion
+  authority는 모두 false로 유지합니다.
 
 ### Fixed
 

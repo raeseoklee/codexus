@@ -76,8 +76,9 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   surface는 truthful gate이고, automation live contract는 이제 explicit approval로
   synchronous dispatch가 가능하며 `automation-action-authority-v1` negative-authority
   evidence와 foreground recovery projection을 기록합니다. 이 projection은 manual-review
-  candidate를 보고하지만 scheduler, retry, cleanup, health, completion authority를
-  주장하지 않습니다. Richer unattended scheduler ownership은 후속입니다.
+  candidate와 `automation-scheduler-ownership-v1` dispatch-store ownership evidence를
+  보고하지만 queue, lease, unattended retry, cleanup, health, completion authority를
+  주장하지 않습니다. 실제 durable queue/lease/retry loop는 후속입니다.
 - Release 운영에는 실행 가능한 cadence policy가 생겼습니다.
   `cx release policy --json`은 작은 commit/더 큰 release 규칙, hotfix exception,
   stable-contract version boundary, 영문/한국어 policy 문서 존재를 보고합니다.
@@ -193,7 +194,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - 제안 command: `cx runs list`, `cx events tail <run-id>`, `cx report <run-id>`.
     - 출력은 bounded, JSON-first로 유지합니다.
 
-15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch, dry-run audit record, schema-validatable blocked-dispatch boundary record, `automation-action-authority-v1` negative-authority record, `cx cron|gateway recovery` foreground recovery projection이 구현됐고, richer unattended scheduler ownership이 남아 있습니다.
+15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch, dry-run audit record, schema-validatable blocked-dispatch boundary record, `automation-action-authority-v1` negative-authority record, `cx cron|gateway recovery` foreground recovery projection, `automation-scheduler-ownership-v1` ownership evidence가 구현됐고, 실제 durable queue, lease heartbeat, retry policy, unattended scheduler owner가 남아 있습니다.
     - Hermes-style cron/gateway는 lock, schema migration, permission event,
       explicit user policy 뒤에 둬야 합니다.
 
@@ -243,9 +244,10 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    계속 분리합니다.
 4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
    공유하며, 첫 synchronous dispatcher slice가 구현됐습니다. Foreground recovery
-   projection은 dispatch record와 manual-review candidate를 automatic retry 없이
-   보고합니다. 다음은 richer scheduler semantics와 foreground dispatch를 넘는
-   durable ownership입니다.
+   projection은 dispatch record, manual-review candidate,
+   `automation-scheduler-ownership-v1` evidence를 automatic retry 없이 보고합니다.
+   다음은 실제 durable queue, lease heartbeat, retry policy, foreground dispatch를
+   넘는 durable ownership입니다.
 5. Adapter injection은 명시적 approval이 필요하고 visible approval
    artifact를 기록합니다. 여전히 prompt context를 자동 주입하지 않습니다.
 6. `cx session hud --json`이 지원되는 fallback입니다. Statusline integration은 Codex가
@@ -386,8 +388,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
    app-server product behavior는 켜지지 않습니다.
 2. Cron/gateway dispatcher: 첫 explicit-approval live slice와
    schema-validatable blocked-dispatch boundary audit record는 구현됐습니다.
-   Foreground recovery projection도 구현됐습니다. 다음은 scheduler semantics,
-   retry policy, 더 강한 long-lived ownership evidence입니다.
+   Foreground recovery projection과 `automation-scheduler-ownership-v1` ownership
+   evidence도 구현됐습니다. 다음은 실제 durable queue, retry policy, 더 강한
+   long-lived ownership evidence입니다.
 3. Full JSON Schema engine: dependency policy가 허용될 때만 local subset engine을
    교체합니다. 현재 schema artifact는 regression fixture로 유지합니다.
 4. Statusline integration: Codex가 안정적인 supported configuration surface를 제공할 때까지

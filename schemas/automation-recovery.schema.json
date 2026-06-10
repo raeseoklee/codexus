@@ -22,6 +22,62 @@
       },
       "required": ["status", "queueOwned", "unattendedOwner", "mutatesScheduler", "recoveryAuthority", "completionAuthority"]
     },
+    "ownership": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "contractVersion": { "const": "automation-scheduler-ownership-v1" },
+        "feature": { "enum": ["cron", "gateway"] },
+        "status": { "const": "not_owned" },
+        "dispatchStorePath": { "type": "string", "minLength": 1 },
+        "dispatchRecordCount": { "type": "number" },
+        "queue": {
+          "type": "object",
+          "properties": {
+            "owned": { "const": false },
+            "durableQueue": { "const": false },
+            "path": { "type": ["string", "null"] },
+            "reason": { "type": "string", "minLength": 1 }
+          },
+          "required": ["owned", "durableQueue", "path", "reason"]
+        },
+        "lease": {
+          "type": "object",
+          "properties": {
+            "supported": { "const": false },
+            "active": { "const": false },
+            "ownerId": { "type": ["string", "null"] },
+            "heartbeat": { "const": false },
+            "reason": { "type": "string", "minLength": 1 }
+          },
+          "required": ["supported", "active", "ownerId", "heartbeat", "reason"]
+        },
+        "unattendedRetry": {
+          "type": "object",
+          "properties": {
+            "supported": { "const": false },
+            "automaticRetry": { "const": false },
+            "requires": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          },
+          "required": ["supported", "automaticRetry", "requires"]
+        },
+        "authority": {
+          "type": "object",
+          "properties": {
+            "schedulerAuthority": { "const": false },
+            "retryAuthority": { "const": false },
+            "cleanupAuthority": { "const": false },
+            "healthAuthority": { "const": false },
+            "completionAuthority": { "const": false }
+          },
+          "required": ["schedulerAuthority", "retryAuthority", "cleanupAuthority", "healthAuthority", "completionAuthority"]
+        }
+      },
+      "required": ["schemaVersion", "contractVersion", "feature", "status", "dispatchStorePath", "dispatchRecordCount", "queue", "lease", "unattendedRetry", "authority"]
+    },
     "retry": {
       "type": "object",
       "properties": {

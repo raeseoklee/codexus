@@ -944,6 +944,37 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
       if (value.scheduler.recoveryAuthority !== false) errors.push("scheduler.recoveryAuthority:not_false");
       if (value.scheduler.completionAuthority !== false) errors.push("scheduler.completionAuthority:not_false");
     }
+    if ("ownership" in value && value.ownership !== undefined) {
+      if (requireRecord(value.ownership, errors, "ownership")) {
+        if (value.ownership.schemaVersion !== 1) errors.push("ownership.schemaVersion:not_1");
+        requireOneOf(value.ownership, "contractVersion", ["automation-scheduler-ownership-v1"], errors, "ownership.contractVersion");
+        requireOneOf(value.ownership, "feature", ["cron", "gateway"], errors, "ownership.feature");
+        requireOneOf(value.ownership, "status", ["not_owned"], errors, "ownership.status");
+        requireString(value.ownership, "dispatchStorePath", errors, "ownership.dispatchStorePath");
+        requireNumber(value.ownership, "dispatchRecordCount", errors, "ownership.dispatchRecordCount");
+        if (requireRecord(value.ownership.queue, errors, "ownership.queue")) {
+          if (value.ownership.queue.owned !== false) errors.push("ownership.queue.owned:not_false");
+          if (value.ownership.queue.durableQueue !== false) errors.push("ownership.queue.durableQueue:not_false");
+        }
+        if (requireRecord(value.ownership.lease, errors, "ownership.lease")) {
+          if (value.ownership.lease.supported !== false) errors.push("ownership.lease.supported:not_false");
+          if (value.ownership.lease.active !== false) errors.push("ownership.lease.active:not_false");
+          if (value.ownership.lease.heartbeat !== false) errors.push("ownership.lease.heartbeat:not_false");
+        }
+        if (requireRecord(value.ownership.unattendedRetry, errors, "ownership.unattendedRetry")) {
+          if (value.ownership.unattendedRetry.supported !== false) errors.push("ownership.unattendedRetry.supported:not_false");
+          if (value.ownership.unattendedRetry.automaticRetry !== false) errors.push("ownership.unattendedRetry.automaticRetry:not_false");
+          requireArray(value.ownership.unattendedRetry, "requires", errors, "ownership.unattendedRetry.requires");
+        }
+        if (requireRecord(value.ownership.authority, errors, "ownership.authority")) {
+          if (value.ownership.authority.schedulerAuthority !== false) errors.push("ownership.authority.schedulerAuthority:not_false");
+          if (value.ownership.authority.retryAuthority !== false) errors.push("ownership.authority.retryAuthority:not_false");
+          if (value.ownership.authority.cleanupAuthority !== false) errors.push("ownership.authority.cleanupAuthority:not_false");
+          if (value.ownership.authority.healthAuthority !== false) errors.push("ownership.authority.healthAuthority:not_false");
+          if (value.ownership.authority.completionAuthority !== false) errors.push("ownership.authority.completionAuthority:not_false");
+        }
+      }
+    }
     if (requireRecord(value.retry, errors, "retry")) {
       if (value.retry.automaticRetry !== false) errors.push("retry.automaticRetry:not_false");
       if (value.retry.retryAuthority !== false) errors.push("retry.retryAuthority:not_false");

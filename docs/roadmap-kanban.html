@@ -457,13 +457,15 @@
             <span class="tag gated">policy-reviewed-live-dispatch-v1</span>
             <span class="tag evidence">experimental next</span>
             <span class="tag gateable">recovery done</span>
+            <span class="tag evidence">ownership contract done</span>
           </div>
-          <p>The first explicit-approval dispatcher is live, blocked live attempts have schema-validatable boundary audit records, and foreground recovery projections report manual-review candidates. The next step is durable unattended scheduler ownership without overstating autonomy.</p>
+          <p>The first explicit-approval dispatcher is live, blocked live attempts have schema-validatable boundary audit records, and foreground recovery projections report manual-review candidates plus <code>automation-scheduler-ownership-v1</code> evidence. The next step is a real durable queue, lease heartbeat, and retry policy without overstating autonomy.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Dry-run and live paths continue to share the same policy contract.</li>
             <li>Done: recovery projections record dispatch history and manual-review candidates without automatic retry authority.</li>
-            <li>Next: queue ownership and unattended retry semantics are recorded as durable evidence.</li>
+            <li>Done: queue ownership and unattended retry semantics are recorded as <code>automation-scheduler-ownership-v1</code> negative evidence.</li>
+            <li>Next: a real queue owner, lease heartbeat, and retry policy can be considered only with fresh recovery proof.</li>
             <li>No unattended scheduler claims without explicit ownership and recovery proofs.</li>
           </ul>
           <span class="label">Sources</span>
@@ -562,7 +564,7 @@
             <span class="tag advisory">experimental live slice</span>
             <span class="tag gated">automation</span>
           </div>
-          <p>An explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, and foreground recovery projection now exist. The remaining work is unattended scheduler, retry, and ownership evidence without overstating autonomy.</p>
+          <p>An explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, foreground recovery projection, and <code>automation-scheduler-ownership-v1</code> evidence now exist. The remaining work is a real durable scheduler queue, retry policy, and long-lived owner proof without overstating autonomy.</p>
           <span class="label">Gate</span>
           <p>Permission, approval, lock, dispatch, completion, recovery, and owner-liveness evidence must stay durable.</p>
         </article>

@@ -639,6 +639,17 @@ test("automation recovery reports dispatch candidates without scheduler or retry
     assert.equal(output.scheduler.unattendedOwner, false);
     assert.equal(output.scheduler.recoveryAuthority, false);
     assert.equal(output.scheduler.completionAuthority, false);
+    assert.equal(output.ownership.contractVersion, "automation-scheduler-ownership-v1");
+    assert.equal(output.ownership.status, "not_owned");
+    assert.equal(output.ownership.dispatchRecordCount, 1);
+    assert.equal(output.ownership.queue.owned, false);
+    assert.equal(output.ownership.queue.durableQueue, false);
+    assert.equal(output.ownership.lease.supported, false);
+    assert.equal(output.ownership.unattendedRetry.supported, false);
+    assert.equal(output.ownership.unattendedRetry.automaticRetry, false);
+    assert.ok(output.ownership.unattendedRetry.requires.includes("durable-queue-owner"));
+    assert.equal(output.ownership.authority.schedulerAuthority, false);
+    assert.equal(output.ownership.authority.completionAuthority, false);
     assert.equal(output.authority.schedulerAuthority, false);
     assert.equal(output.authority.retryAuthority, false);
     assert.equal(output.authority.completionAuthority, false);
@@ -653,6 +664,9 @@ test("automation recovery reports dispatch candidates without scheduler or retry
     const status = runCli(cwd, ["cron", "status", "--json"]);
     assert.equal(status.status, 0, status.stderr);
     const statusOutput = JSON.parse(status.stdout);
+    assert.equal(statusOutput.ownership.contractVersion, "automation-scheduler-ownership-v1");
+    assert.equal(statusOutput.ownership.queue.owned, false);
+    assert.equal(statusOutput.ownership.unattendedRetry.supported, false);
     assert.equal(statusOutput.recovery.status, "manual_review_required");
     assert.equal(statusOutput.recovery.automaticRetry, false);
     assert.equal(statusOutput.recovery.completionAuthority, false);
