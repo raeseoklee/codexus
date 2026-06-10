@@ -296,6 +296,39 @@ deferred, and future injection requires fresh-context gating, explicit approval,
 sanitization, an audit artifact, a reversible disable path, and proof that failed
 freshness cannot inject.
 
+## Reversible Approved-Injection Contract
+
+Status: design only. No current Codexus command mutates a prompt, session, or run
+with wiki context.
+
+Any future injection path must be a separate action surface, not a side effect of
+`cx wiki context`, `cx wiki context --approve`, or `cx wiki injection-policy`.
+The minimum contract is:
+
+- explicit target: the caller names the run, session, or future adapter target;
+- explicit approval: the caller references a fresh
+  `codexus.wiki.context-approval` artifact and records the approver;
+- sanitization: the context pack is scanned/redacted before any target mutation;
+- audit first: Codexus writes an injection audit artifact before attempting
+  mutation;
+- reversible disable: there is a documented command or policy switch that
+  prevents further injection attempts;
+- freshness proof: stale or failed freshness checks cannot produce an injection
+  artifact;
+- no authority promotion: injected context never becomes source truth,
+  verification evidence, health evidence, or completion authority.
+
+The likely first future surface is a two-step plan/apply shape:
+
+```bash
+cx wiki injection plan --approval <approval-id-or-path> --target <target> --json
+cx wiki injection apply --plan <plan-path> --approved-by <name> --json
+```
+
+`plan` should be report-only and gateable. `apply` should remain experimental
+until repeated dogfooding proves that prompt mutation is reversible, auditable,
+and bounded.
+
 Autopilot integration should be explicit:
 
 ```bash

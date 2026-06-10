@@ -392,8 +392,9 @@ Harness-engineering alignment adds these evidence-first tracks:
   also implemented, and the page set now includes architecture/decision/risk
   projections. Manual-only context-pack handoff rules are implemented in the
   approval artifact, and `cx wiki injection-policy --json` now reports the
-  explicit manual-only boundary. Next work is a reversible approved-injection
-  design; do not add an injection path until that policy can be gated.
+  explicit manual-only boundary. A reversible approved-injection contract is
+  documented in doc 18; next work is a report-only `plan` artifact before any
+  prompt mutation path.
   Do not auto-inject stale or advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
@@ -443,8 +444,9 @@ Harness-engineering alignment adds these evidence-first tracks:
     context before use. Graph/session/architecture/decision/risk projection
     pages are implemented, approval artifacts now record manual-only handoff
     rules, and `cx wiki injection-policy --json` reports the explicit
-    manual-only boundary. Next design a reversible approved-injection path before
-    any prompt mutation is considered.
+    manual-only boundary. Doc 18 now defines the reversible approved-injection
+    contract. Next implement only the report-only plan artifact before any prompt
+    mutation is considered.
 13. Worktree app instance launcher: build on the implemented live ownership
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback

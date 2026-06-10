@@ -44,6 +44,8 @@ occur before 1.0, but they should be called out clearly.
   injection boundary. The policy is manual-only, keeps automatic injection
   deferred, and lists the evidence required before any future injection path can
   be considered.
+- Doc 18 now defines the reversible approved-injection contract required before
+  any future wiki context prompt-mutation surface can be implemented.
 
 ### Fixed
 

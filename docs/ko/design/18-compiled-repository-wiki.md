@@ -283,6 +283,35 @@ prompt mutation은 계속 deferred이며, future injection에는 fresh-context g
 approval, sanitization, audit artifact, reversible disable path, failed freshness가 inject할 수
 없다는 증명이 필요합니다.
 
+## Reversible Approved-Injection 계약
+
+상태: 설계 전용. 현재 Codexus 명령은 wiki context로 prompt, session, run을 변경하지 않습니다.
+
+미래의 injection path는 `cx wiki context`, `cx wiki context --approve`,
+`cx wiki injection-policy`의 side effect가 아니라 별도의 action surface여야 합니다. 최소 계약은
+다음과 같습니다:
+
+- explicit target: caller가 run, session, future adapter target을 명시합니다.
+- explicit approval: caller가 fresh `codexus.wiki.context-approval` artifact를 참조하고
+  approver를 기록합니다.
+- sanitization: target mutation 전에 context pack을 scan/redact합니다.
+- audit first: Codexus는 mutation 시도 전에 injection audit artifact를 기록합니다.
+- reversible disable: 추가 injection attempt를 막는 문서화된 command 또는 policy switch가
+  있어야 합니다.
+- freshness proof: stale 또는 failed freshness check는 injection artifact를 만들 수 없습니다.
+- authority promotion 금지: injected context는 source truth, verification evidence,
+  health evidence, completion authority가 되지 않습니다.
+
+첫 future surface는 다음과 같은 two-step plan/apply 형태가 될 가능성이 높습니다:
+
+```bash
+cx wiki injection plan --approval <approval-id-or-path> --target <target> --json
+cx wiki injection apply --plan <plan-path> --approved-by <name> --json
+```
+
+`plan`은 report-only이면서 gateable이어야 합니다. `apply`는 prompt mutation이 reversible,
+auditable, bounded임을 반복 dogfooding으로 증명하기 전까지 experimental이어야 합니다.
+
 Autopilot integration은 명시적이어야 합니다:
 
 ```bash

@@ -365,8 +365,8 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   graph/session projection page와 architecture/decision/risk projection page도 구현됐습니다.
   Manual-only context-pack handoff rule은 approval artifact에 구현됐고,
   `cx wiki injection-policy --json`은 명시적인 manual-only boundary를 보고합니다. 다음
-  작업은 reversible approved-injection 설계이며, 그 policy를 gate할 수 있기 전에는
-  injection path를 추가하지 않습니다.
+  작업은 report-only `plan` artifact입니다. Reversible approved-injection 계약은 18번
+  문서에 정의됐으며, 그 policy를 gate할 수 있기 전에는 injection path를 추가하지 않습니다.
   Stale/advisory page를 run에 자동 주입하지 않습니다.
 
 - Operational control invariant: decision artifact와 ledger-derived loop
@@ -420,8 +420,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     --fresh-only --gate`는 사용 전 fresh manual context를 요구할 수 있습니다.
     Graph/session/architecture/decision/risk projection page와 approval artifact의
     manual-only handoff rule은 구현됐고, `cx wiki injection-policy --json`은 명시적인
-    manual-only boundary를 보고합니다. 다음은 reversible approved-injection path 설계이며,
-    prompt mutation은 그 이후에만 검토합니다.
+    manual-only boundary를 보고합니다. 18번 문서는 reversible approved-injection 계약을
+    정의합니다. 다음은 report-only plan artifact이며, prompt mutation은 그 이후에만
+    검토합니다.
 13. Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)의
     구현된 live ownership과 observation-evidence slice 위에 다음 단계를 쌓습니다.
     첫 loopback HTTP dev-server probe, bounded/redacted log snapshot adapter, metric

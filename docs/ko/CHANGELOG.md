@@ -40,6 +40,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - `cx wiki injection-policy --json`은 이제 wiki context injection boundary를 명시적으로
   보고합니다. Policy는 manual-only이고 automatic injection을 deferred로 유지하며, future
   injection path를 검토하기 전에 필요한 evidence를 나열합니다.
+- 18번 문서는 future wiki context prompt-mutation surface를 구현하기 전에 필요한
+  reversible approved-injection contract를 정의합니다.
 
 ### Fixed
 
