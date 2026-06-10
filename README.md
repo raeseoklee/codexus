@@ -245,6 +245,7 @@ codexus app instance evidence logs --instance-id <id> --json
 codexus app instance evidence metrics --instance-id <id> --json
 codexus app instance evidence screenshot --instance-id <id> --evidence-path ./screen.png --json
 codexus app instance evidence browser --instance-id <id> --capture ./browser-capture.json --json
+codexus app instance evidence adapters --json
 codexus app instance stop --instance-id <id> --json
 codexus run --verify "npm test" "fix the failing parser tests"
 codexus cancel <run-id> --reason "no longer needed" --json

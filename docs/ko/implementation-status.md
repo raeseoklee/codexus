@@ -24,7 +24,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `update check`
 - `wiki map/build/check/context/export`
 - `app instance profile list/status/logs/start/stop`
-- `app instance evidence record/list/probe/logs/metrics/screenshot`
+- `app instance evidence record/list/probe/logs/metrics/screenshot/browser/adapters`
 - `slop check`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
@@ -61,7 +61,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   dispatch store path/count를 담은 `automation-scheduler-ownership-v1` evidence를
   포함하며 scheduler queue ownership, lease, unattended retry, cleanup, health,
   completion authority를 모두 false로 유지합니다.
-- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/automation dispatch/subagent result/subagent launch
+- config/state/event/memory/skill/session-state/supply-chain-policy/decision/app-instance descriptor/app-instance/observability adapter/automation dispatch/subagent result/subagent launch
   versioned schema artifact, durable read-path focused enforcement,
   single-record/run-ledger schema artifact subset validation
 - `npm run build`는 TypeScript source를 esbuild로 bundle해 npm 설치용
@@ -385,9 +385,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   보고합니다. 이 evidence surface들은 process identity 증명, control, health authority,
   cleanup authority, completion authority를 주장하지 않습니다.
   [20번 문서](design/20-observability-adapter-boundary.md)는 future live
-  Browser/DevTools capture driver의 경계를 정의합니다. Adapter role, timeout,
-  redaction, loopback target, storage, authority flag가 schema-visible해지기 전까지
-  live driver는 구현하지 않습니다. `cx session status --json`과
+  Browser/DevTools capture driver의 경계를 정의하고,
+  `cx app instance evidence adapters --json`은 schema-validatable
+  import-only/host-mediated/driver-mediated adapter descriptor/status boundary를
+  보고합니다. Adapter availability는 process identity 증명, health, control, cleanup,
+  prompt-injection, Codex-read, completion authority를 의미하지 않습니다.
+  `cx session status --json`과
   `cx session hud --json`은 app-instance observation과 wiki context approval을
   `evidenceLoop` 아래에 요약하지만 health, control, source-truth, completion
   authority를 추가하지 않습니다. 실제 live Browser/DevTools capture driver는
@@ -517,7 +520,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   로컬 screenshot 파일을 bounded file metadata와 SHA-256으로 같은 `instanceId`에
   연결합니다. `cx app instance evidence browser`는 기존 Browser/DevTools capture JSON
   파일을 import하고 process identity를 증명하지 않는 bounded/redacted endpoint binding
-  fact를 기록합니다. 명시적 stale/orphan lifecycle policy projection도 구현됐습니다.
+  fact를 기록합니다. `cx app instance evidence adapters --json`은 report-only
+  observability adapter descriptor를 보고합니다. Import-only Browser/DevTools
+  capture-file binding은 implemented이고 host-mediated/driver-mediated live capture는
+  unavailable입니다. 명시적 stale/orphan lifecycle policy projection도 구현됐습니다.
   `cx session status --json`과 `cx session hud --json`은 이 observation과 wiki context
   approval을 `evidenceLoop`에 요약하되 권한을 승격하지 않습니다. 실제 live
   Browser/DevTools capture driver는 [20번 문서](design/20-observability-adapter-boundary.md)의

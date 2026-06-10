@@ -564,6 +564,14 @@ process.on("SIGINT", shutdown);
   assert(appStatus.stability === "experimental", "app instance status did not report experimental stability");
   assert(appStatus.status === "empty", "app instance status should not report dry-run plans as live instances");
   assert(appStatus.instances?.length === 0, "app instance status should not include dry-run plans as instances");
+  const appAdapters = parseJsonRun(codexus, ["app", "instance", "evidence", "adapters", "--cwd", project, "--json"]);
+  assert(appAdapters.summary?.importOnlyImplemented === true, "observability adapter report did not expose import-only support");
+  assert(appAdapters.summary?.liveDriverImplemented === false, "observability adapter report must not claim live driver support");
+  assert(appAdapters.authority?.completionAuthority === false, "observability adapter report must not gain completion authority");
+  const appAdaptersPath = join(project, "observability-adapters.json");
+  await writeFile(appAdaptersPath, `${JSON.stringify(appAdapters, null, 2)}\n`);
+  const appAdaptersSchema = parseJsonRun(codexus, ["schema", "validate", "--cwd", project, "--type", "observability-adapter", "--file", appAdaptersPath, "--json"]);
+  assert(appAdaptersSchema.ok === true, "observability adapter report did not validate against schema");
 
   const appLive = parseJsonRun(codexus, [
     "app",

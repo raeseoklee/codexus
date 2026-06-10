@@ -336,11 +336,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   `instanceId`에 연결합니다. `cx app instance evidence browser`는 기존 Browser/DevTools
   JSON capture 파일을 import하고 process identity를 증명하지 않는 endpoint binding
   fact를 기록합니다. [20번 문서](design/20-observability-adapter-boundary.md)는 live
-  Browser/DevTools capture driver를 추가하기 전의 경계를 정의합니다. 다음 작업은
-  report-only `observability-adapter` descriptor와
-  `cx app instance evidence adapters --json`이고, live capture driver는 role,
-  timeout, redaction, loopback, storage, authority flag가 schema-visible해질 때까지
-  deferred입니다.
+  Browser/DevTools capture driver를 추가하기 전의 경계를 정의하고,
+  `cx app instance evidence adapters --json`은 schema-validatable
+  import-only/host-mediated/driver-mediated adapter status를 보고합니다. Live capture
+  driver는 구체 driver가 문서화된 role, timeout, redaction, loopback, storage,
+  authority boundary를 보존할 수 있을 때까지 deferred입니다.
 - Worktree app instance launcher: [19번 문서](design/19-worktree-app-instance-launcher.md)는
   experimental live ownership 첫 slice를 갖습니다. Descriptor/profile listing,
   `start --dry-run`, live owned-process start/stop, heartbeat, port allocation,
@@ -349,9 +349,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   Session status와 HUD는 app-instance observation을 `evidenceLoop` 아래에 요약하지만
   authority를 승격하지 않습니다. 첫 adapter capture slice는 loopback HTTP dev-server,
   bounded log, metric, screenshot-file evidence, Browser/DevTools capture-file
-  binding으로 구현됐습니다. 다음 작업은 [20번 문서](design/20-observability-adapter-boundary.md)의
-  report-only observability-adapter descriptor이며, 그 다음 선택적 live Browser/DevTools
-  capture driver와 future autopilot surface를 위한 worktree-aware launcher reuse입니다.
+  binding, [20번 문서](design/20-observability-adapter-boundary.md)의 report-only
+  observability-adapter descriptor로 구현됐습니다. 다음 작업은 선택적 live
+  Browser/DevTools capture driver와 future autopilot surface를 위한 worktree-aware
+  launcher reuse입니다.
 - Operational control invariant: [17번 문서](design/17-operational-control-invariants.md)는
   autonomy preset, policy catalog, docs-code invariant, decision record, loop breaker,
   HUD projection을 기존 evidence 위의 control layer로 정의합니다. 첫 deterministic
@@ -441,9 +442,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     첫 loopback HTTP dev-server probe, bounded/redacted log snapshot adapter, metric
     snapshot adapter, screenshot-file adapter, Browser/DevTools capture-file binding
     adapter는 구현됐습니다. [20번 문서](design/20-observability-adapter-boundary.md)는
-    future live capture driver의 경계를 정의합니다. 이후 작업은 report-only adapter
-    descriptor/status, 선택적 live Browser/DevTools capture driver, worktree-aware
-    launcher reuse입니다.
+    future live capture driver의 경계를 정의하고, report-only adapter descriptor/status
+    reporting도 구현됐습니다. 이후 작업은 선택적 live Browser/DevTools capture driver와
+    worktree-aware launcher reuse입니다.
 14. Project LSP diagnostics: first-slice `cx lsp status/check`는 명시적 local project
     command를 통한 TypeScript diagnostics 용도로 구현됐습니다. Protocol-server
     lifecycle, workspace trust, output bounding, gate behavior가 명시되기 전까지 자동

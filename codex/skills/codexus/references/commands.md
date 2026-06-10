@@ -112,6 +112,8 @@ node codex/skills/codexus/scripts/cx.mjs app instance evidence probe --instance-
 node codex/skills/codexus/scripts/cx.mjs app instance evidence logs --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence screenshot --instance-id <id> --evidence-path <path> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence browser --instance-id <id> --capture <browser-capture.json> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence adapters --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence list --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance stop --instance-id <id> --json
 ```

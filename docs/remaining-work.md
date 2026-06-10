@@ -361,11 +361,11 @@ Harness-engineering alignment adds these evidence-first tracks:
   `cx app instance evidence browser` imports an existing Browser/DevTools JSON
   capture file and records endpoint binding facts without proving process
   identity. [Doc 20](design/20-observability-adapter-boundary.md) now defines
-  the boundary before any live Browser/DevTools capture driver is added. Next
-  work is a report-only `observability-adapter` descriptor and
-  `cx app instance evidence adapters --json`; live capture drivers remain
-  deferred until role, timeout, redaction, loopback, storage, and authority
-  flags are schema-visible.
+  the boundary before any live Browser/DevTools capture driver is added, and
+  `cx app instance evidence adapters --json` reports the schema-validatable
+  import-only/host-mediated/driver-mediated adapter status. Live capture
+  drivers remain deferred until a concrete driver can preserve the documented
+  role, timeout, redaction, loopback, storage, and authority boundaries.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
   now has an experimental live ownership first slice: descriptor/profile
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
@@ -374,11 +374,11 @@ Harness-engineering alignment adds these evidence-first tracks:
   lifecycle policy projection. Session status and HUD now summarize app-instance
   observations under `evidenceLoop` without authority. The first adapter capture
   slice is implemented as loopback HTTP dev-server, bounded log, metric,
-  screenshot-file evidence, and Browser/DevTools capture-file binding. Next work
-  is the report-only observability-adapter descriptor from
-  [doc 20](design/20-observability-adapter-boundary.md), then optional live
-  Browser/DevTools capture drivers and worktree-aware launcher reuse for future
-  autopilot surfaces.
+  screenshot-file evidence, Browser/DevTools capture-file binding, and the
+  report-only observability-adapter descriptor from
+  [doc 20](design/20-observability-adapter-boundary.md). Next work is optional
+  live Browser/DevTools capture drivers and worktree-aware launcher reuse for
+  future autopilot surfaces.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
@@ -469,9 +469,10 @@ Harness-engineering alignment adds these evidence-first tracks:
     HTTP dev-server probe, bounded/redacted log snapshot adapter, metric
     snapshot adapter, screenshot-file adapter, and Browser/DevTools capture-file
     binding adapter are implemented. [Doc 20](design/20-observability-adapter-boundary.md)
-    defines the boundary for future live capture drivers; first add report-only
-    adapter descriptors/status, then optional live Browser/DevTools capture
-    drivers and worktree-aware launcher reuse for future autopilot surfaces.
+    defines the boundary for future live capture drivers, and report-only
+    adapter descriptor/status reporting is implemented; next add optional live
+    Browser/DevTools capture drivers and worktree-aware launcher reuse for
+    future autopilot surfaces.
 14. Project LSP diagnostics: first-slice `cx lsp status/check` exists for
     TypeScript diagnostics via explicit local project commands. Keep automatic
     project LSP application detect-only until protocol-server lifecycle,

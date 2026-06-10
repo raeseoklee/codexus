@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/observability-adapter.schema.json",
+  "title": "Codexus Observability Adapter Report",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.observability.adapters" },
+    "command": { "const": "app instance evidence adapters" },
+    "cwd": { "type": "string", "minLength": 1 },
+    "adapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["import-only", "host-mediated", "driver-mediated"] },
+          "status": { "enum": ["implemented", "unavailable"] },
+          "observationKind": { "enum": ["browser", "dev-server", "log", "screenshot", "metric"] },
+          "command": { "type": ["string", "null"] },
+          "input": {
+            "type": "object",
+            "properties": {
+              "kind": { "enum": ["capture-file", "host-capture-artifact", "driver-created-capture"] },
+              "existingCommandRequired": { "type": "boolean" }
+            },
+            "required": ["kind", "existingCommandRequired"]
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "artifactType": { "type": "string", "minLength": 1 },
+              "schemaType": { "type": ["string", "null"] }
+            },
+            "required": ["artifactType", "schemaType"]
+          },
+          "capability": {
+            "type": "object",
+            "properties": {
+              "canImportCapture": { "type": "boolean" },
+              "canCreateCapture": { "type": "boolean" },
+              "connectsToLiveBrowser": { "type": "boolean" },
+              "startsBrowser": { "type": "boolean" },
+              "mutatesApplicationState": { "type": "boolean" },
+              "usesUserBrowserProfile": { "type": "boolean" }
+            },
+            "required": [
+              "canImportCapture",
+              "canCreateCapture",
+              "connectsToLiveBrowser",
+              "startsBrowser",
+              "mutatesApplicationState",
+              "usesUserBrowserProfile"
+            ]
+          },
+          "authority": {
+            "type": "object",
+            "properties": {
+              "controlsInstance": { "const": false },
+              "healthAuthority": { "const": false },
+              "cleanupAuthority": { "const": false },
+              "completionAuthority": { "const": false },
+              "promptInjectionAuthority": { "const": false },
+              "codexReadAuthority": { "const": false }
+            },
+            "required": [
+              "controlsInstance",
+              "healthAuthority",
+              "cleanupAuthority",
+              "completionAuthority",
+              "promptInjectionAuthority",
+              "codexReadAuthority"
+            ]
+          },
+          "boundaries": {
+            "type": "object",
+            "properties": {
+              "loopbackOnly": { "type": "boolean" },
+              "boundedOutput": { "type": "boolean" },
+              "redactionRequired": { "type": "boolean" },
+              "storesFilesByPathAndHash": { "type": "boolean" },
+              "finiteTimeoutRequired": { "type": "boolean" },
+              "endpointMatchIsProcessIdentity": { "const": false }
+            },
+            "required": [
+              "loopbackOnly",
+              "boundedOutput",
+              "redactionRequired",
+              "storesFilesByPathAndHash",
+              "finiteTimeoutRequired",
+              "endpointMatchIsProcessIdentity"
+            ]
+          },
+          "caveat": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "id",
+          "role",
+          "status",
+          "observationKind",
+          "command",
+          "input",
+          "output",
+          "capability",
+          "authority",
+          "boundaries",
+          "caveat"
+        ]
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "implemented": { "type": "integer", "minimum": 0 },
+        "unavailable": { "type": "integer", "minimum": 0 },
+        "importOnlyImplemented": { "type": "boolean" },
+        "liveDriverImplemented": { "const": false }
+      },
+      "required": ["total", "implemented", "unavailable", "importOnlyImplemented", "liveDriverImplemented"]
+    },
+    "authority": {
+      "type": "object",
+      "properties": {
+        "controlsInstance": { "const": false },
+        "healthAuthority": { "const": false },
+        "cleanupAuthority": { "const": false },
+        "completionAuthority": { "const": false },
+        "promptInjectionAuthority": { "const": false },
+        "codexReadAuthority": { "const": false }
+      },
+      "required": [
+        "controlsInstance",
+        "healthAuthority",
+        "cleanupAuthority",
+        "completionAuthority",
+        "promptInjectionAuthority",
+        "codexReadAuthority"
+      ]
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "command", "cwd", "adapters", "summary", "authority"]
+}

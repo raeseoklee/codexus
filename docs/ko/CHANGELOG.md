@@ -11,6 +11,13 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ### Added
 
+- `cx app instance evidence adapters --json`은 이제 experimental observability
+  adapter descriptor/status boundary를 보고합니다. 구현된 import-only Browser/DevTools
+  capture-file adapter를 노출하고 host-mediated/driver-mediated capture는 unavailable로
+  표시하며 health, control, cleanup, prompt-injection, Codex-read, completion
+  authority는 false로 유지합니다.
+- `cx schema validate --type observability-adapter --file <path> --json`은 이제
+  observability adapter descriptor/status report를 검증합니다.
 - 20번 문서는 live Browser/DevTools capture driver를 추가하기 전에 필요한
   observability adapter boundary를 정의합니다. 이 설계는 import-only,
   host-mediated, driver-mediated adapter 역할을 분리하고 adapter output이 health,

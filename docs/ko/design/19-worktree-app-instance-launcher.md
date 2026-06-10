@@ -252,11 +252,17 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
     "endpoint_match_only"`를 보고하지만, browser를 열거나 DevTools를 직접 구동하거나
     process identity를 증명하거나 health, control, cleanup, completion authority가
     되지는 않습니다.
+17. 완료: [20번 문서](20-observability-adapter-boundary.md)의 report-only
+    observability adapter descriptor/status boundary로
+    `cx app instance evidence adapters --json`을 추가합니다. 이 command는 import-only
+    Browser/DevTools capture-file binding을 implemented로, host-mediated/driver-mediated
+    live capture를 unavailable로 보고하며 health, control, cleanup, prompt-injection,
+    Codex-read, completion authority를 false로 유지합니다.
 
 ## 다음 Slice
 
 1. `cx app instance evidence browser`가 소비하는 capture JSON을 생성하는 선택적 live
-   Browser/DevTools capture driver를 추가하되 process identity, health/control
-   authority를 주장하지 않게 유지합니다.
+   Browser/DevTools capture driver를 추가하되 process identity, user-browser profile
+   authority, Codex-read authority, health/control authority를 주장하지 않게 유지합니다.
 2. Future autopilot surface가 launcher를 worktree-aware 방식으로 재사용하되 completion
    authority는 verification과 policy gate에만 유지합니다.

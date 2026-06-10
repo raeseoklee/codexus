@@ -11,6 +11,13 @@ occur before 1.0, but they should be called out clearly.
 
 ### Added
 
+- `cx app instance evidence adapters --json` now reports the experimental
+  observability adapter descriptor/status boundary. It exposes the implemented
+  import-only Browser/DevTools capture-file adapter and marks host-mediated and
+  driver-mediated capture as unavailable, while keeping health, control,
+  cleanup, prompt-injection, Codex-read, and completion authority false.
+- `cx schema validate --type observability-adapter --file <path> --json` now
+  validates the observability adapter descriptor/status report.
 - Doc 20 now defines the observability adapter boundary before any live
   Browser/DevTools capture driver is added. The design separates import-only,
   host-mediated, and driver-mediated adapter roles and keeps adapter output from

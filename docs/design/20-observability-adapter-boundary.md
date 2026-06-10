@@ -143,17 +143,19 @@ artifacts:
 | Codex read the capture | no | explicit pass/citation artifact only |
 | Task is complete | no | verification gates only |
 
-## First Slice
+## Implemented First Slice
 
-The first implementation after this design should stay report-only:
+The report-only first slice is implemented:
 
-1. Add a schema-validatable `observability-adapter` descriptor that lists
+1. Done: add a schema-validatable `observability-adapter` descriptor that lists
    supported roles and authority flags.
-2. Add `cx app instance evidence adapters --json` to report available adapters:
-   import-only implemented, host-mediated/driver-mediated unavailable.
-3. Add tests proving that adapter availability does not imply health, control,
-   prompt injection, or completion authority.
-4. Keep live Browser/DevTools capture creation deferred until a concrete driver
+2. Done: add `cx app instance evidence adapters --json` to report available
+   adapters: import-only implemented, host-mediated/driver-mediated
+   unavailable.
+3. Done: add tests proving that adapter availability does not imply health,
+   control, prompt injection, Codex-read, cleanup, or completion authority.
+4. Still deferred: keep live Browser/DevTools capture creation blocked until a
+   concrete driver
    can produce the capture artifact without using user credentials or mutating
    application state.
 

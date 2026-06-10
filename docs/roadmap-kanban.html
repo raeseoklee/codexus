@@ -349,8 +349,9 @@
             <span class="tag gated">experimental</span>
             <span class="tag gateable">HTTP/log/metric/screenshot/browser binding done</span>
             <span class="tag done">boundary design done</span>
+            <span class="tag done">adapter status done</span>
           </div>
-          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, metric snapshot adapter, screenshot-file binding adapter, and Browser/DevTools capture-file binding adapter are implemented. Doc 20 now defines the boundary before optional live Browser/DevTools capture drivers.</p>
+          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, metric snapshot adapter, screenshot-file binding adapter, Browser/DevTools capture-file binding adapter, and report-only observability adapter status are implemented. Doc 20 defines the boundary before optional live Browser/DevTools capture drivers.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale/orphan artifacts report lifecycle policy without implying health, cleanup, completion, or control.</li>
@@ -360,7 +361,8 @@
             <li>Done: screenshot-file evidence binds an already captured local screenshot to the same <code>instanceId</code> using file metadata and SHA-256 without becoming health, control, or completion authority.</li>
             <li>Done: Browser/DevTools capture-file evidence imports an existing JSON capture, records bounded/redacted endpoint facts, and distinguishes endpoint match from process-identity proof.</li>
             <li>Done: doc 20 separates import-only, host-mediated, and driver-mediated adapter roles and makes authority flags explicit.</li>
-            <li>Next: add report-only adapter descriptors/status before any optional live Browser/DevTools capture driver creates capture JSON.</li>
+            <li>Done: <code>cx app instance evidence adapters --json</code> reports import-only implemented and host/driver-mediated live capture unavailable without authority.</li>
+            <li>Next: optional live Browser/DevTools capture drivers can create capture JSON only after preserving the documented boundary.</li>
             <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>
           </ul>
           <span class="label">Sources</span>
@@ -496,14 +498,16 @@
           <div class="tags">
             <span class="tag evidence">adapter descriptors</span>
             <span class="tag done">boundary design done</span>
+            <span class="tag done">status command done</span>
           </div>
-          <p>The loopback HTTP dev-server probe, bounded log adapter, metric adapter, screenshot-file binding adapter, Browser/DevTools capture-file binding adapter, session evidence-loop projection, and adapter boundary design are implemented. Next wire report-only adapter descriptors/status before optional live Browser/DevTools capture or trace drivers.</p>
+          <p>The loopback HTTP dev-server probe, bounded log adapter, metric adapter, screenshot-file binding adapter, Browser/DevTools capture-file binding adapter, session evidence-loop projection, adapter boundary design, and report-only adapter status command are implemented. Next is optional live Browser/DevTools capture or trace drivers, still behind the boundary.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Stack-specific behavior stays outside the workflow kernel.</li>
             <li>Evidence is bounded, redacted, and disposable by default.</li>
             <li>Done: <code>cx session status</code> and <code>cx session hud</code> summarize app-instance observations without authority.</li>
             <li>Done: doc 20 defines import-only, host-mediated, and driver-mediated roles before live drivers.</li>
+            <li>Done: <code>cx app instance evidence adapters --json</code> exposes adapter status without health/control/prompt-injection/completion authority.</li>
             <li>Codexus never claims Codex read evidence unless it was passed or cited.</li>
           </ul>
           <span class="label">Sources</span>

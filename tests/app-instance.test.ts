@@ -851,6 +851,64 @@ test("app instance browser evidence binds capture URL without proving process id
   }
 });
 
+test("app instance evidence adapters report roles without granting authority", async () => {
+  const cwd = await tempDir();
+  try {
+    const adapters = runCli(cwd, ["app", "instance", "evidence", "adapters", "--json"]);
+    assert.equal(adapters.status, 0, adapters.stderr);
+    const output = parseJson(adapters);
+    assert.equal(output.schemaVersion, 1);
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.type, "codexus.observability.adapters");
+    assert.equal(output.command, "app instance evidence adapters");
+    assert.equal(output.summary.total, 3);
+    assert.equal(output.summary.implemented, 1);
+    assert.equal(output.summary.unavailable, 2);
+    assert.equal(output.summary.importOnlyImplemented, true);
+    assert.equal(output.summary.liveDriverImplemented, false);
+    assert.equal(output.authority.controlsInstance, false);
+    assert.equal(output.authority.healthAuthority, false);
+    assert.equal(output.authority.cleanupAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+    assert.equal(output.authority.promptInjectionAuthority, false);
+    assert.equal(output.authority.codexReadAuthority, false);
+
+    const importOnly = output.adapters.find((adapter: { id: string }) => adapter.id === "browser-capture-file");
+    assert.ok(importOnly);
+    assert.equal(importOnly.role, "import-only");
+    assert.equal(importOnly.status, "implemented");
+    assert.equal(importOnly.capability.canImportCapture, true);
+    assert.equal(importOnly.capability.canCreateCapture, false);
+    assert.equal(importOnly.capability.connectsToLiveBrowser, false);
+    assert.equal(importOnly.capability.startsBrowser, false);
+    assert.equal(importOnly.capability.mutatesApplicationState, false);
+    assert.equal(importOnly.capability.usesUserBrowserProfile, false);
+    assert.equal(importOnly.authority.healthAuthority, false);
+    assert.equal(importOnly.authority.cleanupAuthority, false);
+    assert.equal(importOnly.authority.completionAuthority, false);
+    assert.equal(importOnly.authority.promptInjectionAuthority, false);
+    assert.equal(importOnly.authority.codexReadAuthority, false);
+    assert.equal(importOnly.boundaries.endpointMatchIsProcessIdentity, false);
+
+    const driver = output.adapters.find((adapter: { id: string }) => adapter.id === "browser-devtools-driver");
+    assert.ok(driver);
+    assert.equal(driver.role, "driver-mediated");
+    assert.equal(driver.status, "unavailable");
+    assert.equal(driver.capability.canCreateCapture, false);
+    assert.equal(driver.capability.connectsToLiveBrowser, false);
+    assert.equal(driver.authority.healthAuthority, false);
+    assert.equal(driver.authority.completionAuthority, false);
+
+    const outputPath = join(cwd, "observability-adapters.json");
+    await writeFile(outputPath, `${JSON.stringify(output, null, 2)}\n`);
+    const schema = runCli(cwd, ["schema", "validate", "--type", "observability-adapter", "--file", outputPath, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(parseJson(schema).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("app instance browser evidence fails when capture URL is not the instance endpoint", async () => {
   const cwd = await tempDir();
   try {

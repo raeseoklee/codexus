@@ -260,11 +260,18 @@ The live `start` and `stop` slices must enforce these local facts:
     "endpoint_match_only"`. It does not open a browser, drive DevTools, prove
     process identity, or become health, control, cleanup, or completion
     authority.
+17. Done: add `cx app instance evidence adapters --json` as the report-only
+    observability adapter descriptor/status boundary from
+    [doc 20](20-observability-adapter-boundary.md). It reports import-only
+    Browser/DevTools capture-file binding as implemented, host-mediated and
+    driver-mediated live capture as unavailable, and keeps health, control,
+    cleanup, prompt-injection, Codex-read, and completion authority false.
 
 ## Next Slice
 
 1. Add optional live Browser/DevTools capture drivers that create the capture
    JSON consumed by `cx app instance evidence browser`, without claiming process
-   identity or health/control authority.
+   identity, user-browser profile authority, Codex-read authority, or
+   health/control authority.
 2. Add worktree-aware launcher reuse for future autopilot surfaces while keeping
    completion authority on verification and policy gates.

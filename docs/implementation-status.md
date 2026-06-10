@@ -65,6 +65,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `app instance evidence logs`
   - `app instance evidence metrics`
   - `app instance evidence screenshot`
+  - `app instance evidence browser`
+  - `app instance evidence adapters`
   - `memory add`
   - `memory search`
   - `memory list`
@@ -150,8 +152,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   health, and completion authority false.
 - Versioned schema artifacts exist for config, state, events, memory entries,
   skills, session state, supply-chain policy, decision artifacts, app instance
-  descriptors, app instance artifacts, automation dispatch records, subagent
-  result/launch artifacts, and app-server discovery/experiment evidence
+  descriptors, app instance artifacts, observability adapter reports, automation
+  dispatch records, subagent result/launch artifacts, and app-server
+  discovery/experiment evidence
   manifests, with focused enforcement plus
   zero-dependency schema-artifact subset validation on single-record and
   run-ledger checks.
@@ -385,9 +388,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `ownedWorktreeInstanceEvidence: "endpoint_match_only"`. None of these evidence
   surfaces claim process-identity proof, control, health authority, cleanup
   authority, or completion authority. [Doc 20](design/20-observability-adapter-boundary.md)
-  now defines the boundary for future live Browser/DevTools capture drivers:
-  adapter roles, timeouts, redaction, loopback targeting, storage, and authority
-  flags must be schema-visible before any live driver is implemented.
+  now defines the boundary for future live Browser/DevTools capture drivers, and
+  `cx app instance evidence adapters --json` reports the schema-validatable
+  import-only/host-mediated/driver-mediated adapter descriptor/status boundary.
+  Adapter availability never implies process-identity proof, health, control,
+  cleanup, prompt-injection, Codex-read, or completion authority.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External
@@ -660,7 +665,10 @@ review. Current high-level gaps:
   and SHA-256. `cx app instance evidence browser` imports an existing
   Browser/DevTools capture JSON file and records bounded/redacted endpoint
   binding facts without proving process identity. Explicit stale/orphan
-  lifecycle policy projection is implemented.
+  lifecycle policy projection is implemented. `cx app instance evidence
+  adapters --json` reports the report-only observability adapter descriptor:
+  import-only Browser/DevTools capture-file binding is implemented, while
+  host-mediated and driver-mediated live capture remain unavailable.
   `cx session status --json` and `cx session hud --json` now summarize
   app-instance observations and wiki context approvals under `evidenceLoop`
   without adding health, control, source-truth, or completion authority.

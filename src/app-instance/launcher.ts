@@ -193,6 +193,74 @@ export interface AppInstanceEvidenceSummary {
   };
 }
 
+export type ObservabilityAdapterRole = "import-only" | "host-mediated" | "driver-mediated";
+export type ObservabilityAdapterStatus = "implemented" | "unavailable";
+
+export interface ObservabilityAdapterDescriptor {
+  id: string;
+  role: ObservabilityAdapterRole;
+  status: ObservabilityAdapterStatus;
+  observationKind: AppInstanceObservationKind;
+  command: string | null;
+  input: {
+    kind: "capture-file" | "host-capture-artifact" | "driver-created-capture";
+    existingCommandRequired: boolean;
+  };
+  output: {
+    artifactType: string;
+    schemaType: string | null;
+  };
+  capability: {
+    canImportCapture: boolean;
+    canCreateCapture: boolean;
+    connectsToLiveBrowser: boolean;
+    startsBrowser: boolean;
+    mutatesApplicationState: boolean;
+    usesUserBrowserProfile: boolean;
+  };
+  authority: {
+    controlsInstance: false;
+    healthAuthority: false;
+    cleanupAuthority: false;
+    completionAuthority: false;
+    promptInjectionAuthority: false;
+    codexReadAuthority: false;
+  };
+  boundaries: {
+    loopbackOnly: boolean;
+    boundedOutput: boolean;
+    redactionRequired: boolean;
+    storesFilesByPathAndHash: boolean;
+    finiteTimeoutRequired: boolean;
+    endpointMatchIsProcessIdentity: false;
+  };
+  caveat: string;
+}
+
+export interface ObservabilityAdapterReport {
+  schemaVersion: 1;
+  stability: "experimental";
+  type: "codexus.observability.adapters";
+  command: "app instance evidence adapters";
+  cwd: string;
+  adapters: ObservabilityAdapterDescriptor[];
+  summary: {
+    total: number;
+    implemented: number;
+    unavailable: number;
+    importOnlyImplemented: boolean;
+    liveDriverImplemented: false;
+  };
+  authority: {
+    controlsInstance: false;
+    healthAuthority: false;
+    cleanupAuthority: false;
+    completionAuthority: false;
+    promptInjectionAuthority: false;
+    codexReadAuthority: false;
+  };
+}
+
 interface AppInstanceHeartbeat {
   schemaVersion: 1;
   type: "codexus.app.instance.heartbeat";
@@ -744,6 +812,110 @@ function isObservationKind(value: unknown): value is AppInstanceObservationKind 
 
 function isObservationStatus(value: unknown): value is AppInstanceObservationStatus {
   return value === "observed" || value === "unavailable" || value === "failed";
+}
+
+function isObservabilityAdapterRole(value: unknown): value is ObservabilityAdapterRole {
+  return value === "import-only" || value === "host-mediated" || value === "driver-mediated";
+}
+
+function isObservabilityAdapterStatus(value: unknown): value is ObservabilityAdapterStatus {
+  return value === "implemented" || value === "unavailable";
+}
+
+function validateAdapterAuthority(value: unknown, errors: string[], path: string): void {
+  if (!isRecord(value)) {
+    errors.push(`${path}:expected_object`);
+    return;
+  }
+  if (value.controlsInstance !== false) errors.push(`${path}.controlsInstance:not_false`);
+  if (value.healthAuthority !== false) errors.push(`${path}.healthAuthority:not_false`);
+  if (value.cleanupAuthority !== false) errors.push(`${path}.cleanupAuthority:not_false`);
+  if (value.completionAuthority !== false) errors.push(`${path}.completionAuthority:not_false`);
+  if (value.promptInjectionAuthority !== false) errors.push(`${path}.promptInjectionAuthority:not_false`);
+  if (value.codexReadAuthority !== false) errors.push(`${path}.codexReadAuthority:not_false`);
+}
+
+function validateAdapterCapability(value: unknown, errors: string[], path: string): void {
+  if (!isRecord(value)) {
+    errors.push(`${path}:expected_object`);
+    return;
+  }
+  for (const key of [
+    "canImportCapture",
+    "canCreateCapture",
+    "connectsToLiveBrowser",
+    "startsBrowser",
+    "mutatesApplicationState",
+    "usesUserBrowserProfile",
+  ]) {
+    if (typeof value[key] !== "boolean") errors.push(`${path}.${key}:expected_boolean`);
+  }
+}
+
+function validateAdapterBoundaries(value: unknown, errors: string[], path: string): void {
+  if (!isRecord(value)) {
+    errors.push(`${path}:expected_object`);
+    return;
+  }
+  for (const key of ["loopbackOnly", "boundedOutput", "redactionRequired", "storesFilesByPathAndHash", "finiteTimeoutRequired"]) {
+    if (typeof value[key] !== "boolean") errors.push(`${path}.${key}:expected_boolean`);
+  }
+  if (value.endpointMatchIsProcessIdentity !== false) errors.push(`${path}.endpointMatchIsProcessIdentity:not_false`);
+}
+
+export function validateObservabilityAdapterReport(value: unknown, path = "observability-adapter") {
+  const errors: string[] = [];
+  if (!isRecord(value)) return { path, valid: false, errors: [`${path}:not_object`] };
+  if (value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  if (value.stability !== "experimental") errors.push("stability:not_experimental");
+  if (value.type !== "codexus.observability.adapters") errors.push("type:not_codexus_observability_adapters");
+  if (value.command !== "app instance evidence adapters") errors.push("command:not_app_instance_evidence_adapters");
+  if (typeof value.cwd !== "string" || !value.cwd) errors.push("cwd:missing_string");
+  if (!Array.isArray(value.adapters)) {
+    errors.push("adapters:expected_array");
+  } else {
+    for (const [index, adapter] of value.adapters.entries()) {
+      const prefix = `adapters.${index}`;
+      if (!isRecord(adapter)) {
+        errors.push(`${prefix}:expected_object`);
+        continue;
+      }
+      if (typeof adapter.id !== "string" || !adapter.id) errors.push(`${prefix}.id:missing_string`);
+      if (!isObservabilityAdapterRole(adapter.role)) errors.push(`${prefix}.role:invalid_enum`);
+      if (!isObservabilityAdapterStatus(adapter.status)) errors.push(`${prefix}.status:invalid_enum`);
+      if (!isObservationKind(adapter.observationKind)) errors.push(`${prefix}.observationKind:invalid_enum`);
+      if (!(adapter.command === null || typeof adapter.command === "string")) errors.push(`${prefix}.command:invalid`);
+      if (!isRecord(adapter.input)) {
+        errors.push(`${prefix}.input:expected_object`);
+      } else {
+        if (adapter.input.kind !== "capture-file" && adapter.input.kind !== "host-capture-artifact" && adapter.input.kind !== "driver-created-capture") {
+          errors.push(`${prefix}.input.kind:invalid_enum`);
+        }
+        if (typeof adapter.input.existingCommandRequired !== "boolean") errors.push(`${prefix}.input.existingCommandRequired:expected_boolean`);
+      }
+      if (!isRecord(adapter.output)) {
+        errors.push(`${prefix}.output:expected_object`);
+      } else {
+        if (typeof adapter.output.artifactType !== "string" || !adapter.output.artifactType) errors.push(`${prefix}.output.artifactType:missing_string`);
+        if (!(adapter.output.schemaType === null || typeof adapter.output.schemaType === "string")) errors.push(`${prefix}.output.schemaType:invalid`);
+      }
+      validateAdapterCapability(adapter.capability, errors, `${prefix}.capability`);
+      validateAdapterAuthority(adapter.authority, errors, `${prefix}.authority`);
+      validateAdapterBoundaries(adapter.boundaries, errors, `${prefix}.boundaries`);
+      if (typeof adapter.caveat !== "string" || !adapter.caveat) errors.push(`${prefix}.caveat:missing_string`);
+    }
+  }
+  if (!isRecord(value.summary)) {
+    errors.push("summary:expected_object");
+  } else {
+    for (const key of ["total", "implemented", "unavailable"]) {
+      if (!Number.isInteger(value.summary[key]) || (value.summary[key] as number) < 0) errors.push(`summary.${key}:invalid_integer`);
+    }
+    if (typeof value.summary.importOnlyImplemented !== "boolean") errors.push("summary.importOnlyImplemented:expected_boolean");
+    if (value.summary.liveDriverImplemented !== false) errors.push("summary.liveDriverImplemented:not_false");
+  }
+  validateAdapterAuthority(value.authority, errors, "authority");
+  return { path, valid: errors.length === 0, errors };
 }
 
 export function validateAppInstanceObservation(value: unknown, path = "observation"): AppInstanceObservationValidation {
@@ -2437,6 +2609,135 @@ export async function listAppInstanceObservations(cwd: string, options: { instan
       healthAuthority: false as const,
       completionAuthority: false as const,
     },
+  };
+}
+
+const noAdapterAuthority = {
+  controlsInstance: false,
+  healthAuthority: false,
+  cleanupAuthority: false,
+  completionAuthority: false,
+  promptInjectionAuthority: false,
+  codexReadAuthority: false,
+} as const;
+
+export function listObservabilityAdapters(cwd: string): ObservabilityAdapterReport {
+  const adapters: ObservabilityAdapterDescriptor[] = [
+    {
+      id: "browser-capture-file",
+      role: "import-only",
+      status: "implemented",
+      observationKind: "browser",
+      command: "app instance evidence browser --capture <browser-capture.json>",
+      input: {
+        kind: "capture-file",
+        existingCommandRequired: true,
+      },
+      output: {
+        artifactType: "codexus.app.instance.browser-capture",
+        schemaType: "app-instance-observation",
+      },
+      capability: {
+        canImportCapture: true,
+        canCreateCapture: false,
+        connectsToLiveBrowser: false,
+        startsBrowser: false,
+        mutatesApplicationState: false,
+        usesUserBrowserProfile: false,
+      },
+      authority: noAdapterAuthority,
+      boundaries: {
+        loopbackOnly: true,
+        boundedOutput: true,
+        redactionRequired: true,
+        storesFilesByPathAndHash: true,
+        finiteTimeoutRequired: false,
+        endpointMatchIsProcessIdentity: false,
+      },
+      caveat: "Imports an existing capture file; it does not create a browser session or prove process identity.",
+    },
+    {
+      id: "browser-host-mediated-capture",
+      role: "host-mediated",
+      status: "unavailable",
+      observationKind: "browser",
+      command: null,
+      input: {
+        kind: "host-capture-artifact",
+        existingCommandRequired: false,
+      },
+      output: {
+        artifactType: "codexus.observability.capture",
+        schemaType: "observability-adapter",
+      },
+      capability: {
+        canImportCapture: false,
+        canCreateCapture: false,
+        connectsToLiveBrowser: false,
+        startsBrowser: false,
+        mutatesApplicationState: false,
+        usesUserBrowserProfile: false,
+      },
+      authority: noAdapterAuthority,
+      boundaries: {
+        loopbackOnly: true,
+        boundedOutput: true,
+        redactionRequired: true,
+        storesFilesByPathAndHash: true,
+        finiteTimeoutRequired: true,
+        endpointMatchIsProcessIdentity: false,
+      },
+      caveat: "Future host-mediated capture must record the host claim without claiming Codexus controlled the host.",
+    },
+    {
+      id: "browser-devtools-driver",
+      role: "driver-mediated",
+      status: "unavailable",
+      observationKind: "browser",
+      command: null,
+      input: {
+        kind: "driver-created-capture",
+        existingCommandRequired: false,
+      },
+      output: {
+        artifactType: "codexus.observability.capture",
+        schemaType: "observability-adapter",
+      },
+      capability: {
+        canImportCapture: false,
+        canCreateCapture: false,
+        connectsToLiveBrowser: false,
+        startsBrowser: false,
+        mutatesApplicationState: false,
+        usesUserBrowserProfile: false,
+      },
+      authority: noAdapterAuthority,
+      boundaries: {
+        loopbackOnly: true,
+        boundedOutput: true,
+        redactionRequired: true,
+        storesFilesByPathAndHash: true,
+        finiteTimeoutRequired: true,
+        endpointMatchIsProcessIdentity: false,
+      },
+      caveat: "Future driver-mediated capture remains deferred until live driver safety boundaries are implemented.",
+    },
+  ];
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    type: "codexus.observability.adapters",
+    command: "app instance evidence adapters",
+    cwd,
+    adapters,
+    summary: {
+      total: adapters.length,
+      implemented: adapters.filter((adapter) => adapter.status === "implemented").length,
+      unavailable: adapters.filter((adapter) => adapter.status === "unavailable").length,
+      importOnlyImplemented: adapters.some((adapter) => adapter.role === "import-only" && adapter.status === "implemented"),
+      liveDriverImplemented: false,
+    },
+    authority: noAdapterAuthority,
   };
 }
 

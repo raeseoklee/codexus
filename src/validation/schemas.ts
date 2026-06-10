@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { validateArchitecturePolicy } from "../architecture/policy.ts";
-import { validateAppInstanceArtifact, validateAppInstanceDescriptor, validateAppInstanceObservation } from "../app-instance/launcher.ts";
+import { validateAppInstanceArtifact, validateAppInstanceDescriptor, validateAppInstanceObservation, validateObservabilityAdapterReport } from "../app-instance/launcher.ts";
 import { validateAutopilotContract } from "../autopilot/contract.ts";
 import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
 import { validateWikiContextApproval, validateWikiInjectionPlan, validateWikiManifest } from "../wiki/wiki.ts";
@@ -73,6 +73,7 @@ export type SchemaValidationType =
   | "app-instance-descriptor"
   | "app-instance"
   | "app-instance-observation"
+  | "observability-adapter"
   | "automation-dispatch"
   | "automation-recovery"
   | "subagent-result"
@@ -121,6 +122,7 @@ export const schemaArtifactNames = [
   "app-instance-descriptor.schema.json",
   "app-instance.schema.json",
   "app-instance-observation.schema.json",
+  "observability-adapter.schema.json",
   "automation-dispatch.schema.json",
   "automation-recovery.schema.json",
   "subagent-result.schema.json",
@@ -155,6 +157,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "app-instance-descriptor": "app-instance-descriptor.schema.json",
   "app-instance": "app-instance.schema.json",
   "app-instance-observation": "app-instance-observation.schema.json",
+  "observability-adapter": "observability-adapter.schema.json",
   "automation-dispatch": "automation-dispatch.schema.json",
   "automation-recovery": "automation-recovery.schema.json",
   "subagent-result": "subagent-result.schema.json",
@@ -881,6 +884,11 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
 
   if (type === "app-instance-observation") {
     const validation = validateAppInstanceObservation(value);
+    errors.push(...validation.errors);
+  }
+
+  if (type === "observability-adapter") {
+    const validation = validateObservabilityAdapterReport(value);
     errors.push(...validation.errors);
   }
 
