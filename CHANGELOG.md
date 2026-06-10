@@ -36,12 +36,19 @@ occur before 1.0, but they should be called out clearly.
   and runtime pages. The new pages summarize repository graph, session,
   architecture, decision, and change-risk artifacts without becoming source
   truth, injection approval, or task completion evidence.
+- `cx wiki context --approve --json` now records an explicit manual-only
+  context-pack handoff policy. Handoff requires fresh context and explicit
+  reference, keeps automatic injection and applied state false, and never gains
+  source-truth or completion authority.
 
 ### Fixed
 
 - `cx wiki context --topic <text> --json` now ranks canonical page title and
   page-id matches above incidental body/link mentions, so small context budgets
   still include the topic's primary page.
+- `cx wiki context --approve --json` now rejects stale selected pages even when
+  `--fresh-only` is not passed, preventing stale context packs from being
+  approved for handoff.
 - Update summaries now distinguish fresh update facts from stale cache entries.
   Cache-only primary commands (`version --json`, `doctor --json`, and
   `session status --json`) report stale update cache as non-fresh evidence

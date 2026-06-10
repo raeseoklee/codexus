@@ -49,6 +49,24 @@
       },
       "required": ["automatic", "applied", "reason"]
     },
+    "handoffPolicy": {
+      "type": "object",
+      "properties": {
+        "status": { "const": "manual_only" },
+        "contextPackPath": { "type": "string", "minLength": 1 },
+        "allowedConsumers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "requiresFreshContext": { "const": true },
+        "requiresExplicitReference": { "const": true },
+        "automaticInjection": { "const": false },
+        "applied": { "const": false },
+        "sourceTruth": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["status", "contextPackPath", "allowedConsumers", "requiresFreshContext", "requiresExplicitReference", "automaticInjection", "applied", "sourceTruth", "completionAuthority"]
+    },
     "authority": {
       "type": "object",
       "properties": {

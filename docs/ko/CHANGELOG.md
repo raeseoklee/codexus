@@ -33,12 +33,18 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   `architecture.md`, `decisions.md`, `risks.md` projection page를 생성합니다. 새 page들은
   repository graph, session, architecture, decision, change-risk artifact를 요약하지만
   source truth, injection approval, task completion evidence가 되지 않습니다.
+- `cx wiki context --approve --json`은 이제 명시적인 manual-only context-pack
+  handoff policy를 기록합니다. Handoff는 fresh context와 explicit reference를 요구하며,
+  automatic injection과 applied state를 false로 유지하고 source-truth 또는 completion
+  authority를 얻지 않습니다.
 
 ### Fixed
 
 - `cx wiki context --topic <text> --json`은 이제 incidental body/link mention보다
   canonical page title과 page-id match를 더 높게 랭킹합니다. 따라서 작은 context
   budget에서도 topic의 primary page가 포함됩니다.
+- `cx wiki context --approve --json`은 이제 `--fresh-only`가 없어도 stale selected page를
+  거부하여 stale context pack이 handoff로 승인되지 않게 합니다.
 - Update summary가 fresh update fact와 stale cache entry를 구분합니다.
   Cache-only primary command(`version --json`, `doctor --json`,
   `session status --json`)는 stale update cache를 현재 설치본이 최신이라는 암시가

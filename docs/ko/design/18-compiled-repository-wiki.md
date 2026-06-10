@@ -23,6 +23,8 @@ evidence-linked markdown projection을 만드는 방향입니다.
 - 구현된 deterministic page: `overview.md`, `commands.md`, `verification.md`,
   `release.md`, `runtime.md`, `graph.md`, `sessions.md`, `architecture.md`,
   `decisions.md`, `risks.md`
+- 구현된 context handoff policy: `cx wiki context --approve --json`은 fresh
+  context와 explicit reference를 요구하는 manual-only handoff policy를 기록합니다.
 - 구현된 schema: `codexus.wiki.manifest`, `codexus.wiki.page`,
   `codexus.wiki.advisory`
 - 계속 deferred: run으로의 automatic context injection. Export는 fresh passing wiki
@@ -267,9 +269,11 @@ cx wiki export --target docs/codexus-wiki --json
 token estimate, 선택된 정확한 text를 반환해야 합니다. Run에 context를 조용히 inject하면
 안 됩니다. `--approve`는 `approved_not_injected`, `automatic:false`, completion
 authority 없음을 가진 visible `codexus.wiki.context-approval` artifact를 써서 Codex
-session이 context를 명시적으로 인용할 수 있게 합니다. `--fresh-only --gate`는 manual
-context-pack freshness guard입니다. 선택된 topic에 fresh page가 없으면 stale context를
-반환하지 않고 실패합니다.
+session이 context를 명시적으로 인용할 수 있게 합니다. Approval artifact는 이제
+manual-only handoff policy도 포함합니다. Fresh context와 explicit reference가 필요하고,
+automatic injection은 false이며 applied/source-truth/completion authority도 모두 false로
+남습니다. `--fresh-only --gate`는 manual context-pack freshness guard입니다. 선택된 topic에
+fresh page가 없으면 stale context를 반환하지 않고 실패합니다.
 
 Autopilot integration은 명시적이어야 합니다:
 
@@ -362,6 +366,9 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
    선택된 bounded context에 대한 visible non-injected approval artifact로 추가.
 8. 구현됨: `cx wiki context --fresh-only --gate --json`을 추가해 automatic injection 없이
    fresh manual context를 요구할 수 있게 합니다.
+8a. 구현됨: `codexus.wiki.context-approval` artifact에 manual-only handoff policy를 추가.
+   이 policy는 stale selected page를 거부하고 explicit reference를 요구하며 automatic
+   injection을 false로 유지합니다.
 9. 구현됨: `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저
    요구하고, source truth를 쓰지 않으며, auto-commit하지 않는 명시적 export로 추가.
 10. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤

@@ -253,6 +253,17 @@ export interface WikiContextApprovalArtifact {
     applied: false;
     reason: string;
   };
+  handoffPolicy?: {
+    status: "manual_only";
+    contextPackPath: string;
+    allowedConsumers: string[];
+    requiresFreshContext: true;
+    requiresExplicitReference: true;
+    automaticInjection: false;
+    applied: false;
+    sourceTruth: false;
+    completionAuthority: false;
+  };
   authority: {
     sourceTruth: false;
     completionAuthority: false;
@@ -282,6 +293,7 @@ export interface WikiContextApprovalSummary {
       approvedBy: string;
       topic: string;
       tokenEstimate: number;
+      handoffStatus: string | null;
       path: string;
     } | null;
   };
@@ -1657,6 +1669,29 @@ export function validateWikiContextApproval(value: unknown) {
     if (value.injection.applied !== false) errors.push("injection.applied:not_false");
     if (typeof value.injection.reason !== "string" || value.injection.reason.trim().length === 0) errors.push("injection.reason:expected_non_empty_string");
   }
+  if ("handoffPolicy" in value && value.handoffPolicy !== undefined) {
+    if (!isRecord(value.handoffPolicy)) {
+      errors.push("handoffPolicy:expected_object");
+    } else {
+      if (value.handoffPolicy.status !== "manual_only") errors.push("handoffPolicy.status:not_manual_only");
+      if (typeof value.handoffPolicy.contextPackPath !== "string" || value.handoffPolicy.contextPackPath.trim().length === 0) {
+        errors.push("handoffPolicy.contextPackPath:expected_non_empty_string");
+      }
+      if (
+        !Array.isArray(value.handoffPolicy.allowedConsumers)
+        || value.handoffPolicy.allowedConsumers.length === 0
+        || !value.handoffPolicy.allowedConsumers.every((item) => typeof item === "string" && item.trim().length > 0)
+      ) {
+        errors.push("handoffPolicy.allowedConsumers:expected_non_empty_string_array");
+      }
+      if (value.handoffPolicy.requiresFreshContext !== true) errors.push("handoffPolicy.requiresFreshContext:not_true");
+      if (value.handoffPolicy.requiresExplicitReference !== true) errors.push("handoffPolicy.requiresExplicitReference:not_true");
+      if (value.handoffPolicy.automaticInjection !== false) errors.push("handoffPolicy.automaticInjection:not_false");
+      if (value.handoffPolicy.applied !== false) errors.push("handoffPolicy.applied:not_false");
+      if (value.handoffPolicy.sourceTruth !== false) errors.push("handoffPolicy.sourceTruth:not_false");
+      if (value.handoffPolicy.completionAuthority !== false) errors.push("handoffPolicy.completionAuthority:not_false");
+    }
+  }
   if (!isRecord(value.authority)) {
     errors.push("authority:expected_object");
   } else {
@@ -1679,6 +1714,9 @@ export async function approveWikiContext(cwd: string, topic: string, budget: num
 } = {}): Promise<WikiContextApprovalResult> {
   const context = await buildWikiContext(cwd, topic, budget, options);
   if (context.freshnessPolicy.status === "fail") throw new Error("wiki_context_freshness_gate_failed");
+  if (context.selectedPages.some((page) => page.freshness !== "fresh")) {
+    throw new Error("wiki_context_handoff_requires_fresh_context");
+  }
   const approvedAt = nowIso();
   const approvalId = `wiki_context_${Date.now().toString(36)}`;
   const dir = wikiContextApprovalDir(cwd, approvalId);
@@ -1709,6 +1747,21 @@ export async function approveWikiContext(cwd: string, topic: string, budget: num
       applied: false,
       reason: "Codexus records approved wiki context as an artifact but does not inject it into the active Codex prompt automatically.",
     },
+    handoffPolicy: {
+      status: "manual_only",
+      contextPackPath: markdown,
+      allowedConsumers: [
+        "human",
+        "codex-session-explicit-reference",
+        "autopilot-context-pack-argument",
+      ],
+      requiresFreshContext: true,
+      requiresExplicitReference: true,
+      automaticInjection: false,
+      applied: false,
+      sourceTruth: false,
+      completionAuthority: false,
+    },
     authority: {
       sourceTruth: false,
       completionAuthority: false,
@@ -1721,6 +1774,15 @@ export async function approveWikiContext(cwd: string, topic: string, budget: num
     "Status: approved_not_injected",
     "",
     "This context is approved for explicit human/model reading. Codexus does not inject it automatically and it is not source truth.",
+    "",
+    "## Handoff Policy",
+    "",
+    "- status: manual_only",
+    `- contextPackPath: ${markdown}`,
+    "- requiresFreshContext: true",
+    "- requiresExplicitReference: true",
+    "- automaticInjection: false",
+    "- completionAuthority: false",
     "",
     `- approvalId: ${approvalId}`,
     `- approvedAt: ${approvedAt}`,
@@ -1781,6 +1843,7 @@ export async function summarizeWikiContextApprovals(cwd: string): Promise<WikiCo
           approvedBy: latest.approvedBy,
           topic: latest.topic,
           tokenEstimate: latest.tokenEstimate,
+          handoffStatus: latest.handoffPolicy?.status ?? null,
           path: latest.path,
         }
         : null,

@@ -388,14 +388,16 @@
             <span class="tag evidence">18번 문서</span>
             <span class="tag done">advisory 완료</span>
             <span class="tag done">release/runtime/graph/session/architecture/decision/risk page 완료</span>
+            <span class="tag done">manual handoff 완료</span>
             <span class="tag gated">injection deferred</span>
           </div>
-          <p>Deterministic compiled wiki, explicit export, context approval, advisory source-bundle synthesis, release/runtime/graph/session/architecture/decision/risk page coverage slice는 구현되었습니다. 다음 단계는 generated page를 authority로 만들지 않는 explicit context-pack handoff policy입니다.</p>
+          <p>Deterministic compiled wiki, explicit export, context approval, advisory source-bundle synthesis, release/runtime/graph/session/architecture/decision/risk page coverage, manual-only context-pack handoff slice는 구현되었습니다. 다음 단계는 generated page를 authority로 만들지 않는 explicit injection policy입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>완료: <code>cx wiki build --mode advisory</code>가 driver/model/source bundle evidence를 기록하고 advisory 상태를 유지합니다.</li>
             <li>완료: <code>cx wiki export</code>는 explicit하게 동작하고 fresh check를 요구하며 checked-in page를 authoritative하게 만들지 않습니다.</li>
             <li>완료: deterministic wiki build는 <code>release.md</code>, <code>runtime.md</code>, <code>graph.md</code>, <code>sessions.md</code>, <code>architecture.md</code>, <code>decisions.md</code>, <code>risks.md</code> projection page를 포함합니다.</li>
+            <li>완료: <code>cx wiki context --approve</code>는 fresh context와 explicit reference를 요구하는 manual-only handoff policy를 기록합니다.</li>
             <li>완료: context approval artifact는 <code>approved_not_injected</code> 상태를 유지하며 prompt injection이 되지 않습니다.</li>
             <li>Deterministic freshness와 stale-page gate 동작이 유지됩니다.</li>
             <li>Wiki page에서 automatic context injection을 하지 않습니다.</li>

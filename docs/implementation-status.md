@@ -446,7 +446,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   pages when no fresh page is selected. `cx wiki context --topic <name>
   --approve --approved-by <name>` records a visible
   `codexus.wiki.context-approval` artifact with `approved_not_injected`,
-  `automatic:false`, and no completion authority. `cx wiki build --mode advisory` now records
+  `automatic:false`, no completion authority, and a manual-only handoff policy
+  that requires fresh context and explicit reference. `cx wiki build --mode advisory` now records
   a schema-valid local source-bundle synthesis artifact with driver/model
   evidence (`modelInvoked: false`) and non-authority markers. The wiki generates
   regenerable markdown pages under `.codexus/wiki/` with source refs, local

@@ -240,6 +240,22 @@ test("wiki context approval refuses failed fresh-only context even without gate"
     assert.equal(approval.status, 1);
     const output = JSON.parse(approval.stdout);
     assert.equal(output.code, "wiki_context_freshness_gate_failed");
+
+    const staleApproval = runCli(cwd, [
+      "wiki",
+      "context",
+      "--topic",
+      "verification",
+      "--budget",
+      "4000",
+      "--approve",
+      "--approved-by",
+      "tester",
+      "--json",
+    ]);
+    assert.equal(staleApproval.status, 1);
+    assert.equal(JSON.parse(staleApproval.stdout).code, "wiki_context_handoff_requires_fresh_context");
+
     const contextDir = join(cwd, ".codexus", "wiki", "context");
     const entries = existsSync(contextDir) ? await readdir(contextDir) : [];
     assert.deepEqual(entries, []);
@@ -273,6 +289,14 @@ test("wiki context approval writes a visible non-injected artifact", async () =>
     assert.equal(output.approval.approvedBy, "tester");
     assert.equal(output.approval.injection.automatic, false);
     assert.equal(output.approval.injection.applied, false);
+    assert.equal(output.approval.handoffPolicy.status, "manual_only");
+    assert.equal(output.approval.handoffPolicy.requiresFreshContext, true);
+    assert.equal(output.approval.handoffPolicy.requiresExplicitReference, true);
+    assert.equal(output.approval.handoffPolicy.automaticInjection, false);
+    assert.equal(output.approval.handoffPolicy.applied, false);
+    assert.equal(output.approval.handoffPolicy.sourceTruth, false);
+    assert.equal(output.approval.handoffPolicy.completionAuthority, false);
+    assert.ok(output.approval.handoffPolicy.allowedConsumers.includes("codex-session-explicit-reference"));
     assert.equal(output.approval.authority.sourceTruth, false);
     assert.equal(output.approval.authority.completionAuthority, false);
     assert.equal(output.eligibleForAutomaticInjection, false);
@@ -283,11 +307,23 @@ test("wiki context approval writes a visible non-injected artifact", async () =>
     const markdown = await readFile(output.approval.paths.markdown, "utf8");
     assert.match(markdown, /approved_not_injected/);
     assert.match(markdown, /does not inject it automatically/);
+    assert.match(markdown, /Handoff Policy/);
+    assert.match(markdown, /manual_only/);
 
     const schema = runCli(cwd, ["schema", "validate", "--type", "wiki-context-approval", "--file", output.approval.paths.json, "--json"]);
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).validation.valid, true);
     assert.equal(JSON.parse(schema.stdout).artifactValidation.valid, true);
+
+    const artifact = JSON.parse(await readFile(output.approval.paths.json, "utf8"));
+    artifact.handoffPolicy.allowedConsumers = [];
+    await writeFile(output.approval.paths.json, `${JSON.stringify(artifact, null, 2)}\n`);
+    const invalidSchema = runCli(cwd, ["schema", "validate", "--type", "wiki-context-approval", "--file", output.approval.paths.json, "--json"]);
+    assert.equal(invalidSchema.status, 1);
+    const invalidOutput = JSON.parse(invalidSchema.stdout);
+    assert.equal(invalidOutput.validation.valid, false);
+    assert.ok(invalidOutput.validation.errors.includes("handoffPolicy.allowedConsumers:expected_non_empty_string_array"));
+    assert.equal(invalidOutput.artifactValidation.valid, true);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

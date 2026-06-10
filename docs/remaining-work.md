@@ -390,8 +390,8 @@ Harness-engineering alignment adds these evidence-first tracks:
   approval artifacts, fresh-only context gating, explicit export, and advisory
   source-bundle synthesis exist. Deterministic graph/session projection pages are
   also implemented, and the page set now includes architecture/decision/risk
-  projections. Next work is explicit injection policy and context-pack handoff
-  rules.
+  projections. Manual-only context-pack handoff rules are implemented in the
+  approval artifact. Next work is explicit injection policy.
   Do not auto-inject stale or advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
@@ -439,8 +439,9 @@ Harness-engineering alignment adds these evidence-first tracks:
     now exist. `cx wiki context --approve` writes visible non-injected approval
     artifacts, and `cx wiki context --fresh-only --gate` can require fresh manual
     context before use. Graph/session/architecture/decision/risk projection
-    pages are implemented. Next define explicit injection policy and
-    context-pack handoff rules before any injection path is considered.
+    pages are implemented, and approval artifacts now record manual-only
+    handoff rules. Next define explicit injection policy before any injection
+    path is considered.
 13. Worktree app instance launcher: build on the implemented live ownership
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback

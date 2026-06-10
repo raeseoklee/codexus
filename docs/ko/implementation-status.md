@@ -426,7 +426,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   fresh manual context가 필요할 때 사용하며, 선택된 topic에 fresh page가 없으면 stale
   page를 반환하지 않고 실패합니다. `cx wiki context --topic <name> --approve
   --approved-by <name>`은 `approved_not_injected`, `automatic:false`, completion
-  authority 없음이 명시된 visible `codexus.wiki.context-approval` artifact를 기록합니다.
+  authority 없음과 manual-only handoff policy가 명시된 visible
+  `codexus.wiki.context-approval` artifact를 기록합니다. Handoff policy는 fresh context와
+  explicit reference를 요구합니다.
   `cx wiki build --mode advisory`는
   driver/model evidence(`modelInvoked: false`)와 non-authority marker를 가진
   schema-valid local source-bundle synthesis artifact를 기록합니다. `.codexus/wiki/`

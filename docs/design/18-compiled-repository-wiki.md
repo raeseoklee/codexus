@@ -22,6 +22,8 @@ Implementation status as of 2026-06-02:
 - implemented deterministic pages: `overview.md`, `commands.md`,
   `verification.md`, `release.md`, `runtime.md`, `graph.md`, `sessions.md`,
   `architecture.md`, `decisions.md`, and `risks.md`;
+- implemented context handoff policy: `cx wiki context --approve --json` records
+  a manual-only handoff policy requiring fresh context and explicit reference;
 - implemented schemas: `codexus.wiki.manifest`, `codexus.wiki.page`, and
   `codexus.wiki.advisory`;
 - still deferred: any automatic context injection into runs. Export is
@@ -279,9 +281,12 @@ freshness, source refs, token estimate, and the exact text selected. It should
 not silently inject context into a run. `--approve` writes a visible
 `codexus.wiki.context-approval` artifact with `approved_not_injected`,
 `automatic:false`, and no completion authority so a Codex session can cite the
-context explicitly. `--fresh-only --gate` is a manual context-pack freshness
-guard: it fails when the selected topic has no fresh pages instead of returning
-stale context.
+context explicitly. The approval artifact now also carries a manual-only
+handoff policy: fresh context is required, explicit reference is required,
+automatic injection remains false, and applied/source-truth/completion authority
+all remain false. `--fresh-only --gate` is a manual context-pack freshness guard:
+it fails when the selected topic has no fresh pages instead of returning stale
+context.
 
 Autopilot integration should be explicit:
 
@@ -377,6 +382,9 @@ The manifest owns page identity and freshness metadata:
    bounded context.
 8. Implemented: add `cx wiki context --fresh-only --gate --json` so callers can
    require fresh manual context without enabling automatic injection.
+8a. Implemented: add a manual-only handoff policy to
+   `codexus.wiki.context-approval` artifacts. The policy rejects stale selected
+   pages, requires explicit reference, and keeps automatic injection false.
 9. Implemented: add `cx wiki export --target <path> --json` as an explicit
    export that first requires a fresh passing wiki check, writes no source
    truth, and never auto-commits.
