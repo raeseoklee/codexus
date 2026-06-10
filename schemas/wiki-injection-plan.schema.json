@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/wiki-injection-plan.schema.json",
+  "title": "Codexus Wiki Injection Plan Artifact",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.wiki.injection-plan" },
+    "planId": { "type": "string", "minLength": 1 },
+    "status": { "const": "planned_not_applied" },
+    "createdAt": { "type": "string", "minLength": 1 },
+    "target": { "type": "string", "minLength": 1 },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "approvalId": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "contextHash": { "type": "string", "minLength": 1 },
+        "topic": { "type": "string", "minLength": 1 },
+        "handoffStatus": { "const": "manual_only" },
+        "contextPackPath": { "type": "string", "minLength": 1 }
+      },
+      "required": ["approvalId", "path", "contextHash", "topic", "handoffStatus", "contextPackPath"]
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "requiresFreshContext": { "const": true },
+        "requiresExplicitReference": { "const": true },
+        "automaticInjectionSupported": { "const": false },
+        "applySupported": { "const": false },
+        "auditBeforeMutation": { "const": true },
+        "sourceTruth": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["requiresFreshContext", "requiresExplicitReference", "automaticInjectionSupported", "applySupported", "auditBeforeMutation", "sourceTruth", "completionAuthority"]
+    },
+    "applied": { "const": false },
+    "authority": {
+      "type": "object",
+      "properties": {
+        "promptMutation": { "const": false },
+        "sourceTruth": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["promptMutation", "sourceTruth", "completionAuthority"]
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "planId", "status", "createdAt", "target", "approval", "policy", "applied", "authority"]
+}

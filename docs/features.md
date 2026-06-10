@@ -53,7 +53,7 @@ Experimental surfaces are shipped but not frozen as stable JSON contracts.
 | Surface | Commands | Boundary |
 | --- | --- | --- |
 | Repository graph | `codexus repo graph build/check/import/search/explain` | Local graph projection, JSON-only external graph import, structural checks, and read-only search/explain. |
-| Compiled wiki | `codexus wiki map/build/check/export`, `codexus wiki context --approve`, `codexus wiki injection-policy` | Regenerable markdown projection, visible non-injected context approval artifacts, and explicit manual-only injection policy reporting. |
+| Compiled wiki | `codexus wiki map/build/check/export`, `codexus wiki context --approve`, `codexus wiki injection-policy`, `codexus wiki injection plan` | Regenerable markdown projection, visible non-injected context approval artifacts, explicit manual-only injection policy reporting, and report-only injection planning. |
 | App instance launcher | `codexus app instance profile list/status/logs/start/stop/evidence *` | Worktree-local owned process launcher and observation evidence. Stop only targets Codexus-owned instances with owner evidence. |
 | App-server experiments | `codexus app-server status/discover/observer/experiment` | Read-only and isolated evidence experiments. Live Desktop attachment remains gated. |
 | Autopilot contract | `codexus autopilot plan`, `codexus autopilot contract *`, `codexus autopilot relay *` | Plan, approval, scope-check, relay artifact, and stage-gate evidence. Live `autopilot run` remains blocked. |

@@ -449,7 +449,12 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `automatic:false`, no completion authority, and a manual-only handoff policy
   that requires fresh context and explicit reference. `cx wiki injection-policy
   --json` reports the manual-only boundary, keeps automatic injection deferred,
-  and lists the evidence required before any future injection path. `cx wiki build --mode advisory` now records
+  and lists the evidence required before any future injection path. `cx wiki
+  injection plan --approval <id-or-path> --target <target> --json` writes a
+  report-only `codexus.wiki.injection-plan` artifact with `planned_not_applied`,
+  `applySupported:false`, prompt mutation false, and completion authority false;
+  `cx wiki injection apply` remains deferred. The plan artifact is
+  schema-validatable as `wiki-injection-plan`. `cx wiki build --mode advisory` now records
   a schema-valid local source-bundle synthesis artifact with driver/model
   evidence (`modelInvoked: false`) and non-authority markers. The wiki generates
   regenerable markdown pages under `.codexus/wiki/` with source refs, local
@@ -466,6 +471,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `autopilot_run_deferred`
   - `broad_layering_rule_deferred`
   - `typosquat_name_similarity_deferred`
+  - `wiki_injection_apply_deferred`
 
 ## Verified
 
@@ -661,6 +667,6 @@ review. Current high-level gaps:
   source-linked page generation, structural freshness gates, bounded
   context-pack generation, explicit export, advisory synthesis, and deterministic
   graph/session/architecture/decision/risk projection pages exist. The explicit
-  injection policy report exists, but any automatic injection path remains future
-  work.
+  injection policy report and report-only injection plan artifact exist, but any
+  automatic/apply injection path remains future work.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

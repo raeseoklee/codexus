@@ -27,6 +27,7 @@ const schemaValidationTypes = new Set<SchemaValidationType>([
   "wiki-manifest",
   "wiki-advisory",
   "wiki-context-approval",
+  "wiki-injection-plan",
   "repo-graph",
   "relay-session",
   "stage-gate-evidence",

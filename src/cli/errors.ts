@@ -203,6 +203,18 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing wiki context topic.";
     case "invalid_wiki_budget":
       return "Invalid wiki context budget.";
+    case "missing_wiki_injection_approval":
+      return "Missing wiki injection approval reference.";
+    case "missing_wiki_injection_target":
+      return "Missing wiki injection target.";
+    case "unsafe_wiki_injection_approval":
+      return "Wiki injection approval must be an approval id or a workspace-local .codexus/wiki/context/*/approval.json path.";
+    case "wiki_context_approval_missing":
+      return `Wiki context approval not found${target ? `: ${target}` : ""}.`;
+    case "wiki_context_approval_invalid":
+      return `Wiki context approval is invalid${target ? `: ${target}` : ""}.`;
+    case "wiki_injection_apply_deferred":
+      return "Wiki injection apply is deferred; use `cx wiki injection plan --approval <id-or-path> --target <target> --json` for report-only planning.";
     case "wiki_manifest_missing":
       return "Wiki manifest is missing.";
     case "wiki_manifest_invalid":
@@ -360,7 +372,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_schema_command":
       return "Run `cx schema check --json`, `cx schema engine --json`, `cx schema validate --type <type> --file <path> --json`, or `cx schema validate-run <run-id> --json`.";
     case "unsupported_schema_type":
-      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|wiki-context-approval|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|subagent-bridge-probe|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
+      return "Use `--type config|state|event|memory-entry|skill|session-state|supply-chain-policy|architecture-policy|autopilot-contract|wiki-manifest|wiki-advisory|wiki-context-approval|wiki-injection-plan|repo-graph|relay-session|stage-gate-evidence|convergence-agreement|decision|session-tasks|app-instance-descriptor|app-instance|app-instance-observation|automation-dispatch|automation-recovery|subagent-result|subagent-launch-contract|subagent-bridge-probe|app-server-discovery|app-server-stage-a|app-server-stage-b|app-server-stdio-proof`.";
     case "unsupported_app_server_command":
       return "Run `cx app-server status --json` or `cx app-server roundtrip --dry-run --json`.";
     case "unsupported_app_command":
@@ -404,7 +416,7 @@ function hintFor({ code }: ParsedCliError): string | null {
     case "unsupported_release_command":
       return "Run `cx release policy --json` for release cadence policy or `cx release check --gate --json` for release integrity.";
     case "unsupported_wiki_command":
-      return "Run `cx wiki map --json`, `cx wiki build --mode deterministic --json`, `cx wiki check --gate --json`, `cx wiki context --topic <name> --json`, or `cx wiki injection-policy --json`.";
+      return "Run `cx wiki map --json`, `cx wiki build --mode deterministic --json`, `cx wiki check --gate --json`, `cx wiki context --topic <name> --json`, `cx wiki injection-policy --json`, or `cx wiki injection plan --approval <id-or-path> --target <target> --json`.";
     case "unsupported_wiki_build_mode":
       return "Use `--mode deterministic` or `--mode advisory`. Advisory build requires a fresh deterministic wiki manifest.";
     case "unsupported_autopilot_command":
@@ -499,6 +511,18 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass `--topic <name>` with `cx wiki context`.";
     case "invalid_wiki_budget":
       return "Use a positive integer for `--budget`.";
+    case "missing_wiki_injection_approval":
+      return "Pass `--approval <approval-id-or-path>` with `cx wiki injection plan`.";
+    case "missing_wiki_injection_target":
+      return "Pass `--target <target>` with `cx wiki injection plan`.";
+    case "unsafe_wiki_injection_approval":
+      return "Use an approval id or a path under `.codexus/wiki/context/<id>/approval.json`.";
+    case "wiki_context_approval_missing":
+      return "Regenerate the context approval with `cx wiki context --approve --approved-by <name> --json`.";
+    case "wiki_context_approval_invalid":
+      return "Regenerate the context approval so it matches the current schema and handoff policy.";
+    case "wiki_injection_apply_deferred":
+      return "Only report-only injection planning is available; prompt mutation remains deferred.";
     case "wiki_manifest_missing":
       return "Run `cx wiki build --mode deterministic --json` before requesting wiki context or checks.";
     case "wiki_manifest_invalid":

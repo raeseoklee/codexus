@@ -430,7 +430,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   `codexus.wiki.context-approval` artifact를 기록합니다. Handoff policy는 fresh context와
   explicit reference를 요구합니다. `cx wiki injection-policy --json`은 manual-only
   boundary를 보고하고 automatic injection을 deferred로 유지하며 future injection path 전에
-  필요한 evidence를 나열합니다.
+  필요한 evidence를 나열합니다. `cx wiki injection plan --approval <id-or-path>
+  --target <target> --json`은 `planned_not_applied`, `applySupported:false`, prompt
+  mutation false, completion authority false를 가진 report-only
+  `codexus.wiki.injection-plan` artifact를 기록합니다. `cx wiki injection apply`는 계속
+  deferred입니다. 이 plan artifact는 `wiki-injection-plan`으로 schema validation할 수
+  있습니다.
   `cx wiki build --mode advisory`는
   driver/model evidence(`modelInvoked: false`)와 non-authority marker를 가진
   schema-valid local source-bundle synthesis artifact를 기록합니다. `.codexus/wiki/`
@@ -439,8 +444,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   commands, verification에 더해 release/contract, runtime-boundary, repository graph,
   session-state, architecture, decision, risk projection을 포함합니다. Export는 fresh
   passing wiki check를 요구하고 auto-commit 또는 source truth가 되지 않습니다.
-  Explicit injection policy report는 존재하지만 automatic context injection path는 계속
-  deferred입니다.
+  Explicit injection policy report와 report-only injection plan artifact는 존재하지만
+  automatic/apply context injection path는 계속 deferred입니다.
 - `cx repo check --gate --json`가 현재 문서 일치를 강제하는 deferred self-report는
   다음 항목입니다:
   - `acceptance_criteria_extraction_deferred`
@@ -448,6 +453,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   - `autopilot_run_deferred`
   - `broad_layering_rule_deferred`
   - `typosquat_name_similarity_deferred`
+  - `wiki_injection_apply_deferred`
 - unknown command와 argument validation failure의 structured JSON error envelope 테스트
 - unexpected argument, corrupt state, disabled app-server driver의 structured JSON error envelope 테스트
 - init, observability, active skill index/export/improvement, adapter approved retrieval/context artifact, full replay parity fixture-matrix coverage, gated model replay, stale lock, schema/run-ledger validation, migration fixture, driver-failure repair, app-server dry-run/experiment process-probe, fake-supervision 기록, schema-validatable Stage A isolated real evidence, schema-validatable Stage B read-only evidence, conflict/quality finding을 포함한 memory lifecycle/curation, packaging, installed-skill tree diagnosis, feature gate policy/audit-record 테스트

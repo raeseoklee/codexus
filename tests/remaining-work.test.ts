@@ -225,9 +225,10 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 31);
+    assert.equal(schemaOutput.schemas.length, 32);
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "automation-recovery.schema.json"));
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "subagent-bridge-probe.schema.json"));
+    assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "wiki-injection-plan.schema.json"));
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
@@ -246,6 +247,7 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
       "wiki-manifest.schema.json",
       "wiki-page.schema.json",
       "wiki-context-approval.schema.json",
+      "wiki-injection-plan.schema.json",
       "repo-graph.schema.json",
       "relay-session.schema.json",
       "stage-gate-evidence.schema.json",
@@ -396,6 +398,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/supply-chain-policy.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/architecture-policy.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/repo-graph.schema.json"));
+    assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/wiki-injection-plan.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/relay-session.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/stage-gate-evidence.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/convergence-agreement.schema.json"));

@@ -1,10 +1,12 @@
 import { resolve } from "node:path";
 import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
-import { approveWikiContext, buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiInjectionPolicy, buildWikiMap, checkWiki, exportWiki } from "../../wiki/wiki.ts";
+import { approveWikiContext, buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiInjectionPolicy, buildWikiMap, checkWiki, exportWiki, planWikiInjection } from "../../wiki/wiki.ts";
 
 export async function wikiCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "check";
-  assertMaxPositionals(args, 1);
+  const nestedCommand = args.positionals[1];
+  assertMaxPositionals(args, 2);
+  if (nestedCommand && subcommand !== "injection") throw new Error(`unsupported_wiki_command:${subcommand}`);
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
   const json = flagBool(args.flags, "json");
 
@@ -99,6 +101,45 @@ export async function wikiCommand(args: ParsedArgs): Promise<void> {
     console.log(`Gate: ${result.gate.status}`);
     process.exitCode = result.gate.exitCode;
     return;
+  }
+
+  if (subcommand === "injection") {
+    const action = nestedCommand ?? "policy";
+    if (action === "policy") {
+      assertAllowedFlags(args, ["cwd", "json", "gate"]);
+      const result = await buildWikiInjectionPolicy(cwd, flagBool(args.flags, "gate"));
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        process.exitCode = result.gate.exitCode;
+        return;
+      }
+      console.log(`Wiki injection policy: ${result.policy.status}`);
+      console.log(`Automatic injection: ${result.policy.automaticInjection.status}`);
+      console.log(`Gate: ${result.gate.status}`);
+      process.exitCode = result.gate.exitCode;
+      return;
+    }
+    if (action === "plan") {
+      assertAllowedFlags(args, ["cwd", "json", "approval", "target", "gate"]);
+      const approval = flagString(args.flags, "approval");
+      const target = flagString(args.flags, "target");
+      if (!approval) throw new Error("missing_wiki_injection_approval");
+      if (!target) throw new Error("missing_wiki_injection_target");
+      const result = await planWikiInjection(cwd, approval, target, flagBool(args.flags, "gate"));
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        process.exitCode = result.gate.exitCode;
+        return;
+      }
+      console.log(`Wiki injection plan: ${result.plan?.planId ?? "blocked"}`);
+      console.log(`Gate: ${result.gate.status}`);
+      process.exitCode = result.gate.exitCode;
+      return;
+    }
+    if (action === "apply") {
+      throw new Error("wiki_injection_apply_deferred");
+    }
+    throw new Error(`unsupported_wiki_command:${subcommand}`);
   }
 
   if (subcommand === "export") {

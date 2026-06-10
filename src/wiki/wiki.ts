@@ -144,7 +144,8 @@ export interface WikiEvidenceGap {
     | "local_link_missing"
     | "local_link_unregistered"
     | "absolute_private_path_present"
-    | "page_stale";
+    | "page_stale"
+    | "manual_handoff_policy_missing";
   gate: true;
   evidence: string | null;
   recommendation: string;
@@ -346,6 +347,63 @@ export interface WikiInjectionPolicyResult {
   gate: WikiGate;
 }
 
+export interface WikiInjectionPlanArtifact {
+  schemaVersion: 1;
+  stability: "experimental";
+  type: "codexus.wiki.injection-plan";
+  planId: string;
+  status: "planned_not_applied";
+  createdAt: string;
+  target: string;
+  approval: {
+    approvalId: string;
+    path: string;
+    contextHash: string;
+    topic: string;
+    handoffStatus: "manual_only";
+    contextPackPath: string;
+  };
+  policy: {
+    requiresFreshContext: true;
+    requiresExplicitReference: true;
+    automaticInjectionSupported: false;
+    applySupported: false;
+    auditBeforeMutation: true;
+    sourceTruth: false;
+    completionAuthority: false;
+  };
+  applied: false;
+  authority: {
+    promptMutation: false;
+    sourceTruth: false;
+    completionAuthority: false;
+  };
+}
+
+export interface WikiInjectionPlanResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "wiki injection plan";
+  cwd: string;
+  approvalRef: string;
+  target: string;
+  plan: (WikiInjectionPlanArtifact & { paths: { dir: string; json: string } }) | null;
+  evidenceGaps: WikiEvidenceGap[];
+  derivableFacts: WikiDerivableFact[];
+  heuristicClaims: [];
+  blockingUnknowns: [];
+  informationalUnknowns: Array<{
+    kind: "wiki_injection_apply_deferred";
+    gate: false;
+    evidence: null;
+    recommendation: string;
+  }>;
+  eligibleForAutomaticInjection: false;
+  applied: false;
+  completionAuthority: false;
+  gate: WikiGate;
+}
+
 export interface WikiExportResult {
   schemaVersion: 1;
   stability: "experimental";
@@ -446,6 +504,14 @@ function wikiAdvisoryManifestPath(cwd: string): string {
   return join(wikiAdvisoryDir(cwd), "advisory.json");
 }
 
+function wikiInjectionDir(cwd: string): string {
+  return join(wikiRoot(cwd), "injection");
+}
+
+function wikiInjectionPlanDir(cwd: string, planId: string): string {
+  return join(wikiInjectionDir(cwd), planId);
+}
+
 function repoRelative(cwd: string, path: string): string {
   return relative(resolve(cwd), resolve(path)).replace(/\\/g, "/") || ".";
 }
@@ -482,6 +548,19 @@ function resolveExportTarget(cwd: string, target: string): { absolute: string; r
     throw new Error("unsafe_wiki_export_target");
   }
   return { absolute, relative: relativeTarget };
+}
+
+function resolveApprovalRef(cwd: string, approvalRef: string): string {
+  const trimmed = approvalRef.trim();
+  if (!trimmed) throw new Error("missing_wiki_injection_approval");
+  const byId = join(wikiContextApprovalDir(cwd, trimmed), "approval.json");
+  if (/^[a-zA-Z0-9_.-]+$/.test(trimmed) && existsSync(byId)) return byId;
+  const absolute = resolve(cwd, trimmed);
+  const relativePath = repoRelative(cwd, absolute);
+  if (!isSafeRelativePath(relativePath) || !relativePath.startsWith(".codexus/wiki/context/") || basename(relativePath) !== "approval.json") {
+    throw new Error("unsafe_wiki_injection_approval");
+  }
+  return absolute;
 }
 
 async function readJsonIfExists(path: string): Promise<unknown | null> {
@@ -1753,6 +1832,57 @@ export function validateWikiContextApproval(value: unknown) {
   };
 }
 
+export function validateWikiInjectionPlan(value: unknown) {
+  const errors: string[] = [];
+  if (!isRecord(value)) {
+    return { schemaVersion: 1 as const, valid: false, errors: ["plan:not_object"], artifact: null as WikiInjectionPlanArtifact | null };
+  }
+  if (value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  if (value.stability !== "experimental") errors.push("stability:not_experimental");
+  if (value.type !== "codexus.wiki.injection-plan") errors.push("type:not_codexus_wiki_injection_plan");
+  if (value.status !== "planned_not_applied") errors.push("status:not_planned_not_applied");
+  for (const key of ["planId", "createdAt", "target"]) {
+    if (typeof value[key] !== "string" || String(value[key]).trim().length === 0) errors.push(`${key}:expected_non_empty_string`);
+  }
+  if (!isRecord(value.approval)) {
+    errors.push("approval:expected_object");
+  } else {
+    for (const key of ["approvalId", "path", "contextHash", "topic", "contextPackPath"]) {
+      if (typeof value.approval[key] !== "string" || String(value.approval[key]).trim().length === 0) {
+        errors.push(`approval.${key}:expected_non_empty_string`);
+      }
+    }
+    if (value.approval.handoffStatus !== "manual_only") errors.push("approval.handoffStatus:not_manual_only");
+  }
+  if (!isRecord(value.policy)) {
+    errors.push("policy:expected_object");
+  } else {
+    if (value.policy.requiresFreshContext !== true) errors.push("policy.requiresFreshContext:not_true");
+    if (value.policy.requiresExplicitReference !== true) errors.push("policy.requiresExplicitReference:not_true");
+    if (value.policy.automaticInjectionSupported !== false) errors.push("policy.automaticInjectionSupported:not_false");
+    if (value.policy.applySupported !== false) errors.push("policy.applySupported:not_false");
+    if (value.policy.auditBeforeMutation !== true) errors.push("policy.auditBeforeMutation:not_true");
+    if (value.policy.sourceTruth !== false) errors.push("policy.sourceTruth:not_false");
+    if (value.policy.completionAuthority !== false) errors.push("policy.completionAuthority:not_false");
+  }
+  if (value.applied !== false) errors.push("applied:not_false");
+  if (!isRecord(value.authority)) {
+    errors.push("authority:expected_object");
+  } else {
+    if (value.authority.promptMutation !== false) errors.push("authority.promptMutation:not_false");
+    if (value.authority.sourceTruth !== false) errors.push("authority.sourceTruth:not_false");
+    if (value.authority.completionAuthority !== false) errors.push("authority.completionAuthority:not_false");
+  }
+  return {
+    schemaVersion: 1 as const,
+    valid: errors.length === 0,
+    errors,
+    artifact: errors.length === 0
+      ? value as unknown as WikiInjectionPlanArtifact
+      : null,
+  };
+}
+
 export async function approveWikiContext(cwd: string, topic: string, budget: number, approvedBy?: string, options: {
   freshOnly?: boolean;
   gate?: boolean;
@@ -1963,6 +2093,114 @@ export async function buildWikiInjectionPolicy(cwd: string, gate = false): Promi
         recommendation: "Use `cx wiki context --approve --approved-by <name> --json` and reference the returned context path explicitly.",
       },
     ],
+    gate: buildGate(gate, evidenceGaps),
+  };
+}
+
+export async function planWikiInjection(cwd: string, approvalRef: string, target: string, gate = false): Promise<WikiInjectionPlanResult> {
+  if (!target.trim()) throw new Error("missing_wiki_injection_target");
+  const approvalPath = resolveApprovalRef(cwd, approvalRef);
+  if (!existsSync(approvalPath)) throw new Error(`wiki_context_approval_missing:${approvalRef}`);
+  const approval = await readWikiContextApproval(approvalPath);
+  if (!approval) throw new Error(`wiki_context_approval_invalid:${approvalRef}`);
+  const evidenceGaps: WikiEvidenceGap[] = [];
+  if (approval.handoffPolicy?.status !== "manual_only") {
+    evidenceGaps.push({
+      kind: "manual_handoff_policy_missing",
+      gate: true,
+      evidence: "approval does not carry a manual-only handoff policy",
+      recommendation: "Regenerate the context approval with `cx wiki context --approve --approved-by <name> --json`.",
+      files: [repoRelative(cwd, approvalPath)],
+    });
+  }
+  const stalePages = approval.selectedPages.filter((page) => page.freshness !== "fresh");
+  if (stalePages.length > 0) {
+    evidenceGaps.push({
+      kind: "page_stale",
+      gate: true,
+      evidence: `${stalePages.length} approved context pages are not fresh`,
+      recommendation: "Rebuild the wiki and regenerate the context approval before planning injection.",
+      files: stalePages.map((page) => page.path),
+    });
+  }
+  const planId = `wiki_injection_plan_${Date.now().toString(36)}`;
+  const dir = wikiInjectionPlanDir(cwd, planId);
+  const json = join(dir, "plan.json");
+  let plan: (WikiInjectionPlanArtifact & { paths: { dir: string; json: string } }) | null = null;
+  if (evidenceGaps.length === 0) {
+    const artifact: WikiInjectionPlanArtifact = {
+      schemaVersion: 1,
+      stability: "experimental",
+      type: "codexus.wiki.injection-plan",
+      planId,
+      status: "planned_not_applied",
+      createdAt: nowIso(),
+      target: target.trim(),
+      approval: {
+        approvalId: approval.approvalId,
+        path: repoRelative(cwd, approvalPath),
+        contextHash: approval.contextHash,
+        topic: approval.topic,
+        handoffStatus: "manual_only",
+        contextPackPath: approval.handoffPolicy?.contextPackPath ?? approval.paths.markdown,
+      },
+      policy: {
+        requiresFreshContext: true,
+        requiresExplicitReference: true,
+        automaticInjectionSupported: false,
+        applySupported: false,
+        auditBeforeMutation: true,
+        sourceTruth: false,
+        completionAuthority: false,
+      },
+      applied: false,
+      authority: {
+        promptMutation: false,
+        sourceTruth: false,
+        completionAuthority: false,
+      },
+    };
+    await ensureDir(dir);
+    await writeJsonAtomic(json, artifact);
+    plan = { ...artifact, paths: { dir, json } };
+  }
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "wiki injection plan",
+    cwd,
+    approvalRef,
+    target: target.trim(),
+    plan,
+    evidenceGaps,
+    derivableFacts: evidenceGaps.length === 0
+      ? [
+        {
+          kind: "manual_context_handoff_policy",
+          gate: true,
+          evidence: "Fresh manual-only approval can produce a report-only injection plan.",
+          files: [repoRelative(cwd, approvalPath)],
+        },
+        {
+          kind: "automatic_context_injection_deferred",
+          gate: true,
+          evidence: "The injection plan records applySupported:false and performs no prompt mutation.",
+        },
+      ]
+      : [],
+    heuristicClaims: [],
+    blockingUnknowns: [],
+    informationalUnknowns: [
+      {
+        kind: "wiki_injection_apply_deferred",
+        gate: false,
+        evidence: null,
+        recommendation: "Do not apply this plan automatically; prompt mutation remains deferred.",
+      },
+    ],
+    eligibleForAutomaticInjection: false,
+    applied: false,
+    completionAuthority: false,
     gate: buildGate(gate, evidenceGaps),
   };
 }

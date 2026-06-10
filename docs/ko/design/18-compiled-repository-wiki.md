@@ -28,6 +28,9 @@ evidence-linked markdown projection을 만드는 방향입니다.
 - 구현된 injection policy report: `cx wiki injection-policy --json`은 manual-only
   boundary를 보고하고 automatic injection을 deferred로 유지하며 future injection path 전에
   필요한 evidence를 나열합니다.
+- 구현된 report-only injection planning: `cx wiki injection plan --approval
+  <id-or-path> --target <target> --json`은 `applySupported:false`인 non-applied plan
+  artifact를 기록합니다.
 - 구현된 schema: `codexus.wiki.manifest`, `codexus.wiki.page`,
   `codexus.wiki.advisory`
 - 계속 deferred: run으로의 automatic context injection. Export는 fresh passing wiki
@@ -266,6 +269,7 @@ cx wiki context --topic verification --budget 1200 --json
 cx wiki context --topic verification --budget 1200 --fresh-only --gate --json
 cx wiki context --topic verification --approve --approved-by "$USER" --json
 cx wiki injection-policy --json
+cx wiki injection plan --approval <approval-id-or-path> --target session:current --json
 cx wiki export --target docs/codexus-wiki --json
 ```
 
@@ -311,6 +315,11 @@ cx wiki injection apply --plan <plan-path> --approved-by <name> --json
 
 `plan`은 report-only이면서 gateable이어야 합니다. `apply`는 prompt mutation이 reversible,
 auditable, bounded임을 반복 dogfooding으로 증명하기 전까지 experimental이어야 합니다.
+
+`plan`은 구현됐습니다. Approval reference, target, fresh selected page, manual-only handoff
+policy를 검증한 뒤 `planned_not_applied`, `applySupported:false`,
+`promptMutation:false`, `completionAuthority:false`를 가진 schema validation 가능한
+`codexus.wiki.injection-plan`을 기록합니다. `apply`는 계속 deferred입니다.
 
 Autopilot integration은 명시적이어야 합니다:
 
@@ -409,6 +418,10 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
 8b. 구현됨: `cx wiki injection-policy --json`을 report-only policy surface로 추가.
    Manual-only boundary를 보이게 만들고 automatic injection은 deferred로 유지하며 prompt를
    변경하지 않습니다.
+8c. 구현됨: `cx wiki injection plan --approval <id-or-path> --target <target> --json`을
+   report-only plan artifact로 추가. Plan을 apply하지 않으며 `cx wiki injection apply`는
+   deferred로 유지합니다. Plan artifact는 `wiki-injection-plan`으로 schema validation할 수
+   있습니다.
 9. 구현됨: `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저
    요구하고, source truth를 쓰지 않으며, auto-commit하지 않는 명시적 export로 추가.
 10. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤

@@ -27,6 +27,9 @@ Implementation status as of 2026-06-02:
 - implemented injection policy report: `cx wiki injection-policy --json` reports
   the manual-only boundary, keeps automatic injection deferred, and lists the
   evidence required before any future injection path;
+- implemented report-only injection planning: `cx wiki injection plan --approval
+  <id-or-path> --target <target> --json` writes a non-applied plan artifact with
+  `applySupported:false`;
 - implemented schemas: `codexus.wiki.manifest`, `codexus.wiki.page`, and
   `codexus.wiki.advisory`;
 - still deferred: any automatic context injection into runs. Export is
@@ -277,6 +280,7 @@ cx wiki context --topic verification --budget 1200 --json
 cx wiki context --topic verification --budget 1200 --fresh-only --gate --json
 cx wiki context --topic verification --approve --approved-by "$USER" --json
 cx wiki injection-policy --json
+cx wiki injection plan --approval <approval-id-or-path> --target session:current --json
 cx wiki export --target docs/codexus-wiki --json
 ```
 
@@ -325,9 +329,12 @@ cx wiki injection plan --approval <approval-id-or-path> --target <target> --json
 cx wiki injection apply --plan <plan-path> --approved-by <name> --json
 ```
 
-`plan` should be report-only and gateable. `apply` should remain experimental
-until repeated dogfooding proves that prompt mutation is reversible, auditable,
-and bounded.
+`plan` is implemented as a report-only, gateable artifact. It validates the
+approval reference, target, fresh selected pages, and manual-only handoff policy,
+then writes a schema-validatable `codexus.wiki.injection-plan` with
+`planned_not_applied`, `applySupported:false`, `promptMutation:false`, and
+`completionAuthority:false`. `apply` remains deferred until repeated dogfooding
+proves that prompt mutation is reversible, auditable, and bounded.
 
 Autopilot integration should be explicit:
 
@@ -429,6 +436,10 @@ The manifest owns page identity and freshness metadata:
 8b. Implemented: add `cx wiki injection-policy --json` as a report-only policy
    surface. It makes the manual-only boundary visible, keeps automatic injection
    deferred, and does not mutate prompts.
+8c. Implemented: add `cx wiki injection plan --approval <id-or-path> --target
+   <target> --json` as a report-only plan artifact. It does not apply the plan
+   and keeps `cx wiki injection apply` deferred. The plan artifact is
+   schema-validatable as `wiki-injection-plan`.
 9. Implemented: add `cx wiki export --target <path> --json` as an explicit
    export that first requires a fresh passing wiki check, writes no source
    truth, and never auto-commits.

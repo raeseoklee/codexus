@@ -42,6 +42,11 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   injection path를 검토하기 전에 필요한 evidence를 나열합니다.
 - 18번 문서는 future wiki context prompt-mutation surface를 구현하기 전에 필요한
   reversible approved-injection contract를 정의합니다.
+- `cx wiki injection plan --approval <id-or-path> --target <target> --json`은 이제
+  report-only injection plan artifact를 기록합니다. Plan은 fresh approval evidence와
+  target을 기록하지만 `applySupported:false`, prompt mutation false, completion authority
+  false를 유지합니다. `cx wiki injection apply`는 계속 deferred입니다. 이 artifact는
+  `cx schema validate --type wiki-injection-plan`으로 schema validation할 수 있습니다.
 
 ### Fixed
 

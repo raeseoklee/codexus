@@ -377,6 +377,67 @@ test("wiki injection policy reports manual-only handoff without enabling injecti
   }
 });
 
+test("wiki injection plan writes report-only artifact and apply stays deferred", async () => {
+  const cwd = await fixtureRepo();
+  try {
+    const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
+    assert.equal(build.status, 0, build.stderr);
+    const approval = runCli(cwd, [
+      "wiki",
+      "context",
+      "--topic",
+      "verification",
+      "--budget",
+      "4000",
+      "--approve",
+      "--approved-by",
+      "tester",
+      "--json",
+    ]);
+    assert.equal(approval.status, 0, approval.stderr);
+    const approvalOutput = JSON.parse(approval.stdout);
+
+    const plan = runCli(cwd, [
+      "wiki",
+      "injection",
+      "plan",
+      "--approval",
+      approvalOutput.approval.paths.json,
+      "--target",
+      "session:current",
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(plan.status, 0, plan.stderr);
+    const output = JSON.parse(plan.stdout);
+    assert.equal(output.command, "wiki injection plan");
+    assert.equal(output.plan.status, "planned_not_applied");
+    assert.equal(output.plan.policy.automaticInjectionSupported, false);
+    assert.equal(output.plan.policy.applySupported, false);
+    assert.equal(output.plan.applied, false);
+    assert.equal(output.plan.authority.promptMutation, false);
+    assert.equal(output.plan.authority.sourceTruth, false);
+    assert.equal(output.plan.authority.completionAuthority, false);
+    assert.equal(output.eligibleForAutomaticInjection, false);
+    assert.equal(output.applied, false);
+    assert.equal(output.completionAuthority, false);
+    assert.equal(output.gate.status, "passed");
+    assert.ok(existsSync(output.plan.paths.json));
+
+    const schema = runCli(cwd, ["schema", "validate", "--type", "wiki-injection-plan", "--file", output.plan.paths.json, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    const schemaOutput = JSON.parse(schema.stdout);
+    assert.equal(schemaOutput.validation.valid, true);
+    assert.equal(schemaOutput.artifactValidation.valid, true);
+
+    const apply = runCli(cwd, ["wiki", "injection", "apply", "--plan", output.plan.paths.json, "--json"]);
+    assert.equal(apply.status, 1);
+    assert.equal(JSON.parse(apply.stdout).code, "wiki_injection_apply_deferred");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("wiki check fails when a local link resolves outside the registered wiki pages", async () => {
   const cwd = await fixtureRepo();
   try {

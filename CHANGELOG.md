@@ -46,6 +46,12 @@ occur before 1.0, but they should be called out clearly.
   be considered.
 - Doc 18 now defines the reversible approved-injection contract required before
   any future wiki context prompt-mutation surface can be implemented.
+- `cx wiki injection plan --approval <id-or-path> --target <target> --json` now
+  writes a report-only injection plan artifact. The plan records fresh approval
+  evidence and the target but keeps `applySupported:false`, prompt mutation
+  false, and completion authority false; `cx wiki injection apply` remains
+  deferred. The artifact is schema-validatable with
+  `cx schema validate --type wiki-injection-plan`.
 
 ### Fixed
 

@@ -106,6 +106,7 @@
         "schemas/wiki-manifest.schema.json",
         "schemas/wiki-page.schema.json",
         "schemas/wiki-context-approval.schema.json",
+        "schemas/wiki-injection-plan.schema.json",
         "schemas/repo-graph.schema.json",
         "schemas/relay-session.schema.json",
         "schemas/stage-gate-evidence.schema.json",
