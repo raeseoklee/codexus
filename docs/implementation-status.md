@@ -308,8 +308,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   them unless `--dry-run` is used.
 - `cx session verify` reuses the verification policy preflight and records
   blocked verification attempts instead of executing dangerous commands.
-- `cx schema engine --json` reports the active local schema subset engine and
-  the unavailable full JSON Schema engine without adding a dependency.
+- `cx schema engine --json` reports the active local schema subset engine, the
+  unavailable full JSON Schema engine, and a `deferred_by_policy` decision block
+  that keeps replacement authority false without adding a dependency.
 - `cx architecture check --json` reports schema-validated architecture policy
   facts and forbidden-import evidence. Broad layering analysis remains heuristic
   in the first slice and self-reports `broad_layering_rule_deferred`.
@@ -629,7 +630,10 @@ review. Current high-level gaps:
   projections, and `automation-scheduler-ownership-v1` scheduler ownership
   evidence. Future work is a real durable queue, lease heartbeat, retry policy,
   and asynchronous ownership beyond the first synchronous dispatch slice.
-- Config/schema validation is focused local enforcement plus local schema-artifact subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
+- Config/schema validation is focused local enforcement plus local schema-artifact
+  subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
+  `cx schema engine --json` now records the full-engine replacement decision as
+  `deferred_by_policy` until dependency policy explicitly changes.
 - Autopilot active execution remains deferred for the 0.2/0.3 track. The
   experimental foundation now covers `cx autopilot plan` plus contract
   validate/approve/scope-check, but `cx autopilot run` and worktree-attached

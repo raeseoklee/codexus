@@ -52,7 +52,7 @@ current stable line:
   `configFiles`, `driverProbe`, `update`.
 - Schema output: `ok`, `schemas`, `appServerFixture`, and for
   `schema engine`, `schemaVersion`, `stability`, `activeEngine`,
-  `fullJsonSchemaEngine`, `migrationFixtureBoundary`.
+  `fullJsonSchemaEngine`, `decision`, `migrationFixtureBoundary`.
 - Supply-chain output: `schemaVersion`, `stability`, `cwd`, `packageRoot`,
   `packageJsonPath`, `lifecycleExecuted`, `projectionMode`,
   `projectionAccuracy`, `policy`, `packageArtifact`, `evidenceGaps`,

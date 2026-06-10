@@ -210,7 +210,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `cx session verify`는 verification policy preflight를 재사용해 위험한 command를
   실행하지 않고 blocked verification attempt로 기록합니다.
 - `cx schema engine --json`은 dependency를 추가하지 않고 active local schema subset
-  engine과 unavailable full JSON Schema engine을 보고합니다.
+  engine, unavailable full JSON Schema engine, replacement authority를 false로 유지하는
+  `deferred_by_policy` decision block을 보고합니다.
 - `cx architecture check --json`은 schema-validated architecture policy fact와
   forbidden-import evidence를 보고합니다. Broad layering analysis는 첫 slice에서
   heuristic으로 남으며 `broad_layering_rule_deferred`로 자기보고합니다.
@@ -486,7 +487,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   projection, `automation-scheduler-ownership-v1` scheduler ownership evidence를
   가집니다. 다음 작업은 실제 durable queue, lease heartbeat, retry policy,
   asynchronous ownership 증거입니다.
-- config/schema validation은 focused local enforcement와 local schema artifact subset enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직 아닙니다.
+- config/schema validation은 focused local enforcement와 local schema artifact subset
+  enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직
+  아닙니다. `cx schema engine --json`은 dependency policy가 명시적으로 바뀌기 전까지
+  full-engine replacement decision을 `deferred_by_policy`로 기록합니다.
 - Autopilot active execution은 계속 0.2/0.3 트랙에서 deferred입니다. Experimental
   foundation은 이제 `cx autopilot plan`과 contract
   validate/approve/scope-check까지 포함하지만, `cx autopilot run`과 worktree에

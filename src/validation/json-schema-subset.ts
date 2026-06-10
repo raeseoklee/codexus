@@ -20,6 +20,16 @@ export interface JsonSchemaEngineStatus {
     dependency: null;
     reason: string;
   };
+  decision: {
+    status: "deferred_by_policy";
+    dependencyPolicy: {
+      source: "package.json#codexus.supplyChain.runtimeDependenciesMax";
+      runtimeDependenciesMax: 0;
+    };
+    replacementAuthority: false;
+    candidateDependency: null;
+    requires: string[];
+  };
   migrationFixtureBoundary: true;
 }
 
@@ -32,6 +42,21 @@ export function schemaEngineStatus(): JsonSchemaEngineStatus {
       available: false,
       dependency: null,
       reason: "No full JSON Schema dependency is installed; Codexus keeps the local subset engine until dependency policy explicitly allows a replacement.",
+    },
+    decision: {
+      status: "deferred_by_policy",
+      dependencyPolicy: {
+        source: "package.json#codexus.supplyChain.runtimeDependenciesMax",
+        runtimeDependenciesMax: 0,
+      },
+      replacementAuthority: false,
+      candidateDependency: null,
+      requires: [
+        "explicit dependency policy approval",
+        "schema artifact regression fixture parity",
+        "package smoke update",
+        "release check update",
+      ],
     },
     migrationFixtureBoundary: true,
   };

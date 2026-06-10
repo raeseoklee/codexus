@@ -477,11 +477,13 @@
           <div class="tags">
             <span class="tag ready">dependency policy</span>
             <span class="tag gated">optional</span>
+            <span class="tag evidence">decision recorded</span>
           </div>
-          <p>Replace the local subset schema artifact engine only if dependency policy allows it.</p>
+          <p><code>cx schema engine --json</code> now reports the local subset engine, unavailable full engine, and a <code>deferred_by_policy</code> replacement decision. Replace the local subset schema artifact engine only if dependency policy changes.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li><code>cx schema engine --json</code> continues to report current status truthfully.</li>
+            <li>Done: full-engine replacement authority remains false until explicit dependency-policy approval.</li>
             <li>Existing schema artifacts stay as regression fixtures.</li>
             <li>No runtime dependency is added without explicit policy approval.</li>
           </ul>

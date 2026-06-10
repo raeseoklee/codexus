@@ -128,6 +128,11 @@ test("observability commands list runs, tail events, and read reports", async ()
     assert.equal(schemaEngineOutput.stability, "stable");
     assert.equal(schemaEngineOutput.activeEngine, "local-json-schema-subset");
     assert.equal(schemaEngineOutput.fullJsonSchemaEngine.available, false);
+    assert.equal(schemaEngineOutput.decision.status, "deferred_by_policy");
+    assert.equal(schemaEngineOutput.decision.dependencyPolicy.runtimeDependenciesMax, 0);
+    assert.equal(schemaEngineOutput.decision.replacementAuthority, false);
+    assert.equal(schemaEngineOutput.decision.candidateDependency, null);
+    assert.ok(schemaEngineOutput.decision.requires.includes("explicit dependency policy approval"));
     assert.equal(schemaEngineOutput.migrationFixtureBoundary, true);
 
     const replayParity = runCli(cwd, ["replay", "parity", "--json"]);

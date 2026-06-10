@@ -57,6 +57,11 @@ occur before 1.0, but they should be called out clearly.
   `automation-scheduler-ownership-v1` evidence. The projection records dispatch
   store path/count while keeping queue ownership, leases, unattended retry,
   cleanup, health, scheduler, and completion authority false.
+- `cx schema engine --json` now includes a `decision` block for the full JSON
+  Schema engine question. It records that replacement remains
+  `deferred_by_policy`, cites the zero-runtime-dependency package policy, and
+  keeps replacement authority false until explicit approval and regression
+  parity exist.
 
 ### Fixed
 

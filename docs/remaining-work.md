@@ -74,9 +74,10 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   bundles can be recorded under `.codexus/session/subagents/` without promoting
   them to completion evidence.
 - The ten-item evidence-contract pass is implemented without removing gates:
-  schema engine status reports the local subset engine and unavailable full
-  engine, replay parity can be audited, adapter injection writes visible
-  approval artifacts without auto-injection, HUD is available as a read-only
+  schema engine status reports the local subset engine, unavailable full
+  engine, and a `deferred_by_policy` replacement decision; replay parity can be
+  audited, adapter injection writes visible approval artifacts without
+  auto-injection, HUD is available as a read-only
   JSON summary, tmux/native-subagent launch surfaces are truthful gates, and
   automation live contracts now dispatch synchronously with explicit approval
   while recording `automation-action-authority-v1` negative-authority evidence
@@ -91,7 +92,8 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   tag publish.
 - Still intentionally deferred: routine live model-in-the-loop replay, live
   app-server turn execution, automatic prompt injection of retrieved skills,
-  full external JSON Schema engine enforcement/migrations, richer cron/gateway
+  full external JSON Schema engine enforcement/migrations beyond the recorded
+  `deferred_by_policy` decision, richer cron/gateway
   scheduler semantics, statusline/HUD integration, tmux-backed workers, and
   richer wait/remote-host UX around cancellation. The repository knowledge graph
   now has experimental build/check/import/search/explain slices for codexus-lite
@@ -238,7 +240,8 @@ evidence only when the supporting runtime exists:
 
 1. Replace the local schema-artifact subset engine with a full JSON Schema
    engine only if dependency policy allows it; `cx schema engine --json` now
-   reports the current unavailable full-engine status.
+   reports the current unavailable full-engine status and the
+   `deferred_by_policy` replacement decision.
 2. Preserve the replay parity matrix as a contract: `cx replay parity --json`
    reports canonical label coverage and must stay green before new labels land.
 3. Complete the Desktop app-server attachment evidence loop before enabling any
@@ -413,8 +416,9 @@ Harness-engineering alignment adds these evidence-first tracks:
    `automation-scheduler-ownership-v1` ownership evidence are implemented; next
    add a real durable queue, retry policy, and stronger long-lived ownership
    evidence.
-3. Full JSON Schema engine: replace the local subset engine only if dependency
-   policy allows it; keep current schema artifacts as regression fixtures.
+3. Full JSON Schema engine: the replacement decision is now recorded as
+   `deferred_by_policy`; replace the local subset engine only if dependency
+   policy allows it, and keep current schema artifacts as regression fixtures.
 4. Statusline integration: wait for a stable Codex-supported configuration
    surface; keep `cx session hud --json` as the fallback.
 5. tmux-backed worker launch: keep `session workers status` as a gate report

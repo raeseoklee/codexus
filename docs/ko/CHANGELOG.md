@@ -52,6 +52,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   evidence를 보고합니다. Projection은 dispatch store path/count를 기록하지만 queue
   ownership, lease, unattended retry, cleanup, health, scheduler, completion
   authority는 모두 false로 유지합니다.
+- `cx schema engine --json`은 이제 full JSON Schema engine 결정을 위한
+  `decision` block을 포함합니다. Replacement는 `deferred_by_policy`로 남아 있고,
+  zero-runtime-dependency package policy를 인용하며, explicit approval과 regression
+  parity가 생기기 전까지 replacement authority를 false로 유지합니다.
 
 ### Fixed
 

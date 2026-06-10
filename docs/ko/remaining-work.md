@@ -70,10 +70,11 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   `cx session slop`으로 사용할 수 있으며, subagent claim bundle은 completion evidence로
   승격하지 않은 채 `.codexus/session/subagents/` 아래 기록할 수 있습니다.
 - 10개 evidence-contract pass는 gate를 제거하지 않는 방식으로 구현됐습니다:
-  schema engine status는 local subset engine과 unavailable full engine을 보고하고,
-  replay parity는 audit 가능하며, adapter injection은 자동 주입 없이 visible approval
-  artifact를 쓰고, HUD는 read-only JSON summary로 제공됩니다. tmux/native-subagent launch
-  surface는 truthful gate이고, automation live contract는 이제 explicit approval로
+  schema engine status는 local subset engine, unavailable full engine,
+  `deferred_by_policy` replacement decision을 보고하고, replay parity는 audit 가능하며,
+  adapter injection은 자동 주입 없이 visible approval artifact를 쓰고, HUD는 read-only
+  JSON summary로 제공됩니다. tmux/native-subagent launch surface는 truthful gate이고,
+  automation live contract는 이제 explicit approval로
   synchronous dispatch가 가능하며 `automation-action-authority-v1` negative-authority
   evidence와 foreground recovery projection을 기록합니다. 이 projection은 manual-review
   candidate와 `automation-scheduler-ownership-v1` dispatch-store ownership evidence를
@@ -224,7 +225,8 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 
 1. dependency policy가 허용될 때만 local schema-artifact subset engine을 full JSON
    Schema engine으로 교체합니다. `cx schema engine --json`은 현재 full-engine unavailable
-   상태를 보고합니다. Migration fixture는 regression boundary로 유지합니다.
+   상태와 `deferred_by_policy` replacement decision을 보고합니다. Migration fixture는
+   regression boundary로 유지합니다.
 2. replay parity matrix를 contract로 유지합니다. 새 canonical parity label은
    fixture coverage와 CLI replay evidence 없이 추가하지 않습니다. `cx replay parity --json`이
    canonical label coverage를 보고합니다.
@@ -391,8 +393,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
    Foreground recovery projection과 `automation-scheduler-ownership-v1` ownership
    evidence도 구현됐습니다. 다음은 실제 durable queue, retry policy, 더 강한
    long-lived ownership evidence입니다.
-3. Full JSON Schema engine: dependency policy가 허용될 때만 local subset engine을
-   교체합니다. 현재 schema artifact는 regression fixture로 유지합니다.
+3. Full JSON Schema engine: replacement decision은 이제 `deferred_by_policy`로
+   기록됩니다. dependency policy가 허용될 때만 local subset engine을 교체하고, 현재
+   schema artifact는 regression fixture로 유지합니다.
 4. Statusline integration: Codex가 안정적인 supported configuration surface를 제공할 때까지
    기다립니다. 그 전까지는 `cx session hud --json`이 fallback입니다.
 5. tmux-backed worker launch: session state protocol과 launch contract가 안정될 때까지

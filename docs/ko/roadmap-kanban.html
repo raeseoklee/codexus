@@ -476,11 +476,13 @@
           <div class="tags">
             <span class="tag ready">dependency policy</span>
             <span class="tag gated">optional</span>
+            <span class="tag evidence">decision 기록됨</span>
           </div>
-          <p>Dependency policy가 허용할 때만 local subset schema artifact engine을 full engine으로 교체합니다.</p>
+          <p><code>cx schema engine --json</code>은 이제 local subset engine, unavailable full engine, <code>deferred_by_policy</code> replacement decision을 보고합니다. Dependency policy가 바뀔 때만 local subset schema artifact engine을 교체합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li><code>cx schema engine --json</code>이 현재 상태를 정직하게 보고합니다.</li>
+            <li>완료: full-engine replacement authority는 explicit dependency-policy approval 전까지 false입니다.</li>
             <li>기존 schema artifact는 regression fixture로 유지합니다.</li>
             <li>명시적 policy 승인 없이 runtime dependency를 추가하지 않습니다.</li>
           </ul>
