@@ -384,8 +384,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   reports endpoint binding facts such as `matchesInstanceEndpoint` and
   `ownedWorktreeInstanceEvidence: "endpoint_match_only"`. None of these evidence
   surfaces claim process-identity proof, control, health authority, cleanup
-  authority, or completion authority; live Browser/DevTools capture drivers
-  remain follow-up work.
+  authority, or completion authority. [Doc 20](design/20-observability-adapter-boundary.md)
+  now defines the boundary for future live Browser/DevTools capture drivers:
+  adapter roles, timeouts, redaction, loopback targeting, storage, and authority
+  flags must be schema-visible before any live driver is implemented.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External
@@ -662,8 +664,10 @@ review. Current high-level gaps:
   `cx session status --json` and `cx session hud --json` now summarize
   app-instance observations and wiki context approvals under `evidenceLoop`
   without adding health, control, source-truth, or completion authority.
-  Actual live Browser/DevTools capture drivers and worktree-aware launcher reuse
-  remain follow-up work.
+  Actual live Browser/DevTools capture drivers remain deferred behind the
+  observability adapter boundary from
+  [doc 20](design/20-observability-adapter-boundary.md); worktree-aware launcher
+  reuse also remains follow-up work.
 - Operational control invariants have deterministic docs-code checks plus an
   experimental control-plane first slice: decision artifacts, repeated
   verification loop summaries, HUD/status projections, autonomy preset

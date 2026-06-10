@@ -11,6 +11,10 @@ occur before 1.0, but they should be called out clearly.
 
 ### Added
 
+- Doc 20 now defines the observability adapter boundary before any live
+  Browser/DevTools capture driver is added. The design separates import-only,
+  host-mediated, and driver-mediated adapter roles and keeps adapter output from
+  becoming health, control, prompt-injection, or completion authority.
 - The deterministic compiled wiki now emits `release.md` and `runtime.md`
   pages alongside overview, commands, and verification. These pages summarize
   release/contract pointers and runtime authority boundaries as regenerable

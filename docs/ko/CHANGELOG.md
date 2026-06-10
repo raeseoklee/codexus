@@ -11,6 +11,10 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ### Added
 
+- 20번 문서는 live Browser/DevTools capture driver를 추가하기 전에 필요한
+  observability adapter boundary를 정의합니다. 이 설계는 import-only,
+  host-mediated, driver-mediated adapter 역할을 분리하고 adapter output이 health,
+  control, prompt-injection, completion authority가 되지 않도록 제한합니다.
 - Deterministic compiled wiki가 이제 overview, commands, verification에 더해
   `release.md`와 `runtime.md` page를 생성합니다. 이 page들은 release/contract
   pointer와 runtime authority boundary를 재생성 가능한 projection으로 요약하며,

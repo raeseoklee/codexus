@@ -383,11 +383,16 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   capture-file SHA-256을 기록하며 `matchesInstanceEndpoint`와
   `ownedWorktreeInstanceEvidence: "endpoint_match_only"` 같은 endpoint binding fact를
   보고합니다. 이 evidence surface들은 process identity 증명, control, health authority,
-  cleanup authority, completion authority를 주장하지 않습니다. `cx session status --json`과
+  cleanup authority, completion authority를 주장하지 않습니다.
+  [20번 문서](design/20-observability-adapter-boundary.md)는 future live
+  Browser/DevTools capture driver의 경계를 정의합니다. Adapter role, timeout,
+  redaction, loopback target, storage, authority flag가 schema-visible해지기 전까지
+  live driver는 구현하지 않습니다. `cx session status --json`과
   `cx session hud --json`은 app-instance observation과 wiki context approval을
   `evidenceLoop` 아래에 요약하지만 health, control, source-truth, completion
-  authority를 추가하지 않습니다. 실제 live Browser/DevTools capture driver는 후속
-  작업입니다.
+  authority를 추가하지 않습니다. 실제 live Browser/DevTools capture driver는
+  [20번 문서](design/20-observability-adapter-boundary.md)의 observability adapter
+  boundary 뒤에 deferred되어 있습니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,
@@ -515,7 +520,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   fact를 기록합니다. 명시적 stale/orphan lifecycle policy projection도 구현됐습니다.
   `cx session status --json`과 `cx session hud --json`은 이 observation과 wiki context
   approval을 `evidenceLoop`에 요약하되 권한을 승격하지 않습니다. 실제 live
-  Browser/DevTools capture driver와 worktree-aware launcher reuse가 후속 작업입니다.
+  Browser/DevTools capture driver는 [20번 문서](design/20-observability-adapter-boundary.md)의
+  경계 뒤에 deferred되어 있고, worktree-aware launcher reuse도 후속 작업입니다.
 - Operational control invariant는 deterministic docs-code check와 실험적
   control-plane 첫 slice까지 구현됐습니다. Decision artifact, 반복
   verification loop summary, HUD/status projection, autonomy preset metadata,

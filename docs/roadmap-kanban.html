@@ -348,8 +348,9 @@
             <span class="tag evidence">worktree evidence</span>
             <span class="tag gated">experimental</span>
             <span class="tag gateable">HTTP/log/metric/screenshot/browser binding done</span>
+            <span class="tag done">boundary design done</span>
           </div>
-          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, metric snapshot adapter, screenshot-file binding adapter, and Browser/DevTools capture-file binding adapter are implemented. The next step is optional live Browser/DevTools capture drivers.</p>
+          <p>The live ownership, observation descriptor, stale/orphan lifecycle policy baseline, loopback HTTP dev-server probe, bounded log snapshot adapter, metric snapshot adapter, screenshot-file binding adapter, and Browser/DevTools capture-file binding adapter are implemented. Doc 20 now defines the boundary before optional live Browser/DevTools capture drivers.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>The implemented baseline stays honest: only Codexus-owned instances can be stopped, and stale/orphan artifacts report lifecycle policy without implying health, cleanup, completion, or control.</li>
@@ -358,11 +359,12 @@
             <li>Done: metric snapshot evidence records process, heartbeat, health-evidence, and log-file metrics for the same <code>instanceId</code> without becoming health, control, or completion authority.</li>
             <li>Done: screenshot-file evidence binds an already captured local screenshot to the same <code>instanceId</code> using file metadata and SHA-256 without becoming health, control, or completion authority.</li>
             <li>Done: Browser/DevTools capture-file evidence imports an existing JSON capture, records bounded/redacted endpoint facts, and distinguishes endpoint match from process-identity proof.</li>
-            <li>Next: optional live Browser/DevTools capture drivers can create that capture JSON without becoming health, control, or completion authority.</li>
+            <li>Done: doc 20 separates import-only, host-mediated, and driver-mediated adapter roles and makes authority flags explicit.</li>
+            <li>Next: add report-only adapter descriptors/status before any optional live Browser/DevTools capture driver creates capture JSON.</li>
             <li>Future launcher reuse for autopilot surfaces points to one per-worktree instance artifact instead of a generic localhost port.</li>
           </ul>
           <span class="label">Sources</span>
-          <p><a href="design/19-worktree-app-instance-launcher.md">worktree app instance launcher</a> · <a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
+          <p><a href="design/19-worktree-app-instance-launcher.md">worktree app instance launcher</a> · <a href="design/20-observability-adapter-boundary.md">observability adapter boundary</a> · <a href="design/12-autopilot-contract.md#worktree-isolation">autopilot worktree isolation</a> · <a href="design/13-harness-engineering-alignment.md#observability-track">observability track</a></p>
         </article>
 
         <article class="card">
@@ -493,17 +495,19 @@
           <h3>Observability Adapters</h3>
           <div class="tags">
             <span class="tag evidence">adapter descriptors</span>
+            <span class="tag done">boundary design done</span>
           </div>
-          <p>The loopback HTTP dev-server probe, bounded log adapter, metric adapter, screenshot-file binding adapter, Browser/DevTools capture-file binding adapter, and session evidence-loop projection are implemented. Wire optional live Browser/DevTools capture or trace adapters to existing app-instance observation descriptors.</p>
+          <p>The loopback HTTP dev-server probe, bounded log adapter, metric adapter, screenshot-file binding adapter, Browser/DevTools capture-file binding adapter, session evidence-loop projection, and adapter boundary design are implemented. Next wire report-only adapter descriptors/status before optional live Browser/DevTools capture or trace drivers.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Stack-specific behavior stays outside the workflow kernel.</li>
             <li>Evidence is bounded, redacted, and disposable by default.</li>
             <li>Done: <code>cx session status</code> and <code>cx session hud</code> summarize app-instance observations without authority.</li>
+            <li>Done: doc 20 defines import-only, host-mediated, and driver-mediated roles before live drivers.</li>
             <li>Codexus never claims Codex read evidence unless it was passed or cited.</li>
           </ul>
           <span class="label">Sources</span>
-          <p><a href="design/13-harness-engineering-alignment.md#observability-track">doc 13 observability</a></p>
+          <p><a href="design/13-harness-engineering-alignment.md#observability-track">doc 13 observability</a> · <a href="design/20-observability-adapter-boundary.md">doc 20 boundary</a></p>
         </article>
 
         <article class="card">

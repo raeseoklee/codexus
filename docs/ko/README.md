@@ -265,6 +265,7 @@ Canonical bin은 `codexus`이고, `cx`는 지원되는 short alias입니다.
 - [Operational control invariants](design/17-operational-control-invariants.md): autonomy preset, policy catalog reporting, docs-code invariant, decision record, loop breaker, HUD projection의 실험적 첫 slice를 정리하되 새 완료 권한은 만들지 않습니다.
 - [Compiled repository wiki](design/18-compiled-repository-wiki.md): repository fact, ledger, graph artifact, decision, verification evidence 위의 재생성 가능한 markdown page를 위한 experimental deterministic 첫 slice입니다. `cx wiki map/build/check/context/export`가 local하게 동작하며 advisory synthesis는 계속 deferred이고, export는 자동이 아니라 명시적으로만 수행됩니다.
 - [Worktree app instance launcher](design/19-worktree-app-instance-launcher.md): worktree별 app evidence를 위한 experimental live ownership과 observation-evidence app instance surface입니다. Live start/stop은 Codexus-owned instance에 대해 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용합니다.
+- [Observability adapter boundary](design/20-observability-adapter-boundary.md): 선택적 live Browser/DevTools capture driver를 추가하기 전의 경계 설계입니다. Adapter는 bounded capture artifact를 만들 수 있지만 health, control, prompt-injection, completion authority가 될 수 없습니다.
 - [레퍼런스 거버넌스](references/README.md)
 - [구현 상태](implementation-status.md)
 - [남은 작업](remaining-work.md)

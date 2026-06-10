@@ -360,8 +360,12 @@ Harness-engineering alignment adds these evidence-first tracks:
   screenshot file to the same `instanceId` with file metadata and SHA-256.
   `cx app instance evidence browser` imports an existing Browser/DevTools JSON
   capture file and records endpoint binding facts without proving process
-  identity. Next work is optional live Browser/DevTools capture drivers while
-  keeping stack-specific behavior outside the workflow kernel.
+  identity. [Doc 20](design/20-observability-adapter-boundary.md) now defines
+  the boundary before any live Browser/DevTools capture driver is added. Next
+  work is a report-only `observability-adapter` descriptor and
+  `cx app instance evidence adapters --json`; live capture drivers remain
+  deferred until role, timeout, redaction, loopback, storage, and authority
+  flags are schema-visible.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
   now has an experimental live ownership first slice: descriptor/profile
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
@@ -371,8 +375,10 @@ Harness-engineering alignment adds these evidence-first tracks:
   observations under `evidenceLoop` without authority. The first adapter capture
   slice is implemented as loopback HTTP dev-server, bounded log, metric,
   screenshot-file evidence, and Browser/DevTools capture-file binding. Next work
-  is optional live Browser/DevTools capture drivers and worktree-aware launcher
-  reuse for future autopilot surfaces.
+  is the report-only observability-adapter descriptor from
+  [doc 20](design/20-observability-adapter-boundary.md), then optional live
+  Browser/DevTools capture drivers and worktree-aware launcher reuse for future
+  autopilot surfaces.
 - Operational control invariants: [doc 17](design/17-operational-control-invariants.md)
   defines autonomy presets, policy catalogs, docs-code invariants, decision
   records, loop breakers, and HUD projection as a control layer over existing
@@ -462,9 +468,10 @@ Harness-engineering alignment adds these evidence-first tracks:
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback
     HTTP dev-server probe, bounded/redacted log snapshot adapter, metric
     snapshot adapter, screenshot-file adapter, and Browser/DevTools capture-file
-    binding adapter are implemented; next add optional live Browser/DevTools
-    capture drivers and worktree-aware launcher reuse for future autopilot
-    surfaces.
+    binding adapter are implemented. [Doc 20](design/20-observability-adapter-boundary.md)
+    defines the boundary for future live capture drivers; first add report-only
+    adapter descriptors/status, then optional live Browser/DevTools capture
+    drivers and worktree-aware launcher reuse for future autopilot surfaces.
 14. Project LSP diagnostics: first-slice `cx lsp status/check` exists for
     TypeScript diagnostics via explicit local project commands. Keep automatic
     project LSP application detect-only until protocol-server lifecycle,
