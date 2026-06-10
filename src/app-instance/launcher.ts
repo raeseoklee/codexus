@@ -128,6 +128,10 @@ export interface AppInstanceObservationArtifact {
     artifactPath: string;
     worktreePath: string;
     processStatus: AppInstanceStatus;
+    processReason?: string | null;
+    heartbeatFresh?: boolean | null;
+    heartbeatAgeMs?: number | null;
+    lifecycleState?: AppInstanceLifecycleState | null;
     healthStatus: AppInstanceHealthStatus;
     url: string | null;
   };
@@ -177,6 +181,8 @@ export interface AppInstanceEvidenceSummary {
       instanceId: string;
       kind: AppInstanceObservationKind;
       status: AppInstanceObservationStatus;
+      processStatus: AppInstanceStatus;
+      lifecycleState: AppInstanceLifecycleState | null;
       path: string;
     } | null;
   };
@@ -294,10 +300,30 @@ function requireBoolean(record: Record<string, unknown>, key: string, errors: st
   return value;
 }
 
+function optionalBoolean(record: Record<string, unknown>, key: string, errors: string[], path = key): boolean | null {
+  const value = record[key];
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "boolean") {
+    errors.push(`${path}:expected_boolean_or_null`);
+    return null;
+  }
+  return value;
+}
+
 function requireInteger(record: Record<string, unknown>, key: string, errors: string[], path = key): number | null {
   const value = record[key];
   if (!Number.isInteger(value)) {
     errors.push(`${path}:expected_integer`);
+    return null;
+  }
+  return value as number;
+}
+
+function optionalInteger(record: Record<string, unknown>, key: string, errors: string[], path = key): number | null {
+  const value = record[key];
+  if (value === null || value === undefined) return null;
+  if (!Number.isInteger(value)) {
+    errors.push(`${path}:expected_integer_or_null`);
     return null;
   }
   return value as number;
@@ -618,6 +644,14 @@ function isInstanceStatus(value: unknown): value is AppInstanceStatus {
   return value === "running" || value === "stopped" || value === "orphaned" || value === "unknown";
 }
 
+function isLifecycleState(value: unknown): value is AppInstanceLifecycleState {
+  return value === "managed_running"
+    || value === "managed_stopped"
+    || value === "orphaned_live_process"
+    || value === "orphaned_dead_artifact"
+    || value === "unmanaged_or_unverifiable";
+}
+
 export function validateAppInstanceArtifact(value: unknown, path = "artifact"): AppInstanceArtifactValidation {
   const errors: string[] = [];
   if (!isRecord(value)) {
@@ -728,6 +762,10 @@ export function validateAppInstanceObservation(value: unknown, path = "observati
   if (!isInstanceStatus(rawProcessStatus)) errors.push("instance.processStatus:invalid_enum");
   const rawHealthStatus = isRecord(value.instance) ? value.instance.healthStatus : null;
   if (!isHealthStatus(rawHealthStatus)) errors.push("instance.healthStatus:invalid_enum");
+  const rawLifecycleState = isRecord(value.instance) ? value.instance.lifecycleState : null;
+  if (rawLifecycleState !== null && rawLifecycleState !== undefined && !isLifecycleState(rawLifecycleState)) {
+    errors.push("instance.lifecycleState:invalid_enum");
+  }
   const rawKind = isRecord(value.observation) ? value.observation.kind : null;
   if (!isObservationKind(rawKind)) errors.push("observation.kind:invalid_enum");
   const rawStatus = isRecord(value.observation) ? value.observation.status : null;
@@ -744,6 +782,10 @@ export function validateAppInstanceObservation(value: unknown, path = "observati
       artifactPath: requireString(value.instance, "artifactPath", errors, "instance.artifactPath") ?? "",
       worktreePath: requireString(value.instance, "worktreePath", errors, "instance.worktreePath") ?? "",
       processStatus: isInstanceStatus(rawProcessStatus) ? rawProcessStatus : "unknown" as const,
+      processReason: optionalString(value.instance, "processReason", errors, "instance.processReason"),
+      heartbeatFresh: optionalBoolean(value.instance, "heartbeatFresh", errors, "instance.heartbeatFresh"),
+      heartbeatAgeMs: optionalInteger(value.instance, "heartbeatAgeMs", errors, "instance.heartbeatAgeMs"),
+      lifecycleState: isLifecycleState(rawLifecycleState) ? rawLifecycleState : null,
       healthStatus: isHealthStatus(rawHealthStatus) ? rawHealthStatus : "unknown" as const,
       url: optionalString(value.instance, "url", errors, "instance.url"),
     }
@@ -1590,6 +1632,10 @@ async function writeObservationArtifact(cwd: string, options: {
       artifactPath: instance.artifactPath,
       worktreePath: instance.worktree.path,
       processStatus: instance.process.status,
+      processReason: instance.process.reason,
+      heartbeatFresh: instance.process.heartbeatFresh,
+      heartbeatAgeMs: instance.process.heartbeatAgeMs,
+      lifecycleState: instance.process.lifecycle.state,
       healthStatus: instance.health.status,
       url: instance.network.url,
     },
@@ -2135,6 +2181,8 @@ export async function summarizeAppInstanceEvidence(cwd: string): Promise<AppInst
       instanceId: latest.instance.instanceId,
       kind: latest.observation.kind,
       status: latest.observation.status,
+      processStatus: latest.instance.processStatus,
+      lifecycleState: latest.instance.lifecycleState ?? null,
       path: latest.path,
     }
     : null;

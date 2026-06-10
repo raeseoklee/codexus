@@ -16,6 +16,19 @@
         "artifactPath": { "type": "string", "minLength": 1 },
         "worktreePath": { "type": "string", "minLength": 1 },
         "processStatus": { "enum": ["running", "stopped", "orphaned", "unknown"] },
+        "processReason": { "type": ["string", "null"] },
+        "heartbeatFresh": { "type": ["boolean", "null"] },
+        "heartbeatAgeMs": { "type": ["integer", "null"], "minimum": 0 },
+        "lifecycleState": {
+          "enum": [
+            "managed_running",
+            "managed_stopped",
+            "orphaned_live_process",
+            "orphaned_dead_artifact",
+            "unmanaged_or_unverifiable",
+            null
+          ]
+        },
         "healthStatus": { "enum": ["passed", "failed", "unknown", "unavailable"] },
         "url": { "type": ["string", "null"] }
       },

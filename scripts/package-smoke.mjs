@@ -105,6 +105,10 @@ function assertNpmReadmeLinksArePortable() {
     readme.includes("Canonical bin: `codexus`. Supported short alias: `cx`."),
     "README must present codexus as the canonical CLI name and cx as a supported short alias"
   );
+  assert(
+    pkg.scripts?.["build:sourcemap"] === "node scripts/build.mjs --sourcemap",
+    "package.json must expose the maintainer-only build:sourcemap helper"
+  );
 }
 
 function binPath(prefix, name) {
@@ -246,6 +250,10 @@ process.on("SIGINT", shutdown);
 
   const tarEntries = run("tar", ["-tf", tarball]).stdout.split(/\n/).filter(Boolean);
   const policy = readSupplyChainPolicy();
+  assert(
+    policy.forbiddenPackageFiles.includes("dist/**/*.map"),
+    "sourcemaps must stay forbidden from the default npm package"
+  );
   for (const required of policy.requiredPackageFiles) {
     assert(tarEntries.some((entry) => matchesPattern(entry, required)), `packed tarball missing package/${required}`);
   }

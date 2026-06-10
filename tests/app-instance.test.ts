@@ -334,6 +334,10 @@ test("app instance evidence records observation without promoting control or hea
     assert.equal(record.status, 0, record.stderr);
     const output = parseJson(record);
     assert.equal(output.observation.instance.instanceId, "app_test");
+    assert.equal(output.observation.instance.processStatus, "orphaned");
+    assert.equal(output.observation.instance.processReason, "pid_dead");
+    assert.equal(output.observation.instance.heartbeatFresh, false);
+    assert.equal(output.observation.instance.lifecycleState, "orphaned_dead_artifact");
     assert.equal(output.observation.observation.kind, "browser");
     assert.equal(output.observation.observation.status, "unavailable");
     assert.equal(output.observation.observation.reason, "instance_not_running:pid_dead");
@@ -349,6 +353,7 @@ test("app instance evidence records observation without promoting control or hea
     assert.equal(list.status, 0, list.stderr);
     const listed = parseJson(list);
     assert.equal(listed.observations.length, 1);
+    assert.equal(listed.observations[0].instance.lifecycleState, "orphaned_dead_artifact");
     assert.equal(listed.authority.completionAuthority, false);
   } finally {
     await cleanupInstances(cwd);
@@ -407,6 +412,10 @@ test("app instance HTTP probe records bounded redacted evidence for a running ow
     assert.equal(output.probe.healthAuthority, false);
     assert.equal(output.probe.completionAuthority, false);
     assert.equal(output.observation.observation.kind, "dev-server");
+    assert.equal(output.observation.instance.processStatus, "running");
+    assert.equal(output.observation.instance.processReason, "pid_live_and_heartbeat_fresh");
+    assert.equal(output.observation.instance.heartbeatFresh, true);
+    assert.equal(output.observation.instance.lifecycleState, "managed_running");
     assert.equal(output.observation.observation.status, "observed");
     assert.equal(output.observation.observation.summary, "http_200");
     assert.equal(output.observation.authority.controlsInstance, false);
@@ -432,6 +441,14 @@ test("app instance HTTP probe records bounded redacted evidence for a running ow
     const listed = parseJson(list);
     assert.equal(listed.observations.length, 1);
     assert.equal(listed.observations[0].observation.summary, "http_200");
+    assert.equal(listed.observations[0].instance.lifecycleState, "managed_running");
+
+    const session = runCli(cwd, ["session", "status", "--json"]);
+    assert.equal(session.status, 0, session.stderr);
+    const sessionOutput = parseJson(session);
+    assert.equal(sessionOutput.evidenceLoop.appInstances.observations.latest.instanceId, instanceId);
+    assert.equal(sessionOutput.evidenceLoop.appInstances.observations.latest.processStatus, "running");
+    assert.equal(sessionOutput.evidenceLoop.appInstances.observations.latest.lifecycleState, "managed_running");
   } finally {
     await cleanupInstances(cwd);
     await rm(cwd, { recursive: true, force: true });

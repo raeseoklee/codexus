@@ -7,6 +7,7 @@ export type UpdateStatus = "current" | "available" | "unknown" | "disabled";
 export type UpdateSource = "registry" | "cache" | "none" | "disabled";
 export type UpdateChannel = "stable" | "next";
 export type UpdateDistTag = "latest" | "next";
+export type UpdateCacheState = "fresh" | "stale" | "missing";
 
 export interface UpdateSummary {
   schemaVersion: 1;
@@ -22,10 +23,12 @@ export interface UpdateSummary {
   checkedAt: string | null;
   cacheExpiresAt: string | null;
   ttlMs: number;
+  cacheState: UpdateCacheState;
+  versionFresh: boolean;
   registryChecked: boolean;
   cachePath: string;
   disabled: boolean;
-  disabledReason: "env" | "cache_only_miss" | null;
+  disabledReason: "env" | "cache_only_miss" | "cache_only_stale" | null;
   error: { kind: "registry_unavailable" | "cache_unreadable" | "cache_write_failed"; summary: string } | null;
   advisory: true;
   completionAuthority: false;
@@ -194,16 +197,19 @@ function fromKnownVersion(input: {
   cachePath: string;
   ttlMs: number;
   now: Date;
+  cacheState: UpdateCacheState;
+  versionFresh?: boolean;
   registryChecked: boolean;
   disabled?: boolean;
   disabledReason?: UpdateSummary["disabledReason"];
   error?: UpdateSummary["error"];
 }): UpdateSummary {
   const cacheExpiresAt = input.checkedAt ? new Date(Date.parse(input.checkedAt) + input.ttlMs).toISOString() : null;
-  const updateAvailable = input.latestVersion ? compareVersions(input.latestVersion, input.currentVersion) > 0 : null;
+  const versionFresh = input.versionFresh ?? (input.source === "registry" || input.cacheState === "fresh");
+  const updateAvailable = input.latestVersion && versionFresh ? compareVersions(input.latestVersion, input.currentVersion) > 0 : null;
   const status: UpdateStatus = input.disabled
     ? "disabled"
-    : input.latestVersion
+    : input.latestVersion && versionFresh
       ? updateAvailable ? "available" : "current"
       : "unknown";
   return {
@@ -220,6 +226,8 @@ function fromKnownVersion(input: {
     checkedAt: input.checkedAt,
     cacheExpiresAt,
     ttlMs: input.ttlMs,
+    cacheState: input.cacheState,
+    versionFresh,
     registryChecked: input.registryChecked,
     cachePath: input.cachePath,
     disabled: input.disabled === true,
@@ -241,6 +249,7 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
   const { cache, error: cacheError } = readCache(path, channel);
   const checkedAtMs = cache ? Date.parse(cache.checkedAt) : Number.NaN;
   const freshCache = cache !== null && Number.isFinite(checkedAtMs) && now.getTime() - checkedAtMs < ttlMs;
+  const cacheState: UpdateCacheState = cache === null ? "missing" : freshCache ? "fresh" : "stale";
   const disabledByEnv = process.env.CODEXUS_NO_UPDATE_CHECK === "1";
   const cacheOnly = options.cacheOnly === true || process.env.CI === "true" || process.env.CI === "1";
 
@@ -255,6 +264,8 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
       cachePath: path,
       ttlMs,
       now,
+      cacheState,
+      versionFresh: freshCache,
       registryChecked: false,
       disabled: true,
       disabledReason: "env",
@@ -273,6 +284,8 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
       cachePath: path,
       ttlMs,
       now,
+      cacheState,
+      versionFresh: true,
       registryChecked: false,
       error: cacheError,
     });
@@ -289,9 +302,11 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
       cachePath: path,
       ttlMs,
       now,
+      cacheState,
+      versionFresh: freshCache,
       registryChecked: false,
-      disabled: cache === null,
-      disabledReason: cache === null ? "cache_only_miss" : null,
+      disabled: true,
+      disabledReason: cache === null ? "cache_only_miss" : "cache_only_stale",
       error: cacheError,
     });
   }
@@ -320,6 +335,8 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
       cachePath: path,
       ttlMs,
       now,
+      cacheState,
+      versionFresh: false,
       registryChecked: true,
       error: writeError ?? registryError,
     });
@@ -343,6 +360,8 @@ export function buildUpdateSummary(options: UpdateCheckOptions): UpdateSummary {
     cachePath: path,
     ttlMs,
     now,
+    cacheState: "fresh",
+    versionFresh: true,
     registryChecked: true,
     error: writeError,
   });

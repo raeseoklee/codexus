@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
-import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -47,6 +47,22 @@ console.log(JSON.stringify({
   await chmod(path, 0o755);
 }
 
+async function writeUpdateCache(cacheDir: string, fileName: "latest.json" | "next.json", checkedAt: string, latestVersion: string): Promise<void> {
+  await mkdir(cacheDir, { recursive: true });
+  await writeFile(
+    join(cacheDir, fileName),
+    `${JSON.stringify({
+      schemaVersion: 1,
+      packageName: "codexus",
+      channel: fileName === "next.json" ? "next" : "stable",
+      distTag: fileName === "next.json" ? "next" : "latest",
+      latestVersion,
+      checkedAt,
+      registryError: null,
+    }, null, 2)}\n`,
+  );
+}
+
 test("update check reports registry-derived availability without mutating installation", async () => {
   const cwd = await tempDir();
   try {
@@ -72,6 +88,8 @@ test("update check reports registry-derived availability without mutating instal
     assert.equal(output.status, "available");
     assert.equal(output.updateAvailable, true);
     assert.equal(output.source, "registry");
+    assert.equal(output.cacheState, "fresh");
+    assert.equal(output.versionFresh, true);
     assert.equal(output.registryChecked, true);
     assert.equal(output.advisory, true);
     assert.equal(output.completionAuthority, false);
@@ -106,6 +124,8 @@ test("update check only reads next dist-tag through explicit channel opt-in", as
     assert.equal(output.latestVersion, "10.0.0-alpha.1");
     assert.equal(output.status, "available");
     assert.equal(output.source, "registry");
+    assert.equal(output.cacheState, "fresh");
+    assert.equal(output.versionFresh, true);
     assert.equal(output.registryChecked, true);
     assert.equal(output.advisory, true);
     assert.equal(output.installationMutated, false);
@@ -136,6 +156,8 @@ test("update check can be disabled without calling npm", async () => {
     assert.equal(output.distTag, "latest");
     assert.equal(output.status, "disabled");
     assert.equal(output.source, "disabled");
+    assert.equal(output.cacheState, "missing");
+    assert.equal(output.versionFresh, false);
     assert.equal(output.registryChecked, false);
     assert.equal(output.disabled, true);
     assert.equal(output.disabledReason, "env");
@@ -164,6 +186,8 @@ test("disabled next-channel update check does not query npm", async () => {
     assert.equal(output.distTag, "next");
     assert.equal(output.status, "disabled");
     assert.equal(output.source, "disabled");
+    assert.equal(output.cacheState, "missing");
+    assert.equal(output.versionFresh, false);
     assert.equal(output.registryChecked, false);
     assert.equal(output.disabled, true);
     assert.equal(output.disabledReason, "env");
@@ -196,6 +220,8 @@ test("stable primary JSON commands include cache-only update summaries and never
     assert.equal(versionOutput.update.channel, "stable");
     assert.equal(versionOutput.update.distTag, "latest");
     assert.equal(versionOutput.update.registryChecked, false);
+    assert.equal(versionOutput.update.cacheState, "missing");
+    assert.equal(versionOutput.update.versionFresh, false);
     assert.equal(versionOutput.update.disabledReason, "cache_only_miss");
 
     const doctor = runCli(cwd, ["doctor", "--json"], env);
@@ -207,6 +233,8 @@ test("stable primary JSON commands include cache-only update summaries and never
     assert.equal(doctorOutput.update.channel, "stable");
     assert.equal(doctorOutput.update.distTag, "latest");
     assert.equal(doctorOutput.update.registryChecked, false);
+    assert.equal(doctorOutput.update.cacheState, "missing");
+    assert.equal(doctorOutput.update.versionFresh, false);
 
     const session = runCli(cwd, ["session", "status", "--json"], env);
     assert.equal(session.status, 0, session.stderr);
@@ -216,7 +244,70 @@ test("stable primary JSON commands include cache-only update summaries and never
     assert.equal(sessionOutput.update.channel, "stable");
     assert.equal(sessionOutput.update.distTag, "latest");
     assert.equal(sessionOutput.update.registryChecked, false);
+    assert.equal(sessionOutput.update.cacheState, "missing");
+    assert.equal(sessionOutput.update.versionFresh, false);
     assert.equal(existsSync(marker), false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("stable primary JSON commands do not report stale cache as current", async () => {
+  const cwd = await tempDir();
+  try {
+    const fakeNpm = join(cwd, "fake-npm.mjs");
+    const marker = join(cwd, "npm-called");
+    const cacheDir = join(cwd, "update-cache");
+    await writeFakeNpm(fakeNpm);
+    await writeUpdateCache(cacheDir, "latest.json", "2000-01-01T00:00:00.000Z", "0.0.1");
+
+    const result = runCli(cwd, ["version", "--json"], {
+      CODEXUS_UPDATE_NPM_COMMAND: fakeNpm,
+      CODEXUS_UPDATE_CACHE_DIR: cacheDir,
+      CODEXUS_FAKE_NPM_MARKER: marker,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.update.source, "cache");
+    assert.equal(output.update.cacheState, "stale");
+    assert.equal(output.update.versionFresh, false);
+    assert.equal(output.update.status, "disabled");
+    assert.equal(output.update.updateAvailable, null);
+    assert.equal(output.update.disabledReason, "cache_only_stale");
+    assert.equal(output.update.latestVersion, "0.0.1");
+    assert.equal(output.update.registryChecked, false);
+    assert.equal(existsSync(marker), false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("update check does not use stale cache to claim current when registry is unavailable", async () => {
+  const cwd = await tempDir();
+  try {
+    const fakeNpm = join(cwd, "fake-npm.mjs");
+    const marker = join(cwd, "npm-called");
+    const cacheDir = join(cwd, "update-cache");
+    await writeFakeNpm(fakeNpm);
+    await writeUpdateCache(cacheDir, "latest.json", "2000-01-01T00:00:00.000Z", "0.0.1");
+
+    const result = runCli(cwd, ["update", "check", "--json"], {
+      CODEXUS_UPDATE_NPM_COMMAND: fakeNpm,
+      CODEXUS_UPDATE_CACHE_DIR: cacheDir,
+      CODEXUS_FAKE_NPM_MARKER: marker,
+      CODEXUS_FAKE_NPM_EXIT: "13",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.source, "cache");
+    assert.equal(output.cacheState, "stale");
+    assert.equal(output.versionFresh, false);
+    assert.equal(output.status, "unknown");
+    assert.equal(output.updateAvailable, null);
+    assert.equal(output.latestVersion, "0.0.1");
+    assert.equal(output.registryChecked, true);
+    assert.equal(output.error.kind, "registry_unavailable");
+    assert.equal(existsSync(marker), true);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

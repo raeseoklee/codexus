@@ -9,6 +9,22 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Fixed
+
+- Update summaries now distinguish fresh update facts from stale cache entries.
+  Cache-only primary commands (`version --json`, `doctor --json`, and
+  `session status --json`) report stale update cache as non-fresh evidence
+  instead of implying that the installed version is current. Explicit
+  `update check` also avoids using stale cache to claim current/available when
+  the registry is unavailable.
+- The default npm package now explicitly forbids `dist/**/*.map` while exposing
+  a maintainer-only `npm run build:sourcemap` helper that emits an external
+  debug source map with `sourcesContent: false`.
+- App-instance observation artifacts now include process reason, heartbeat
+  freshness/age, and lifecycle state snapshots so observations are more clearly
+  bound to instance evidence without gaining health, cleanup, or completion
+  authority.
+
 ## 0.2.0 - 2026-06-08
 
 This release is Codexus's first stable-contract promotion milestone. It promotes

@@ -9,6 +9,21 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Fixed
+
+- Update summary가 fresh update fact와 stale cache entry를 구분합니다.
+  Cache-only primary command(`version --json`, `doctor --json`,
+  `session status --json`)는 stale update cache를 현재 설치본이 최신이라는 암시가
+  아니라 fresh하지 않은 evidence로 보고합니다. 명시적 `update check`도 registry에
+  접근할 수 없을 때 stale cache만으로 current/available을 주장하지 않습니다.
+- 기본 npm package는 이제 `dist/**/*.map`을 명시적으로 금지합니다. Maintainer-only
+  `npm run build:sourcemap` helper는 `sourcesContent: false`인 외부 debug source
+  map을 생성합니다.
+- App-instance observation artifact는 이제 process reason, heartbeat freshness/age,
+  lifecycle state snapshot을 포함합니다. 이를 통해 observation이 어떤 instance
+  evidence에 묶였는지 더 명확히 드러내되 health, cleanup, completion authority는
+  얻지 않습니다.
+
 ## 0.2.0 - 2026-06-08
 
 이 release는 Codexus의 첫 stable-contract promotion milestone입니다. 좁은

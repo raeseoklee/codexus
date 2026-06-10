@@ -187,6 +187,9 @@ The live `start` and `stop` slices must enforce these local facts:
 - health is tri-state or richer: `passed`, `failed`, `unknown`, `unavailable`;
 - browser/dev-server evidence must cite `instanceId`; otherwise it is generic
   observation, not per-worktree app evidence.
+- app-instance observation artifacts should snapshot process reason, heartbeat
+  freshness, heartbeat age, and lifecycle state so later review can see what
+  the observation was bound to without treating it as health authority.
 
 ## Relationship To Other Tracks
 
@@ -244,6 +247,11 @@ The live `start` and `stop` slices must enforce these local facts:
     an already captured local screenshot and links that evidence to one
     `instanceId`; it does not open browsers, capture pixels itself, or become
     health, control, cleanup, or completion authority.
+15. Done: strengthen app-instance observation binding. New observation artifacts
+    snapshot `processReason`, heartbeat freshness/age, and lifecycle state, and
+    session evidence summaries expose the latest observation's process and
+    lifecycle state without promoting that observation to health or completion
+    authority.
 
 ## Next Slice
 

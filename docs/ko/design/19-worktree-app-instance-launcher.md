@@ -180,6 +180,10 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
   보고합니다;
 - browser/dev-server evidence는 `instanceId`를 인용해야 합니다. 그렇지 않으면
   per-worktree app evidence가 아니라 generic observation입니다.
+- app-instance observation artifact는 process reason, heartbeat freshness,
+  heartbeat age, lifecycle state를 snapshot해야 합니다. 나중에 검토자가 그 관측이
+  어떤 evidence에 묶였는지 볼 수 있어야 하지만, 이것이 health authority가 되어서는
+  안 됩니다.
 
 ## 다른 트랙과의 관계
 
@@ -236,6 +240,10 @@ Live `start`와 `stop` slice는 아래 local fact를 enforce해야 합니다:
     media type, SHA-256을 기록하고 하나의 `instanceId`에 연결합니다. Browser를 열거나
     pixel을 직접 capture하지 않으며 health, control, cleanup, completion authority가
     되지 않습니다.
+15. 완료: app-instance observation binding을 강화합니다. 새 observation artifact는
+    `processReason`, heartbeat freshness/age, lifecycle state를 snapshot하고,
+    session evidence summary는 최신 observation의 process/lifecycle state를 노출하되
+    이를 health 또는 completion authority로 승격하지 않습니다.
 
 ## 다음 Slice
 

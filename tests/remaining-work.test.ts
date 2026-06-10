@@ -383,6 +383,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(pkg.files.includes("src"), false);
     assert.equal(pkg.files.includes("fixtures"), false);
     assert.equal(pkg.scripts.prepublishOnly, "npm run release:check");
+    assert.equal(pkg.scripts["build:sourcemap"], "node scripts/build.mjs --sourcemap");
     assert.equal(pkg.scripts["lsp:check"], "node src/cli/main.ts lsp check --gate --json");
     assert.equal(pkg.scripts["supply-chain:report"], "node src/cli/main.ts supply-chain check --json");
     assert.match(pkg.scripts["release:check"], /lsp:check/);
@@ -400,6 +401,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/decision.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("scripts/publish-next.mjs"));
     assert.ok(pkg.codexus.supplyChain.forbiddenPackageFiles.includes("src/**"));
+    assert.ok(pkg.codexus.supplyChain.forbiddenPackageFiles.includes("dist/**/*.map"));
     assert.equal(pkg.codexus.supplyChain.binTargetsMustBeBuiltArtifacts, true);
     assert.equal(pkg.codexus.architecture.rules[0].id, "no-runtime-package-imports-in-src");
 

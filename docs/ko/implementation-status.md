@@ -109,6 +109,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `version --json`, `doctor --json`, `session status --json`은 additive
   cache-only experimental `update` summary를 포함합니다. 이 primary command들은
   registry를 조회하지 않고 update lookup이 불가능해도 실패하지 않습니다.
+  오래된 cache entry는 `cacheState: "stale"` 및 `versionFresh: false`로 보고되며,
+  현재 설치본이 최신이라는 증거로 해석하면 안 됩니다.
 - `cx plugin status --json`은 experimental Codex plugin package evidence를
   보고합니다. Packaged manifest validity, bundled skill count, wrapper script
   presence, explicit non-authority field를 포함합니다. Codex가 문서화된 plugin
@@ -118,7 +120,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - npm tarball은 `dist`, `schemas`, Codex skill adapter,
   experimental Codex plugin package, `fixtures/app-server/schema.fixture.json`,
   `install.sh`, package installer scripts, top-level release metadata만 싣고
-  source, tests, docs, replay/migration fixture는 제외합니다.
+  source, tests, docs, replay/migration fixture, source map은 제외합니다.
+  Maintainer는 `npm run build:sourcemap`으로 외부 debug source map을 만들 수
+  있지만, 이 source map은 `sourcesContent: false`를 사용하며 기본 npm package에
+  포함되지 않습니다.
 - `npm run typecheck` syntax/static validation
 - normal Codexus runtime path 바깥에 둔 optional advanced interop capability probe/export
 - `codex/skills/codexus` 아래 Codex-native skill adapter source
