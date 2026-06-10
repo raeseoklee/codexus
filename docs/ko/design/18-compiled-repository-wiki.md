@@ -118,6 +118,8 @@ Compiled wiki는 기본적으로 `.codexus/wiki/` 아래에 저장할 수 있습
 - `commands.md`: command registry와 docs에서 유도한 CLI surfaces;
 - `architecture.md`: architecture fact와 import policy finding;
 - `verification.md`: verification command, latest evidence, known gaps;
+- `release.md`: package version, changelog, release policy, JSON contract pointer;
+- `runtime.md`: implementation status, remaining work, roadmap, runtime authority boundary;
 - `decisions.md`: decision record와 rejected alternative;
 - `risks.md`: supply-chain, slop, graph, policy finding;
 - `graph.md`: repository graph summary와 freshness state;
@@ -347,8 +349,8 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
    - schema registry;
    - command registry;
    - 존재하는 경우 latest repo/architecture/supply-chain report.
-4. `overview.md`, `commands.md`, `verification.md`용 deterministic
-   `cx wiki build --mode deterministic --json` 추가.
+4. `overview.md`, `commands.md`, `verification.md`, `release.md`, `runtime.md`용
+   deterministic `cx wiki build --mode deterministic --json` 추가.
 5. `cx wiki check --gate --json`으로 schema, source ref, local link, path sanitization,
    scoped freshness 검사.
 6. `cx wiki context --topic <name> --budget <n> --json`을 read-only context-pack generator로
@@ -357,8 +359,8 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
    선택된 bounded context에 대한 visible non-injected approval artifact로 추가.
 8. 구현됨: `cx wiki context --fresh-only --gate --json`을 추가해 automatic injection 없이
    fresh manual context를 요구할 수 있게 합니다.
-9. `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저 요구하고,
-   source truth를 쓰지 않으며, auto-commit하지 않는 명시적 export로 추가.
+9. 구현됨: `cx wiki export --target <path> --json`을 fresh passing wiki check를 먼저
+   요구하고, source truth를 쓰지 않으며, auto-commit하지 않는 명시적 export로 추가.
 10. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤
    `cx wiki build --mode advisory --json`을 추가. Advisory artifact는 driver/source-bundle
    evidence를 기록하지만 권위가 없습니다.

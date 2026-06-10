@@ -125,6 +125,10 @@ The first useful page set is small:
 - `commands.md`: CLI surfaces derived from command registry and docs;
 - `architecture.md`: architecture facts and import policy findings;
 - `verification.md`: verification commands, latest evidence, known gaps;
+- `release.md`: package version, changelog, release policy, and JSON contract
+  pointers;
+- `runtime.md`: implementation status, remaining work, roadmap, and runtime
+  authority boundaries;
 - `decisions.md`: decision records and rejected alternatives;
 - `risks.md`: supply-chain, slop, graph, and policy findings;
 - `graph.md`: repository graph summary and freshness state;
@@ -359,7 +363,8 @@ The manifest owns page identity and freshness metadata:
    - command registry;
    - latest repo/architecture/supply-chain reports when present.
 4. Add deterministic `cx wiki build --mode deterministic --json` for
-   `overview.md`, `commands.md`, and `verification.md`.
+   `overview.md`, `commands.md`, `verification.md`, `release.md`, and
+   `runtime.md`.
 5. Add `cx wiki check --gate --json` for schema, source refs, local links,
    path sanitization, and scoped freshness.
 6. Add `cx wiki context --topic <name> --budget <n> --json` as a read-only
@@ -369,9 +374,9 @@ The manifest owns page identity and freshness metadata:
    bounded context.
 8. Implemented: add `cx wiki context --fresh-only --gate --json` so callers can
    require fresh manual context without enabling automatic injection.
-9. Add `cx wiki export --target <path> --json` as an explicit export that first
-   requires a fresh passing wiki check, writes no source truth, and never
-   auto-commits.
+9. Implemented: add `cx wiki export --target <path> --json` as an explicit
+   export that first requires a fresh passing wiki check, writes no source
+   truth, and never auto-commits.
 10. Implemented: add `cx wiki build --mode advisory --json` after deterministic
    pages and freshness checks are stable enough to provide a source bundle.
    The advisory artifact records driver/source-bundle evidence and remains

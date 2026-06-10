@@ -437,9 +437,11 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   a schema-valid local source-bundle synthesis artifact with driver/model
   evidence (`modelInvoked: false`) and non-authority markers. The wiki generates
   regenerable markdown pages under `.codexus/wiki/` with source refs, local
-  links, manifest/page/advisory schemas, and scoped freshness. Export requires
-  a fresh passing wiki check and does not auto-commit or become source truth.
-  Automatic context injection remains deferred.
+  links, manifest/page/advisory schemas, and scoped freshness. The deterministic
+  page set now includes release/contract and runtime-boundary projections in
+  addition to overview, commands, and verification. Export requires a fresh
+  passing wiki check and does not auto-commit or become source truth. Automatic
+  context injection remains deferred.
 - Deferred self-reports currently documented and enforced by `cx repo check
   --gate --json` are:
   - `acceptance_criteria_extraction_deferred`

@@ -52,7 +52,11 @@ export interface WikiMapSourceCandidate {
     | "schema-registry"
     | "verification"
     | "decision"
-    | "repo-graph";
+    | "repo-graph"
+    | "release-policy"
+    | "json-contract"
+    | "implementation-status"
+    | "roadmap";
   path: string;
   exists: boolean;
   usedBy: string[];
@@ -306,9 +310,16 @@ export interface WikiExportResult {
 
 interface SourceDiscovery {
   packageJson: string;
+  changelog: string;
   readme: string;
   docsReadme: string;
   docsKoReadme: string;
+  jsonContract: string;
+  releasePolicy: string;
+  implementationStatus: string;
+  remainingWork: string;
+  roadmapKanban: string;
+  appInstanceDesign: string;
   cliMain: string;
   schemaDir: string;
   latestVerification: string | null;
@@ -317,7 +328,7 @@ interface SourceDiscovery {
 }
 
 interface PageDefinition {
-  pageId: "wiki.overview" | "wiki.commands" | "wiki.verification";
+  pageId: "wiki.overview" | "wiki.commands" | "wiki.verification" | "wiki.release" | "wiki.runtime";
   title: string;
   required: string[];
   sourceRefs: string[];
@@ -457,9 +468,16 @@ async function discoverSources(cwd: string): Promise<SourceDiscovery> {
   const session = sessionPaths(cwd);
   return {
     packageJson: join(cwd, "package.json"),
+    changelog: join(cwd, "CHANGELOG.md"),
     readme: join(cwd, "README.md"),
     docsReadme: join(cwd, "docs", "README.md"),
     docsKoReadme: join(cwd, "docs", "ko", "README.md"),
+    jsonContract: join(cwd, "docs", "json-contract.md"),
+    releasePolicy: join(cwd, "docs", "release-policy.md"),
+    implementationStatus: join(cwd, "docs", "implementation-status.md"),
+    remainingWork: join(cwd, "docs", "remaining-work.md"),
+    roadmapKanban: join(cwd, "docs", "roadmap-kanban.html"),
+    appInstanceDesign: join(cwd, "docs", "design", "19-worktree-app-instance-launcher.md"),
     cliMain: join(cwd, "src", "cli", "main.ts"),
     schemaDir: join(cwd, "schemas"),
     latestVerification: await newestArtifact(session.verificationDir, "verification.json"),
@@ -663,6 +681,18 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
     discovered.latestVerification,
   ].filter((value): value is string => typeof value === "string" && existsSync(value))
     .map((path) => repoRelative(cwd, path));
+  const releaseSources = [
+    discovered.packageJson,
+    discovered.changelog,
+    discovered.jsonContract,
+    discovered.releasePolicy,
+  ].filter((path) => existsSync(path)).map((path) => repoRelative(cwd, path));
+  const runtimeSources = [
+    discovered.implementationStatus,
+    discovered.remainingWork,
+    discovered.roadmapKanban,
+    discovered.appInstanceDesign,
+  ].filter((path) => existsSync(path)).map((path) => repoRelative(cwd, path));
 
   const verificationRecord = latestVerification && typeof latestVerification === "object" && latestVerification !== null
     ? latestVerification as Record<string, unknown>
@@ -677,7 +707,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Overview",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: overviewSources.length > 0 ? overviewSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["commands.md", "verification.md"],
+      localLinks: ["commands.md", "verification.md", "release.md", "runtime.md"],
       claimClasses: { derivableFacts: 6, advisoryClaims: 0 },
       body: [
         "# Overview",
@@ -693,6 +723,8 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         "Related pages:",
         "- [Commands](commands.md)",
         "- [Verification](verification.md)",
+        "- [Release And Contract](release.md)",
+        "- [Runtime Boundaries](runtime.md)",
         "",
         "Source refs:",
         renderSourceRefs(overviewSources.length > 0 ? overviewSources : [repoRelative(cwd, discovered.packageJson)]),
@@ -703,7 +735,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Commands",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: commandsSources.length > 0 ? commandsSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["overview.md", "verification.md"],
+      localLinks: ["overview.md", "verification.md", "release.md", "runtime.md"],
       claimClasses: { derivableFacts: 8, advisoryClaims: 0 },
       body: [
         "# Commands",
@@ -728,6 +760,8 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         "Related pages:",
         "- [Overview](overview.md)",
         "- [Verification](verification.md)",
+        "- [Release And Contract](release.md)",
+        "- [Runtime Boundaries](runtime.md)",
         "",
         "Source refs:",
         renderSourceRefs(commandsSources.length > 0 ? commandsSources : [repoRelative(cwd, discovered.packageJson)]),
@@ -738,7 +772,7 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
       title: "Verification",
       required: [repoRelative(cwd, discovered.packageJson)],
       sourceRefs: verificationSources.length > 0 ? verificationSources : [repoRelative(cwd, discovered.packageJson)],
-      localLinks: ["overview.md", "commands.md"],
+      localLinks: ["overview.md", "commands.md", "release.md", "runtime.md"],
       claimClasses: { derivableFacts: 7, advisoryClaims: 0 },
       body: [
         "# Verification",
@@ -754,9 +788,66 @@ async function buildPageDefinitions(cwd: string): Promise<PageDefinition[]> {
         "Related pages:",
         "- [Overview](overview.md)",
         "- [Commands](commands.md)",
+        "- [Release And Contract](release.md)",
+        "- [Runtime Boundaries](runtime.md)",
         "",
         "Source refs:",
         renderSourceRefs(verificationSources.length > 0 ? verificationSources : [repoRelative(cwd, discovered.packageJson)]),
+      ].join("\n"),
+    },
+    {
+      pageId: "wiki.release",
+      title: "Release And Contract",
+      required: [repoRelative(cwd, discovered.packageJson)],
+      sourceRefs: releaseSources.length > 0 ? releaseSources : [repoRelative(cwd, discovered.packageJson)],
+      localLinks: ["overview.md", "commands.md", "verification.md", "runtime.md"],
+      claimClasses: { derivableFacts: 7, advisoryClaims: 0 },
+      body: [
+        "# Release And Contract",
+        "",
+        `- Package version: ${pkg.version ?? "unknown"}`,
+        `- Changelog present: ${existsSync(discovered.changelog) ? "yes" : "no"}`,
+        `- JSON contract present: ${existsSync(discovered.jsonContract) ? "yes" : "no"}`,
+        `- Release policy present: ${existsSync(discovered.releasePolicy) ? "yes" : "no"}`,
+        `- Package name: ${pkg.name ?? "unknown"}`,
+        "",
+        "This page is a deterministic projection over release metadata. It is not a release gate and does not replace the release policy or JSON contract documents.",
+        "",
+        "Related pages:",
+        "- [Overview](overview.md)",
+        "- [Commands](commands.md)",
+        "- [Verification](verification.md)",
+        "- [Runtime Boundaries](runtime.md)",
+        "",
+        "Source refs:",
+        renderSourceRefs(releaseSources.length > 0 ? releaseSources : [repoRelative(cwd, discovered.packageJson)]),
+      ].join("\n"),
+    },
+    {
+      pageId: "wiki.runtime",
+      title: "Runtime Boundaries",
+      required: [repoRelative(cwd, discovered.packageJson)],
+      sourceRefs: runtimeSources.length > 0 ? runtimeSources : [repoRelative(cwd, discovered.packageJson)],
+      localLinks: ["overview.md", "commands.md", "verification.md", "release.md"],
+      claimClasses: { derivableFacts: 6, advisoryClaims: 1 },
+      body: [
+        "# Runtime Boundaries",
+        "",
+        `- Implementation status doc present: ${existsSync(discovered.implementationStatus) ? "yes" : "no"}`,
+        `- Remaining work doc present: ${existsSync(discovered.remainingWork) ? "yes" : "no"}`,
+        `- Roadmap kanban present: ${existsSync(discovered.roadmapKanban) ? "yes" : "no"}`,
+        `- Worktree app-instance design present: ${existsSync(discovered.appInstanceDesign) ? "yes" : "no"}`,
+        "",
+        "Use the source refs below for the authoritative runtime boundaries. This page summarizes where to look; it does not grant health, cleanup, control, injection, or completion authority.",
+        "",
+        "Related pages:",
+        "- [Overview](overview.md)",
+        "- [Commands](commands.md)",
+        "- [Verification](verification.md)",
+        "- [Release And Contract](release.md)",
+        "",
+        "Source refs:",
+        renderSourceRefs(runtimeSources.length > 0 ? runtimeSources : [repoRelative(cwd, discovered.packageJson)]),
       ].join("\n"),
     },
   ];
@@ -772,9 +863,15 @@ export async function buildWikiMap(cwd: string): Promise<WikiMapResult> {
   const pages = await buildPageDefinitions(cwd);
   const categories: WikiMapSourceCandidate[] = [
     { kind: "file", category: "package-metadata", path: repoRelative(cwd, discovered.packageJson), exists: existsSync(discovered.packageJson), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.packageJson))).map((page) => page.pageId) },
+    { kind: "file", category: "release-policy", path: repoRelative(cwd, discovered.changelog), exists: existsSync(discovered.changelog), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.changelog))).map((page) => page.pageId) },
     { kind: "file", category: "readme", path: repoRelative(cwd, discovered.readme), exists: existsSync(discovered.readme), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.readme))).map((page) => page.pageId) },
     { kind: "file", category: "docs-index", path: repoRelative(cwd, discovered.docsReadme), exists: existsSync(discovered.docsReadme), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.docsReadme))).map((page) => page.pageId) },
     { kind: "file", category: "docs-index", path: repoRelative(cwd, discovered.docsKoReadme), exists: existsSync(discovered.docsKoReadme), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.docsKoReadme))).map((page) => page.pageId) },
+    { kind: "file", category: "json-contract", path: repoRelative(cwd, discovered.jsonContract), exists: existsSync(discovered.jsonContract), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.jsonContract))).map((page) => page.pageId) },
+    { kind: "file", category: "release-policy", path: repoRelative(cwd, discovered.releasePolicy), exists: existsSync(discovered.releasePolicy), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.releasePolicy))).map((page) => page.pageId) },
+    { kind: "file", category: "implementation-status", path: repoRelative(cwd, discovered.implementationStatus), exists: existsSync(discovered.implementationStatus), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.implementationStatus))).map((page) => page.pageId) },
+    { kind: "file", category: "roadmap", path: repoRelative(cwd, discovered.remainingWork), exists: existsSync(discovered.remainingWork), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.remainingWork))).map((page) => page.pageId) },
+    { kind: "file", category: "roadmap", path: repoRelative(cwd, discovered.roadmapKanban), exists: existsSync(discovered.roadmapKanban), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.roadmapKanban))).map((page) => page.pageId) },
     { kind: "file", category: "command-registry", path: repoRelative(cwd, discovered.cliMain), exists: existsSync(discovered.cliMain), usedBy: pages.filter((page) => page.sourceRefs.includes(repoRelative(cwd, discovered.cliMain))).map((page) => page.pageId) },
     { kind: "file", category: "schema-registry", path: repoRelative(cwd, discovered.schemaDir), exists: existsSync(discovered.schemaDir), usedBy: [] },
     { kind: "artifact", category: "verification", path: discovered.latestVerification ? repoRelative(cwd, discovered.latestVerification) : ".codexus/session/verification/<latest>/verification.json", exists: !!discovered.latestVerification, usedBy: pages.filter((page) => discovered.latestVerification && page.sourceRefs.includes(repoRelative(cwd, discovered.latestVerification))).map((page) => page.pageId) },

@@ -380,7 +380,9 @@ process.on("SIGINT", shutdown);
   const wikiBuild = parseJsonRun(codexus, ["wiki", "build", "--cwd", project, "--mode", "deterministic", "--json"]);
   assert(wikiBuild.stability === "experimental", "wiki build did not report experimental stability");
   assert(wikiBuild.mode === "deterministic", "wiki build did not stay in deterministic mode");
-  assert(wikiBuild.manifest?.pages?.length >= 3, "wiki build did not generate the expected starter pages");
+  assert(wikiBuild.manifest?.pages?.length >= 5, "wiki build did not generate the expected starter pages");
+  assert(wikiBuild.manifest?.pages?.some((page) => page.pageId === "wiki.release"), "wiki build did not include the release projection page");
+  assert(wikiBuild.manifest?.pages?.some((page) => page.pageId === "wiki.runtime"), "wiki build did not include the runtime-boundary projection page");
   const wikiManifestValidation = parseJsonRun(codexus, [
     "schema",
     "validate",

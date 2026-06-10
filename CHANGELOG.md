@@ -9,6 +9,14 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- The deterministic compiled wiki now emits `release.md` and `runtime.md`
+  pages alongside overview, commands, and verification. These pages summarize
+  release/contract pointers and runtime authority boundaries as regenerable
+  projections without gaining source-truth, injection, health, cleanup, or
+  completion authority.
+
 ### Fixed
 
 - Update summaries now distinguish fresh update facts from stale cache entries.

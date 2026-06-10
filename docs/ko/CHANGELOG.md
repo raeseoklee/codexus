@@ -9,6 +9,13 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- Deterministic compiled wiki가 이제 overview, commands, verification에 더해
+  `release.md`와 `runtime.md` page를 생성합니다. 이 page들은 release/contract
+  pointer와 runtime authority boundary를 재생성 가능한 projection으로 요약하며,
+  source-truth, injection, health, cleanup, completion authority를 얻지 않습니다.
+
 ### Fixed
 
 - Update summary가 fresh update fact와 stale cache entry를 구분합니다.

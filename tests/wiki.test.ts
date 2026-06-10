@@ -49,6 +49,12 @@ test("wiki map lists deterministic source candidates and page plans", async () =
     assert.ok(output.pages.some((page: { pageId: string; buildable: boolean }) => page.pageId === "wiki.overview" && page.buildable));
     assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.commands"));
     assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.verification"));
+    assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.release"));
+    assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.runtime"));
+    assert.ok(output.candidates.some((candidate: { category: string; path: string }) =>
+      candidate.category === "json-contract" && candidate.path === "docs/json-contract.md"));
+    assert.ok(output.candidates.some((candidate: { category: string; path: string }) =>
+      candidate.category === "implementation-status" && candidate.path === "docs/implementation-status.md"));
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
@@ -65,6 +71,8 @@ test("wiki build writes a schema-valid manifest and markdown pages", async () =>
     assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "overview.md")));
     assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "commands.md")));
     assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "verification.md")));
+    assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "release.md")));
+    assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "runtime.md")));
 
     const manifestSchema = runCli(cwd, ["schema", "validate", "--type", "wiki-manifest", "--file", output.manifestPath, "--json"]);
     assert.equal(manifestSchema.status, 0, manifestSchema.stderr);
@@ -128,6 +136,11 @@ test("wiki context returns bounded topic-matched pages", async () => {
     assert.equal(output.eligibleForAutomaticInjection, false);
     assert.equal(output.freshnessPolicy.freshOnly, false);
     assert.equal(output.gate.status, "not_requested");
+
+    const releaseContext = runCli(cwd, ["wiki", "context", "--topic", "release contract", "--budget", "4000", "--json"]);
+    assert.equal(releaseContext.status, 0, releaseContext.stderr);
+    const releaseOutput = JSON.parse(releaseContext.stdout);
+    assert.ok(releaseOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.release"));
 
     await writeFile(join(cwd, "package.json"), `${JSON.stringify({
       name: "fixture",
@@ -328,9 +341,11 @@ test("wiki export writes an explicit projection only after a fresh check", async
     assert.equal(output.export.autoCommitted, false);
     assert.equal(output.export.sourceTruth, false);
     assert.equal(output.check.gate, "passed");
-    assert.equal(output.pageCount, 3);
+    assert.equal(output.pageCount, 5);
     assert.ok(output.exportedFiles.includes("docs/codexus-wiki/index.md"));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "overview.md")));
+    assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "release.md")));
+    assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "runtime.md")));
     const index = await readFile(join(cwd, "docs", "codexus-wiki", "index.md"), "utf8");
     assert.match(index, /generated projection, not the source of truth/);
     assert.match(index, /does not auto-commit/);
