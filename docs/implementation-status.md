@@ -654,6 +654,7 @@ review. Current high-level gaps:
   aggregation remain future work.
 - Compiled repository wiki now has an experimental deterministic first slice:
   source-linked page generation, structural freshness gates, bounded
-  context-pack generation, and explicit export exist. Advisory synthesis and any
-  automatic injection path remain future work.
+  context-pack generation, explicit export, advisory synthesis, and deterministic
+  graph/session projection pages exist. Any automatic injection path remains
+  future work.
 - Git-aware checks still warn in non-git workspaces; this repository now passes git root detection.

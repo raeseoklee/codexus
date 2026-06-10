@@ -28,9 +28,16 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
   연결합니다. Capture는 bounded/redacted URL/title evidence를 기록하고 관측된
   loopback endpoint가 instance endpoint와 일치하는지 보고하지만, process identity
   증명, health, control, cleanup, completion authority는 계속 false로 유지합니다.
+- Deterministic `cx wiki build --mode deterministic --json`은 이제 overview,
+  commands, verification, release, runtime page에 더해 `graph.md`와 `sessions.md`
+  projection page를 생성합니다. 새 page들은 repository graph와 session artifact를
+  요약하지만 source truth, injection approval, task completion evidence가 되지 않습니다.
 
 ### Fixed
 
+- `cx wiki context --topic <text> --json`은 이제 incidental body/link mention보다
+  canonical page title과 page-id match를 더 높게 랭킹합니다. 따라서 작은 context
+  budget에서도 topic의 primary page가 포함됩니다.
 - Update summary가 fresh update fact와 stale cache entry를 구분합니다.
   Cache-only primary command(`version --json`, `doctor --json`,
   `session status --json`)는 stale update cache를 현재 설치본이 최신이라는 암시가

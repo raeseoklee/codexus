@@ -30,9 +30,17 @@ occur before 1.0, but they should be called out clearly.
   whether the observed loopback endpoint matches the instance endpoint, while
   keeping process-identity proof, health, control, cleanup, and completion
   authority false.
+- Deterministic `cx wiki build --mode deterministic --json` now emits
+  `graph.md` and `sessions.md` projection pages in addition to overview,
+  commands, verification, release, and runtime pages. The new pages summarize
+  repository graph and session artifacts without becoming source truth,
+  injection approval, or task completion evidence.
 
 ### Fixed
 
+- `cx wiki context --topic <text> --json` now ranks canonical page title and
+  page-id matches above incidental body/link mentions, so small context budgets
+  still include the topic's primary page.
 - Update summaries now distinguish fresh update facts from stale cache entries.
   Cache-only primary commands (`version --json`, `doctor --json`, and
   `session status --json`) report stale update cache as non-fresh evidence

@@ -364,6 +364,10 @@ Manifest가 page identity와 freshness metadata를 소유합니다:
 10. 구현됨: deterministic page와 freshness check가 source bundle을 제공할 만큼 안정된 뒤
    `cx wiki build --mode advisory --json`을 추가. Advisory artifact는 driver/source-bundle
    evidence를 기록하지만 권위가 없습니다.
+11. 구현됨: deterministic build에 `graph.md`와 `sessions.md`를 추가. 이 page들은 최신
+    repository graph artifact와 local session state를 요약하지만, 계속 재생성 가능한
+    projection일 뿐 graph injection approval, task completion evidence, source truth가
+    아닙니다.
 
 ## 성공 기준
 

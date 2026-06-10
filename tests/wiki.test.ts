@@ -51,6 +51,8 @@ test("wiki map lists deterministic source candidates and page plans", async () =
     assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.verification"));
     assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.release"));
     assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.runtime"));
+    assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.graph"));
+    assert.ok(output.pages.some((page: { pageId: string }) => page.pageId === "wiki.sessions"));
     assert.ok(output.candidates.some((candidate: { category: string; path: string }) =>
       candidate.category === "json-contract" && candidate.path === "docs/json-contract.md"));
     assert.ok(output.candidates.some((candidate: { category: string; path: string }) =>
@@ -73,6 +75,8 @@ test("wiki build writes a schema-valid manifest and markdown pages", async () =>
     assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "verification.md")));
     assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "release.md")));
     assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "runtime.md")));
+    assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "graph.md")));
+    assert.ok(existsSync(join(cwd, ".codexus", "wiki", "pages", "sessions.md")));
 
     const manifestSchema = runCli(cwd, ["schema", "validate", "--type", "wiki-manifest", "--file", output.manifestPath, "--json"]);
     assert.equal(manifestSchema.status, 0, manifestSchema.stderr);
@@ -124,7 +128,7 @@ test("wiki context returns bounded topic-matched pages", async () => {
     const build = runCli(cwd, ["wiki", "build", "--mode", "deterministic", "--json"]);
     assert.equal(build.status, 0, build.stderr);
 
-    const context = runCli(cwd, ["wiki", "context", "--topic", "verification", "--budget", "4000", "--json"]);
+    const context = runCli(cwd, ["wiki", "context", "--topic", "verification", "--budget", "1200", "--json"]);
     assert.equal(context.status, 0, context.stderr);
     const output = JSON.parse(context.stdout);
     assert.equal(output.command, "wiki context");
@@ -141,6 +145,12 @@ test("wiki context returns bounded topic-matched pages", async () => {
     assert.equal(releaseContext.status, 0, releaseContext.stderr);
     const releaseOutput = JSON.parse(releaseContext.stdout);
     assert.ok(releaseOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.release"));
+
+    const graphContext = runCli(cwd, ["wiki", "context", "--topic", "repository graph session", "--budget", "4000", "--json"]);
+    assert.equal(graphContext.status, 0, graphContext.stderr);
+    const graphOutput = JSON.parse(graphContext.stdout);
+    assert.ok(graphOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.graph"));
+    assert.ok(graphOutput.selectedPages.some((page: { pageId: string }) => page.pageId === "wiki.sessions"));
 
     await writeFile(join(cwd, "package.json"), `${JSON.stringify({
       name: "fixture",
@@ -341,11 +351,13 @@ test("wiki export writes an explicit projection only after a fresh check", async
     assert.equal(output.export.autoCommitted, false);
     assert.equal(output.export.sourceTruth, false);
     assert.equal(output.check.gate, "passed");
-    assert.equal(output.pageCount, 5);
+    assert.equal(output.pageCount, 7);
     assert.ok(output.exportedFiles.includes("docs/codexus-wiki/index.md"));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "overview.md")));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "release.md")));
     assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "runtime.md")));
+    assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "graph.md")));
+    assert.ok(existsSync(join(cwd, "docs", "codexus-wiki", "sessions.md")));
     const index = await readFile(join(cwd, "docs", "codexus-wiki", "index.md"), "utf8");
     assert.match(index, /generated projection, not the source of truth/);
     assert.match(index, /does not auto-commit/);

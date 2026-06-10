@@ -388,8 +388,9 @@ Harness-engineering alignment adds these evidence-first tracks:
   now has an experimental deterministic first slice: schemas, `cx wiki
   map/build/check`, read-only context packs, visible non-injected context
   approval artifacts, fresh-only context gating, explicit export, and advisory
-  source-bundle synthesis exist. Next work is richer page sets and explicit
-  injection policy.
+  source-bundle synthesis exist. Deterministic graph/session projection pages are
+  also implemented. Next work is architecture/decision/risk page coverage and
+  explicit injection policy.
   Do not auto-inject stale or advisory pages into a run.
 
 1. Desktop app-server attachment: current discovery evidence is `stdio_only`.
@@ -436,8 +437,9 @@ Harness-engineering alignment adds these evidence-first tracks:
     map/build/check/context/export` slice and advisory source-bundle synthesis
     now exist. `cx wiki context --approve` writes visible non-injected approval
     artifacts, and `cx wiki context --fresh-only --gate` can require fresh manual
-    context before use. Next implement richer page coverage before any injection
-    path is considered.
+    context before use. Graph/session projection pages are implemented. Next
+    implement architecture/decision/risk page coverage before any injection path
+    is considered.
 13. Worktree app instance launcher: build on the implemented live ownership
     and observation-evidence slices from
     [doc 19](design/19-worktree-app-instance-launcher.md). The first loopback

@@ -381,6 +381,10 @@ The manifest owns page identity and freshness metadata:
    pages and freshness checks are stable enough to provide a source bundle.
    The advisory artifact records driver/source-bundle evidence and remains
    non-authoritative.
+11. Implemented: extend deterministic builds with `graph.md` and `sessions.md`.
+    These pages summarize the latest repository graph artifact and local session
+    state while staying regenerated projections, not graph injection approval,
+    task completion evidence, or source truth.
 
 ## Success Criteria
 

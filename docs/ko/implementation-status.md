@@ -432,9 +432,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   schema-valid local source-bundle synthesis artifact를 기록합니다. `.codexus/wiki/`
   아래에 source ref, local link, manifest/page/advisory schema, scoped freshness를 가진
   재생성 가능한 markdown page를 만듭니다. Deterministic page set은 이제 overview,
-  commands, verification에 더해 release/contract와 runtime-boundary projection을
-  포함합니다. Export는 fresh passing wiki check를 요구하고 auto-commit 또는 source
-  truth가 되지 않습니다. Automatic context injection은 계속 deferred입니다.
+  commands, verification에 더해 release/contract, runtime-boundary, repository graph,
+  session-state projection을 포함합니다. Export는 fresh passing wiki check를 요구하고
+  auto-commit 또는 source truth가 되지 않습니다. Automatic context injection은 계속
+  deferred입니다.
 - `cx repo check --gate --json`가 현재 문서 일치를 강제하는 deferred self-report는
   다음 네 가지입니다:
   - `acceptance_criteria_extraction_deferred`
@@ -506,6 +507,6 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   않았습니다.
 - Compiled repository wiki는 이제 experimental deterministic 첫 slice를
   가집니다. Source-linked page generation, structural freshness gate, bounded
-  context-pack generation, explicit export가 존재하며 advisory synthesis와 automatic
-  injection path는 future work입니다.
+  context-pack generation, explicit export, advisory synthesis, deterministic
+  graph/session projection page가 존재하며 automatic injection path는 future work입니다.
 - git-aware checks는 non-git workspace에서 warn하며, 이 repository에서는 git root detection이 pass합니다.
