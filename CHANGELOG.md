@@ -9,8 +9,31 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.1 - 2026-06-11
+
 ### Added
 
+- `cx lsp adapters --json` now reports the experimental project-LSP adapter
+  boundary. It exposes implemented explicit diagnostics-command support when a
+  project typecheck command exists, marks long-lived protocol-server lifecycle
+  unavailable, and keeps language-server start, edit, workspace-mutation, and
+  completion authority false. The report is schema-validatable with
+  `cx schema validate --type lsp-adapter`.
+- `cx autopilot run-gate --policy <path> --json` now reports pre-run contract,
+  approval, scope, and fresh-evidence readiness without starting a live
+  autopilot run. The readiness gate is separate from the execution gate:
+  `runSupported:false`, `executionGate.status:"blocked"`, and
+  `actionAuthority.sideEffects.startsRun:false` remain explicit until
+  worktree-owned execution is implemented. The report is schema-validatable
+  with `cx schema validate --type autopilot-run-gate`.
+- `cx cron|gateway status --json` and `cx cron|gateway recovery --json` now
+  include `automation-scheduler-readiness-v1` report-only evidence. It lists
+  missing durable queue, lease heartbeat, retry-policy, approval/policy, and
+  recovery-proof requirements while keeping scheduler, retry, cleanup, health,
+  and completion authority false.
+- `cx app-server observer status --json` now includes an explicit
+  `sessionProjection` block that distinguishes recorded observer evidence from
+  live Desktop attachment proof and keeps completion authority false.
 - `cx autopilot relay adapters --json` now reports the experimental
   multi-engine relay adapter descriptor/status boundary. It exposes the
   implemented artifact-import author/reviewer paths and marks Codex exec,

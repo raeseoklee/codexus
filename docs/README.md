@@ -51,6 +51,7 @@ supported short alias.
 - [0.1.14 release evidence](release-evidence/0.1.14.md): trusted-publishing evidence for the evidence operating loop patch.
 - [0.1.15 release evidence](release-evidence/0.1.15.md): trusted-publishing evidence for roadmap-sequence hardening before the 0.2 promotion.
 - [0.2.0 release evidence](release-evidence/0.2.0.md): trusted-publishing evidence for the first stable-contract promotion milestone.
+- [0.2.1 release evidence](release-evidence/0.2.1.md): pre-tag release-prep evidence for the action-readiness evidence bundle.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.
@@ -63,7 +64,7 @@ supported short alias.
 - [Subagent evidence supervision](design/09-subagent-evidence-supervision.md): Codex-native subagents as bounded evidence-producing adapters, not completion authorities.
 - [Quality evidence guard (slop guard)](design/10-quality-evidence-guard.md): evidence-first change-quality gate that splits derivable evidence gaps from advisory heuristic claims, built on the session evidence model.
 - [Supply-chain evidence](design/11-supply-chain-evidence.md): local, derivable supply-chain facts and an optional pre-publish gate, reusing the change-evidence model — not a CVE/network scanner.
-- [Autopilot contract](design/12-autopilot-contract.md): experimental foundation slice for long supervised runs — `cx autopilot plan`, contract validate/approve/scope-check, human-approved scope, worktree isolation, detect-then-stop enforcement, and evidence-gated acceptance; live `autopilot run` remains deferred.
+- [Autopilot contract](design/12-autopilot-contract.md): experimental foundation slice for long supervised runs — `cx autopilot plan`, contract validate/approve/scope-check, run-gate readiness, human-approved scope, worktree isolation, detect-then-stop enforcement, and evidence-gated acceptance; live `autopilot run` remains deferred.
 - [Harness engineering alignment](design/13-harness-engineering-alignment.md): synthesis of OpenAI harness engineering and Karpathy-style behavior contracts for repository maps, architecture gates, behavior evidence, and non-goals.
 - [Repository knowledge graph](design/14-repository-knowledge-graph.md): experimental codexus-lite graph build/check first slice, plus the deferred graph-provider boundary for Understand-Anything JSON import, scoped freshness, and structural graph gates.
 - [Multi-engine relay autopilot](design/15-multi-engine-relay-autopilot.md): experimental recorder/checker first slice for author/reviewer artifacts, stage-gate evidence, relay adapter status, and convergence validation without making convergence completion authority.
@@ -123,8 +124,10 @@ The repository now has a working MVP harness spine:
 - lock inspection/stale recovery, versioned schema artifacts, schema artifact subset enforcement, focused read-path enforcement, and run-ledger validation,
 - owner/liveness-based external run cancellation, approved adapter context artifacts, full replay parity fixture-matrix coverage, gated model replay, app-server dry-run roundtrip/recorded experiment manifests/process-probe/fake-supervision evidence, explicit-budget driver-failure repair, experimental cron/gateway live dispatch with explicit approval plus audit records, installed skill tree diagnosis, and local syntax/static validation.
 - experimental project LSP diagnostics evidence: `cx lsp status` detects
-  candidate language-server diagnostics without starting a server, and
-  `cx lsp check` runs explicit project diagnostics such as `npm run typecheck`
-  without gaining completion authority.
+  candidate language-server diagnostics without starting a server,
+  `cx lsp adapters` reports explicit diagnostics-command support while keeping
+  protocol-server lifecycle unavailable, and `cx lsp check` runs explicit
+  project diagnostics such as `npm run typecheck` without gaining completion
+  authority.
 
 The remaining work is no longer P0-P2 surface construction; it is deeper hardening: full external schema-engine enforcement if dependency policy allows it, preserving replay parity coverage, isolated real app-server process experiments, and maturing the experimental cron/gateway dispatcher into richer scheduler/recovery semantics. See [Remaining work](remaining-work.md).

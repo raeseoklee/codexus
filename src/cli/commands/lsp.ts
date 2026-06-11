@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { buildLspCheckReport, buildLspStatusReport } from "../../lsp/project.ts";
+import { buildLspAdapterReport, buildLspCheckReport, buildLspStatusReport } from "../../lsp/project.ts";
 import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
 
 function parseTimeoutMs(value: string | undefined): number | undefined {
@@ -11,11 +11,21 @@ function parseTimeoutMs(value: string | undefined): number | undefined {
 
 export async function lspCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "status";
-  if (subcommand !== "status" && subcommand !== "check") throw new Error(`unsupported_lsp_command:${subcommand}`);
+  if (subcommand !== "status" && subcommand !== "check" && subcommand !== "adapters") throw new Error(`unsupported_lsp_command:${subcommand}`);
   assertMaxPositionals(args, 1);
-  assertAllowedFlags(args, subcommand === "status" ? ["json", "cwd"] : ["json", "cwd", "gate", "timeout-ms"]);
+  assertAllowedFlags(args, subcommand === "check" ? ["json", "cwd", "gate", "timeout-ms"] : ["json", "cwd"]);
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
   const json = flagBool(args.flags, "json");
+  if (subcommand === "adapters") {
+    const result = buildLspAdapterReport(cwd);
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`LSP adapters: ${result.summary.implemented}/${result.summary.total} implemented`);
+    console.log(`Protocol server lifecycle: ${result.summary.protocolServerImplemented ? "implemented" : "unavailable"}`);
+    return;
+  }
   const result = subcommand === "status"
     ? buildLspStatusReport(cwd)
     : buildLspCheckReport(cwd, {

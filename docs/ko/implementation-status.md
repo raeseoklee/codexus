@@ -166,12 +166,12 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   advisory heuristic claim, 명시적 diff base metadata, optional declared-scope 및
   explicit review-artifact check. `--gate`는 같은 tri-state evidence status를
   automation exit code로 변환하지만 heuristic으로 change를 fail시키지는 않습니다.
-- `cx lsp status`와 `cx lsp check`는 experimental project LSP diagnostics evidence를
+- `cx lsp status`, `cx lsp check`, `cx lsp adapters`는 experimental project LSP diagnostics evidence를
   제공합니다. 첫 slice는 local project file과 명시적 package script에서 TypeScript
   diagnostics 후보를 자동 탐지하고, `npm run typecheck` 같은 명시적 diagnostics
-  command만 실행하며, bounded stdout/stderr tail을 redact합니다. Long-lived LSP
-  protocol server를 시작하거나 제어하지 않는다고 자기보고하고, 파일을 수정하지 않으며
-  completion authority가 되지 않습니다.
+  command만 실행하며, bounded stdout/stderr tail을 redact하고 adapter authority를
+  보고합니다. Long-lived LSP protocol server를 시작하거나 제어하지 않는다고 자기보고하고,
+  파일을 수정하지 않으며 completion authority가 되지 않습니다.
 - `cx session subagent record/attach/status`는 subagent claim bundle을
   `.codexus/session/subagents/` 아래 기록하고 session state에서 link하며, subagent claim을
   verification freshness와 분리합니다. `cx session subagent launch`는
@@ -285,7 +285,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   observer bridge가 증명될 때까지 계속 blocked입니다. `cx app-server observer status
   --json`은 기록된 discovery, Stage B, stdio-proof evidence를 live socket 연결 없이
   하나의 bridge summary로 투영하며, `desktop-app-server`는 기록된 Stage B
-  turn-boundary evidence에서만 보고합니다.
+  turn-boundary evidence에서만 보고하고 `sessionProjection`으로 recorded evidence와
+  live Desktop attachment proof를 구분합니다.
 - `cx session status --json`와 `cx session hud --json`은 같은 recorded app-server
   observer projection을 `evidenceLoop.appServerObserver` 아래 포함합니다. 이는
   turn-boundary evidence를 session visibility로 매핑하지만 session runtime surface를
@@ -464,6 +465,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   다음 항목입니다:
   - `acceptance_criteria_extraction_deferred`
   - `automatic_context_injection_deferred`
+  - `autopilot_run_authority_deferred`
   - `autopilot_run_deferred`
   - `broad_layering_rule_deferred`
   - `typosquat_name_similarity_deferred`
@@ -496,17 +498,19 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - cron/gateway는 이제 experimental explicit-approval live dispatcher,
   schema-validatable blocked-dispatch boundary record,
   `automation-action-authority-v1` negative-authority record, foreground recovery
-  projection, `automation-scheduler-ownership-v1` scheduler ownership evidence를
-  가집니다. 다음 작업은 실제 durable queue, lease heartbeat, retry policy,
-  asynchronous ownership 증거입니다.
+  projection, `automation-scheduler-ownership-v1` scheduler ownership evidence,
+  `automation-scheduler-readiness-v1` missing-requirement report를 가집니다. 다음 작업은
+  실제 durable queue, lease heartbeat, retry policy, asynchronous ownership 증거입니다.
 - config/schema validation은 focused local enforcement와 local schema artifact subset
   enforcement 수준이며 full draft-2020-12 JSON Schema engine enforcement는 아직
   아닙니다. `cx schema engine --json`은 dependency policy가 명시적으로 바뀌기 전까지
   full-engine replacement decision을 `deferred_by_policy`로 기록합니다.
 - Autopilot active execution은 계속 0.2/0.3 트랙에서 deferred입니다. Experimental
   foundation은 이제 `cx autopilot plan`과 contract
-  validate/approve/scope-check까지 포함하지만, `cx autopilot run`과 worktree에
-  붙는 장시간 실행은 의도적으로 아직 구현하지 않았습니다. `cx repo graph
+  validate/approve/scope-check, `cx autopilot run-gate`까지 포함하지만,
+  `cx autopilot run`과 worktree에 붙는 장시간 실행은 의도적으로 아직 구현하지 않았습니다.
+  `cx autopilot run-gate`는 readiness output이 live-run authority로 오해되지 않도록
+  `autopilot_run_authority_deferred`를 자기보고합니다. `cx repo graph
   build/check`와 `cx autopilot relay record/stage-gate/check-agreement`는
   experimental foundation으로 존재합니다. `cx repo graph import`는 provider package를
   실행하지 않고 bounded JSON-only external graph를 import하며,

@@ -330,7 +330,7 @@
             <span class="tag evidence">관측 이후 설계</span>
             <span class="tag done">session projection 완료</span>
           </div>
-          <p>Recorded app-server observer evidence는 이제 product execution 없이 <code>cx session status</code>와 <code>cx session hud</code>에 projection됩니다.</p>
+          <p>Recorded app-server observer evidence는 이제 product execution 없이 <code>cx session status</code>와 <code>cx session hud</code>에 projection되며, observer status는 recorded evidence와 live Desktop attachment proof를 구분하는 <code>sessionProjection</code> block을 포함합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>완료: session projection은 <code>cx app-server observer status</code>와 같은 recorded-evidence observer model을 재사용합니다.</li>
@@ -462,12 +462,13 @@
             <span class="tag gateable">recovery 완료</span>
             <span class="tag evidence">ownership contract 완료</span>
           </div>
-          <p>첫 explicit-approval dispatcher는 live이며, blocked live attempt는 schema-validatable boundary audit record를 남기고 foreground recovery projection은 manual-review candidate와 <code>automation-scheduler-ownership-v1</code> evidence를 보고합니다. 다음은 autonomy를 과장하지 않는 실제 durable queue, lease heartbeat, retry policy입니다.</p>
+          <p>첫 explicit-approval dispatcher는 live이며, blocked live attempt는 schema-validatable boundary audit record를 남기고 foreground recovery projection은 manual-review candidate, <code>automation-scheduler-ownership-v1</code> evidence, <code>automation-scheduler-readiness-v1</code> gap을 보고합니다. 다음은 autonomy를 과장하지 않는 실제 durable queue, lease heartbeat, retry policy입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>Dry-run/live path가 계속 같은 policy contract를 공유합니다.</li>
             <li>완료: recovery projection은 dispatch history와 manual-review candidate를 automatic retry authority 없이 기록합니다.</li>
             <li>완료: queue ownership과 unattended retry semantic은 <code>automation-scheduler-ownership-v1</code> negative evidence로 기록됩니다.</li>
+            <li>완료: scheduler readiness gap은 scheduler/retry authority 없이 <code>automation-scheduler-readiness-v1</code>로 보고됩니다.</li>
             <li>다음: 실제 queue owner, lease heartbeat, retry policy는 fresh recovery proof가 있을 때만 검토합니다.</li>
             <li>Explicit ownership/recovery proof 없이는 unattended scheduler를 주장하지 않습니다.</li>
           </ul>
@@ -519,11 +520,12 @@
             <span class="tag evidence">diagnostics evidence</span>
             <span class="tag gated">protocol server deferred</span>
           </div>
-          <p>첫 slice는 long-lived language server를 시작하지 않고 TypeScript project diagnostics를 탐지하고 명시적 diagnostics command를 실행합니다. 다음 단계는 descriptor-backed protocol-server adapter입니다.</p>
+          <p>첫 slice는 long-lived language server를 시작하지 않고 TypeScript project diagnostics를 탐지하고 명시적 diagnostics command를 실행하며 descriptor-backed adapter status를 보고합니다. 다음 단계는 실제 protocol-server lifecycle입니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>완료: <code>cx lsp status</code>는 server를 시작하지 않고 candidate를 탐지합니다.</li>
             <li>완료: <code>cx lsp check --gate</code>는 명시적 project diagnostics를 실행하고 bounded output을 redact합니다.</li>
+            <li>완료: <code>cx lsp adapters --json</code>은 edit/start/completion authority 없이 diagnostics-command support와 protocol-server unavailable을 보고합니다.</li>
             <li>다음: 자동 project LSP 적용 전에 protocol-server lifecycle, trust, timeout, cancellation contract를 정의합니다.</li>
             <li>LSP diagnostics는 파일을 수정하지 않고 completion authority가 되지 않습니다.</li>
           </ul>
@@ -573,7 +575,7 @@
             <span class="tag advisory">experimental live slice</span>
             <span class="tag gated">automation</span>
           </div>
-          <p>Explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, foreground recovery projection, <code>automation-scheduler-ownership-v1</code> evidence는 이미 있습니다. 남은 작업은 autonomy를 과장하지 않으면서 실제 durable scheduler queue, retry policy, long-lived owner proof를 추가하는 것입니다.</p>
+          <p>Explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, foreground recovery projection, <code>automation-scheduler-ownership-v1</code> evidence, <code>automation-scheduler-readiness-v1</code> gap은 이미 있습니다. 남은 작업은 autonomy를 과장하지 않으면서 실제 durable scheduler queue, retry policy, long-lived owner proof를 추가하는 것입니다.</p>
           <span class="label">Gate</span>
           <p>Permission, approval, lock, dispatch, completion, recovery, owner-liveness evidence가 durable해야 합니다.</p>
         </article>
@@ -646,11 +648,12 @@
             <span class="tag gateable">foundation 완료</span>
             <span class="tag gated">live run deferred</span>
           </div>
-          <p>Experimental foundation은 이미 있습니다. draft planning, contract validate/approve, scope-check까지 구현됐고, live <code>cx autopilot run</code>에는 worktree-owned execution과 capability 시작 게이트가 아직 필요합니다.</p>
+          <p>Experimental foundation은 이미 있습니다. draft planning, contract validate/approve, scope-check, run-gate readiness reporting까지 구현됐고, live <code>cx autopilot run</code>에는 worktree-owned execution과 capability 시작 게이트가 아직 필요합니다.</p>
           <span class="label">완료 조건</span>
           <ul>
             <li>완료: 사람 승인 contract draft 및 approval record 흐름.</li>
             <li>완료: change-evidence fact 위의 scope-check foundation.</li>
+            <li>완료: <code>cx autopilot run-gate --policy</code>는 실행을 blocked로 유지하면서 readiness를 보고합니다.</li>
             <li>다음: worktree-owned live execution.</li>
             <li>다음: live run용 capability/policy 시작 게이트.</li>
           </ul>

@@ -9,8 +9,31 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.1 - 2026-06-11
+
 ### Added
 
+- `cx lsp adapters --json`은 이제 experimental project-LSP adapter boundary를
+  보고합니다. Project typecheck command가 있을 때 명시적 diagnostics-command
+  support를 implemented로 노출하고, long-lived protocol-server lifecycle은
+  unavailable로 유지하며 language-server start, edit, workspace-mutation,
+  completion authority는 false로 유지합니다. 이 report는
+  `cx schema validate --type lsp-adapter`로 schema validation할 수 있습니다.
+- `cx autopilot run-gate --policy <path> --json`은 이제 live autopilot run을
+  시작하지 않고 pre-run contract, approval, scope, fresh-evidence readiness를
+  보고합니다. Readiness gate와 execution gate는 분리되어 있으며,
+  worktree-owned execution이 구현되기 전까지 `runSupported:false`,
+  `executionGate.status:"blocked"`,
+  `actionAuthority.sideEffects.startsRun:false`를 명시합니다. 이 report는
+  `cx schema validate --type autopilot-run-gate`로 schema validation할 수 있습니다.
+- `cx cron|gateway status --json`과 `cx cron|gateway recovery --json`은 이제
+  `automation-scheduler-readiness-v1` report-only evidence를 포함합니다. Durable
+  queue, lease heartbeat, retry-policy, approval/policy, recovery-proof 요구사항을
+  나열하면서 scheduler, retry, cleanup, health, completion authority는 false로
+  유지합니다.
+- `cx app-server observer status --json`은 이제 기록된 observer evidence와 live
+  Desktop attachment proof를 구분하는 명시적 `sessionProjection` block을 포함하고,
+  completion authority를 false로 유지합니다.
 - `cx autopilot relay adapters --json`은 이제 experimental multi-engine relay
   adapter descriptor/status boundary를 보고합니다. 구현된 artifact-import author/reviewer
   경로를 노출하고 Codex exec, external review-engine, MCP/protocol relay driver는

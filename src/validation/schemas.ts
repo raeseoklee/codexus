@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { validateArchitecturePolicy } from "../architecture/policy.ts";
 import { validateAppInstanceArtifact, validateAppInstanceDescriptor, validateAppInstanceObservation, validateObservabilityAdapterReport } from "../app-instance/launcher.ts";
 import { validateAutopilotContract } from "../autopilot/contract.ts";
+import { validateLspAdapterReport } from "../lsp/project.ts";
 import { validateRelayAdapterReport } from "../relay/artifacts.ts";
 import { validateSupplyChainPolicy } from "../supply-chain/policy.ts";
 import { validateWikiContextApproval, validateWikiInjectionPlan, validateWikiManifest } from "../wiki/wiki.ts";
@@ -61,6 +62,7 @@ export type SchemaValidationType =
   | "supply-chain-policy"
   | "architecture-policy"
   | "autopilot-contract"
+  | "autopilot-run-gate"
   | "wiki-manifest"
   | "wiki-advisory"
   | "wiki-context-approval"
@@ -76,6 +78,7 @@ export type SchemaValidationType =
   | "app-instance"
   | "app-instance-observation"
   | "observability-adapter"
+  | "lsp-adapter"
   | "automation-dispatch"
   | "automation-recovery"
   | "subagent-result"
@@ -110,6 +113,7 @@ export const schemaArtifactNames = [
   "supply-chain-policy.schema.json",
   "architecture-policy.schema.json",
   "autopilot-contract.schema.json",
+  "autopilot-run-gate.schema.json",
   "wiki-manifest.schema.json",
   "wiki-page.schema.json",
   "wiki-advisory.schema.json",
@@ -126,6 +130,7 @@ export const schemaArtifactNames = [
   "app-instance.schema.json",
   "app-instance-observation.schema.json",
   "observability-adapter.schema.json",
+  "lsp-adapter.schema.json",
   "automation-dispatch.schema.json",
   "automation-recovery.schema.json",
   "subagent-result.schema.json",
@@ -147,6 +152,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "supply-chain-policy": "supply-chain-policy.schema.json",
   "architecture-policy": "architecture-policy.schema.json",
   "autopilot-contract": "autopilot-contract.schema.json",
+  "autopilot-run-gate": "autopilot-run-gate.schema.json",
   "wiki-manifest": "wiki-manifest.schema.json",
   "wiki-advisory": "wiki-advisory.schema.json",
   "wiki-context-approval": "wiki-context-approval.schema.json",
@@ -162,6 +168,7 @@ const schemaArtifactsByType: Record<SchemaValidationType, typeof schemaArtifactN
   "app-instance": "app-instance.schema.json",
   "app-instance-observation": "app-instance-observation.schema.json",
   "observability-adapter": "observability-adapter.schema.json",
+  "lsp-adapter": "lsp-adapter.schema.json",
   "automation-dispatch": "automation-dispatch.schema.json",
   "automation-recovery": "automation-recovery.schema.json",
   "subagent-result": "subagent-result.schema.json",
@@ -898,6 +905,11 @@ export function validateSchemaValue(type: SchemaValidationType, value: unknown):
 
   if (type === "observability-adapter") {
     const validation = validateObservabilityAdapterReport(value);
+    errors.push(...validation.errors);
+  }
+
+  if (type === "lsp-adapter") {
+    const validation = validateLspAdapterReport(value);
     errors.push(...validation.errors);
   }
 

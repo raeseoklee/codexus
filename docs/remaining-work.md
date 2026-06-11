@@ -2,7 +2,7 @@
 
 [Korean](ko/remaining-work.md)
 
-Date: 2026-06-08
+Date: 2026-06-11
 
 This document is the current backlog after the MVP spine and the high-risk
 promotion slice. It lists what remains, why it matters, and what design
@@ -37,8 +37,8 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   export plus optional third-party bundle export, bounded adapter retrieval,
   deterministic replay and model replay gate, memory lifecycle
   commands, app-server fixture/status gate, `cx init`, packaging/typecheck
-  smoke, run observability commands, and the experimental cron/gateway
-  dispatcher.
+  smoke, run observability commands, the experimental cron/gateway dispatcher,
+  LSP adapter status, and autopilot run readiness reporting.
 - Promoted hardening surfaces: stale-lock metadata inspection/recovery,
   versioned schema artifacts, budget/policy-gated model replay runner,
   Codex-native bounded context formatter plus non-injected approved context
@@ -82,9 +82,10 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   automation live contracts now dispatch synchronously with explicit approval
   while recording `automation-action-authority-v1` negative-authority evidence
   plus foreground recovery projections that report manual-review candidates and
-  `automation-scheduler-ownership-v1` dispatch-store ownership evidence without
-  queue, lease, unattended retry, cleanup, health, or completion authority. A
-  real durable queue/lease/retry loop remains follow-up work.
+  `automation-scheduler-ownership-v1` dispatch-store ownership evidence plus
+  `automation-scheduler-readiness-v1` readiness gaps without queue, lease,
+  unattended retry, cleanup, health, or completion authority. A real durable
+  queue/lease/retry loop remains follow-up work.
 - Release operations now have an executable cadence policy:
   `cx release policy --json` reports the active small-commits/larger-releases
   rule, hotfix exceptions, stable-contract version boundary, and English/Korean
@@ -99,9 +100,10 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   now has experimental build/check/import/search/explain slices for codexus-lite
   graph artifacts, JSON-only external graph import, scoped freshness, structural
   gates, and read-only advisory retrieval. Autopilot, graph context injection,
-  and multi-engine relay autopilot remain deferred to the 0.2/0.3 track. Autopilot now has an experimental
-  foundation slice (`cx autopilot plan`, contract validate/approve/scope-check),
-  but live `cx autopilot run` and worktree-attached execution are still
+  and multi-engine relay autopilot remain deferred to the 0.2/0.3 track.
+  Autopilot now has an experimental foundation slice (`cx autopilot plan`,
+  contract validate/approve/scope-check, and run-gate readiness reporting), but
+  live `cx autopilot run` and worktree-attached execution are still
   intentionally unbuilt.
 
 ### P0: Contract and Safety Hardening
@@ -254,16 +256,19 @@ evidence only when the supporting runtime exists:
    Codexus-owned `cx app-server experiment --stdio-proof --record --json`
    proof harness is implemented. `cx app-server observer status --json` now
    projects recorded discovery, Stage B, and stdio-proof evidence into one
-   bridge summary without connecting to live sockets. The next slice is real
-   session-event mapping only from a non-disruptive observer bridge or an
+   bridge summary without connecting to live sockets, and now includes an
+   explicit session projection block that separates recorded observer evidence
+   from live Desktop attachment proof. The next slice is real session-event
+   mapping only from a non-disruptive observer bridge or an
    explicit user-provided socket that produces turn-boundary evidence without
    transcript values. Keep app-server driver enablement separate and still
    gated.
 4. Cron/gateway dry-run and live paths now share
    `policy-reviewed-live-dispatch-v1`, and the first synchronous dispatcher
    slice is implemented. Foreground recovery projections now report dispatch
-   records, manual-review candidates, and `automation-scheduler-ownership-v1`
-   evidence without automatic retry. Next add a real durable queue, lease
+   records, manual-review candidates, `automation-scheduler-ownership-v1`
+   evidence, and `automation-scheduler-readiness-v1` missing-requirement
+   reporting without automatic retry. Next add a real durable queue, lease
    heartbeat, retry policy, and ownership beyond one foreground dispatch.
 5. Retrieved context surfaces only as approved, user-visible artifacts, with no
    auto-injection of prompt context.
@@ -280,10 +285,11 @@ evidence only when the supporting runtime exists:
 10. Subagent support remains schema-validatable recorder/handoff/contract-only.
    Do not expose an active native spawn launcher until a supported Codex bridge
    exists; subagent claims must stay separate from verification freshness.
-11. Autopilot now has an experimental foundation slice. The next work is live
-    `cx autopilot run`: keep it human-approved, worktree-isolated, and
-    `stability: experimental`, while adding capability/policy start-gates and
-    refusing unsupported policy fields instead of silently downgrading them.
+11. Autopilot now has an experimental foundation slice plus `cx autopilot
+    run-gate` readiness reporting. The next work is live `cx autopilot run`:
+    keep it human-approved, worktree-isolated, and `stability: experimental`,
+    while adding capability/policy start-gates and refusing unsupported policy
+    fields instead of silently downgrading them.
 12. Repository knowledge graph now has an experimental first slice: canonical
     graph identity hashing, graph schema validation, scoped freshness, and
     structural graph gates. JSON-only external import and read-only
@@ -336,13 +342,13 @@ Harness-engineering alignment adds these evidence-first tracks:
   evidence while preserving the facts-vs-heuristics boundary. The subagent
   behavior checklist counterpart is implemented; remaining work is optional
   future artifacts such as lint/typecheck/coverage reports.
-- Project LSP diagnostics follow-up: `cx lsp status/check` now has an
+- Project LSP diagnostics follow-up: `cx lsp status/check/adapters` now has an
   experimental first slice for TypeScript diagnostics evidence. It detects
   candidate project diagnostics automatically, runs only explicit diagnostics
-  commands, and reports that long-lived LSP protocol servers are not started in
-  this slice. Next work is descriptor-backed protocol-server adapters and
-  multi-language diagnostics only if they can preserve bounded output,
-  no-editing behavior, and no completion authority.
+  commands, reports adapter authority, and keeps long-lived LSP protocol
+  servers unavailable in this slice. Next work is actual protocol-server
+  lifecycle and multi-language diagnostics only if they can preserve bounded
+  output, no-editing behavior, and no completion authority.
 - Multi-engine relay follow-up: [doc 15](design/15-multi-engine-relay-autopilot.md)
   now has a recorder/checker first slice with `cx autopilot relay
   record/stage-gate/check-agreement`. AC-to-verification matrix
@@ -424,10 +430,11 @@ Harness-engineering alignment adds these evidence-first tracks:
    app-server product behavior yet.
 2. Cron/gateway dispatcher: the first explicit-approval live slice and
    schema-validatable blocked-dispatch boundary audit records are now
-   implemented. Foreground recovery projections and
-   `automation-scheduler-ownership-v1` ownership evidence are implemented; next
-   add a real durable queue, retry policy, and stronger long-lived ownership
-   evidence.
+   implemented. Foreground recovery projections,
+   `automation-scheduler-ownership-v1` ownership evidence, and
+   `automation-scheduler-readiness-v1` missing-requirement reporting are
+   implemented; next add a real durable queue, retry policy, and stronger
+   long-lived ownership evidence.
 3. Full JSON Schema engine: the replacement decision is now recorded as
    `deferred_by_policy`; replace the local subset engine only if dependency
    policy allows it, and keep current schema artifacts as regression fixtures.
@@ -442,10 +449,10 @@ Harness-engineering alignment adds these evidence-first tracks:
    auto-injection until an explicit, reversible injection path is designed.
 8. Routine live model replay: keep it opt-in, budget-gated, and outside the
    default stable path.
-9. Autopilot contract layer: schema artifacts, draft planning, contract approval,
-   and scope-check foundations now exist as an experimental slice. Before any
-   live `cx autopilot run`, add worktree-owned execution, capability start
-   gates, and explicit policy-surface blocking.
+9. Autopilot contract layer: schema artifacts, draft planning, contract
+   approval, scope-check, and run-gate readiness foundations now exist as an
+   experimental slice. Before any live `cx autopilot run`, add worktree-owned
+   execution, capability start gates, and explicit policy-surface blocking.
 10. Multi-engine relay autopilot: the report-only artifact recorder/checker is
     implemented, and implementation-stage AC-to-verification matrix enforcement
     is now a structural gate. Keep review engines artifact-import-only until a

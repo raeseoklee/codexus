@@ -148,8 +148,13 @@ Validation rules that matter:
    This writes an approval artifact with source document hashes and the canonical
    contract-body hash. This is the single approval that replaces per-step
    approval.
-3. **`cx autopilot run --policy <contract>`** runs the supervised loop inside a
-   worktree, under the approved contract, with strict gates and stop conditions.
+3. **`cx autopilot run-gate --policy <contract>`** checks the approved contract,
+   approval record, scope, and fresh-evidence readiness without starting a run.
+   It may report readiness facts while still reporting `runSupported:false` and
+   `executionGate.status:"blocked"`.
+4. **`cx autopilot run --policy <contract>`** is still deferred. When promoted,
+   it will run the supervised loop inside a worktree, under the approved
+   contract, with strict gates and stop conditions.
 
 ## Gate composition (completion authority)
 
@@ -245,6 +250,7 @@ cx autopilot plan --from docs/PRD.md --json
 cx autopilot contract validate .codexus/autopilot/drafts/<id>.json --json
 cx autopilot contract approve .codexus/autopilot/drafts/<id>.json --approved-by maintainer --json
 cx autopilot contract scope-check .codexus/autopilot/drafts/<id>.json --json
+cx autopilot run-gate --policy .codexus/autopilot/drafts/<id>.json --json
 cx autopilot run --policy .codexus/autopilot.json --json   # deferred
 ```
 
@@ -279,6 +285,9 @@ Current implementation status:
   approval artifact and emits an approved contract.
 - Done: `cx autopilot contract scope-check` reuses change-evidence facts and can
   gate forbidden or out-of-scope changes against an approved contract.
+- Done: `cx autopilot run-gate` reports pre-run contract/scope/evidence
+  readiness while keeping live execution blocked (`runSupported:false`,
+  `startsRun:false`).
 - Deferred: acceptance-criteria extraction is heuristic and self-reports
   `acceptance_criteria_extraction_deferred`; empty or partial extraction must not
   be treated as authoritative acceptance coverage.

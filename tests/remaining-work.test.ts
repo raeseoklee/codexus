@@ -230,12 +230,14 @@ test("stale locks can be inspected and cleared while schema artifacts validate",
     assert.equal(schema.status, 0, schema.stderr);
     const schemaOutput = JSON.parse(schema.stdout);
     assert.equal(schemaOutput.ok, true);
-    assert.equal(schemaOutput.schemas.length, 34);
+    assert.equal(schemaOutput.schemas.length, 36);
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "automation-recovery.schema.json"));
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "subagent-bridge-probe.schema.json"));
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "wiki-injection-plan.schema.json"));
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "observability-adapter.schema.json"));
     assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "relay-adapter.schema.json"));
+    assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "lsp-adapter.schema.json"));
+    assert.ok(schemaOutput.schemas.some((item: { name: string }) => item.name === "autopilot-run-gate.schema.json"));
     assert.equal(schemaOutput.schemas[0].engine, "local-json-schema-subset");
     assert.deepEqual(schemaOutput.schemas[0].unsupportedKeywords, []);
     assert.equal(schemaOutput.appServerFixture.valid, true);
@@ -404,6 +406,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.equal(pkg.codexus.supplyChain.runtimeDependenciesMax, 0);
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/supply-chain-policy.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/architecture-policy.schema.json"));
+    assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/autopilot-run-gate.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/repo-graph.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/wiki-injection-plan.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/relay-session.schema.json"));
@@ -412,6 +415,7 @@ test("packaging metadata, adapter install, typecheck, and guarded features are e
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/convergence-agreement.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/decision.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/observability-adapter.schema.json"));
+    assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("schemas/lsp-adapter.schema.json"));
     assert.ok(pkg.codexus.supplyChain.requiredPackageFiles.includes("scripts/publish-next.mjs"));
     assert.ok(pkg.codexus.supplyChain.forbiddenPackageFiles.includes("src/**"));
     assert.ok(pkg.codexus.supplyChain.forbiddenPackageFiles.includes("dist/**/*.map"));
@@ -657,6 +661,16 @@ test("automation recovery reports dispatch candidates without scheduler or retry
     assert.equal(output.ownership.unattendedRetry.supported, false);
     assert.equal(output.ownership.unattendedRetry.automaticRetry, false);
     assert.ok(output.ownership.unattendedRetry.requires.includes("durable-queue-owner"));
+    assert.equal(output.schedulerReadiness.contractVersion, "automation-scheduler-readiness-v1");
+    assert.equal(output.schedulerReadiness.status, "blocked");
+    assert.equal(output.schedulerReadiness.durableQueueReady, false);
+    assert.equal(output.schedulerReadiness.leaseHeartbeatReady, false);
+    assert.equal(output.schedulerReadiness.retryPolicyReady, false);
+    assert.equal(output.schedulerReadiness.ownerProofReady, false);
+    assert.equal(output.schedulerReadiness.authority.startsScheduler, false);
+    assert.equal(output.schedulerReadiness.authority.schedulerAuthority, false);
+    assert.equal(output.schedulerReadiness.authority.completionAuthority, false);
+    assert.ok(output.schedulerReadiness.missingRequirements.includes("lease-heartbeat"));
     assert.equal(output.ownership.authority.schedulerAuthority, false);
     assert.equal(output.ownership.authority.completionAuthority, false);
     assert.equal(output.authority.schedulerAuthority, false);
@@ -676,6 +690,9 @@ test("automation recovery reports dispatch candidates without scheduler or retry
     assert.equal(statusOutput.ownership.contractVersion, "automation-scheduler-ownership-v1");
     assert.equal(statusOutput.ownership.queue.owned, false);
     assert.equal(statusOutput.ownership.unattendedRetry.supported, false);
+    assert.equal(statusOutput.schedulerReadiness.contractVersion, "automation-scheduler-readiness-v1");
+    assert.equal(statusOutput.schedulerReadiness.status, "blocked");
+    assert.equal(statusOutput.schedulerReadiness.authority.startsScheduler, false);
     assert.equal(statusOutput.recovery.status, "manual_review_required");
     assert.equal(statusOutput.recovery.automaticRetry, false);
     assert.equal(statusOutput.recovery.completionAuthority, false);

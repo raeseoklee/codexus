@@ -60,6 +60,43 @@ test("lsp status detects TypeScript diagnostics without starting a language serv
   }
 });
 
+test("lsp adapters report diagnostics support without protocol-server authority", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeTypeScriptProject(cwd, "console.log('ok');\n");
+    const result = runCli(cwd, ["lsp", "adapters", "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.schemaVersion, 1);
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.type, "codexus.lsp.adapters");
+    assert.equal(output.command, "lsp adapters");
+    assert.equal(output.summary.diagnosticsCommandImplemented, true);
+    assert.equal(output.summary.protocolServerImplemented, false);
+    assert.equal(output.authority.startsLanguageServerAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+    const diagnostics = output.adapters.find((adapter: { id: string }) => adapter.id === "typescript-diagnostics-command");
+    assert.equal(diagnostics.status, "implemented");
+    assert.equal(diagnostics.capability.canRunDiagnostics, true);
+    assert.equal(diagnostics.capability.canStartLanguageServer, false);
+    assert.equal(diagnostics.authority.diagnosticsAuthority, true);
+    assert.equal(diagnostics.authority.workspaceMutationAuthority, false);
+    const protocol = output.adapters.find((adapter: { id: string }) => adapter.id === "typescript-protocol-server");
+    assert.equal(protocol.status, "unavailable");
+    assert.equal(protocol.capability.canStartLanguageServer, false);
+    assert.equal(protocol.authority.startsLanguageServerAuthority, false);
+    assert.equal(protocol.boundaries.protocolLifecycleDeferred, true);
+
+    const artifact = join(cwd, "lsp-adapters.json");
+    await writeFile(artifact, `${JSON.stringify(output, null, 2)}\n`);
+    const schema = runCli(cwd, ["schema", "validate", "--type", "lsp-adapter", "--file", artifact, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("lsp status rejects gate because it never runs diagnostics", async () => {
   const cwd = await tempDir();
   try {

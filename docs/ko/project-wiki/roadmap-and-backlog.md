@@ -43,7 +43,8 @@ Release blocker가 생기지 않는 한 아래 순서로 진행합니다:
 
 - Desktop app-server attachment와 live event observation.
 - Plugin always-on behavior. Packaging evidence는 runtime supervision과 다릅니다.
-- Detect-only project diagnostics를 넘어서는 LSP protocol-server integration.
+- Detect-only project diagnostics와 report-only adapter status를 넘어서는 LSP
+  protocol-server integration.
 - Process liveness, endpoint check, user-observed behavior를 구분하는 app-instance health
   modeling.
 
@@ -51,11 +52,11 @@ Release blocker가 생기지 않는 한 아래 순서로 진행합니다:
 
 Contract가 생기기 전까지 명확히 gate 뒤에 있어야 하는 항목:
 
-- live `cx autopilot run`,
+- `run-gate` readiness report를 넘어서는 live `cx autopilot run`,
 - automatic context 또는 prompt injection,
 - artifact import를 넘어서는 active relay engine spawning,
 - routine live model replay,
-- full unattended cron/gateway scheduler ownership,
+- 현재 readiness-gap report를 넘어서는 full unattended cron/gateway scheduler ownership,
 - honest status와 recorder surface를 넘어서는 tmux/native worker launch authority.
 
 ## Review Cadence

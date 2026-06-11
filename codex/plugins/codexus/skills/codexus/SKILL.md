@@ -18,6 +18,8 @@ node codex/plugins/codexus/scripts/cx.mjs plugin status --json
 node codex/plugins/codexus/scripts/cx.mjs doctor --json
 node codex/plugins/codexus/scripts/cx.mjs update check --json
 node codex/plugins/codexus/scripts/cx.mjs session status --json
+node codex/plugins/codexus/scripts/cx.mjs lsp adapters --json
+node codex/plugins/codexus/scripts/cx.mjs autopilot run-gate --policy <path> --json
 node codex/plugins/codexus/scripts/cx.mjs wiki context --topic verification --approve --approved-by "$USER" --json
 node codex/plugins/codexus/scripts/cx.mjs wiki injection-policy --json
 node codex/plugins/codexus/scripts/cx.mjs wiki injection plan --approval <approval-id-or-path> --target session:current --json

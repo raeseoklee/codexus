@@ -195,6 +195,8 @@ cx lsp check --gate --json
 - `status`는 local project file과 package script에서 project LSP/diagnostics 후보를
   자동 탐지합니다;
 - `check`는 `npm run typecheck` 같은 명시적 diagnostics command를 실행합니다;
+- `adapters`는 descriptor-backed adapter status를 보고합니다. 명시적 diagnostics command
+  support는 implemented일 수 있지만 protocol-server lifecycle은 unavailable로 유지됩니다;
 - Codexus는 long-lived LSP protocol server를 시작하거나 제어하지 않습니다;
 - JSON output에 들어가기 전 bounded stdout/stderr tail을 redact합니다;
 - diagnostics는 사용자가 `--gate`를 요청할 때만 gate가 될 수 있습니다;

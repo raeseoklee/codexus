@@ -1521,6 +1521,10 @@ test("session status and hud summarize app evidence and wiki context approvals w
     assert.equal(statusOutput.evidenceLoop.appServerObserver.observerBridge.sessionMappingAuthority, "stage_b_turn_boundary");
     assert.equal(statusOutput.evidenceLoop.appServerObserver.observerBridge.connectsToLiveSocket, false);
     assert.equal(statusOutput.evidenceLoop.appServerObserver.observerBridge.completionAuthority, false);
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.sessionProjection.eligibleForSessionEvidenceLoop, true);
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.sessionProjection.runtimeSurfaceSource, "stage-b-turn-boundary");
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.sessionProjection.liveAttachmentProof, false);
+    assert.equal(statusOutput.evidenceLoop.appServerObserver.sessionProjection.completionAuthority, false);
 
     const hud = runCli(cwd, ["session", "hud", "--json"], { CODEX_HOME: codexHome });
     assert.equal(hud.status, 0, hud.stderr);

@@ -267,12 +267,13 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   declared-scope and explicit review-artifact checks. `--gate` converts the
   same tri-state evidence status into an automation exit code without letting
   heuristics fail a change.
-- `cx lsp status` and `cx lsp check` expose experimental project LSP diagnostics
+- `cx lsp status`, `cx lsp check`, and `cx lsp adapters` expose experimental project LSP diagnostics
   evidence. The first slice auto-detects TypeScript diagnostics from local
   project files and explicit package scripts, runs only an explicit diagnostics
   command such as `npm run typecheck`, redacts bounded stdout/stderr tails, and
-  self-reports that no long-lived LSP protocol server is started or controlled.
-  The surface does not edit files and does not become completion authority.
+  reports adapter authority while self-reporting that no long-lived LSP protocol
+  server is started or controlled. The surface does not edit files and does not
+  become completion authority.
 - `cx session subagent record/attach/status` records subagent claim bundles
   under `.codexus/session/subagents/`, links them from session state, and keeps
   subagent claims separate from verification freshness. `cx session subagent
@@ -409,7 +410,8 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   `cx app-server observer status --json` now projects recorded discovery,
   Stage B, and stdio-proof evidence into one bridge summary without connecting
   to live sockets; it reports `desktop-app-server` only from recorded Stage B
-  turn-boundary evidence.
+  turn-boundary evidence and exposes `sessionProjection` to distinguish recorded
+  observer evidence from live Desktop attachment proof.
 - `cx session status --json` and `cx session hud --json` include the same
   recorded app-server observer projection under `evidenceLoop.appServerObserver`.
   This maps turn-boundary evidence into session visibility without mutating
@@ -482,6 +484,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   --gate --json` are:
   - `acceptance_criteria_extraction_deferred`
   - `automatic_context_injection_deferred`
+  - `autopilot_run_authority_deferred`
   - `autopilot_run_deferred`
   - `broad_layering_rule_deferred`
   - `typosquat_name_similarity_deferred`
@@ -638,8 +641,9 @@ review. Current high-level gaps:
   implemented.
 - Cron/gateway now have an experimental explicit-approval live dispatcher,
   schema-validatable blocked-dispatch boundary records, foreground recovery
-  projections, and `automation-scheduler-ownership-v1` scheduler ownership
-  evidence. Future work is a real durable queue, lease heartbeat, retry policy,
+  projections, `automation-scheduler-ownership-v1` scheduler ownership
+  evidence, and `automation-scheduler-readiness-v1` missing-requirement
+  reporting. Future work is a real durable queue, lease heartbeat, retry policy,
   and asynchronous ownership beyond the first synchronous dispatch slice.
 - Config/schema validation is focused local enforcement plus local schema-artifact
   subset enforcement, not full draft-2020-12 JSON Schema engine enforcement.
@@ -647,8 +651,11 @@ review. Current high-level gaps:
   `deferred_by_policy` until dependency policy explicitly changes.
 - Autopilot active execution remains deferred for the 0.2/0.3 track. The
   experimental foundation now covers `cx autopilot plan` plus contract
-  validate/approve/scope-check, but `cx autopilot run` and worktree-attached
-  long-running execution are still intentionally unbuilt. `cx repo graph
+  validate/approve/scope-check and `cx autopilot run-gate`, but `cx autopilot
+  run` and worktree-attached long-running execution are still intentionally
+  unbuilt. `cx autopilot run-gate` self-reports
+  `autopilot_run_authority_deferred` so readiness output cannot be mistaken for
+  live-run authority. `cx repo graph
   build/check` and `cx autopilot relay record/adapters/stage-gate/check-agreement`
   exist as experimental foundations. `cx repo graph import` now imports bounded
   JSON-only external graphs without executing provider packages, and

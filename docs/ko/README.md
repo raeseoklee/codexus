@@ -157,7 +157,7 @@ npm run package:smoke
 
 ## 상태
 
-Codexus 0.2.0은 `codex exec --json`을 감싸는 좁은 stable path, stable local evidence
+Codexus 0.2.x는 `codex exec --json`을 감싸는 좁은 stable path, stable local evidence
 gate, architecture/manual wiki context surface의 첫 stable promotion을 가진 local
 harness로 사용할 수 있습니다. Live app-server turn, routine live model replay,
 automatic prompt injection은 의도적으로 gate 뒤에 있습니다.
@@ -172,8 +172,8 @@ automatic prompt injection은 의도적으로 gate 뒤에 있습니다.
 | `architecture check --gate`, `repo check --gate`, `release check --gate`, `lsp check --gate`, `wiki context --fresh-only --gate` | 문서화된 bounded contract에 한한 stable local evidence gate |
 | `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve` | Experimental graph/wiki evidence surface; context approval artifact는 visible하고 non-injected |
 | `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics/screenshot` | Experimental owned-process와 observation-evidence surface; live start/stop은 Codexus-owned instance에서만 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용 |
-| app-server, cron/gateway, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; app-server는 read-only, cron/gateway는 explicit approval live dispatch 지원, 나머지는 status/record/launch-contract/gated surface |
-| autopilot contract layer | Experimental foundation slice 구현 (`plan`, `contract validate/approve/scope-check`, relay recorder/checker, relay adapter status); live `autopilot run`과 active relay driver는 계속 0.2/0.3 트랙에서 deferred |
+| app-server, cron/gateway, LSP adapter, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; app-server는 read-only, cron/gateway는 explicit approval live dispatch와 scheduler readiness gap 보고를 지원하며, LSP protocol-server lifecycle은 unavailable, 나머지는 status/record/launch-contract/gated surface |
+| autopilot contract layer | Experimental foundation slice 구현 (`plan`, `contract validate/approve/scope-check`, `run-gate`, relay recorder/checker, relay adapter status); live `autopilot run`과 active relay driver는 계속 0.2/0.3 트랙에서 deferred |
 
 정확한 coverage와 gap은 [구현 상태](implementation-status.md)와
 [남은 작업](remaining-work.md)을 확인하세요.
@@ -207,6 +207,7 @@ codexus session subagent complete --task-id <id> --claim "review found no API dr
 codexus session subagent record --file <result.json> --json
 codexus session workers status --json
 codexus lsp status --json
+codexus lsp adapters --json
 codexus lsp check --gate --json
 codexus schema engine --json
 codexus replay parity --json
@@ -258,7 +259,7 @@ Canonical bin은 `codexus`이고, `cx`는 지원되는 short alias입니다.
 - [Subagent evidence supervision](design/09-subagent-evidence-supervision.md)
 - [품질 증거 가드 (slop guard)](design/10-quality-evidence-guard.md)
 - [공급망 증거](design/11-supply-chain-evidence.md)
-- [Autopilot 계약](design/12-autopilot-contract.md): 장시간 supervised run을 위한 experimental foundation slice입니다. `cx autopilot plan`, contract validate/approve/scope-check, 사람이 승인한 scope, worktree 격리, detect-then-stop, evidence-gated acceptance를 다루며, live `autopilot run`은 계속 deferred입니다.
+- [Autopilot 계약](design/12-autopilot-contract.md): 장시간 supervised run을 위한 experimental foundation slice입니다. `cx autopilot plan`, contract validate/approve/scope-check, run-gate readiness, 사람이 승인한 scope, worktree 격리, detect-then-stop, evidence-gated acceptance를 다루며, live `autopilot run`은 계속 deferred입니다.
 - [하네스 엔지니어링 정렬](design/13-harness-engineering-alignment.md): OpenAI harness engineering 글과 Karpathy-style behavior contract를 종합한 정렬 문서. repository map, architecture gate, behavior evidence, non-goal을 정의합니다.
 - [Repository knowledge graph](design/14-repository-knowledge-graph.md): experimental codexus-lite graph build/check 첫 slice와, deferred Understand-Anything JSON import용 graph-provider boundary, scoped freshness, structural graph gate를 정의합니다.
 - [Multi-engine relay autopilot](design/15-multi-engine-relay-autopilot.md): author/reviewer artifact, stage-gate evidence, relay adapter status, convergence validation을 위한 experimental recorder/checker 첫 slice입니다. Convergence는 완료 권한이 아닙니다.
@@ -289,6 +290,7 @@ Canonical bin은 `codexus`이고, `cx`는 지원되는 short alias입니다.
 - [0.1.14 release evidence](release-evidence/0.1.14.md)
 - [0.1.15 release evidence](release-evidence/0.1.15.md)
 - [0.2.0 release evidence](release-evidence/0.2.0.md)
+- [0.2.1 release evidence](release-evidence/0.2.1.md)
 - [JSON contract](json-contract.md)
 - [릴리즈 정책](release-policy.md)
 - [Public release checklist](public-release.md)

@@ -1,6 +1,6 @@
 {
   "name": "codexus",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A globally installed CLI harness for OpenAI Codex with durable ledgers, verification gates, memory, and replay-gated skills.",
   "license": "MIT",
   "type": "module",
@@ -103,6 +103,7 @@
         "schemas/supply-chain-policy.schema.json",
         "schemas/architecture-policy.schema.json",
         "schemas/autopilot-contract.schema.json",
+        "schemas/autopilot-run-gate.schema.json",
         "schemas/wiki-manifest.schema.json",
         "schemas/wiki-page.schema.json",
         "schemas/wiki-context-approval.schema.json",
@@ -116,6 +117,7 @@
         "schemas/app-instance-descriptor.schema.json",
         "schemas/app-instance.schema.json",
         "schemas/observability-adapter.schema.json",
+        "schemas/lsp-adapter.schema.json",
         "schemas/subagent-bridge-probe.schema.json",
         "fixtures/app-server/schema.fixture.json",
         "codex/skills/codexus/SKILL.md",

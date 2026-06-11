@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/lsp-adapter.schema.json",
+  "title": "Codexus LSP Adapter Report",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "type": { "const": "codexus.lsp.adapters" },
+    "command": { "const": "lsp adapters" },
+    "cwd": { "type": "string", "minLength": 1 },
+    "projectRoot": { "type": ["string", "null"] },
+    "adapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["diagnostics-command", "protocol-server"] },
+          "status": { "enum": ["implemented", "unavailable"] },
+          "language": { "type": "string", "minLength": 1 },
+          "command": { "type": ["string", "null"] },
+          "input": {
+            "type": "object",
+            "properties": {
+              "kind": { "enum": ["project-diagnostics", "language-server-protocol"] },
+              "existingCommandRequired": { "type": "boolean" }
+            },
+            "required": ["kind", "existingCommandRequired"]
+          },
+          "capability": {
+            "type": "object",
+            "properties": {
+              "canRunDiagnostics": { "type": "boolean" },
+              "canStartLanguageServer": { "type": "boolean" },
+              "canApplyEdits": { "type": "boolean" },
+              "canReadOpenBuffers": { "type": "boolean" },
+              "canMutateWorkspace": { "type": "boolean" }
+            },
+            "required": ["canRunDiagnostics", "canStartLanguageServer", "canApplyEdits", "canReadOpenBuffers", "canMutateWorkspace"]
+          },
+          "authority": {
+            "type": "object",
+            "properties": {
+              "startsLanguageServerAuthority": { "const": false },
+              "diagnosticsAuthority": { "type": "boolean" },
+              "editAuthority": { "const": false },
+              "workspaceMutationAuthority": { "const": false },
+              "completionAuthority": { "const": false }
+            },
+            "required": ["startsLanguageServerAuthority", "diagnosticsAuthority", "editAuthority", "workspaceMutationAuthority", "completionAuthority"]
+          },
+          "boundaries": {
+            "type": "object",
+            "properties": {
+              "explicitCommandOnly": { "type": "boolean" },
+              "finiteTimeoutRequired": { "type": "boolean" },
+              "boundedOutput": { "type": "boolean" },
+              "redactionRequired": { "type": "boolean" },
+              "protocolLifecycleDeferred": { "type": "boolean" }
+            },
+            "required": ["explicitCommandOnly", "finiteTimeoutRequired", "boundedOutput", "redactionRequired", "protocolLifecycleDeferred"]
+          },
+          "caveat": { "type": "string", "minLength": 1 }
+        },
+        "required": ["id", "role", "status", "language", "command", "input", "capability", "authority", "boundaries", "caveat"]
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "number", "minimum": 0 },
+        "implemented": { "type": "number", "minimum": 0 },
+        "unavailable": { "type": "number", "minimum": 0 },
+        "diagnosticsCommandImplemented": { "type": "boolean" },
+        "protocolServerImplemented": { "const": false }
+      },
+      "required": ["total", "implemented", "unavailable", "diagnosticsCommandImplemented", "protocolServerImplemented"]
+    },
+    "authority": {
+      "type": "object",
+      "properties": {
+        "startsLanguageServerAuthority": { "const": false },
+        "editAuthority": { "const": false },
+        "workspaceMutationAuthority": { "const": false },
+        "completionAuthority": { "const": false }
+      },
+      "required": ["startsLanguageServerAuthority", "editAuthority", "workspaceMutationAuthority", "completionAuthority"]
+    }
+  },
+  "required": ["schemaVersion", "stability", "type", "command", "cwd", "projectRoot", "adapters", "summary", "authority"]
+}

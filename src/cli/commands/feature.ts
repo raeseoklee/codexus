@@ -165,6 +165,42 @@ function automationSchedulerOwnership(feature: GuardedFeature, dispatchStorePath
   };
 }
 
+function automationSchedulerReadiness(feature: GuardedFeature, dispatchRecordCount: number) {
+  return {
+    schemaVersion: 1,
+    contractVersion: "automation-scheduler-readiness-v1",
+    feature,
+    status: "blocked" as const,
+    dispatchRecordCount,
+    durableQueueReady: false as const,
+    leaseHeartbeatReady: false as const,
+    retryPolicyReady: false as const,
+    ownerProofReady: false as const,
+    missingRequirements: [
+      "durable-queue-owner",
+      "lease-heartbeat",
+      "retry-policy",
+      "fresh-explicit-approval-or-declared-policy",
+      "recovery-proof",
+    ],
+    gate: {
+      enabled: false as const,
+      status: "not_requested" as const,
+      exitCode: 0 as const,
+      reason: "scheduler readiness is report-only; foreground dispatch remains the only implemented automation path",
+    },
+    authority: {
+      startsScheduler: false as const,
+      schedulerAuthority: false as const,
+      retryAuthority: false as const,
+      cleanupAuthority: false as const,
+      healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
+    caveat: "Codexus can run approved foreground automation dispatches, but it does not own an unattended scheduler queue, lease heartbeat, or automatic retry loop.",
+  };
+}
+
 function automationApprovalContract(dryRun: boolean, approvedBy: string | null) {
   const approvedAt = !dryRun && approvedBy ? new Date().toISOString() : null;
   return {
@@ -318,6 +354,7 @@ async function automationRecoveryProjection(cwd: string, feature: GuardedFeature
       caveat: "Codexus can inspect foreground dispatch records, but it does not own an unattended scheduler queue in this slice.",
     },
     ownership: automationSchedulerOwnership(feature, loaded.dir, loaded.records.length),
+    schedulerReadiness: automationSchedulerReadiness(feature, loaded.records.length),
     retry: {
       automaticRetry: false as const,
       retryAuthority: false as const,
@@ -550,6 +587,7 @@ export async function featureCommand(args: ParsedArgs, feature: GuardedFeature):
       ...status,
       scheduler: recovery.scheduler,
       ownership: recovery.ownership,
+      schedulerReadiness: recovery.schedulerReadiness,
       recovery: {
         status: recovery.recovery.status,
         manualReviewCandidates: recovery.retry.candidateCount,

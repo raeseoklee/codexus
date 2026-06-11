@@ -172,7 +172,7 @@ npm run package:smoke
 
 ## Status
 
-Codexus 0.2.0 is usable as a local harness with a narrow stable path around
+Codexus 0.2.x is usable as a local harness with a narrow stable path around
 `codex exec --json`, stable local evidence gates, and a first stable promotion
 of architecture and manual wiki context surfaces. Live app-server turns,
 routine live model replay, and automatic prompt injection remain intentionally
@@ -188,8 +188,8 @@ gated.
 | `architecture check --gate`, `repo check --gate`, `release check --gate`, `lsp check --gate`, `wiki context --fresh-only --gate` | Stable local evidence gates for their documented bounded contracts |
 | `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve` | Experimental graph/wiki evidence surface; context approval artifacts are visible and non-injected |
 | `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics/screenshot` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
-| app-server, cron/gateway, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval, and other surfaces stay status/record/launch-contract/gated |
-| autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`, relay recorder/checker, relay adapter status); live `autopilot run` and active relay drivers remain deferred to the 0.2/0.3 track |
+| app-server, cron/gateway, LSP adapters, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval while reporting scheduler readiness gaps, LSP protocol-server lifecycle remains unavailable, and other surfaces stay status/record/launch-contract/gated |
+| autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`, `run-gate`, relay recorder/checker, relay adapter status); live `autopilot run` and active relay drivers remain deferred to the 0.2/0.3 track |
 
 See [Feature reference](https://github.com/raeseoklee/codexus/blob/main/docs/features.md),
 [Implementation status](https://github.com/raeseoklee/codexus/blob/main/docs/implementation-status.md),
@@ -257,6 +257,8 @@ codexus memory search "parser regression" --json
 codexus skill review <skill-id> --json
 codexus skill export <skill-id> --target codex --json
 codexus schema check --json
+codexus lsp adapters --json
+codexus autopilot run-gate --policy <path> --json
 codexus app-server experiment --dry-run --record --supervise-fake --json
 ```
 
@@ -279,7 +281,7 @@ Canonical bin: `codexus`. Supported short alias: `cx`.
 - [Implementation status](https://github.com/raeseoklee/codexus/blob/main/docs/implementation-status.md)
 - [Remaining work](https://github.com/raeseoklee/codexus/blob/main/docs/remaining-work.md)
 - [0.1.0 stable readiness plan](https://github.com/raeseoklee/codexus/blob/main/docs/plans/2026-05-31-0.1.0-stable-readiness-plan.md)
-- [0.2.0 release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.0.md)
+- [0.2.1 release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.1.md)
 - [JSON contract](https://github.com/raeseoklee/codexus/blob/main/docs/json-contract.md)
 - [Public release checklist](https://github.com/raeseoklee/codexus/blob/main/docs/public-release.md)
 

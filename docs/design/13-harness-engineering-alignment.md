@@ -209,6 +209,9 @@ The first slice is intentionally conservative:
 - `status` auto-detects project LSP/diagnostics candidates from local project
   files and package scripts;
 - `check` runs an explicit diagnostics command such as `npm run typecheck`;
+- `adapters` reports descriptor-backed adapter status: explicit diagnostics
+  command support may be implemented, while protocol-server lifecycle remains
+  unavailable;
 - Codexus does **not** start or control a long-lived LSP protocol server;
 - bounded stdout/stderr tails are redacted before they enter JSON output;
 - diagnostics can gate only when the user asks for `--gate`;

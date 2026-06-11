@@ -2,7 +2,7 @@
 
 [English](../remaining-work.md)
 
-날짜: 2026-06-08
+날짜: 2026-06-11
 
 이 문서는 MVP spine과 high-risk promotion slice 이후의 현재 backlog입니다. 남은
 항목, 필요한 이유, 다음 구현에서 지켜야 할 설계 제약을 정리합니다.
@@ -37,7 +37,8 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   third-party bundle export, bounded adapter retrieval, deterministic replay와
   model replay gate, memory lifecycle command, app-server
   fixture/status gate, `cx init`, packaging/typecheck smoke, run observability,
-  experimental cron/gateway dispatcher.
+  experimental cron/gateway dispatcher, LSP adapter status, autopilot run
+  readiness report.
 - 승격된 hardening surface: stale-lock metadata inspection/recovery, versioned
   schema artifact, budget/policy-gated model replay runner, Codex-native
   bounded context formatter와 자동 주입 없는 approved context artifact,
@@ -77,9 +78,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   automation live contract는 이제 explicit approval로
   synchronous dispatch가 가능하며 `automation-action-authority-v1` negative-authority
   evidence와 foreground recovery projection을 기록합니다. 이 projection은 manual-review
-  candidate와 `automation-scheduler-ownership-v1` dispatch-store ownership evidence를
-  보고하지만 queue, lease, unattended retry, cleanup, health, completion authority를
-  주장하지 않습니다. 실제 durable queue/lease/retry loop는 후속입니다.
+  candidate, `automation-scheduler-ownership-v1` dispatch-store ownership evidence,
+  `automation-scheduler-readiness-v1` missing-requirement report를 보고하지만 queue,
+  lease, unattended retry, cleanup, health, completion authority를 주장하지 않습니다.
+  실제 durable queue/lease/retry loop는 후속입니다.
 - Release 운영에는 실행 가능한 cadence policy가 생겼습니다.
   `cx release policy --json`은 작은 commit/더 큰 release 규칙, hotfix exception,
   stable-contract version boundary, 영문/한국어 policy 문서 존재를 보고합니다.
@@ -91,10 +93,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   Repository knowledge graph는 이제 codexus-lite graph artifact, JSON-only external
   graph import, scoped freshness, structural gate, read-only advisory retrieval을 위한
   experimental build/check/import/search/explain slice를 갖습니다. Autopilot, graph
-  context injection, multi-engine relay autopilot은 계속 0.2/0.3 track으로 deferred입니다. 다만 Autopilot은 이제 experimental
-  foundation slice(`cx autopilot plan`, contract validate/approve/scope-check)를
-  갖고 있으며, live `cx autopilot run`과 worktree에 붙는 실행만 의도적으로 남겨둔
-  상태입니다.
+  context injection, multi-engine relay autopilot은 계속 0.2/0.3 track으로 deferred입니다.
+  다만 Autopilot은 이제 experimental foundation slice(`cx autopilot plan`, contract
+  validate/approve/scope-check, run-gate readiness report)를 갖고 있으며, live
+  `cx autopilot run`과 worktree에 붙는 실행만 의도적으로 남겨둔 상태입니다.
 
 ### P0: Contract and Safety Hardening
 
@@ -195,7 +197,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     - 제안 command: `cx runs list`, `cx events tail <run-id>`, `cx report <run-id>`.
     - 출력은 bounded, JSON-first로 유지합니다.
 
-15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch, dry-run audit record, schema-validatable blocked-dispatch boundary record, `automation-action-authority-v1` negative-authority record, `cx cron|gateway recovery` foreground recovery projection, `automation-scheduler-ownership-v1` ownership evidence가 구현됐고, 실제 durable queue, lease heartbeat, retry policy, unattended scheduler owner가 남아 있습니다.
+15. cron/gateway automation은 P0 safety 이후에 추가. 상태: experimental explicit-approval live dispatch, dry-run audit record, schema-validatable blocked-dispatch boundary record, `automation-action-authority-v1` negative-authority record, `cx cron|gateway recovery` foreground recovery projection, `automation-scheduler-ownership-v1` ownership evidence, `automation-scheduler-readiness-v1` missing-requirement report가 구현됐고, 실제 durable queue, lease heartbeat, retry policy, unattended scheduler owner가 남아 있습니다.
     - Hermes-style cron/gateway는 lock, schema migration, permission event,
       explicit user policy 뒤에 둬야 합니다.
 
@@ -240,16 +242,18 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
    Codexus-owned `cx app-server experiment --stdio-proof --record --json` proof
    harness는 구현됐습니다. `cx app-server observer status --json`은 기록된
    discovery, Stage B, stdio-proof evidence를 live socket 연결 없이 하나의 bridge
-   summary로 투영합니다. 다음 slice는 non-disruptive observer bridge 또는 explicit
+   summary로 투영하고, recorded observer evidence와 live Desktop attachment proof를
+   구분하는 `sessionProjection` block을 포함합니다. 다음 slice는 non-disruptive observer bridge 또는 explicit
    user-provided socket이 transcript 값 없이 turn-boundary evidence를 만들 때만 실제
    session-event mapping으로 진행합니다. app-server driver 활성화는 별도 gate로
    계속 분리합니다.
 4. Cron/gateway dry-run/live path는 `policy-reviewed-live-dispatch-v1` contract를
    공유하며, 첫 synchronous dispatcher slice가 구현됐습니다. Foreground recovery
    projection은 dispatch record, manual-review candidate,
-   `automation-scheduler-ownership-v1` evidence를 automatic retry 없이 보고합니다.
-   다음은 실제 durable queue, lease heartbeat, retry policy, foreground dispatch를
-   넘는 durable ownership입니다.
+   `automation-scheduler-ownership-v1` evidence와
+   `automation-scheduler-readiness-v1` missing-requirement report를 automatic retry 없이
+   보고합니다. 다음은 실제 durable queue, lease heartbeat, retry policy, foreground
+   dispatch를 넘는 durable ownership입니다.
 5. Adapter injection은 명시적 approval이 필요하고 visible approval
    artifact를 기록합니다. 여전히 prompt context를 자동 주입하지 않습니다.
 6. `cx session hud --json`이 지원되는 fallback입니다. Statusline integration은 Codex가
@@ -264,11 +268,11 @@ supporting runtime이 있을 때만 gate를 더 깊은 evidence로 바꾸는 방
 10. Subagent support는 schema-validatable recorder/handoff/contract-only로
    유지합니다. 지원되는 Codex bridge가 생기기 전까지 active native spawn launcher를
    노출하지 않습니다. Subagent claim은 verification freshness와 계속 분리해야 합니다.
-11. Autopilot은 이제 experimental foundation slice를 가집니다. 다음 작업은 live
-   `cx autopilot run`입니다. 사람 승인 contract 흐름을 유지하고,
-   worktree-isolated, `stability: experimental` 상태를 지키면서, 시작 시
-   capability/policy proof를 요구하고 지원되지 않는 policy field는 조용히
-   downgrade하지 말고 block해야 합니다.
+11. Autopilot은 이제 experimental foundation slice와 `cx autopilot run-gate`
+   readiness report를 가집니다. 다음 작업은 live `cx autopilot run`입니다. 사람 승인
+   contract 흐름을 유지하고, worktree-isolated, `stability: experimental` 상태를
+   지키면서, 시작 시 capability/policy proof를 요구하고 지원되지 않는 policy field는
+   조용히 downgrade하지 말고 block해야 합니다.
 12. Repository knowledge graph는 canonical graph identity hashing, graph schema
    validation, scoped freshness, structural graph gate를 포함한 experimental 첫 slice가
    있습니다. JSON-only external import와 read-only search/explain retrieval은 구현됐습니다.
@@ -314,12 +318,12 @@ Harness-engineering alignment에서 추가된 evidence-first track:
   assumption, verification-artifact, diff-surface evidence를 기록합니다. Fact-vs-heuristic
   경계는 유지했고, subagent behavior checklist counterpart는 구현됐습니다. 남은 작업은
   선택적 lint/typecheck/coverage artifact입니다.
-- Project LSP diagnostics follow-up: `cx lsp status/check`는 TypeScript diagnostics
+- Project LSP diagnostics follow-up: `cx lsp status/check/adapters`는 TypeScript diagnostics
   evidence를 위한 experimental 첫 slice를 갖습니다. Project diagnostics 후보는 자동
-  탐지하지만, 명시적 diagnostics command만 실행하며, long-lived LSP protocol server는
-  이 slice에서 시작하지 않는다고 보고합니다. 다음 작업은 bounded output, no-editing
-  behavior, no completion authority를 보존할 수 있을 때만 descriptor-backed protocol-server
-  adapter와 multi-language diagnostics를 추가하는 것입니다.
+  탐지하고, 명시적 diagnostics command만 실행하며, adapter authority를 보고하고,
+  long-lived LSP protocol server는 unavailable로 유지합니다. 다음 작업은 bounded output,
+  no-editing behavior, no completion authority를 보존할 수 있을 때만 실제
+  protocol-server lifecycle과 multi-language diagnostics를 추가하는 것입니다.
 - Multi-engine relay follow-up: [15번 문서](design/15-multi-engine-relay-autopilot.md)는
   이제 `cx autopilot relay record/stage-gate/check-agreement` recorder/checker 첫 slice를
   갖습니다. AC-to-verification matrix import/enforcement는 implementation-stage
@@ -401,9 +405,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
    app-server product behavior는 켜지지 않습니다.
 2. Cron/gateway dispatcher: 첫 explicit-approval live slice와
    schema-validatable blocked-dispatch boundary audit record는 구현됐습니다.
-   Foreground recovery projection과 `automation-scheduler-ownership-v1` ownership
-   evidence도 구현됐습니다. 다음은 실제 durable queue, retry policy, 더 강한
-   long-lived ownership evidence입니다.
+   Foreground recovery projection, `automation-scheduler-ownership-v1` ownership
+   evidence, `automation-scheduler-readiness-v1` missing-requirement report도
+   구현됐습니다. 다음은 실제 durable queue, retry policy, 더 강한 long-lived
+   ownership evidence입니다.
 3. Full JSON Schema engine: replacement decision은 이제 `deferred_by_policy`로
    기록됩니다. dependency policy가 허용될 때만 local subset engine을 교체하고, 현재
    schema artifact는 regression fixture로 유지합니다.
@@ -418,9 +423,9 @@ Harness-engineering alignment에서 추가된 evidence-first track:
    visible approval artifact만 기록하고 auto-injection은 하지 않습니다.
 8. Routine live model replay: opt-in, budget-gated로 유지하고 기본 stable path 밖에 둡니다.
 9. Autopilot contract layer: schema artifact, draft planning, contract approval,
-   scope-check foundation이 experimental slice로 존재합니다. Live `cx autopilot run`
-   전에는 worktree-owned execution, capability 시작 게이트, explicit
-   policy-surface blocking을 추가해야 합니다.
+   scope-check, run-gate readiness foundation이 experimental slice로 존재합니다.
+   Live `cx autopilot run` 전에는 worktree-owned execution, capability 시작 게이트,
+   explicit policy-surface blocking을 추가해야 합니다.
 10. Multi-engine relay autopilot: report-only artifact recorder/checker는 구현됐습니다.
     Implementation-stage AC-to-verification matrix enforcement도 structural gate로
     구현됐습니다. 지원되는 adapter가 생기기 전 review engine은 artifact import-only로
@@ -450,10 +455,10 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     future live capture driver의 경계를 정의하고, report-only adapter descriptor/status
     reporting도 구현됐습니다. 이후 작업은 선택적 live Browser/DevTools capture driver와
     worktree-aware launcher reuse입니다.
-14. Project LSP diagnostics: first-slice `cx lsp status/check`는 명시적 local project
-    command를 통한 TypeScript diagnostics 용도로 구현됐습니다. Protocol-server
-    lifecycle, workspace trust, output bounding, gate behavior가 명시되기 전까지 자동
-    project LSP 적용은 detect-only로 유지합니다.
+14. Project LSP diagnostics: first-slice `cx lsp status/check/adapters`는 명시적 local
+    project command를 통한 TypeScript diagnostics와 adapter status 용도로 구현됐습니다.
+    Protocol-server lifecycle, workspace trust, output bounding, gate behavior가 명시되기
+    전까지 자동 project LSP 적용은 detect-only로 유지합니다.
 15. Update availability notification: 첫 slice는 `cx update check --json`, TTL-bounded
     npm `latest` 조회, 명시적 `cx update check --channel next --json` prerelease opt-in,
     `CODEXUS_NO_UPDATE_CHECK=1`, CI/primary-command cache-only summary, 그리고

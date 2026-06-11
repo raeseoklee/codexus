@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codexus.local/schemas/autopilot-run-gate.schema.json",
+  "title": "Codexus Autopilot Run Gate Report",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "stability": { "const": "experimental" },
+    "command": { "const": "autopilot run-gate" },
+    "file": { "type": "string", "minLength": 1 },
+    "runSupported": { "const": false },
+    "contractStatus": { "enum": ["draft", "approved", "invalid"] },
+    "validation": { "type": "object" },
+    "approvalRecordExists": { "type": ["boolean", "null"] },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "allow": { "type": "array", "items": { "type": "string" } },
+        "forbiddenChanges": { "type": "array", "items": { "type": "string" } },
+        "diffStatus": { "enum": ["pass", "fail", "unknown"] },
+        "freshEvidence": { "type": "boolean" }
+      },
+      "required": ["allow", "forbiddenChanges", "diffStatus", "freshEvidence"]
+    },
+    "readinessGate": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "status": { "enum": ["not_requested", "passed", "failed", "blocked"] },
+        "exitCode": { "type": "number" },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["enabled", "status", "exitCode", "reason"]
+    },
+    "executionGate": {
+      "type": "object",
+      "properties": {
+        "enabled": { "const": true },
+        "status": { "const": "blocked" },
+        "exitCode": { "const": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["enabled", "status", "exitCode", "reason"]
+    },
+    "actionAuthority": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "contractVersion": { "const": "autopilot-run-gate-v1" },
+        "actionSurface": { "const": "autopilot.run" },
+        "runSupported": { "const": false },
+        "sideEffects": {
+          "type": "object",
+          "properties": {
+            "startsRun": { "const": false },
+            "mutatesWorkspace": { "const": false },
+            "requiresWorktreeIsolation": { "const": true },
+            "requiresExplicitApproval": { "const": true },
+            "requiresFreshVerification": { "const": true }
+          },
+          "required": ["startsRun", "mutatesWorkspace", "requiresWorktreeIsolation", "requiresExplicitApproval", "requiresFreshVerification"]
+        },
+        "driverAuthority": { "const": "none" },
+        "completionAuthority": { "const": false },
+        "cleanupAuthority": { "const": false },
+        "healthAuthority": { "const": false },
+        "caveat": { "type": "string", "minLength": 1 }
+      },
+      "required": ["schemaVersion", "contractVersion", "actionSurface", "runSupported", "sideEffects", "driverAuthority", "completionAuthority", "cleanupAuthority", "healthAuthority", "caveat"]
+    },
+    "evidenceGaps": { "type": "array" },
+    "derivableFacts": { "type": "array" },
+    "heuristicClaims": { "type": "array" },
+    "blockingUnknowns": { "type": "array" },
+    "gate": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "status": { "enum": ["not_requested", "passed", "failed", "blocked"] },
+        "exitCode": { "type": "number" },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": ["enabled", "status", "exitCode", "reason"]
+    }
+  },
+  "required": ["schemaVersion", "stability", "command", "file", "runSupported", "contractStatus", "validation", "approvalRecordExists", "scope", "readinessGate", "executionGate", "actionAuthority", "evidenceGaps", "derivableFacts", "heuristicClaims", "blockingUnknowns", "gate"]
+}

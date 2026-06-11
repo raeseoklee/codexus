@@ -339,6 +339,9 @@ process.on("SIGINT", shutdown);
   assert(appServerObserver.observerBridge?.connectsToLiveSocket === false, "app-server observer status must not connect to live sockets");
   assert(appServerObserver.observerBridge?.startsDesktopTurn === false, "app-server observer status must not start Desktop turns");
   assert(appServerObserver.observerBridge?.completionAuthority === false, "app-server observer status must not claim completion authority");
+  assert(appServerObserver.sessionProjection?.eligibleForSessionEvidenceLoop === true, "app-server observer status must expose session projection eligibility");
+  assert(appServerObserver.sessionProjection?.liveAttachmentProof === false, "app-server observer status must not treat recorded evidence as live attachment proof");
+  assert(appServerObserver.sessionProjection?.completionAuthority === false, "app-server session projection must not claim completion authority");
 
   const supplyChain = parseJsonRun(codexus, ["supply-chain", "check", "--gate", "--json"]);
   assert(supplyChain.stability === "stable", "supply-chain check did not report stable JSON stability");
@@ -350,6 +353,15 @@ process.on("SIGINT", shutdown);
   assert(lsp.autoApply?.startsLanguageServer === false, "installed lsp check should not start a language server");
   assert(lsp.result?.status === "passed", "installed lsp check did not run the fixture typecheck");
   assert(lsp.gate?.status === "passed", "installed lsp gate did not pass");
+  const lspAdapters = parseJsonRun(codexus, ["lsp", "adapters", "--cwd", project, "--json"]);
+  assert(lspAdapters.stability === "experimental", "installed lsp adapters did not report experimental stability");
+  assert(lspAdapters.summary?.diagnosticsCommandImplemented === true, "lsp adapters did not expose diagnostics command support");
+  assert(lspAdapters.summary?.protocolServerImplemented === false, "lsp adapters must not claim protocol-server support");
+  assert(lspAdapters.authority?.startsLanguageServerAuthority === false, "lsp adapters must not gain language-server start authority");
+  const lspAdaptersPath = join(project, "lsp-adapters.json");
+  await writeFile(lspAdaptersPath, `${JSON.stringify(lspAdapters, null, 2)}\n`);
+  const lspAdaptersSchema = parseJsonRun(codexus, ["schema", "validate", "--cwd", project, "--type", "lsp-adapter", "--file", lspAdaptersPath, "--json"]);
+  assert(lspAdaptersSchema.ok === true, "lsp adapter report did not validate against schema");
   const policyCatalog = parseJsonRun(codexus, ["policy", "catalog", "check", "--scope", "src/**", "--json"], {
     cwd: project,
   });
@@ -502,6 +514,35 @@ process.on("SIGINT", shutdown);
   ]);
   assert(autopilotPlan.stability === "experimental", "autopilot plan did not report experimental stability");
   assert(autopilotPlan.contract?.autonomyPreset === "guided", "autopilot plan did not persist the requested preset");
+  const autopilotApproval = parseJsonRun(codexus, [
+    "autopilot",
+    "contract",
+    "approve",
+    "--cwd",
+    project,
+    autopilotPlan.artifactPath,
+    "--approved-by",
+    "package-smoke",
+    "--json",
+  ]);
+  assert(autopilotApproval.contract?.status === "approved", "autopilot contract approval did not produce an approved contract");
+  const autopilotRunGate = parseJsonRun(codexus, [
+    "autopilot",
+    "run-gate",
+    "--cwd",
+    project,
+    "--policy",
+    autopilotApproval.artifactPath,
+    "--json",
+  ]);
+  assert(autopilotRunGate.stability === "experimental", "autopilot run-gate did not report experimental stability");
+  assert(autopilotRunGate.runSupported === false, "autopilot run-gate must not claim run support");
+  assert(autopilotRunGate.actionAuthority?.sideEffects?.startsRun === false, "autopilot run-gate must not start a run");
+  assert(autopilotRunGate.executionGate?.status === "blocked", "autopilot run-gate execution gate must remain blocked");
+  const autopilotRunGatePath = join(project, "autopilot-run-gate.json");
+  await writeFile(autopilotRunGatePath, `${JSON.stringify(autopilotRunGate, null, 2)}\n`);
+  const autopilotRunGateSchema = parseJsonRun(codexus, ["schema", "validate", "--cwd", project, "--type", "autopilot-run-gate", "--file", autopilotRunGatePath, "--json"]);
+  assert(autopilotRunGateSchema.ok === true, "autopilot run-gate report did not validate against schema");
   const cronDispatch = parseJsonRun(codexus, [
     "cron",
     "run-now",

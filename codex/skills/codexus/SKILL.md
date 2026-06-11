@@ -21,7 +21,7 @@ If this skill has been installed into `$CODEX_HOME/skills`, the same wrapper sho
 
 - Use normal Codex interaction for direct code edits, explanations, and small one-off checks.
 - Use Codexus when the user asks for harness behavior: durable run ledger, status, cancellation, verification, replay, memory, skill proposal/review/promotion/export, bounded context retrieval, or supervised handoff.
-- Prefer session-native and read-only Codexus commands first inside an ongoing conversation: `session status`, `session checkpoint`, `session verify`, `status`, `events tail`, `verify`, `replay`, `memory search`, `memory review`, `skill review`, `skill index`, `locks list`, `schema check`, `schema validate-run`.
+- Prefer session-native and read-only Codexus commands first inside an ongoing conversation: `session status`, `session checkpoint`, `session verify`, `status`, `events tail`, `verify`, `replay`, `memory search`, `memory review`, `skill review`, `skill index`, `locks list`, `lsp status`, `lsp adapters`, `autopilot run-gate`, `schema check`, `schema validate-run`.
 - Use `run --driver codex-exec` only when an explicit supervised sub-run is useful. It starts a separate `codex exec` process and should not replace the active conversation for ordinary edits.
 - Preserve the current conversation as the primary interaction surface. Codexus augments it; it does not create a competing chat loop.
 
@@ -50,12 +50,14 @@ node codex/skills/codexus/scripts/cx.mjs skill improve <skill-id> --reason "<why
 node codex/skills/codexus/scripts/cx.mjs replay skill <skill-id> --with-model-replay --json
 node codex/skills/codexus/scripts/cx.mjs locks list --json
 node codex/skills/codexus/scripts/cx.mjs lsp status --json
+node codex/skills/codexus/scripts/cx.mjs lsp adapters --json
 node codex/skills/codexus/scripts/cx.mjs lsp check --gate --json
 node codex/skills/codexus/scripts/cx.mjs wiki build --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --fresh-only --gate --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --approve --approved-by "$USER" --json
 node codex/skills/codexus/scripts/cx.mjs wiki injection-policy --json
 node codex/skills/codexus/scripts/cx.mjs wiki injection plan --approval <approval-id-or-path> --target session:current --json
+node codex/skills/codexus/scripts/cx.mjs autopilot run-gate --policy <path> --json
 node codex/skills/codexus/scripts/cx.mjs autopilot relay adapters --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence screenshot --instance-id <id> --evidence-path <path> --json

@@ -83,6 +83,66 @@ export interface LspEvidenceReport {
   };
 }
 
+type LspAdapterStatus = "implemented" | "unavailable";
+type LspAdapterRole = "diagnostics-command" | "protocol-server";
+
+export interface LspAdapterDescriptor {
+  id: string;
+  role: LspAdapterRole;
+  status: LspAdapterStatus;
+  language: string;
+  command: string | null;
+  input: {
+    kind: "project-diagnostics" | "language-server-protocol";
+    existingCommandRequired: boolean;
+  };
+  capability: {
+    canRunDiagnostics: boolean;
+    canStartLanguageServer: boolean;
+    canApplyEdits: boolean;
+    canReadOpenBuffers: boolean;
+    canMutateWorkspace: boolean;
+  };
+  authority: {
+    startsLanguageServerAuthority: false;
+    diagnosticsAuthority: boolean;
+    editAuthority: false;
+    workspaceMutationAuthority: false;
+    completionAuthority: false;
+  };
+  boundaries: {
+    explicitCommandOnly: boolean;
+    finiteTimeoutRequired: boolean;
+    boundedOutput: boolean;
+    redactionRequired: boolean;
+    protocolLifecycleDeferred: boolean;
+  };
+  caveat: string;
+}
+
+export interface LspAdapterReport {
+  schemaVersion: 1;
+  stability: "experimental";
+  type: "codexus.lsp.adapters";
+  command: "lsp adapters";
+  cwd: string;
+  projectRoot: string | null;
+  adapters: LspAdapterDescriptor[];
+  summary: {
+    total: number;
+    implemented: number;
+    unavailable: number;
+    diagnosticsCommandImplemented: boolean;
+    protocolServerImplemented: false;
+  };
+  authority: {
+    startsLanguageServerAuthority: false;
+    editAuthority: false;
+    workspaceMutationAuthority: false;
+    completionAuthority: false;
+  };
+}
+
 const OUTPUT_TAIL_LIMIT = 4_000;
 const DEFAULT_TIMEOUT_MS = 60_000;
 
@@ -385,4 +445,217 @@ export function buildLspCheckReport(cwd: string, options: { gate: boolean; timeo
     blockingUnknowns,
     gate,
   };
+}
+
+export function buildLspAdapterReport(cwd: string): LspAdapterReport {
+  const status = buildLspStatusReport(cwd);
+  const providers = status.providers.length > 0
+    ? status.providers
+    : [{
+      id: "typescript",
+      language: "typescript",
+      detected: false,
+      detection: [],
+      protocol: {
+        server: "typescript-language-server",
+        available: false,
+        startsServer: false as const,
+        reason: "typescript_project_not_detected",
+      },
+      diagnostics: {
+        available: false,
+        command: [],
+        displayCommand: null,
+        source: "unavailable" as const,
+        reason: "typescript_project_not_detected",
+      },
+    }];
+
+  const adapters: LspAdapterDescriptor[] = providers.flatMap((provider) => {
+    const diagnosticsImplemented = provider.diagnostics.available;
+    return [
+      {
+        id: `${provider.id}-diagnostics-command`,
+        role: "diagnostics-command",
+        status: diagnosticsImplemented ? "implemented" : "unavailable",
+        language: provider.language,
+        command: provider.diagnostics.displayCommand,
+        input: {
+          kind: "project-diagnostics",
+          existingCommandRequired: true,
+        },
+        capability: {
+          canRunDiagnostics: diagnosticsImplemented,
+          canStartLanguageServer: false,
+          canApplyEdits: false,
+          canReadOpenBuffers: false,
+          canMutateWorkspace: false,
+        },
+        authority: {
+          startsLanguageServerAuthority: false,
+          diagnosticsAuthority: diagnosticsImplemented,
+          editAuthority: false,
+          workspaceMutationAuthority: false,
+          completionAuthority: false,
+        },
+        boundaries: {
+          explicitCommandOnly: true,
+          finiteTimeoutRequired: true,
+          boundedOutput: true,
+          redactionRequired: true,
+          protocolLifecycleDeferred: true,
+        },
+        caveat: diagnosticsImplemented
+          ? "This adapter runs only the existing project diagnostics command when explicitly invoked; it does not start or control an LSP server."
+          : `Project diagnostics are unavailable for this provider: ${provider.diagnostics.reason ?? "no explicit diagnostics command"}.`,
+      },
+      {
+        id: `${provider.id}-protocol-server`,
+        role: "protocol-server",
+        status: "unavailable",
+        language: provider.language,
+        command: provider.protocol.server,
+        input: {
+          kind: "language-server-protocol",
+          existingCommandRequired: true,
+        },
+        capability: {
+          canRunDiagnostics: false,
+          canStartLanguageServer: false,
+          canApplyEdits: false,
+          canReadOpenBuffers: false,
+          canMutateWorkspace: false,
+        },
+        authority: {
+          startsLanguageServerAuthority: false,
+          diagnosticsAuthority: false,
+          editAuthority: false,
+          workspaceMutationAuthority: false,
+          completionAuthority: false,
+        },
+        boundaries: {
+          explicitCommandOnly: true,
+          finiteTimeoutRequired: true,
+          boundedOutput: true,
+          redactionRequired: true,
+          protocolLifecycleDeferred: true,
+        },
+        caveat: `Long-lived ${provider.protocol.server} lifecycle is deferred; Codexus does not auto-start project language servers in this slice.`,
+      },
+    ];
+  });
+
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    type: "codexus.lsp.adapters",
+    command: "lsp adapters",
+    cwd,
+    projectRoot: status.projectRoot,
+    adapters,
+    summary: {
+      total: adapters.length,
+      implemented: adapters.filter((adapter) => adapter.status === "implemented").length,
+      unavailable: adapters.filter((adapter) => adapter.status === "unavailable").length,
+      diagnosticsCommandImplemented: adapters.some((adapter) => adapter.role === "diagnostics-command" && adapter.status === "implemented"),
+      protocolServerImplemented: false,
+    },
+    authority: {
+      startsLanguageServerAuthority: false,
+      editAuthority: false,
+      workspaceMutationAuthority: false,
+      completionAuthority: false,
+    },
+  };
+}
+
+function isLspAdapterRole(value: unknown): value is LspAdapterRole {
+  return value === "diagnostics-command" || value === "protocol-server";
+}
+
+function isLspAdapterStatus(value: unknown): value is LspAdapterStatus {
+  return value === "implemented" || value === "unavailable";
+}
+
+function validateBooleanObject(value: unknown, errors: string[], path: string, required: string[]) {
+  if (!isRecord(value)) {
+    errors.push(`${path}:not_object`);
+    return;
+  }
+  for (const key of required) {
+    if (typeof value[key] !== "boolean") errors.push(`${path}.${key}:expected_boolean`);
+  }
+}
+
+export function validateLspAdapterReport(value: unknown, path = "lsp-adapter") {
+  const errors: string[] = [];
+  if (!isRecord(value)) return { valid: false, errors: [`${path}:not_object`] };
+  if (value.schemaVersion !== 1) errors.push("schemaVersion:not_1");
+  if (value.stability !== "experimental") errors.push("stability:not_experimental");
+  if (value.type !== "codexus.lsp.adapters") errors.push("type:not_codexus_lsp_adapters");
+  if (value.command !== "lsp adapters") errors.push("command:not_lsp_adapters");
+  if (typeof value.cwd !== "string" || !value.cwd) errors.push("cwd:missing_string");
+  if (!(value.projectRoot === null || typeof value.projectRoot === "string")) errors.push("projectRoot:invalid");
+  if (!Array.isArray(value.adapters)) {
+    errors.push("adapters:expected_array");
+  } else {
+    for (const [index, adapter] of value.adapters.entries()) {
+      const prefix = `adapters.${index}`;
+      if (!isRecord(adapter)) {
+        errors.push(`${prefix}:not_object`);
+        continue;
+      }
+      if (typeof adapter.id !== "string" || !adapter.id) errors.push(`${prefix}.id:missing_string`);
+      if (!isLspAdapterRole(adapter.role)) errors.push(`${prefix}.role:invalid_enum`);
+      if (!isLspAdapterStatus(adapter.status)) errors.push(`${prefix}.status:invalid_enum`);
+      if (typeof adapter.language !== "string" || !adapter.language) errors.push(`${prefix}.language:missing_string`);
+      if (!(adapter.command === null || typeof adapter.command === "string")) errors.push(`${prefix}.command:invalid`);
+      if (!isRecord(adapter.input)) {
+        errors.push(`${prefix}.input:not_object`);
+      } else {
+        if (adapter.input.kind !== "project-diagnostics" && adapter.input.kind !== "language-server-protocol") errors.push(`${prefix}.input.kind:invalid_enum`);
+        if (typeof adapter.input.existingCommandRequired !== "boolean") errors.push(`${prefix}.input.existingCommandRequired:expected_boolean`);
+      }
+      validateBooleanObject(adapter.capability, errors, `${prefix}.capability`, [
+        "canRunDiagnostics",
+        "canStartLanguageServer",
+        "canApplyEdits",
+        "canReadOpenBuffers",
+        "canMutateWorkspace",
+      ]);
+      validateBooleanObject(adapter.authority, errors, `${prefix}.authority`, [
+        "startsLanguageServerAuthority",
+        "diagnosticsAuthority",
+        "editAuthority",
+        "workspaceMutationAuthority",
+        "completionAuthority",
+      ]);
+      validateBooleanObject(adapter.boundaries, errors, `${prefix}.boundaries`, [
+        "explicitCommandOnly",
+        "finiteTimeoutRequired",
+        "boundedOutput",
+        "redactionRequired",
+        "protocolLifecycleDeferred",
+      ]);
+      if (typeof adapter.caveat !== "string" || !adapter.caveat) errors.push(`${prefix}.caveat:missing_string`);
+    }
+  }
+  if (!isRecord(value.summary)) {
+    errors.push("summary:not_object");
+  } else {
+    if (typeof value.summary.total !== "number") errors.push("summary.total:expected_number");
+    if (typeof value.summary.implemented !== "number") errors.push("summary.implemented:expected_number");
+    if (typeof value.summary.unavailable !== "number") errors.push("summary.unavailable:expected_number");
+    if (typeof value.summary.diagnosticsCommandImplemented !== "boolean") errors.push("summary.diagnosticsCommandImplemented:expected_boolean");
+    if (value.summary.protocolServerImplemented !== false) errors.push("summary.protocolServerImplemented:not_false");
+  }
+  if (!isRecord(value.authority)) {
+    errors.push("authority:not_object");
+  } else {
+    if (value.authority.startsLanguageServerAuthority !== false) errors.push("authority.startsLanguageServerAuthority:not_false");
+    if (value.authority.editAuthority !== false) errors.push("authority.editAuthority:not_false");
+    if (value.authority.workspaceMutationAuthority !== false) errors.push("authority.workspaceMutationAuthority:not_false");
+    if (value.authority.completionAuthority !== false) errors.push("authority.completionAuthority:not_false");
+  }
+  return { valid: errors.length === 0, errors };
 }

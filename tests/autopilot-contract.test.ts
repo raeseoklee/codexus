@@ -227,6 +227,85 @@ test("autopilot contract approve writes approval record and approved contract", 
   }
 });
 
+test("autopilot run-gate reports pre-run readiness without starting a run", async () => {
+  const cwd = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    await writePackage(cwd);
+    const prd = await writePlanSource(cwd);
+    const draft = JSON.parse(runCli(cwd, ["autopilot", "plan", "--from", prd, "--json"]).stdout);
+    const approve = runCli(cwd, [
+      "autopilot",
+      "contract",
+      "approve",
+      draft.artifactPath,
+      "--approved-by",
+      "maintainer",
+      "--json",
+    ]);
+    assert.equal(approve.status, 0, approve.stderr);
+    const approved = JSON.parse(approve.stdout);
+
+    const result = runCli(cwd, ["autopilot", "run-gate", "--policy", approved.artifactPath, "--json"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.schemaVersion, 1);
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.command, "autopilot run-gate");
+    assert.equal(output.runSupported, false);
+    assert.equal(output.contractStatus, "approved");
+    assert.equal(output.approvalRecordExists, true);
+    assert.equal(output.actionAuthority.contractVersion, "autopilot-run-gate-v1");
+    assert.equal(output.actionAuthority.sideEffects.startsRun, false);
+    assert.equal(output.actionAuthority.sideEffects.requiresWorktreeIsolation, true);
+    assert.equal(output.actionAuthority.sideEffects.requiresFreshVerification, true);
+    assert.equal(output.actionAuthority.driverAuthority, "none");
+    assert.equal(output.actionAuthority.completionAuthority, false);
+    assert.equal(output.executionGate.status, "blocked");
+    assert.equal(output.executionGate.exitCode, 1);
+    assert.equal(output.gate.status, "not_requested");
+    assert.equal(output.gate.exitCode, 0);
+    assert.ok(output.derivableFacts.some((fact: { kind: string }) => fact.kind === "autopilot_run_authority_deferred"));
+
+    const artifact = join(cwd, "run-gate.json");
+    await writeFile(artifact, `${JSON.stringify(output, null, 2)}\n`);
+    const schema = runCli(cwd, ["schema", "validate", "--type", "autopilot-run-gate", "--file", artifact, "--json"]);
+    assert.equal(schema.status, 0, schema.stderr);
+    assert.equal(JSON.parse(schema.stdout).ok, true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("autopilot run-gate can gate readiness while live execution remains blocked", async () => {
+  const cwd = await tempDir();
+  try {
+    await initGitRepo(cwd);
+    await writePackage(cwd);
+    const prd = await writePlanSource(cwd);
+    const draft = JSON.parse(runCli(cwd, ["autopilot", "plan", "--from", prd, "--json"]).stdout);
+    const approve = JSON.parse(runCli(cwd, [
+      "autopilot",
+      "contract",
+      "approve",
+      draft.artifactPath,
+      "--approved-by",
+      "maintainer",
+      "--json",
+    ]).stdout);
+
+    const result = runCli(cwd, ["autopilot", "run-gate", "--policy", approve.artifactPath, "--gate", "--json"]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.runSupported, false);
+    assert.ok(["failed", "blocked"].includes(output.gate.status));
+    assert.equal(output.executionGate.status, "blocked");
+    assert.equal(output.actionAuthority.sideEffects.startsRun, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("autopilot contract scope-check reports forbidden and out-of-scope changes", async () => {
   const cwd = await tempDir();
   try {

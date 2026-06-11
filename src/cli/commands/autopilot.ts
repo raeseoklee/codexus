@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import {
   approveAutopilotContract,
   buildAutopilotPlan,
+  buildAutopilotRunGate,
   scopeCheckAutopilotContract,
   validateAutopilotContractFile,
 } from "../../autopilot/contract.ts";
@@ -114,6 +115,28 @@ export async function autopilotCommand(args: ParsedArgs): Promise<void> {
     throw new Error(`unsupported_autopilot_contract_command:${action}`);
   }
 
+  if (namespace === "run-gate") {
+    assertMaxPositionals(args, 2);
+    assertAllowedFlags(args, ["json", "cwd", "file", "policy", "gate", "since"]);
+    const contractPath = args.positionals[1] ?? flagString(args.flags, "file") ?? flagString(args.flags, "policy");
+    if (!contractPath) throw new Error("missing_autopilot_contract_file");
+    const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
+    const json = flagBool(args.flags, "json");
+    const result = await buildAutopilotRunGate(cwd, contractPath, {
+      gate: flagBool(args.flags, "gate"),
+      since: flagString(args.flags, "since"),
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      process.exitCode = result.gate.exitCode;
+      return;
+    }
+    console.log(`Autopilot run readiness: ${result.readinessGate.status}`);
+    console.log(`Execution: ${result.executionGate.status}`);
+    console.log(`Run supported: ${result.runSupported ? "yes" : "no"}`);
+    process.exitCode = result.gate.exitCode;
+    return;
+  }
   if (namespace === "run") throw new Error("autopilot_run_deferred");
   if (namespace !== "relay") throw new Error(`unsupported_autopilot_command:${namespace ?? "missing"}`);
   const action = args.positionals[1] ?? "status";

@@ -148,6 +148,16 @@ export async function appServerObserverStatus(cwd: string) {
       completionAuthority: false,
       caveat: "This command reads recorded app-server evidence only. It never connects to a live socket, starts a Desktop turn, or treats fake stdio proof as live Desktop attachment.",
     },
+    sessionProjection: {
+      eligibleForSessionEvidenceLoop: true,
+      source: "recorded-app-server-evidence" as const,
+      runtimeSurfaceSource: liveStageBObserved ? "stage-b-turn-boundary" as const : "none" as const,
+      projectsRuntimeSurface: liveStageBObserved,
+      liveAttachmentProof: false,
+      connectsToLiveSocket: false,
+      completionAuthority: false,
+      caveat: "Session projections may cite recorded observer evidence, but they do not prove an active Desktop attachment or authorize completion.",
+    },
     latest: {
       discovery: latestDiscovery,
       stageB: latestStageB,

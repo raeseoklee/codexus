@@ -132,8 +132,13 @@ gate를 약화시키지 말고 loud하게 실패). 후보 필드:
    contract metadata로 함께 기록합니다.
 2. **사람 승인(1회).** 메인테이너가 계약을 검토·승인. 이때 source document hash와 canonical
    contract-body hash를 담은 approval artifact를 씁니다. 이 1회 승인이 per-step 승인을 대체.
-3. **`cx autopilot run --policy <contract>`** 가 worktree 안에서, 승인된 계약 아래, strict
-   gate와 stop condition으로 supervised loop를 돌림.
+3. **`cx autopilot run-gate --policy <contract>`** 는 run을 시작하지 않고 승인된 계약,
+   approval record, scope, fresh-evidence readiness를 검사합니다. 이 report는 readiness
+   fact를 보여주더라도 `runSupported:false`와 `executionGate.status:"blocked"`를 함께
+   보고합니다.
+4. **`cx autopilot run --policy <contract>`** 는 계속 deferred입니다. 승격될 경우에만
+   worktree 안에서, 승인된 계약 아래, strict gate와 stop condition으로 supervised loop를
+   돌립니다.
 
 ## Gate 합성 (완료 권한)
 
@@ -219,6 +224,7 @@ cx autopilot plan --from docs/PRD.md --json
 cx autopilot contract validate .codexus/autopilot/drafts/<id>.json --json
 cx autopilot contract approve .codexus/autopilot/drafts/<id>.json --approved-by maintainer --json
 cx autopilot contract scope-check .codexus/autopilot/drafts/<id>.json --json
+cx autopilot run-gate --policy .codexus/autopilot/drafts/<id>.json --json
 cx autopilot run --policy .codexus/autopilot.json --json   # deferred
 ```
 
@@ -250,6 +256,9 @@ cx autopilot run --policy .codexus/autopilot.json --json   # deferred
   artifact를 기록하고 승인된 contract를 생성.
 - 완료: `cx autopilot contract scope-check`가 change-evidence fact를 재사용해 승인된
   contract 기준 forbidden/out-of-scope change를 gate 가능.
+- 완료: `cx autopilot run-gate`가 pre-run contract/scope/evidence readiness를
+  보고하되 live execution은 계속 blocked로 유지(`runSupported:false`,
+  `startsRun:false`).
 - Deferred: acceptance-criteria extraction은 heuristic이며
   `acceptance_criteria_extraction_deferred`를 자기보고합니다. 비어 있거나 일부만 추출된
   결과를 authoritative acceptance coverage로 해석하면 안 됩니다.

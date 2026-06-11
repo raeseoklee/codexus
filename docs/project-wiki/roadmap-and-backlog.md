@@ -46,7 +46,8 @@ These need more evidence before promotion:
 - Desktop app-server attachment and live event observation.
 - Plugin always-on behavior in Codex, because packaging evidence is not the
   same as runtime supervision.
-- LSP protocol-server integration beyond detect-only project diagnostics.
+- LSP protocol-server integration beyond detect-only project diagnostics and
+  report-only adapter status.
 - App-instance health modeling that distinguishes process liveness, endpoint
   checks, and user-observed behavior.
 
@@ -54,11 +55,12 @@ These need more evidence before promotion:
 
 These must stay visibly gated until their contracts exist:
 
-- live `cx autopilot run`,
+- live `cx autopilot run` beyond `run-gate` readiness reporting,
 - automatic context or prompt injection,
 - active relay engine spawning beyond artifact import,
 - routine live model replay,
-- full unattended cron/gateway scheduler ownership,
+- full unattended cron/gateway scheduler ownership beyond current readiness-gap
+  reporting,
 - tmux or native worker launch authority beyond honest status and recorder
   surfaces.
 

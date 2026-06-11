@@ -176,6 +176,53 @@ export interface AutopilotScopeCheckResult {
   migration: Awaited<ReturnType<typeof readSessionStateWithMigration>>["migration"];
 }
 
+export interface AutopilotRunGateResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "autopilot run-gate";
+  file: string;
+  runSupported: false;
+  contractStatus: AutopilotScopeCheckResult["contractStatus"];
+  validation: AutopilotScopeCheckResult["validation"];
+  approvalRecordExists: boolean | null;
+  scope: {
+    allow: string[];
+    forbiddenChanges: string[];
+    diffStatus: AutopilotScopeCheckResult["changeEvidence"]["status"];
+    freshEvidence: boolean;
+  };
+  readinessGate: AutopilotScopeCheckResult["gate"];
+  executionGate: {
+    enabled: true;
+    status: "blocked";
+    exitCode: 1;
+    reason: string;
+  };
+  actionAuthority: {
+    schemaVersion: 1;
+    contractVersion: "autopilot-run-gate-v1";
+    actionSurface: "autopilot.run";
+    runSupported: false;
+    sideEffects: {
+      startsRun: false;
+      mutatesWorkspace: false;
+      requiresWorktreeIsolation: true;
+      requiresExplicitApproval: true;
+      requiresFreshVerification: true;
+    };
+    driverAuthority: "none";
+    completionAuthority: false;
+    cleanupAuthority: false;
+    healthAuthority: false;
+    caveat: string;
+  };
+  evidenceGaps: AutopilotScopeCheckResult["evidenceGaps"];
+  derivableFacts: AutopilotScopeCheckResult["derivableFacts"];
+  heuristicClaims: AutopilotScopeCheckResult["heuristicClaims"];
+  blockingUnknowns: AutopilotScopeCheckResult["blockingUnknowns"];
+  gate: AutopilotScopeCheckResult["gate"];
+}
+
 const allowedTopLevelKeys = new Set(["schemaVersion", "stability", "type", "status", "autonomyPreset", "sourceDocs", "autopilot", "approval"]);
 const allowedBodyKeys = new Set([
   "scope",
@@ -804,5 +851,71 @@ export async function scopeCheckAutopilotContract(
     blockingUnknowns,
     gate,
     migration: stateRead.migration,
+  };
+}
+
+export async function buildAutopilotRunGate(
+  cwd: string,
+  file: string,
+  options: { gate?: boolean; since?: string } = {},
+): Promise<AutopilotRunGateResult> {
+  const scope = await scopeCheckAutopilotContract(cwd, file, {
+    gate: options.gate,
+    since: options.since,
+  });
+  const contract = scope.validation.contract;
+  const actionAuthority: AutopilotRunGateResult["actionAuthority"] = {
+    schemaVersion: 1,
+    contractVersion: "autopilot-run-gate-v1",
+    actionSurface: "autopilot.run",
+    runSupported: false,
+    sideEffects: {
+      startsRun: false,
+      mutatesWorkspace: false,
+      requiresWorktreeIsolation: true,
+      requiresExplicitApproval: true,
+      requiresFreshVerification: true,
+    },
+    driverAuthority: "none",
+    completionAuthority: false,
+    cleanupAuthority: false,
+    healthAuthority: false,
+    caveat: "This command checks pre-run contract, approval, scope, and fresh-evidence readiness only. Live autopilot execution remains deferred and this command never starts a run.",
+  };
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "autopilot run-gate",
+    file: scope.file,
+    runSupported: false,
+    contractStatus: scope.contractStatus,
+    validation: scope.validation,
+    approvalRecordExists: scope.approvalRecordExists,
+    scope: {
+      allow: contract?.autopilot.scope.allow ?? [],
+      forbiddenChanges: contract?.autopilot.scope.forbiddenChanges ?? [],
+      diffStatus: scope.changeEvidence.status,
+      freshEvidence: scope.changeEvidence.status === "pass",
+    },
+    readinessGate: scope.gate,
+    executionGate: {
+      enabled: true,
+      status: "blocked",
+      exitCode: 1,
+      reason: "live autopilot run remains deferred until worktree-owned execution and capability start gates are implemented",
+    },
+    actionAuthority,
+    evidenceGaps: scope.evidenceGaps,
+    derivableFacts: [
+      ...scope.derivableFacts,
+      {
+        kind: "autopilot_run_authority_deferred",
+        gate: false,
+        evidence: "runSupported=false; actionAuthority.sideEffects.startsRun=false",
+      },
+    ],
+    heuristicClaims: scope.heuristicClaims,
+    blockingUnknowns: scope.blockingUnknowns,
+    gate: scope.gate,
   };
 }

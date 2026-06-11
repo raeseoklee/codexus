@@ -331,7 +331,7 @@
             <span class="tag evidence">design after observation</span>
             <span class="tag done">session projection done</span>
           </div>
-          <p>Recorded app-server observer evidence is now projected into <code>cx session status</code> and <code>cx session hud</code> without enabling product execution.</p>
+          <p>Recorded app-server observer evidence is now projected into <code>cx session status</code> and <code>cx session hud</code> without enabling product execution, and the observer status now includes a <code>sessionProjection</code> block that separates recorded evidence from live Desktop attachment proof.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Done: session projections reuse the same recorded-evidence observer model as <code>cx app-server observer status</code>.</li>
@@ -463,12 +463,13 @@
             <span class="tag gateable">recovery done</span>
             <span class="tag evidence">ownership contract done</span>
           </div>
-          <p>The first explicit-approval dispatcher is live, blocked live attempts have schema-validatable boundary audit records, and foreground recovery projections report manual-review candidates plus <code>automation-scheduler-ownership-v1</code> evidence. The next step is a real durable queue, lease heartbeat, and retry policy without overstating autonomy.</p>
+          <p>The first explicit-approval dispatcher is live, blocked live attempts have schema-validatable boundary audit records, and foreground recovery projections report manual-review candidates plus <code>automation-scheduler-ownership-v1</code> and <code>automation-scheduler-readiness-v1</code> evidence. The next step is a real durable queue, lease heartbeat, and retry policy without overstating autonomy.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Dry-run and live paths continue to share the same policy contract.</li>
             <li>Done: recovery projections record dispatch history and manual-review candidates without automatic retry authority.</li>
             <li>Done: queue ownership and unattended retry semantics are recorded as <code>automation-scheduler-ownership-v1</code> negative evidence.</li>
+            <li>Done: scheduler readiness gaps are reported as <code>automation-scheduler-readiness-v1</code> without scheduler/retry authority.</li>
             <li>Next: a real queue owner, lease heartbeat, and retry policy can be considered only with fresh recovery proof.</li>
             <li>No unattended scheduler claims without explicit ownership and recovery proofs.</li>
           </ul>
@@ -520,11 +521,12 @@
             <span class="tag evidence">diagnostics evidence</span>
             <span class="tag gated">protocol server deferred</span>
           </div>
-          <p>The first slice detects TypeScript project diagnostics and runs explicit diagnostics commands without starting a long-lived language server. The next step is descriptor-backed protocol-server adapters.</p>
+          <p>The first slice detects TypeScript project diagnostics, runs explicit diagnostics commands, and reports descriptor-backed adapter status without starting a long-lived language server. The next step is actual protocol-server lifecycle.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Done: <code>cx lsp status</code> detects candidates without starting a server.</li>
             <li>Done: <code>cx lsp check --gate</code> runs explicit project diagnostics and redacts bounded output.</li>
+            <li>Done: <code>cx lsp adapters --json</code> reports diagnostics-command support and protocol-server unavailability without edit/start/completion authority.</li>
             <li>Next: protocol-server lifecycle, trust, timeout, and cancellation contracts before automatic project LSP application.</li>
             <li>LSP diagnostics never edit files or become completion authority.</li>
           </ul>
@@ -574,7 +576,7 @@
             <span class="tag advisory">experimental live slice</span>
             <span class="tag gated">automation</span>
           </div>
-          <p>An explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, foreground recovery projection, and <code>automation-scheduler-ownership-v1</code> evidence now exist. The remaining work is a real durable scheduler queue, retry policy, and long-lived owner proof without overstating autonomy.</p>
+          <p>An explicit-approval live dispatcher, blocked-dispatch boundary audit record, action-authority negative evidence, foreground recovery projection, <code>automation-scheduler-ownership-v1</code> evidence, and <code>automation-scheduler-readiness-v1</code> gaps now exist. The remaining work is a real durable scheduler queue, retry policy, and long-lived owner proof without overstating autonomy.</p>
           <span class="label">Gate</span>
           <p>Permission, approval, lock, dispatch, completion, recovery, and owner-liveness evidence must stay durable.</p>
         </article>
@@ -647,11 +649,12 @@
             <span class="tag gateable">foundation done</span>
             <span class="tag gated">live run deferred</span>
           </div>
-          <p>The experimental foundation exists: draft planning, contract validate/approve, and scope-check are in place. Live <code>cx autopilot run</code> still needs worktree-owned execution and capability start gates.</p>
+          <p>The experimental foundation exists: draft planning, contract validate/approve, scope-check, and run-gate readiness reporting are in place. Live <code>cx autopilot run</code> still needs worktree-owned execution and capability start gates.</p>
           <span class="label">Acceptance</span>
           <ul>
             <li>Done: human-approved contract draft and approval record flow.</li>
             <li>Done: scope-check foundation over change-evidence facts.</li>
+            <li>Done: <code>cx autopilot run-gate --policy</code> reports readiness while keeping execution blocked.</li>
             <li>Next: worktree-owned live execution.</li>
             <li>Next: capability/policy start gate for live runs.</li>
           </ul>
