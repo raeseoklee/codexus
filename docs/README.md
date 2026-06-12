@@ -24,6 +24,7 @@ supported short alias.
 - [Quick start](quickstart.md): local setup, deterministic test run, real Codex run, and Codex-native adapter installation.
 - [Feature reference](features.md): shipped stable, experimental, and deferred surfaces by command.
 - [Using Codexus inside Codex](codex-session-usage.md): how to invoke the `$codexus` skill from an interactive Codex session, what to ask it to do, and when not to use it.
+- [Demo tape](demo/README.md): reproducible VHS source for the redacted README demo.
 - [Project LLM Wiki](project-wiki/README.md): checked-in project-management context for maintainers and LLM agents, separate from the generated experimental repository wiki.
 - [Engineering plan](plans/2026-05-29-codex-harness-engineering-plan.md): migrated planning baseline, research findings, constraints, MVP scope, and risks.
 - [Harness remediation plan](plans/2026-05-29-harness-remediation-plan.md): accepted review findings and implemented remediation slices for repair, supervision, and evolution depth.

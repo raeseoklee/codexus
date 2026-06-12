@@ -24,6 +24,9 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Feature reference, project wiki current-state snapshot, roadmap kanban,
   Codex-native adapter 문서, implementation status를 `0.2.2` baseline으로
   갱신하고 update-notification boundary를 명확히 했습니다.
+- Redacted VHS README demo와 재생성 가능한 tape source를 추가했습니다. 이 demo는
+  live model transcript라고 주장하지 않고 supervised verify/repair/ledger loop만
+  보여줍니다.
 
 ## 0.2.2 - 2026-06-12
 

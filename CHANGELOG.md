@@ -24,6 +24,9 @@ occur before 1.0, but they should be called out clearly.
 - Updated the feature reference, project wiki current-state snapshot, roadmap
   kanban, Codex-native adapter docs, and implementation status to the `0.2.2`
   baseline and clarified update-notification boundaries.
+- Added a redacted VHS README demo and reproducible tape source. The demo shows
+  the supervised verify/repair/ledger loop without claiming to be a live model
+  transcript.
 
 ## 0.2.2 - 2026-06-12
 

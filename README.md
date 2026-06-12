@@ -48,6 +48,15 @@ Codexus runs Codex, then runs `npm test`. If the test fails, Codexus gives Codex
 the real failing output and retries within the configured repair budget. The run
 is `complete` only when the verification command passes.
 
+![Redacted Codexus supervised run demo](https://raw.githubusercontent.com/raeseoklee/codexus/main/docs/assets/codexus-supervised-run.gif)
+
+This is a redacted fixture tape, not a live model transcript. It shows the
+user-facing loop without exposing local paths, auth state, or private output.
+The reproducible VHS source is in
+[docs/demo](https://github.com/raeseoklee/codexus/blob/main/docs/demo/README.md);
+full release verification remains in
+[release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.2.md).
+
 > The 0.2 stable contract is intentionally narrow: live app-server turns,
 > routine live model replay, and automatic prompt injection remain gated off.
 > Architecture checks and manual wiki context are stable only for the bounded
