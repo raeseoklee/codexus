@@ -26,8 +26,10 @@ Stable tag 전:
    가리키는지 확인합니다.
 2. Source gate와 package gate를 실행합니다.
 3. `cx release check --gate --json`을 실행합니다.
-4. Release commit을 push하고 GitHub CI green을 확인합니다.
-5. Version tag를 push해 trusted publishing을 trigger합니다.
+4. Release commit 전 docs, README link, release policy, release evidence가
+   갱신됐는지 확인합니다.
+5. Release commit을 push하고 GitHub CI green을 확인합니다.
+6. Version tag를 push해 trusted publishing을 trigger합니다.
 
 자주 쓰는 명령:
 
@@ -44,6 +46,8 @@ Publish 후 `docs/release-evidence/<version>.md`와 한국어 counterpart에 evi
 기록합니다:
 
 - npm version과 dist-tags,
+- npm `next >= latest`; trusted publishing 이후 `next`가 뒤처지면 인증된
+  maintainer dist-tag correction을 기록,
 - GitHub Release와 `install.sh` asset,
 - trusted-publishing provenance,
 - installed `cx --version`,

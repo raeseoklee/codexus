@@ -49,9 +49,11 @@ Codexus pre-1.0 versioning은 기능이 커 보이는지보다 stable JSON contr
 - Minor release는 experimental evidence surface를 stable contract surface로 승격하거나 이미
   frozen된 stable field를 breaking/redefine할 때 사용합니다.
 - Prerelease build는 명시적 npm `next` channel에 남깁니다.
-- Stable publish는 `latest`와 `next`를 모두 stable version으로 동기화합니다.
-  이후 prerelease publish가 `next`를 다시 앞으로 이동할 수 있지만, `next`는
-  `latest`보다 오래된 version을 가리키면 안 됩니다.
+- Tag-triggered stable publish는 trusted publishing으로 `npm publish`만 수행하며,
+  post-publish `npm dist-tag add` 권한을 요구하면 안 됩니다.
+- Live release sign-off는 `next >= latest`를 검증합니다. Trusted publishing 이후 npm
+  `next`가 `latest`보다 뒤처져 있으면, 인증된 maintainer가 release 완료 선언 전에
+  `next`를 갱신합니다.
 
 따라서 큰 experimental bundle도 frozen stable contract를 바꾸지 않으면 patch release일 수
 있습니다. 반대로 작은 breaking contract change는 다음 minor release가 필요합니다.

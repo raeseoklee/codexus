@@ -291,6 +291,7 @@ Canonical bin은 `codexus`이고, `cx`는 지원되는 short alias입니다.
 - [0.1.15 release evidence](release-evidence/0.1.15.md)
 - [0.2.0 release evidence](release-evidence/0.2.0.md)
 - [0.2.1 release evidence](release-evidence/0.2.1.md)
+- [0.2.2 release evidence](release-evidence/0.2.2.md)
 - [JSON contract](json-contract.md)
 - [릴리즈 정책](release-policy.md)
 - [Public release checklist](public-release.md)

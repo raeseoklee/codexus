@@ -57,7 +57,7 @@ async function writeFixture(rootDir: string, options: { installDefault?: "stable
       "      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
       "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",
       '        with: { registry-url: "https://registry.npmjs.org" }',
-      "      - run: npm run publish:stable",
+      "      - run: npm run publish:stable -- --no-dist-tag-sync",
       '      - run: echo "Prerelease tags must publish via workflow_dispatch mode=next"',
       "  github-release:",
       "    permissions:",
@@ -85,12 +85,31 @@ test("release integrity passes for local source release wiring", () => {
   assert.equal(report.releaseIntegrity.status, "pass");
   assert.equal(report.gate.status, "passed");
   assert.equal(report.releaseIntegrity.installScript.defaultChannel, "stable");
-  assert.equal(report.releaseIntegrity.workflow.stableDistTagSync, true);
+  assert.equal(report.releaseIntegrity.workflow.stableDistTagSync, false);
+  assert.equal(report.releaseIntegrity.workflow.trustedPublishSkipsDistTagMutation, true);
   assert.equal(report.releaseIntegrity.workflow.installerAssetAttached, true);
-  assert.ok(report.derivableFacts.some((fact) => fact.kind === "release_workflow_dist_tag_sync"));
+  assert.ok(report.derivableFacts.some((fact) => fact.kind === "release_workflow_trusted_publish_no_dist_tag_mutation"));
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "installer_expected_version_guard"));
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "release_workflow_installer_asset"));
   assert.ok(report.informationalUnknowns.some((unknown) => unknown.kind === "github_release_not_checked"));
+});
+
+test("release integrity gates trusted-publishing post-publish dist-tag mutation", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeFixture(cwd);
+    const workflowPath = join(cwd, ".github", "workflows", "release.yml");
+    const workflow = readFileSync(workflowPath, "utf8").replace("npm run publish:stable -- --no-dist-tag-sync", "npm run publish:stable");
+    writeFileSync(workflowPath, workflow);
+
+    const report = buildReleaseIntegrityReport(cwd, { gate: true });
+    assert.equal(report.releaseIntegrity.status, "fail");
+    assert.equal(report.releaseIntegrity.workflow.stableDistTagSync, true);
+    assert.equal(report.releaseIntegrity.workflow.trustedPublishSkipsDistTagMutation, false);
+    assert.ok(report.evidenceGaps.some((gap) => gap.kind === "release_workflow_post_publish_dist_tag_mutation"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
 });
 
 test("release integrity gates installer prerelease defaults", async () => {

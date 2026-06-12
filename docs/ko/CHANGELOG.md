@@ -9,6 +9,29 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.2 - 2026-06-12
+
+### Fixed
+
+- Tag-triggered publish가 `npm run publish:stable -- --no-dist-tag-sync`를
+  사용하도록 trusted-publishing stable release workflow를 보강했습니다. GitHub OIDC
+  trusted-publisher 권한 표면을 `npm publish`로 제한하고, package publish는 성공했는데
+  post-publish `npm dist-tag add` 단계에서 workflow가 실패하는 0.2.1 실패 모드를
+  방지합니다.
+- `cx release check --gate --json`이 trusted-publishing workflow의 post-publish
+  dist-tag mutation 회피를 요구하도록 갱신했습니다. Static release gate는 이제
+  `trustedPublishSkipsDistTagMutation:true`를 보고하고, npm `next >= latest` 증명은
+  계속 post-publish live sign-off가 담당합니다.
+- Trusted-publishing post-publish dist-tag mutation 회귀 테스트를 추가해 0.2.1
+  workflow failure mode가 조용히 재발하지 않게 했습니다.
+
+### Documentation
+
+- Release policy, public release checklist, JSON contract, implementation
+  status, project wiki release page를 정리했습니다. Trusted publishing은 stable
+  package publish만 담당하고, npm `next`가 `latest`보다 뒤처진 경우 인증된
+  maintainer dist-tag correction을 post-publish live sign-off action으로 기록합니다.
+
 ## 0.2.1 - 2026-06-11
 
 ### Added

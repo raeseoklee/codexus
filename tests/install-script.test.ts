@@ -174,9 +174,8 @@ test("release workflow is wired for trusted publishing and stable-only tag publi
   const workflow = await readFile(resolve(".github/workflows/release.yml"), "utf8");
   assert.match(workflow, /id-token:\s*write/);
   assert.match(workflow, /registry-url:\s*"https:\/\/registry\.npmjs\.org"/);
-  assert.match(workflow, /npm run publish:stable/);
+  assert.match(workflow, /npm run publish:stable -- --no-dist-tag-sync/);
   assert.match(workflow, /npm run publish:next/);
-  assert.doesNotMatch(workflow, /npm run publish:stable -- --no-dist-tag-sync/);
   assert.match(workflow, /Prerelease tags must publish via workflow_dispatch mode=next/);
   assert.match(workflow, /actions\/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd/);
   assert.match(workflow, /actions\/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/);

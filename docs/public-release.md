@@ -113,7 +113,10 @@ token. Before each stable cut:
 - After the tag-triggered workflow completes, run
   `cx release check --version <version> --live --gate --json` from the source
   checkout to verify npm `latest`, GitHub latest, and the GitHub Release
-  `install.sh` asset hash against the checked-in installer.
+  `install.sh` asset hash against the checked-in installer. This live sign-off
+  also verifies that npm `next` is not older than `latest`; if it is stale, an
+  authenticated maintainer must run `npm dist-tag add codexus@<version> next`
+  before declaring the release complete.
 
 Local stable publish remains a fallback/dev path only:
 
@@ -127,8 +130,8 @@ The stable helper refuses non-dry-run prerelease versions; use
 Both helpers retry dist-tag reads to avoid failing on npm registry
 read-after-write lag. Local fallback publishes can force `latest` and `next` to
 the published version; trusted-publishing runs keep the npm trusted-publisher
-permission surface to `npm publish` and only verify the tag that publish
-created.
+permission surface to `npm publish` and leave `next >= latest` enforcement to
+the post-publish live sign-off.
 
 ## GitHub Pages Installer
 

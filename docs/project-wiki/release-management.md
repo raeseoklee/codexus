@@ -27,8 +27,10 @@ Before a stable tag:
    refer to the intended version.
 2. Run the source and package gates.
 3. Run `cx release check --gate --json`.
-4. Push the release commit and confirm GitHub CI is green.
-5. Push the version tag to trigger trusted publishing.
+4. Confirm docs, README links, release policy, and release evidence have been
+   refreshed before the release commit.
+5. Push the release commit and confirm GitHub CI is green.
+6. Push the version tag to trigger trusted publishing.
 
 Useful commands:
 
@@ -45,6 +47,8 @@ After publish, record evidence under `docs/release-evidence/<version>.md` and
 the Korean counterpart:
 
 - npm version and dist-tags,
+- npm `next >= latest`; if `next` lags after trusted publishing, record the
+  authenticated maintainer dist-tag correction,
 - GitHub Release and `install.sh` asset,
 - trusted-publishing provenance,
 - installed `cx --version`,

@@ -82,11 +82,11 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   gate-mode supply-chain check, local-mode release check, LSP check가 포함됩니다.
 - `cx release check --json`은 source checkout의 stable local-mode release-integrity
   evidence를 보고합니다. Stable installer default, expected-version guard,
-  pinned trusted-publishing workflow, stable dist-tag sync wiring, GitHub Release
-  `install.sh` asset wiring, local release-evidence doc을 확인합니다. `--live`는
-  npm `latest`, npm `next`가 `latest`보다 오래되지 않았는지, GitHub latest,
-  installer asset hash identity를 확인하는 명시적 experimental post-publish
-  sign-off입니다.
+  pinned trusted-publishing workflow, trusted-publishing workflow의 post-publish
+  dist-tag mutation 금지, GitHub Release `install.sh` asset wiring, local
+  release-evidence doc을 확인합니다. `--live`는 npm `latest`, npm `next`가
+  `latest`보다 오래되지 않았는지, GitHub latest, installer asset hash identity를
+  확인하는 명시적 experimental post-publish sign-off입니다.
 - `cx release policy --json`은 active release cadence policy를 보고합니다. 작은 commit을
   유지하되 더 큰 theme의 stable release로 묶는 cadence, hotfix exception,
   stable-contract version boundary, 영문/한국어 policy 문서 존재를 포함합니다.

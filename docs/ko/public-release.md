@@ -106,7 +106,9 @@ Stable release의 canonical path는 local npm token이 아니라
 - tag-triggered workflow가 완료된 뒤 source checkout에서
   `cx release check --version <version> --live --gate --json`을 실행해 npm `latest`,
   GitHub latest, GitHub Release의 `install.sh` asset hash가 checked-in installer와
-  일치하는지 확인합니다.
+  일치하는지 확인합니다. 이 live sign-off는 npm `next`가 `latest`보다 오래되지
+  않았는지도 검증합니다. `next`가 뒤처져 있으면 release 완료 선언 전에 인증된
+  maintainer가 `npm dist-tag add codexus@<version> next`를 실행해야 합니다.
 
 Local stable publish는 fallback/dev path로만 사용합니다:
 
@@ -120,7 +122,7 @@ stable helper는 non-dry-run prerelease version을 거부합니다. Prerelease b
 두 helper 모두 npm registry read-after-write lag를 고려해 dist-tag read를 retry합니다.
 로컬 fallback publish는 `latest`와 `next`를 published version으로 강제 정렬할 수
 있고, trusted-publishing run은 npm trusted-publisher 권한 표면을 `npm publish`로
-좁힌 채 publish가 만든 tag만 검증합니다.
+좁힌 뒤 `next >= latest` enforcement를 post-publish live sign-off에 맡깁니다.
 
 ## GitHub Pages Installer
 

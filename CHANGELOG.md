@@ -9,6 +9,30 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.2 - 2026-06-12
+
+### Fixed
+
+- Hardened the trusted-publishing stable release workflow so tag-triggered
+  publishes use `npm run publish:stable -- --no-dist-tag-sync`. This keeps the
+  GitHub OIDC trusted-publisher surface limited to `npm publish` and prevents a
+  successful package publish from being followed by a failing post-publish
+  `npm dist-tag add` step.
+- Updated `cx release check --gate --json` to require the trusted-publishing
+  workflow to avoid post-publish dist-tag mutation. The static release gate now
+  reports `trustedPublishSkipsDistTagMutation:true`; the live release sign-off
+  remains responsible for proving npm `next >= latest`.
+- Added regression coverage for trusted-publishing post-publish dist-tag
+  mutation so the 0.2.1 workflow failure mode cannot silently return.
+
+### Documentation
+
+- Clarified the release policy, public release checklist, JSON contract,
+  implementation status, and project wiki release page: trusted publishing
+  publishes the stable package, while authenticated maintainer dist-tag
+  correction is a post-publish live sign-off action when npm `next` trails
+  `latest`.
+
 ## 0.2.1 - 2026-06-11
 
 ### Added

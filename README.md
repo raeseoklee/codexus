@@ -281,7 +281,7 @@ Canonical bin: `codexus`. Supported short alias: `cx`.
 - [Implementation status](https://github.com/raeseoklee/codexus/blob/main/docs/implementation-status.md)
 - [Remaining work](https://github.com/raeseoklee/codexus/blob/main/docs/remaining-work.md)
 - [0.1.0 stable readiness plan](https://github.com/raeseoklee/codexus/blob/main/docs/plans/2026-05-31-0.1.0-stable-readiness-plan.md)
-- [0.2.1 release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.1.md)
+- [0.2.2 release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.2.md)
 - [JSON contract](https://github.com/raeseoklee/codexus/blob/main/docs/json-contract.md)
 - [Public release checklist](https://github.com/raeseoklee/codexus/blob/main/docs/public-release.md)
 

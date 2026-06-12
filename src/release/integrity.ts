@@ -14,7 +14,7 @@ export interface ReleaseIntegrityEvidenceGap {
     | "installer_expected_version_guard_missing"
     | "release_workflow_missing"
     | "release_workflow_not_trusted_publishing"
-    | "release_workflow_dist_tag_sync_missing"
+    | "release_workflow_post_publish_dist_tag_mutation"
     | "release_workflow_unpinned_action"
     | "release_workflow_installer_asset_missing"
     | "release_evidence_missing"
@@ -37,7 +37,7 @@ export interface ReleaseIntegrityDerivableFact {
     | "installer_default_stable_channel"
     | "installer_expected_version_guard"
     | "release_workflow_trusted_publishing"
-    | "release_workflow_dist_tag_sync"
+    | "release_workflow_trusted_publish_no_dist_tag_mutation"
     | "release_workflow_pinned_actions"
     | "release_workflow_installer_asset"
     | "release_evidence_present"
@@ -93,6 +93,7 @@ export interface ReleaseIntegrityReport {
       path: string | null;
       trustedPublishing: boolean;
       stableDistTagSync: boolean;
+      trustedPublishSkipsDistTagMutation: boolean;
       installerAssetAttached: boolean;
       pinnedActions: string[];
       unpinnedActions: string[];
@@ -226,7 +227,18 @@ function trustedPublishingConfigured(workflowText: string): boolean {
 }
 
 function stableDistTagSyncConfigured(workflowText: string): boolean {
-  return /npm run publish:stable/.test(workflowText) && !/npm run publish:stable -- --no-dist-tag-sync/.test(workflowText);
+  return stablePublishCommands(workflowText)
+    .filter((command) => !command.includes("--dry-run"))
+    .some((command) => !command.includes("--no-dist-tag-sync"));
+}
+
+function trustedPublishSkipsDistTagMutationConfigured(workflowText: string): boolean {
+  const stableCommands = stablePublishCommands(workflowText).filter((command) => !command.includes("--dry-run"));
+  return stableCommands.length > 0 && stableCommands.every((command) => command.includes("--no-dist-tag-sync"));
+}
+
+function stablePublishCommands(workflowText: string): string[] {
+  return Array.from(workflowText.matchAll(/run:\s*(npm run publish:stable[^\n]*)/g), (match) => match[1]?.trim() ?? "");
 }
 
 function installerAssetAttached(workflowText: string): boolean {
@@ -347,6 +359,7 @@ export function buildReleaseIntegrityReport(
   let workflowPath: string | null = null;
   let trustedPublishing = false;
   let stableDistTagSync = false;
+  let trustedPublishSkipsDistTagMutation = false;
   let releaseInstallerAsset = false;
   let pinnedActions: string[] = [];
   let unpinnedActions: string[] = [];
@@ -469,6 +482,7 @@ export function buildReleaseIntegrityReport(
       const workflowText = readFileSync(workflowPath, "utf8");
       trustedPublishing = trustedPublishingConfigured(workflowText);
       stableDistTagSync = stableDistTagSyncConfigured(workflowText);
+      trustedPublishSkipsDistTagMutation = trustedPublishSkipsDistTagMutationConfigured(workflowText);
       releaseInstallerAsset = installerAssetAttached(workflowText);
       const refs = actionRefs(workflowText);
       pinnedActions = refs.pinned;
@@ -488,18 +502,18 @@ export function buildReleaseIntegrityReport(
           files: [".github/workflows/release.yml"],
         });
       }
-      if (stableDistTagSync) {
+      if (trustedPublishSkipsDistTagMutation) {
         appendFact(derivableFacts, {
-          kind: "release_workflow_dist_tag_sync",
-          evidence: "stable publish syncs npm latest and next dist-tags to the stable package version",
+          kind: "release_workflow_trusted_publish_no_dist_tag_mutation",
+          evidence: "trusted-publishing stable publish avoids post-publish npm dist-tag mutation",
           files: [".github/workflows/release.yml"],
         });
       } else {
         appendGap(evidenceGaps, {
-          kind: "release_workflow_dist_tag_sync_missing",
+          kind: "release_workflow_post_publish_dist_tag_mutation",
           evidence: ".github/workflows/release.yml",
-          policy: "stable publish must not leave npm next pointing at an older prerelease",
-          recommendation: "Run stable publish through npm run publish:stable without --no-dist-tag-sync.",
+          policy: "trusted-publishing workflow must not require post-publish npm dist-tag add permission",
+          recommendation: "Run trusted-publishing stable publish through npm run publish:stable -- --no-dist-tag-sync; enforce next >= latest in live release sign-off.",
           files: [".github/workflows/release.yml"],
         });
       }
@@ -720,6 +734,7 @@ export function buildReleaseIntegrityReport(
         path: workflowPath,
         trustedPublishing,
         stableDistTagSync,
+        trustedPublishSkipsDistTagMutation,
         installerAssetAttached: releaseInstallerAsset,
         pinnedActions,
         unpinnedActions,

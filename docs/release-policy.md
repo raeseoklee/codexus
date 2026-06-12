@@ -55,9 +55,11 @@ large a feature feels.
   stable contract surfaces or for breaking/redefining already frozen stable
   fields.
 - Prerelease builds stay on the explicit npm `next` channel.
-- Stable publishes synchronize both `latest` and `next` to the stable version.
-  A later prerelease publish may move `next` forward again, but `next` must not
-  point at a version older than `latest`.
+- Tag-triggered stable publishes use trusted publishing for `npm publish` only
+  and must not require post-publish `npm dist-tag add` permission.
+- Live release sign-off verifies `next >= latest`. If npm `next` lags behind
+  `latest` after trusted publishing, an authenticated maintainer updates `next`
+  before the release is declared complete.
 
 Therefore a large experimental bundle can still be a patch release if it does
 not change the frozen stable contract. Conversely, a small breaking contract
