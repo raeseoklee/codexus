@@ -8,6 +8,24 @@ export type UpdateSource = "registry" | "cache" | "none" | "disabled";
 export type UpdateChannel = "stable" | "next";
 export type UpdateDistTag = "latest" | "next";
 export type UpdateCacheState = "fresh" | "stale" | "missing";
+export type UpdateNotificationStatus = "available" | "silent";
+
+export interface UpdateNotification {
+  schemaVersion: 1;
+  status: UpdateNotificationStatus;
+  shouldNotify: boolean;
+  reason:
+    | "update_available"
+    | "no_fresh_update_available"
+    | "cache_only_unavailable"
+    | "disabled"
+    | "unknown";
+  message: string | null;
+  command: string;
+  advisory: true;
+  completionAuthority: false;
+  installationMutated: false;
+}
 
 export interface UpdateSummary {
   schemaVersion: 1;
@@ -34,6 +52,7 @@ export interface UpdateSummary {
   completionAuthority: false;
   installationMutated: false;
   primaryCommandCanFail: false;
+  notification: UpdateNotification;
 }
 
 interface UpdateCache {
@@ -212,6 +231,15 @@ function fromKnownVersion(input: {
     : input.latestVersion && versionFresh
       ? updateAvailable ? "available" : "current"
       : "unknown";
+  const notification = buildUpdateNotification({
+    channel: input.channel,
+    currentVersion: input.currentVersion,
+    latestVersion: input.latestVersion,
+    status,
+    versionFresh,
+    disabled: input.disabled === true,
+    disabledReason: input.disabledReason ?? null,
+  });
   return {
     schemaVersion: 1,
     stability: "experimental",
@@ -237,6 +265,51 @@ function fromKnownVersion(input: {
     completionAuthority: false,
     installationMutated: false,
     primaryCommandCanFail: false,
+    notification,
+  };
+}
+
+function buildUpdateNotification(input: {
+  channel: UpdateChannel;
+  currentVersion: string;
+  latestVersion: string | null;
+  status: UpdateStatus;
+  versionFresh: boolean;
+  disabled: boolean;
+  disabledReason: UpdateSummary["disabledReason"];
+}): UpdateNotification {
+  const checkCommand = input.channel === "next"
+    ? "codexus update check --channel next --json"
+    : "codexus update check --json";
+  if (input.status === "available" && input.versionFresh && input.latestVersion) {
+    const installCommand = input.channel === "next"
+      ? `npm install -g codexus@next`
+      : `npm install -g codexus`;
+    return {
+      schemaVersion: 1,
+      status: "available",
+      shouldNotify: true,
+      reason: "update_available",
+      message: `Codexus ${input.channel} update available: ${input.currentVersion} -> ${input.latestVersion}. Run \`${checkCommand}\` for details; install explicitly with \`${installCommand}\` when you choose.`,
+      command: checkCommand,
+      advisory: true,
+      completionAuthority: false,
+      installationMutated: false,
+    };
+  }
+  const reason: UpdateNotification["reason"] = input.disabled
+    ? input.disabledReason === "env" ? "disabled" : "cache_only_unavailable"
+    : input.versionFresh ? "no_fresh_update_available" : "unknown";
+  return {
+    schemaVersion: 1,
+    status: "silent",
+    shouldNotify: false,
+    reason,
+    message: null,
+    command: checkCommand,
+    advisory: true,
+    completionAuthority: false,
+    installationMutated: false,
   };
 }
 

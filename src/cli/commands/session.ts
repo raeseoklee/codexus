@@ -134,6 +134,9 @@ async function statusCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`App evidence: ${result.evidenceLoop.appInstances.status} (${result.evidenceLoop.appInstances.observations.total} observations)`);
   console.log(`App-server observer: ${result.evidenceLoop.appServerObserver.observerBridge.status}`);
   console.log(`Wiki context approvals: ${result.evidenceLoop.wikiContext.status} (${result.evidenceLoop.wikiContext.approvals.total})`);
+  if (result.update.notification.shouldNotify && result.update.notification.message) {
+    console.log(`Update: ${result.update.notification.message}`);
+  }
 }
 
 async function hudCommand(cwd: string, json: boolean): Promise<void> {
@@ -199,6 +202,9 @@ async function hudCommand(cwd: string, json: boolean): Promise<void> {
   console.log(`App-server observer: ${result.evidenceLoop.appServerObserver.observerBridge.status}`);
   console.log(`Wiki context approvals: ${result.evidenceLoop.wikiContext.status}`);
   console.log(`Notify: ${result.notifyDispatch.status}`);
+  if (status.update.notification.shouldNotify && status.update.notification.message) {
+    console.log(`Update: ${status.update.notification.message}`);
+  }
 }
 
 async function migrateCommand(args: ParsedArgs, cwd: string, json: boolean): Promise<void> {

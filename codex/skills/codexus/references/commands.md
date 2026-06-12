@@ -29,6 +29,12 @@ Use stable update checks for normal advisory availability facts. Use the
 commands are informational: they do not mutate installation and cannot become
 completion, verification, or release authority.
 
+Primary commands such as `version --json`, `doctor --json`, and
+`session status --json` expose cache-only `update.notification` facts. If
+`update.notification.shouldNotify` is true, summarize the message in the active
+Codex chat as advisory; do not install or update unless the user explicitly
+asks.
+
 ## Current Session
 
 ```bash

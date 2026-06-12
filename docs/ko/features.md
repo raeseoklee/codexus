@@ -2,7 +2,7 @@
 
 [English](../features.md)
 
-상태: `0.2.0` 기준 최신
+상태: `0.2.2` 기준 최신
 
 이 문서는 배포된 Codexus surface를 안정성별로 정리한 제품 레퍼런스입니다. 완료
 권한은 아닙니다. 자동화 contract의 기준은 [JSON contract](json-contract.md)이고,
@@ -24,7 +24,7 @@ cx doctor --json
 
 | Surface | Commands | 증명하는 것 |
 | --- | --- | --- |
-| Version and doctor | `codexus --version`, `codexus version --json`, `codexus doctor --json` | Local package version, Codex CLI capability check, machine-readable readiness fact. |
+| Version and doctor | `codexus --version`, `codexus version --json`, `codexus doctor --json` | Local package version, Codex CLI capability check, machine-readable readiness fact, cache-only advisory update notice. |
 | Supervised runs | `codexus run`, `codexus status`, `codexus events tail`, `codexus verify`, `codexus resume`, `codexus cancel` | `.codexus/runs/<run-id>` ledger, verification result, repair attempt, terminal outcome, cancellation state. |
 | Session evidence | `codexus setup codex-session`, `codexus session status`, `codexus session checkpoint`, `codexus session verify`, `codexus session hud` | 현재 workspace session state, 명시적 checkpoint artifact, verification artifact, compact HUD summary. |
 | Memory and skills | `codexus memory *`, `codexus skill *`, `codexus replay *` | Bounded memory retrieval, curation, skill lifecycle, deterministic replay, 명시적으로 허용한 gated live replay. |
@@ -57,7 +57,7 @@ Experimental surface는 배포되어 있지만 stable JSON contract로 freeze되
 | Autopilot contract | `codexus autopilot plan`, `codexus autopilot contract *`, `codexus autopilot run-gate`, `codexus autopilot relay *` | Plan, approval, scope-check, pre-run readiness report, relay artifact, stage-gate evidence, relay adapter status. Live `autopilot run`과 active relay driver는 blocked입니다. |
 | Cron/gateway automation | `codexus cron *`, `codexus gateway *` | Dry-run, explicit approval, recorded dispatch, recovery projection, scheduler-readiness gap report. Rich unattended ownership은 future work입니다. |
 | Project LSP | `codexus lsp status/check/adapters` | Detect-only project diagnostics, explicit diagnostics gate, adapter status. Long-lived protocol-server lifecycle과 자동 project LSP 적용은 계속 deferred입니다. |
-| Update and plugin checks | `codexus update check`, `codexus plugin status` | Advisory availability와 plugin packaging fact. Installation을 자동 변경하지 않습니다. |
+| Update and plugin checks | `codexus update check`, `codexus plugin status` | Advisory availability와 plugin packaging fact. Primary command의 update notice는 cache-only이며 installation을 자동 변경하지 않습니다. |
 
 ## Deferred Surfaces
 

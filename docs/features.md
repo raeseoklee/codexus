@@ -2,7 +2,7 @@
 
 [Korean](ko/features.md)
 
-Status: current as of `0.2.0`
+Status: current as of `0.2.2`
 
 This reference lists the shipped Codexus surfaces by stability. It is a product
 reference, not a completion authority. The authoritative automation contract is
@@ -26,7 +26,7 @@ Both commands execute the same binary and produce the same JSON contract.
 
 | Surface | Commands | What it proves |
 | --- | --- | --- |
-| Version and doctor | `codexus --version`, `codexus version --json`, `codexus doctor --json` | Local package version, Codex CLI capability checks, and machine-readable readiness facts. |
+| Version and doctor | `codexus --version`, `codexus version --json`, `codexus doctor --json` | Local package version, Codex CLI capability checks, machine-readable readiness facts, and cache-only advisory update notices. |
 | Supervised runs | `codexus run`, `codexus status`, `codexus events tail`, `codexus verify`, `codexus resume`, `codexus cancel` | A durable `.codexus/runs/<run-id>` ledger, verification result, repair attempts, terminal outcome, and cancellation state. |
 | Session evidence | `codexus setup codex-session`, `codexus session status`, `codexus session checkpoint`, `codexus session verify`, `codexus session hud` | Current-workspace session state, explicit checkpoint artifacts, verification artifacts, and compact HUD summaries. |
 | Memory and skills | `codexus memory *`, `codexus skill *`, `codexus replay *` | Bounded memory retrieval, curation, skill lifecycle, deterministic replay, and gated live replay when explicitly enabled. |
@@ -59,7 +59,7 @@ Experimental surfaces are shipped but not frozen as stable JSON contracts.
 | Autopilot contract | `codexus autopilot plan`, `codexus autopilot contract *`, `codexus autopilot run-gate`, `codexus autopilot relay *` | Plan, approval, scope-check, pre-run readiness reporting, relay artifact, stage-gate evidence, and relay adapter status. Live `autopilot run` and active relay drivers remain blocked. |
 | Cron/gateway automation | `codexus cron *`, `codexus gateway *` | Dry-run, explicit approval, recorded dispatch, recovery projections, and scheduler-readiness gap reporting. Rich unattended ownership is future work. |
 | Project LSP | `codexus lsp status/check/adapters` | Detect-only project diagnostics, explicit diagnostics gate, and adapter status. Long-lived protocol-server lifecycle and automatic project LSP application remain deferred. |
-| Update and plugin checks | `codexus update check`, `codexus plugin status` | Advisory availability and plugin packaging facts. They never mutate installation automatically. |
+| Update and plugin checks | `codexus update check`, `codexus plugin status` | Advisory availability and plugin packaging facts. Update notices are cache-only on primary commands and never mutate installation automatically. |
 
 ## Deferred Surfaces
 

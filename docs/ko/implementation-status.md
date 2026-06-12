@@ -112,6 +112,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   registry를 조회하지 않고 update lookup이 불가능해도 실패하지 않습니다.
   오래된 cache entry는 `cacheState: "stale"` 및 `versionFresh: false`로 보고되며,
   현재 설치본이 최신이라는 증거로 해석하면 안 됩니다.
+- Non-JSON `version`, `doctor`, `session status`, `session hud`는 fresh cache
+  evidence가 있을 때만 짧은 update notice를 표시합니다. Cache가 없거나 오래되면
+  조용히 유지되고, notice는 설치를 자동 변경하지 않고 사용자가 명시적으로 설치하도록
+  안내합니다.
 - `cx plugin status --json`은 experimental Codex plugin package evidence를
   보고합니다. Packaged manifest validity, bundled skill count, wrapper script
   presence, explicit non-authority field를 포함합니다. Codex가 문서화된 plugin

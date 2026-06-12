@@ -4,11 +4,11 @@
 
 이 문서는 프로젝트 관리용 snapshot입니다. 정확한 coverage는
 [구현 상태](../implementation-status.md), [JSON contract](../json-contract.md), 최신
-[release evidence](../release-evidence/0.2.0.md)를 기준으로 확인하세요.
+[release evidence](../release-evidence/0.2.2.md)를 기준으로 확인하세요.
 
 ## Baseline
 
-- 현재 published baseline: `0.2.0`.
+- 현재 published baseline: `0.2.2`.
 - Stable execution path: 로컬에서 인증된 `codex exec --json`을 Codexus가 감독하는 경로.
 - Stable management expectation: stable JSON field는 현재 stable line 동안 frozen 상태를
   유지하고, experimental surface는 promotion 없이 추가될 수 있습니다.
@@ -25,6 +25,7 @@ Codexus에는 작동하는 harness spine이 있습니다:
 - memory lifecycle과 replay-gated skill,
 - schema, slop, supply-chain, LSP, repo graph, release, contract check,
 - experimental app-instance observation과 owned-process control,
+- release/update-channel hardening과 cache-only advisory update notice,
 - experimental wiki, relay, decision, loop-breaker, autopilot contract surface.
 
 현재 프로젝트 방향은 Codex를 대체하는 것이 아닙니다. Codexus는 Codex를 engine으로 두고,

@@ -4,11 +4,11 @@
 
 This page gives a quick project-management snapshot. For exact coverage, read
 [Implementation status](../implementation-status.md), [JSON contract](../json-contract.md),
-and the latest [release evidence](../release-evidence/0.2.0.md).
+and the latest [release evidence](../release-evidence/0.2.2.md).
 
 ## Baseline
 
-- Current published baseline: `0.2.0`.
+- Current published baseline: `0.2.2`.
 - Stable execution path: local authenticated `codex exec --json` supervised by
   Codexus.
 - Stable management expectation: stable JSON fields stay frozen through the
@@ -26,6 +26,7 @@ Codexus has a working harness spine:
 - memory lifecycle and replay-gated skills,
 - schema, slop, supply-chain, LSP, repo graph, release, and contract checks,
 - experimental app-instance observation and owned-process controls,
+- release/update-channel hardening and cache-only advisory update notices,
 - experimental wiki, relay, decision, loop-breaker, and autopilot contract
   surfaces.
 

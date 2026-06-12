@@ -9,6 +9,22 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added cache-only advisory update notices to non-JSON `version`, `doctor`,
+  `session status`, and `session hud`. Notices appear only when fresh cached
+  npm evidence proves a newer Codexus version exists; stale or missing cache
+  remains silent.
+- Added a structured `update.notification` object to update summaries so the
+  Codex-native `$codexus` skill can surface available updates in chat without
+  mutating installation.
+
+### Documentation
+
+- Updated the feature reference, project wiki current-state snapshot, roadmap
+  kanban, Codex-native adapter docs, and implementation status to the `0.2.2`
+  baseline and clarified update-notification boundaries.
+
 ## 0.2.2 - 2026-06-12
 
 ### Fixed

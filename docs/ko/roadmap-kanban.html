@@ -177,8 +177,8 @@
       항목은 advisory로 남기며, runtime contract가 없는 기능은 명시적으로 blocked 상태로 둡니다.
     </p>
     <div class="meta">
-      <span class="pill">갱신일: 2026-06-11</span>
-      <span class="pill">기준: npm 0.2.1 published</span>
+      <span class="pill">갱신일: 2026-06-12</span>
+      <span class="pill">기준: npm 0.2.2 published</span>
       <span class="pill">출처: indexed docs 01-20 + remaining work</span>
       <span class="pill"><a href="../roadmap-kanban.html">English</a></span>
       <span class="pill"><a href="remaining-work.md">남은 작업</a></span>
@@ -546,7 +546,8 @@
             <li>완료: 명시적 <code>cx update check --channel next --json</code>은 별도 cache로 prerelease fact를 읽습니다.</li>
             <li>완료: cache-only <code>update</code> summary가 <code>version</code>, <code>doctor</code>, <code>session status</code>에 additive로 붙습니다.</li>
             <li>완료: <code>CODEXUS_NO_UPDATE_CHECK=1</code>과 CI/cache-only 동작이 noisy registry probe를 막습니다.</li>
-            <li>다음: richer notification UX만 남고, plugin-package freshness diagnostic은 별도 항목에서 추적합니다.</li>
+            <li>완료: non-JSON <code>version</code>, <code>doctor</code>, <code>session status</code>, <code>session hud</code>는 fresh cache evidence가 있을 때만 짧은 notice를 표시합니다.</li>
+            <li>다음: 선택적 alternate notification channel만 남고, plugin-package freshness diagnostic은 별도 항목에서 추적합니다.</li>
             <li>Update lookup은 설치를 변경하지 않고 primary command를 실패시키지 않습니다.</li>
           </ul>
           <span class="label">근거</span>

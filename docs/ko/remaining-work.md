@@ -173,7 +173,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
     compatibility, stable-readiness smoke coverage, local release integrity gate 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 현재 npm baseline은 `0.2.0`입니다. Prerelease는 fallback/dev path인
+    - 현재 npm baseline은 `0.2.2`입니다. Prerelease는 fallback/dev path인
       `publish:next`를 통해 배포할 수 있고, stable release는 trusted GitHub Actions
       tag run에서 배포합니다.
     - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,
@@ -464,9 +464,11 @@ Harness-engineering alignment에서 추가된 evidence-first track:
     `CODEXUS_NO_UPDATE_CHECK=1`, CI/primary-command cache-only summary, 그리고
     `version`, `doctor`, `session status`의 additive `update` field로 구현됐습니다.
     `$codexus` skill은 Codex 안에서 Codexus가 호출될 때 사용 가능한 update를 advisory로
-    요약할 수 있습니다. 남은 후속 작업은 richer notification UX뿐입니다. Update check는
-    계속 informational only여야 하며, primary command 실패나 설치 변경으로 이어지면 안
-    됩니다.
+    요약할 수 있습니다. 기본 richer CLI UX도 구현되어 non-JSON `version`, `doctor`,
+    `session status`, `session hud`가 fresh cache evidence가 있을 때만 짧은 notice를
+    표시합니다. 남은 후속 작업은 선택적 alternate notification channel뿐입니다. Update
+    check는 계속 informational only여야 하며, primary command 실패나 설치 변경으로
+    이어지면 안 됩니다.
 16. Codex plugin packaging experiment: 첫 package-freshness slice가
     `cx plugin status --json`, `codex/plugins/codexus` 아래 packaged manifest, 그리고 npm
     tarball에 plugin file이 포함되는지 확인하는 package-smoke 검증으로 구현됐습니다.

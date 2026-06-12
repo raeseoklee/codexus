@@ -178,8 +178,8 @@
       until their runtime contract exists.
     </p>
     <div class="meta">
-      <span class="pill">Updated: 2026-06-11</span>
-      <span class="pill">Baseline: npm 0.2.1 published</span>
+      <span class="pill">Updated: 2026-06-12</span>
+      <span class="pill">Baseline: npm 0.2.2 published</span>
       <span class="pill">Source: indexed docs 01-20 + remaining work</span>
       <span class="pill"><a href="ko/roadmap-kanban.html">Korean</a></span>
       <span class="pill"><a href="remaining-work.md">Remaining work</a></span>
@@ -547,7 +547,8 @@
             <li>Done: explicit <code>cx update check --channel next --json</code> reads prerelease facts through a separate cache.</li>
             <li>Done: cache-only <code>update</code> summaries are additive on <code>version</code>, <code>doctor</code>, and <code>session status</code>.</li>
             <li>Done: <code>CODEXUS_NO_UPDATE_CHECK=1</code> and CI/cache-only behavior prevent noisy registry probes.</li>
-            <li>Next: richer notification UX only; plugin-package freshness diagnostics are tracked separately.</li>
+            <li>Done: non-JSON <code>version</code>, <code>doctor</code>, <code>session status</code>, and <code>session hud</code> show a short notice only from fresh cache evidence.</li>
+            <li>Next: optional alternate notification channels only; plugin-package freshness diagnostics are tracked separately.</li>
             <li>Update lookup never mutates installation or fails the primary command.</li>
           </ul>
           <span class="label">Sources</span>

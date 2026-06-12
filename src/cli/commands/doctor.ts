@@ -315,5 +315,8 @@ export async function doctorCommand(args: ParsedArgs): Promise<void> {
   if (warnings.length > 0) {
     for (const warning of warnings) console.log(`WARN config: ${warning}`);
   }
+  if (update.notification.shouldNotify && update.notification.message) {
+    console.log(`Update: ${update.notification.message}`);
+  }
   process.exitCode = ok ? 0 : 1;
 }

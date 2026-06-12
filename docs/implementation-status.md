@@ -208,6 +208,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   Stale cache entries are reported with `cacheState: "stale"` and
   `versionFresh: false`; they must not be interpreted as proof that the current
   installation is up to date.
+- Non-JSON `version`, `doctor`, `session status`, and `session hud` display a
+  short update notice only from fresh cache evidence. Missing or stale cache
+  stays silent, and the notice tells users to install explicitly instead of
+  mutating the installation.
 - `cx plugin status --json` reports experimental Codex plugin package evidence:
   packaged manifest validity, bundled skill count, wrapper-script presence, and
   explicit non-authority fields. Installed-plugin state remains deferred until

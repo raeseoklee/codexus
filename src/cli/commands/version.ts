@@ -38,18 +38,22 @@ export function readCodexusVersionInfo(): CodexusVersionInfo {
 
 export async function versionCommand(args: ParsedArgs, options: { short?: boolean } = {}): Promise<void> {
   const info = readCodexusVersionInfo();
+  if (options.short) {
+    console.log(info.version);
+    return;
+  }
+  const update = buildUpdateSummary({ currentVersion: info.version, cacheOnly: true });
   if (flagBool(args.flags, "json")) {
     console.log(JSON.stringify({
       ...info,
-      update: buildUpdateSummary({ currentVersion: info.version, cacheOnly: true }),
+      update,
     }, null, 2));
-    return;
-  }
-  if (options.short) {
-    console.log(info.version);
     return;
   }
   console.log(`${info.name} ${info.version}`);
   console.log(`Node ${info.node}`);
   console.log(`Package ${info.packageRoot}`);
+  if (update.notification.shouldNotify && update.notification.message) {
+    console.log(`Update: ${update.notification.message}`);
+  }
 }

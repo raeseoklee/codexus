@@ -319,11 +319,11 @@ const deferredDefinitions: CandidateDefinition[] = [
     contractRisk: "medium",
     sideEffectRisk: "low",
     reasons: [
-      "Update checks exist, but richer CLI/chat notification UX is still experimental and non-authoritative.",
+      "Update checks and cache-only CLI/chat notices exist, but update notification remains experimental and non-authoritative.",
     ],
     requiredEvidence: [
       "TTL cache, opt-out, CI-off behavior, and proof that update checks cannot fail primary commands.",
-      "Observed notification UX that remains advisory and never mutates installation.",
+      "Longer dogfood evidence that notification UX remains advisory and never mutates installation.",
     ],
   },
   {

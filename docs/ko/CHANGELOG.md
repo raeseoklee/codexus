@@ -9,6 +9,22 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- Non-JSON `version`, `doctor`, `session status`, `session hud`에 cache-only
+  advisory update notice를 추가했습니다. Fresh cached npm evidence가 더 새
+  Codexus version을 증명할 때만 표시되며, stale 또는 missing cache는 조용히
+  유지됩니다.
+- Update summary에 구조화된 `update.notification` object를 추가해 Codex-native
+  `$codexus` skill이 설치를 변경하지 않고 chat 안에서 사용 가능한 update를
+  surface할 수 있게 했습니다.
+
+### Documentation
+
+- Feature reference, project wiki current-state snapshot, roadmap kanban,
+  Codex-native adapter 문서, implementation status를 `0.2.2` baseline으로
+  갱신하고 update-notification boundary를 명확히 했습니다.
+
 ## 0.2.2 - 2026-06-12
 
 ### Fixed

@@ -185,7 +185,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     smoke compatibility, stable-readiness smoke coverage, and local release
     integrity gating implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current npm baseline is `0.2.0`; prereleases publish through
+    - Current npm baseline is `0.2.2`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
       trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin
@@ -496,9 +496,11 @@ Harness-engineering alignment adds these evidence-first tracks:
     `CODEXUS_NO_UPDATE_CHECK=1`, cache-only CI/primary-command summaries, and
     additive `update` fields on `version`, `doctor`, and `session status`. The
     `$codexus` skill may summarize available updates inside Codex chat when
-    Codexus is invoked. Remaining follow-up: richer notification UX only; update
-    checks must continue to be informational, never fail the primary command,
-    and never mutate installation.
+    Codexus is invoked. Basic richer CLI UX is implemented: non-JSON `version`,
+    `doctor`, `session status`, and `session hud` display a short notice only
+    from fresh cache evidence. Remaining follow-up is optional alternate
+    notification channels only; update checks must continue to be informational,
+    never fail the primary command, and never mutate installation.
 16. Codex plugin packaging experiment: first package-freshness slice implemented
     with `cx plugin status --json`, a packaged manifest under
     `codex/plugins/codexus`, and package-smoke verification that the npm tarball

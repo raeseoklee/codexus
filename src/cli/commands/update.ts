@@ -20,7 +20,7 @@ export async function updateCommand(args: ParsedArgs): Promise<void> {
     return;
   }
   if (update.status === "available" && update.latestVersion) {
-    console.log(`Codexus ${update.channel} update available: ${update.currentVersion} -> ${update.latestVersion}`);
+    console.log(update.notification.message ?? `Codexus ${update.channel} update available: ${update.currentVersion} -> ${update.latestVersion}`);
   } else if (update.status === "current") {
     console.log(`Codexus ${update.channel} channel is current: ${update.currentVersion}`);
   } else if (update.status === "disabled") {

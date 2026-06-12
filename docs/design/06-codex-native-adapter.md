@@ -78,6 +78,8 @@ Implemented first slice:
   additive cache-only `update` summary without querying the registry;
 - the `$codexus` skill can summarize `update.status: "available"` inside the
   active Codex chat when Codexus is invoked from a session;
+- non-JSON `version`, `doctor`, `session status`, and `session hud` display a
+  short advisory notice only when a fresh cache proves an update is available;
 - primary commands do not fail when the update check cannot reach the registry.
 
 Required gates:
@@ -89,6 +91,8 @@ Required gates:
   verification, or release gates;
 - prerelease/`next` checks require explicit opt-in and use a separate cache;
 - automatic installation is out of scope for this slice.
+- stale or missing cache entries must stay quiet instead of implying that the
+  current installation is up to date.
 
 ## Skill Versus Plugin Packaging
 
