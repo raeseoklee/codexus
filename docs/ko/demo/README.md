@@ -10,13 +10,13 @@ auth state, transcript, package-manager log를 출력하지 않습니다. 목적
 
 1. Codexus를 global install합니다;
 2. verification command를 붙여 supervised task를 실행합니다;
-3. 한 번 실패합니다;
-4. bounded failure output을 repair context로 전달합니다;
-5. verification command가 통과한 뒤에만 `complete`를 보고합니다;
-6. durable run ledger를 남깁니다.
+3. verification command를 실행합니다;
+4. verification command가 통과한 뒤에만 `complete`를 보고합니다;
+5. durable run ledger를 남깁니다.
 
-전체 live release validation은 README media asset이 아니라 release evidence 문서에
-남깁니다.
+README media는 첫인상 명확성을 위해 깨끗한 pass path만 보여줍니다. Repair 동작은
+빨간 테스트 frame으로 demo에 넣지 않고, README 설명과 release evidence에서
+검증합니다.
 
 ## 재생성
 

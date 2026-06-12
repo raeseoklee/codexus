@@ -10,13 +10,13 @@ Its job is to show the core user-facing loop:
 
 1. install Codexus globally;
 2. run a supervised task with a verification command;
-3. fail once;
-4. feed bounded failure output into repair;
-5. report `complete` only after the verification command passes;
-6. leave a durable run ledger.
+3. run the verification command;
+4. report `complete` only after the verification command passes;
+5. leave a durable run ledger.
 
-Full live release validation remains in the release evidence documents instead
-of the README media asset.
+The README media intentionally shows the clean pass path for first-impression
+clarity. Repair behavior is described in prose and validated in release
+evidence instead of being shown as a red test frame in the demo.
 
 ## Regenerate
 

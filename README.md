@@ -37,7 +37,7 @@ From a shell:
 
 ```bash
 npm install -g codexus
-codexus run --verify "npm test" "fix the failing parser tests"
+codexus run --verify "npm test" "fix the parser regression"
 ```
 
 Codexus is a command-line tool, so install it globally. The npmjs sidebar may
@@ -52,6 +52,8 @@ is `complete` only when the verification command passes.
 
 This is a redacted fixture tape, not a live model transcript. It shows the
 user-facing loop without exposing local paths, auth state, or private output.
+The media uses the clean pass path for first-impression clarity; repair behavior
+is described above and validated in release evidence.
 The reproducible VHS source is in
 [docs/demo](https://github.com/raeseoklee/codexus/blob/main/docs/demo/README.md);
 full release verification remains in
@@ -256,7 +258,7 @@ codexus app instance evidence screenshot --instance-id <id> --evidence-path ./sc
 codexus app instance evidence browser --instance-id <id> --capture ./browser-capture.json --json
 codexus app instance evidence adapters --json
 codexus app instance stop --instance-id <id> --json
-codexus run --verify "npm test" "fix the failing parser tests"
+codexus run --verify "npm test" "fix the parser regression"
 codexus cancel <run-id> --reason "no longer needed" --json
 codexus status <run-id> --json
 codexus events tail <run-id> --json
