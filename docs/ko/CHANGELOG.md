@@ -9,6 +9,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.3 - 2026-06-15
+
 ### Added
 
 - Non-JSON `version`, `doctor`, `session status`, `session hud`에 cache-only
@@ -28,7 +30,7 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 ### Documentation
 
 - Feature reference, project wiki current-state snapshot, roadmap kanban,
-  Codex-native adapter 문서, implementation status를 `0.2.2` baseline으로
+  Codex-native adapter 문서, implementation status를 `0.2.3` baseline으로
   갱신하고 update-notification boundary를 명확히 했습니다.
 - App-instance summary와 wiki approval listing surface를 README, feature reference,
   implementation status, remaining work, project wiki, roadmap kanban, Codex-native

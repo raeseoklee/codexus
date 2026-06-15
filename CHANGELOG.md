@@ -9,6 +9,8 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.3 - 2026-06-15
+
 ### Added
 
 - Added cache-only advisory update notices to non-JSON `version`, `doctor`,
@@ -27,7 +29,7 @@ occur before 1.0, but they should be called out clearly.
 ### Documentation
 
 - Updated the feature reference, project wiki current-state snapshot, roadmap
-  kanban, Codex-native adapter docs, and implementation status to the `0.2.2`
+  kanban, Codex-native adapter docs, and implementation status to the `0.2.3`
   baseline and clarified update-notification boundaries.
 - Refreshed README, feature reference, implementation status, remaining work,
   project wiki, roadmap kanban, and the Codex-native skill command list for the

@@ -4,11 +4,11 @@
 
 This page gives a quick project-management snapshot. For exact coverage, read
 [Implementation status](../implementation-status.md), [JSON contract](../json-contract.md),
-and the latest [release evidence](../release-evidence/0.2.2.md).
+and the latest [release evidence](../release-evidence/0.2.3.md).
 
 ## Baseline
 
-- Current published baseline: `0.2.2`.
+- Current published baseline: `0.2.3`.
 - Stable execution path: local authenticated `codex exec --json` supervised by
   Codexus.
 - Stable management expectation: stable JSON fields stay frozen through the

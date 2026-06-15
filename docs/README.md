@@ -54,6 +54,7 @@ supported short alias.
 - [0.2.0 release evidence](release-evidence/0.2.0.md): trusted-publishing evidence for the first stable-contract promotion milestone.
 - [0.2.1 release evidence](release-evidence/0.2.1.md): pre-tag release-prep evidence for the action-readiness evidence bundle.
 - [0.2.2 release evidence](release-evidence/0.2.2.md): release/update-channel hardening evidence for trusted-publishing dist-tag boundaries.
+- [0.2.3 release evidence](release-evidence/0.2.3.md): trusted-publishing evidence for update notices, app evidence summaries, wiki approval listings, and the redacted README demo.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.
