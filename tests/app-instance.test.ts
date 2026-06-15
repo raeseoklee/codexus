@@ -522,6 +522,23 @@ test("app instance log evidence records a redacted snapshot without authority", 
     const schema = runCli(cwd, ["schema", "validate", "--type", "app-instance-observation", "--file", output.path, "--json"]);
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(parseJson(schema).ok, true);
+
+    const summary = runCli(cwd, ["app", "instance", "evidence", "summary", "--json"]);
+    assert.equal(summary.status, 0, summary.stderr);
+    const summaryOutput = parseJson(summary);
+    assert.equal(summaryOutput.command, "app instance evidence summary");
+    assert.equal(summaryOutput.evidence.observations.total, 1);
+    assert.equal(summaryOutput.evidence.observations.artifacts.valid, 1);
+    assert.equal(summaryOutput.evidence.observations.artifacts.invalid, 0);
+    assert.equal(summaryOutput.evidence.observations.latest.kind, "log");
+    assert.equal(summaryOutput.evidence.observations.latest.source, "log-snapshot");
+    assert.equal(summaryOutput.evidence.observations.latest.evidencePath, output.logSnapshot.evidencePath);
+    assert.equal(summaryOutput.evidence.observations.latest.reason, null);
+    assert.equal(summaryOutput.evidence.authority.cleanupAuthority, false);
+    assert.equal(summaryOutput.authority.controlsInstance, false);
+    assert.equal(summaryOutput.authority.healthAuthority, false);
+    assert.equal(summaryOutput.authority.cleanupAuthority, false);
+    assert.equal(summaryOutput.authority.completionAuthority, false);
   } finally {
     await cleanupInstances(cwd);
     await rm(cwd, { recursive: true, force: true });

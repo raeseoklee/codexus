@@ -375,9 +375,12 @@ Harness-engineering alignment adds these evidence-first tracks:
   identity. [Doc 20](design/20-observability-adapter-boundary.md) now defines
   the boundary before any live Browser/DevTools capture driver is added, and
   `cx app instance evidence adapters --json` reports the schema-validatable
-  import-only/host-mediated/driver-mediated adapter status. Live capture
-  drivers remain deferred until a concrete driver can preserve the documented
-  role, timeout, redaction, loopback, storage, and authority boundaries.
+  import-only/host-mediated/driver-mediated adapter status. `cx app instance
+  evidence summary --json` is implemented as a bounded rollup over observation
+  artifacts, including invalid-artifact counts and the latest observation,
+  without health, control, cleanup, or completion authority. Live capture drivers
+  remain deferred until a concrete driver can preserve the documented role,
+  timeout, redaction, loopback, storage, and authority boundaries.
 - Worktree app instance launcher: [doc 19](design/19-worktree-app-instance-launcher.md)
   now has an experimental live ownership first slice: descriptor/profile
   listing, `start --dry-run`, live owned-process start/stop, heartbeat,
@@ -468,7 +471,8 @@ Harness-engineering alignment adds these evidence-first tracks:
 12. Compiled repository wiki: the deterministic `cx wiki
     map/build/check/context/export` slice and advisory source-bundle synthesis
     now exist. `cx wiki context --approve` writes visible non-injected approval
-    artifacts, and `cx wiki context --fresh-only --gate` can require fresh manual
+    artifacts, `cx wiki context approvals --json` lists those manual-only
+    approvals, and `cx wiki context --fresh-only --gate` can require fresh manual
     context before use. Graph/session/architecture/decision/risk projection
     pages are implemented, approval artifacts now record manual-only handoff
     rules, and `cx wiki injection-policy --json` reports the explicit

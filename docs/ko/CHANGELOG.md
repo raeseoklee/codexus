@@ -18,12 +18,21 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Update summary에 구조화된 `update.notification` object를 추가해 Codex-native
   `$codexus` skill이 설치를 변경하지 않고 chat 안에서 사용 가능한 update를
   surface할 수 있게 했습니다.
+- `cx app instance evidence summary --json`을 추가했습니다. 이 명령은 valid/invalid
+  observation artifact와 최신 observation을 bounded rollup으로 보고하지만 health,
+  control, cleanup, completion authority를 주장하지 않습니다.
+- `cx wiki context approvals --json`을 추가해 manual-only wiki context approval을
+  Codex chat 안에서 나열할 수 있게 했습니다. 이 목록은 automatic prompt injection이
+  아닙니다.
 
 ### Documentation
 
 - Feature reference, project wiki current-state snapshot, roadmap kanban,
   Codex-native adapter 문서, implementation status를 `0.2.2` baseline으로
   갱신하고 update-notification boundary를 명확히 했습니다.
+- App-instance summary와 wiki approval listing surface를 README, feature reference,
+  implementation status, remaining work, project wiki, roadmap kanban, Codex-native
+  skill command list에 반영했습니다.
 - Redacted VHS README demo와 재생성 가능한 tape source를 추가했습니다. 이 demo는
   live model transcript라고 주장하지 않고 supervised verify/repair/ledger loop만
   보여줍니다.

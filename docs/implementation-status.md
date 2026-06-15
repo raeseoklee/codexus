@@ -67,6 +67,7 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   - `app instance evidence screenshot`
   - `app instance evidence browser`
   - `app instance evidence adapters`
+  - `app instance evidence summary`
   - `memory add`
   - `memory search`
   - `memory list`
@@ -396,7 +397,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   now defines the boundary for future live Browser/DevTools capture drivers, and
   `cx app instance evidence adapters --json` reports the schema-validatable
   import-only/host-mediated/driver-mediated adapter descriptor/status boundary.
-  Adapter availability never implies process-identity proof, health, control,
+  `cx app instance evidence summary --json` summarizes valid and invalid
+  observation artifacts plus the latest observation. Adapter availability and
+  evidence summaries never imply process-identity proof, health, control,
   cleanup, prompt-injection, Codex-read, or completion authority.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
@@ -467,7 +470,9 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   --approve --approved-by <name>` records a visible
   `codexus.wiki.context-approval` artifact with `approved_not_injected`,
   `automatic:false`, no completion authority, and a manual-only handoff policy
-  that requires fresh context and explicit reference. `cx wiki injection-policy
+  that requires fresh context and explicit reference. `cx wiki context approvals
+  --json` lists approval artifacts with the same manual-only, non-injected
+  boundaries. `cx wiki injection-policy
   --json` reports the manual-only boundary, keeps automatic injection deferred,
   and lists the evidence required before any future injection path. `cx wiki
   injection plan --approval <id-or-path> --target <target> --json` writes a
@@ -557,12 +562,13 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   list`, `start --dry-run`, live start, duplicate-start rejection, active
   health promotion for a live owned process, bounded log tails, owned stop,
   unverifiable owner stop refusal, stale/orphan lifecycle policy projection, and
-  instance-linked observation evidence, including loopback HTTP probe evidence,
-  that never promotes control, health, or completion authority.
+  instance-linked observation evidence, including loopback HTTP probe evidence
+  and evidence summaries, that never promote control, health, cleanup, or
+  completion authority.
 - Installed package smoke also covers deterministic wiki build, wiki-manifest
   schema validation, `wiki check --gate`, explicit wiki export, and bounded wiki
-  context generation plus non-injected wiki context approval artifact validation
-  and session evidence-loop projection.
+  context generation plus non-injected wiki context approval artifact/listing
+  validation and session evidence-loop projection.
 - Installed package smoke also covers `cx policy catalog check --json`,
   `cx autopilot presets list --json`, and autopilot draft planning with an
   explicit preset.

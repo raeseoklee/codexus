@@ -18,12 +18,20 @@ occur before 1.0, but they should be called out clearly.
 - Added a structured `update.notification` object to update summaries so the
   Codex-native `$codexus` skill can surface available updates in chat without
   mutating installation.
+- Added `cx app instance evidence summary --json`, a bounded observation rollup
+  that reports valid/invalid observation artifacts and the latest observation
+  without claiming health, control, cleanup, or completion authority.
+- Added `cx wiki context approvals --json` so manual-only wiki context approvals
+  are listable from Codex chat without becoming automatic prompt injection.
 
 ### Documentation
 
 - Updated the feature reference, project wiki current-state snapshot, roadmap
   kanban, Codex-native adapter docs, and implementation status to the `0.2.2`
   baseline and clarified update-notification boundaries.
+- Refreshed README, feature reference, implementation status, remaining work,
+  project wiki, roadmap kanban, and the Codex-native skill command list for the
+  app-instance summary and wiki approval listing surfaces.
 - Added a redacted VHS README demo and reproducible tape source. The demo shows
   the supervised verify/repair/ledger loop without claiming to be a live model
   transcript.

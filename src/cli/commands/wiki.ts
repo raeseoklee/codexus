@@ -1,12 +1,12 @@
 import { resolve } from "node:path";
 import { assertAllowedFlags, assertMaxPositionals, flagBool, flagString, type ParsedArgs } from "../args.ts";
-import { approveWikiContext, buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiInjectionPolicy, buildWikiMap, checkWiki, exportWiki, planWikiInjection } from "../../wiki/wiki.ts";
+import { approveWikiContext, buildWiki, buildWikiAdvisory, buildWikiContext, buildWikiInjectionPolicy, buildWikiMap, checkWiki, exportWiki, listWikiContextApprovals, planWikiInjection } from "../../wiki/wiki.ts";
 
 export async function wikiCommand(args: ParsedArgs): Promise<void> {
   const subcommand = args.positionals[0] ?? "check";
   const nestedCommand = args.positionals[1];
   assertMaxPositionals(args, 2);
-  if (nestedCommand && subcommand !== "injection") throw new Error(`unsupported_wiki_command:${subcommand}`);
+  if (nestedCommand && subcommand !== "injection" && subcommand !== "context") throw new Error(`unsupported_wiki_command:${subcommand}`);
   const cwd = resolve(flagString(args.flags, "cwd") ?? process.cwd());
   const json = flagBool(args.flags, "json");
 
@@ -60,6 +60,18 @@ export async function wikiCommand(args: ParsedArgs): Promise<void> {
   }
 
   if (subcommand === "context") {
+    if (nestedCommand === "approvals") {
+      assertAllowedFlags(args, ["cwd", "json"]);
+      const result = await listWikiContextApprovals(cwd);
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`Wiki context approvals: ${result.summary.total}`);
+      if (result.summary.latestApprovalId) console.log(`Latest: ${result.summary.latestApprovalId}`);
+      return;
+    }
+    if (nestedCommand) throw new Error(`unsupported_wiki_command:context-${nestedCommand}`);
     assertAllowedFlags(args, ["cwd", "json", "topic", "budget", "approve", "approved-by", "fresh-only", "gate"]);
     const topic = flagString(args.flags, "topic");
     const budgetRaw = flagString(args.flags, "budget") ?? "1200";

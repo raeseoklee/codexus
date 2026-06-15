@@ -24,9 +24,10 @@ Codexus에는 작동하는 harness spine이 있습니다:
 - session status, checkpoint, verification, HUD, notify-hook evidence,
 - memory lifecycle과 replay-gated skill,
 - schema, slop, supply-chain, LSP, repo graph, release, contract check,
-- experimental app-instance observation과 owned-process control,
+- experimental app-instance observation summary와 owned-process control,
 - release/update-channel hardening과 cache-only advisory update notice,
-- experimental wiki, relay, decision, loop-breaker, autopilot contract surface.
+- experimental wiki context approval, relay, decision, loop-breaker, autopilot
+  contract surface.
 
 현재 프로젝트 방향은 Codex를 대체하는 것이 아닙니다. Codexus는 Codex를 engine으로 두고,
 그 주변에 evidence, record, boundary, gate를 추가합니다.
@@ -56,6 +57,6 @@ theme 단위로 묶는 것이 좋습니다.
 
 - `0.2.0` contract-promotion readiness,
 - project observability와 LLM context management 강화,
-- app-instance lifecycle과 observation hardening,
+- app-instance lifecycle, observation summary, authority-boundary hardening,
 - relay/autopilot evidence gate,
 - explicit하고 non-injected인 generated wiki/graph context.

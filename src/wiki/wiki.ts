@@ -304,6 +304,41 @@ export interface WikiContextApprovalSummary {
   completionAuthority: false;
 }
 
+export interface WikiContextApprovalListResult {
+  schemaVersion: 1;
+  stability: "experimental";
+  command: "wiki context approvals";
+  cwd: string;
+  approvals: Array<{
+    approvalId: string;
+    approvedAt: string;
+    approvedBy: string;
+    topic: string;
+    tokenEstimate: number;
+    contextHash: string;
+    selectedPageCount: number;
+    handoffStatus: "manual_only" | null;
+    contextPackPath: string;
+    approvalPath: string;
+    manualUse: {
+      requiresExplicitReference: true;
+      recommendedReference: string;
+      allowedConsumers: string[];
+      automaticInjection: false;
+      applied: false;
+      sourceTruth: false;
+      completionAuthority: false;
+    };
+  }>;
+  summary: {
+    total: number;
+    latestApprovalId: string | null;
+    automaticInjectionEligible: false;
+  };
+  eligibleForAutomaticInjection: false;
+  completionAuthority: false;
+}
+
 export interface WikiInjectionPolicyResult {
   schemaVersion: 1;
   stability: "experimental";
@@ -2018,6 +2053,58 @@ export async function summarizeWikiContextApprovals(cwd: string): Promise<WikiCo
           path: latest.path,
         }
         : null,
+    },
+    eligibleForAutomaticInjection: false,
+    completionAuthority: false,
+  };
+}
+
+export async function listWikiContextApprovals(cwd: string): Promise<WikiContextApprovalListResult> {
+  const root = wikiContextDir(cwd);
+  const approvals: Array<WikiContextApprovalArtifact & { path: string }> = [];
+  if (existsSync(root)) {
+    for (const entry of await readdir(root, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const path = join(root, entry.name, "approval.json");
+      if (!existsSync(path)) continue;
+      const approval = await readWikiContextApproval(path);
+      if (approval) approvals.push({ ...approval, path });
+    }
+  }
+  approvals.sort((left, right) => right.approvedAt.localeCompare(left.approvedAt));
+  return {
+    schemaVersion: 1,
+    stability: "experimental",
+    command: "wiki context approvals",
+    cwd,
+    approvals: approvals.map((approval) => {
+      const contextPackPath = approval.handoffPolicy?.contextPackPath ?? approval.paths.markdown;
+      return {
+        approvalId: approval.approvalId,
+        approvedAt: approval.approvedAt,
+        approvedBy: approval.approvedBy,
+        topic: approval.topic,
+        tokenEstimate: approval.tokenEstimate,
+        contextHash: approval.contextHash,
+        selectedPageCount: approval.selectedPages.length,
+        handoffStatus: approval.handoffPolicy?.status ?? null,
+        contextPackPath,
+        approvalPath: approval.path,
+        manualUse: {
+          requiresExplicitReference: true,
+          recommendedReference: `Read ${contextPackPath} explicitly before using this context.`,
+          allowedConsumers: approval.handoffPolicy?.allowedConsumers ?? manualContextConsumers,
+          automaticInjection: false,
+          applied: false,
+          sourceTruth: false,
+          completionAuthority: false,
+        },
+      };
+    }),
+    summary: {
+      total: approvals.length,
+      latestApprovalId: approvals[0]?.approvalId ?? null,
+      automaticInjectionEligible: false,
     },
     eligibleForAutomaticInjection: false,
     completionAuthority: false,

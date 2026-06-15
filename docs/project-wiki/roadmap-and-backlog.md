@@ -13,15 +13,16 @@ These are suitable for release-sized goals when grouped with verification:
 - Project context and LLM wiki management: keep checked-in project context
   current without making generated wiki pages authority.
 - App-instance observation hardening: improve owned-process evidence,
-  lifecycle boundaries, and log/probe/metric adapters without claiming app
-  health authority.
+  lifecycle boundaries, evidence summaries, and log/probe/metric adapters
+  without claiming app health authority.
 - Relay and autopilot gates: strengthen stage evidence, agreement structure,
   verification matrix handling, and stop-at-boundary behavior.
 - Contract promotion readiness: keep the stable contract current after the
   `0.2.0` promotion, and audit any future experimental surface before
   promoting it into the next stable contract.
 - Repository knowledge and compiled wiki: expand deterministic repository facts,
-  page manifests, and explicit context approval while keeping injection manual.
+  page manifests, and explicit/listable context approval while keeping injection
+  manual.
 
 ## Recommended Sequence
 

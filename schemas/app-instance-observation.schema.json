@@ -52,6 +52,7 @@
       "properties": {
         "controlsInstance": { "const": false },
         "healthAuthority": { "const": false },
+        "cleanupAuthority": { "const": false },
         "completionAuthority": { "const": false }
       },
       "required": ["controlsInstance", "healthAuthority", "completionAuthority"]

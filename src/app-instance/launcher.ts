@@ -147,6 +147,7 @@ export interface AppInstanceObservationArtifact {
   authority: {
     controlsInstance: false;
     healthAuthority: false;
+    cleanupAuthority: false;
     completionAuthority: false;
   };
 }
@@ -174,6 +175,11 @@ export interface AppInstanceEvidenceSummary {
     observed: number;
     failed: number;
     unavailable: number;
+    artifacts: {
+      valid: number;
+      invalid: number;
+      invalidPaths: string[];
+    };
     byKind: Record<AppInstanceObservationKind, number>;
     latest: {
       observationId: string;
@@ -181,6 +187,11 @@ export interface AppInstanceEvidenceSummary {
       instanceId: string;
       kind: AppInstanceObservationKind;
       status: AppInstanceObservationStatus;
+      source: string;
+      url: string | null;
+      evidencePath: string | null;
+      summary: string | null;
+      reason: string | null;
       processStatus: AppInstanceStatus;
       lifecycleState: AppInstanceLifecycleState | null;
       path: string;
@@ -189,6 +200,7 @@ export interface AppInstanceEvidenceSummary {
   authority: {
     controlsInstance: false;
     healthAuthority: false;
+    cleanupAuthority: false;
     completionAuthority: false;
   };
 }
@@ -1944,6 +1956,7 @@ async function writeObservationArtifact(cwd: string, options: {
     authority: {
       controlsInstance: false,
       healthAuthority: false,
+      cleanupAuthority: false,
       completionAuthority: false,
     },
   };
@@ -2162,6 +2175,7 @@ export async function recordAppInstanceLogObservation(cwd: string, options: {
     authority: {
       controlsInstance: false,
       healthAuthority: false,
+      cleanupAuthority: false,
       completionAuthority: false,
     },
   };
@@ -2297,6 +2311,7 @@ export async function recordAppInstanceMetricObservation(cwd: string, options: {
     authority: {
       controlsInstance: false,
       healthAuthority: false,
+      cleanupAuthority: false,
       completionAuthority: false,
     },
   };
@@ -2496,11 +2511,20 @@ export async function recordAppInstanceBrowserObservation(cwd: string, options: 
   };
 }
 
+function isObservationArtifactFilename(filename: string): boolean {
+  return filename.endsWith(".json")
+    && !filename.endsWith(".http.json")
+    && !filename.endsWith(".log.json")
+    && !filename.endsWith(".metric.json")
+    && !filename.endsWith(".screenshot.json")
+    && !filename.endsWith(".browser.json");
+}
+
 async function listObservationPaths(worktree: string, instanceId: string): Promise<string[]> {
   const dir = instancePaths(worktree, instanceId).observations;
   if (!existsSync(dir)) return [];
   const entries = await readdir(dir);
-  return entries.filter((entry) => entry.endsWith(".json")).sort().map((entry) => join(dir, entry));
+  return entries.filter(isObservationArtifactFilename).sort().map((entry) => join(dir, entry));
 }
 
 export async function readAppInstanceObservation(path: string): Promise<AppInstanceObservationValidation> {
@@ -2526,6 +2550,11 @@ export async function summarizeAppInstanceEvidence(cwd: string): Promise<AppInst
     observed: 0,
     failed: 0,
     unavailable: 0,
+    artifacts: {
+      valid: 0,
+      invalid: 0,
+      invalidPaths: [] as string[],
+    },
     byKind: {
       browser: 0,
       "dev-server": 0,
@@ -2547,7 +2576,13 @@ export async function summarizeAppInstanceEvidence(cwd: string): Promise<AppInst
     const observationPaths = await listObservationPaths(validation.artifact.worktree.path, validation.artifact.instanceId);
     for (const path of observationPaths) {
       const observation = await readAppInstanceObservation(path);
-      if (observation.artifact) observations.push({ ...observation.artifact, path });
+      if (observation.artifact) {
+        observationCounts.artifacts.valid += 1;
+        observations.push({ ...observation.artifact, path });
+      } else {
+        observationCounts.artifacts.invalid += 1;
+        observationCounts.artifacts.invalidPaths.push(path);
+      }
     }
   }
 
@@ -2565,6 +2600,11 @@ export async function summarizeAppInstanceEvidence(cwd: string): Promise<AppInst
       instanceId: latest.instance.instanceId,
       kind: latest.observation.kind,
       status: latest.observation.status,
+      source: latest.observation.source,
+      url: latest.observation.url,
+      evidencePath: latest.observation.evidencePath,
+      summary: latest.observation.summary,
+      reason: latest.observation.reason,
       processStatus: latest.instance.processStatus,
       lifecycleState: latest.instance.lifecycleState ?? null,
       path: latest.path,
@@ -2580,6 +2620,7 @@ export async function summarizeAppInstanceEvidence(cwd: string): Promise<AppInst
     authority: {
       controlsInstance: false,
       healthAuthority: false,
+      cleanupAuthority: false,
       completionAuthority: false,
     },
   };
@@ -2607,6 +2648,23 @@ export async function listAppInstanceObservations(cwd: string, options: { instan
     authority: {
       controlsInstance: false as const,
       healthAuthority: false as const,
+      completionAuthority: false as const,
+    },
+  };
+}
+
+export async function appInstanceEvidenceSummary(cwd: string) {
+  const evidence = await summarizeAppInstanceEvidence(cwd);
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence summary" as const,
+    cwd,
+    evidence,
+    authority: {
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      cleanupAuthority: false as const,
       completionAuthority: false as const,
     },
   };

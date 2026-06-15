@@ -24,7 +24,7 @@ alias는 공개 npm bin으로 배포하지 않습니다.
 - `update check`
 - `wiki map/build/check/context/export`
 - `app instance profile list/status/logs/start/stop`
-- `app instance evidence record/list/probe/logs/metrics/screenshot/browser/adapters`
+- `app instance evidence record/list/probe/logs/metrics/screenshot/browser/adapters/summary`
 - `slop check`
 - `memory add/search/list/review/curate/prune`
 - `skill propose/index/list/review/promote/export/improve/deprecate`
@@ -393,8 +393,10 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   Browser/DevTools capture driver의 경계를 정의하고,
   `cx app instance evidence adapters --json`은 schema-validatable
   import-only/host-mediated/driver-mediated adapter descriptor/status boundary를
-  보고합니다. Adapter availability는 process identity 증명, health, control, cleanup,
-  prompt-injection, Codex-read, completion authority를 의미하지 않습니다.
+  보고합니다. `cx app instance evidence summary --json`은 valid/invalid observation
+  artifact와 최신 observation을 요약합니다. Adapter availability와 evidence summary는
+  process identity 증명, health, control, cleanup, prompt-injection, Codex-read,
+  completion authority를 의미하지 않습니다.
   `cx session status --json`과
   `cx session hud --json`은 app-instance observation과 wiki context approval을
   `evidenceLoop` 아래에 요약하지만 health, control, source-truth, completion
@@ -447,7 +449,8 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   --approved-by <name>`은 `approved_not_injected`, `automatic:false`, completion
   authority 없음과 manual-only handoff policy가 명시된 visible
   `codexus.wiki.context-approval` artifact를 기록합니다. Handoff policy는 fresh context와
-  explicit reference를 요구합니다. `cx wiki injection-policy --json`은 manual-only
+  explicit reference를 요구합니다. `cx wiki context approvals --json`은 같은 manual-only,
+  non-injected boundary로 approval artifact를 나열합니다. `cx wiki injection-policy --json`은 manual-only
   boundary를 보고하고 automatic injection을 deferred로 유지하며 future injection path 전에
   필요한 evidence를 나열합니다. `cx wiki injection plan --approval <id-or-path>
   --target <target> --json`은 `planned_not_applied`, `applySupported:false`, prompt
@@ -535,7 +538,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   fact를 기록합니다. `cx app instance evidence adapters --json`은 report-only
   observability adapter descriptor를 보고합니다. Import-only Browser/DevTools
   capture-file binding은 implemented이고 host-mediated/driver-mediated live capture는
-  unavailable입니다. 명시적 stale/orphan lifecycle policy projection도 구현됐습니다.
+  unavailable입니다. `cx app instance evidence summary --json`은 valid/invalid artifact와
+  최신 observation을 요약하지만 health, control, cleanup, completion authority를 얻지
+  않습니다. 명시적 stale/orphan lifecycle policy projection도 구현됐습니다.
   `cx session status --json`과 `cx session hud --json`은 이 observation과 wiki context
   approval을 `evidenceLoop`에 요약하되 권한을 승격하지 않습니다. 실제 live
   Browser/DevTools capture driver는 [20번 문서](design/20-observability-adapter-boundary.md)의

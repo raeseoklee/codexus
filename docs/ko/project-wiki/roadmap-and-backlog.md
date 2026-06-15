@@ -13,13 +13,14 @@ design docs 위에 얹은 프로젝트 관리용 projection입니다. 짧게 유
 - Project context와 LLM wiki management: generated wiki page를 authority로 만들지
   않으면서 checked-in project context를 최신으로 유지합니다.
 - App-instance observation hardening: app health authority를 주장하지 않고
-  owned-process evidence, lifecycle boundary, log/probe/metric adapter를 개선합니다.
+  owned-process evidence, lifecycle boundary, evidence summary, log/probe/metric
+  adapter를 개선합니다.
 - Relay와 autopilot gate: stage evidence, agreement structure, verification matrix
   handling, stop-at-boundary behavior를 강화합니다.
 - Contract promotion readiness: `0.2.0` promotion 이후에도 stable contract를 최신으로
   유지하고, future experimental surface를 다음 stable contract로 승격하기 전에 audit합니다.
 - Repository knowledge와 compiled wiki: deterministic repository fact, page manifest,
-  explicit context approval을 확장하되 injection은 manual로 유지합니다.
+  explicit/listable context approval을 확장하되 injection은 manual로 유지합니다.
 
 ## 권장 순서
 

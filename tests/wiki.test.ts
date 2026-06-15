@@ -310,6 +310,24 @@ test("wiki context approval writes a visible non-injected artifact", async () =>
     assert.match(markdown, /Handoff Policy/);
     assert.match(markdown, /manual_only/);
 
+    const approvals = runCli(cwd, ["wiki", "context", "approvals", "--json"]);
+    assert.equal(approvals.status, 0, approvals.stderr);
+    const approvalsOutput = JSON.parse(approvals.stdout);
+    assert.equal(approvalsOutput.command, "wiki context approvals");
+    assert.equal(approvalsOutput.summary.total, 1);
+    assert.equal(approvalsOutput.summary.latestApprovalId, output.approval.approvalId);
+    assert.equal(approvalsOutput.summary.automaticInjectionEligible, false);
+    assert.equal(approvalsOutput.eligibleForAutomaticInjection, false);
+    assert.equal(approvalsOutput.completionAuthority, false);
+    assert.equal(approvalsOutput.approvals[0].approvalId, output.approval.approvalId);
+    assert.equal(approvalsOutput.approvals[0].handoffStatus, "manual_only");
+    assert.equal(approvalsOutput.approvals[0].contextPackPath, output.approval.paths.markdown);
+    assert.match(approvalsOutput.approvals[0].manualUse.recommendedReference, /Read .+ explicitly/);
+    assert.equal(approvalsOutput.approvals[0].manualUse.automaticInjection, false);
+    assert.equal(approvalsOutput.approvals[0].manualUse.applied, false);
+    assert.equal(approvalsOutput.approvals[0].manualUse.sourceTruth, false);
+    assert.equal(approvalsOutput.approvals[0].manualUse.completionAuthority, false);
+
     const schema = runCli(cwd, ["schema", "validate", "--type", "wiki-context-approval", "--file", output.approval.paths.json, "--json"]);
     assert.equal(schema.status, 0, schema.stderr);
     assert.equal(JSON.parse(schema.stdout).validation.valid, true);

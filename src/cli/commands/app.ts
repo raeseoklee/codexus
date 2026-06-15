@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import {
   appInstanceLogs,
   appInstanceStatus,
+  appInstanceEvidenceSummary,
   listObservabilityAdapters,
   listAppInstanceObservations,
   listAppInstanceProfiles,
@@ -101,6 +102,16 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
         return;
       }
       console.log(`app instance evidence adapters: ${result.summary.implemented}/${result.summary.total} implemented`);
+      return;
+    }
+    if (subaction === "summary") {
+      const result = await appInstanceEvidenceSummary(cwd);
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`app instance evidence summary: ${result.evidence.status}`);
+      console.log(`Observations: ${result.evidence.observations.total}`);
       return;
     }
     if (subaction === "probe") {

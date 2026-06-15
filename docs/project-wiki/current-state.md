@@ -25,10 +25,10 @@ Codexus has a working harness spine:
 - session status, checkpoint, verification, HUD, and notify-hook evidence,
 - memory lifecycle and replay-gated skills,
 - schema, slop, supply-chain, LSP, repo graph, release, and contract checks,
-- experimental app-instance observation and owned-process controls,
+- experimental app-instance observation summaries and owned-process controls,
 - release/update-channel hardening and cache-only advisory update notices,
-- experimental wiki, relay, decision, loop-breaker, and autopilot contract
-  surfaces.
+- experimental wiki context approvals, relay, decision, loop-breaker, and
+  autopilot contract surfaces.
 
 The current project direction is not to replace Codex. Codexus keeps Codex as
 the engine and adds evidence, records, boundaries, and gates around it.
@@ -59,6 +59,6 @@ Useful current themes:
 
 - contract-promotion readiness for `0.2.0`,
 - stronger project observability and LLM context management,
-- app-instance lifecycle and observation hardening,
+- app-instance lifecycle, observation summary, and authority-boundary hardening,
 - relay/autopilot evidence gates,
 - generated wiki and graph context that remain explicit and non-injected.

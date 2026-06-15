@@ -197,8 +197,8 @@ gated.
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | Stable session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | Stable local evidence surfaces |
 | `architecture check --gate`, `repo check --gate`, `release check --gate`, `lsp check --gate`, `wiki context --fresh-only --gate` | Stable local evidence gates for their documented bounded contracts |
-| `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve` | Experimental graph/wiki evidence surface; context approval artifacts are visible and non-injected |
-| `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics/screenshot` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
+| `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve/approvals` | Experimental graph/wiki evidence surface; context approval artifacts are visible, listable, and non-injected |
+| `app instance profile list/status/logs/start/stop/evidence record/evidence list/evidence summary/probe/logs/metrics/screenshot/browser/adapters` | Experimental owned-process and observation-evidence surface; live start/stop work only for Codexus-owned instances, and observations cite an `instanceId` without becoming authority |
 | app-server, cron/gateway, LSP adapters, model replay, adapter injection, tmux workers, native subagent launch | Experimental/deferred; app-server remains read-only, cron/gateway can dispatch with explicit approval while reporting scheduler readiness gaps, LSP protocol-server lifecycle remains unavailable, and other surfaces stay status/record/launch-contract/gated |
 | autopilot contract layer | Experimental foundation slice implemented (`plan`, `contract validate/approve/scope-check`, `run-gate`, relay recorder/checker, relay adapter status); live `autopilot run` and active relay drivers remain deferred to the 0.2/0.3 track |
 
@@ -244,6 +244,7 @@ codexus repo graph check --graph <graph-id-or-path> --gate --json
 codexus wiki build --json
 codexus wiki context --topic verification --fresh-only --gate --json
 codexus wiki context --topic verification --approve --approved-by "$USER" --json
+codexus wiki context approvals --json
 codexus slop check --scope "src/**" --gate --json
 codexus supply-chain check --gate --json
 codexus release check --gate --json
@@ -257,6 +258,7 @@ codexus app instance evidence metrics --instance-id <id> --json
 codexus app instance evidence screenshot --instance-id <id> --evidence-path ./screen.png --json
 codexus app instance evidence browser --instance-id <id> --capture ./browser-capture.json --json
 codexus app instance evidence adapters --json
+codexus app instance evidence summary --json
 codexus app instance stop --instance-id <id> --json
 codexus run --verify "npm test" "fix the parser regression"
 codexus cancel <run-id> --reason "no longer needed" --json

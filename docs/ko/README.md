@@ -181,8 +181,8 @@ automatic prompt injection은 의도적으로 gate 뒤에 있습니다.
 | Codex-native `$codexus` skill, session status/checkpoint/verify/hud, notify-hook evidence | 안정적인 session evidence surface |
 | `slop check`, `supply-chain check`, schema subset engine, replay parity, memory/skill lifecycle | 안정적인 local evidence surface |
 | `architecture check --gate`, `repo check --gate`, `release check --gate`, `lsp check --gate`, `wiki context --fresh-only --gate` | 문서화된 bounded contract에 한한 stable local evidence gate |
-| `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve` | Experimental graph/wiki evidence surface; context approval artifact는 visible하고 non-injected |
-| `app instance profile list/status/logs/start/stop/evidence record/evidence list/probe/logs/metrics/screenshot` | Experimental owned-process와 observation-evidence surface; live start/stop은 Codexus-owned instance에서만 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용 |
+| `repo graph build/check/import/search/explain`, `wiki build/check/export`, `wiki context approve/approvals` | Experimental graph/wiki evidence surface; context approval artifact는 visible/listable하고 non-injected |
+| `app instance profile list/status/logs/start/stop/evidence record/evidence list/evidence summary/probe/logs/metrics/screenshot/browser/adapters` | Experimental owned-process와 observation-evidence surface; live start/stop은 Codexus-owned instance에서만 동작하고 observation은 authority가 되지 않은 채 `instanceId`를 인용 |
 | app-server, cron/gateway, LSP adapter, model replay, adapter injection, tmux worker, native subagent launch | Experimental/deferred; app-server는 read-only, cron/gateway는 explicit approval live dispatch와 scheduler readiness gap 보고를 지원하며, LSP protocol-server lifecycle은 unavailable, 나머지는 status/record/launch-contract/gated surface |
 | autopilot contract layer | Experimental foundation slice 구현 (`plan`, `contract validate/approve/scope-check`, `run-gate`, relay recorder/checker, relay adapter status); live `autopilot run`과 active relay driver는 계속 0.2/0.3 트랙에서 deferred |
 
@@ -227,6 +227,7 @@ codexus repo graph check --graph <graph-id-or-path> --gate --json
 codexus wiki build --json
 codexus wiki context --topic verification --fresh-only --gate --json
 codexus wiki context --topic verification --approve --approved-by "$USER" --json
+codexus wiki context approvals --json
 codexus slop check --scope "src/**" --gate --json
 codexus supply-chain check --gate --json
 codexus release check --gate --json
@@ -240,6 +241,7 @@ codexus app instance evidence metrics --instance-id <id> --json
 codexus app instance evidence screenshot --instance-id <id> --evidence-path ./screen.png --json
 codexus app instance evidence browser --instance-id <id> --capture ./browser-capture.json --json
 codexus app instance evidence adapters --json
+codexus app instance evidence summary --json
 codexus app instance stop --instance-id <id> --json
 codexus run --verify "npm test" "fix the parser regression"
 codexus cancel <run-id> --reason "no longer needed" --json
