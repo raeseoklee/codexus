@@ -109,6 +109,11 @@ export interface ReleaseIntegrityReport {
       checked: boolean;
       latest: string | null;
       next: string | null;
+      nextDistTagAction: {
+        status: "not_checked" | "satisfied" | "required" | "unknown";
+        command: string | null;
+        reason: string;
+      };
     };
   };
   evidenceGaps: ReleaseIntegrityEvidenceGap[];
@@ -374,6 +379,11 @@ export function buildReleaseIntegrityReport(
     checked: false,
     latest: null,
     next: null,
+    nextDistTagAction: {
+      status: "not_checked",
+      command: null,
+      reason: "Run release check with --live after publishing to verify npm dist-tags.",
+    },
   };
 
   if (!root) {
@@ -679,6 +689,11 @@ export function buildReleaseIntegrityReport(
         checked: true,
         latest: typeof tags.value.latest === "string" ? tags.value.latest : null,
         next: typeof tags.value.next === "string" ? tags.value.next : null,
+        nextDistTagAction: {
+          status: "unknown",
+          command: null,
+          reason: "npm dist-tags were read, but next/latest ordering has not been classified yet.",
+        },
       };
       if (npm.latest === version) {
         appendFact(derivableFacts, {
@@ -694,11 +709,27 @@ export function buildReleaseIntegrityReport(
         });
       }
       if (npm.latest && npm.next && compareSemverish(npm.next, npm.latest) >= 0) {
+        npm.nextDistTagAction = {
+          status: "satisfied",
+          command: null,
+          reason: `npm next ${npm.next} is not older than latest ${npm.latest}`,
+        };
         appendFact(derivableFacts, {
           kind: "npm_next_not_older_than_latest",
           evidence: `npm next ${npm.next} is not older than latest ${npm.latest}`,
         });
       } else {
+        npm.nextDistTagAction = npm.latest === version
+          ? {
+            status: "required",
+            command: `npm dist-tag add codexus@${version} next`,
+            reason: `npm next is ${npm.next ?? "unknown"}, latest is ${npm.latest}; next must be moved to the signed-off stable version before release completion.`,
+          }
+          : {
+            status: "unknown",
+            command: null,
+            reason: `npm latest is ${npm.latest ?? "unknown"}, expected ${version}; fix latest before deciding the next dist-tag action.`,
+          };
         appendGap(evidenceGaps, {
           kind: "npm_next_older_than_latest",
           evidence: `npm next is ${npm.next ?? "unknown"}, latest is ${npm.latest ?? "unknown"}`,

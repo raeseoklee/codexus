@@ -9,6 +9,21 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.4 - 2026-06-16
+
+### Added
+
+- `release check --live --json` now includes
+  `releaseIntegrity.npm.nextDistTagAction`, a bounded action summary that states
+  whether npm `next` already satisfies `next >= latest` or whether a maintainer
+  must run `npm dist-tag add codexus@<version> next`.
+
+### Documentation
+
+- Updated the feature reference, public release checklist, JSON contract,
+  remaining-work backlog, roadmap kanban, and project wiki current-state
+  baseline before publish so the release docs match the `0.2.4` cut.
+
 ## 0.2.3 - 2026-06-15
 
 ### Added

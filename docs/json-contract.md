@@ -93,8 +93,8 @@ current stable line:
   the trusted-publishing workflow, pinned publish actions, installer asset
   workflow wiring, and redacted release-evidence docs. Live GitHub/npm
   post-publish sign-off remains opt-in and experimental; when used, it reports
-  both npm `latest` and npm `next` and gates stale `next` tags that point behind
-  `latest`.
+  both npm `latest` and npm `next`, includes a structured `nextDistTagAction`,
+  and gates stale `next` tags that point behind `latest`.
 - LSP diagnostics output (`lsp status`, `lsp check --gate`): `schemaVersion`,
   `stability`, `command`, `cwd`, `projectRoot`, `scanMode`, `scanAccuracy`,
   `limits`, `autoApply`, `lsp`, `providers`, `result`, `evidenceGaps`,

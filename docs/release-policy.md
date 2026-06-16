@@ -78,7 +78,8 @@ Every stable release must keep the release loop auditable:
 - Post-publish install smoke verifies `codexus@latest` and release
   `install.sh`.
 - Live release sign-off verifies npm `latest` and ensures npm `next` is not
-  older than `latest`.
+  older than `latest`. The live output's `nextDistTagAction` states whether no
+  action is needed or which maintainer command is required.
 - Release evidence is updated after publish with bounded, redacted facts.
 
 Do not commit raw workflow logs, run ledgers, local private paths, tokens,

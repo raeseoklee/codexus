@@ -69,7 +69,8 @@ Codexus pre-1.0 versioning은 기능이 커 보이는지보다 stable JSON contr
 - Publish 후 `codexus release check --version <version> --live --gate --json`이 통과합니다.
 - Post-publish install smoke가 `codexus@latest`와 release `install.sh`를 검증합니다.
 - Live release sign-off는 npm `latest`를 검증하고 npm `next`가 `latest`보다
-  오래되지 않았는지 확인합니다.
+  오래되지 않았는지 확인합니다. Live output의 `nextDistTagAction`은 조치가 필요
+  없는지 또는 어떤 maintainer command가 필요한지를 보고합니다.
 - Publish 후 release evidence를 bounded, redacted fact로 갱신합니다.
 
 Raw workflow log, run ledger, private local path, token, transcript, model prompt를

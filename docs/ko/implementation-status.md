@@ -86,7 +86,9 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   dist-tag mutation 금지, GitHub Release `install.sh` asset wiring, local
   release-evidence doc을 확인합니다. `--live`는 npm `latest`, npm `next`가
   `latest`보다 오래되지 않았는지, GitHub latest, installer asset hash identity를
-  확인하는 명시적 experimental post-publish sign-off입니다.
+  확인하는 명시적 experimental post-publish sign-off입니다. Live output은 이제
+  `releaseIntegrity.npm.nextDistTagAction`을 포함해 stale `next` 보정을 prose-only
+  recommendation이 아니라 구조화된 maintainer action으로 보고합니다.
 - `cx release policy --json`은 active release cadence policy를 보고합니다. 작은 commit을
   유지하되 더 큰 theme의 stable release로 묶는 cadence, hotfix exception,
   stable-contract version boundary, 영문/한국어 policy 문서 존재를 포함합니다.

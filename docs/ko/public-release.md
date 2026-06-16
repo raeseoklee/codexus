@@ -108,7 +108,9 @@ Stable release의 canonical path는 local npm token이 아니라
   GitHub latest, GitHub Release의 `install.sh` asset hash가 checked-in installer와
   일치하는지 확인합니다. 이 live sign-off는 npm `next`가 `latest`보다 오래되지
   않았는지도 검증합니다. `next`가 뒤처져 있으면 release 완료 선언 전에 인증된
-  maintainer가 `npm dist-tag add codexus@<version> next`를 실행해야 합니다.
+  maintainer가 `npm dist-tag add codexus@<version> next`를 실행해야 합니다. Live JSON
+  output의 `releaseIntegrity.npm.nextDistTagAction`은 이 maintainer step이 충족됐는지
+  또는 아직 필요한지를 보여주는 bounded action summary입니다.
 
 Local stable publish는 fallback/dev path로만 사용합니다:
 

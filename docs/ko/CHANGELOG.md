@@ -9,6 +9,21 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.4 - 2026-06-16
+
+### Added
+
+- `release check --live --json`에 `releaseIntegrity.npm.nextDistTagAction`을
+  추가했습니다. 이 bounded action summary는 npm `next`가 이미 `next >= latest`
+  조건을 충족하는지, 아니면 maintainer가
+  `npm dist-tag add codexus@<version> next`를 실행해야 하는지를 명확히 보고합니다.
+
+### Documentation
+
+- Publish 전에 feature reference, public release checklist, JSON contract,
+  remaining-work backlog, roadmap kanban, project wiki current-state baseline을
+  `0.2.4` cut에 맞춰 갱신했습니다.
+
 ## 0.2.3 - 2026-06-15
 
 ### Added

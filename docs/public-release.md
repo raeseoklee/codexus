@@ -116,7 +116,9 @@ token. Before each stable cut:
   `install.sh` asset hash against the checked-in installer. This live sign-off
   also verifies that npm `next` is not older than `latest`; if it is stale, an
   authenticated maintainer must run `npm dist-tag add codexus@<version> next`
-  before declaring the release complete.
+  before declaring the release complete. The live JSON output includes
+  `releaseIntegrity.npm.nextDistTagAction`, which is the bounded action summary
+  for whether this maintainer step is satisfied or still required.
 
 Local stable publish remains a fallback/dev path only:
 

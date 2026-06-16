@@ -191,6 +191,11 @@ test("release integrity live sign-off compares gh latest without relying on isLa
     assert.equal(report.releaseIntegrity.githubRelease.isLatest, true);
     assert.equal(report.releaseIntegrity.npm.latest, "9.9.9");
     assert.equal(report.releaseIntegrity.npm.next, "9.9.9");
+    assert.deepEqual(report.releaseIntegrity.npm.nextDistTagAction, {
+      status: "satisfied",
+      command: null,
+      reason: "npm next 9.9.9 is not older than latest 9.9.9",
+    });
     assert.ok(report.derivableFacts.some((fact) => fact.kind === "github_release_asset_matches_local"));
     assert.ok(report.derivableFacts.some((fact) => fact.kind === "npm_next_not_older_than_latest"));
   } finally {
@@ -223,6 +228,11 @@ test("release integrity live sign-off gates stale npm next dist-tag", async () =
     assert.equal(report.releaseIntegrity.status, "fail");
     assert.equal(report.gate.status, "failed");
     assert.ok(report.evidenceGaps.some((gap) => gap.kind === "npm_next_older_than_latest"));
+    assert.deepEqual(report.releaseIntegrity.npm.nextDistTagAction, {
+      status: "required",
+      command: "npm dist-tag add codexus@9.9.9 next",
+      reason: "npm next is 0.1.0-alpha.7, latest is 9.9.9; next must be moved to the signed-off stable version before release completion.",
+    });
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
