@@ -36,6 +36,13 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - Evidence operations pack을 Codex-native skill command list, feature reference,
   implementation status, project wiki roadmap, roadmap kanban에 반영했습니다.
 
+### Fixed
+
+- `cx evidence export`를 강화해 workspace-local target이 symlink를 통해 workspace
+  밖으로 쓰이지 않도록 막고, exported JSON hash가 실제 파일 바이트와 일치하도록
+  조정했으며, aggregate evidence gate가 child `blocked` 상태를 `failed`로
+  평탄화하지 않고 보존하도록 했습니다.
+
 ## 0.2.4 - 2026-06-16
 
 ### Added

@@ -1,10 +1,10 @@
-import { writeFile } from "node:fs/promises";
+import { lstat } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import { summarizeAppInstanceEvidence } from "../app-instance/launcher.ts";
 import { buildLspCheckReport, buildLspStatusReport } from "../lsp/project.ts";
 import { buildReleaseIntegrityReport } from "../release/integrity.ts";
 import { buildRepoKnowledgeReport } from "../repo-knowledge/check.ts";
-import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
+import { ensureDir, writeTextAtomic } from "../util/fs.ts";
 import { sha256CanonicalJson, sha256Text } from "../util/hash.ts";
 import { checkWiki } from "../wiki/wiki.ts";
 
@@ -41,6 +41,21 @@ function resolveEvidenceExportTarget(cwd: string, target: string): { absolute: s
   return { absolute, relative: relativeTarget };
 }
 
+async function assertNoSymlinkComponents(cwd: string, relativeTarget: string): Promise<void> {
+  let current = resolve(cwd);
+  for (const part of relativeTarget.split("/")) {
+    if (!part) continue;
+    current = join(current, part);
+    try {
+      const stat = await lstat(current);
+      if (stat.isSymbolicLink()) throw new Error("unsafe_evidence_export_target");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+      throw error;
+    }
+  }
+}
+
 function prefixedList(items: Array<Record<string, unknown>>, source: string): Array<Record<string, unknown>> {
   return items.map((item) => ({ ...item, source }));
 }
@@ -64,11 +79,12 @@ function gateFor(enabled: boolean, surfaces: Array<{ gate: { status: EvidenceGat
   }
   const failed = surfaces.filter((surface) => surface.gate.exitCode !== 0 || surface.gate.status === "failed" || surface.gate.status === "blocked");
   if (failed.length > 0) {
+    const blocked = failed.some((surface) => surface.gate.status === "blocked");
     return {
       enabled: true as const,
-      status: "failed" as const,
+      status: blocked ? "blocked" as const : "failed" as const,
       exitCode: 1 as const,
-      reason: `evidence_surface_gaps:${failed.length}`,
+      reason: blocked ? `evidence_surface_blocked:${failed.length}` : `evidence_surface_gaps:${failed.length}`,
     };
   }
   return {
@@ -339,14 +355,16 @@ function renderEvidenceMarkdown(check: Awaited<ReturnType<typeof buildEvidenceCh
 
 export async function exportEvidenceBundle(cwd: string, options: { target: string; gate: boolean; timeoutMs?: number }) {
   const resolved = resolveEvidenceExportTarget(cwd, options.target);
+  await assertNoSymlinkComponents(cwd, resolved.relative);
   const check = await buildEvidenceCheck(cwd, { gate: options.gate, timeoutMs: options.timeoutMs });
   await ensureDir(resolved.absolute);
   const jsonPath = join(resolved.absolute, "evidence.json");
   const markdownPath = join(resolved.absolute, "evidence.md");
+  const json = `${JSON.stringify(check, null, 2)}\n`;
   const markdown = renderEvidenceMarkdown(check);
-  await writeJsonAtomic(jsonPath, check);
+  await writeTextAtomic(jsonPath, json);
   await ensureDir(dirname(markdownPath));
-  await writeFile(markdownPath, markdown);
+  await writeTextAtomic(markdownPath, markdown);
   return {
     schemaVersion: 1,
     stability: "experimental" as const,
@@ -359,7 +377,7 @@ export async function exportEvidenceBundle(cwd: string, options: { target: strin
       gate: check.gate.status,
       evidenceGapCount: check.counts.evidenceGaps,
       blockingUnknownCount: check.counts.blockingUnknowns,
-      jsonSha256: sha256CanonicalJson(check),
+      jsonSha256: sha256Text(json),
       markdownSha256: sha256Text(markdown),
       sourceTruthAuthority: false as const,
       completionAuthority: false as const,

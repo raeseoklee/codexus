@@ -39,6 +39,13 @@ occur before 1.0, but they should be called out clearly.
   implementation status, project wiki roadmap, and roadmap kanban for the
   evidence operations pack.
 
+### Fixed
+
+- Hardened `cx evidence export` so workspace-local targets cannot be symlinked
+  outside the workspace, exported JSON hashes match the actual file bytes, and
+  aggregate evidence gates preserve child `blocked` status instead of flattening
+  it to `failed`.
+
 ## 0.2.4 - 2026-06-16
 
 ### Added

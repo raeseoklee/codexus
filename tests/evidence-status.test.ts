@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -100,6 +101,22 @@ test("evidence check aggregates existing gates without becoming completion autho
   }
 });
 
+test("evidence check preserves blocked child gates in the aggregate gate", async () => {
+  const cwd = await tempDir();
+  try {
+    const result = runCli(cwd, ["evidence", "check", "--gate", "--json", "--timeout-ms", "10000"]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.status, "blocked");
+    assert.equal(output.gate.status, "blocked");
+    assert.equal(output.gate.reason, "evidence_surface_blocked:4");
+    assert.equal(output.surfaces.find((surface: { id: string }) => surface.id === "repo").gate.status, "blocked");
+    assert.equal(output.surfaces.find((surface: { id: string }) => surface.id === "lsp").gate.status, "blocked");
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("evidence export writes an explicit projection without source-truth authority", async () => {
   const cwd = await tempDir();
   try {
@@ -126,10 +143,31 @@ test("evidence export writes an explicit projection without source-truth authori
     assert.equal(existsSync(markdownPath), true);
     const exportedJson = JSON.parse(await readFile(jsonPath, "utf8"));
     assert.equal(exportedJson.command, "evidence check");
+    const jsonHash = `sha256:${createHash("sha256").update(await readFile(jsonPath)).digest("hex")}`;
+    assert.equal(output.bundle.jsonSha256, jsonHash);
     const markdown = await readFile(markdownPath, "utf8");
+    const markdownHash = `sha256:${createHash("sha256").update(markdown).digest("hex")}`;
+    assert.equal(output.bundle.markdownSha256, markdownHash);
     assert.match(markdown, /Codexus Evidence Bundle/);
     assert.match(markdown, /not source truth/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("evidence export rejects symlink targets before writing outside the workspace", async () => {
+  const cwd = await tempDir();
+  const outside = await tempDir();
+  try {
+    await symlink(outside, join(cwd, "linkout"));
+    const result = runCli(cwd, ["evidence", "export", "--target", "linkout", "--json", "--timeout-ms", "10000"]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.code, "unsafe_evidence_export_target");
+    assert.equal(existsSync(join(outside, "evidence.json")), false);
+    assert.equal(existsSync(join(outside, "evidence.md")), false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+    await rm(outside, { recursive: true, force: true });
   }
 });
