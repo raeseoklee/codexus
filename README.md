@@ -155,6 +155,8 @@ less install.sh
 sh install.sh
 ```
 
+Run `sh install.sh --help` to print the options (configured through environment variables) without installing anything.
+
 Clone and verify the repository:
 
 ```bash
