@@ -9,6 +9,8 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.5 - 2026-06-17
+
 ### Added
 
 - `cx app instance profile doctor --json`을 추가했습니다. 이 read-only

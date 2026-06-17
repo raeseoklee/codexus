@@ -2,7 +2,7 @@
 
 [English](../features.md)
 
-상태: `0.2.4` 이후 `main` 기준 최신
+상태: `0.2.5` 이후 `main` 기준 최신
 
 이 문서는 배포된 Codexus surface를 안정성별로 정리한 제품 레퍼런스입니다. 완료
 권한은 아닙니다. 자동화 contract의 기준은 [JSON contract](json-contract.md)이고,

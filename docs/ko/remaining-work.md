@@ -180,7 +180,7 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
     alpha publish, trusted-publishing release workflow, Node 22 package smoke
     compatibility, stable-readiness smoke coverage, local release integrity gate 구현.
     - `cx`, `codexus`를 canonical public bin으로 유지합니다.
-    - 현재 npm baseline은 `0.2.4`입니다. Prerelease는 fallback/dev path인
+    - 현재 release-prep baseline은 `0.2.5`입니다. Prerelease는 fallback/dev path인
       `publish:next`를 통해 배포할 수 있고, stable release는 trusted GitHub Actions
       tag run에서 배포합니다.
     - `npm run package:smoke`는 installed tarball release gate로 유지합니다. Bin path,

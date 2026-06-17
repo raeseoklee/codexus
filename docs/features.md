@@ -2,7 +2,7 @@
 
 [Korean](ko/features.md)
 
-Status: current as of `main` after `0.2.4`
+Status: current as of `main` after `0.2.5`
 
 This reference lists the shipped Codexus surfaces by stability. It is a product
 reference, not a completion authority. The authoritative automation contract is

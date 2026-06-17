@@ -31,8 +31,7 @@ design docs 위에 얹은 프로젝트 관리용 projection입니다. 짧게 유
 Release blocker가 생기지 않는 한 아래 순서로 진행합니다:
 
 1. Docs, kanban, project wiki, stable JSON contract를 최신 상태로 유지합니다.
-2. `0.2.4` post-publish `next` sign-off를 닫은 뒤, health 또는 cleanup authority를
-   승격하지 않고 evidence operations pack을 강화합니다.
+2. Evidence operations pack의 `0.2.5` post-publish live sign-off를 닫습니다.
 3. Relay/autopilot stage gate와 stop-at-boundary behavior를 강화합니다.
 4. Injection은 manual로 유지하면서 deterministic repository knowledge와 compiled wiki
    context를 확장합니다.

@@ -9,6 +9,8 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.5 - 2026-06-17
+
 ### Added
 
 - Added `cx app instance profile doctor --json`, a read-only app-instance
