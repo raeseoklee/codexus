@@ -27,7 +27,8 @@ Codexus has a working harness spine:
 - schema, slop, supply-chain, LSP, repo graph, release, and contract checks,
 - experimental app-instance observation summaries and owned-process controls,
 - app-instance profile preflight, split observation signals, bounded evidence
-  collection, and a read-only evidence dashboard over app/wiki/LSP evidence,
+  collection, a read-only evidence dashboard over app/wiki/LSP evidence,
+  aggregate evidence checks, and explicit evidence bundle export,
 - release/update-channel hardening and cache-only advisory update notices,
 - experimental wiki context approvals, relay, decision, loop-breaker, and
   autopilot contract surfaces.

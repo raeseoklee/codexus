@@ -27,6 +27,7 @@ Codexus에는 작동하는 harness spine이 있습니다:
 - experimental app-instance observation summary와 owned-process control,
 - app-instance profile preflight, split observation signal, bounded evidence
   collection, app/wiki/LSP evidence 위의 read-only evidence dashboard,
+  aggregate evidence check, explicit evidence bundle export,
 - release/update-channel hardening과 cache-only advisory update notice,
 - experimental wiki context approval, relay, decision, loop-breaker, autopilot
   contract surface.

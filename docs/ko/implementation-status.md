@@ -415,6 +415,13 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   status, LSP detection status를 집계하는 experimental project evidence dashboard를
   제공합니다. 이는 기존 evidence surface 위의 projection이며 새 completion gate나
   semantic quality judgment가 아닙니다.
+- `cx evidence check --gate --json`은 기존 repo, wiki, LSP, local
+  release-integrity gate를 하나의 project evidence report로 집계합니다. aggregate
+  gate는 기존 gate 결과를 반영할 뿐, 새 semantic completion authority를 만들지
+  않습니다.
+- `cx evidence export --target <path> --json`은 사람이 검토할 수 있는 markdown/JSON
+  evidence bundle을 명시적으로 씁니다. 이 export는 workspace-local이고,
+  auto-commit되지 않으며 source truth나 completion authority가 아닙니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,

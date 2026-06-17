@@ -80,6 +80,8 @@ Usage:
   cx lsp adapters [--json]
   cx lsp check [--gate] [--timeout-ms <n>] [--json]
   cx evidence status [--json]
+  cx evidence check [--gate] [--timeout-ms <n>] [--json]
+  cx evidence export --target <path> [--gate] [--timeout-ms <n>] [--json]
   cx supply-chain check [--gate] [--json]
   cx policy catalog check [--since <ref>] [--scope <glob>] [--json]
   cx release check [--version <version>] [--live] [--gate] [--json]

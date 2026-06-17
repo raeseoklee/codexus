@@ -53,6 +53,8 @@ node codex/skills/codexus/scripts/cx.mjs lsp status --json
 node codex/skills/codexus/scripts/cx.mjs lsp adapters --json
 node codex/skills/codexus/scripts/cx.mjs lsp check --gate --json
 node codex/skills/codexus/scripts/cx.mjs evidence status --json
+node codex/skills/codexus/scripts/cx.mjs evidence check --gate --json
+node codex/skills/codexus/scripts/cx.mjs evidence export --target docs/evidence --json
 node codex/skills/codexus/scripts/cx.mjs wiki build --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --fresh-only --gate --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --approve --approved-by "$USER" --json

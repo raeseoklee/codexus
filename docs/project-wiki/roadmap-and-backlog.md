@@ -11,8 +11,9 @@ and point back to source docs.
 These are suitable for release-sized goals when grouped with verification:
 
 - Evidence operations pack: close release-channel sign-off, add project-wide
-  evidence dashboards, and harden app-instance preflight/observation/collection
-  without promoting health or cleanup authority.
+  evidence dashboards, aggregate evidence checks, explicit evidence bundle
+  export, and harden app-instance preflight/observation/collection without
+  promoting health or cleanup authority.
 - Project context and LLM wiki management: keep checked-in project context
   current without making generated wiki pages authority.
 - App-instance observation hardening: improve owned-process evidence,

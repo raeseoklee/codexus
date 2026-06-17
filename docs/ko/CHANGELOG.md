@@ -24,6 +24,12 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 - `cx evidence status --json`을 추가했습니다. 이 experimental read-only project evidence
   dashboard는 app-instance evidence, deterministic wiki check status, LSP detection
   status를 집계하지만 새로운 completion gate를 만들지 않습니다.
+- `cx evidence check --gate --json`을 추가했습니다. 이 experimental aggregate는 기존
+  repo, wiki, LSP, release gate를 묶어 surface별 gate status와 evidence gap을
+  보고하지만 aggregate status를 semantic completion authority로 승격하지 않습니다.
+- `cx evidence export --target <path> --json`을 추가했습니다. 사람이 검토할 수 있는
+  markdown/JSON evidence bundle을 명시적으로 내보내며, export는 projection일 뿐
+  auto-commit되지 않고 source truth가 되지 않습니다.
 
 ### Documentation
 

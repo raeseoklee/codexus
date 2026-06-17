@@ -25,6 +25,13 @@ occur before 1.0, but they should be called out clearly.
 - Added `cx evidence status --json`, an experimental read-only project evidence
   dashboard that aggregates app-instance evidence, deterministic wiki check
   status, and LSP detection status without creating a new completion gate.
+- Added `cx evidence check --gate --json`, an experimental aggregate over the
+  existing repo, wiki, LSP, and release gates. It reports per-surface gate
+  status and evidence gaps without turning aggregate status into semantic
+  completion authority.
+- Added `cx evidence export --target <path> --json`, an explicit markdown/JSON
+  evidence bundle export for human review. The export is a projection, is not
+  auto-committed, and does not become source truth.
 
 ### Documentation
 

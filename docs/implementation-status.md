@@ -414,6 +414,13 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   dashboard over app-instance observations, deterministic wiki check status,
   and LSP detection status. It is a projection over existing evidence surfaces,
   not a new completion gate or semantic quality judgment.
+- `cx evidence check --gate --json` aggregates the existing repo, wiki, LSP, and
+  local release-integrity gates into one project evidence report. The aggregate
+  gate mirrors those existing gates; it does not create a new semantic
+  completion authority.
+- `cx evidence export --target <path> --json` writes an explicit markdown/JSON
+  evidence bundle for human review. The export is workspace-local, explicit,
+  not auto-committed, not source truth, and not completion authority.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External

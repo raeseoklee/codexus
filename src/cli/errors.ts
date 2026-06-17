@@ -209,8 +209,12 @@ function messageFor({ code, target, raw }: ParsedCliError): string {
       return "Missing wiki injection approval reference.";
     case "missing_wiki_injection_target":
       return "Missing wiki injection target.";
+    case "missing_evidence_export_target":
+      return "Missing evidence export target.";
     case "unsafe_wiki_injection_approval":
       return "Wiki injection approval must be an approval id or a workspace-local .codexus/wiki/context/*/approval.json path.";
+    case "unsafe_evidence_export_target":
+      return `Evidence export target is unsafe${target ? `: ${target}` : ""}.`;
     case "wiki_context_approval_missing":
       return `Wiki context approval not found${target ? `: ${target}` : ""}.`;
     case "wiki_context_approval_invalid":
@@ -521,8 +525,12 @@ function hintFor({ code }: ParsedCliError): string | null {
       return "Pass `--approval <approval-id-or-path>` with `cx wiki injection plan`.";
     case "missing_wiki_injection_target":
       return "Pass `--target <target>` with `cx wiki injection plan`.";
+    case "missing_evidence_export_target":
+      return "Pass `--target <workspace-relative-directory>` with `cx evidence export`.";
     case "unsafe_wiki_injection_approval":
       return "Use an approval id or a path under `.codexus/wiki/context/<id>/approval.json`.";
+    case "unsafe_evidence_export_target":
+      return "Use a workspace-relative target outside `.codexus`, `.git`, and `node_modules`.";
     case "wiki_context_approval_missing":
       return "Regenerate the context approval with `cx wiki context --approve --approved-by <name> --json`.";
     case "wiki_context_approval_invalid":

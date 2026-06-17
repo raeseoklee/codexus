@@ -11,7 +11,8 @@ design docs 위에 얹은 프로젝트 관리용 projection입니다. 짧게 유
 검증과 함께 release-sized goal로 묶기 좋은 항목:
 
 - Evidence operations pack: release-channel sign-off를 닫고, project-wide evidence
-  dashboard를 추가하며, health/cleanup authority를 승격하지 않고 app-instance
+  dashboard, aggregate evidence check, explicit evidence bundle export를 추가하며,
+  health/cleanup authority를 승격하지 않고 app-instance
   preflight/observation/collection을 강화합니다.
 - Project context와 LLM wiki management: generated wiki page를 authority로 만들지
   않으면서 checked-in project context를 최신으로 유지합니다.

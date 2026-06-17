@@ -56,6 +56,20 @@ projection artifact at `.codexus/session/tasks.json`; task state is useful for
 host-panel mirroring and HUD summaries, but it never becomes verification,
 health, or completion authority.
 
+## Evidence Operations
+
+```bash
+node codex/skills/codexus/scripts/cx.mjs evidence status --json
+node codex/skills/codexus/scripts/cx.mjs evidence check --gate --json
+node codex/skills/codexus/scripts/cx.mjs evidence export --target docs/evidence --json
+```
+
+Use `evidence status` as a read-only dashboard over app-instance, wiki, and LSP
+facts. Use `evidence check` to aggregate existing repo/wiki/LSP/release gates
+without turning the aggregate into semantic completion authority. Use
+`evidence export` to write a markdown/JSON projection for human review. Export
+does not auto-commit, mutate source truth, or prove task completion.
+
 ## Run State
 
 ```bash
@@ -111,9 +125,12 @@ Live model replay is blocked unless the local experiment gate is explicitly enab
 
 ```bash
 node codex/skills/codexus/scripts/cx.mjs app instance profile list --json
+node codex/skills/codexus/scripts/cx.mjs app instance profile doctor --worktree . --json
 node codex/skills/codexus/scripts/cx.mjs app instance status --json
+node codex/skills/codexus/scripts/cx.mjs app instance observe --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance start --profile web --worktree . --dry-run --json
 node codex/skills/codexus/scripts/cx.mjs app instance logs --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence collect --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence probe --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence logs --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
@@ -125,9 +142,10 @@ node codex/skills/codexus/scripts/cx.mjs app instance stop --instance-id <id> --
 ```
 
 Use app instance commands for experimental worktree-local dev-server ownership
-and observation. The HTTP, log, metric, and screenshot-file evidence adapters
-record bounded artifacts tied to an `instanceId`; they do not become health,
-cleanup, control, or completion authority.
+and observation. Profile doctor, split-signal observe, HTTP, log, metric,
+screenshot-file, Browser/DevTools capture-file, and collection adapters record
+bounded artifacts tied to an `instanceId`; they do not become health, cleanup,
+control, or completion authority.
 
 ## Relay Adapters
 

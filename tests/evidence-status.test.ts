@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -64,6 +65,70 @@ test("evidence status aggregates app wiki and lsp evidence without authority", a
     assert.equal(output.authority.cleanupAuthority, false);
     assert.equal(output.authority.sourceTruthAuthority, false);
     assert.equal(output.authority.completionAuthority, false);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("evidence check aggregates existing gates without becoming completion authority", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeFile(join(cwd, "package.json"), `${JSON.stringify({
+      version: "0.0.0-test",
+      scripts: { typecheck: "node -e \"process.exit(0)\"" },
+      devDependencies: { typescript: "^5.0.0" },
+    }, null, 2)}\n`);
+
+    const result = runCli(cwd, ["evidence", "check", "--gate", "--json", "--timeout-ms", "10000"]);
+    assert.equal(result.status, 1);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.command, "evidence check");
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.gate.status, "failed");
+    assert.equal(output.authority.sourceTruthAuthority, false);
+    assert.equal(output.authority.healthAuthority, false);
+    assert.equal(output.authority.cleanupAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+    assert.deepEqual(output.surfaces.map((surface: { id: string }) => surface.id), ["repo", "wiki", "lsp", "release"]);
+    assert.equal(output.surfaces.find((surface: { id: string }) => surface.id === "lsp").gate.status, "passed");
+    assert.equal(output.evidenceGaps.some((gap: { source?: string }) => gap.source === "repo"), true);
+    assert.equal(output.evidenceGaps.some((gap: { source?: string }) => gap.source === "wiki"), true);
+    assert.equal(output.evidenceGaps.some((gap: { source?: string }) => gap.source === "release"), true);
+    assert.equal(output.heuristicClaims.some((claim: { kind?: string }) => claim.kind === "evidence_check_is_aggregate_gate"), true);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("evidence export writes an explicit projection without source-truth authority", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeFile(join(cwd, "package.json"), `${JSON.stringify({
+      version: "0.0.0-test",
+      scripts: { typecheck: "node -e \"process.exit(0)\"" },
+      devDependencies: { typescript: "^5.0.0" },
+    }, null, 2)}\n`);
+
+    const result = runCli(cwd, ["evidence", "export", "--target", "evidence-bundle", "--json", "--timeout-ms", "10000"]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.command, "evidence export");
+    assert.equal(output.target, "evidence-bundle");
+    assert.equal(output.gate.status, "not_requested");
+    assert.equal(output.bundle.sourceTruthAuthority, false);
+    assert.equal(output.bundle.completionAuthority, false);
+    assert.equal(output.bundle.autoCommitted, false);
+    assert.equal(output.authority.sourceTruthAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+    const jsonPath = join(cwd, "evidence-bundle", "evidence.json");
+    const markdownPath = join(cwd, "evidence-bundle", "evidence.md");
+    assert.equal(existsSync(jsonPath), true);
+    assert.equal(existsSync(markdownPath), true);
+    const exportedJson = JSON.parse(await readFile(jsonPath, "utf8"));
+    assert.equal(exportedJson.command, "evidence check");
+    const markdown = await readFile(markdownPath, "utf8");
+    assert.match(markdown, /Codexus Evidence Bundle/);
+    assert.match(markdown, /not source truth/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
