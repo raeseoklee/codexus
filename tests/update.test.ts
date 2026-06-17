@@ -19,6 +19,7 @@ function runCli(cwd: string, args: string[], env: Record<string, string> = {}) {
     env: {
       ...process.env,
       CI: "",
+      CODEXUS_UPDATE_TIMEOUT_MS: "10000",
       ...env,
     },
   });

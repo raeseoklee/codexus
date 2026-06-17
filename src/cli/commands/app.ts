@@ -2,10 +2,13 @@ import { resolve } from "node:path";
 import {
   appInstanceLogs,
   appInstanceStatus,
+  collectAppInstanceEvidence,
+  doctorAppInstanceProfiles,
   appInstanceEvidenceSummary,
   listObservabilityAdapters,
   listAppInstanceObservations,
   listAppInstanceProfiles,
+  observeAppInstance,
   probeAppInstanceHttpObservation,
   recordAppInstanceBrowserObservation,
   recordAppInstanceLogObservation,
@@ -27,15 +30,21 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
 
   if (action === "profile") {
     const subaction = args.positionals[2];
-    if (subaction !== "list") throw new Error(`unsupported_app_instance_command:profile-${subaction ?? "missing"}`);
-    const result = await listAppInstanceProfiles(cwd, { descriptorPath });
+    if (subaction !== "list" && subaction !== "doctor") throw new Error(`unsupported_app_instance_command:profile-${subaction ?? "missing"}`);
+    const result = subaction === "doctor"
+      ? await doctorAppInstanceProfiles(cwd, {
+        descriptorPath,
+        worktree: flagString(args.flags, "worktree"),
+        gate: flagBool(args.flags, "gate"),
+      })
+      : await listAppInstanceProfiles(cwd, { descriptorPath });
     if (json) {
       console.log(JSON.stringify(result, null, 2));
-      process.exitCode = result.descriptor.valid ? 0 : 1;
+      process.exitCode = "gate" in result ? result.gate.exitCode : result.descriptor.valid ? 0 : 1;
       return;
     }
-    console.log(`app instance profiles: ${result.profiles.length}`);
-    process.exitCode = result.descriptor.valid ? 0 : 1;
+    console.log(subaction === "doctor" ? `app instance profile doctor: ${"gate" in result ? result.gate.status : "not_requested"}` : `app instance profiles: ${result.profiles.length}`);
+    process.exitCode = "gate" in result ? result.gate.exitCode : result.descriptor.valid ? 0 : 1;
     return;
   }
 
@@ -62,6 +71,18 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
       return;
     }
     console.log(`app instance logs: ${result.instanceId}`);
+    return;
+  }
+
+  if (action === "observe") {
+    const result = await observeAppInstance(cwd, {
+      instanceId: flagString(args.flags, "instance-id"),
+    });
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`app instance observe: ${result.status}`);
     return;
   }
 
@@ -112,6 +133,19 @@ export async function appCommand(args: ParsedArgs): Promise<void> {
       }
       console.log(`app instance evidence summary: ${result.evidence.status}`);
       console.log(`Observations: ${result.evidence.observations.total}`);
+      return;
+    }
+    if (subaction === "collect") {
+      const result = await collectAppInstanceEvidence(cwd, {
+        instanceId: flagString(args.flags, "instance-id"),
+        tail: flagString(args.flags, "tail"),
+        timeoutMs: flagString(args.flags, "timeout-ms"),
+      });
+      if (json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(`app instance evidence collect: ${result.status}`);
       return;
     }
     if (subaction === "probe") {

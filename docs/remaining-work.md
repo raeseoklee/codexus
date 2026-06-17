@@ -105,6 +105,11 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
   contract validate/approve/scope-check, and run-gate readiness reporting), but
   live `cx autopilot run` and worktree-attached execution are still
   intentionally unbuilt.
+- Evidence operations follow-up implemented after the `0.2.4` release-prep
+  pass: app-instance profile doctor, split-signal app-instance observation,
+  bounded app-instance evidence collection, and a read-only `cx evidence status`
+  dashboard that aggregates app-instance, wiki, and LSP evidence without
+  becoming a completion gate.
 
 ### P0: Contract and Safety Hardening
 

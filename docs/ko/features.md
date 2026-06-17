@@ -2,7 +2,7 @@
 
 [English](../features.md)
 
-상태: `0.2.4` 기준 최신
+상태: `0.2.4` 이후 `main` 기준 최신
 
 이 문서는 배포된 Codexus surface를 안정성별로 정리한 제품 레퍼런스입니다. 완료
 권한은 아닙니다. 자동화 contract의 기준은 [JSON contract](json-contract.md)이고,
@@ -52,7 +52,8 @@ Experimental surface는 배포되어 있지만 stable JSON contract로 freeze되
 | --- | --- | --- |
 | Repository graph | `codexus repo graph build/check/import/search/explain` | Local graph projection, JSON-only external graph import, structural check, read-only search/explain. |
 | Compiled wiki | `codexus wiki map/build/check/export`, `codexus wiki context --approve`, `codexus wiki context approvals`, `codexus wiki injection-policy`, `codexus wiki injection plan` | Regenerable markdown projection, visible non-injected context approval artifact, explicit approval listing, 명시적인 manual-only injection policy report, report-only injection planning. |
-| App instance launcher | `codexus app instance profile list/status/logs/start/stop/evidence *` | Worktree-local owned process launcher, observation evidence, evidence summary, report-only observability adapter status. Stop은 owner evidence가 있는 Codexus-owned instance만 대상으로 하며 adapter status와 evidence summary는 health, control, cleanup, completion authority를 의미하지 않습니다. |
+| Evidence operations | `codexus evidence status` | App-instance observation, deterministic wiki check status, LSP detection status를 집계하는 read-only project evidence dashboard입니다. 새 completion gate가 아니라 projection입니다. |
+| App instance launcher | `codexus app instance profile list/doctor/status/observe/logs/start/stop/evidence *` | Worktree-local owned process launcher, descriptor preflight, split-signal observation, observation evidence, evidence collection, evidence summary, report-only observability adapter status. Stop은 owner evidence가 있는 Codexus-owned instance만 대상으로 하며 adapter status와 evidence summary는 health, control, cleanup, completion authority를 의미하지 않습니다. |
 | App-server experiments | `codexus app-server status/discover/observer/experiment` | Read-only/isolated evidence experiment. Live Desktop attachment는 계속 gated입니다. |
 | Autopilot contract | `codexus autopilot plan`, `codexus autopilot contract *`, `codexus autopilot run-gate`, `codexus autopilot relay *` | Plan, approval, scope-check, pre-run readiness report, relay artifact, stage-gate evidence, relay adapter status. Live `autopilot run`과 active relay driver는 blocked입니다. |
 | Cron/gateway automation | `codexus cron *`, `codexus gateway *` | Dry-run, explicit approval, recorded dispatch, recovery projection, scheduler-readiness gap report. Rich unattended ownership은 future work입니다. |

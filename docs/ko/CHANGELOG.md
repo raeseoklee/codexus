@@ -9,6 +9,27 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+### Added
+
+- `cx app instance profile doctor --json`을 추가했습니다. 이 read-only
+  app-instance descriptor preflight는 앱 프로세스를 시작하거나 제어하지 않고 profile
+  cwd boundary, command resolution, fixed-port availability, loopback health URL,
+  runner availability를 점검합니다.
+- `cx app instance observe --json`을 추가했습니다. 이 명령은 process, heartbeat,
+  loopback port, HTTP health projection, log evidence를 분리된 signal로 보고하지만
+  app health, cleanup, control, completion authority가 되지 않습니다.
+- `cx app instance evidence collect --json`을 추가했습니다. 하나의 `instanceId`에 대해
+  기존 schema-valid observation artifact를 재사용해 metric, log, loopback HTTP
+  observation을 bounded evidence pack으로 기록합니다.
+- `cx evidence status --json`을 추가했습니다. 이 experimental read-only project evidence
+  dashboard는 app-instance evidence, deterministic wiki check status, LSP detection
+  status를 집계하지만 새로운 completion gate를 만들지 않습니다.
+
+### Documentation
+
+- Evidence operations pack을 Codex-native skill command list, feature reference,
+  implementation status, project wiki roadmap, roadmap kanban에 반영했습니다.
+
 ## 0.2.4 - 2026-06-16
 
 ### Added

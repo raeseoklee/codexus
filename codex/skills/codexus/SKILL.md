@@ -52,6 +52,7 @@ node codex/skills/codexus/scripts/cx.mjs locks list --json
 node codex/skills/codexus/scripts/cx.mjs lsp status --json
 node codex/skills/codexus/scripts/cx.mjs lsp adapters --json
 node codex/skills/codexus/scripts/cx.mjs lsp check --gate --json
+node codex/skills/codexus/scripts/cx.mjs evidence status --json
 node codex/skills/codexus/scripts/cx.mjs wiki build --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --fresh-only --gate --json
 node codex/skills/codexus/scripts/cx.mjs wiki context --topic verification --approve --approved-by "$USER" --json
@@ -61,6 +62,9 @@ node codex/skills/codexus/scripts/cx.mjs wiki injection plan --approval <approva
 node codex/skills/codexus/scripts/cx.mjs autopilot run-gate --policy <path> --json
 node codex/skills/codexus/scripts/cx.mjs autopilot relay adapters --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence metrics --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance profile doctor --worktree . --json
+node codex/skills/codexus/scripts/cx.mjs app instance observe --instance-id <id> --json
+node codex/skills/codexus/scripts/cx.mjs app instance evidence collect --instance-id <id> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence screenshot --instance-id <id> --evidence-path <path> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence browser --instance-id <id> --capture <browser-capture.json> --json
 node codex/skills/codexus/scripts/cx.mjs app instance evidence adapters --json

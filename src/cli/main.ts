@@ -35,6 +35,7 @@ import { lspCommand } from "./commands/lsp.ts";
 import { contractCommand } from "./commands/contract.ts";
 import { updateCommand } from "./commands/update.ts";
 import { pluginCommand } from "./commands/plugin.ts";
+import { evidenceCommand } from "./commands/evidence.ts";
 import { migrateLegacyHarnessRoot } from "../ledger/paths.ts";
 
 function helpText(): string {
@@ -78,6 +79,7 @@ Usage:
   cx lsp status [--json]
   cx lsp adapters [--json]
   cx lsp check [--gate] [--timeout-ms <n>] [--json]
+  cx evidence status [--json]
   cx supply-chain check [--gate] [--json]
   cx policy catalog check [--since <ref>] [--scope <glob>] [--json]
   cx release check [--version <version>] [--live] [--gate] [--json]
@@ -130,7 +132,9 @@ Usage:
   cx app-server experiment --live-read-only --sock <path> --record [--observe-ms <n>] [--timeout-ms <n>] [--json]
   cx app-server experiment --stdio-proof --record [--timeout-ms <n>] [--json]
   cx app instance profile list [--descriptor <path>] [--json]
+  cx app instance profile doctor [--descriptor <path>] [--worktree <path>] [--gate] [--json]
   cx app instance status [--instance-id <id>] [--worktree <path>] [--json]
+  cx app instance observe --instance-id <id> [--json]
   cx app instance logs --instance-id <id> [--tail <n>] [--json]
   cx app instance evidence record --instance-id <id> --kind browser|dev-server|log|screenshot|metric --source <name> [--status observed|unavailable|failed] [--url <url>] [--evidence-path <path>] [--summary <text>] [--json]
   cx app instance evidence probe --instance-id <id> [--url <loopback-url>] [--timeout-ms <n>] [--json]
@@ -140,6 +144,7 @@ Usage:
   cx app instance evidence browser --instance-id <id> --capture <browser-capture.json> [--url <loopback-url>] [--summary <text>] [--json]
   cx app instance evidence adapters [--json]
   cx app instance evidence summary [--json]
+  cx app instance evidence collect --instance-id <id> [--tail <n>] [--timeout-ms <n>] [--json]
   cx app instance evidence list --instance-id <id> [--json]
   cx app instance start --profile <name> --worktree <path> [--dry-run] [--descriptor <path>] [--port <n>] [--json]
   cx app instance stop --instance-id <id> [--json]
@@ -213,6 +218,10 @@ async function dispatch(args: ReturnType<typeof parseArgs>): Promise<void> {
   }
   if (args.command === "lsp") {
     await lspCommand(args);
+    return;
+  }
+  if (args.command === "evidence") {
+    await evidenceCommand(args);
     return;
   }
   if (args.command === "supply-chain") {

@@ -405,6 +405,16 @@ alias는 공개 npm bin으로 배포하지 않습니다.
   authority를 추가하지 않습니다. 실제 live Browser/DevTools capture driver는
   [20번 문서](design/20-observability-adapter-boundary.md)의 observability adapter
   boundary 뒤에 deferred되어 있습니다.
+- App-instance evidence operations follow-up은
+  `cx app instance profile doctor --json` read-only descriptor preflight,
+  `cx app instance observe --json` process/heartbeat/port/http/log split signal,
+  `cx app instance evidence collect --json` bounded metrics/logs/probe evidence
+  pack을 추가했습니다. 이 명령들은 기존 observation artifact를 재사용하며
+  start/control/health/cleanup/completion authority를 계속 false로 유지합니다.
+- `cx evidence status --json`은 app-instance observation, deterministic wiki check
+  status, LSP detection status를 집계하는 experimental project evidence dashboard를
+  제공합니다. 이는 기존 evidence surface 위의 projection이며 새 completion gate나
+  semantic quality judgment가 아닙니다.
 - Repository knowledge graph는 experimental 첫 slice를 갖습니다:
   `cx repo graph build/check`는 persisted codexus-lite graph artifact, scoped freshness,
   deterministic graph identity, structural gate를 내보냅니다. External graph import,

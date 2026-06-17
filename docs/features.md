@@ -2,7 +2,7 @@
 
 [Korean](ko/features.md)
 
-Status: current as of `0.2.4`
+Status: current as of `main` after `0.2.4`
 
 This reference lists the shipped Codexus surfaces by stability. It is a product
 reference, not a completion authority. The authoritative automation contract is
@@ -54,7 +54,8 @@ Experimental surfaces are shipped but not frozen as stable JSON contracts.
 | --- | --- | --- |
 | Repository graph | `codexus repo graph build/check/import/search/explain` | Local graph projection, JSON-only external graph import, structural checks, and read-only search/explain. |
 | Compiled wiki | `codexus wiki map/build/check/export`, `codexus wiki context --approve`, `codexus wiki context approvals`, `codexus wiki injection-policy`, `codexus wiki injection plan` | Regenerable markdown projection, visible non-injected context approval artifacts, explicit approval listing, manual-only injection policy reporting, and report-only injection planning. |
-| App instance launcher | `codexus app instance profile list/status/logs/start/stop/evidence *` | Worktree-local owned process launcher, observation evidence, evidence summary, and report-only observability adapter status. Stop only targets Codexus-owned instances with owner evidence; adapter status and evidence summaries do not imply health, control, cleanup, or completion authority. |
+| Evidence operations | `codexus evidence status` | Read-only project evidence dashboard over app-instance observations, deterministic wiki check status, and LSP detection status. It is a projection, not a new completion gate. |
+| App instance launcher | `codexus app instance profile list/doctor/status/observe/logs/start/stop/evidence *` | Worktree-local owned process launcher, descriptor preflight, split-signal observation, observation evidence, evidence collection, evidence summary, and report-only observability adapter status. Stop only targets Codexus-owned instances with owner evidence; adapter status and evidence summaries do not imply health, control, cleanup, or completion authority. |
 | App-server experiments | `codexus app-server status/discover/observer/experiment` | Read-only and isolated evidence experiments. Live Desktop attachment remains gated. |
 | Autopilot contract | `codexus autopilot plan`, `codexus autopilot contract *`, `codexus autopilot run-gate`, `codexus autopilot relay *` | Plan, approval, scope-check, pre-run readiness reporting, relay artifact, stage-gate evidence, and relay adapter status. Live `autopilot run` and active relay drivers remain blocked. |
 | Cron/gateway automation | `codexus cron *`, `codexus gateway *` | Dry-run, explicit approval, recorded dispatch, recovery projections, and scheduler-readiness gap reporting. Rich unattended ownership is future work. |

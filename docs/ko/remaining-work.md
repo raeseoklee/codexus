@@ -86,6 +86,10 @@ P0-P2 구현 pass와 high-risk promotion slice 이후 상태:
   `cx release policy --json`은 작은 commit/더 큰 release 규칙, hotfix exception,
   stable-contract version boundary, 영문/한국어 policy 문서 존재를 보고합니다.
   `npm run release:check`는 tag publish 전에 이 policy gate를 포함합니다.
+- `0.2.4` release-prep pass 이후 evidence operations follow-up을 구현했습니다:
+  app-instance profile doctor, split-signal app-instance observation, bounded
+  app-instance evidence collection, 그리고 app-instance/wiki/LSP evidence를 집계하되
+  completion gate가 되지 않는 read-only `cx evidence status` dashboard입니다.
 - 의도적으로 남김: routine live model-in-the-loop replay, live app-server turn
   execution, retrieved skill 자동 prompt injection, full external JSON Schema
   engine enforcement/migration, richer cron/gateway scheduler semantics,

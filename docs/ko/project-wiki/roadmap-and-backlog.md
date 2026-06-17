@@ -10,11 +10,14 @@ design docs 위에 얹은 프로젝트 관리용 projection입니다. 짧게 유
 
 검증과 함께 release-sized goal로 묶기 좋은 항목:
 
+- Evidence operations pack: release-channel sign-off를 닫고, project-wide evidence
+  dashboard를 추가하며, health/cleanup authority를 승격하지 않고 app-instance
+  preflight/observation/collection을 강화합니다.
 - Project context와 LLM wiki management: generated wiki page를 authority로 만들지
   않으면서 checked-in project context를 최신으로 유지합니다.
 - App-instance observation hardening: app health authority를 주장하지 않고
-  owned-process evidence, lifecycle boundary, evidence summary, log/probe/metric
-  adapter를 개선합니다.
+  owned-process evidence, lifecycle boundary, profile preflight, split observation
+  signal, evidence collection, log/probe/metric adapter를 개선합니다.
 - Relay와 autopilot gate: stage evidence, agreement structure, verification matrix
   handling, stop-at-boundary behavior를 강화합니다.
 - Contract promotion readiness: `0.2.0` promotion 이후에도 stable contract를 최신으로
@@ -27,8 +30,8 @@ design docs 위에 얹은 프로젝트 관리용 projection입니다. 짧게 유
 Release blocker가 생기지 않는 한 아래 순서로 진행합니다:
 
 1. Docs, kanban, project wiki, stable JSON contract를 최신 상태로 유지합니다.
-2. Health 또는 cleanup authority를 승격하지 않고 app-instance observation evidence를
-   강화합니다.
+2. `0.2.4` post-publish `next` sign-off를 닫은 뒤, health 또는 cleanup authority를
+   승격하지 않고 evidence operations pack을 강화합니다.
 3. Relay/autopilot stage gate와 stop-at-boundary behavior를 강화합니다.
 4. Injection은 manual로 유지하면서 deterministic repository knowledge와 compiled wiki
    context를 확장합니다.

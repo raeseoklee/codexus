@@ -9,6 +9,29 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+### Added
+
+- Added `cx app instance profile doctor --json`, a read-only app-instance
+  descriptor preflight that checks profile cwd boundaries, command resolution,
+  fixed-port availability, loopback health URLs, and runner availability without
+  starting or controlling an app process.
+- Added `cx app instance observe --json`, a split-signal observation view over
+  process, heartbeat, loopback port, HTTP health projection, and log evidence.
+  The command reports observation status without becoming app health, cleanup,
+  control, or completion authority.
+- Added `cx app instance evidence collect --json`, a bounded evidence pack
+  command that records metric, log, and loopback HTTP observations for one
+  `instanceId` by reusing existing schema-valid observation artifacts.
+- Added `cx evidence status --json`, an experimental read-only project evidence
+  dashboard that aggregates app-instance evidence, deterministic wiki check
+  status, and LSP detection status without creating a new completion gate.
+
+### Documentation
+
+- Updated the Codex-native skill command list, feature reference,
+  implementation status, project wiki roadmap, and roadmap kanban for the
+  evidence operations pack.
+
 ## 0.2.4 - 2026-06-16
 
 ### Added

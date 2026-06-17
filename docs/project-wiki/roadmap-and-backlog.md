@@ -10,11 +10,15 @@ and point back to source docs.
 
 These are suitable for release-sized goals when grouped with verification:
 
+- Evidence operations pack: close release-channel sign-off, add project-wide
+  evidence dashboards, and harden app-instance preflight/observation/collection
+  without promoting health or cleanup authority.
 - Project context and LLM wiki management: keep checked-in project context
   current without making generated wiki pages authority.
 - App-instance observation hardening: improve owned-process evidence,
-  lifecycle boundaries, evidence summaries, and log/probe/metric adapters
-  without claiming app health authority.
+  lifecycle boundaries, profile preflight, split observation signals, evidence
+  collection, and log/probe/metric adapters without claiming app health
+  authority.
 - Relay and autopilot gates: strengthen stage evidence, agreement structure,
   verification matrix handling, and stop-at-boundary behavior.
 - Contract promotion readiness: keep the stable contract current after the
@@ -29,8 +33,8 @@ These are suitable for release-sized goals when grouped with verification:
 Work through the roadmap in this order unless a release blocker appears:
 
 1. Keep docs, kanban, project wiki, and stable JSON contracts current.
-2. Harden app-instance observation evidence without promoting health or cleanup
-   authority.
+2. Close the `0.2.4` post-publish `next` sign-off, then harden the evidence
+   operations pack without promoting health or cleanup authority.
 3. Strengthen relay/autopilot stage gates and stop-at-boundary behavior.
 4. Expand deterministic repository knowledge and compiled wiki context while
    keeping injection manual.

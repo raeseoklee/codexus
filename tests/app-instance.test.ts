@@ -203,6 +203,46 @@ test("app instance profile list reads descriptor and advertises live ownership s
   }
 });
 
+test("app instance profile doctor reports launch preflight without starting anything", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+    const result = runCli(cwd, [
+      "app",
+      "instance",
+      "profile",
+      "doctor",
+      "--descriptor",
+      descriptorPath,
+      "--worktree",
+      cwd,
+      "--gate",
+      "--json",
+    ]);
+    assert.equal(result.status, 0, result.stderr);
+    const output = parseJson(result);
+    assert.equal(output.command, "app instance profile doctor");
+    assert.equal(output.stability, "experimental");
+    assert.equal(output.gate.status, "passed");
+    assert.equal(output.profiles.length, 1);
+    assert.equal(output.profiles[0].command.status, "observed");
+    assert.equal(output.profiles[0].cwd.insideWorktree, true);
+    assert.equal(output.profiles[0].health.status, "observed");
+    assert.equal(output.profiles[0].authority.startsInstance, false);
+    assert.equal(output.authority.healthAuthority, false);
+    assert.equal(output.authority.cleanupAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+
+    const status = runCli(cwd, ["app", "instance", "status", "--json"]);
+    assert.equal(status.status, 0, status.stderr);
+    assert.equal(parseJson(status).instances.length, 0);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("app instance start dry-run resolves worktree plan without spawning", async () => {
   const cwd = await tempDir();
   try {
@@ -449,6 +489,120 @@ test("app instance HTTP probe records bounded redacted evidence for a running ow
     assert.equal(sessionOutput.evidenceLoop.appInstances.observations.latest.instanceId, instanceId);
     assert.equal(sessionOutput.evidenceLoop.appInstances.observations.latest.processStatus, "running");
     assert.equal(sessionOutput.evidenceLoop.appInstances.observations.latest.lifecycleState, "managed_running");
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance observe reports split process heartbeat port http and log signals without authority", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+
+    const start = runCli(cwd, [
+      "app",
+      "instance",
+      "start",
+      "--descriptor",
+      descriptorPath,
+      "--profile",
+      "web",
+      "--worktree",
+      cwd,
+      "--json",
+    ]);
+    assert.equal(start.status, 0, start.stderr);
+    const started = parseJson(start);
+    const instanceId = started.launch.instanceId;
+
+    await waitFor(async () => {
+      const status = runCli(cwd, ["app", "instance", "status", "--instance-id", instanceId, "--json"]);
+      if (status.status !== 0) return false;
+      const output = parseJson(status);
+      return output.instances[0]?.process?.status === "running" && output.instances[0]?.health?.status === "passed";
+    });
+
+    const observe = runCli(cwd, ["app", "instance", "observe", "--instance-id", instanceId, "--json"]);
+    assert.equal(observe.status, 0, observe.stderr);
+    const output = parseJson(observe);
+    assert.equal(output.command, "app instance observe");
+    assert.equal(output.status, "observed");
+    assert.equal(output.signals.process.status, "observed");
+    assert.equal(output.signals.heartbeat.status, "observed");
+    assert.equal(output.signals.port.status, "observed");
+    assert.equal(output.signals.port.endpointMatchIsProcessIdentity, false);
+    assert.equal(output.signals.http.status, "observed");
+    assert.equal(output.signals.http.healthAuthority, false);
+    assert.equal(output.signals.log.status, "observed");
+    assert.equal(output.authority.controlsInstance, false);
+    assert.equal(output.authority.healthAuthority, false);
+    assert.equal(output.authority.cleanupAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+  } finally {
+    await cleanupInstances(cwd);
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test("app instance evidence collect records bounded observation pack without authority", async () => {
+  const cwd = await tempDir();
+  try {
+    const serverPath = await writeServer(cwd);
+    const descriptorPath = await writeDescriptor(cwd, [process.execPath, serverPath]);
+
+    const start = runCli(cwd, [
+      "app",
+      "instance",
+      "start",
+      "--descriptor",
+      descriptorPath,
+      "--profile",
+      "web",
+      "--worktree",
+      cwd,
+      "--json",
+    ]);
+    assert.equal(start.status, 0, start.stderr);
+    const started = parseJson(start);
+    const instanceId = started.launch.instanceId;
+
+    await waitFor(async () => {
+      const status = runCli(cwd, ["app", "instance", "status", "--instance-id", instanceId, "--json"]);
+      if (status.status !== 0) return false;
+      const output = parseJson(status);
+      return output.instances[0]?.process?.status === "running";
+    });
+
+    const collect = runCli(cwd, [
+      "app",
+      "instance",
+      "evidence",
+      "collect",
+      "--instance-id",
+      instanceId,
+      "--tail",
+      "20",
+      "--timeout-ms",
+      "2000",
+      "--json",
+    ]);
+    assert.equal(collect.status, 0, collect.stderr);
+    const output = parseJson(collect);
+    assert.equal(output.command, "app instance evidence collect");
+    assert.equal(output.status, "collected");
+    assert.equal(output.counts.total, 3);
+    assert.equal(output.counts.observed, 3);
+    assert.ok(output.collected.every((item: { path: string | null }) => item.path));
+    assert.equal(output.authority.controlsInstance, false);
+    assert.equal(output.authority.healthAuthority, false);
+    assert.equal(output.authority.cleanupAuthority, false);
+    assert.equal(output.authority.completionAuthority, false);
+
+    const summary = runCli(cwd, ["app", "instance", "evidence", "summary", "--json"]);
+    assert.equal(summary.status, 0, summary.stderr);
+    assert.equal(parseJson(summary).evidence.observations.total, 3);
   } finally {
     await cleanupInstances(cwd);
     await rm(cwd, { recursive: true, force: true });

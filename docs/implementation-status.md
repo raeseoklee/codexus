@@ -403,6 +403,17 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   observation artifacts plus the latest observation. Adapter availability and
   evidence summaries never imply process-identity proof, health, control,
   cleanup, prompt-injection, Codex-read, or completion authority.
+- The app-instance evidence operations follow-up adds
+  `cx app instance profile doctor --json` for read-only descriptor preflight,
+  `cx app instance observe --json` for split process/heartbeat/port/http/log
+  observation signals, and `cx app instance evidence collect --json` for a
+  bounded metrics/logs/probe evidence pack. These commands reuse existing
+  observation artifacts and keep start/control/health/cleanup/completion
+  authority false.
+- `cx evidence status --json` provides an experimental project evidence
+  dashboard over app-instance observations, deterministic wiki check status,
+  and LSP detection status. It is a projection over existing evidence surfaces,
+  not a new completion gate or semantic quality judgment.
 - The repository knowledge graph has an experimental first slice:
   `cx repo graph build/check` emits persisted codexus-lite graph artifacts,
   scoped freshness, deterministic graph identity, and structural gates. External

@@ -3,7 +3,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:net";
 import { existsSync } from "node:fs";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { dirname, extname, isAbsolute, join, relative, resolve } from "node:path";
+import { delimiter, dirname, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { harnessRoot } from "../ledger/paths.ts";
 import { redactSensitiveText } from "../policy/redaction.ts";
 import { ensureDir, writeJsonAtomic } from "../util/fs.ts";
@@ -345,6 +345,8 @@ const MAX_SCREENSHOT_EVIDENCE_BYTES = 20 * 1024 * 1024;
 const MAX_BROWSER_CAPTURE_EVIDENCE_BYTES = 1024 * 1024;
 const MAX_BROWSER_CAPTURE_TEXT_CHARS = 512;
 
+type EvidenceSignalStatus = "observed" | "stale" | "unavailable" | "failed";
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -638,6 +640,21 @@ function observationPath(worktree: string, instanceId: string, observationId: st
 
 function runnerScriptPath(): string {
   return join(findCodexusPackageRoot(), "scripts", "codexus-app-instance-runner.mjs");
+}
+
+function commandResolvable(command: string, cwd: string) {
+  if (isAbsolute(command)) {
+    return { status: existsSync(command) ? "observed" as const : "failed" as const, resolvedPath: existsSync(command) ? command : null };
+  }
+  if (command.includes("/") || command.includes("\\")) {
+    const resolved = resolve(cwd, command);
+    return { status: existsSync(resolved) ? "observed" as const : "failed" as const, resolvedPath: existsSync(resolved) ? resolved : null };
+  }
+  for (const entry of (process.env.PATH ?? "").split(delimiter).filter(Boolean)) {
+    const candidate = join(entry, command);
+    if (existsSync(candidate)) return { status: "observed" as const, resolvedPath: candidate };
+  }
+  return { status: "failed" as const, resolvedPath: null };
 }
 
 function substitutePlaceholders(value: string, port: number | null): string {
@@ -1234,6 +1251,8 @@ async function probeHealth(artifact: AppInstanceArtifact, artifactPath: string, 
       evidenceExists: evidencePath !== null && existsSync(evidencePath),
       reason: "process_not_running" as const,
       lastCheckedAt: artifact.health.lastCheckedAt,
+      url: artifact.health.url ?? null,
+      timeoutMs: artifact.health.timeoutMs ?? null,
     };
   }
   if (!artifact.health.url) {
@@ -1244,6 +1263,8 @@ async function probeHealth(artifact: AppInstanceArtifact, artifactPath: string, 
       evidenceExists: evidencePath !== null && existsSync(evidencePath),
       reason: "health_descriptor_unavailable" as const,
       lastCheckedAt: artifact.health.lastCheckedAt,
+      url: artifact.health.url ?? null,
+      timeoutMs: artifact.health.timeoutMs ?? null,
     };
   }
   const timeoutMs = artifact.health.timeoutMs ?? HEALTH_DEFAULT_TIMEOUT_MS;
@@ -1294,6 +1315,8 @@ async function probeHealth(artifact: AppInstanceArtifact, artifactPath: string, 
     evidenceExists: evidencePath !== null && existsSync(evidencePath),
     reason: nextStatus === "passed" ? null : summary,
     lastCheckedAt: checkedAt,
+    url: artifact.health.url,
+    timeoutMs,
   };
 }
 
@@ -1509,6 +1532,183 @@ export async function listAppInstanceProfiles(cwd: string, options: { descriptor
   };
 }
 
+export async function doctorAppInstanceProfiles(cwd: string, options: {
+  descriptorPath?: string;
+  worktree?: string;
+  gate: boolean;
+}) {
+  const descriptor = await readAppInstanceDescriptor(cwd, options.descriptorPath);
+  const worktree = resolve(options.worktree ?? cwd);
+  const evidenceGaps: Array<Record<string, unknown>> = [];
+  const derivableFacts: Array<Record<string, unknown>> = [];
+  const profiles = [];
+  const runnerAvailable = existsSync(runnerScriptPath());
+
+  if (!descriptor.declared) {
+    evidenceGaps.push({
+      kind: "app_instance_descriptor_missing",
+      evidence: null,
+      policy: "app-instance profiles require an explicit descriptor before launch planning",
+      recommendation: "Add codexus.app-instances.json, package.json#codexus.appInstances, or pass --descriptor.",
+      gate: true,
+    });
+  } else if (!descriptor.validation.valid) {
+    evidenceGaps.push({
+      kind: "app_instance_descriptor_invalid",
+      evidence: descriptor.validation.errors.join(","),
+      files: descriptor.path ? [descriptor.path] : [],
+      policy: "app-instance descriptor must validate before launch planning",
+      recommendation: "Fix descriptor shape, profile command, port, health, or log fields.",
+      gate: true,
+    });
+  } else {
+    derivableFacts.push({
+      kind: "app_instance_descriptor_valid",
+      evidence: descriptor.path ?? descriptor.source,
+      files: descriptor.path ? [descriptor.path] : [],
+      gate: false,
+    });
+  }
+
+  if (!existsSync(worktree)) {
+    evidenceGaps.push({
+      kind: "app_instance_worktree_missing",
+      evidence: worktree,
+      policy: "app-instance doctor must inspect an existing worktree",
+      recommendation: "Pass --worktree <path> for the intended worktree.",
+      gate: true,
+    });
+  }
+
+  for (const profile of descriptor.validation.descriptor?.profiles ?? []) {
+    const profileCwd = resolve(worktree, profile.cwd);
+    const cwdInsideWorktree = pathInside(worktree, profileCwd);
+    const commandCheck = commandResolvable(profile.command[0] ?? "", cwdInsideWorktree ? profileCwd : worktree);
+    const preferredPort = profile.port.preferred;
+    const preferredPortAvailable = preferredPort === null ? null : await probePort(preferredPort);
+    const fixedPortBlocked = profile.port.mode === "fixed" && preferredPort !== null && preferredPortAvailable === false;
+    let healthUrlStatus: EvidenceSignalStatus = profile.health ? "observed" : "unavailable";
+    let renderedHealthUrl: string | null = null;
+    if (profile.health) {
+      try {
+        renderedHealthUrl = substitutePlaceholders(profile.health.url, preferredPort ?? 1);
+        parseLoopbackUrl(renderedHealthUrl);
+      } catch {
+        healthUrlStatus = "failed";
+      }
+    }
+
+    if (!cwdInsideWorktree) {
+      evidenceGaps.push({
+        kind: "app_instance_profile_cwd_outside_worktree",
+        evidence: `${profile.name}:${profile.cwd}`,
+        policy: "app-instance profile cwd must stay inside the selected worktree",
+        recommendation: "Use a relative profile cwd under the worktree.",
+        gate: true,
+      });
+    }
+    if (commandCheck.status === "failed") {
+      evidenceGaps.push({
+        kind: "app_instance_profile_command_unresolved",
+        evidence: `${profile.name}:${profile.command[0] ?? ""}`,
+        policy: "app-instance direct command must resolve before launch",
+        recommendation: "Use an absolute path, a relative executable under the profile cwd, or a PATH-resolvable command.",
+        gate: true,
+      });
+    }
+    if (fixedPortBlocked) {
+      evidenceGaps.push({
+        kind: "app_instance_fixed_port_unavailable",
+        evidence: `${profile.name}:${preferredPort}`,
+        policy: "fixed app-instance ports must be available before launch",
+        recommendation: "Stop the conflicting process or choose another fixed port.",
+        gate: true,
+      });
+    }
+    if (healthUrlStatus === "failed") {
+      evidenceGaps.push({
+        kind: "app_instance_health_url_not_loopback",
+        evidence: `${profile.name}:${profile.health?.url ?? ""}`,
+        policy: "app-instance health checks are restricted to loopback URLs",
+        recommendation: "Use http://127.0.0.1:{port}/... or http://localhost:{port}/...",
+        gate: true,
+      });
+    }
+
+    profiles.push({
+      name: profile.name,
+      cwd: {
+        value: profile.cwd,
+        resolved: profileCwd,
+        insideWorktree: cwdInsideWorktree,
+      },
+      command: {
+        argv: profile.command,
+        executable: profile.command[0] ?? null,
+        status: commandCheck.status,
+        resolvedPath: commandCheck.resolvedPath,
+      },
+      port: {
+        mode: profile.port.mode,
+        preferred: preferredPort,
+        preferredAvailable: preferredPortAvailable,
+        fixedPortBlocked,
+      },
+      health: {
+        configured: profile.health !== null,
+        status: healthUrlStatus,
+        urlTemplate: profile.health?.url ?? null,
+        renderedUrl: renderedHealthUrl,
+        timeoutMs: profile.health?.timeoutMs ?? null,
+      },
+      logs: profile.log,
+      authority: {
+        startsInstance: false as const,
+        controlsInstance: false as const,
+        healthAuthority: false as const,
+        cleanupAuthority: false as const,
+        completionAuthority: false as const,
+      },
+    });
+  }
+
+  const status = evidenceGaps.length > 0 ? "fail" as const : "pass" as const;
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance profile doctor" as const,
+    cwd,
+    worktree,
+    descriptor: {
+      declared: descriptor.declared,
+      source: descriptor.source,
+      path: descriptor.path,
+      valid: descriptor.validation.valid,
+      errors: descriptor.validation.errors,
+    },
+    runner: {
+      available: runnerAvailable,
+      path: runnerAvailable ? runnerScriptPath() : null,
+    },
+    profiles,
+    evidenceGaps,
+    derivableFacts,
+    heuristicClaims: [],
+    blockingUnknowns: [],
+    informationalUnknowns: [],
+    authority: {
+      startsInstance: false as const,
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      cleanupAuthority: false as const,
+      completionAuthority: false as const,
+    },
+    gate: options.gate
+      ? { enabled: true as const, status: status === "pass" ? "passed" as const : "failed" as const, exitCode: status === "pass" ? 0 : 1, reason: status === "pass" ? "no app-instance profile gaps" : `evidence_gaps:${evidenceGaps.length}` }
+      : { enabled: false as const, status: "not_requested" as const, exitCode: 0, reason: "pass --gate to make app-instance profile gaps affect the process exit code" },
+  };
+}
+
 export async function startAppInstance(cwd: string, options: {
   descriptorPath?: string;
   profile?: string;
@@ -1657,6 +1857,135 @@ export async function appInstanceStatus(cwd: string, options: { instanceId?: str
       liveProcessProbe: true,
       liveStart: true,
       liveStop: true,
+    },
+  };
+}
+
+function signalForProcess(status: AppInstanceStatus): EvidenceSignalStatus {
+  if (status === "running") return "observed";
+  if (status === "orphaned" || status === "stopped") return "failed";
+  return "unavailable";
+}
+
+async function portSignal(instance: Awaited<ReturnType<typeof findProjectedInstance>>) {
+  const port = instance.network.port;
+  if (port === null) {
+    return { status: "unavailable" as const, port, reason: "port_not_declared", endpointMatchIsProcessIdentity: false as const };
+  }
+  const portAvailable = await probePort(port);
+  if (instance.process.status !== "running") {
+    return {
+      status: "unavailable" as const,
+      port,
+      portAvailable,
+      reason: `instance_not_running:${instance.process.reason}`,
+      endpointMatchIsProcessIdentity: false as const,
+    };
+  }
+  return {
+    status: portAvailable ? "failed" as const : "observed" as const,
+    port,
+    portAvailable,
+    reason: portAvailable ? "expected_port_is_not_bound" : "port_bound_on_loopback",
+    endpointMatchIsProcessIdentity: false as const,
+  };
+}
+
+function httpSignal(instance: Awaited<ReturnType<typeof findProjectedInstance>>) {
+  if (!instance.health.url) {
+    return { status: "unavailable" as const, url: null, reason: "health_url_not_declared", healthAuthority: false as const };
+  }
+  if (instance.process.status !== "running") {
+    return { status: "unavailable" as const, url: instance.health.url, reason: `instance_not_running:${instance.process.reason}`, healthAuthority: false as const };
+  }
+  if (instance.health.status === "passed") {
+    return { status: "observed" as const, url: instance.health.url, reason: null, rawHealthStatus: instance.health.rawStatus, healthAuthority: false as const };
+  }
+  if (instance.health.status === "failed") {
+    return { status: "failed" as const, url: instance.health.url, reason: instance.health.reason ?? "health_probe_failed", rawHealthStatus: instance.health.rawStatus, healthAuthority: false as const };
+  }
+  return { status: "unavailable" as const, url: instance.health.url, reason: `health_${instance.health.status}`, rawHealthStatus: instance.health.rawStatus, healthAuthority: false as const };
+}
+
+async function logSignal(instance: Awaited<ReturnType<typeof findProjectedInstance>>) {
+  const validation = await readInstanceArtifact(instance.artifactPath);
+  if (!validation.artifact) {
+    return {
+      status: "failed" as const,
+      reason: "instance_artifact_invalid",
+      stdout: await fileMetric(null),
+      stderr: await fileMetric(null),
+    };
+  }
+  const stdoutPath = resolveArtifactPath(validation.artifact, validation.path, validation.artifact.logs.stdoutPath);
+  const stderrPath = resolveArtifactPath(validation.artifact, validation.path, validation.artifact.logs.stderrPath);
+  const stdout = await fileMetric(stdoutPath);
+  const stderr = await fileMetric(stderrPath);
+  const hasLogs = stdout.exists || stderr.exists;
+  return {
+    status: hasLogs ? "observed" as const : "unavailable" as const,
+    reason: hasLogs ? null : "logs_not_configured_or_missing",
+    stdout,
+    stderr,
+  };
+}
+
+export async function observeAppInstance(cwd: string, options: { instanceId?: string }) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const processStatus = signalForProcess(instance.process.status);
+  const heartbeatStatus: EvidenceSignalStatus = instance.heartbeat.status === "missing"
+    ? "unavailable"
+    : instance.heartbeat.fresh
+      ? "observed"
+      : "stale";
+  const signals = {
+    process: {
+      status: processStatus,
+      processStatus: instance.process.status,
+      reason: instance.process.reason,
+      lifecycle: instance.process.lifecycle,
+    },
+    heartbeat: {
+      status: heartbeatStatus,
+      heartbeatStatus: instance.heartbeat.status,
+      fresh: instance.heartbeat.fresh,
+      ageMs: instance.heartbeat.ageMs,
+      staleAfterMs: instance.heartbeat.staleAfterMs,
+      reason: instance.heartbeat.status === "missing" ? "heartbeat_missing" : instance.heartbeat.fresh ? null : "heartbeat_stale",
+    },
+    port: await portSignal(instance),
+    http: httpSignal(instance),
+    log: await logSignal(instance),
+  };
+  const statuses = Object.values(signals).map((signal) => signal.status);
+  const status = statuses.includes("failed")
+    ? "failed" as const
+    : statuses.includes("stale")
+      ? "stale" as const
+      : statuses.includes("observed")
+        ? "observed" as const
+        : "unavailable" as const;
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance observe" as const,
+    cwd,
+    instanceId: options.instanceId,
+    status,
+    instance: {
+      instanceId: instance.instanceId,
+      artifactPath: instance.artifactPath,
+      worktree: instance.worktree,
+      profile: instance.profile,
+      url: instance.network.url,
+    },
+    signals,
+    authority: {
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      cleanupAuthority: false as const,
+      completionAuthority: false as const,
     },
   };
 }
@@ -2508,6 +2837,99 @@ export async function recordAppInstanceBrowserObservation(cwd: string, options: 
       completionAuthority: false as const,
     },
     observation,
+  };
+}
+
+export async function collectAppInstanceEvidence(cwd: string, options: {
+  instanceId?: string;
+  tail?: string;
+  timeoutMs?: string;
+}) {
+  if (!options.instanceId) throw new Error("missing_app_instance_id");
+  const instance = await findProjectedInstance(cwd, options.instanceId);
+  const collected: Array<{
+    kind: AppInstanceObservationKind;
+    source: string;
+    status: AppInstanceObservationStatus | "failed";
+    path: string | null;
+    evidencePath: string | null;
+    reason: string | null;
+  }> = [];
+
+  const record = async (
+    kind: AppInstanceObservationKind,
+    source: string,
+    run: () => Promise<{ path: string; observation: AppInstanceObservationArtifact }>,
+  ) => {
+    try {
+      const result = await run();
+      collected.push({
+        kind,
+        source,
+        status: result.observation.observation.status,
+        path: result.path,
+        evidencePath: result.observation.observation.evidencePath,
+        reason: result.observation.observation.reason,
+      });
+    } catch (error) {
+      collected.push({
+        kind,
+        source,
+        status: "failed",
+        path: null,
+        evidencePath: null,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+
+  await record("metric", "metric-snapshot", async () => await recordAppInstanceMetricObservation(cwd, { instanceId: options.instanceId }));
+  await record("log", "log-snapshot", async () => await recordAppInstanceLogObservation(cwd, { instanceId: options.instanceId, tail: options.tail }));
+  if (instance.network.url) {
+    await record("dev-server", "http-probe", async () => await probeAppInstanceHttpObservation(cwd, {
+      instanceId: options.instanceId,
+      url: instance.network.url ?? undefined,
+      timeoutMs: options.timeoutMs,
+    }));
+  } else {
+    collected.push({
+      kind: "dev-server",
+      source: "http-probe",
+      status: "unavailable",
+      path: null,
+      evidencePath: null,
+      reason: "network_url_unavailable",
+    });
+  }
+
+  const observed = collected.filter((item) => item.status === "observed").length;
+  const failed = collected.filter((item) => item.status === "failed").length;
+  const unavailable = collected.filter((item) => item.status === "unavailable").length;
+  const status = failed > 0
+    ? "partial" as const
+    : observed > 0
+      ? "collected" as const
+      : "unavailable" as const;
+  return {
+    schemaVersion: 1,
+    stability: "experimental" as const,
+    command: "app instance evidence collect" as const,
+    cwd,
+    instanceId: options.instanceId,
+    status,
+    collected,
+    counts: {
+      total: collected.length,
+      observed,
+      unavailable,
+      failed,
+    },
+    authority: {
+      controlsInstance: false as const,
+      healthAuthority: false as const,
+      cleanupAuthority: false as const,
+      completionAuthority: false as const,
+    },
   };
 }
 
