@@ -24,6 +24,41 @@ need_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "missing required command: $1"
 }
 
+usage() {
+  cat <<EOF
+codexus install — install the Codexus CLI (codexus, cx) globally via npm.
+
+Usage:
+  sh install.sh [--help]
+
+Runs \`npm install -g\` for the Codexus package and links the \`codexus\` and
+\`cx\` binaries into your bin directory. Configure it through environment
+variables (current effective values shown):
+
+  CODEXUS_NPM_SPEC             npm package spec to install        [$package_spec]
+  CODEXUS_NPM_PREFIX           npm --prefix install root          [$npm_prefix]
+  CODEXUS_BIN_DIR              directory for codexus/cx links      [$bin_dir]
+  CODEXUS_INSTALL_CODEX_SKILL  install the Codex skill adapter     [$install_skill]
+  CODEXUS_EXPECTED_VERSION     assert the installed version match  [${expected_version:-<none>}]
+
+Examples:
+  sh install.sh
+  CODEXUS_NPM_PREFIX=/usr/local sh install.sh
+  CODEXUS_NPM_SPEC=codexus@0.2.5 sh install.sh
+EOF
+}
+
+# Parse arguments BEFORE any side effect (node/npm probes, install). --help must
+# be non-destructive and must not require node/npm to be present.
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    --) shift; break ;;
+    -*) printf 'codexus install: unknown option: %s\n\n' "$1" >&2; usage >&2; exit 2 ;;
+    *) printf 'codexus install: unexpected argument: %s\n\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
 need_cmd node
 need_cmd npm
 

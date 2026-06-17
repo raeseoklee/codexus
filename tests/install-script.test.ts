@@ -82,6 +82,42 @@ test("install.sh defaults to the stable npm channel", async () => {
   assert.doesNotMatch(text, /CODEXUS_NPM_SPEC:-codexus@next}/);
 });
 
+test("install.sh --help prints usage and performs no install", async () => {
+  const cwd = await tempDir();
+  const npmPrefix = join(cwd, "prefix");
+  const binDir = join(cwd, "bin");
+  try {
+    for (const flag of ["--help", "-h"]) {
+      const help = spawnSync("sh", [resolve("install.sh"), flag], {
+        cwd: root,
+        encoding: "utf8",
+        env: { ...process.env, CODEXUS_NPM_PREFIX: npmPrefix, CODEXUS_BIN_DIR: binDir },
+      });
+      assert.equal(help.status, 0, `${flag}: ${help.stderr ?? help.error?.message}`);
+      assert.match(help.stdout, /codexus install/);
+      assert.match(help.stdout, /Usage:/);
+      assert.match(help.stdout, /CODEXUS_NPM_SPEC/);
+      // It must NOT enter the install path (the "Installing ... with npm prefix" log).
+      assert.doesNotMatch(help.stdout, /Installing .* with npm prefix/);
+    }
+    // Help is non-destructive: the bin dir / prefix are created only on install.
+    await assert.rejects(lstat(binDir), { code: "ENOENT" });
+    await assert.rejects(lstat(npmPrefix), { code: "ENOENT" });
+
+    // An unknown option fails closed (usage error to stderr, exit 2) — no install.
+    const bogus = spawnSync("sh", [resolve("install.sh"), "--bogus"], {
+      cwd: root,
+      encoding: "utf8",
+      env: { ...process.env, CODEXUS_NPM_PREFIX: npmPrefix, CODEXUS_BIN_DIR: binDir },
+    });
+    assert.equal(bogus.status, 2);
+    assert.match(bogus.stderr, /unknown option: --bogus/);
+    await assert.rejects(lstat(binDir), { code: "ENOENT" });
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
 test("npm global install postinstall installs the Codex skill adapter", async () => {
   const cwd = await tempDir();
   const npmPrefix = join(cwd, "prefix");

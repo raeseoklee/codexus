@@ -142,6 +142,8 @@ less install.sh
 sh install.sh
 ```
 
+`sh install.sh --help`를 실행하면 아무것도 설치하지 않고 (환경 변수로 설정하는) 옵션을 출력합니다.
+
 Repository clone 후 검증:
 
 ```bash
