@@ -192,7 +192,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     smoke compatibility, stable-readiness smoke coverage, and local release
     integrity gating implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current release-prep baseline is `0.2.5`; prereleases publish through
+    - Current release-prep baseline is `0.2.6`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
       trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin

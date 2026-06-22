@@ -97,6 +97,7 @@ test("install.sh --help prints usage and performs no install", async () => {
       assert.match(help.stdout, /codexus install/);
       assert.match(help.stdout, /Usage:/);
       assert.match(help.stdout, /CODEXUS_NPM_SPEC/);
+      assert.match(help.stdout, /CODEXUS_NPM_SPEC=codexus@latest/);
       // It must NOT enter the install path (the "Installing ... with npm prefix" log).
       assert.doesNotMatch(help.stdout, /Installing .* with npm prefix/);
     }

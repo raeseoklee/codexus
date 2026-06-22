@@ -9,6 +9,14 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.6 - 2026-06-22
+
+### Fixed
+
+- `install.sh --help`와 `install.sh -h`를 비파괴 동작으로 수정했습니다.
+  이제 installer는 Node/npm probe 또는 filesystem/install side effect 전에
+  usage를 출력하며, 알 수 없는 argument는 exit code `2`로 fail closed 합니다.
+
 ## 0.2.5 - 2026-06-17
 
 ### Added

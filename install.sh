@@ -44,7 +44,7 @@ variables (current effective values shown):
 Examples:
   sh install.sh
   CODEXUS_NPM_PREFIX=/usr/local sh install.sh
-  CODEXUS_NPM_SPEC=codexus@0.2.5 sh install.sh
+  CODEXUS_NPM_SPEC=codexus@latest sh install.sh
 EOF
 }
 

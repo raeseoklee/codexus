@@ -9,6 +9,14 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.6 - 2026-06-22
+
+### Fixed
+
+- Made `install.sh --help` and `install.sh -h` non-destructive. The installer
+  now prints usage before any Node/npm probe or filesystem/install side effect,
+  and unknown arguments fail closed with exit code `2`.
+
 ## 0.2.5 - 2026-06-17
 
 ### Added

@@ -34,8 +34,8 @@ These are suitable for release-sized goals when grouped with verification:
 Work through the roadmap in this order unless a release blocker appears:
 
 1. Keep docs, kanban, project wiki, and stable JSON contracts current.
-2. Close the `0.2.5` post-publish live sign-off for the evidence operations
-   pack.
+2. Close the `0.2.6` post-publish live sign-off for the installer help-safety
+   hotfix.
 3. Strengthen relay/autopilot stage gates and stop-at-boundary behavior.
 4. Expand deterministic repository knowledge and compiled wiki context while
    keeping injection manual.
