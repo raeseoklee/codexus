@@ -4,11 +4,11 @@
 
 이 문서는 프로젝트 관리용 snapshot입니다. 정확한 coverage는
 [구현 상태](../implementation-status.md), [JSON contract](../json-contract.md), 최신
-[release evidence](../release-evidence/0.2.6.md)를 기준으로 확인하세요.
+[release evidence](../release-evidence/0.2.7.md)를 기준으로 확인하세요.
 
 ## Baseline
 
-- 현재 release-prep baseline: `0.2.6`.
+- 현재 release-prep baseline: `0.2.7`.
 - Stable execution path: 로컬에서 인증된 `codex exec --json`을 Codexus가 감독하는 경로.
 - Stable management expectation: stable JSON field는 현재 stable line 동안 frozen 상태를
   유지하고, experimental surface는 promotion 없이 추가될 수 있습니다.

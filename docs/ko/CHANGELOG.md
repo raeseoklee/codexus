@@ -9,6 +9,21 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.7 - 2026-06-29
+
+### Added
+
+- Installer help safety를 위한 `release check --gate` invariant를 추가했습니다.
+  Local release integrity는 `install.sh`가 Node/npm probe, `npm install`, bin-link
+  mutation, Codex skill adapter 설치보다 먼저 `-h`/`--help`와 알 수 없는 option을
+  처리할 때만 `releaseIntegrity.installScript.helpNonDestructive:true`를
+  보고합니다.
+
+### Fixed
+
+- 향후 installer가 비파괴 help 처리를 증명하지 못하면 publish 전에 release gate가
+  실패하도록 회귀 테스트를 추가했습니다.
+
 ## 0.2.6 - 2026-06-22
 
 ### Fixed

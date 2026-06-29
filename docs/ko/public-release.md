@@ -135,6 +135,10 @@ postinstall을 통해 같은 adapter install을 수행합니다. GitHub Pages는
 mode로 활성화해 `.github/workflows/pages.yml`이 pinned action과 Node 24 JavaScript
 action opt-in으로 deploy path를 소유하게 합니다:
 
+사용자는 먼저 `sh install.sh --help`를 실행할 수 있습니다. Release integrity는 이
+help path가 Node/npm probe, installation, link creation, skill adapter 설치보다 먼저
+처리되는지 gate합니다.
+
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
 ```

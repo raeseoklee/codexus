@@ -37,7 +37,20 @@ async function writeFixture(rootDir: string, options: { installDefault?: "stable
       "#!/bin/sh",
       `package_spec="\${CODEXUS_NPM_SPEC:-${installDefault === "stable" ? "codexus" : "codexus@next"}}"`,
       'expected_version="${CODEXUS_EXPECTED_VERSION:-}"',
+      "usage() {",
+      "  printf 'usage\\n'",
+      "}",
+      'while [ "$#" -gt 0 ]; do',
+      '  case "$1" in',
+      "    -h|--help) usage; exit 0 ;;",
+      "    -*) usage >&2; exit 2 ;;",
+      "    *) usage >&2; exit 2 ;;",
+      "  esac",
+      "done",
+      "need_cmd node",
+      "need_cmd npm",
       'if [ -n "$expected_version" ]; then echo "$expected_version" >/dev/null; fi',
+      'npm install -g "$package_spec"',
       "",
     ].join("\n")
   );
@@ -88,10 +101,38 @@ test("release integrity passes for local source release wiring", () => {
   assert.equal(report.releaseIntegrity.workflow.stableDistTagSync, false);
   assert.equal(report.releaseIntegrity.workflow.trustedPublishSkipsDistTagMutation, true);
   assert.equal(report.releaseIntegrity.workflow.installerAssetAttached, true);
+  assert.equal(report.releaseIntegrity.installScript.helpNonDestructive, true);
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "release_workflow_trusted_publish_no_dist_tag_mutation"));
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "installer_expected_version_guard"));
+  assert.ok(report.derivableFacts.some((fact) => fact.kind === "installer_help_non_destructive"));
   assert.ok(report.derivableFacts.some((fact) => fact.kind === "release_workflow_installer_asset"));
   assert.ok(report.informationalUnknowns.some((unknown) => unknown.kind === "github_release_not_checked"));
+});
+
+test("release integrity gates installer help that is not proven non-destructive", async () => {
+  const cwd = await tempDir();
+  try {
+    await writeFixture(cwd);
+    await writeFile(
+      join(cwd, "install.sh"),
+      [
+        "#!/bin/sh",
+        'package_spec="${CODEXUS_NPM_SPEC:-codexus}"',
+        'expected_version="${CODEXUS_EXPECTED_VERSION:-}"',
+        'if [ -n "$expected_version" ]; then echo "$expected_version" >/dev/null; fi',
+        'npm install -g "$package_spec"',
+        "",
+      ].join("\n")
+    );
+
+    const report = buildReleaseIntegrityReport(cwd, { gate: true });
+    assert.equal(report.releaseIntegrity.status, "fail");
+    assert.equal(report.gate.status, "failed");
+    assert.equal(report.releaseIntegrity.installScript.helpNonDestructive, false);
+    assert.ok(report.evidenceGaps.some((gap) => gap.kind === "installer_help_not_non_destructive"));
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
 });
 
 test("release integrity gates trusted-publishing post-publish dist-tag mutation", async () => {

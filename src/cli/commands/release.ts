@@ -40,7 +40,9 @@ export async function releaseCommand(args: ParsedArgs): Promise<void> {
   console.log(`Release integrity: ${report.releaseIntegrity.status}`);
   console.log(`Version: ${report.version ?? "unknown"}`);
   console.log(`Live: ${report.live}`);
-  console.log(`Installer: ${report.releaseIntegrity.installScript.defaultChannel}`);
+  console.log(
+    `Installer: ${report.releaseIntegrity.installScript.defaultChannel}, helpNonDestructive=${report.releaseIntegrity.installScript.helpNonDestructive}`
+  );
   console.log(`Workflow installer asset: ${report.releaseIntegrity.workflow.installerAssetAttached}`);
   console.log(`Gate: ${report.gate.status}`);
   console.log(`Evidence gaps: ${report.evidenceGaps.length}`);

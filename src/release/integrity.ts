@@ -12,6 +12,7 @@ export interface ReleaseIntegrityEvidenceGap {
     | "install_script_missing"
     | "installer_default_channel_not_stable"
     | "installer_expected_version_guard_missing"
+    | "installer_help_not_non_destructive"
     | "release_workflow_missing"
     | "release_workflow_not_trusted_publishing"
     | "release_workflow_post_publish_dist_tag_mutation"
@@ -36,6 +37,7 @@ export interface ReleaseIntegrityDerivableFact {
     | "installer_sha256"
     | "installer_default_stable_channel"
     | "installer_expected_version_guard"
+    | "installer_help_non_destructive"
     | "release_workflow_trusted_publishing"
     | "release_workflow_trusted_publish_no_dist_tag_mutation"
     | "release_workflow_pinned_actions"
@@ -88,6 +90,7 @@ export interface ReleaseIntegrityReport {
       sha256: string | null;
       defaultChannel: "stable" | "next" | "custom" | "missing" | "unknown";
       expectedVersionGuard: boolean;
+      helpNonDestructive: boolean;
     };
     workflow: {
       path: string | null;
@@ -220,6 +223,40 @@ function detectInstallDefaultChannel(installText: string): "stable" | "next" | "
   if (/CODEXUS_NPM_SPEC:-codexus@next}/.test(installText)) return "next";
   if (/CODEXUS_NPM_SPEC:-[^}]+}/.test(installText)) return "custom";
   return "unknown";
+}
+
+function firstRegexIndex(text: string, patterns: RegExp[]): number {
+  let first = -1;
+  for (const pattern of patterns) {
+    const match = pattern.exec(text);
+    if (!match) continue;
+    if (first === -1 || match.index < first) first = match.index;
+  }
+  return first;
+}
+
+function detectInstallerHelpNonDestructive(installText: string): boolean {
+  const parserIndex = firstRegexIndex(installText, [/while\s+\[\s+"\$#"\s+-gt\s+0\s+\];\s+do/]);
+  const helpIndex = firstRegexIndex(installText, [/-h\|--help\)\s*usage;\s*exit\s+0\s*;;/]);
+  const unknownOptionIndex = firstRegexIndex(installText, [/\-\*\)\s*[\s\S]{0,400}?exit\s+2\s*;;/]);
+  const firstSideEffect = firstRegexIndex(installText, [
+    /^\s*need_cmd\s+node\b/m,
+    /^\s*need_cmd\s+npm\b/m,
+    /^\s*(?:[A-Z_]+=\S+\s+)*npm\s+install\s+-g\b/m,
+    /^\s*mkdir\s+-p\b/m,
+    /^\s*ln\s+-sfn\b/m,
+    /\bnpm\s+root\s+-g\b/,
+    /install-codex-skill\.mjs/,
+  ]);
+  const sideEffectIndex = firstSideEffect === -1 ? installText.length : firstSideEffect;
+  return (
+    parserIndex >= 0 &&
+    helpIndex >= 0 &&
+    unknownOptionIndex >= 0 &&
+    parserIndex < sideEffectIndex &&
+    helpIndex < sideEffectIndex &&
+    unknownOptionIndex < sideEffectIndex
+  );
 }
 
 function trustedPublishingConfigured(workflowText: string): boolean {
@@ -361,6 +398,7 @@ export function buildReleaseIntegrityReport(
   let installScriptHash: string | null = null;
   let defaultChannel: ReleaseIntegrityReport["releaseIntegrity"]["installScript"]["defaultChannel"] = "missing";
   let expectedVersionGuard = false;
+  let helpNonDestructive = false;
   let workflowPath: string | null = null;
   let trustedPublishing = false;
   let stableDistTagSync = false;
@@ -441,6 +479,7 @@ export function buildReleaseIntegrityReport(
       installScriptHash = sha256File(installScriptPath);
       defaultChannel = detectInstallDefaultChannel(installText);
       expectedVersionGuard = /CODEXUS_EXPECTED_VERSION/.test(installText);
+      helpNonDestructive = detectInstallerHelpNonDestructive(installText);
       appendFact(derivableFacts, {
         kind: "installer_sha256",
         evidence: `install.sh sha256 ${installScriptHash}`,
@@ -473,6 +512,21 @@ export function buildReleaseIntegrityReport(
           evidence: "CODEXUS_EXPECTED_VERSION not found",
           policy: "release smoke must be able to assert an expected installed version",
           recommendation: "Keep CODEXUS_EXPECTED_VERSION support in install.sh.",
+          files: ["install.sh"],
+        });
+      }
+      if (helpNonDestructive) {
+        appendFact(derivableFacts, {
+          kind: "installer_help_non_destructive",
+          evidence: "install.sh parses -h/--help and unknown options before node/npm/install side effects",
+          files: ["install.sh"],
+        });
+      } else {
+        appendGap(evidenceGaps, {
+          kind: "installer_help_not_non_destructive",
+          evidence: "install.sh help parser is missing or appears after install side effects",
+          policy: "public installer help must be non-destructive",
+          recommendation: "Parse -h/--help and unknown options before node/npm probes, npm install, link creation, or skill install.",
           files: ["install.sh"],
         });
       }
@@ -760,6 +814,7 @@ export function buildReleaseIntegrityReport(
         sha256: installScriptHash,
         defaultChannel,
         expectedVersionGuard,
+        helpNonDestructive,
       },
       workflow: {
         path: workflowPath,

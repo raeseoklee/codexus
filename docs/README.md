@@ -58,6 +58,7 @@ supported short alias.
 - [0.2.4 release evidence](release-evidence/0.2.4.md): trusted-publishing evidence for structured npm `next` dist-tag action reporting and documentation baseline cleanup.
 - [0.2.5 release evidence](release-evidence/0.2.5.md): trusted-publishing evidence for the evidence operations pack, aggregate evidence gate, explicit export bundle, and app-instance observation helpers.
 - [0.2.6 release evidence](release-evidence/0.2.6.md): trusted-publishing evidence for the non-destructive installer help hotfix.
+- [0.2.7 release evidence](release-evidence/0.2.7.md): trusted-publishing evidence for the installer help-safety release-integrity gate.
 - [Reference governance](references/README.md): mandatory reference-first policy and current upstream harness audit.
 - [Architecture](design/01-architecture.md): system boundaries, runtime layers, driver strategy, and major components.
 - [Detailed design](design/02-detailed-design.md): CLI commands, state machine, storage layout, event schema, verification, and adapter contracts.

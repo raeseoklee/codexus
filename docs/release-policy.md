@@ -70,7 +70,8 @@ change requires the next minor release.
 Every stable release must keep the release loop auditable:
 
 - English and Korean release-evidence docs exist before tag publish.
-- `npm run release:check` passes before tag publish.
+- `npm run release:check` passes before tag publish, including the local
+  release-integrity proof that `install.sh --help` is non-destructive.
 - The tag-triggered trusted-publishing workflow publishes npm and creates or
   refreshes the matching GitHub Release.
 - After publish, `codexus release check --version <version> --live --gate --json`

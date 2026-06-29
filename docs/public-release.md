@@ -145,6 +145,10 @@ postinstall. Enable GitHub Pages in workflow mode so
 `.github/workflows/pages.yml` owns the deploy path with pinned actions and the
 Node 24 JavaScript action opt-in:
 
+Users can run `sh install.sh --help` first; release integrity gates that this
+help path is parsed before Node/npm probes, installation, link creation, or
+skill adapter installation.
+
 ```bash
 curl -fsSL https://raeseoklee.github.io/codexus/install.sh | sh
 ```

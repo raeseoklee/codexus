@@ -89,9 +89,10 @@ current stable line:
   `derivableFacts`, `heuristicClaims`, `blockingUnknowns`,
   `informationalUnknowns`, `gate`. The stable contract covers local, static
   release wiring evidence only: installer default channel, expected-version
-  guard, trusted-publishing workflow shape, no post-publish dist-tag mutation in
-  the trusted-publishing workflow, pinned publish actions, installer asset
-  workflow wiring, and redacted release-evidence docs. Live GitHub/npm
+  guard, non-destructive installer help parsing, trusted-publishing workflow
+  shape, no post-publish dist-tag mutation in the trusted-publishing workflow,
+  pinned publish actions, installer asset workflow wiring, and redacted
+  release-evidence docs. Live GitHub/npm
   post-publish sign-off remains opt-in and experimental; when used, it reports
   both npm `latest` and npm `next`, includes a structured `nextDistTagAction`,
   and gates stale `next` tags that point behind `latest`.

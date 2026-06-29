@@ -25,7 +25,9 @@ Stable tag 전:
 1. `package.json`, package lock, changelog, docs, release evidence가 의도한 version을
    가리키는지 확인합니다.
 2. Source gate와 package gate를 실행합니다.
-3. `cx release check --gate --json`을 실행합니다.
+3. `cx release check --gate --json`을 실행합니다. Tag publish 전 installer 기본
+   channel, expected-version guard, 비파괴 help 처리, workflow wiring,
+   release-evidence doc을 증명해야 합니다.
 4. Release commit 전 docs, README link, release policy, release evidence가
    갱신됐는지 확인합니다.
 5. Release commit을 push하고 GitHub CI green을 확인합니다.
@@ -52,6 +54,8 @@ Publish 후 `docs/release-evidence/<version>.md`와 한국어 counterpart에 evi
 - trusted-publishing provenance,
 - installed `cx --version`,
 - `CODEXUS_EXPECTED_VERSION`을 사용한 installer smoke,
+- release `install.sh --help` smoke. Help path가 install side effect를 만들지 않음을
+  증명합니다.
 - known not-tested items.
 
 Token, local path, unrelated environment detail이 들어갈 수 있는 raw log는 commit하지

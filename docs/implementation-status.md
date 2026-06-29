@@ -177,9 +177,10 @@ The npm package exposes `cx` and `codexus` as canonical bins. The historical
   includes the gate-mode supply-chain and LSP checks for the installed package.
 - `cx release check --json` reports stable local-mode release-integrity evidence
   for the source checkout: stable installer default, expected-version guard,
-  pinned trusted-publishing workflow, no post-publish dist-tag mutation in the
-  trusted-publishing workflow, GitHub Release `install.sh` asset wiring, and
-  local release-evidence docs. `--live` remains an explicit experimental
+  non-destructive installer help handling, pinned trusted-publishing workflow,
+  no post-publish dist-tag mutation in the trusted-publishing workflow,
+  GitHub Release `install.sh` asset wiring, and local release-evidence docs.
+  `--live` remains an explicit experimental
   post-publish sign-off for npm `latest`, npm `next` not trailing `latest`,
   GitHub latest, and installer asset hash identity. Live output now includes
   `releaseIntegrity.npm.nextDistTagAction` so stale `next` correction is a

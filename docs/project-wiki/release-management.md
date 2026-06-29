@@ -26,7 +26,9 @@ Before a stable tag:
 1. Confirm `package.json`, package lock, changelog, docs, and release evidence
    refer to the intended version.
 2. Run the source and package gates.
-3. Run `cx release check --gate --json`.
+3. Run `cx release check --gate --json`; it must prove installer default
+   channel, expected-version guard, non-destructive help handling, workflow
+   wiring, and release-evidence docs before tag publish.
 4. Confirm docs, README links, release policy, and release evidence have been
    refreshed before the release commit.
 5. Push the release commit and confirm GitHub CI is green.
@@ -53,6 +55,8 @@ the Korean counterpart:
 - trusted-publishing provenance,
 - installed `cx --version`,
 - installer smoke with `CODEXUS_EXPECTED_VERSION`,
+- release `install.sh --help` smoke proving the help path has no install side
+  effects,
 - any known not-tested items.
 
 Do not commit raw logs that may contain local paths, tokens, or unrelated

@@ -9,6 +9,21 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.7 - 2026-06-29
+
+### Added
+
+- Added a `release check --gate` invariant for installer help safety. Local
+  release integrity now reports
+  `releaseIntegrity.installScript.helpNonDestructive:true` only when
+  `install.sh` parses `-h`/`--help` and unknown options before Node/npm probes,
+  `npm install`, bin-link mutation, or Codex skill adapter installation.
+
+### Fixed
+
+- Added regression coverage so a future installer without proven
+  non-destructive help handling fails the release gate before publish.
+
 ## 0.2.6 - 2026-06-22
 
 ### Fixed

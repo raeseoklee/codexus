@@ -63,7 +63,9 @@ Codexus pre-1.0 versioning은 기능이 커 보이는지보다 stable JSON contr
 모든 stable release는 release loop를 audit 가능하게 유지해야 합니다:
 
 - Tag publish 전에 영문/한국어 release-evidence 문서가 존재합니다.
-- Tag publish 전에 `npm run release:check`가 통과합니다.
+- Tag publish 전에 `npm run release:check`가 통과합니다. 여기에는
+  `install.sh --help`가 비파괴 동작임을 증명하는 local release-integrity check가
+  포함됩니다.
 - Tag-triggered trusted-publishing workflow가 npm publish를 수행하고 matching GitHub
   Release를 생성 또는 갱신합니다.
 - Publish 후 `codexus release check --version <version> --live --gate --json`이 통과합니다.

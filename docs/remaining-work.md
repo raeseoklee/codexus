@@ -192,7 +192,7 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
     smoke compatibility, stable-readiness smoke coverage, and local release
     integrity gating implemented.
     - Keep `cx` and `codexus` as canonical public bins.
-    - Current release-prep baseline is `0.2.6`; prereleases publish through
+    - Current release-prep baseline is `0.2.7`; prereleases publish through
       `publish:next` as a fallback/dev path, while stable releases publish from
       trusted GitHub Actions tag runs.
     - Keep `npm run package:smoke` as the installed-tarball release gate for bin
@@ -201,8 +201,9 @@ Status after the P0-P2 implementation pass and high-risk promotion slice:
       behavior.
     - Keep `cx release check --gate --json` in `npm run release:check` so stable
       release candidates prove the installer default, expected-version guard,
-      trusted-publishing workflow, GitHub Release asset wiring, and release
-      evidence docs before tag publish. Use `--live` only for explicit
+      non-destructive installer help handling, trusted-publishing workflow,
+      GitHub Release asset wiring, and release evidence docs before tag publish.
+      Use `--live` only for explicit
       post-publish sign-off against npm and GitHub.
 
 13. Add TypeScript/static verification. Status: local syntax/static check,
