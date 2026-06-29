@@ -57,7 +57,7 @@ is described above and validated in release evidence.
 The reproducible VHS source is in
 [docs/demo](https://github.com/raeseoklee/codexus/blob/main/docs/demo/README.md);
 full release verification remains in
-[release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.7.md).
+[release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.8.md).
 
 > The 0.2 stable contract is intentionally narrow: live app-server turns,
 > routine live model replay, and automatic prompt injection remain gated off.
@@ -296,7 +296,7 @@ Canonical bin: `codexus`. Supported short alias: `cx`.
 - [Implementation status](https://github.com/raeseoklee/codexus/blob/main/docs/implementation-status.md)
 - [Remaining work](https://github.com/raeseoklee/codexus/blob/main/docs/remaining-work.md)
 - [0.1.0 stable readiness plan](https://github.com/raeseoklee/codexus/blob/main/docs/plans/2026-05-31-0.1.0-stable-readiness-plan.md)
-- [0.2.7 release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.7.md)
+- [0.2.8 release evidence](https://github.com/raeseoklee/codexus/blob/main/docs/release-evidence/0.2.8.md)
 - [JSON contract](https://github.com/raeseoklee/codexus/blob/main/docs/json-contract.md)
 - [Public release checklist](https://github.com/raeseoklee/codexus/blob/main/docs/public-release.md)
 

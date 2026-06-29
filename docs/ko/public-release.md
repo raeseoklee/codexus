@@ -82,10 +82,10 @@ alpha/prerelease build는 guarded `next` helper로 publish합니다:
 npm run publish:next
 ```
 
-로컬 fallback helper는 `--tag next`로 publish한 뒤 `latest`를 같은 version으로
-갱신하고 `latest >= next`를 검증합니다. GitHub Actions trusted publisher 경로는
-`--no-dist-tag-sync`를 사용합니다. 이 경로는 `npm publish` 자체가 만든 tag만
-검증하고, 별도 `npm dist-tag add` 권한을 요구하지 않습니다.
+로컬 fallback helper는 `--tag next`로 publish하고 `next` dist-tag만 검증합니다.
+GitHub Actions trusted publisher 경로는 `--no-dist-tag-sync`를 사용합니다. 이 경로는
+`npm publish` 자체가 만든 tag만 검증하고, 별도 `npm dist-tag add` 권한을 요구하지
+않습니다.
 
 Stable release의 canonical path는 local npm token이 아니라
 `.github/workflows/release.yml`의 GitHub Actions trusted-publishing workflow입니다.
@@ -106,11 +106,10 @@ Stable release의 canonical path는 local npm token이 아니라
 - tag-triggered workflow가 완료된 뒤 source checkout에서
   `cx release check --version <version> --live --gate --json`을 실행해 npm `latest`,
   GitHub latest, GitHub Release의 `install.sh` asset hash가 checked-in installer와
-  일치하는지 확인합니다. 이 live sign-off는 npm `next`가 `latest`보다 오래되지
-  않았는지도 검증합니다. `next`가 뒤처져 있으면 release 완료 선언 전에 인증된
-  maintainer가 `npm dist-tag add codexus@<version> next`를 실행해야 합니다. Live JSON
-  output의 `releaseIntegrity.npm.nextDistTagAction`은 이 maintainer step이 충족됐는지
-  또는 아직 필요한지를 보여주는 bounded action summary입니다.
+  일치하는지 확인합니다. npm `next`는 prerelease 전용 channel이며 stable release
+  blocker가 아닙니다. Live JSON output의
+  `releaseIntegrity.npm.nextDistTagAction`은 stable sign-off에서 `not_applicable`을
+  보고합니다.
 
 Local stable publish는 fallback/dev path로만 사용합니다:
 
@@ -122,9 +121,9 @@ stable helper는 non-dry-run prerelease version을 거부합니다. Prerelease b
 `npm run publish:next`를 사용합니다.
 
 두 helper 모두 npm registry read-after-write lag를 고려해 dist-tag read를 retry합니다.
-로컬 fallback publish는 `latest`와 `next`를 published version으로 강제 정렬할 수
-있고, trusted-publishing run은 npm trusted-publisher 권한 표면을 `npm publish`로
-좁힌 뒤 `next >= latest` enforcement를 post-publish live sign-off에 맡깁니다.
+로컬 stable fallback publish는 `latest`만 검증합니다. `publish:next`는 명시적
+prerelease path로 남습니다. Trusted-publishing run은 npm trusted-publisher 권한
+표면을 `npm publish`로 좁히고, `next`를 stable release completion 밖에 둡니다.
 
 ## GitHub Pages Installer
 

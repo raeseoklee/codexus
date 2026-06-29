@@ -9,6 +9,25 @@ occur before 1.0, but they should be called out clearly.
 
 ## Unreleased
 
+## 0.2.8 - 2026-06-29
+
+### Changed
+
+- Changed stable release sign-off to treat npm `next` as a prerelease-only
+  channel. `release check --live --gate --json` now gates npm `latest`, GitHub
+  latest, and the installer asset for stable releases, while
+  `releaseIntegrity.npm.nextDistTagAction` reports `not_applicable` instead of
+  requiring a maintainer `next` dist-tag mutation.
+- Updated the local publish helper so stable fallback publishes verify `latest`
+  only. `publish:next` remains the explicit prerelease path and still verifies
+  the npm `next` dist-tag.
+
+### Documentation
+
+- Updated the release policy, public release checklist, JSON contract, feature
+  reference, implementation status, and project wiki release page so stable
+  release completion no longer depends on npm `next`.
+
 ## 0.2.7 - 2026-06-29
 
 ### Added

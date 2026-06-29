@@ -1,37 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath, pathToFileURL } from "node:url";
-
-export function compareVersions(left, right) {
-  const parse = (value) => {
-    const [core, pre = ""] = value.split("-", 2);
-    const [major, minor, patch] = core.split(".").map((part) => Number(part));
-    const prerelease = pre ? pre.split(".").map((part) => (/^\d+$/.test(part) ? Number(part) : part)) : [];
-    return { major, minor, patch, prerelease };
-  };
-  const a = parse(left);
-  const b = parse(right);
-  for (const key of ["major", "minor", "patch"]) {
-    if (a[key] !== b[key]) return a[key] - b[key];
-  }
-  if (a.prerelease.length === 0 && b.prerelease.length === 0) return 0;
-  if (a.prerelease.length === 0) return 1;
-  if (b.prerelease.length === 0) return -1;
-  const length = Math.max(a.prerelease.length, b.prerelease.length);
-  for (let index = 0; index < length; index += 1) {
-    const leftPart = a.prerelease[index];
-    const rightPart = b.prerelease[index];
-    if (leftPart === undefined) return -1;
-    if (rightPart === undefined) return 1;
-    if (leftPart === rightPart) continue;
-    if (typeof leftPart === "number" && typeof rightPart === "number") return leftPart - rightPart;
-    if (typeof leftPart === "number") return -1;
-    if (typeof rightPart === "number") return 1;
-    return leftPart.localeCompare(rightPart);
-  }
-  return 0;
-}
+import { pathToFileURL } from "node:url";
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { stdio: "inherit", ...options });
@@ -57,13 +27,6 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function assertNextNotOlderThanLatest(tags) {
-  if (!tags.latest || !tags.next) throw new Error("missing latest or next dist-tag");
-  if (compareVersions(tags.next, tags.latest) < 0) {
-    throw new Error(`npm dist-tag invariant failed: next ${tags.next} is older than latest ${tags.latest}`);
-  }
-}
-
 export function publishPlanForArgs(args, pkg) {
   const dryRun = args.includes("--dry-run");
   const stable = args.includes("--stable");
@@ -75,9 +38,7 @@ export function publishPlanForArgs(args, pkg) {
   if (!stable) publishArgs.push("--tag", "next");
   if (dryRun) publishArgs.push("--dry-run");
   const expectedTags = stable
-    ? syncDistTags
-      ? { latest: pkg.version, next: pkg.version }
-      : { latest: pkg.version }
+    ? { latest: pkg.version }
     : { next: pkg.version };
   return {
     mode: stable ? "stable" : "next",
@@ -108,14 +69,10 @@ async function main() {
 
   if (plan.syncDistTags) {
     run("npm", ["dist-tag", "add", `${pkg.name}@${pkg.version}`, "latest"]);
-    run("npm", ["dist-tag", "add", `${pkg.name}@${pkg.version}`, "next"]);
   }
   const tags = await readDistTagsWithRetry(pkg.name, plan.expectedTags);
   if (!tags || !tagsMatch(tags, plan.expectedTags)) {
     throw new Error(`published ${pkg.version}, but dist-tags are ${JSON.stringify(tags)}`);
-  }
-  if (plan.mode === "stable" && plan.syncDistTags) {
-    assertNextNotOlderThanLatest(tags);
   }
   const expected = Object.entries(plan.expectedTags).map(([key, value]) => `${key}=${value}`).join(", ");
   console.log(`Published ${pkg.name}@${pkg.version} (${plan.mode}); verified ${expected}.`);

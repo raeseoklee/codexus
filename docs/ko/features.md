@@ -39,7 +39,7 @@ cx doctor --json
 | Quality evidence | `codexus slop check --gate --json` | Derivable evidence gap만 gate합니다. Heuristic quality claim은 advisory로 남습니다. |
 | Supply chain | `codexus supply-chain check --gate --json` | Package-policy fact, safe static package projection, required/forbidden file, high-confidence secret leak를 gate합니다. |
 | Repository knowledge | `codexus repo check --gate --json` | Mechanical docs/index/counterpart/schema-reference invariant를 gate합니다. Semantic freshness는 판단하지 않습니다. |
-| Release integrity | `codexus release check --gate --json` | install script 기본 channel, expected-version guard, 비파괴 installer help 처리, trusted-publishing workflow, release evidence, `--live` 사용 시 npm/GitHub fact를 gate합니다. Live output은 stale channel 보정이 명확히 드러나도록 구조화된 npm `next` dist-tag action을 포함합니다. |
+| Release integrity | `codexus release check --gate --json` | install script 기본 channel, expected-version guard, 비파괴 installer help 처리, trusted-publishing workflow, release evidence, `--live` 사용 시 npm/GitHub fact를 gate합니다. Stable live sign-off는 npm `latest`를 확인하고, npm `next`는 prerelease 전용으로 stable completion에서는 not applicable로 보고합니다. |
 | LSP diagnostics | `codexus lsp check --gate --json` | Project config나 안전하게 감지한 explicit local diagnostic command를 gate합니다. |
 | Architecture policy | `codexus architecture check --gate --json` | Declared `forbidden-import` rule만 gate합니다. Broad layering judgment와 type-aware graph claim은 stable contract 밖입니다. |
 | Wiki context freshness | `codexus wiki context --fresh-only --gate --json` | 명시적 manual context selection과 local freshness를 gate합니다. Prompt를 자동 주입하거나 source-truth authority를 주장하지 않습니다. |

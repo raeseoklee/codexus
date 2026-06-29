@@ -49,8 +49,8 @@ After publish, record evidence under `docs/release-evidence/<version>.md` and
 the Korean counterpart:
 
 - npm version and dist-tags,
-- npm `next >= latest`; if `next` lags after trusted publishing, record the
-  authenticated maintainer dist-tag correction,
+- npm `latest` matching the release version; `next` is prerelease-only and is
+  recorded as informational when present,
 - GitHub Release and `install.sh` asset,
 - trusted-publishing provenance,
 - installed `cx --version`,

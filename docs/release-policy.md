@@ -57,9 +57,9 @@ large a feature feels.
 - Prerelease builds stay on the explicit npm `next` channel.
 - Tag-triggered stable publishes use trusted publishing for `npm publish` only
   and must not require post-publish `npm dist-tag add` permission.
-- Live release sign-off verifies `next >= latest`. If npm `next` lags behind
-  `latest` after trusted publishing, an authenticated maintainer updates `next`
-  before the release is declared complete.
+- Live stable release sign-off verifies npm `latest`, GitHub latest, and the
+  installer asset. npm `next` is a prerelease-only channel and stale `next`
+  state is not a stable release blocker.
 
 Therefore a large experimental bundle can still be a patch release if it does
 not change the frozen stable contract. Conversely, a small breaking contract
@@ -78,9 +78,10 @@ Every stable release must keep the release loop auditable:
   passes.
 - Post-publish install smoke verifies `codexus@latest` and release
   `install.sh`.
-- Live release sign-off verifies npm `latest` and ensures npm `next` is not
-  older than `latest`. The live output's `nextDistTagAction` states whether no
-  action is needed or which maintainer command is required.
+- Live release sign-off verifies npm `latest`, GitHub latest, and the installer
+  asset. The live output's `nextDistTagAction` reports `not_applicable` for
+  stable releases because npm `next` is reserved for explicit prerelease
+  publishing.
 - Release evidence is updated after publish with bounded, redacted facts.
 
 Do not commit raw workflow logs, run ledgers, local private paths, tokens,

@@ -173,14 +173,8 @@ test("npm local install postinstall does not mutate Codex home by default", asyn
   }
 });
 
-test("publish helper enforces next not older than latest", async () => {
-  const { compareVersions, assertNextNotOlderThanLatest, publishPlanForArgs } = await import("../scripts/publish-next.mjs");
-  assert.ok(compareVersions("0.1.0-alpha.2", "0.1.0-alpha.1") > 0);
-  assert.ok(compareVersions("0.1.0", "0.1.0-alpha.9") > 0);
-  assert.doesNotThrow(() => assertNextNotOlderThanLatest({ latest: "0.2.0", next: "0.2.0" }));
-  assert.doesNotThrow(() => assertNextNotOlderThanLatest({ latest: "0.2.0", next: "0.3.0-alpha.1" }));
-  assert.throws(() => assertNextNotOlderThanLatest({ latest: "0.2.0", next: "0.1.0-alpha.7" }), /next 0\.1\.0-alpha\.7 is older than latest 0\.2\.0/);
-
+test("publish helper keeps stable latest-only and prerelease next-only", async () => {
+  const { publishPlanForArgs } = await import("../scripts/publish-next.mjs");
   const nextPlan = publishPlanForArgs([], { name: "codexus", version: "0.1.0-alpha.5" });
   assert.equal(nextPlan.mode, "next");
   assert.equal(nextPlan.syncDistTags, false);
@@ -195,7 +189,7 @@ test("publish helper enforces next not older than latest", async () => {
   const stablePlan = publishPlanForArgs(["--stable"], { name: "codexus", version: "0.1.0" });
   assert.equal(stablePlan.mode, "stable");
   assert.equal(stablePlan.syncDistTags, true);
-  assert.deepEqual(stablePlan.expectedTags, { latest: "0.1.0", next: "0.1.0" });
+  assert.deepEqual(stablePlan.expectedTags, { latest: "0.1.0" });
   assert.deepEqual(stablePlan.publishArgs, ["publish", "--access", "public"]);
   const trustedStablePlan = publishPlanForArgs(["--stable", "--no-dist-tag-sync"], { name: "codexus", version: "0.1.0" });
   assert.equal(trustedStablePlan.syncDistTags, false);

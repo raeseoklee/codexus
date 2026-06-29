@@ -92,10 +92,12 @@ current stable line:
   guard, non-destructive installer help parsing, trusted-publishing workflow
   shape, no post-publish dist-tag mutation in the trusted-publishing workflow,
   pinned publish actions, installer asset workflow wiring, and redacted
-  release-evidence docs. Live GitHub/npm
-  post-publish sign-off remains opt-in and experimental; when used, it reports
-  both npm `latest` and npm `next`, includes a structured `nextDistTagAction`,
-  and gates stale `next` tags that point behind `latest`.
+  release-evidence docs. Live GitHub/npm post-publish sign-off remains opt-in
+  and experimental; when used for stable releases, it gates npm `latest`,
+  GitHub latest, and installer asset identity. npm `next` is reserved for
+  explicit prerelease publishing and is not a stable-release completion gate.
+  The structured `nextDistTagAction` remains present for compatibility and
+  reports `not_applicable` during stable sign-off.
 - LSP diagnostics output (`lsp status`, `lsp check --gate`): `schemaVersion`,
   `stability`, `command`, `cwd`, `projectRoot`, `scanMode`, `scanAccuracy`,
   `limits`, `autoApply`, `lsp`, `providers`, `result`, `evidenceGaps`,

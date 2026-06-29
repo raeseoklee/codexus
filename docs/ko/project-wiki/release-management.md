@@ -48,8 +48,8 @@ Publish 후 `docs/release-evidence/<version>.md`와 한국어 counterpart에 evi
 기록합니다:
 
 - npm version과 dist-tags,
-- npm `next >= latest`; trusted publishing 이후 `next`가 뒤처지면 인증된
-  maintainer dist-tag correction을 기록,
+- npm `latest`가 release version과 일치하는지 기록합니다. `next`는 prerelease
+  전용이며 존재할 경우 informational로만 기록합니다.
 - GitHub Release와 `install.sh` asset,
 - trusted-publishing provenance,
 - installed `cx --version`,

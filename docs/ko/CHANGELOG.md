@@ -9,6 +9,25 @@ change가 있을 수 있지만, 명확히 표시해야 합니다.
 
 ## Unreleased
 
+## 0.2.8 - 2026-06-29
+
+### Changed
+
+- Stable release sign-off에서 npm `next`를 prerelease 전용 channel로 취급하도록
+  변경했습니다. `release check --live --gate --json`은 이제 stable release에서 npm
+  `latest`, GitHub latest, installer asset을 gate하고,
+  `releaseIntegrity.npm.nextDistTagAction`은 maintainer `next` dist-tag mutation을
+  요구하는 대신 `not_applicable`을 보고합니다.
+- Local publish helper는 stable fallback publish에서 `latest`만 검증합니다.
+  `publish:next`는 명시적 prerelease path로 남으며 npm `next` dist-tag를 계속
+  검증합니다.
+
+### Documentation
+
+- Release policy, public release checklist, JSON contract, feature reference,
+  implementation status, project wiki release page를 갱신해 stable release completion이
+  더 이상 npm `next`에 의존하지 않도록 정리했습니다.
+
 ## 0.2.7 - 2026-06-29
 
 ### Added

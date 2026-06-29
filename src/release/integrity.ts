@@ -21,8 +21,7 @@ export interface ReleaseIntegrityEvidenceGap {
     | "release_evidence_missing"
     | "github_release_not_latest"
     | "github_release_asset_mismatch"
-    | "npm_latest_mismatch"
-    | "npm_next_older_than_latest";
+    | "npm_latest_mismatch";
   gate: true;
   evidence: string | null;
   policy: string;
@@ -45,8 +44,7 @@ export interface ReleaseIntegrityDerivableFact {
     | "release_evidence_present"
     | "github_release_latest"
     | "github_release_asset_matches_local"
-    | "npm_latest_matches_version"
-    | "npm_next_not_older_than_latest";
+    | "npm_latest_matches_version";
   gate: boolean;
   evidence: string;
   files?: string[];
@@ -113,7 +111,7 @@ export interface ReleaseIntegrityReport {
       latest: string | null;
       next: string | null;
       nextDistTagAction: {
-        status: "not_checked" | "satisfied" | "required" | "unknown";
+        status: "not_checked" | "not_applicable" | "unknown";
         command: string | null;
         reason: string;
       };
@@ -335,39 +333,6 @@ function commandError(result: CommandResult): string {
   return (result.stderr || result.stdout || `exit ${result.status ?? "unknown"}`).trim();
 }
 
-function compareSemverish(left: string, right: string): number {
-  const parse = (value: string) => {
-    const [core, prereleaseRaw = ""] = value.split("-", 2);
-    const [major = 0, minor = 0, patch = 0] = core.split(".").map((part) => Number.parseInt(part, 10));
-    const prerelease = prereleaseRaw
-      ? prereleaseRaw.split(".").map((part) => (/^\d+$/.test(part) ? Number.parseInt(part, 10) : part))
-      : [];
-    return { major, minor, patch, prerelease };
-  };
-  const a = parse(left);
-  const b = parse(right);
-  for (const key of ["major", "minor", "patch"] as const) {
-    const delta = a[key] - b[key];
-    if (delta !== 0) return delta;
-  }
-  if (a.prerelease.length === 0 && b.prerelease.length === 0) return 0;
-  if (a.prerelease.length === 0) return 1;
-  if (b.prerelease.length === 0) return -1;
-  const length = Math.max(a.prerelease.length, b.prerelease.length);
-  for (let index = 0; index < length; index += 1) {
-    const leftPart = a.prerelease[index];
-    const rightPart = b.prerelease[index];
-    if (leftPart === undefined) return -1;
-    if (rightPart === undefined) return 1;
-    if (leftPart === rightPart) continue;
-    if (typeof leftPart === "number" && typeof rightPart === "number") return leftPart - rightPart;
-    if (typeof leftPart === "number") return -1;
-    if (typeof rightPart === "number") return 1;
-    return leftPart.localeCompare(rightPart);
-  }
-  return 0;
-}
-
 function readJsonCommand(command: string, args: string[], runner: CommandRunner, cwd: string): { value: unknown; error: string | null } {
   const result = runner(command, args, { cwd });
   if (result.status !== 0) return { value: null, error: commandError(result) };
@@ -577,7 +542,7 @@ export function buildReleaseIntegrityReport(
           kind: "release_workflow_post_publish_dist_tag_mutation",
           evidence: ".github/workflows/release.yml",
           policy: "trusted-publishing workflow must not require post-publish npm dist-tag add permission",
-          recommendation: "Run trusted-publishing stable publish through npm run publish:stable -- --no-dist-tag-sync; enforce next >= latest in live release sign-off.",
+          recommendation: "Run trusted-publishing stable publish through npm run publish:stable -- --no-dist-tag-sync; keep prerelease next outside stable release sign-off.",
           files: [".github/workflows/release.yml"],
         });
       }
@@ -746,7 +711,7 @@ export function buildReleaseIntegrityReport(
         nextDistTagAction: {
           status: "unknown",
           command: null,
-          reason: "npm dist-tags were read, but next/latest ordering has not been classified yet.",
+          reason: "npm dist-tags were read, but latest has not been classified yet.",
         },
       };
       if (npm.latest === version) {
@@ -762,35 +727,11 @@ export function buildReleaseIntegrityReport(
           recommendation: "Wait for npm propagation or fix the dist-tag before declaring release completion.",
         });
       }
-      if (npm.latest && npm.next && compareSemverish(npm.next, npm.latest) >= 0) {
-        npm.nextDistTagAction = {
-          status: "satisfied",
-          command: null,
-          reason: `npm next ${npm.next} is not older than latest ${npm.latest}`,
-        };
-        appendFact(derivableFacts, {
-          kind: "npm_next_not_older_than_latest",
-          evidence: `npm next ${npm.next} is not older than latest ${npm.latest}`,
-        });
-      } else {
-        npm.nextDistTagAction = npm.latest === version
-          ? {
-            status: "required",
-            command: `npm dist-tag add codexus@${version} next`,
-            reason: `npm next is ${npm.next ?? "unknown"}, latest is ${npm.latest}; next must be moved to the signed-off stable version before release completion.`,
-          }
-          : {
-            status: "unknown",
-            command: null,
-            reason: `npm latest is ${npm.latest ?? "unknown"}, expected ${version}; fix latest before deciding the next dist-tag action.`,
-          };
-        appendGap(evidenceGaps, {
-          kind: "npm_next_older_than_latest",
-          evidence: `npm next is ${npm.next ?? "unknown"}, latest is ${npm.latest ?? "unknown"}`,
-          policy: "npm next must not point at a version older than npm latest",
-          recommendation: "Move next to the current stable release or a newer prerelease before declaring release completion.",
-        });
-      }
+      npm.nextDistTagAction = {
+        status: "not_applicable",
+        command: null,
+        reason: "Stable release sign-off checks npm latest only; npm next is reserved for explicit prerelease publishing.",
+      };
     }
   }
 

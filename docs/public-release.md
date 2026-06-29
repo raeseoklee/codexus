@@ -87,10 +87,10 @@ For alpha/prerelease builds, publish through the guarded `next` helper:
 npm run publish:next
 ```
 
-The local fallback helper publishes with `--tag next`, then updates `latest` to
-the same version and verifies `latest >= next`. The GitHub Actions trusted
-publisher path uses `--no-dist-tag-sync`: it verifies the tag created by
-`npm publish` itself and does not require extra `npm dist-tag add` permission.
+The local fallback helper publishes with `--tag next` and verifies the `next`
+dist-tag only. The GitHub Actions trusted publisher path uses
+`--no-dist-tag-sync`: it verifies the tag created by `npm publish` itself and
+does not require extra `npm dist-tag add` permission.
 
 For stable releases, the canonical path is the GitHub Actions
 trusted-publishing workflow at `.github/workflows/release.yml`, not a local npm
@@ -113,12 +113,10 @@ token. Before each stable cut:
 - After the tag-triggered workflow completes, run
   `cx release check --version <version> --live --gate --json` from the source
   checkout to verify npm `latest`, GitHub latest, and the GitHub Release
-  `install.sh` asset hash against the checked-in installer. This live sign-off
-  also verifies that npm `next` is not older than `latest`; if it is stale, an
-  authenticated maintainer must run `npm dist-tag add codexus@<version> next`
-  before declaring the release complete. The live JSON output includes
-  `releaseIntegrity.npm.nextDistTagAction`, which is the bounded action summary
-  for whether this maintainer step is satisfied or still required.
+  `install.sh` asset hash against the checked-in installer. npm `next` is a
+  prerelease-only channel and is not a stable release blocker. The live JSON
+  output still includes `releaseIntegrity.npm.nextDistTagAction`, which reports
+  `not_applicable` during stable sign-off.
 
 Local stable publish remains a fallback/dev path only:
 
@@ -130,10 +128,10 @@ The stable helper refuses non-dry-run prerelease versions; use
 `npm run publish:next` for prerelease builds.
 
 Both helpers retry dist-tag reads to avoid failing on npm registry
-read-after-write lag. Local fallback publishes can force `latest` and `next` to
-the published version; trusted-publishing runs keep the npm trusted-publisher
-permission surface to `npm publish` and leave `next >= latest` enforcement to
-the post-publish live sign-off.
+read-after-write lag. Local stable fallback publishes verify `latest` only;
+`publish:next` remains the explicit prerelease path. Trusted-publishing runs
+keep the npm trusted-publisher permission surface to `npm publish` and leave
+`next` outside stable release completion.
 
 ## GitHub Pages Installer
 
